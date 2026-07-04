@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "Hospital": {
+      "title": "Hospital",
+      "description": "Current status of a hospital's wait time.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique ID for the hospital (usually from AHS)" },
+        "name": { "type": "string", "description": "Name of the facility" },
+        "city": { "type": "string" },
+        "region": { "type": "string" },
+        "waitTime": { "type": "integer", "description": "Current wait time in minutes" },
+        "waitTimeLabel": { "type": "string", "description": "Human readable label (e.g. '1h 30m')" },
+        "status": { "type": "string", "description": "Status level (Green, Yellow, Red)" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "waitTime", "updatedAt"]
+    },
+    "WaitTimeSnapshot": {
+      "title": "Wait Time Snapshot",
+      "description": "A single data point for a hospital's wait time trend.",
+      "type": "object",
+      "properties": {
+        "hospitalId": { "type": "string" },
+        "waitTime": { "type": "integer" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["hospitalId", "waitTime", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/hospitals/{hospitalId}": {
+      "schema": "Hospital",
+      "description": "Current status for each hospital."
+    },
+    "/snapshots/{snapshotId}": {
+      "schema": "WaitTimeSnapshot",
+      "description": "Historical logs for trend analysis."
+    }
+  }
+}

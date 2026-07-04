@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-sans;
+  }
+}
+
+/* Custom Leaflet Tooltip dark styles */
+.custom-leaflet-tooltip {
+  background: #090d16 !important;
+  border: 1px solid #1e293b !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
+  color: #f1f5f9 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.5rem 0.75rem !important;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.leaflet-tooltip-top.custom-leaflet-tooltip::before {
+  border-top-color: #1e293b !important;
+}
+.leaflet-tooltip-bottom.custom-leaflet-tooltip::before {
+  border-bottom-color: #1e293b !important;
+}
+.leaflet-tooltip-left.custom-leaflet-tooltip::before {
+  border-left-color: #1e293b !important;
+}
+.leaflet-tooltip-right.custom-leaflet-tooltip::before {
+  border-right-color: #1e293b !important;
+}
+
+/* Custom Leaflet Attribution dark styles */
+.leaflet-container .leaflet-control-attribution {
+  background: rgba(9, 13, 22, 0.85) !important;
+  border-top-left-radius: 0.5rem !important;
+  border-left: 1px solid rgba(30, 41, 59, 0.5) !important;
+  border-top: 1px solid rgba(30, 41, 59, 0.5) !important;
+  color: #94a3b8 !important;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif !important;
+  font-size: 9px !important;
+}
+
+.leaflet-container .leaflet-control-attribution a {
+  color: #3b82f6 !important;
+  text-decoration: none !important;
+}
+
+.leaflet-container .leaflet-control-attribution a:hover {
+  text-decoration: underline !important;
+}

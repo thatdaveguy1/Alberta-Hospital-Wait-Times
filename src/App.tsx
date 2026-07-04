@@ -1,0 +1,2508 @@
+import React, { useState, useEffect } from 'react';
+import { Hospital, WaitTimeSnapshot } from './types';
+import { 
+  Activity, 
+  Clock, 
+  MapPin, 
+  TrendingUp, 
+  AlertCircle, 
+  Search,
+  ArrowRight,
+  BarChart3,
+  RefreshCw,
+  Info,
+  Compass,
+  Map,
+  SlidersHorizontal,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Mail,
+  Bell,
+  Trash2,
+  AlertTriangle,
+  CheckCircle,
+  Navigation,
+  Sparkles,
+  Minus,
+  Check,
+  Maximize2,
+  Minimize2,
+  Layers,
+  Stethoscope,
+  Users,
+  FlaskConical,
+  HeartPulse,
+  Brain,
+  Home,
+  HeartHandshake,
+  Coins,
+  Phone
+} from 'lucide-react';
+import { 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  Legend
+} from 'recharts';
+import { format } from 'date-fns';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+import { motion, AnimatePresence } from 'motion/react';
+import { MapComponent } from './components/MapComponent';
+import SurgicalDashboard from './components/SurgicalDashboard';
+import ServiceDisruptionsDashboard from './components/ServiceDisruptionsDashboard';
+import SystemFlowDashboard from './components/SystemFlowDashboard';
+import PrimaryCareDashboard from './components/PrimaryCareDashboard';
+import WorkforceDashboard from './components/WorkforceDashboard';
+import DiagnosticDashboard from './components/DiagnosticDashboard';
+import CancerDashboard from './components/CancerDashboard';
+import MentalHealthDashboard from './components/MentalHealthDashboard';
+import ContinuingCareDashboard from './components/ContinuingCareDashboard';
+import PatientExperienceDashboard from './components/PatientExperienceDashboard';
+import PublicHealthDashboard from './components/PublicHealthDashboard';
+import RegionalInequityDashboard from './components/RegionalInequityDashboard';
+import SpendingDashboard from './components/SpendingDashboard';
+import VirtualCareDashboard from './components/VirtualCareDashboard';
+
+
+const DASHBOARDS = [
+  {
+    id: 'er-waits' as const,
+    title: 'ER Wait Times',
+    shortName: 'ER waits',
+    category: 'Acute & Urgent Care',
+    description: 'Real-time emergency department tracking, wait estimates, facility mapping, and geographic proximity alerts.',
+    icon: Activity,
+    color: 'text-red-400',
+    bgColor: 'bg-red-500/10',
+    borderColor: 'border-red-500/20',
+    badge: 'LIVE FEED',
+    badgeColor: 'bg-red-500/10 text-red-400 border-red-500/20',
+    source: 'Alberta Health Services Portal',
+    updateFrequency: 'Every 30 minutes',
+  },
+  {
+    id: 'disruptions' as const,
+    title: 'Service Disruptions',
+    shortName: 'Disruptions',
+    category: 'Acute & Urgent Care',
+    description: 'Active facility closures, temporary service shutdowns, and clinical emergency alerts across Alberta.',
+    icon: AlertTriangle,
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-500/10',
+    borderColor: 'border-amber-500/20',
+    badge: 'ACTIVE ALERTS',
+    badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    source: 'AHS Emergency Advisories',
+    updateFrequency: 'Ad-hoc / Instant',
+  },
+  {
+    id: 'system-flow' as const,
+    title: 'Hospital System Flow',
+    shortName: 'System Flow',
+    category: 'System Capacity & Flow',
+    description: 'Inpatient occupancy metrics, emergency admission bottlenecks, and medical discharge delay statistics.',
+    icon: Layers,
+    color: 'text-indigo-400',
+    bgColor: 'bg-indigo-500/10',
+    borderColor: 'border-indigo-500/20',
+    badge: 'CAPACITY',
+    badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    source: 'AHS Clinical Operations DB',
+    updateFrequency: 'Daily updates',
+  },
+  {
+    id: 'surgical-waits' as const,
+    title: 'Surgical Waitlists',
+    shortName: 'Surgical waits',
+    category: 'System Capacity & Flow',
+    description: 'Surgical waitlist queues, specialty-specific wait distributions, and diagnostic timeline targets.',
+    icon: TrendingUp,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/10',
+    borderColor: 'border-blue-500/20',
+    badge: 'BACKLOG',
+    badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    source: 'AHCIP Surgical Wait Time Registry',
+    updateFrequency: 'Monthly stats',
+  },
+  {
+    id: 'primary-care' as const,
+    title: 'Primary Care Access',
+    shortName: 'Primary Care',
+    category: 'Community & Prevention',
+    description: 'Family doctor attachment rates, accepting provider directories, and Local Geographic Area community healthcare needs.',
+    icon: Stethoscope,
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    borderColor: 'border-emerald-500/20',
+    badge: 'COMMUNITY',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    source: 'HQA FOCUS & StatsCan Profiles',
+    updateFrequency: 'Annual surveys',
+  },
+  {
+    id: 'workforce' as const,
+    title: 'Health Workforce & Supply',
+    shortName: 'Health Workforce',
+    category: 'Community & Prevention',
+    description: 'Physician registries, nursing supply indicators, allied health benchmarks, age profiles, and job vacancy trends.',
+    icon: Users,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    borderColor: 'border-sky-500/20',
+    badge: 'NEW CONSOLE',
+    badgeColor: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+    source: 'CIHI, CPSA, CRNA & StatsCan',
+    updateFrequency: 'Quarterly stats',
+  },
+  {
+    id: 'diagnostics' as const,
+    title: 'Diagnostic Imaging + Labs',
+    shortName: 'Diagnostics & Labs',
+    category: 'Community & Prevention',
+    description: 'Live community lab waits, CT & MRI backlogs, compliance targets, and pathology result turnarounds.',
+    icon: FlaskConical,
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/10',
+    borderColor: 'border-cyan-500/20',
+    badge: 'LIVE LABS',
+    badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    source: 'APL QMe, AHS & CIHI',
+    updateFrequency: 'Every 15 minutes',
+  },
+  {
+    id: 'cancer' as const,
+    title: 'Cancer Screening & Care',
+    shortName: 'Cancer Care',
+    category: 'Community & Prevention',
+    description: 'Oncology burden, cancer screening participation rates by health zone, surgery wait times, and treatment locations.',
+    icon: HeartPulse,
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    borderColor: 'border-emerald-500/20',
+    badge: 'ONCOLOGY',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    source: 'Cancer Care Alberta & CIHI',
+    updateFrequency: 'Q1 2026 Release',
+  },
+  {
+    id: 'mental-health' as const,
+    title: 'Mental Health & Addictions',
+    shortName: 'Mental Health',
+    category: 'Community & Prevention',
+    description: 'Oncology, substance-related harms, live detoxification and recovery bed availability, and counselling wait times.',
+    icon: Brain,
+    color: 'text-purple-400',
+    bgColor: 'bg-purple-500/10',
+    borderColor: 'border-purple-500/20',
+    badge: 'MHSU SYSTEM',
+    badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    source: 'Recovery Alberta & ABED Registry',
+    updateFrequency: 'Daily updates',
+  },
+  {
+    id: 'long-term-care' as const,
+    title: 'Long Term Care & Seniors Care',
+    shortName: 'Long Term Care',
+    category: 'Community & Prevention',
+    description: 'Placement timelines, clinical outcome standards, home care professional continuity, and facility compliance registries.',
+    icon: Home,
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    borderColor: 'border-emerald-500/20',
+    badge: 'CONTINUING CARE',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    source: 'HQA FOCUS & CIHI CCRS Registry',
+    updateFrequency: 'Quarterly Audits',
+  },
+  {
+    id: 'patient-experience' as const,
+    title: 'Patient Experience & Care Quality',
+    shortName: 'Patient Experience',
+    category: 'Community & Prevention',
+    description: 'Patient-reported satisfaction, clinician communication efficacy, hospital harm rates, and advocacy diagnostics.',
+    icon: HeartHandshake,
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/10',
+    borderColor: 'border-cyan-500/20',
+    badge: 'FOCUS SURVEY',
+    badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    source: 'HQA FOCUS & CIHI Inpatient CPES-IC',
+    updateFrequency: 'Quarterly Release',
+  },
+  {
+    id: 'public-health' as const,
+    title: 'Public Health & Outbreaks',
+    shortName: 'Public Health',
+    category: 'Community & Prevention',
+    description: 'Respiratory pathogens, wastewater early-warning monitors, childhood immunization gaps, and active environmental advisories.',
+    icon: HeartPulse,
+    color: 'text-indigo-400',
+    bgColor: 'bg-indigo-500/10',
+    borderColor: 'border-indigo-500/20',
+    badge: 'SURVEILLANCE',
+    badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    source: 'AHS ProvLab & PHAC Wastewater Feed',
+    updateFrequency: 'Weekly Updates',
+  },
+  {
+    id: 'regional-inequity' as const,
+    title: 'Regional Health Inequity',
+    shortName: 'Health Inequity',
+    category: 'Community & Prevention',
+    description: 'Socioeconomic deprivation indicators, regional chronic disease burdens, emergency department reliance, and travel-for-care metrics.',
+    icon: Compass,
+    color: 'text-rose-400',
+    bgColor: 'bg-rose-500/10',
+    borderColor: 'border-rose-500/20',
+    badge: 'EQUITY INDEX',
+    badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    source: 'Alberta Health Community Profiles (132 LGAs)',
+    updateFrequency: 'Annual Audits',
+  },
+  {
+    id: 'health-spending' as const,
+    title: 'Health Spending & Productivity',
+    shortName: 'Health Spending',
+    category: 'System Capacity & Flow',
+    description: 'CIHI spending benchmarks, hospital productivity indexes, case stay costs, and physician clinical payment analyses.',
+    icon: Coins,
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    borderColor: 'border-emerald-500/20',
+    badge: 'VALUE AUDIT',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    source: 'CIHI Spending Trends & AHCIP Supplement',
+    updateFrequency: 'Annual Releases',
+  },
+  {
+    id: 'virtual-care' as const,
+    title: 'Virtual Care & 811 Access',
+    shortName: 'Virtual Care',
+    category: 'Community & Prevention',
+    description: 'Health Link 811 call volumes, Virtual MD physician consult outcomes, 911-to-811 diversion pathways, and digital care access.',
+    icon: Phone,
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    borderColor: 'border-emerald-500/20',
+    badge: 'VIRTUAL CARE',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    source: 'AHS Quick Facts • CJEM Study • Primary Care Alberta',
+    updateFrequency: 'Quarterly Audits',
+  },
+];
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+// Haversine formula to compute distance in kilometers
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return parseFloat((R * c).toFixed(1));
+}
+
+interface EmailAlert {
+  id: string;
+  email: string;
+  hospitalId: string;
+  hospitalName: string;
+  thresholdMins: number;
+  createdAt: string;
+}
+
+interface AlertLog {
+  id: string;
+  email: string;
+  hospitalName: string;
+  thresholdMins: number;
+  currentMins: number;
+  timestamp: string;
+}
+
+const formatMinutesToHm = (mins: number) => {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${h}:${m.toString().padStart(2, '0')}`;
+};
+
+const isWaitTimeUnavailable = (hospital: Hospital | null | undefined) => {
+  if (!hospital) return true;
+  const label = hospital.waitTimeLabel?.toLowerCase() || '';
+  return label.includes('unavailable') || label.includes('not available') || label.includes('n/a') || hospital.waitTime < 0;
+};
+
+const formatChartXAxis = (tick: string, range: string) => {
+  try {
+    const d = new Date(tick);
+    if (range === '24h') {
+      return format(d, 'HH:mm');
+    } else if (range === '7d' || range === '30D' || range === '30d') {
+      return format(d, 'MMM d');
+    } else {
+      return format(d, 'MMM yy');
+    }
+  } catch (e) {
+    return tick;
+  }
+};
+
+export default function App() {
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [zoneTrends, setZoneTrends] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState<string>('All');
+  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
+  const [trends, setTrends] = useState<WaitTimeSnapshot[]>([]);
+  const [loadingTrends, setLoadingTrends] = useState(false);
+
+  // Geolocation States
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; city: string; region: string; isGPS: boolean } | null>(null);
+  const [loadingGeo, setLoadingGeo] = useState(false);
+  const [sortBy, setSortBy] = useState<'net-wait' | 'proximity' | 'raw-wait'>('net-wait');
+  const [gpsRefused, setGpsRefused] = useState(false);
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [addressInput, setAddressInput] = useState('');
+  const [geocodingError, setGeocodingError] = useState('');
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [osrmData, setOsrmData] = useState<{ [id: string]: { durationMins: number; distanceKm: number } }>({});
+
+  // Chart Range States
+  const [zoneRange, setZoneRange] = useState<string>('24h');
+  const [hospitalRange, setHospitalRange] = useState<string>('24h');
+
+  // Email Alert States
+  const [alertEmail, setAlertEmail] = useState('');
+  const [selectedAlertHospitals, setSelectedAlertHospitals] = useState<string[]>([]);
+  const [alertThreshold, setAlertThreshold] = useState(60);
+  const [submittingAlert, setSubmittingAlert] = useState(false);
+  const [activeAlerts, setActiveAlerts] = useState<EmailAlert[]>([]);
+  const [alertLogs, setAlertLogs] = useState<AlertLog[]>([]);
+  const [alertSuccessMessage, setAlertSuccessMessage] = useState('');
+  const [alertErrorMessage, setAlertErrorMessage] = useState('');
+  const [expandedRegions, setExpandedRegions] = useState<{ [region: string]: boolean }>({});
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'er-waits' | 'surgical-waits' | 'disruptions' | 'system-flow' | 'primary-care' | 'workforce' | 'diagnostics' | 'cancer' | 'mental-health' | 'long-term-care' | 'patient-experience' | 'public-health' | 'regional-inequity' | 'health-spending' | 'virtual-care'>('er-waits');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [dashboardSearch, setDashboardSearch] = useState('');
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  // Lock body scroll when map is fullscreen
+  useEffect(() => {
+    if (isMapFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMapFullscreen]);
+  
+  const [maxStats, setMaxStats] = useState<{
+    max24h: { waitTime: number; timestamp: string; hospitalId: string; hospitalName: string; city: string } | null;
+    max7d: { waitTime: number; timestamp: string; hospitalId: string; hospitalName: string; city: string } | null;
+    max30d: { waitTime: number; timestamp: string; hospitalId: string; hospitalName: string; city: string } | null;
+  } | null>(null);
+
+  // Resolve city name from coordinates using our secure server-side proxy
+  const updateLocationWithCityName = async (lat: number, lng: number, isGPS: boolean) => {
+    // 1. Immediately set coordinates so all distance-based and routing calculations proceed
+    setUserLocation({
+      lat,
+      lng,
+      city: "Determining...",
+      region: "Alberta",
+      isGPS
+    });
+
+    try {
+      const res = await fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.city) {
+          setUserLocation({
+            lat,
+            lng,
+            city: data.city,
+            region: data.region || 'Alberta',
+            isGPS
+          });
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to reverse geocode user coordinates:', err);
+    }
+
+    // Fallback default if geocoding yields nothing or fails
+    setUserLocation({
+      lat,
+      lng,
+      city: "Alberta",
+      region: "Alberta",
+      isGPS
+    });
+  };
+
+  // Persist userLocation to localStorage
+  useEffect(() => {
+    if (userLocation) {
+      localStorage.setItem('alberta_hospital_user_location', JSON.stringify(userLocation));
+    }
+  }, [userLocation]);
+
+  useEffect(() => {
+    fetchHospitals();
+    fetchAlertsAndLogs();
+    fetchMaxStats();
+    
+    // Check if there is a saved location in localStorage first
+    const savedLoc = localStorage.getItem('alberta_hospital_user_location');
+    if (savedLoc) {
+      try {
+        const loc = JSON.parse(savedLoc);
+        if (loc && typeof loc.lat === 'number' && typeof loc.lng === 'number') {
+          setUserLocation(loc);
+          setSortBy('net-wait');
+          setLoadingGeo(false);
+          
+          // If the saved location was a GPS location and had a generic placeholder name, geocode it
+          if (loc.isGPS && (loc.city === "GPS Location" || loc.city === "My Precise GPS Location" || loc.city === "Determining..." || loc.city === "Alberta")) {
+            updateLocationWithCityName(loc.lat, loc.lng, true);
+          }
+          
+          // Poll logs occasionally to show real-time alert dispatching
+          const intervalLoc = setInterval(fetchAlertsAndLogs, 10000);
+          return () => clearInterval(intervalLoc);
+        }
+      } catch (e) {
+        console.warn('Failed to parse saved user location:', e);
+      }
+    }
+
+    // Auto-request GPS on page load, fallback to IP-based location
+    setLoadingGeo(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          updateLocationWithCityName(pos.coords.latitude, pos.coords.longitude, true);
+          setGpsRefused(false);
+          setSortBy('net-wait');
+          setLoadingGeo(false);
+        },
+        (err) => {
+          console.warn("GPS access declined/failed, falling back to IP based:", err);
+          setGpsRefused(true);
+          detectIPLocation();
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    } else {
+      setGpsRefused(true);
+      detectIPLocation();
+    }
+    
+    // Poll logs occasionally to show real-time alert dispatching
+    const interval = setInterval(fetchAlertsAndLogs, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch travel times using OpenStreetMap routing (OSRM API) for hospitals within 100km
+  useEffect(() => {
+    if (!userLocation || hospitals.length === 0) {
+      setOsrmData({});
+      return;
+    }
+
+    const fetchOSRMDistances = async () => {
+      const results: { [id: string]: { durationMins: number; distanceKm: number } } = {};
+      
+      // Filter hospitals within 100km straight-line distance
+      const nearbyHospitals = hospitals.filter(h => {
+        if (!h.latitude || !h.longitude) return false;
+        const d = calculateDistance(userLocation.lat, userLocation.lng, h.latitude, h.longitude);
+        return d <= 100;
+      });
+
+      if (nearbyHospitals.length === 0) {
+        setOsrmData({});
+        return;
+      }
+
+      // Fetch OSRM coordinates for each nearby hospital
+      await Promise.all(nearbyHospitals.map(async (h) => {
+        try {
+          const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${h.longitude},${h.latitude}?overview=false`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+              const route = data.routes[0];
+              const durationMins = Math.round(route.duration / 60);
+              const distanceKm = parseFloat((route.distance / 1000).toFixed(1));
+              results[h.id] = { durationMins, distanceKm };
+            }
+          }
+        } catch (e) {
+          console.warn(`OSRM routing failed for ${h.name}:`, e);
+        }
+      }));
+
+      setOsrmData(results);
+    };
+
+    fetchOSRMDistances();
+  }, [userLocation, hospitals]);
+
+  // Auto-select nearest hospital when userLocation or hospitals list updates
+  useEffect(() => {
+    if (userLocation && hospitals.length > 0) {
+      const withDistances = hospitals
+        .filter(h => h.latitude !== null && h.longitude !== null)
+        .map(h => {
+          const dist = calculateDistance(userLocation.lat, userLocation.lng, h.latitude!, h.longitude!);
+          return { ...h, distance: dist };
+        });
+
+      if (withDistances.length > 0) {
+        withDistances.sort((a, b) => a.distance - b.distance);
+        const nearest = hospitals.find(h => h.id === withDistances[0].id);
+        if (nearest && selectedHospital?.id !== nearest.id) {
+          setSelectedHospital(nearest);
+        }
+      }
+    }
+  }, [userLocation, hospitals]);
+
+  // Sync Zone Trends on Range Update
+  useEffect(() => {
+    fetchZoneTrends(zoneRange);
+  }, [zoneRange]);
+
+  // Sync Selected Hospital Trends on Hospital or Range Update
+  useEffect(() => {
+    if (selectedHospital) {
+      fetchTrends(selectedHospital.id, hospitalRange);
+    }
+  }, [selectedHospital?.id, hospitalRange]);
+
+  const fetchHospitals = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/hospitals');
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setHospitals(data);
+        // Default to first hospital for detailed side panel
+        if (data.length > 0 && !selectedHospital) {
+          setSelectedHospital(data[0]);
+        }
+      } else {
+        console.error('Expected array of hospitals, got:', data);
+        setHospitals([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch hospitals', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMaxStats = async () => {
+    try {
+      const res = await fetch('/api/trends/max-stats');
+      if (res.ok) {
+        const data = await res.json();
+        setMaxStats(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch max stats', err);
+    }
+  };
+
+  const fetchZoneTrends = async (range: string = '24h') => {
+    try {
+      const res = await fetch(`/api/trends/zones?range=${range}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setZoneTrends(data);
+      } else {
+        console.error('Expected array of zone trends, got:', data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch zone trends', error);
+    }
+  };
+
+  const fetchTrends = async (id: string, range: string = '24h') => {
+    setLoadingTrends(true);
+    try {
+      const res = await fetch(`/api/trends/${id}?range=${range}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setTrends(data);
+      } else {
+        console.error('Expected array of trends, got:', data);
+        setTrends([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch trends', error);
+    } finally {
+      setLoadingTrends(false);
+    }
+  };
+
+  // Fetch active subscriptions and dispatch history
+  const fetchAlertsAndLogs = async () => {
+    try {
+      const resAlerts = await fetch('/api/alerts');
+      const dataAlerts = await resAlerts.json();
+      if (Array.isArray(dataAlerts)) {
+        setActiveAlerts(dataAlerts);
+      }
+
+      const resLogs = await fetch('/api/alerts/logs');
+      const dataLogs = await resLogs.json();
+      if (Array.isArray(dataLogs)) {
+        setAlertLogs(dataLogs);
+      }
+    } catch (err) {
+      console.warn('Failed to load alert statuses:', err);
+    }
+  };
+
+  // IP-Based Geolocation detection (No GPS pop-ups required)
+  const detectIPLocation = async () => {
+    setLoadingGeo(true);
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.latitude && data.longitude) {
+          setUserLocation({
+            lat: data.latitude,
+            lng: data.longitude,
+            city: data.city || 'Calgary',
+            region: data.region || 'Alberta',
+            isGPS: false
+          });
+          setSortBy('net-wait');
+        }
+      }
+    } catch (err) {
+      console.warn('IP geolocation fallback triggered:', err);
+    } finally {
+      setLoadingGeo(false);
+    }
+  };
+
+  // Precise browser GPS request
+  const requestGPSLocation = () => {
+    setLoadingGeo(true);
+    setGpsRefused(false);
+    setGeocodingError('');
+    if (!navigator.geolocation) {
+      setGeocodingError("Browser geolocation services are not supported by this browser.");
+      setGpsRefused(true);
+      setLoadingGeo(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        updateLocationWithCityName(pos.coords.latitude, pos.coords.longitude, true);
+        setGpsRefused(false);
+        setSortBy('net-wait');
+        setLoadingGeo(false);
+      },
+      (err) => {
+        console.warn("Precise GPS access declined/failed:", err);
+        setGpsRefused(true);
+        setGeocodingError("Could not detect your location automatically. You can enter an Alberta postal code or city below.");
+        setLoadingGeo(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+
+  // Geocode address or postal code using zippopotam.us (for Canadian postal codes) or Nominatim as fallback
+  const handleAddressSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addressInput.trim()) return;
+    setIsGeocoding(true);
+    setGeocodingError('');
+    try {
+      const inputTrimmed = addressInput.trim();
+      
+      // Match Canadian postal code FSA pattern (first 3 characters like T8N, T6G, etc.)
+      const fsaMatch = inputTrimmed.match(/\b([a-zA-Z]\d[a-zA-Z])\b/) || inputTrimmed.match(/([a-zA-Z]\d[a-zA-Z])/);
+      const fsa = fsaMatch ? fsaMatch[1].toUpperCase() : null;
+
+      if (fsa) {
+        try {
+          const zipRes = await fetch(`https://api.zippopotam.us/ca/${fsa}`);
+          if (zipRes.ok) {
+            const zipData = await zipRes.json();
+            if (zipData && zipData.places && zipData.places.length > 0) {
+              const place = zipData.places[0];
+              setUserLocation({
+                lat: parseFloat(place.latitude),
+                lng: parseFloat(place.longitude),
+                city: `${place['place name'].toUpperCase()} (${fsa})`,
+                region: "Alberta",
+                isGPS: false
+              });
+              setSortBy('net-wait');
+              setAddressInput('');
+              setIsGeocoding(false);
+              return; // Successfully geocoded postal code
+            }
+          }
+        } catch (zipErr) {
+          console.warn('Zippopotam.us API error, falling back to Nominatim:', zipErr);
+        }
+      }
+
+      // Fallback: Geocode using Nominatim
+      const cleanQuery = fsa ? `${fsa}, Alberta, Canada` : `${inputTrimmed}, Alberta, Canada`;
+      const query = encodeURIComponent(cleanQuery);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`, {
+        headers: {
+          'Accept-Language': 'en-US,en;q=0.9',
+          'User-Agent': 'AlbertaWaitTimesApp/1.0'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const result = data[0];
+          setUserLocation({
+            lat: parseFloat(result.lat),
+            lng: parseFloat(result.lon),
+            city: inputTrimmed.toUpperCase(),
+            region: "Alberta",
+            isGPS: false
+          });
+          setSortBy('net-wait');
+          setAddressInput('');
+        } else {
+          setGeocodingError('Location not found. Please try a valid Alberta postal code, address, or city (e.g., T2P 2M5, Calgary).');
+        }
+      } else {
+        setGeocodingError('Unable to connect to location services. Please try again.');
+      }
+    } catch (err) {
+      console.error('Geocoding error:', err);
+      setGeocodingError('An error occurred while looking up the location.');
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
+
+  // Register a new Email alert
+  const registerAlert = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAlertSuccessMessage('');
+    setAlertErrorMessage('');
+    if (!alertEmail || selectedAlertHospitals.length === 0) {
+      setAlertErrorMessage("Please provide an email address and select at least one hospital facility.");
+      return;
+    }
+
+    setSubmittingAlert(true);
+    try {
+      const res = await fetch('/api/alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: alertEmail,
+          hospitalIds: selectedAlertHospitals,
+          thresholdMins: alertThreshold
+        })
+      });
+
+      if (res.ok) {
+        setAlertSuccessMessage(`Successfully registered alerts for ${alertEmail}!`);
+        setAlertEmail('');
+        setSelectedAlertHospitals([]);
+        fetchAlertsAndLogs();
+        setTimeout(() => setAlertSuccessMessage(''), 5000);
+      } else {
+        const errData = await res.json();
+        setAlertErrorMessage(errData.error || "Subscription failed");
+      }
+    } catch (error) {
+      console.error("Alert registration error:", error);
+      setAlertErrorMessage("An error occurred during alert registration. Please check your connection and try again.");
+    } finally {
+      setSubmittingAlert(false);
+    }
+  };
+
+  // Remove alert subscription
+  const deleteAlert = async (id: string) => {
+    try {
+      const res = await fetch(`/api/alerts/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchAlertsAndLogs();
+      }
+    } catch (err) {
+      console.warn("Delete subscription failure:", err);
+    }
+  };
+
+  const refreshAll = () => {
+    fetchHospitals();
+    fetchZoneTrends(zoneRange);
+    fetchAlertsAndLogs();
+    fetchMaxStats();
+    if (selectedHospital) {
+      fetchTrends(selectedHospital.id, hospitalRange);
+    }
+  };
+
+  // Get unique region list
+  const regions = ['All', ...Array.from(new Set(hospitals.map(h => h.region)))];
+
+  // Process list with distance calculation, search, filters, and proximity sorting
+  const processedHospitals = hospitals.map(h => {
+    let distance: number | undefined = undefined;
+    let driveMins: number | undefined = undefined;
+    
+    if (userLocation && h.latitude && h.longitude) {
+      if (osrmData[h.id]) {
+        distance = osrmData[h.id].distanceKm;
+        driveMins = osrmData[h.id].durationMins;
+      } else {
+        distance = calculateDistance(userLocation.lat, userLocation.lng, h.latitude, h.longitude);
+        driveMins = Math.round((distance / 85) * 60);
+      }
+    }
+    return { ...h, distance, driveMins };
+  });
+
+  const filteredAndSortedHospitals = processedHospitals
+    .filter(h => {
+      const matchesSearch = h.name.toLowerCase().includes(search.toLowerCase()) || 
+                            h.city.toLowerCase().includes(search.toLowerCase());
+      const matchesRegion = selectedRegion === 'All' || h.region === selectedRegion;
+      return matchesSearch && matchesRegion;
+    })
+    .sort((a, b) => {
+      const isAUnav = isWaitTimeUnavailable(a);
+      const isBUnav = isWaitTimeUnavailable(b);
+      // Keep unavailable wait times at the bottom of the list for all sort modes
+      if (isAUnav && !isBUnav) return 1;
+      if (!isAUnav && isBUnav) return -1;
+      if (isAUnav && isBUnav) {
+        // If both are unavailable, sort by distance/name
+        if (a.distance !== undefined && b.distance !== undefined) {
+          return a.distance - b.distance;
+        }
+        return a.name.localeCompare(b.name);
+      }
+
+      if (sortBy === 'net-wait') {
+        if (a.distance !== undefined && b.distance !== undefined) {
+          const driveMinsA = a.driveMins || 0;
+          const driveMinsB = b.driveMins || 0;
+          const netWaitA = driveMinsA + a.waitTime;
+          const netWaitB = driveMinsB + b.waitTime;
+          return netWaitA - netWaitB;
+        }
+        // Fallback if no location: Sort by waitTime (raw)
+        return a.waitTime - b.waitTime;
+      }
+
+      if (sortBy === 'proximity') {
+        if (a.distance !== undefined && b.distance !== undefined) {
+          return a.distance - b.distance;
+        }
+        if (a.distance !== undefined) return -1;
+        if (b.distance !== undefined) return 1;
+        return a.waitTime - b.waitTime;
+      }
+
+      // sortBy === 'raw-wait'
+      return a.waitTime - b.waitTime;
+    });
+
+  // Group processed hospitals by zone (region), sorting them within each zone using the same selected sort key
+  const groupedZones: { name: string; distance: number; hospitals: typeof processedHospitals }[] = [];
+  const allRegions = Array.from(new Set(processedHospitals.map(h => h.region))) as string[];
+  
+  allRegions.forEach(regionName => {
+    const matchedHospitals = processedHospitals.filter(h => {
+      const matchesSearch = h.name.toLowerCase().includes(search.toLowerCase()) || 
+                            h.city.toLowerCase().includes(search.toLowerCase());
+      const matchesRegion = selectedRegion === 'All' || h.region === selectedRegion;
+      return h.region === regionName && matchesSearch && matchesRegion;
+    });
+
+    if (matchedHospitals.length > 0) {
+      matchedHospitals.sort((a, b) => {
+        const isAUnav = isWaitTimeUnavailable(a);
+        const isBUnav = isWaitTimeUnavailable(b);
+        if (isAUnav && !isBUnav) return 1;
+        if (!isAUnav && isBUnav) return -1;
+        if (isAUnav && isBUnav) {
+          if (a.distance !== undefined && b.distance !== undefined) {
+            return a.distance - b.distance;
+          }
+          return a.name.localeCompare(b.name);
+        }
+
+        if (sortBy === 'net-wait') {
+          if (a.distance !== undefined && b.distance !== undefined) {
+            const driveMinsA = a.driveMins || 0;
+            const driveMinsB = b.driveMins || 0;
+            const netWaitA = driveMinsA + a.waitTime;
+            const netWaitB = driveMinsB + b.waitTime;
+            return netWaitA - netWaitB;
+          }
+          return a.waitTime - b.waitTime;
+        }
+
+        if (sortBy === 'proximity') {
+          if (a.distance !== undefined && b.distance !== undefined) {
+            return a.distance - b.distance;
+          }
+          if (a.distance !== undefined) return -1;
+          if (b.distance !== undefined) return 1;
+          return a.waitTime - b.waitTime;
+        }
+
+        return a.waitTime - b.waitTime;
+      });
+
+      const minDistance = Math.min(...matchedHospitals.map(h => h.distance !== undefined ? h.distance : Infinity));
+
+      groupedZones.push({
+        name: regionName,
+        distance: minDistance === Infinity ? 999999 : minDistance,
+        hospitals: matchedHospitals
+      });
+    }
+  });
+
+  // Sort the zones themselves: closest zone to user first!
+  groupedZones.sort((a, b) => {
+    if (sortBy === 'net-wait' && userLocation) {
+      const minNetWaitA = Math.min(...a.hospitals.map(h => {
+        const isUnav = isWaitTimeUnavailable(h);
+        if (isUnav) return Infinity;
+        const driveMins = h.driveMins || 0;
+        return driveMins + h.waitTime;
+      }));
+      const minNetWaitB = Math.min(...b.hospitals.map(h => {
+        const isUnav = isWaitTimeUnavailable(h);
+        if (isUnav) return Infinity;
+        const driveMins = h.driveMins || 0;
+        return driveMins + h.waitTime;
+      }));
+      if (minNetWaitA !== minNetWaitB) return minNetWaitA - minNetWaitB;
+    }
+    return a.distance - b.distance;
+  });
+
+  // Shortest Wait Calculator logic: Drive Time (OSRM or 85km/h avg) + Current Hospital Wait Time
+  const calculatedShortestWaitList = processedHospitals
+    .filter(h => h.distance !== undefined && h.distance < 150 && !isWaitTimeUnavailable(h)) // Only look within 150km radius and with available wait times
+    .map(h => {
+      const driveMins = h.driveMins || 0;
+      const totalTime = driveMins + h.waitTime;
+
+      return {
+        ...h,
+        driveMins,
+        trafficDelay: 0,
+        totalTime
+      };
+    })
+    .sort((a, b) => a.totalTime - b.totalTime)
+    .slice(0, 3); // Top 3 optimal recommendations
+
+  // Calculate high-fidelity metrics
+  const validHospitals = hospitals.filter(h => h.waitTime >= 0);
+  const edmontonHospitals = validHospitals.filter(h => h.city.toLowerCase() === 'edmonton');
+  const calgaryHospitals = validHospitals.filter(h => h.city.toLowerCase() === 'calgary');
+  const restHospitals = validHospitals.filter(h => h.city.toLowerCase() !== 'edmonton' && h.city.toLowerCase() !== 'calgary');
+
+  const stats = {
+    avgWait: validHospitals.length > 0 ? Math.round(validHospitals.reduce((acc, h) => acc + h.waitTime, 0) / validHospitals.length) : 0,
+    edmontonAvgWait: edmontonHospitals.length > 0 ? Math.round(edmontonHospitals.reduce((acc, h) => acc + h.waitTime, 0) / edmontonHospitals.length) : 0,
+    calgaryAvgWait: calgaryHospitals.length > 0 ? Math.round(calgaryHospitals.reduce((acc, h) => acc + h.waitTime, 0) / calgaryHospitals.length) : 0,
+    restAvgWait: restHospitals.length > 0 ? Math.round(restHospitals.reduce((acc, h) => acc + h.waitTime, 0) / restHospitals.length) : 0,
+    maxWait: hospitals.length > 0 ? Math.max(...hospitals.map(h => h.waitTime)) : 0,
+    totalHospitals: hospitals.length,
+    nearestHospital: processedHospitals.filter(h => h.distance !== undefined).sort((a, b) => (a.distance || 0) - (b.distance || 0))[0] || null
+  };
+
+  return (
+    <div className="min-h-screen bg-[#070b19] text-slate-100 font-sans selection:bg-blue-600/30 selection:text-blue-200">
+      
+      {/* Sticky Premium Header */}
+      <header className="bg-[#0b1226] border-b border-slate-800/80 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-red-600/20 border border-red-500/30 p-2 rounded-xl">
+              <Activity className="w-5 h-5 text-red-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-extrabold tracking-tight text-white sm:text-lg">Unofficial Alberta Hospital Wait Times</h1>
+                <span className="hidden sm:inline-block px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded text-[9px] font-bold uppercase tracking-wider">AHS Data Feed</span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Independent ED Monitor • Unofficial Tracking</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {/* Compass Geolocation Badge */}
+            {userLocation ? (
+              <button
+                onClick={() => {
+                  setShowManualInput(true);
+                  const el = document.getElementById('geolocation-banner');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  setTimeout(() => {
+                    const inputEl = document.getElementById('manual-location-input');
+                    if (inputEl) inputEl.focus();
+                  }, 500);
+                }}
+                className="hidden md:flex items-center gap-2 px-3.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 rounded-full text-xs text-blue-300 font-medium transition-all cursor-pointer group"
+                title="Change or set location manually"
+              >
+                <Compass className="w-3.5 h-3.5 text-blue-400 group-hover:text-blue-300 animate-spin-slow" />
+                <span>Location: {userLocation.city}</span>
+                <span className="text-[10px] text-blue-400/80 hover:text-blue-200 pl-1.5 border-l border-blue-500/30 font-bold uppercase tracking-wider ml-0.5">Change</span>
+              </button>
+            ) : loadingGeo ? (
+              <div className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800/60 rounded-full text-xs text-slate-400 font-medium">
+                <Compass className="w-3 h-3 animate-spin" />
+                <span>Locating...</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setShowManualInput(true);
+                  const el = document.getElementById('geolocation-banner');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  setTimeout(() => {
+                    const inputEl = document.getElementById('manual-location-input');
+                    if (inputEl) inputEl.focus();
+                  }, 500);
+                }}
+                className="hidden md:flex items-center gap-2 px-3.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 rounded-full text-xs text-blue-300 font-medium transition-all cursor-pointer"
+              >
+                <MapPin className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
+                <span>Set Location</span>
+              </button>
+            )}
+
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+              <Clock className="w-3.5 h-3.5 text-slate-500" />
+              <span>Synced: {hospitals.length > 0 ? format(new Date(hospitals[0].updatedAt), 'HH:mm:ss') : '--:--:--'}</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Unofficial Warning Disclaimer Header */}
+        <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+          <p className="text-xs text-amber-200/90 leading-relaxed font-medium">
+            <strong>Notice:</strong> This tracker is completely <strong>unofficial</strong> and not endorsed by or affiliated with Alberta Health Services. For critical emergency services or life-threatening conditions, please dial <strong>911</strong> immediately.
+          </p>
+        </div>
+
+        {/* Mobile Header Dashboard Switcher */}
+        {(() => {
+          const activeDashboard = DASHBOARDS.find(d => d.id === activeTab) || DASHBOARDS[0];
+          const ActiveIcon = activeDashboard.icon;
+          return (
+            <div className="lg:hidden mb-6">
+              <button
+                onClick={() => setIsMobileNavOpen(true)}
+                className="w-full flex items-center justify-between p-4 bg-[#090e21] border border-slate-800 rounded-2xl hover:border-slate-700 transition-all text-left shadow-xl"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl ${activeDashboard.bgColor} ${activeDashboard.color}`}>
+                    <ActiveIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[9px] text-slate-500 font-black uppercase tracking-wider">
+                      {activeDashboard.category}
+                    </div>
+                    <div className="text-sm font-extrabold text-white">
+                      {activeDashboard.title}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 text-[9px] font-black bg-blue-600/10 border border-blue-500/20 text-blue-400 rounded-full uppercase tracking-wider">
+                    Change Module
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                </div>
+              </button>
+            </div>
+          );
+        })()}
+
+        {/* Mobile Slide-Up Navigation Drawer */}
+        <AnimatePresence>
+          {isMobileNavOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                key="mobile-nav-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMobileNavOpen(false)}
+                className="fixed inset-0 bg-black/80 z-50 lg:hidden"
+              />
+              {/* Slide-up Container */}
+              <motion.div
+                key="mobile-nav-drawer"
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+                className="fixed bottom-0 left-0 right-0 max-h-[85vh] bg-[#090e21] border-t border-slate-800 rounded-t-3xl z-50 p-6 flex flex-col overflow-hidden lg:hidden shadow-2xl"
+              >
+                {/* Drawer Drag Bar */}
+                <div className="w-12 h-1.5 bg-slate-800 rounded-full mx-auto mb-4 shrink-0" />
+
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800 shrink-0">
+                  <div>
+                    <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                      <SlidersHorizontal className="w-4 h-4 text-blue-500" />
+                      Select Analytics Console
+                    </h3>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Explore active health service metrics across Alberta</p>
+                  </div>
+                  <button
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="p-1 text-slate-400 hover:text-white"
+                  >
+                    <Minus className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Drawer Search */}
+                <div className="relative my-4 shrink-0">
+                  <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Search dashboards..."
+                    value={dashboardSearch}
+                    onChange={(e) => setDashboardSearch(e.target.value)}
+                    className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-2 pl-9 pr-8 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  />
+                  {dashboardSearch && (
+                    <button
+                      onClick={() => setDashboardSearch('')}
+                      className="absolute right-3 top-2.5 text-slate-500 hover:text-white text-xs font-bold"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                {/* Drawer Body - Scrollable */}
+                <div className="flex-1 overflow-y-auto pr-1 pb-8 space-y-6">
+                  {Array.from(new Set(DASHBOARDS.map(d => d.category))).map(category => {
+                    const items = DASHBOARDS.filter(d => 
+                      d.category === category &&
+                      (d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+                       d.description.toLowerCase().includes(dashboardSearch.toLowerCase()))
+                    );
+
+                    if (items.length === 0) return null;
+
+                    return (
+                      <div key={category} className="space-y-2">
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">
+                          {category}
+                        </h4>
+                        <div className="grid grid-cols-1 gap-2">
+                          {items.map(d => {
+                            const Icon = d.icon;
+                            const isActive = activeTab === d.id;
+                            return (
+                              <button
+                                key={d.id}
+                                onClick={() => {
+                                  setActiveTab(d.id);
+                                  setIsMobileNavOpen(false);
+                                  if (isMapFullscreen) {
+                                    setIsMapFullscreen(false);
+                                  }
+                                }}
+                                className={`w-full flex items-start gap-3.5 p-3.5 rounded-xl text-xs transition-all text-left ${
+                                  isActive 
+                                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold border border-blue-400/30' 
+                                    : 'bg-slate-950/40 text-slate-400 hover:text-slate-200 border border-slate-800/40'
+                                }`}
+                              >
+                                <div className={`p-2 rounded-xl shrink-0 ${
+                                  isActive ? 'bg-white/10 text-white' : `${d.bgColor} ${d.color}`
+                                }`}>
+                                  <Icon className="w-4 h-4" />
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="font-extrabold flex items-center gap-2">
+                                    <span>{d.title}</span>
+                                    {d.badge && (
+                                      <span className={`text-[8px] px-1.5 py-0.5 rounded font-extrabold uppercase tracking-widest border ${
+                                        isActive ? 'bg-white/10 text-white border-white/20' : d.badgeColor
+                                      }`}>
+                                        {d.badge}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className={`text-[10px] leading-relaxed ${isActive ? 'text-blue-100/80' : 'text-slate-400'}`}>
+                                    {d.description}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* No Results Drawer */}
+                  {DASHBOARDS.filter(d => 
+                    d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+                    d.description.toLowerCase().includes(dashboardSearch.toLowerCase())
+                  ).length === 0 && (
+                    <div className="text-center py-8 bg-slate-950/20 border border-dashed border-slate-800 rounded-2xl space-y-2">
+                      <Search className="w-8 h-8 text-slate-600 mx-auto" />
+                      <p className="text-xs text-slate-400 font-medium">No matches found</p>
+                      <button
+                        onClick={() => setDashboardSearch('')}
+                        className="text-[10px] text-blue-400 font-black uppercase tracking-wider"
+                      >
+                        Reset Filters
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Horizontal Nav Bar (Desktop Only, under notice disclaimer) */}
+        <div className="hidden lg:block bg-[#090e21] border border-slate-800 rounded-2xl p-5 mb-8 shadow-xl w-full space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
+                <SlidersHorizontal className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  Analytics Modules
+                </h3>
+                <p className="text-[11px] text-slate-500 font-medium">Select a module below to view interactive health indicators and trends</p>
+              </div>
+            </div>
+
+            {/* Category selection and Search Row */}
+            <div className="flex items-center gap-3">
+              {/* Category Pills */}
+              <div className="flex items-center bg-slate-950/60 border border-slate-800/85 rounded-xl p-1 gap-1">
+                {['All', 'Acute & Urgent Care', 'System Capacity & Flow', 'Community & Prevention'].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                      selectedCategory === cat
+                        ? 'bg-slate-800 text-white font-bold'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
+                    }`}
+                  >
+                    {cat === 'All' ? 'All' : cat.split(' & ')[0]}
+                  </button>
+                ))}
+              </div>
+
+              {/* Compact Search Bar */}
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-2 w-3.5 h-3.5 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Search modules..."
+                  value={dashboardSearch}
+                  onChange={(e) => setDashboardSearch(e.target.value)}
+                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-1.5 pl-8.5 pr-8 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                />
+                {dashboardSearch && (
+                  <button
+                    onClick={() => setDashboardSearch('')}
+                    className="absolute right-3 top-2 text-slate-500 hover:text-slate-300 text-xs font-bold"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Dashboards Pills list */}
+          <div className="flex flex-wrap gap-2 pt-1">
+            {DASHBOARDS.filter(d => {
+              const matchesCategory = selectedCategory === 'All' || d.category === selectedCategory;
+              const matchesSearch = d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) || 
+                                    d.description.toLowerCase().includes(dashboardSearch.toLowerCase());
+              return matchesCategory && matchesSearch;
+            }).map((d) => {
+              const Icon = d.icon;
+              const isActive = activeTab === d.id;
+              return (
+                <button
+                  key={d.id}
+                  onClick={() => {
+                    setActiveTab(d.id);
+                    if (isMapFullscreen) {
+                      setIsMapFullscreen(false);
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all text-left cursor-pointer border ${
+                    isActive
+                      ? 'bg-gradient-to-r from-blue-600/95 to-blue-500/85 text-white border-blue-500/30 font-bold shadow-lg shadow-blue-500/10'
+                      : 'bg-slate-950/40 text-slate-400 border-slate-800/40 hover:text-slate-200 hover:border-slate-800/80 hover:bg-slate-950/80'
+                  }`}
+                >
+                  <div className={`p-1 rounded-lg shrink-0 ${
+                    isActive ? 'bg-white/10 text-white' : `${d.bgColor} ${d.color}`
+                  }`}>
+                    <Icon className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="font-semibold">{d.shortName}</span>
+                </button>
+              );
+            })}
+
+            {/* Empty search results */}
+            {DASHBOARDS.filter(d => {
+              const matchesCategory = selectedCategory === 'All' || d.category === selectedCategory;
+              const matchesSearch = d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) || 
+                                    d.description.toLowerCase().includes(dashboardSearch.toLowerCase());
+              return matchesCategory && matchesSearch;
+            }).length === 0 && (
+              <div className="text-center py-4 w-full text-xs text-slate-500 font-medium">
+                No matching analytical modules found for your search criteria.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ACTIVE CONTENT CHANNEL (Full Width Layout) */}
+        <div className="w-full min-w-0">
+            {activeTab === 'er-waits' ? (
+          <>
+            {/* Proximity / Geolocation Control Banner */}
+            <div id="geolocation-banner" className="mb-6 p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950/20 border border-slate-800 rounded-2xl shadow-xl relative overflow-hidden">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+          
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+            {/* Left Side: Title and Feature Explanation */}
+            <div className="max-w-2xl space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="p-1.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400">
+                  <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
+                </span>
+                <h3 className="text-xs font-black text-slate-100 uppercase tracking-wider">
+                  Door-to-Doctor Queue Calculator
+                </h3>
+                <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[9px] font-bold uppercase tracking-widest">
+                  Best Feature
+                </span>
+              </div>
+              
+              <h4 className="text-base sm:text-lg font-black text-white tracking-tight leading-snug">
+                Calculate your exact travel time combined with live emergency waiting queues.
+              </h4>
+              
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Standard wait times don't tell the whole story. A closer hospital with a long queue might take longer than a farther hospital with zero wait. This app calculates your driving time to each ER and adds it to the live wait time to show you the <strong className="text-blue-400 font-bold">absolute fastest path to being treated</strong>.
+              </p>
+
+              {/* Formula Visualization */}
+              <div className="pt-1.5">
+                <div className="inline-flex flex-wrap items-center gap-2 p-2 bg-slate-950/80 border border-slate-800/80 rounded-xl text-[10px] sm:text-xs font-mono text-slate-300">
+                  <span className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-900 border border-slate-800/50 rounded-lg text-slate-200">
+                    <Clock className="w-3 h-3 text-blue-400" />
+                    🏥 ER Wait Queue
+                  </span>
+                  <span className="text-slate-500 font-bold">+</span>
+                  <span className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-900 border border-slate-800/50 rounded-lg text-slate-200">
+                    <Navigation className="w-3 h-3 text-cyan-400" />
+                    🚗 Driving Time
+                  </span>
+                  <span className="text-slate-500 font-bold">=</span>
+                  <span className="flex items-center gap-1.5 px-2 py-0.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold">
+                    ⏱️ Net Treatment Time
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side: Interactive Geolocation Form */}
+            <div className="bg-slate-950/60 border border-slate-800/80 p-4 sm:p-5 rounded-2xl lg:w-[350px] shrink-0 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                  Select Location Method:
+                </span>
+                {userLocation ? (
+                  <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
+                    userLocation.isGPS 
+                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 animate-pulse' 
+                      : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400'
+                  }`}>
+                    {userLocation.isGPS ? 'Auto-Detected' : 'Custom Location'}
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded text-[8px] font-black uppercase tracking-widest">
+                    Default Mode
+                  </span>
+                )}
+              </div>
+
+              {userLocation && (
+                <div className="p-2 bg-slate-900 border border-slate-800/50 rounded-xl">
+                  <p className="text-[10px] text-slate-400 leading-normal">
+                    Currently estimating drive times relative to:
+                  </p>
+                  <p className="text-xs text-white font-extrabold mt-0.5 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-blue-400" />
+                    <span>{userLocation.city}, AB</span>
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <button
+                  onClick={requestGPSLocation}
+                  disabled={loadingGeo}
+                  className={`w-full py-2 text-xs font-black rounded-xl border transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    userLocation?.isGPS 
+                      ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/10' 
+                      : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
+                  }`}
+                  title="Find my location automatically"
+                >
+                  <Compass className={`w-3.5 h-3.5 ${loadingGeo ? 'animate-spin' : ''}`} />
+                  <span>{loadingGeo ? 'Locating...' : 'Use My Current Location'}</span>
+                </button>
+
+                <div className="relative flex items-center justify-center py-1 select-none">
+                  <span className="absolute bg-slate-950 px-2 text-[8px] font-extrabold text-slate-600 uppercase tracking-wider">
+                    Or Enter Manually
+                  </span>
+                  <div className="w-full border-t border-slate-800"></div>
+                </div>
+
+                <form onSubmit={handleAddressSubmit} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      id="manual-location-input"
+                      type="text"
+                      placeholder="e.g. Calgary or T2P 2M5"
+                      value={addressInput}
+                      onChange={(e) => setAddressInput(e.target.value)}
+                      className="w-full h-9 px-3 pl-8 text-xs bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all font-medium"
+                    />
+                    <MapPin className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-500" />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isGeocoding}
+                    className="px-4 h-9 text-xs font-black rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-50 shrink-0 cursor-pointer shadow-md shadow-blue-600/10"
+                  >
+                    {isGeocoding ? '...' : 'Calculate'}
+                  </button>
+                </form>
+              </div>
+
+              {geocodingError && (
+                <p className="text-[10px] text-red-400 font-medium pl-1 leading-normal">{geocodingError}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Provincial Avg Wait Card Breakdown */}
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
+                  <Clock className="w-4 h-4 text-blue-400" />
+                </div>
+                <span className="text-[8px] font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                  Live State Average
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2 mb-1.5">
+                <p className="text-2xl font-black text-white tracking-tight leading-none">
+                  {formatMinutesToHm(stats.avgWait)}
+                </p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  Provincial Average Wait
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2 border-t border-slate-800/80 pt-2.5 mt-1">
+              <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Edmonton</span>
+                <span className="text-xs font-black text-emerald-400 font-mono block mt-0.5">
+                  {formatMinutesToHm(stats.edmontonAvgWait)}
+                </span>
+              </div>
+              <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Calgary</span>
+                <span className="text-xs font-black text-blue-400 font-mono block mt-0.5">
+                  {formatMinutesToHm(stats.calgaryAvgWait)}
+                </span>
+              </div>
+              <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Rest AB</span>
+                <span className="text-xs font-black text-indigo-400 font-mono block mt-0.5">
+                  {formatMinutesToHm(stats.restAvgWait)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Max Recorded Wait Card Breakdown */}
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-red-400" />
+                </div>
+                <span className="text-[8px] font-extrabold text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                  Historical Peaks
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2 mb-1.5">
+                <p className="text-2xl font-black text-white tracking-tight leading-none">
+                  {maxStats?.max24h ? formatMinutesToHm(maxStats.max24h.waitTime) : formatMinutesToHm(stats.maxWait)}
+                </p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  Max Recorded Wait (24h Peak)
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2 border-t border-slate-800/80 pt-2.5 mt-1">
+              {/* 24 Hour Max Column */}
+              <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl flex flex-col justify-between text-center min-w-0">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">24h Max</span>
+                <span className="text-xs font-black text-red-400 font-mono block mt-0.5">
+                  {maxStats?.max24h ? formatMinutesToHm(maxStats.max24h.waitTime) : formatMinutesToHm(stats.maxWait)}
+                </span>
+                <span className="text-[7px] text-slate-500 font-medium italic truncate block mt-1" title={maxStats?.max24h ? maxStats.max24h.hospitalName : ''}>
+                  {maxStats?.max24h ? maxStats.max24h.hospitalName.replace('Community Hospital', '').replace('General Hospital', '').trim() : 'Syncing...'}
+                </span>
+              </div>
+
+              {/* 7 Day Max Column */}
+              <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl flex flex-col justify-between text-center min-w-0">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">7d Max</span>
+                <span className="text-xs font-black text-red-400 font-mono block mt-0.5">
+                  {maxStats?.max7d ? formatMinutesToHm(maxStats.max7d.waitTime) : formatMinutesToHm(stats.maxWait)}
+                </span>
+                <span className="text-[7px] text-slate-500 font-medium italic truncate block mt-1" title={maxStats?.max7d ? maxStats.max7d.hospitalName : ''}>
+                  {maxStats?.max7d ? maxStats.max7d.hospitalName.replace('Community Hospital', '').replace('General Hospital', '').trim() : 'Syncing...'}
+                </span>
+              </div>
+
+              {/* 30 Day Max Column */}
+              <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl flex flex-col justify-between text-center min-w-0">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">30d Max</span>
+                <span className="text-xs font-black text-red-400 font-mono block mt-0.5">
+                  {maxStats?.max30d ? formatMinutesToHm(maxStats.max30d.waitTime) : formatMinutesToHm(stats.maxWait)}
+                </span>
+                <span className="text-[7px] text-slate-500 font-medium italic truncate block mt-1" title={maxStats?.max30d ? maxStats.max30d.hospitalName : ''}>
+                  {maxStats?.max30d ? maxStats.max30d.hospitalName.replace('Community Hospital', '').replace('General Hospital', '').trim() : 'Syncing...'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Shortest Wait Time Driving Calculator Section (Shows if distance available) */}
+        {calculatedShortestWaitList.length > 0 && (
+          <div className="mb-3 p-3.5 sm:p-4 bg-[#0b1329] border border-blue-900/30 rounded-2xl shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+              <Compass className="w-32 h-32 text-blue-500" />
+            </div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-2.5">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="w-4.5 h-4.5 text-blue-400" />
+                <h3 className="text-sm font-extrabold text-white tracking-tight">Optimal Route Planner: Shortest Time to Treatment</h3>
+              </div>
+              <p className="text-[10px] text-slate-400">
+                Live Alberta Health waiting cues + driving times combined to calculate fastest path.
+              </p>
+            </div>
+ 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 mb-2.5">
+              {calculatedShortestWaitList.map((h, i) => (
+                <div 
+                  key={h.id} 
+                  className={cn(
+                    "p-3 rounded-xl border transition-all flex flex-col justify-between cursor-pointer",
+                    i === 0 
+                      ? "bg-blue-950/20 border-blue-500/40 ring-1 ring-blue-500/10" 
+                      : "bg-slate-900/40 border-slate-800 hover:border-slate-700"
+                  )}
+                  onClick={() => setSelectedHospital(h)}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={cn(
+                        "text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded",
+                        i === 0 ? "bg-blue-500/20 text-blue-300" : "bg-slate-800 text-slate-400"
+                      )}>
+                        {i === 0 ? "Rank 1: Fastest Care" : `Rank ${i + 1}`}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold font-mono">{h.distance} km away</span>
+                    </div>
+                    <h4 className="text-xs font-extrabold text-white break-words mt-0.5 leading-tight">{h.name}</h4>
+                    <p className="text-[10px] text-slate-400 mt-0.5">{h.city}</p>
+                  </div>
+ 
+                  <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between">
+                    <div>
+                      <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-none">Est. Treatment</p>
+                      <p className="text-sm font-black text-white mt-0.5 leading-none">{formatMinutesToHm(h.totalTime)}</p>
+                    </div>
+                    <div className="text-right text-[9px] text-slate-400 font-semibold space-y-0.5 leading-none">
+                      <p>Wait: {formatMinutesToHm(h.waitTime)}</p>
+                      <p>Drive: {formatMinutesToHm(h.driveMins)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+ 
+            {/* Disclaimer block inside Optimal Route Planner */}
+            <div className="p-2 bg-amber-500/5 border border-amber-500/15 rounded-xl text-[9px] text-amber-300/85 leading-normal flex items-center gap-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <p className="truncate sm:whitespace-normal">
+                <strong>Emergency Disclaimer:</strong> Estimates are guidance only. In a medical emergency, please dial <strong>911</strong> immediately or head directly to the nearest facility.
+              </p>
+            </div>
+          </div>
+        )}
+ 
+        {/* Consolidated Historical Charts */}
+        <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-3 sm:p-3.5 mb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <TrendingUp className="w-4.5 h-4.5 text-blue-400" />
+                <h3 className="text-sm font-extrabold text-white">Hospital Queue Averages & Trends</h3>
+              </div>
+            </div>
+            
+            <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800 shrink-0 self-start sm:self-center">
+              {['24h', '7d', '30D'].map((r) => {
+                const val = r;
+                const isActive = zoneRange === val;
+                return (
+                  <button
+                    key={r}
+                    onClick={() => setZoneRange(val)}
+                    className={cn(
+                      "px-2 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider transition-all",
+                      isActive 
+                        ? "bg-blue-600 text-white shadow-sm shadow-blue-500/10" 
+                        : "text-slate-400 hover:text-slate-200"
+                    )}
+                  >
+                    {r}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+ 
+          <div className="h-36">
+            {zoneTrends.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={zoneTrends}>
+                  <defs>
+                    <linearGradient id="colorCalgary" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient>
+                    <linearGradient id="colorEdmonton" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.15}/><stop offset="95%" stopColor="#10b981" stopOpacity={0}/></linearGradient>
+                    <linearGradient id="colorCentral" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f59e0b" stopOpacity={0.15}/><stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/></linearGradient>
+                    <linearGradient id="colorSouth" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ec4899" stopOpacity={0.15}/><stop offset="95%" stopColor="#ec4899" stopOpacity={0}/></linearGradient>
+                    <linearGradient id="colorNorth" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.15}/><stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/></linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                  <XAxis 
+                    dataKey="timestamp" 
+                    tickFormatter={(tick) => formatChartXAxis(tick, zoneRange)}
+                    stroke="#475569"
+                    tick={{ fill: '#94a3b8', fontSize: 10 }}
+                  />
+                  <YAxis stroke="#475569" tick={{ fill: '#94a3b8', fontSize: 10 }} unit="m" />
+                  <Tooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-[#0b1329] border border-slate-800 p-4 rounded-2xl shadow-xl space-y-1.5 text-xs max-w-xs">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{format(new Date(payload[0].payload.timestamp), 'MMM d, h:mm a')}</p>
+                            {payload.map((series: any) => (
+                              <div key={series.name} className="flex justify-between gap-4">
+                                <span style={{ color: series.color || '#cbd5e1' }} className="font-semibold">{series.name}:</span>
+                                <span className="font-bold text-white">{formatMinutesToHm(Number(series.value))}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Area type="monotone" name="Calgary Zone" dataKey="Calgary Zone" stroke="#3b82f6" strokeWidth={2.5} fill="url(#colorCalgary)" />
+                  <Area type="monotone" name="Edmonton Zone" dataKey="Edmonton Zone" stroke="#10b981" strokeWidth={2.5} fill="url(#colorEdmonton)" />
+                  <Area type="monotone" name="Central Zone" dataKey="Central Zone" stroke="#f59e0b" strokeWidth={2.5} fill="url(#colorCentral)" />
+                  <Area type="monotone" name="South Zone" dataKey="South Zone" stroke="#ec4899" strokeWidth={2.5} fill="url(#colorSouth)" />
+                  <Area type="monotone" name="North Zone" dataKey="North Zone" stroke="#8b5cf6" strokeWidth={2.5} fill="url(#colorNorth)" />
+                  <Area type="monotone" name="Provincial Avg" dataKey="Provincial Avg" stroke="#cbd5e1" strokeDasharray="5 5" strokeWidth={2.5} fill="none" />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-500">
+                <RefreshCw className="w-6 h-6 animate-spin mr-2 text-emerald-500" />
+                <span>Compiling comparative zone trends...</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Live Cartography & Selected Facility Details Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+          {/* Map Layer Section (Alberta Cartographic Overlay) */}
+          <div className={cn(
+            "transition-all duration-300 flex flex-col justify-between",
+            isMapFullscreen 
+              ? "fixed inset-0 z-[9999] bg-slate-950 p-4 sm:p-6 h-screen w-screen" 
+              : "bg-slate-900/40 border border-slate-800 rounded-2xl p-3 sm:p-3.5"
+          )}>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5">
+                  <Map className="w-4.5 h-4.5 text-blue-400" />
+                  <h3 className="font-extrabold text-sm text-white">
+                    {isMapFullscreen ? "Live Cartography (Alberta Overlay) — Fullscreen Mode" : "Live Cartography"}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsMapFullscreen(!isMapFullscreen)}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-bold border border-slate-700/60 transition-colors cursor-pointer"
+                    title={isMapFullscreen ? "Exit fullscreen map mode" : "Maximize map view"}
+                  >
+                    {isMapFullscreen ? (
+                      <>
+                        <Minimize2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                        <span>Exit Fullscreen</span>
+                      </>
+                    ) : (
+                      <>
+                        <Maximize2 className="w-3.5 h-3.5 text-blue-400" />
+                        <span>Fullscreen</span>
+                      </>
+                    )}
+                  </button>
+                  <span className="px-1.5 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded text-[8px] font-bold uppercase tracking-wider">OpenStreetMap</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-normal">
+                Explore real-time Alberta Emergency Departments on the interactive map. Click a pin to inspect detailed wait queues.
+              </p>
+            </div>
+
+            {/* Interactive OpenStreetMap Map Container */}
+            <div className={cn(
+              "relative bg-slate-950 border border-slate-800/80 rounded-xl overflow-hidden mt-2",
+              isMapFullscreen ? "flex-1 min-h-0 my-3" : "h-[300px]"
+            )}>
+              <MapComponent
+                hospitals={processedHospitals}
+                userLocation={userLocation}
+                selectedHospital={selectedHospital}
+                setSelectedHospital={setSelectedHospital}
+                sortBy={sortBy}
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[9px] text-slate-500 font-bold uppercase tracking-wider mt-2">
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Low Queue</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Med Queue</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400"></span> High Queue</span>
+            </div>
+          </div>
+
+          {/* Selected Hospital Details Card */}
+          <div className={cn(
+            "bg-slate-900 rounded-2xl border border-slate-800 p-3 sm:p-3.5 shadow-2xl flex flex-col justify-between",
+            !selectedHospital && "border-slate-800/40 opacity-50"
+          )}>
+            {selectedHospital ? (
+              <>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <BarChart3 className="w-4.5 h-4.5 text-blue-400" />
+                      <h2 className="font-extrabold text-sm text-white">Facility Details</h2>
+                    </div>
+                    <span className="px-1.5 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded text-[8px] font-bold text-blue-400 uppercase tracking-widest">
+                      {selectedHospital.category || "Emergency"}
+                    </span>
+                  </div>
+                  
+                  <div className="p-2 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-xs font-extrabold text-slate-100 truncate">{selectedHospital.name}</h3>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{selectedHospital.city}, {selectedHospital.region}</p>
+                      {selectedHospital.distance !== undefined && (
+                        <p className="text-[10px] text-blue-400 font-bold mt-1 flex items-center gap-1">
+                          <Compass className="w-3.5 h-3.5 animate-spin-slow shrink-0" />
+                          <span className="truncate">{selectedHospital.distance} km away from your location</span>
+                        </p>
+                      )}
+                    </div>
+                    {/* Big Spotlight visual according to sortBy */}
+                    <div className="shrink-0 text-right p-2 bg-slate-900 border border-slate-800 rounded-xl min-w-[84px] flex flex-col items-center justify-center select-none shadow-sm">
+                      {sortBy === 'raw-wait' ? (
+                        <>
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Wait Time</span>
+                          <span className={cn(
+                            "text-base font-black tracking-tight leading-none font-sans",
+                            isWaitTimeUnavailable(selectedHospital)
+                              ? "text-slate-500"
+                              : selectedHospital.status === 'Red' 
+                                ? "text-red-400" 
+                                : selectedHospital.status === 'Yellow' 
+                                  ? "text-amber-400" 
+                                  : "text-emerald-400"
+                          )}>
+                            {isWaitTimeUnavailable(selectedHospital) ? "Unav" : formatMinutesToHm(selectedHospital.waitTime)}
+                          </span>
+                        </>
+                      ) : selectedHospital.distance !== undefined && !isWaitTimeUnavailable(selectedHospital) ? (
+                        <>
+                          <span className="text-[8px] font-black text-cyan-400 uppercase tracking-widest leading-none mb-1">Net Time</span>
+                          <span className="text-base font-black tracking-tight text-cyan-200 leading-none font-sans">
+                            {formatMinutesToHm((selectedHospital.driveMins || 0) + selectedHospital.waitTime)}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Wait Time</span>
+                          <span className={cn(
+                            "text-base font-black tracking-tight leading-none font-sans",
+                            isWaitTimeUnavailable(selectedHospital)
+                              ? "text-slate-500"
+                              : selectedHospital.status === 'Red' 
+                                ? "text-red-400" 
+                                : selectedHospital.status === 'Yellow' 
+                                  ? "text-amber-400" 
+                                  : "text-emerald-400"
+                          )}>
+                            {isWaitTimeUnavailable(selectedHospital) ? "Unav" : formatMinutesToHm(selectedHospital.waitTime)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Single Facility Historical Trend */}
+                  <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+                      <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Historical Wait Trend</h4>
+                      <div className="flex bg-slate-950 p-0.5 rounded border border-slate-800 shrink-0">
+                        {['24h', '7d', '30D'].map((r) => {
+                          const val = r;
+                          const isActive = hospitalRange === val;
+                          return (
+                            <button
+                              key={r}
+                              onClick={() => setHospitalRange(val)}
+                              className={cn(
+                                "px-1 py-0.5 text-[7px] font-extrabold rounded uppercase tracking-wider transition-all",
+                                isActive 
+                                  ? "bg-blue-600 text-white" 
+                                  : "text-slate-400 hover:text-slate-200"
+                              )}
+                            >
+                              {r}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="h-14 bg-slate-950 border border-slate-800/80 rounded-xl p-1.5">
+                      {loadingTrends ? (
+                        <div className="w-full h-full animate-pulse flex items-center justify-center">
+                          <RefreshCw className="w-4 h-4 text-blue-500/40 animate-spin" />
+                        </div>
+                      ) : trends.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={trends} margin={{ top: 1, right: 1, left: 1, bottom: 1 }}>
+                            <defs>
+                              <linearGradient id="colorWaitSingle" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2}/>
+                                <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                            <XAxis 
+                              dataKey="timestamp" 
+                              tickFormatter={(tick) => formatChartXAxis(tick, hospitalRange)}
+                              stroke="#334155"
+                              tick={{ fill: '#64748b', fontSize: 7 }}
+                            />
+                            <YAxis hide domain={['auto', 'auto']} />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                  return (
+                                    <div className="bg-[#0b1329] border border-slate-800 p-1.5 rounded-lg shadow-lg text-[10px]">
+                                      <p className="font-extrabold text-blue-400">{formatMinutesToHm(Number(payload[0].value))}</p>
+                                      <p className="text-[8px] text-slate-500">{format(new Date(payload[0].payload.timestamp), 'MMM d, HH:mm')}</p>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="waitTime" 
+                              stroke="#3b82f6" 
+                              strokeWidth={1.5}
+                              fillOpacity={1} 
+                              fill="url(#colorWaitSingle)" 
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="w-full h-full rounded-lg flex flex-col items-center justify-center text-center">
+                          <TrendingUp className="w-4 h-4 text-slate-700 mb-0.5" />
+                          <p className="text-[8px] text-slate-500 italic">No trend coordinates collected yet.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 mt-2">
+                  <div className={cn(
+                    "flex justify-between items-center text-xs border-b border-slate-800/80 pb-1 px-1 rounded transition-colors",
+                    sortBy === 'raw-wait' && "bg-blue-500/5 border-blue-500/20"
+                  )}>
+                    <span className={cn("text-slate-400 font-medium", sortBy === 'raw-wait' && "text-slate-200 font-bold")}>
+                      Current Wait Queue {sortBy === 'raw-wait' && "🎯"}
+                    </span>
+                    <span className={cn(
+                      "font-black text-xs font-mono",
+                      isWaitTimeUnavailable(selectedHospital)
+                        ? "text-slate-500"
+                        : selectedHospital.status === 'Red' 
+                          ? "text-red-400" 
+                          : selectedHospital.status === 'Yellow' 
+                            ? "text-amber-400" 
+                            : "text-emerald-400",
+                      sortBy === 'raw-wait' && "text-sm"
+                    )}>
+                      {isWaitTimeUnavailable(selectedHospital) ? "Unavailable" : formatMinutesToHm(selectedHospital.waitTime)}
+                    </span>
+                  </div>
+
+                  {selectedHospital.distance !== undefined && !isWaitTimeUnavailable(selectedHospital) && (
+                    <>
+                      <div className="flex justify-between items-center text-xs border-b border-slate-800/80 pb-1 px-1">
+                        <span className="text-slate-400 font-medium">Estimated Drive Time</span>
+                        <span className="font-bold text-xs text-blue-400 font-mono">
+                          ~{formatMinutesToHm(selectedHospital.driveMins || 0)}
+                        </span>
+                      </div>
+                      <div className={cn(
+                        "flex justify-between items-center text-xs border-b border-slate-800/80 pb-1 px-1 rounded transition-colors",
+                        sortBy !== 'raw-wait' && "bg-cyan-950/15 border-cyan-500/10"
+                      )}>
+                        <span className={cn("text-slate-400 font-medium", sortBy !== 'raw-wait' && "text-cyan-300 font-bold")}>
+                          Total Net Treatment Time {sortBy !== 'raw-wait' && "🎯"}
+                        </span>
+                        <span className={cn(
+                          "font-black text-xs font-mono text-cyan-400",
+                          sortBy !== 'raw-wait' && "text-sm text-cyan-300"
+                        )}>
+                          ~{formatMinutesToHm((selectedHospital.driveMins || 0) + selectedHospital.waitTime)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="flex justify-between items-center text-xs border-b border-slate-800/80 pb-1 px-1">
+                    <span className="text-slate-400 font-medium">Queue Severity</span>
+                    <StatusBadge status={selectedHospital.status} />
+                  </div>
+
+                  {selectedHospital.address && (
+                    <div className="text-[11px]">
+                      <span className="text-slate-400 block mb-0.5 text-[9px]">Facility Address</span>
+                      <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg flex items-start gap-1.5 justify-between">
+                        <p className="text-[10px] text-slate-300 leading-normal max-w-[190px] truncate" title={selectedHospital.address}>{selectedHospital.address}</p>
+                        <a 
+                          href={`https://maps.google.com/?q=${encodeURIComponent(selectedHospital.name + ' ' + selectedHospital.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded border border-blue-500/20 transition-all shrink-0"
+                          title="Navigate in Google Maps"
+                        >
+                          <Map className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedHospital.note && (
+                    <div className="text-[11px]">
+                      <span className="text-slate-400 block mb-0.5 text-[9px]">Hours</span>
+                      <div className="p-1.5 bg-slate-950/60 border border-slate-800 rounded-lg flex gap-1.5">
+                        <Clock className="w-3 h-3 text-blue-400 shrink-0 mt-0.5" />
+                        <p className="text-[9px] text-slate-400 leading-normal truncate-2-lines">
+                          {formatHospitalHours(selectedHospital.note)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="py-6 text-center my-auto">
+                <div className="w-10 h-10 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-center mx-auto mb-2 shadow-xl">
+                  <TrendingUp className="w-5 h-5 text-slate-600" />
+                </div>
+                <p className="text-slate-300 font-extrabold text-xs">Select a Facility</p>
+                <p className="text-[10px] text-slate-500 mt-1 max-w-[180px] mx-auto">Explore live wait metrics, facility hours, directions and 24-hour trends.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main List Section */}
+        <div className="space-y-6">
+            
+            {/* Search and Filters */}
+            <div className="flex flex-col md:flex-row gap-4 bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
+                <input 
+                  type="text" 
+                  placeholder="Search by facility or city..." 
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-2xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 md:shrink-0">
+                <div className="relative w-full sm:w-44">
+                  <select 
+                    className="w-full appearance-none pl-4 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-2xl text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                    value={selectedRegion}
+                    onChange={(e) => setSelectedRegion(e.target.value)}
+                  >
+                    {regions.map(r => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                  <SlidersHorizontal className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                </div>
+
+                <div className="relative w-full sm:w-48">
+                  <select 
+                    className="w-full appearance-none pl-4 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-2xl text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'net-wait' | 'proximity' | 'raw-wait')}
+                  >
+                    <option value="net-wait">Sort: Net Wait (Fastest)</option>
+                    <option value="proximity">Sort: Proximity (Nearest)</option>
+                    <option value="raw-wait">Sort: Raw Wait Time</option>
+                  </select>
+                  <SlidersHorizontal className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            {/* List Header */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Emergency & Urgent Care Centers ({filteredAndSortedHospitals.length})</h2>
+              <span className="text-xs text-slate-400">
+                Sorting: <span className="text-blue-400 font-semibold">
+                  {sortBy === 'net-wait' 
+                    ? (userLocation ? "Net Wait (Drive + Wait)" : "Wait Time (Default Location)") 
+                    : sortBy === 'proximity' 
+                      ? (userLocation ? "Proximity" : "Proximity (Default Location)") 
+                      : "Raw Wait Time"}
+                </span>
+              </span>
+            </div>
+
+            {/* Hospital Grid grouped by Zone */}
+            <div className="space-y-8">
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array(6).fill(0).map((_, i) => <SkeletonCard key={i} />)}
+                </div>
+              ) : groupedZones.length > 0 ? (
+                groupedZones.map(zone => (
+                  <div key={zone.name} className="space-y-3">
+                    {/* Zone Header with proximity badge */}
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-slate-400" />
+                        <h3 className="font-extrabold text-sm text-slate-200 uppercase tracking-wider">
+                          {zone.name}
+                        </h3>
+                      </div>
+                      {userLocation && zone.distance !== 999999 && (
+                        <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[9px] font-bold">
+                          ~{zone.distance} km closest
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Hospital cards for this zone */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {zone.hospitals.map(hospital => (
+                        <HospitalCard 
+                          key={hospital.id} 
+                          hospital={hospital} 
+                          onClick={() => setSelectedHospital(hospital)}
+                          selected={selectedHospital?.id === hospital.id}
+                          sortBy={sortBy}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-16 bg-slate-900/20 border border-dashed border-slate-800 rounded-3xl text-center text-slate-500">
+                  <Info className="w-12 h-12 mx-auto mb-4 text-slate-700" />
+                  <p className="text-lg font-bold text-slate-300">No facilities found</p>
+                  <p className="text-sm text-slate-500 mt-1">Try adjusting your search or region filter</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+
+
+          </>
+        ) : activeTab === 'surgical-waits' ? (
+          <SurgicalDashboard />
+        ) : activeTab === 'disruptions' ? (
+          <ServiceDisruptionsDashboard />
+        ) : activeTab === 'system-flow' ? (
+          <SystemFlowDashboard />
+        ) : activeTab === 'primary-care' ? (
+          <PrimaryCareDashboard />
+        ) : activeTab === 'workforce' ? (
+          <WorkforceDashboard />
+        ) : activeTab === 'diagnostics' ? (
+          <DiagnosticDashboard />
+        ) : activeTab === 'cancer' ? (
+          <CancerDashboard />
+        ) : activeTab === 'mental-health' ? (
+          <MentalHealthDashboard />
+        ) : activeTab === 'long-term-care' ? (
+          <ContinuingCareDashboard />
+        ) : activeTab === 'patient-experience' ? (
+          <PatientExperienceDashboard />
+        ) : activeTab === 'public-health' ? (
+          <PublicHealthDashboard />
+        ) : activeTab === 'regional-inequity' ? (
+          <RegionalInequityDashboard />
+        ) : activeTab === 'health-spending' ? (
+          <SpendingDashboard />
+        ) : (
+          <VirtualCareDashboard />
+        )}
+          </div>
+      </main>
+
+      <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800 mt-12 text-slate-500">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+          <div>
+            <p className="text-xs font-bold text-slate-400 tracking-wider uppercase">Alberta Emergency Department Monitor</p>
+            <p className="text-[11px] text-slate-500 mt-1">
+              Data synchronized directly from the Alberta Health Services live portal. Estimated wait times are updated every 30 minutes.
+            </p>
+          </div>
+          <div className="flex items-center gap-6 text-xs shrink-0 font-bold uppercase tracking-wider">
+            <a href="https://www.albertahealthservices.ca/" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-300 transition-colors">Official AHS Web</a>
+            <a href="#" className="text-slate-500 hover:text-slate-300 transition-colors">System Diagnostics</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function StatCard({ title, value, icon, trend, subtext }: { title: string, value: string, icon: React.ReactNode, trend: string, subtext?: string }) {
+  return (
+    <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg hover:border-slate-700 transition-colors">
+      <div className="flex items-center justify-between mb-4">
+        <div className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl">{icon}</div>
+        <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest">{trend}</span>
+      </div>
+      <div>
+        <p className="text-2xl font-black text-white tracking-tight leading-none">{value}</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">{title}</p>
+        {subtext && <p className="text-[10px] text-slate-500 mt-0.5 truncate">{subtext}</p>}
+      </div>
+    </div>
+  );
+}
+
+function HospitalCard({ hospital, onClick, selected, sortBy }: { hospital: Hospital, onClick: () => void, selected: boolean, sortBy?: 'net-wait' | 'proximity' | 'raw-wait', key?: any }) {
+  const isUnavailable = isWaitTimeUnavailable(hospital);
+
+  return (
+    <div 
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className={cn(
+        "text-left bg-slate-900/40 p-4 rounded-2xl border transition-colors flex items-center justify-between group cursor-pointer w-full gap-4 focus:outline-none focus:ring-2 focus:ring-blue-500/50",
+        selected 
+          ? "border-blue-500 bg-blue-950/25 ring-4 ring-blue-500/15 shadow-xl shadow-blue-950/40" 
+          : isUnavailable
+            ? "border-slate-800/40 bg-slate-900/10 opacity-60 hover:opacity-85"
+            : "border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/60"
+      )}
+    >
+      <div className="space-y-1.5 flex-1 min-w-0">
+        <h3 className="font-extrabold text-sm sm:text-base text-slate-100 group-hover:text-blue-400 transition-colors break-words">
+          {hospital.name}
+        </h3>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 font-medium">
+          <span className="flex items-center gap-1 shrink-0">
+            <MapPin className="w-3.5 h-3.5 text-slate-500" />
+            {hospital.city}
+          </span>
+          <span className="w-1 h-1 bg-slate-700 rounded-full" />
+          <span className="truncate">{hospital.region}</span>
+        </div>
+        
+        {/* Navigation Directions & Proximity Display */}
+        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+          <a
+            href={`https://maps.google.com/?daddr=${encodeURIComponent(hospital.name + ' ' + (hospital.address || ''))}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-1 text-[10px] font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md hover:bg-blue-500/20 hover:border-blue-500/40 transition-all shrink-0 cursor-pointer"
+            title="Get driving directions in Google Maps"
+          >
+            <Navigation className="w-3 h-3" />
+            <span>Directions</span>
+          </a>
+
+          {hospital.distance !== undefined && (
+            <>
+              <div className="flex items-center gap-1 text-[10px] font-extrabold text-slate-400 bg-slate-500/10 border border-slate-500/20 px-2 py-0.5 rounded-md shrink-0">
+                <Compass className="w-3 h-3 animate-spin-slow" />
+                <span>{hospital.distance} km away</span>
+              </div>
+              {!isUnavailable && hospital.driveMins !== undefined && (
+                <div className="flex items-center gap-1 text-[10px] font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md shrink-0">
+                  <Clock className="w-3 h-3" />
+                  <span>~{formatMinutesToHm(hospital.driveMins)} drive</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-4 shrink-0">
+        <div className="text-right">
+          {hospital.distance !== undefined && !isUnavailable ? (
+            sortBy === 'raw-wait' ? (
+              <div className="flex flex-col items-end select-none">
+                {/* Stacked Math Formula with Drive & Net as helpers */}
+                <div className="flex flex-col items-end text-[10px] font-mono text-slate-400 leading-none space-y-1 pb-1 mb-1.5 border-b border-slate-800/60 w-24">
+                  <div className="flex justify-between w-full">
+                    <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider">Drive:</span>
+                    <span className="font-bold text-slate-300">~{formatMinutesToHm(hospital.driveMins || 0)}</span>
+                  </div>
+                  <div className="flex justify-between w-full">
+                    <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider">Net:</span>
+                    <span className="font-bold text-slate-300">{formatMinutesToHm((hospital.driveMins || 0) + hospital.waitTime)}</span>
+                  </div>
+                </div>
+                
+                {/* Primary spotlight is Wait Time */}
+                <div className="flex flex-col items-end">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Wait Time</span>
+                  <p className={cn(
+                    "text-xl sm:text-2xl font-black tracking-tight leading-none font-sans",
+                    hospital.status === 'Red' 
+                      ? "text-red-400" 
+                      : hospital.status === 'Yellow' 
+                        ? "text-amber-400" 
+                        : "text-emerald-400"
+                  )}>
+                    {formatMinutesToHm(hospital.waitTime)}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-end select-none">
+                {/* Stacked Math Formula with Wait & Drive */}
+                <div className="flex flex-col items-end text-[10px] font-mono text-slate-400 leading-none space-y-1 pb-1 mb-1.5 border-b border-slate-800/60 w-24">
+                  <div className="flex justify-between w-full">
+                    <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider">Wait:</span>
+                    <span className="font-bold text-slate-300">{formatMinutesToHm(hospital.waitTime)}</span>
+                  </div>
+                  <div className="flex justify-between w-full">
+                    <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider">Drive:</span>
+                    <span className="font-bold text-slate-300">+{formatMinutesToHm(hospital.driveMins || 0)}</span>
+                  </div>
+                </div>
+                
+                {/* Primary spotlight is Net Time */}
+                <div className="flex flex-col items-end">
+                  <span className="text-[8px] font-black text-cyan-400/90 uppercase tracking-widest leading-none mb-1">Net Time</span>
+                  <p className="text-xl sm:text-2xl font-black tracking-tight text-cyan-200 leading-none font-sans">
+                    {formatMinutesToHm((hospital.driveMins || 0) + hospital.waitTime)}
+                  </p>
+                </div>
+              </div>
+            )
+          ) : (
+            <>
+              <p className={cn(
+                "text-lg sm:text-xl font-black tracking-tight leading-none",
+                isUnavailable
+                  ? "text-slate-500"
+                  : hospital.status === 'Red' 
+                    ? "text-red-400" 
+                    : hospital.status === 'Yellow' 
+                      ? "text-amber-400" 
+                      : "text-emerald-400"
+              )}>
+                {isUnavailable ? "Unavailable" : formatMinutesToHm(hospital.waitTime)}
+              </p>
+              {!isUnavailable && <p className="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mt-1">Wait Time</p>}
+            </>
+          )}
+        </div>
+        <ChevronRight className={cn(
+          "w-5 h-5 transition-transform duration-300",
+          selected ? "translate-x-1 text-blue-400" : "text-slate-600 group-hover:text-slate-400"
+        )} />
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const colors = {
+    Green: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    Yellow: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    Red: 'bg-red-500/10 text-red-400 border-red-500/20'
+  };
+  const colorClass = colors[status as keyof typeof colors] || colors.Green;
+  
+  return (
+    <span className={cn("px-2.5 py-1 rounded-lg text-[9px] font-extrabold border uppercase tracking-wider", colorClass)}>
+      {status}
+    </span>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-slate-900/40 p-5 rounded-3xl border border-slate-800/60 flex items-center justify-between animate-pulse">
+      <div className="space-y-2">
+        <div className="h-4 w-44 bg-slate-800 rounded-lg" />
+        <div className="h-3 w-28 bg-slate-800/60 rounded-lg" />
+      </div>
+      <div className="h-8 w-14 bg-slate-800 rounded-lg" />
+    </div>
+  );
+}
+
+function formatHospitalHours(note: string): string {
+  if (!note) return '';
+  
+  // Clean up HTML/Entities tags first: e.g. <br>, <br/>, &lt;br&gt;, &lt;br/&gt; etc.
+  let cleaned = note
+    .replace(/&lt;br\s*\/?&gt;/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/&amp;/g, '&');
+  
+  // Remove "Operational Advisory" (case insensitive) and optionally any trailing punctuation like colons
+  cleaned = cleaned.replace(/operational\s+advisory\s*:/gi, '');
+  cleaned = cleaned.replace(/operational\s+advisory/gi, '');
+  
+  // Trim and clean up multiple newlines/spaces
+  cleaned = cleaned.trim();
+  
+  // If there's a leading colon or dash, remove it
+  cleaned = cleaned.replace(/^[:\-\s\n]+/, '');
+  
+  return cleaned.trim();
+}
