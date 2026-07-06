@@ -5,6 +5,7 @@ import axios from 'axios';
 import fs from 'fs';
 import { Hospital, WaitTimeSnapshot, ServiceDisruption } from './src/types';
 import * as cheerio from 'cheerio';
+import { scrapeDisruptions } from './src/pipelines/disruptionsScraper';
 
 // Alert Interfaces
 interface EmailAlert {
@@ -311,52 +312,18 @@ async function fetchAndSyncWaitTimes() {
 }
 
 async function fetchAndSyncDisruptions() {
-  console.log('[Server] Attempting to scrape live AHS temporary service disruptions page...');
+  console.log('[Server] Attempting to scrape live AHS temporary service disruptions page using the pipeline scraper...');
   try {
-    const response = await axios.get('https://www.albertahealthservices.ca/br/Page17594.aspx', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      },
-      timeout: 15000
-    });
-
-    if (response.data) {
-      const $ = cheerio.load(response.data);
-      console.log('[Server] Scraped AHS temporary service disruptions page successfully. Parsing HTML content...');
-      const htmlText = response.data.toLowerCase();
-      let updatedCount = 0;
-      
-      localDisruptions = localDisruptions.map(disr => {
-        const facilityNameLower = disr.facilityName.toLowerCase();
-        const containsFacility = htmlText.includes(facilityNameLower);
-        
-        if (disr.status === 'Active') {
-          if (containsFacility) {
-            updatedCount++;
-            return {
-              ...disr,
-              updatedAt: new Date().toISOString()
-            };
-          } else {
-            console.log(`[Server] Disruption resolved! Facility: ${disr.facilityName} is no longer on the live active list.`);
-            return {
-              ...disr,
-              status: 'Resolved',
-              endDate: new Date().toISOString().split('T')[0],
-              updatedAt: new Date().toISOString()
-            };
-          }
-        }
-        return disr;
-      });
-
-      if (updatedCount > 0) {
-        console.log(`[Server] Verified and updated ${updatedCount} live active disruptions against the scraped HTML.`);
-        saveDataToFile(DISRUPTIONS_FILE, localDisruptions);
-      }
+    const result = await scrapeDisruptions();
+    if (result.status === 'success') {
+      const data = fs.readFileSync(DISRUPTIONS_FILE, 'utf8');
+      localDisruptions = JSON.parse(data);
+      console.log(`[Server] Live disruptions scraped and reloaded successfully: ${localDisruptions.length} total, ${localDisruptions.filter(d => d.status === 'Active').length} active.`);
+    } else {
+      console.warn('[Server] Pipeline scraper reported failure:', result.error);
     }
   } catch (err: any) {
-    console.warn('[Server] Scraping live AHS disruptions page failed or timed out (expected in sandboxed environment):', err.message || err);
+    console.warn('[Server] Scraping live AHS disruptions page failed:', err.message || err);
     console.log('[Server] Serving real cached historical and active disruptions dataset from data-disruptions.json');
   }
 }
@@ -456,7 +423,7 @@ setInterval(syncOtherDatasetsDaily, 24 * 60 * 60 * 1000);
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = parseInt(process.env.PORT || '3004', 10);
 
   app.use(express.json());
 
@@ -471,6 +438,12 @@ async function startServer() {
 
   // Service Disruptions Endpoints
   app.get('/api/disruptions', (req, res) => {
+    try {
+      const data = fs.readFileSync(DISRUPTIONS_FILE, 'utf8');
+      localDisruptions = JSON.parse(data);
+    } catch (err: any) {
+      console.warn('[Server] Failed to read disruptions file from disk, falling back to in-memory cache:', err.message || err);
+    }
     res.json(localDisruptions);
   });
 
@@ -479,6 +452,13 @@ async function startServer() {
     
     if (!facilityName || !city || !zone || !serviceAffected || !disruptionType || !reason) {
       return res.status(400).json({ error: 'Missing required disruption fields' });
+    }
+    
+    try {
+      const data = fs.readFileSync(DISRUPTIONS_FILE, 'utf8');
+      localDisruptions = JSON.parse(data);
+    } catch (err: any) {
+      console.warn('[Server] Failed to read disruptions file before POST, using in-memory cache:', err.message || err);
     }
     
     const facilityId = facilityName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -508,6 +488,14 @@ async function startServer() {
 
   app.post('/api/disruptions/:id/resolve', (req, res) => {
     const { id } = req.params;
+    
+    try {
+      const data = fs.readFileSync(DISRUPTIONS_FILE, 'utf8');
+      localDisruptions = JSON.parse(data);
+    } catch (err: any) {
+      console.warn('[Server] Failed to read disruptions file before resolve, using in-memory cache:', err.message || err);
+    }
+    
     const disruption = localDisruptions.find(d => d.id === id);
     if (!disruption) {
       return res.status(404).json({ error: 'Disruption not found' });
@@ -801,6 +789,37 @@ async function startServer() {
     localAlerts = localAlerts.filter(a => a.id !== id);
     saveDataToFile(ALERTS_FILE, localAlerts);
     res.json({ success: true, message: 'Alert subscription successfully cancelled' });
+  });
+
+  // Domain data endpoint — serves data-*.json files for dashboard fetch calls
+  app.get('/api/data/:domain', (req, res) => {
+    const domainMap: Record<string, string> = {
+      'cancer': 'data-cancer.json',
+      'primary-care': 'data-primary-care.json',
+      'workforce': 'data-workforce.json',
+      'surgical': 'data-surgical.json',
+      'system-flow': 'data-system-flow.json',
+      'diagnostic': 'data-diagnostic.json',
+      'mental-health': 'data-mental-health.json',
+      'continuing-care': 'data-continuing-care.json',
+      'patient-experience': 'data-patient-experience.json',
+      'public-health': 'data-public-health.json',
+      'regional-inequity': 'data-regional-inequity.json',
+      'spending': 'data-spending.json',
+      'virtual-care': 'data-virtual-care.json',
+    };
+    const filename = domainMap[req.params.domain];
+    if (!filename) {
+      return res.status(404).json({ error: `Unknown domain: ${req.params.domain}` });
+    }
+    const filePath = path.join(process.cwd(), filename);
+    try {
+      const data = fs.readFileSync(filePath, 'utf8');
+      res.json(JSON.parse(data));
+    } catch (err: any) {
+      console.warn(`[Server] Failed to load ${filename}:`, err.message || err);
+      return res.status(500).json({ error: `Failed to load domain data: ${req.params.domain}` });
+    }
   });
 
   // Vite middleware for development
