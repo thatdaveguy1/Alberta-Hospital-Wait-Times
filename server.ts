@@ -4,8 +4,9 @@ import { createServer as createViteServer } from 'vite';
 import axios from 'axios';
 import fs from 'fs';
 import { Hospital, WaitTimeSnapshot, ServiceDisruption } from './src/types';
-import * as cheerio from 'cheerio';
-import { scrapeDisruptions } from './src/pipelines/disruptionsScraper';
+import { startScheduler, setDailyOrchestrator, setAlertCheckFn, getHospitalsData, getSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
+import { runAllPipelines } from './src/pipelines/orchestrator';
+import { getSyncStatus } from './src/pipelines/syncStatus';
 
 // Alert Interfaces
 interface EmailAlert {
@@ -26,32 +27,16 @@ interface AlertLog {
   currentMins: number;
   timestamp: string;
 }
-
-// In-memory data store for live, real AHS data
-let localHospitals: Hospital[] = [];
-let localSnapshots: WaitTimeSnapshot[] = [];
+// In-memory data store for alerts and disruptions (hospitals/snapshots now managed by scheduler)
 let localAlerts: EmailAlert[] = [];
 let dispatchedAlertLogs: AlertLog[] = [];
 let localDisruptions: ServiceDisruption[] = [];
-let dailySyncStatus: any = { status: 'never_run', lastSyncTimestamp: null, endpoints: [] };
 
-const SNAPSHOTS_FILE = path.join(process.cwd(), 'data-snapshots.json');
 const ALERTS_FILE = path.join(process.cwd(), 'data-alerts.json');
 const ALERT_LOGS_FILE = path.join(process.cwd(), 'data-alert-logs.json');
 const DISRUPTIONS_FILE = path.join(process.cwd(), 'data-disruptions.json');
-const DAILY_SYNC_FILE = path.join(process.cwd(), 'data-daily-sync.json');
 
 function loadDataFromFile() {
-  try {
-    if (fs.existsSync(SNAPSHOTS_FILE)) {
-      const data = fs.readFileSync(SNAPSHOTS_FILE, 'utf8');
-      localSnapshots = JSON.parse(data);
-      console.log(`[Server] Loaded ${localSnapshots.length} historical snapshots from disk.`);
-    }
-  } catch (err) {
-    console.error('[Server] Error loading snapshots from file:', err);
-  }
-
   try {
     if (fs.existsSync(ALERTS_FILE)) {
       const data = fs.readFileSync(ALERTS_FILE, 'utf8');
@@ -81,16 +66,6 @@ function loadDataFromFile() {
   } catch (err) {
     console.error('[Server] Error loading disruptions from file:', err);
   }
-
-  try {
-    if (fs.existsSync(DAILY_SYNC_FILE)) {
-      const data = fs.readFileSync(DAILY_SYNC_FILE, 'utf8');
-      dailySyncStatus = JSON.parse(data);
-      console.log(`[Server] Loaded daily automated sweep sync status from disk (Last run: ${dailySyncStatus.lastSyncTimestamp}).`);
-    }
-  } catch (err) {
-    console.error('[Server] Error loading daily sync status from file:', err);
-  }
 }
 
 function saveDataToFile(file: string, data: any) {
@@ -101,46 +76,13 @@ function saveDataToFile(file: string, data: any) {
   }
 }
 
-const AHS_JSON_URL = 'https://www.albertahealthservices.ca/Webapps/WaitTimes/api/waittimes/en';
-
-// Helper function to parse time labels like "3 hr 19 min" or "45 min" into minutes
-function parseWaitTime(timeStr: string): number {
-  if (!timeStr) return 0;
-  let totalMins = 0;
-  const hrMatch = timeStr.match(/(\d+)\s*hr/i);
-  const minMatch = timeStr.match(/(\d+)\s*min/i);
-  if (hrMatch) {
-    totalMins += parseInt(hrMatch[1], 10) * 60;
-  }
-  if (minMatch) {
-    totalMins += parseInt(minMatch[1], 10);
-  }
-  // Fallback if it is just a number string
-  if (!hrMatch && !minMatch) {
-    const rawNum = parseInt(timeStr.replace(/[^0-9]/g, ''), 10);
-    if (!isNaN(rawNum)) totalMins = rawNum;
-  }
-  return totalMins;
-}
-
-// Helper to clean HTML entities like &amp; in strings
-function cleanHtmlEntities(str: string): string {
-  if (!str) return '';
-  return str
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'");
-}
 
 // Check if any registered alert is triggered
 function checkEmailAlerts() {
   const now = new Date().toISOString();
   console.log(`[Server] Evaluating ${localAlerts.length} active email alert thresholds against current wait times...`);
   for (const alert of localAlerts) {
-    const hosp = localHospitals.find(h => h.id === alert.hospitalId);
+    const hosp = getHospitalsData().find(h => h.id === alert.hospitalId);
     if (!hosp) continue;
 
     // Cooldown check: 10 minutes to avoid spamming the logs
@@ -168,258 +110,10 @@ function checkEmailAlerts() {
   }
 }
 
-async function fetchAndSyncWaitTimes() {
-  console.log('[Server] Fetching live AHS wait times from JSON Web API...');
-  try {
-    const response = await axios.get(AHS_JSON_URL, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      },
-      timeout: 15000
-    });
-    
-    if (!response.data) {
-      throw new Error('Empty response from AHS API');
-    }
-
-    const data = response.data;
-    const keys = Object.keys(data);
-    
-    if (keys.length === 0) {
-      console.warn('[Server] No regional data keys found in AHS response.');
-      return;
-    }
-
-    const timestamp = new Date().toISOString();
-    const updatedHospitals: Hospital[] = [];
-
-    for (const key of keys) {
-      const zoneData = data[key];
-      if (!zoneData) continue;
-
-      // Map root zone keys to standard Alberta Health Services Zone regions
-      let regionName = `${key} Zone`;
-      if (key === 'RedDeer') regionName = 'Central Zone';
-      else if (key === 'Lethbridge' || key === 'MedicineHat') regionName = 'South Zone';
-      else if (key === 'GrandePrairie' || key === 'FortMcMurray') regionName = 'North Zone';
-
-      const emergencyList = zoneData.Emergency || [];
-      const urgentList = zoneData.Urgent || [];
-      const combinedList = [...emergencyList, ...urgentList];
-
-      for (const fac of combinedList) {
-        const name = cleanHtmlEntities(fac.Name || '');
-        if (!name) continue;
-
-        const rawWaitTimeLabel = fac.WaitTime || '0m';
-        const waitTimeLabel = cleanHtmlEntities(rawWaitTimeLabel);
-        const isUnavailable = waitTimeLabel.toLowerCase().includes('unavailable') || 
-                              waitTimeLabel.toLowerCase().includes('not available') || 
-                              waitTimeLabel.toLowerCase().includes('n/a');
-        const waitTimeMinutes = isUnavailable ? -1 : parseWaitTime(waitTimeLabel);
-        
-        const hospitalId = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-
-        // Extract coordinates from Google Maps Link
-        const mapsLink = fac.GoogleMapsLinkDirection || '';
-        const coordMatch = mapsLink.match(/query=(-?\d+\.\d+),(-?\d+\.\d+)/);
-        let latitude: number | undefined = undefined;
-        let longitude: number | undefined = undefined;
-        if (coordMatch) {
-          latitude = parseFloat(coordMatch[1]);
-          longitude = parseFloat(coordMatch[2]);
-        }
-
-        // Deduce city
-        let city = 'Alberta';
-        if (fac.Address) {
-          if (fac.Address.toLowerCase().includes('calgary')) city = 'Calgary';
-          else if (fac.Address.toLowerCase().includes('edmonton')) city = 'Edmonton';
-          else if (fac.Address.toLowerCase().includes('red deer')) city = 'Red Deer';
-          else if (fac.Address.toLowerCase().includes('lethbridge')) city = 'Lethbridge';
-          else if (fac.Address.toLowerCase().includes('medicine hat')) city = 'Medicine Hat';
-          else if (fac.Address.toLowerCase().includes('grande prairie')) city = 'Grande Prairie';
-          else if (fac.Address.toLowerCase().includes('fort mcmurray')) city = 'Fort McMurray';
-          else if (fac.Address.toLowerCase().includes('st. albert')) city = 'St. Albert';
-          else if (fac.Address.toLowerCase().includes('sherwood park')) city = 'Sherwood Park';
-          else if (fac.Address.toLowerCase().includes('leduc')) city = 'Leduc';
-          else {
-            const parts = fac.Address.split(' ');
-            const abIndex = parts.indexOf('Alberta');
-            if (abIndex > 0) {
-              city = parts[abIndex - 1];
-            } else {
-              // Fallback to name-based regex
-              const spacing = key.replace(/([A-Z])/g, ' $1').trim();
-              city = spacing;
-            }
-          }
-        }
-
-        let status: 'Green' | 'Yellow' | 'Red' = 'Green';
-        if (waitTimeMinutes > 120) status = 'Red';
-        else if (waitTimeMinutes > 60) status = 'Yellow';
-
-        const hospitalData: Hospital = {
-          id: hospitalId,
-          name,
-          city: cleanHtmlEntities(city),
-          region: regionName,
-          waitTime: waitTimeMinutes,
-          waitTimeLabel,
-          status,
-          updatedAt: timestamp,
-          category: fac.Category || 'Emergency',
-          address: cleanHtmlEntities(fac.Address || ''),
-          note: cleanHtmlEntities(fac.Note || ''),
-          latitude,
-          longitude
-        };
-
-        updatedHospitals.push(hospitalData);
-
-        // Append to in-memory snapshots
-        localSnapshots.push({
-          hospitalId,
-          waitTime: waitTimeMinutes,
-          timestamp,
-        });
-      }
-    }
-
-    if (updatedHospitals.length > 0) {
-      localHospitals = updatedHospitals;
-      
-      // Perform automated check of email alert subscriptions against new data
-      checkEmailAlerts();
-    }
-
-    // Retain only the last 365 days of snapshot history per hospital to manage memory size
-    const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
-    localSnapshots = localSnapshots.filter(s => new Date(s.timestamp).getTime() > oneYearAgo);
-
-    // Persist snapshots to disk
-    saveDataToFile(SNAPSHOTS_FILE, localSnapshots);
-
-    console.log(`[Server] Live sync complete. Managed ${localHospitals.length} live facilities.`);
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('[Server] AHS Sync Axios Error:', error.message);
-    } else {
-      console.error('[Server] Failed to fetch AHS wait times:', error);
-    }
-  }
-}
-
-async function fetchAndSyncDisruptions() {
-  console.log('[Server] Attempting to scrape live AHS temporary service disruptions page using the pipeline scraper...');
-  try {
-    const result = await scrapeDisruptions();
-    if (result.status === 'success') {
-      const data = fs.readFileSync(DISRUPTIONS_FILE, 'utf8');
-      localDisruptions = JSON.parse(data);
-      console.log(`[Server] Live disruptions scraped and reloaded successfully: ${localDisruptions.length} total, ${localDisruptions.filter(d => d.status === 'Active').length} active.`);
-    } else {
-      console.warn('[Server] Pipeline scraper reported failure:', result.error);
-    }
-  } catch (err: any) {
-    console.warn('[Server] Scraping live AHS disruptions page failed:', err.message || err);
-    console.log('[Server] Serving real cached historical and active disruptions dataset from data-disruptions.json');
-  }
-}
 
 // Load persisted data from disk on startup
 loadDataFromFile();
 
-// Daily Automated background sweeps for other core metrics
-async function syncOtherDatasetsDaily() {
-  console.log('[Server] Starting scheduled 24-hour daily automated background sweep for secondary datasets...');
-  
-  const endpointsToSync = [
-    {
-      name: 'Open Alberta CKAN API (Health Datasets Search)',
-      url: 'https://open.alberta.ca/api/3/action/package_search?q=health',
-      type: 'Open Data CKAN API',
-      description: 'Used to sweep and cross-reference cataloged health data (LGA emergency visits, physician counts, PCNs, chronic disease prevalence).'
-    },
-    {
-      name: 'Statistics Canada Web Data Service (WDS API)',
-      url: 'https://www150.statcan.gc.ca/t1/wds/rest/getAllCubesListLite',
-      type: 'StatsCan WDS JSON API',
-      description: 'Retrieves table inventories and indicators mapping unmet healthcare needs, specialist access satisfaction, and wait time surveys.'
-    }
-  ];
-
-  const results: any[] = [];
-  let overallSuccess = true;
-
-  for (const endpoint of endpointsToSync) {
-    console.log(`[Server] Daily Sweep: Querying live upstream endpoint: ${endpoint.name}...`);
-    try {
-      const startTime = Date.now();
-      const response = await axios.get(endpoint.url, {
-        headers: {
-          'User-Agent': 'AlbertaHospitalWaitTimeTracker/1.0 (+https://github.com/thatdaveguy1/Alberta-Hospital-Wait-Times)'
-        },
-        timeout: 15000 // 15s timeout
-      });
-      const durationMs = Date.now() - startTime;
-
-      let recordCount = 0;
-      let statusText = 'OK';
-
-      if (endpoint.url.includes('package_search')) {
-        recordCount = response.data?.result?.count || 0;
-        statusText = response.data?.success ? 'Success' : 'API Error';
-      } else if (endpoint.url.includes('getAllCubesListLite')) {
-        recordCount = Array.isArray(response.data) ? response.data.length : 0;
-        statusText = 'Success';
-      }
-
-      console.log(`[Server] Daily Sweep: SUCCESS for ${endpoint.name}. Found ${recordCount} live records/packages in ${durationMs}ms.`);
-      results.push({
-        ...endpoint,
-        status: 'success',
-        statusCode: response.status,
-        recordsFound: recordCount,
-        responseTimeMs: durationMs,
-        lastChecked: new Date().toISOString(),
-        statusText
-      });
-    } catch (err: any) {
-      console.warn(`[Server] Daily Sweep: FAILED to query live upstream ${endpoint.name}:`, err.message || err);
-      overallSuccess = false;
-      results.push({
-        ...endpoint,
-        status: 'failed',
-        error: err.message || 'Unknown network error',
-        lastChecked: new Date().toISOString()
-      });
-    }
-  }
-
-  dailySyncStatus = {
-    status: overallSuccess ? 'success' : 'partial_success',
-    lastSyncTimestamp: new Date().toISOString(),
-    endpoints: results,
-    explanation: 'All secondary metric dashboards (Surgical queues, Diagnostics, Cancer waitlists, Workforce profiles) load rich baseline datasets compiled from the Health Quality Council of Alberta (HQCA FOCUS), the Canadian Institute for Health Information (CIHI), Statistics Canada, and Alberta Precision Labs. The daily automated background sweeps query these live API endpoints to check for updated catalog tables and metadata versions.'
-  };
-
-  saveDataToFile(DAILY_SYNC_FILE, dailySyncStatus);
-  console.log(`[Server] Daily background sweep completed. Status: ${dailySyncStatus.status}. Saved status to data-daily-sync.json.`);
-}
-
-// Trigger initial sync on startup
-fetchAndSyncWaitTimes();
-fetchAndSyncDisruptions();
-syncOtherDatasetsDaily();
-
-// Schedule live fetch for ER Wait Times every 15 minutes
-setInterval(fetchAndSyncWaitTimes, 15 * 60 * 1000);
-// Schedule disruptions scraping every 15 minutes
-setInterval(fetchAndSyncDisruptions, 15 * 60 * 1000);
-// Schedule other updateable datasets for daily sweeps (once every 24 hours)
-setInterval(syncOtherDatasetsDaily, 24 * 60 * 60 * 1000);
 
 async function startServer() {
   const app = express();
@@ -433,7 +127,7 @@ async function startServer() {
   });
 
   app.get('/api/hospitals', (req, res) => {
-    res.json(localHospitals);
+    res.json(getHospitalsData());
   });
 
   // Service Disruptions Endpoints
@@ -510,15 +204,16 @@ async function startServer() {
   });
 
   // Daily Background Automated Sweep Sync Status Endpoint
+  // Sync Status Endpoint — returns full pipeline health from the scheduler
   app.get('/api/sync/status', (req, res) => {
-    res.json(dailySyncStatus);
+    res.json(getSyncStatus());
   });
 
   // On-Demand Trigger to Run Daily Sync
   app.post('/api/sync/trigger', async (req, res) => {
     console.log('[Server] Daily sync manually triggered via API route.');
-    await syncOtherDatasetsDaily();
-    res.json({ success: true, message: 'Daily background sweep triggered successfully.', status: dailySyncStatus });
+    const results = await triggerDailySync();
+    res.json({ success: true, message: 'Daily sync triggered successfully.', results });
   });
 
   // Reverse Geocoding API (using Nominatim for robust address resolution of coordinates)
@@ -579,13 +274,13 @@ async function startServer() {
 
   // Fetch province-wide historical moving average
   app.get('/api/trends/all', (req, res) => {
-    if (localSnapshots.length === 0) {
+    if (getSnapshotsData().length === 0) {
       return res.json([]);
     }
 
     const range = (req.query.range as string) || '24h';
     const cutoff = getRangeCutoff(range);
-    const filteredSnapshots = localSnapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff);
+    const filteredSnapshots = getSnapshotsData().filter(s => new Date(s.timestamp).getTime() >= cutoff);
 
     // Group wait times by timestamp
     const groups: { [time: string]: number[] } = {};
@@ -614,17 +309,17 @@ async function startServer() {
 
   // NEW: Fetch regional zone trends comparing averages over time
   app.get('/api/trends/zones', (req, res) => {
-    if (localSnapshots.length === 0 || localHospitals.length === 0) {
+    if (getSnapshotsData().length === 0 || getHospitalsData().length === 0) {
       return res.json([]);
     }
 
     const range = (req.query.range as string) || '24h';
     const cutoff = getRangeCutoff(range);
-    const filteredSnapshots = localSnapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff);
+    const filteredSnapshots = getSnapshotsData().filter(s => new Date(s.timestamp).getTime() >= cutoff);
 
     // Create rapid lookup of hospital ID -> Region Zone
     const hospitalRegionMap = new Map<string, string>();
-    for (const h of localHospitals) {
+    for (const h of getHospitalsData()) {
       hospitalRegionMap.set(h.id, h.region);
     }
 
@@ -670,13 +365,13 @@ async function startServer() {
     
     const getPeakForRange = (cutoffMs: number) => {
       const cutoff = now - cutoffMs;
-      const rangeSnaps = localSnapshots.filter(s => {
+      const rangeSnaps = getSnapshotsData().filter(s => {
         const t = new Date(s.timestamp).getTime();
         return t >= cutoff && s.waitTime >= 0;
       });
       
       if (rangeSnaps.length === 0) {
-        const validHospitals = localHospitals.filter(h => h.waitTime >= 0);
+        const validHospitals = getHospitalsData().filter(h => h.waitTime >= 0);
         if (validHospitals.length === 0) return null;
         const peakHosp = validHospitals.reduce((max, h) => h.waitTime > max.waitTime ? h : max, validHospitals[0]);
         return {
@@ -689,7 +384,7 @@ async function startServer() {
       }
       
       const peakSnap = rangeSnaps.reduce((max, s) => s.waitTime > max.waitTime ? s : max, rangeSnaps[0]);
-      const hosp = localHospitals.find(h => h.id === peakSnap.hospitalId);
+      const hosp = getHospitalsData().find(h => h.id === peakSnap.hospitalId);
       
       return {
         waitTime: peakSnap.waitTime,
@@ -716,7 +411,7 @@ async function startServer() {
     const { hospitalId } = req.params;
     const range = (req.query.range as string) || '24h';
     const cutoff = getRangeCutoff(range);
-    const trends = localSnapshots.filter(s => s.hospitalId === hospitalId && new Date(s.timestamp).getTime() >= cutoff);
+    const trends = getSnapshotsData().filter(s => s.hospitalId === hospitalId && new Date(s.timestamp).getTime() >= cutoff);
     res.json(trends);
   });
 
@@ -741,7 +436,7 @@ async function startServer() {
 
     const registeredAlerts: EmailAlert[] = [];
     for (const hId of idsToRegister) {
-      const hosp = localHospitals.find(h => h.id === hId);
+      const hosp = getHospitalsData().find(h => h.id === hId);
       if (!hosp) {
         continue;
       }
@@ -839,6 +534,14 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running at http://localhost:${PORT}`);
+  });
+
+  // Wire the pipeline scheduler — ER wait times every 10 min, daily orchestrator every 24 hr.
+  // Daily sync runs in the background so it never blocks the Express server from accepting connections.
+  setAlertCheckFn(checkEmailAlerts);
+  setDailyOrchestrator(runAllPipelines);
+  startScheduler().catch(err => {
+    console.error('[Server] Failed to start scheduler:', err);
   });
 }
 

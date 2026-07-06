@@ -4,7 +4,7 @@
 
 import { fetchErWaitTimes, getHospitals, getSnapshots, setAlertChecker } from './erWaitTimesFetcher';
 import { scrapeDisruptions } from './disruptionsScraper';
-import { recordErWaitTimesUpdate, recordDailySyncResults, loadSyncStatusFromDisk } from './syncStatus';
+import { recordErWaitTimesUpdate, recordDailySyncResults, loadSyncStatusFromDisk, getSyncStatus } from './syncStatus';
 import type { SyncResult } from './types';
 
 type DailyOrchestratorFn = () => Promise<SyncResult[]>;
@@ -87,10 +87,14 @@ export async function startScheduler(): Promise<void> {
   // Load persisted sync status
   loadSyncStatusFromDisk();
 
-  // Initial runs on startup
-  console.log('[Scheduler] Starting initial pipeline runs...');
+  // Initial ER wait times run — fast, await so hospitals are populated before serving
+  console.log('[Scheduler] Starting initial ER wait times pipeline...');
   await runErWaitTimesPipeline();
-  await runDailySync();
+
+  // Kick off daily sync in the background — don't block server startup (Puppeteer/CIHI take minutes)
+  runDailySync().catch(err => {
+    console.error('[Scheduler] Initial daily sync error:', err);
+  });
 
   // Schedule ER wait times every 10 minutes
   erIntervalId = setInterval(() => {
@@ -129,7 +133,5 @@ export async function triggerDailySync(): Promise<SyncResult[]> {
 }
 
 function getSyncStatusResults(): SyncResult[] {
-  // Re-import to get fresh state
-  const { getSyncStatus } = require('./syncStatus');
   return getSyncStatus().results;
 }
