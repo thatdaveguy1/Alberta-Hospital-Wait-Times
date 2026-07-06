@@ -196,12 +196,6 @@ export default function PatientExperienceDashboard() {
     });
   };
 
-  const handleResetSimulation = () => {
-    setSimulatedComplaintText('');
-    setSelectedFacility('');
-    setSimulationResponse(null);
-  };
-
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}

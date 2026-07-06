@@ -489,3 +489,11 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Solution:** Completely remove the Causal Flow Simulator state (`simulatorStress`, `simulatedValues`), icon imports (`Gauge`), subtab button navigation, and JSX render blocks. Always standard-verify code differences before checking out files.
 - **Prevention:** Keep a detailed log of feature exclusions. Re-verify the subtab selection and index state to ensure deleted placeholder simulation components are not reintroduced.
 
+## Session: 2026-07-06 (Data Freshness Language & Timezone Harmonization)
+
+### Lesson: Internal pipeline names and "scrape" language must not reach the UI
+
+- **Mistake:** The standardized last-updated banner in `App.tsx` displayed "Scraped daily" for the disruptions tab fallback, and the `DataTimestamp` component was gutted and returning `null` so per-dashboard banners were missing. Where `DataTimestamp` did render, internal pipeline IDs like `goodcaringScraper`, `ahsAsiScraper`, and `albertaSubstanceUseScraper` would have leaked to users.
+- **Solution:** Replaced "Scraped daily" with a dynamic timestamp fallback (or "Updated daily") in `App.tsx`. Restored `DataTimestamp.tsx` to render both full and compact banner layouts. Added a `sanitizeSource()` helper that maps internal pipeline IDs to human labels (e.g., `powerbiScraper` → "Alberta Wait Times Reporting", `albertaSubstanceUseScraper` → "Alberta Substance Use Surveillance"). Forced all date formatting to `timeZone: 'America/Edmonton'` so every banner shows the same Edmonton time.
+- **Prevention:** Centralize source-name sanitization in the display component rather than editing every data file. Always use explicit `timeZone` options in `toLocaleString`/`toLocaleDateString` calls for data freshness; never rely on browser-local time. Audit banner text for implementation jargon before shipping.
+

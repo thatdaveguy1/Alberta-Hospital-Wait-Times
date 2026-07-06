@@ -1544,7 +1544,7 @@ export default function App() {
           if (isAuto) {
             if (activeTab === 'er-waits') {
               if (syncStatus?.erWaitTimesLastUpdate) {
-                lastUpdatedDisplay = new Date(syncStatus.erWaitTimesLastUpdate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                lastUpdatedDisplay = new Date(syncStatus.erWaitTimesLastUpdate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
                 sourceVintageDisplay = lastUpdatedDisplay;
               } else {
                 lastUpdatedDisplay = 'Live Feed';
@@ -1552,17 +1552,20 @@ export default function App() {
             } else if (activeTab === 'disruptions') {
               const result = syncStatus?.results?.find(r => r.domain === 'disruptions' || r.pipeline === 'disruptionsScraper');
               if (result?.timestamp) {
-                lastUpdatedDisplay = new Date(result.timestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                lastUpdatedDisplay = new Date(result.timestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
+                sourceVintageDisplay = lastUpdatedDisplay;
+              } else if (syncStatus?.lastSyncTimestamp) {
+                lastUpdatedDisplay = new Date(syncStatus.lastSyncTimestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
                 sourceVintageDisplay = lastUpdatedDisplay;
               } else {
-                lastUpdatedDisplay = 'Scraped daily';
+                lastUpdatedDisplay = 'Updated daily';
               }
             } else {
               const result = syncStatus?.results?.find(r => r.domain === activeTabMeta.domain);
               if (result?.timestamp) {
-                lastUpdatedDisplay = new Date(result.timestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                lastUpdatedDisplay = new Date(result.timestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
               } else if (syncStatus?.lastSyncTimestamp) {
-                lastUpdatedDisplay = new Date(syncStatus.lastSyncTimestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                lastUpdatedDisplay = new Date(syncStatus.lastSyncTimestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
               } else {
                 lastUpdatedDisplay = 'July 5, 2026 at 12:00 PM';
               }
