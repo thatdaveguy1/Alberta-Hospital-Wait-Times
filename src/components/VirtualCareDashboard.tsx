@@ -13,7 +13,6 @@ import {
   Info, 
   Calendar, 
   ArrowUpRight, 
-  Layers,
   Sparkles,
   TrendingUp,
   MapPin,
@@ -50,7 +49,7 @@ import {
 import { DataTimestamp } from './DataTimestamp';
 
 export default function VirtualCareDashboard() {
-  const [activeSubTab, setActiveSubTab] = useState<'demand' | 'access-modes' | 'virtual-md' | 'ems-diversion' | 'adjacent-lines'>('demand');
+  const [activeSubTab, setActiveSubTab] = useState<'demand' | 'virtual-md' | 'ems-diversion' | 'adjacent-lines'>('demand');
   const [activeFiscalYear, setActiveFiscalYear] = useState<string>('2024-2025');
 
   // Chart colors matching the emerald/teal virtual care theme
@@ -101,17 +100,6 @@ export default function VirtualCareDashboard() {
         >
           <Activity className="w-4 h-4" />
           <span>Health Link 811</span>
-        </button>
-        <button
-          onClick={() => setActiveSubTab('access-modes')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'access-modes'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <Layers className="w-4 h-4" />
-          <span>Patient Access Modes</span>
         </button>
         <button
           onClick={() => setActiveSubTab('virtual-md')}
@@ -330,111 +318,6 @@ export default function VirtualCareDashboard() {
         </div>
       )}
 
-      {/* 2. ACCESS MODES */}
-      {activeSubTab === 'access-modes' && (
-        <div className="space-y-6 animate-fadeIn">
-          {/* Main program description */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 lg:col-span-2 space-y-4">
-              <div className="flex items-center gap-2 text-emerald-400">
-                <Sparkles size={20} />
-                <h3 className="text-base font-bold text-white">Modernizing Ingress Pathways</h3>
-              </div>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Health Link has moved beyond traditional voice-only queues to reduce caller abandonment and telephone hold times. Two major digital initiatives launched provincially to improve public convenience and capacity management:
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850">
-                  <div className="flex items-center gap-2 text-emerald-400 mb-2">
-                    <MessageSquare size={18} />
-                    <h4 className="text-sm font-bold text-white">Health Information Chat</h4>
-                  </div>
-                  <p className="text-slate-400 text-xs leading-relaxed mb-3">
-                    Enables real-time, text-based interactive conversations with a clinical information nurse directly on the MyHealth Alberta portal.
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-slate-900 text-slate-400 font-mono">Business Hours</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 font-mono">Interactive Web Chat</span>
-                  </div>
-                </div>
-
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850">
-                  <div className="flex items-center gap-2 text-teal-400 mb-2">
-                    <Clock size={18} />
-                    <h4 className="text-sm font-bold text-white">Automated Nurse Callback</h4>
-                  </div>
-                  <p className="text-slate-400 text-xs leading-relaxed mb-3">
-                    Allows patients waiting in high-volume queues to preserve their place and opt to receive an automated callback from an RN when their turn arises.
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-slate-900 text-slate-400 font-mono">24/7 Enabled</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-teal-500/10 text-teal-400 font-mono">Queue-Hold Mitigator</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-xl flex items-start gap-3">
-                <Info size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  <strong>Urgent Exclusions:</strong> Digital channels and core 811 triage strictly filter out emergency conditions. Digital landing pages explicitly state: <em>"If you have a life-threatening emergency, call 911 immediately or go to the nearest emergency department."</em>
-                </p>
-              </div>
-            </div>
-
-            {/* Ingress Channels Availability Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Access Channels & Capabilities</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-850">
-                  <div className="flex items-center gap-2">
-                    <Phone size={14} className="text-emerald-400" />
-                    <span className="text-xs text-slate-200">Interactive Nurse Advice</span>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold">24/7 VOICE</span>
-                </div>
-
-                <div className="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-850">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare size={14} className="text-blue-400" />
-                    <span className="text-xs text-slate-200">Interactive Clinical Chat</span>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-bold">WEEKDAYS</span>
-                </div>
-
-                <div className="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-850">
-                  <div className="flex items-center gap-2">
-                    <Clock size={14} className="text-teal-400" />
-                    <span className="text-xs text-slate-200">Automated Nurse Callback</span>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-bold">24/7 QUEUE</span>
-                </div>
-
-                <div className="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-850">
-                  <div className="flex items-center gap-2">
-                    <Users size={14} className="text-amber-400" />
-                    <span className="text-xs text-slate-200">Translation Support</span>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">130+ LANGS</span>
-                </div>
-
-                <div className="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-850">
-                  <div className="flex items-center gap-2">
-                    <Info size={14} className="text-pink-400" />
-                    <span className="text-xs text-slate-200">Hearing & Speech Support</span>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-pink-500/10 text-pink-400 font-bold">TTY ENABLED</span>
-                </div>
-              </div>
-
-              <div className="p-3 bg-slate-950 rounded-lg border border-slate-850 text-center">
-                <p className="text-[10px] text-slate-500">FALLBACK DIRECT LINE</p>
-                <p className="text-sm font-mono font-bold text-white mt-0.5">1-866-408-5465</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 3. VIRTUAL MD OUTCOMES */}
       {activeSubTab === 'virtual-md' && (
