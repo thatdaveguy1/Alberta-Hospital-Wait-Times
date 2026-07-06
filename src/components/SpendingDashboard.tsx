@@ -40,6 +40,13 @@ import { _dataMetadata as spendingDataMetadata } from '../spendingData';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#ef4444', '#8b5cf6', '#06b6d4'];
 
+const getSpecialtyLabel = (name: string): string => {
+  if (name.includes('General Practice')) return 'Family Medicine';
+  if (name.includes('General & Thoracic')) return 'Surgery';
+  if (name.includes('Internal')) return 'Internal Med';
+  return name;
+};
+
 export default function SpendingDashboard() {
   const [activeSpendingTab, setActiveSpendingTab] = useState<'spending-access' | 'national-scoreboard' | 'hospital-efficiency' | 'physician-payments'>('spending-access');
   const [selectedProvince, setSelectedProvince] = useState<string>('Alberta');
@@ -625,7 +632,7 @@ export default function SpendingDashboard() {
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    {spec.specialtyGroup.split(' ')[0]}
+                    {getSpecialtyLabel(spec.specialtyGroup)}
                   </button>
                 ))}
               </div>
@@ -705,7 +712,7 @@ export default function SpendingDashboard() {
                     margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="specialtyGroup" stroke="#64748b" fontSize={9} tickFormatter={(val) => val.split(' ')[0]} />
+                    <XAxis dataKey="specialtyGroup" stroke="#64748b" fontSize={9} tickFormatter={getSpecialtyLabel} />
                     <YAxis stroke="#64748b" fontSize={9} label={{ value: 'Average Gross Payment ($)', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} />
                     <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
