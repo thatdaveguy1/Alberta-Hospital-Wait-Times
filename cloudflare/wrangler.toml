@@ -1,0 +1,18 @@
+name = "alberta-hospital-wait-times"
+main = "worker.ts"
+compatibility_date = "2026-01-01"
+
+[[kv_namespaces]]
+binding = "DATA_KV"
+id = "b28661f90d284e1b85516519d6c24807"
+
+[[kv_namespaces]]
+binding = "SNAPSHOTS_KV"
+id = "dbb8ee9d6e7143b7900a9dd49a9e2e86"
+
+[[kv_namespaces]]
+binding = "ALERTS_KV"
+id = "efe9384c95b3484ca4b80bafa07bd5a3"
+
+# No [triggers] / crons — all scheduling is local on the Mac mini.
+# The Worker only serves reads and receives authenticated pushes.
