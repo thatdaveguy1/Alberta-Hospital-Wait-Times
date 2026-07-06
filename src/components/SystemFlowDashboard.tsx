@@ -1347,40 +1347,115 @@ export default function SystemFlowDashboard() {
                   const isBeds = comp.unit === 'beds_per_1000';
                   // Staffed beds is better when higher, others are better when lower
                   const isPositive = isBeds ? !isBetterThanCanada : isBetterThanCanada;
+
+                  // Compute absolute difference and percentage variance
+                  const diffPercent = ((comp.albertaValue - comp.canadaValue) / comp.canadaValue) * 100;
+                  
+                  let varianceText = '';
+                  let varianceColor = '';
+                  if (isBeds) {
+                    // Beds: higher is better
+                    if (comp.albertaValue > comp.canadaValue) {
+                      varianceText = `+${diffPercent.toFixed(1)}% above national avg (Favorable)`;
+                      varianceColor = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+                    } else if (comp.albertaValue < comp.canadaValue) {
+                      varianceText = `${diffPercent.toFixed(1)}% below national avg (Unfavorable)`;
+                      varianceColor = 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+                    } else {
+                      varianceText = 'Equal to national avg';
+                      varianceColor = 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+                    }
+                  } else {
+                    // Lower is better (ALC, LOS, LWBS, Readmissions)
+                    if (comp.albertaValue < comp.canadaValue) {
+                      varianceText = `${diffPercent.toFixed(1)}% below national avg (Favorable)`;
+                      varianceColor = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+                    } else if (comp.albertaValue > comp.canadaValue) {
+                      varianceText = `+${diffPercent.toFixed(1)}% above national avg (Unfavorable)`;
+                      varianceColor = 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+                    } else {
+                      varianceText = 'Equal to national avg';
+                      varianceColor = 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+                    }
+                  }
+
+                  const formatVal = (val: number) => {
+                    if (comp.unit === 'percent') return `${val}%`;
+                    if (comp.unit === 'hours') return `${val} hrs`;
+                    if (comp.unit === 'beds_per_1000') return `${val} per 1k`;
+                    if (comp.unit === 'days') return `${val} days`;
+                    return val.toString();
+                  };
+
+                  // Parallel bars scaling normalized to max of both values + 15% padding
+                  const maxVal = Math.max(comp.albertaValue, comp.canadaValue);
+                  const abPercent = (comp.albertaValue / (maxVal * 1.15)) * 100;
+                  const caPercent = (comp.canadaValue / (maxVal * 1.15)) * 100;
+
+                  const getMetricIcon = (metricName: string) => {
+                    if (metricName.includes('Alternate Level of Care')) return <Layers className="w-4 h-4 text-violet-400" />;
+                    if (metricName.includes('Admitted Patient ED Total Length')) return <Clock className="w-4 h-4 text-rose-400" />;
+                    if (metricName.includes('Discharged Patient ED Total Length')) return <Clock className="w-4 h-4 text-amber-400" />;
+                    if (metricName.includes('Staffed Acute Care Beds')) return <Building2 className="w-4 h-4 text-blue-400" />;
+                    if (metricName.includes('Left Without Being Seen')) return <ShieldAlert className="w-4 h-4 text-orange-400" />;
+                    if (metricName.includes('Readmissions')) return <Activity className="w-4 h-4 text-indigo-400" />;
+                    return <Award className="w-4 h-4 text-slate-400" />;
+                  };
                   
                   return (
-                    <div key={idx} className="p-3 bg-slate-950/60 rounded-xl border border-slate-850 space-y-2">
+                    <div key={idx} className="p-4 bg-slate-950/60 rounded-xl border border-slate-850 hover:border-slate-800 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/2 space-y-3">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-0.5">
-                          <h4 className="text-xs font-black text-slate-200">{comp.metric}</h4>
-                          <p className="text-[10px] text-slate-400 leading-relaxed font-medium">{comp.description}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                            isPositive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                          }`}>
-                            {isPositive ? 'Favorable' : 'Unfavorable'}
-                          </span>
+                        <div className="flex gap-2.5 items-start">
+                          <div className="mt-0.5 p-1.5 rounded-lg bg-slate-900 border border-slate-800/80 shrink-0">
+                            {getMetricIcon(comp.metric)}
+                          </div>
+                          <div className="space-y-0.5">
+                            <h4 className="text-xs font-black text-slate-200 leading-tight">{comp.metric}</h4>
+                            <p className="text-[10px] text-slate-400 leading-relaxed font-medium">{comp.description}</p>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Stacked comparison bar */}
-                      <div className="flex items-center gap-4 text-xs font-mono pt-1">
-                        <div className="flex-1 space-y-1.5">
-                          <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-slate-400">Alberta: <strong className="text-white font-extrabold">{comp.albertaValue}{comp.unit === 'percent' ? '%' : comp.unit === 'hours' ? ' hrs' : comp.unit === 'days' ? ' days' : ''}</strong></span>
-                            <span className="text-slate-500">Canada Avg: <strong className="text-slate-400 font-extrabold">{comp.canadaValue}{comp.unit === 'percent' ? '%' : comp.unit === 'hours' ? ' hrs' : comp.unit === 'days' ? ' days' : ''}</strong></span>
+                      {/* Variance Badge */}
+                      <div className="flex items-center justify-between gap-2 border-t border-b border-slate-900/60 py-2">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">Performance Gap</span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border font-mono ${varianceColor}`}>
+                          {varianceText}
+                        </span>
+                      </div>
+
+                      {/* Parallel progress bars */}
+                      <div className="space-y-2 pt-1 font-mono text-xs">
+                        {/* Alberta Row */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center text-[10px]">
+                            <span className="text-slate-400 font-medium flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                              <span>Alberta</span>
+                            </span>
+                            <span className="text-white font-extrabold">{formatVal(comp.albertaValue)}</span>
                           </div>
-                          
-                          {/* visual progress comparing alberta vs canada */}
-                          <div className="h-2 bg-slate-900 rounded-full overflow-hidden flex border border-slate-850">
+                          <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-900">
                             <div 
-                              className={`h-full ${isPositive ? 'bg-blue-500' : 'bg-red-500'} rounded-l`} 
-                              style={{ width: `${Math.min(100, (comp.albertaValue / (comp.albertaValue + comp.canadaValue)) * 100)}%` }} 
+                              className={`h-full bg-gradient-to-r ${isPositive ? 'from-emerald-600 to-emerald-400 shadow-emerald-500/20' : 'from-rose-600 to-rose-400 shadow-rose-500/20'} rounded-full`}
+                              style={{ width: `${abPercent}%` }}
                             />
+                          </div>
+                        </div>
+
+                        {/* Canada Row */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center text-[10px]">
+                            <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-650" />
+                              <span>Canada Average</span>
+                            </span>
+                            <span className="text-slate-400 font-bold">{formatVal(comp.canadaValue)}</span>
+                          </div>
+                          <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-900">
                             <div 
-                              className="bg-slate-700 h-full rounded-r" 
-                              style={{ width: `${Math.min(100, (comp.canadaValue / (comp.albertaValue + comp.canadaValue)) * 100)}%` }} 
+                              className="h-full bg-slate-700/80 rounded-full"
+                              style={{ width: `${caPercent}%` }}
                             />
                           </div>
                         </div>
@@ -1399,53 +1474,131 @@ export default function SystemFlowDashboard() {
                   <span>Upstream LGA Demand Profiles (Open Alberta Portal)</span>
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Analysis of emergency department visit rates and Canadian Triage and Acuity Scale (CTAS) profiles by local health geographic area.
+                  Analysis of emergency department visit rates and Canadian Triage and Acuity Scale (CTAS) profiles by local health geographic area. Click a card to focus on its zone.
                 </p>
               </div>
 
               <div className="space-y-4">
                 {REGIONAL_LGA_DEMAND.map((lga, idx) => {
+                  const visitRate = Math.round((lga.annualEdVisits / lga.population) * 1000);
+                  const isZoneFocused = selectedZone === lga.zone;
+                  
                   return (
-                    <div key={idx} className="p-4 bg-slate-950/60 rounded-xl border border-slate-850 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <h4 className="text-xs font-black text-white">{lga.lgaName}</h4>
-                          <div className="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono">{lga.zone}</div>
+                    <div 
+                      key={idx} 
+                      onClick={() => setSelectedZone(lga.zone)}
+                      className={`p-4 rounded-xl cursor-pointer border transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:shadow-blue-500/2 space-y-3.5 group relative overflow-hidden select-none ${
+                        isZoneFocused 
+                          ? 'bg-slate-900/90 border-blue-500/50 shadow-blue-500/5' 
+                          : 'bg-slate-950/60 border-slate-850 hover:border-slate-800'
+                      }`}
+                    >
+                      {/* Active Indicator Glow Corner */}
+                      {isZoneFocused && (
+                        <div className="absolute top-0 right-0 h-1.5 w-16 bg-gradient-to-l from-blue-500 to-indigo-600 rounded-bl" />
+                      )}
+
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="space-y-1">
+                          <h4 className="text-xs font-black text-white group-hover:text-blue-400 transition-colors flex items-center gap-1.5">
+                            <MapPin className={`w-3.5 h-3.5 ${isZoneFocused ? 'text-blue-400' : 'text-slate-500'}`} />
+                            <span>{lga.lgaName}</span>
+                          </h4>
+                          <span className="px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 text-[8px] font-black font-mono rounded uppercase tracking-wider block w-max">
+                            {lga.zone.replace(' Zone', '')}
+                          </span>
                         </div>
-                        <div className="text-right font-mono text-xs">
-                          <div className="font-extrabold text-slate-200">{lga.annualEdVisits.toLocaleString()} visits/year</div>
-                          <div className="text-[10px] text-slate-500">Population: {lga.population.toLocaleString()}</div>
+                        <div className="text-right shrink-0">
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border font-mono ${
+                            isZoneFocused ? 'text-blue-400 border-blue-500/30 bg-blue-500/5' : 'text-slate-500 border-slate-800 bg-slate-950'
+                          }`}>
+                            {isZoneFocused ? 'Active Filter' : 'Focus Zone'}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Stacked Triage Progress Bar */}
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between text-[9px] font-mono text-slate-400">
-                          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500" />CTAS 1-2 (Urgent): {lga.ctas1_2_Pct}%</span>
-                          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" />CTAS 3 (Moderate): {lga.ctas3_Pct}%</span>
-                          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />CTAS 4-5 (Mild): {lga.ctas4_5_Pct}%</span>
+                      {/* LGA epidemiological stats grid */}
+                      <div className="grid grid-cols-3 gap-2 p-2.5 rounded-lg bg-slate-950/80 border border-slate-900 text-center font-mono">
+                        <div className="space-y-0.5">
+                          <span className="text-[8px] text-slate-500 uppercase font-black tracking-wider block">ED Visits</span>
+                          <span className="text-xs font-black text-slate-200">{lga.annualEdVisits.toLocaleString()}</span>
                         </div>
-                        <div className="h-2.5 w-full rounded-full overflow-hidden flex bg-slate-900 border border-slate-800">
-                          <div className="bg-red-500 h-full" style={{ width: `${lga.ctas1_2_Pct}%` }} title="CTAS 1-2" />
-                          <div className="bg-amber-500 h-full" style={{ width: `${lga.ctas3_Pct}%` }} title="CTAS 3" />
-                          <div className="bg-emerald-500 h-full" style={{ width: `${lga.ctas4_5_Pct}%` }} title="CTAS 4-5" />
+                        <div className="space-y-0.5 border-l border-r border-slate-900">
+                          <span className="text-[8px] text-slate-500 uppercase font-black tracking-wider block">Population</span>
+                          <span className="text-xs font-black text-slate-200">{lga.population.toLocaleString()}</span>
+                        </div>
+                        <div className="space-y-0.5">
+                          <span className="text-[8px] text-slate-500 uppercase font-black tracking-wider block">Visit Rate</span>
+                          <span className="text-xs font-black text-amber-400">{visitRate} / 1k</span>
+                        </div>
+                      </div>
+
+                      {/* Segmented triage progress bar */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-[9px] font-mono text-slate-400 flex-wrap gap-x-3 gap-y-1">
+                          <span className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                            <span>CTAS 1-2 (Urgent): <strong className="text-slate-200">{lga.ctas1_2_Pct}%</strong></span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            <span>CTAS 3 (Mod): <strong className="text-slate-200">{lga.ctas3_Pct}%</strong></span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            <span>CTAS 4-5 (Mild): <strong className="text-slate-200">{lga.ctas4_5_Pct}%</strong></span>
+                          </span>
+                        </div>
+                        
+                        {/* Segmented triage capsule with gaps */}
+                        <div className="h-3 w-full rounded-full overflow-hidden flex bg-slate-950 p-px border border-slate-900 gap-0.5">
+                          <div 
+                            className="bg-gradient-to-r from-rose-600 to-rose-400 h-full rounded-l-full" 
+                            style={{ width: `${lga.ctas1_2_Pct}%` }} 
+                            title={`CTAS 1-2: ${lga.ctas1_2_Pct}%`} 
+                          />
+                          <div 
+                            className="bg-gradient-to-r from-amber-500 to-yellow-400 h-full" 
+                            style={{ width: `${lga.ctas3_Pct}%` }} 
+                            title={`CTAS 3: ${lga.ctas3_Pct}%`} 
+                          />
+                          <div 
+                            className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-r-full" 
+                            style={{ width: `${lga.ctas4_5_Pct}%` }} 
+                            title={`CTAS 4-5: ${lga.ctas4_5_Pct}%`} 
+                          />
                         </div>
                       </div>
 
                       {/* Diagnoses */}
-                      <div className="pt-1.5 border-t border-slate-850 flex items-start gap-2 text-[10px] text-slate-400 leading-relaxed font-medium">
-                        <span className="font-black text-slate-300 uppercase tracking-widest text-[8px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 shrink-0">
+                      <div className="pt-2 border-t border-slate-900/60 flex items-start gap-2 text-[10px] text-slate-400 leading-relaxed font-medium">
+                        <span className="font-black text-slate-300 uppercase tracking-widest text-[8px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-850 shrink-0">
                           Primary Presenting Issue
                         </span>
-                        <span>{lga.topDiagnosis}</span>
+                        <span className="text-slate-300">{lga.topDiagnosis}</span>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="p-3.5 text-[10.5px] text-slate-400 leading-relaxed bg-slate-950/40 rounded-xl border border-slate-850">
-                <strong>CTAS Guidelines:</strong> Level 1 (Resuscitation) and Level 2 (Emergent) represent immediate critical pathologies. Level 4 (Less Urgent) and Level 5 (Non-Urgent) represent primary care issues (e.g. prescription renewals, minor sprains) that crowd metropolitan ED waiting areas due to lack of local community walk-in clinic access.
+              {/* CTAS Guidelines detailed card */}
+              <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-850 space-y-2.5 shadow-md">
+                <div className="flex items-center gap-1.5 text-slate-200 font-extrabold text-[11px] uppercase tracking-wide">
+                  <Info className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Clinical Guidance: Canadian Triage and Acuity Scale (CTAS)</span>
+                </div>
+                <div className="space-y-2 text-[10px] text-slate-400 leading-relaxed font-medium">
+                  <p>
+                    <strong>Levels 1 & 2 (Resuscitation / Emergent):</strong> Critical life threats (e.g. cardiac arrest, severe trauma). Require immediate intervention.
+                  </p>
+                  <p>
+                    <strong>Level 3 (Urgent):</strong> Serious conditions requiring moderate resources (e.g., chest pain, asthma flare).
+                  </p>
+                  <p>
+                    <strong>Levels 4 & 5 (Less / Non-Urgent):</strong> Minor illnesses (e.g., sprains, cold symptoms, refills) that can be managed in community clinics, yet crowd metropolitan EDs due to localized primary care access shortfalls.
+                  </p>
+                </div>
               </div>
             </div>
 
