@@ -4,6 +4,13 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 
 ---
 
+## Session: 2026-07-06 (Python Environment & Launchd PATH Conflicts)
+
+### Lesson: Launchd PATH overrides can redirect python3 execution to Homebrew versions
+- **Mistake:** Assuming that `python3` resolved inside the `primaryCareFetcher` pipeline matches the user's terminal default (`/usr/local/bin/python3` -> Python 3.13). When launched via launchd, the plist `PATH` variable had `/opt/homebrew/bin` before `/usr/local/bin`, leading `python3` to execute Homebrew's Python 3.14 instead, which lacked the `openpyxl` dependency.
+- **Solution:** Installed `openpyxl` using `/opt/homebrew/bin/python3 -m pip install openpyxl --user --break-system-packages` to ensure the library is present in Python 3.14's user site-packages.
+- **Prevention:** Always check which python executable and version are resolved under the specific daemon environment (`PATH` and `HOME`) when troubleshooting imports in child processes.
+
 ## Session: 2026-07-06 (Scheduler Dead Code — 18h KV Outage)
 
 ### Lesson: Scheduler module was dead code — never wired into the server
