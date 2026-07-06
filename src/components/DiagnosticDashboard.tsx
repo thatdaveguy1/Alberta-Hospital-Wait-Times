@@ -5,6 +5,7 @@ import {
   MapPin, 
   Search, 
   AlertTriangle, 
+  AlertCircle,
   Info, 
   ChevronRight,
   Sparkles,
@@ -61,7 +62,53 @@ export default function DiagnosticDashboard() {
   const [labSearch, setLabSearch] = useState<string>('');
   const [facilitySearch, setFacilitySearch] = useState<string>('');
   const [selectedModality, setSelectedModality] = useState<'CT Scan' | 'MRI Scan'>('MRI Scan');
+  const [selectedLabId, setSelectedLabId] = useState<string | null>(null);
 
+  const formatMinutesToHm = (minutes: number): string => {
+    if (!minutes || isNaN(minutes)) return '0m';
+    const hrs = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hrs > 0) {
+      return `${hrs}h ${mins}m`;
+    }
+    return `${mins}m`;
+  };
+
+  const labStats = useMemo(() => {
+    const validLabs = LAB_LOCATION_WAITS.filter(l => typeof l.waitTimeMin === 'number');
+    const avgWait = validLabs.length > 0 ? Math.round(validLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / validLabs.length) : 0;
+    
+    const edmontonLabs = validLabs.filter(l => l.region === 'Edmonton Zone');
+    const edmontonAvg = edmontonLabs.length > 0 ? Math.round(edmontonLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / edmontonLabs.length) : 0;
+    
+    const calgaryLabs = validLabs.filter(l => l.region === 'Calgary Zone');
+    const calgaryAvg = calgaryLabs.length > 0 ? Math.round(calgaryLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / calgaryLabs.length) : 0;
+    
+    const restLabs = validLabs.filter(l => l.region !== 'Edmonton Zone' && l.region !== 'Calgary Zone');
+    const restAvg = restLabs.length > 0 ? Math.round(restLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / restLabs.length) : 0;
+    
+    let maxWaitLab: typeof LAB_LOCATION_WAITS[0] | null = null;
+    if (validLabs.length > 0) {
+      maxWaitLab = validLabs.reduce((prev, curr) => 
+        (typeof curr.waitTimeMin === 'number' && typeof prev.waitTimeMin === 'number' && curr.waitTimeMin > prev.waitTimeMin) ? curr : prev
+      );
+    }
+    
+    const totalActive = LAB_LOCATION_WAITS.length;
+    const walkInCount = LAB_LOCATION_WAITS.filter(l => l.walkInAvailable).length;
+    const apptOnlyCount = LAB_LOCATION_WAITS.filter(l => l.appointmentRequired && !l.walkInAvailable).length;
+    
+    return {
+      avgWait,
+      edmontonAvg,
+      calgaryAvg,
+      restAvg,
+      maxWaitLab,
+      totalActive,
+      walkInCount,
+      apptOnlyCount
+    };
+  }, []);
   // Lab location filtering
   const filteredLabs = useMemo(() => {
     return LAB_LOCATION_WAITS.filter(lab => {
@@ -187,6 +234,119 @@ export default function DiagnosticDashboard() {
       {activeSubTab === 'labs' && (
         <div className="space-y-6">
           <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="LAB_LOCATION_WAITS" />
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Provincial Avg Wait Card Breakdown */}
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
+                    <Clock className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  <span className="text-[8px] font-extrabold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                    Lab State Average
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2 mb-1.5">
+                  <p className="text-2xl font-black text-white tracking-tight leading-none">
+                    {formatMinutesToHm(labStats.avgWait)}
+                  </p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                    Provincial Average Lab Wait
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2 border-t border-slate-800/80 pt-2.5 mt-1">
+                <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Edmonton</span>
+                  <span className="text-xs font-black text-emerald-400 font-mono block mt-0.5">
+                    {formatMinutesToHm(labStats.edmontonAvg)}
+                  </span>
+                </div>
+                <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Calgary</span>
+                  <span className="text-xs font-black text-blue-400 font-mono block mt-0.5">
+                    {formatMinutesToHm(labStats.calgaryAvg)}
+                  </span>
+                </div>
+                <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Rest AB</span>
+                  <span className="text-xs font-black text-indigo-400 font-mono block mt-0.5">
+                    {formatMinutesToHm(labStats.restAvg)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Max Wait Card Breakdown */}
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
+                    <AlertCircle className="w-4 h-4 text-red-400" />
+                  </div>
+                  <span className="text-[8px] font-extrabold text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                    Peak Delay Lab
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2 mb-1.5">
+                  <p className="text-2xl font-black text-white tracking-tight leading-none">
+                    {labStats.maxWaitLab ? formatMinutesToHm(labStats.maxWaitLab.waitTimeMin as number) : '0m'}
+                  </p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                    Longest Estimated Wait Time
+                  </p>
+                </div>
+              </div>
+              
+              <div className="border-t border-slate-800/80 pt-2 mt-1">
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider block">Highest Volume Site</span>
+                <span className="text-xs font-black text-red-400 font-mono block mt-0.5 truncate" title={labStats.maxWaitLab?.name}>
+                  {labStats.maxWaitLab ? labStats.maxWaitLab.name : 'N/A'}
+                </span>
+              </div>
+            </div>
+
+            {/* Total Active / Walk-in Available Card */}
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
+                    <Building className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <span className="text-[8px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                    Lab Sites Status
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2 mb-1.5">
+                  <p className="text-2xl font-black text-white tracking-tight leading-none">
+                    {labStats.totalActive}
+                  </p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                    Total Monitored Facilities
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 border-t border-slate-800/80 pt-2.5 mt-1">
+                <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Walk-In Access</span>
+                  <span className="text-xs font-black text-emerald-400 font-mono block mt-0.5">
+                    {labStats.walkInCount}
+                  </span>
+                </div>
+                <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Appt Only</span>
+                  <span className="text-xs font-black text-indigo-400 font-mono block mt-0.5">
+                    {labStats.apptOnlyCount}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Lab location filters & search */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
@@ -284,8 +444,14 @@ export default function DiagnosticDashboard() {
               }
 
               return (
-                <div key={lab.id} className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-4">
-                  <div className="space-y-2">
+                <button
+                  key={lab.id}
+                  onClick={() => setSelectedLabId(selectedLabId === lab.id ? null : lab.id)}
+                  className={`bg-slate-900 border text-left p-4 rounded-2xl shadow-lg flex flex-col justify-between space-y-4 cursor-pointer transition-all hover:border-cyan-500/50 ${
+                    selectedLabId === lab.id ? 'border-cyan-500 ring-1 ring-cyan-500/30' : 'border-slate-800'
+                  }`}
+                >
+                  <div className="space-y-2 w-full">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <h4 className="text-sm font-bold text-white truncate">{lab.name}</h4>
@@ -319,7 +485,7 @@ export default function DiagnosticDashboard() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-850/60">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-850/60 w-full" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2">
                       {lab.walkInAvailable && (
                         <span className="text-[9px] bg-slate-950 text-slate-400 px-1.5 py-0.5 rounded border border-slate-850 font-bold uppercase">
@@ -344,7 +510,7 @@ export default function DiagnosticDashboard() {
                       </a>
                     )}
                   </div>
-                </div>
+                </button>
               );
             })}
 
