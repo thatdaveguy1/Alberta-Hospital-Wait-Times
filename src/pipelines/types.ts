@@ -1,0 +1,58 @@
+// Shared pipeline interfaces for the Alberta Hospital Wait Times data update system.
+
+export interface SyncResult {
+  domain: string;
+  pipeline: string;
+  status: 'success' | 'failed' | 'partial' | 'skipped';
+  recordsFetched: number;
+  recordsWritten: number;
+  durationMs: number;
+  error?: string;
+  timestamp: string;
+}
+
+export interface SyncStatus {
+  status: 'never_run' | 'running' | 'success' | 'partial_success' | 'failed';
+  lastSyncTimestamp: string | null;
+  nextSyncTimestamp: string | null;
+  results: SyncResult[];
+  erWaitTimesLastUpdate: string | null;
+  erWaitTimesNextUpdate: string | null;
+}
+
+export interface DataSourceConfig {
+  id: string;
+  name: string;
+  url: string;
+  type: 'api' | 'scraper' | 'download' | 'manual';
+  cadence: '10min' | '24hr';
+  domain: string;
+}
+
+// Domain whitelist — all data domains served by the API
+export const DOMAINS = [
+  'er-waittimes',
+  'disruptions',
+  'surgical',
+  'diagnostic',
+  'cancer',
+  'continuing-care',
+  'mental-health',
+  'patient-experience',
+  'primary-care',
+  'public-health',
+  'regional-inequity',
+  'spending',
+  'system-flow',
+  'virtual-care',
+  'workforce',
+] as const;
+
+export type Domain = typeof DOMAINS[number];
+
+// Pipeline module interface — every pipeline implements this
+export interface Pipeline {
+  name: string;
+  domain: string;
+  run(): Promise<SyncResult>;
+}

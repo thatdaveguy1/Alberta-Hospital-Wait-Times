@@ -1,0 +1,613 @@
+// CIHI NHEX 2025 Downloader & Parser
+// Downloads the NHEX 2025 full data tables ZIP from CIHI, extracts the XLSX
+// workbooks, and parses them with SheetJS (xlsx) to populate data-spending.json.
+//
+// Source: https://www.cihi.ca/sites/default/files/document/nhex-2025-full-data-tables-en.zip
+// Published Nov 27, 2025 — contains finalized 2023 actuals + preliminary 2024/2025 forecasts.
+//
+// Extracted datasets:
+//   NATIONAL_SPENDING_COMPARE      — from Table O.1 (per-capita spending by province)
+//   ALBERTA_USE_OF_FUNDS           — from series-d1 Alberta sheet (amounts + shares)
+//   ALBERTA_ACTIVITY_VOLUME_TREND  — from Table O.1 (Alberta total spending by year,
+//                                    preserving existing non-NHEX fields)
+//
+// All failures are caught and returned as SyncResult — run() never throws.
+
+import AdmZip from 'adm-zip';
+import axios from 'axios';
+import * as XLSX from 'xlsx';
+import fs from 'fs';
+import path from 'path';
+import type { SyncResult } from './types';
+import type {
+  ActivityVolumeTrend,
+  NationalSpendingCompare,
+  SpendingByUseOfFunds,
+} from '../spendingData';
+
+const NHEX_ZIP_URL =
+  'https://www.cihi.ca/sites/default/files/document/nhex-2025-full-data-tables-en.zip';
+const SPENDING_FILE = path.join(process.cwd(), 'data-spending.json');
+const RATE_LIMIT_MS = 2000;
+const USER_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+// XLSX filenames inside the ZIP that we need.
+const OPEN_DATA_FILE = 'nhex-open-data-2025-en.xlsx';
+const SERIES_D1_FILE = 'nhex-series-d1-2025-en.xlsx';
+
+// Provinces / national rollups we recognise in CIHI workbooks.
+const PROVINCE_NAMES = [
+  'Alberta',
+  'British Columbia',
+  'Manitoba',
+  'New Brunswick',
+  'Newfoundland and Labrador',
+  'Northwest Territories',
+  'Nova Scotia',
+  'Nunavut',
+  'Ontario',
+  'Prince Edward Island',
+  'Quebec',
+  'Saskatchewan',
+  'Yukon',
+  'Canada',
+] as const;
+
+// NHEX Table O.1 use-of-funds categories that map to NationalSpendingCompare fields.
+const UOF_HOSPITALS = 'Hospitals';
+const UOF_PHYSICIANS = 'Physicians';
+const UOF_DRUGS = 'Drugs';
+const UOF_TOTAL = 'Total';
+
+// NHEX Table O.1 sectors.
+const SECTOR_PUBLIC = 'Public';
+const SECTOR_PRIVATE = 'Private';
+
+// Use-of-funds categories extracted from series-d1, mapped to friendly labels
+// matching the existing ALBERTA_USE_OF_FUNDS shape.
+const USE_OF_FUNDS_MAP: Record<string, string> = {
+  Hospitals: 'Hospitals & Acute Care',
+  Physicians: 'Physician Payments',
+  Drugs: 'Drugs & Therapeutics',
+  'Other Institutions': 'Long-Term & Continuing Care',
+  'Public Health': 'Public Health & Prevention',
+  Administration: 'Administration & Infrastructure',
+  'Other Professionals': 'Allied & Other Professionals',
+  'Other Health Spending: Net of HCC': 'Other Health Spending',
+};
+
+function sleep(ms: number): Promise<void> {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
+function asString(value: unknown): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  return undefined;
+}
+
+function asNumber(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[$,%\s]/g, '');
+    if (cleaned === '' || cleaned === '—' || cleaned === '..') return undefined;
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
+// Read a worksheet into a 2D array of cell values (first row = row 1).
+function sheetToRows(sheet: XLSX.WorkSheet): unknown[][] {
+  return XLSX.utils.sheet_to_json<unknown[]>(sheet, {
+    header: 1,
+    raw: false,
+    defval: null,
+    blankrows: false,
+  });
+}
+
+interface LoadedJson {
+  [key: string]: unknown;
+}
+
+function loadJsonFile(file: string): LoadedJson {
+  try {
+    const raw = fs.readFileSync(file, 'utf8');
+    const parsed = JSON.parse(raw) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as LoadedJson;
+    }
+  } catch {
+    /* file missing or invalid — start empty */
+  }
+  return {};
+}
+
+// Merge new arrays into an existing JSON object, only overwriting keys that
+// carry non-empty new data. Returns the number of records written.
+function mergeAndWrite(file: string, newPartial: LoadedJson): number {
+  const existing = loadJsonFile(file);
+  let written = 0;
+  for (const [key, value] of Object.entries(newPartial)) {
+    if (Array.isArray(value) && value.length > 0) {
+      existing[key] = value;
+      written += value.length;
+    }
+  }
+  if (written > 0) {
+    fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
+  }
+  return written;
+}
+
+// ---------------------------------------------------------------------------
+// Table O.1 extraction (nhex-open-data-2025-en.xlsx)
+// ---------------------------------------------------------------------------
+
+// Table O.1 column layout (header at row 2, 0-indexed):
+//   0: Year
+//   1: Forecast Category
+//   2: Province
+//   3: Sector
+//   4: Use of Funds
+//   5: Current dollars
+//   6: Current dollars per capita
+//   7: Constant 2010 dollars
+//   8: Constant 2010 dollars per capita
+
+const COL_YEAR = 0;
+const COL_PROVINCE = 2;
+const COL_SECTOR = 3;
+const COL_UOF = 4;
+const COL_CURRENT_DOLLARS = 5;
+const COL_PER_CAPITA = 6;
+
+interface TableO1Row {
+  year: string;
+  province: string;
+  sector: string;
+  useOfFunds: string;
+  currentDollars: number | undefined;
+  perCapita: number | undefined;
+}
+
+// Parse Table O.1 into typed row objects.
+function parseTableO1(rows: unknown[][]): TableO1Row[] {
+  const result: TableO1Row[] = [];
+  for (let i = 3; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r) continue;
+    const year = asString(r[COL_YEAR]);
+    if (!year || !/^\d{4}$/.test(year)) continue;
+    const province = asString(r[COL_PROVINCE]);
+    const sector = asString(r[COL_SECTOR]);
+    const useOfFunds = asString(r[COL_UOF]);
+    if (!province || !sector || !useOfFunds) continue;
+    result.push({
+      year,
+      province,
+      sector,
+      useOfFunds,
+      currentDollars: asNumber(r[COL_CURRENT_DOLLARS]),
+      perCapita: asNumber(r[COL_PER_CAPITA]),
+    });
+  }
+  return result;
+}
+
+// Extract NATIONAL_SPENDING_COMPARE: per-capita spending by province for the
+// latest forecast year. Uses Public + Private per-capita totals combined as
+// the "total" per-capita figure, since NHEX has no single "Total" sector row.
+// hospitalSpendingPerCapita / physicianSpendingPerCapita / drugSpendingPerCapita
+// are similarly summed across Public + Private sectors.
+function extractNationalSpending(tableRows: TableO1Row[]): NationalSpendingCompare[] {
+  if (tableRows.length === 0) return [];
+
+  const latestYear = tableRows.reduce((max, r) => (r.year > max ? r.year : max), '0');
+
+  // Build per-capita map: province -> sector -> uof -> perCapita
+  const perCapByProv = new Map<string, Map<string, Map<string, number>>>();
+  for (const r of tableRows) {
+    if (r.year !== latestYear) continue;
+    if (r.perCapita === undefined) continue;
+    if (r.sector !== SECTOR_PUBLIC && r.sector !== SECTOR_PRIVATE) continue;
+    let bySector = perCapByProv.get(r.province);
+    if (!bySector) {
+      bySector = new Map();
+      perCapByProv.set(r.province, bySector);
+    }
+    let byUof = bySector.get(r.sector);
+    if (!byUof) {
+      byUof = new Map();
+      bySector.set(r.sector, byUof);
+    }
+    byUof.set(r.useOfFunds, r.perCapita);
+  }
+
+  const records: NationalSpendingCompare[] = [];
+  for (const province of PROVINCE_NAMES) {
+    const bySector = perCapByProv.get(province);
+    if (!bySector) continue;
+
+    const sumPerCap = (uof: string): number => {
+      let total = 0;
+      let found = false;
+      for (const sector of [SECTOR_PUBLIC, SECTOR_PRIVATE]) {
+        const byUof = bySector.get(sector);
+        if (!byUof) continue;
+        const val = byUof.get(uof);
+        if (val !== undefined) {
+          total += val;
+          found = true;
+        }
+      }
+      return found ? total : 0;
+    };
+
+    const spendingPerCapita = sumPerCap(UOF_TOTAL);
+    if (spendingPerCapita === 0) continue;
+
+    records.push({
+      province,
+      spendingPerCapita,
+      spendingAsPercentGdp: 0, // not available in NHEX Table O.1
+      hospitalSpendingPerCapita: sumPerCap(UOF_HOSPITALS),
+      physicianSpendingPerCapita: sumPerCap(UOF_PHYSICIANS),
+      drugSpendingPerCapita: sumPerCap(UOF_DRUGS),
+      bedsPer100k: 0, // not available in NHEX — sourced from CIHI CSHS
+      costPerStandardStay: 0, // not available in NHEX — sourced from CIHI CSHS
+    });
+  }
+  return records;
+}
+
+// Extract ALBERTA_ACTIVITY_VOLUME_TREND: Alberta total spending by year (in
+// billions CAD). Only totalExpenseBillions is sourced from NHEX; all other
+// fields are preserved from the existing JSON data.
+function extractActivityVolume(
+  tableRows: TableO1Row[],
+  existing: ActivityVolumeTrend[],
+): ActivityVolumeTrend[] {
+  if (tableRows.length === 0) return existing;
+
+  // Collect Alberta total current-dollars by year (Public + Private combined).
+  const totalByYear = new Map<string, number>();
+  for (const r of tableRows) {
+    if (r.province !== 'Alberta') continue;
+    if (r.useOfFunds !== UOF_TOTAL) continue;
+    if (r.currentDollars === undefined) continue;
+    if (r.sector !== SECTOR_PUBLIC && r.sector !== SECTOR_PRIVATE) continue;
+    totalByYear.set(r.year, (totalByYear.get(r.year) ?? 0) + r.currentDollars);
+  }
+
+  // Map NHEX calendar year -> fiscal year label (e.g. 2023 -> '2023-2024').
+  const nhexToFiscal = (year: string): string => {
+    const y = Number(year);
+    if (!Number.isFinite(y)) return year;
+    return `${y}-${y + 1}`;
+  };
+
+  // Index existing records by fiscal year for merging.
+  const existingByFy = new Map<string, ActivityVolumeTrend>();
+  for (const rec of existing) {
+    existingByFy.set(rec.fiscalYear, { ...rec });
+  }
+
+  // Update or create records for each NHEX year we have data for.
+  for (const [year, totalDollars] of totalByYear) {
+    const fiscalYear = nhexToFiscal(year);
+    const totalExpenseBillions = Math.round((totalDollars / 1_000_000_000) * 10) / 10;
+    const existingRec = existingByFy.get(fiscalYear);
+    if (existingRec) {
+      existingRec.totalExpenseBillions = totalExpenseBillions;
+    } else {
+      existingByFy.set(fiscalYear, {
+        fiscalYear,
+        totalExpenseBillions,
+        surgeriesCount: 0,
+        ctExamsCount: 0,
+        labTestsMillions: 0,
+        edVisitsMillions: 0,
+        hospitalAdmissions: 0,
+        physiciansCount: 0,
+      });
+    }
+  }
+
+  // Return sorted by fiscal year.
+  return [...existingByFy.values()].sort((a, b) =>
+    a.fiscalYear.localeCompare(b.fiscalYear),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Series D1 extraction (nhex-series-d1-2025-en.xlsx, Alberta sheet)
+// ---------------------------------------------------------------------------
+
+// Series D1 Alberta sheet has 3 tables:
+//   Table D.1.9.1.a — amounts in millions of current dollars (header row 2)
+//   Table D.1.9.2.a — percentage distribution (header row 112)
+//   Table D.1.9.3.a — per capita (header row 222)
+// We use table 1 for amounts (millions -> billions) and table 2 for shares.
+
+// Find the header row and latest data row for a table starting after the given
+// title row. Returns { headerRow, dataRows }.
+function findD1Table(
+  rows: unknown[][],
+  titleFragment: string,
+): { headerIdx: number; yearRows: { year: string; values: number[] }[] } | null {
+  // Find the title row.
+  let titleIdx = -1;
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (r && r[0] && asString(r[0])?.includes(titleFragment)) {
+      titleIdx = i;
+      break;
+    }
+  }
+  if (titleIdx === -1) return null;
+
+  // Header is the row after the title.
+  const headerIdx = titleIdx + 1;
+  const headerRow = rows[headerIdx];
+  if (!headerRow) return null;
+
+  // Collect data rows (year in col 0, numeric values in cols 1+).
+  const yearRows: { year: string; values: number[] }[] = [];
+  for (let i = headerIdx + 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || !r[0]) continue;
+    const yearStr = asString(r[0]);
+    if (!yearStr || !/^\d{4}/.test(yearStr)) {
+      // Stop when we hit a non-year row (notes, source, etc.)
+      if (yearRows.length > 0) break;
+      continue;
+    }
+    const year = yearStr.replace(/\s*f.*$/i, '').trim();
+    const values: number[] = [];
+    for (let c = 1; c < headerRow.length; c++) {
+      values.push(asNumber(r[c]) ?? 0);
+    }
+    yearRows.push({ year, values });
+  }
+
+  return { headerIdx, yearRows };
+}
+
+// Extract ALBERTA_USE_OF_FUNDS from the Alberta sheet of series-d1.
+// Uses the latest forecast year's amounts (millions -> billions) and percentage
+// shares from the percentage-distribution table.
+function extractUseOfFunds(sheet: XLSX.WorkSheet): SpendingByUseOfFunds[] {
+  const rows = sheetToRows(sheet);
+
+  // Table 1: amounts in millions of current dollars.
+  const amountsTable = findD1Table(rows, 'Table D.1.9.1.a');
+  // Table 2: percentage distribution.
+  const sharesTable = findD1Table(rows, 'Table D.1.9.2.a');
+  if (!amountsTable || !sharesTable) return [];
+
+  const headerRow = rows[amountsTable.headerIdx];
+  if (!headerRow) return [];
+
+  // Build category column index from header labels. Header cells in CIHI
+  // workbooks often contain embedded newlines (e.g. "Other\nInstitutions"),
+  // so we normalize whitespace before lookup.
+  const categoryCols: { col: number; label: string }[] = [];
+  for (let c = 1; c < headerRow.length; c++) {
+    const h = asString(headerRow[c]);
+    if (!h) continue;
+    const normalized = h.replace(/\s+/g, ' ').trim();
+    const friendly = USE_OF_FUNDS_MAP[normalized];
+    if (friendly) {
+      categoryCols.push({ col: c, label: friendly });
+    }
+  }
+  if (categoryCols.length === 0) return [];
+
+  // Use the latest year from the amounts table.
+  const latestAmounts = amountsTable.yearRows[amountsTable.yearRows.length - 1];
+  const latestShares = sharesTable.yearRows[sharesTable.yearRows.length - 1];
+  if (!latestAmounts) return [];
+
+  const records: SpendingByUseOfFunds[] = [];
+  for (const { col, label } of categoryCols) {
+    const amountMillions = latestAmounts.values[col - 1] ?? 0;
+    const share = latestShares ? latestShares.values[col - 1] ?? 0 : 0;
+    if (amountMillions === 0 && share === 0) continue;
+    records.push({
+      category: label,
+      amountBillions: Math.round((amountMillions / 1000) * 100) / 100,
+      percentageShare: Math.round(share * 10) / 10,
+    });
+  }
+  return records;
+}
+
+// ---------------------------------------------------------------------------
+// Main pipeline
+// ---------------------------------------------------------------------------
+
+export async function run(): Promise<SyncResult> {
+  const startTime = Date.now();
+  const timestamp = new Date().toISOString();
+  console.log('[CIHIDownloader] Starting NHEX 2025 ZIP download + parse');
+
+  try {
+    // 1. Rate-limit before download.
+    await sleep(RATE_LIMIT_MS);
+
+    // 2. Download the NHEX 2025 full data tables ZIP.
+    console.log(`[CIHIDownloader] Downloading: ${NHEX_ZIP_URL}`);
+    let zipBuffer: Buffer;
+    try {
+      const response = await axios.get(NHEX_ZIP_URL, {
+        responseType: 'arraybuffer',
+        headers: { 'User-Agent': USER_AGENT },
+        timeout: 120000,
+        maxContentLength: 100 * 1024 * 1024,
+      });
+      zipBuffer = Buffer.from(response.data as ArrayBuffer);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[CIHIDownloader] ZIP download failed: ${msg}`);
+      return {
+        domain: 'spending',
+        pipeline: 'cihiDownloader',
+        status: 'skipped',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        timestamp,
+        error: `ZIP download failed: ${msg}`,
+      };
+    }
+
+    // 3. Extract ZIP and locate the two workbooks we need.
+    let zip: AdmZip;
+    try {
+      zip = new AdmZip(zipBuffer);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[CIHIDownloader] ZIP parse failed: ${msg}`);
+      return {
+        domain: 'spending',
+        pipeline: 'cihiDownloader',
+        status: 'skipped',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        timestamp,
+        error: `ZIP parse failed: ${msg}`,
+      };
+    }
+
+    const openDataEntry = zip.getEntries().find((e) => e.entryName === OPEN_DATA_FILE);
+    const seriesD1Entry = zip.getEntries().find((e) => e.entryName === SERIES_D1_FILE);
+
+    if (!openDataEntry) {
+      console.warn(`[CIHIDownloader] ${OPEN_DATA_FILE} not found in ZIP — skipping.`);
+      return {
+        domain: 'spending',
+        pipeline: 'cihiDownloader',
+        status: 'skipped',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        timestamp,
+        error: `${OPEN_DATA_FILE} not found in ZIP`,
+      };
+    }
+
+    // 4. Parse open-data workbook (Table O.1) directly from the ZIP entry buffer.
+    const openDataWb = XLSX.read(openDataEntry.getData(), { type: 'buffer' });
+    const tableO1Sheet = openDataWb.Sheets['Table O.1'];
+    if (!tableO1Sheet) {
+      console.warn('[CIHIDownloader] Table O.1 sheet not found — skipping.');
+      return {
+        domain: 'spending',
+        pipeline: 'cihiDownloader',
+        status: 'skipped',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        timestamp,
+        error: 'Table O.1 sheet not found in open-data workbook',
+      };
+    }
+
+    const tableO1Rows = parseTableO1(sheetToRows(tableO1Sheet));
+    const nationalSpending = extractNationalSpending(tableO1Rows);
+    console.log(
+      `[CIHIDownloader] Table O.1: ${nationalSpending.length} national-spending records, ${tableO1Rows.length} total rows parsed.`,
+    );
+
+    // 5. Parse series-d1 workbook (Alberta sheet) for use-of-funds.
+    let useOfFunds: SpendingByUseOfFunds[] = [];
+    if (seriesD1Entry) {
+      const seriesD1Wb = XLSX.read(seriesD1Entry.getData(), { type: 'buffer' });
+      const albertaSheet = seriesD1Wb.Sheets['Alta.'];
+      if (albertaSheet) {
+        useOfFunds = extractUseOfFunds(albertaSheet);
+        console.log(`[CIHIDownloader] Series D1 Alberta: ${useOfFunds.length} use-of-funds records.`);
+      } else {
+        console.warn('[CIHIDownloader] Alberta sheet not found in series-d1 workbook.');
+      }
+    } else {
+      console.warn(`[CIHIDownloader] ${SERIES_D1_FILE} not found in ZIP.`);
+    }
+
+    // 6. Load existing data-spending.json to preserve non-NHEX fields.
+    const existingData = loadJsonFile(SPENDING_FILE);
+    const existingActivityVolume = Array.isArray(existingData.ALBERTA_ACTIVITY_VOLUME_TREND)
+      ? (existingData.ALBERTA_ACTIVITY_VOLUME_TREND as ActivityVolumeTrend[])
+      : [];
+    const activityVolume = extractActivityVolume(tableO1Rows, existingActivityVolume);
+
+    const recordsFetched =
+      nationalSpending.length + useOfFunds.length + activityVolume.length;
+
+    if (recordsFetched === 0) {
+      console.warn(
+        '[CIHIDownloader] No matching records extracted — leaving data-spending.json unchanged.',
+      );
+      return {
+        domain: 'spending',
+        pipeline: 'cihiDownloader',
+        status: 'skipped',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        timestamp,
+        error: 'No workbook rows matched the expected NHEX 2025 shapes',
+      };
+    }
+
+    // 7. Merge into data-spending.json, preserving PHYSICIAN_SPECIALTY_BILLING
+    //    and HOSPITAL_EFFICIENCY_TREND (not touched here).
+    const recordsWritten = mergeAndWrite(SPENDING_FILE, {
+      NATIONAL_SPENDING_COMPARE: nationalSpending,
+      ALBERTA_USE_OF_FUNDS: useOfFunds,
+      ALBERTA_ACTIVITY_VOLUME_TREND: activityVolume,
+    });
+
+    const status: SyncResult['status'] = recordsWritten > 0 ? 'success' : 'skipped';
+    console.log(
+      `[CIHIDownloader] Complete. fetched=${recordsFetched} written=${recordsWritten} in ${Date.now() - startTime}ms`,
+    );
+
+    return {
+      domain: 'spending',
+      pipeline: 'cihiDownloader',
+      status,
+      recordsFetched,
+      recordsWritten,
+      durationMs: Date.now() - startTime,
+      timestamp,
+    };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error('[CIHIDownloader] FAILED:', errorMsg);
+    return {
+      domain: 'spending',
+      pipeline: 'cihiDownloader',
+      status: 'failed',
+      recordsFetched: 0,
+      recordsWritten: 0,
+      durationMs: Date.now() - startTime,
+      error: errorMsg,
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
+
+// CLI entry point.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  run().then((result) => {
+    console.log(JSON.stringify(result, null, 2));
+    process.exit(result.status === 'failed' ? 1 : 0);
+  });
+}
