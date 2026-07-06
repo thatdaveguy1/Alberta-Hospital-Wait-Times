@@ -6,10 +6,9 @@ import {
   Search, 
   AlertTriangle, 
   Info, 
-  ChevronRight, 
+  ChevronRight,
   Sparkles,
   Calendar,
-  Layers,
   FlaskConical,
   Activity,
   Award,
@@ -55,7 +54,7 @@ import {
 import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
 
 export default function DiagnosticDashboard() {
-  const [activeSubTab, setActiveSubTab] = useState<'labs' | 'imaging-waits' | 'facilities' | 'turnaround' | 'bottlenecks'>('labs');
+  const [activeSubTab, setActiveSubTab] = useState<'labs' | 'imaging-waits' | 'facilities' | 'turnaround'>('labs');
   
   // Interactive States
   const [selectedRegion, setSelectedRegion] = useState<string>('All');
@@ -181,17 +180,6 @@ export default function DiagnosticDashboard() {
         >
           <TrendingDown className="w-4 h-4" />
           <span>Lab Turnaround</span>
-        </button>
-        <button
-          onClick={() => setActiveSubTab('bottlenecks')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'bottlenecks'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <Layers className="w-4 h-4" />
-          <span>Flow Bottlenecks</span>
         </button>
       </div>
 
@@ -621,69 +609,6 @@ export default function DiagnosticDashboard() {
         </div>
       )}
 
-      {/* SUBTAB 5: Diagnostic Bottlenecks & Auditor General Review */}
-      {activeSubTab === 'bottlenecks' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="PRIORITY_TARGET_COMPLIANCE" />
-            
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-2.5 h-full bg-red-500" />
-              <div className="flex items-center gap-2 text-red-400 font-bold text-xs uppercase tracking-wider">
-                <ShieldAlert className="w-4 h-4" />
-                <span>Decentralized Zone Intake</span>
-              </div>
-              <h4 className="text-sm font-bold text-white">Manual Referral Booking Schedulers</h4>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                The Auditor General audit reports CT/MRI bookings remain highly decentralized and manual across individual health zones, resulting in significant administrative routing lag of up to 14 days before triage is complete.
-              </p>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-2.5 h-full bg-amber-500" />
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Inconsistent Prioritization</span>
-              </div>
-              <h4 className="text-sm font-bold text-white">Non-Standardized Intake Triaging</h4>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Triage guidelines (P1 - P4 scales) are applied inconsistently between metropolitan hospitals and rural diagnostic facilities, creating wide variance in wait-times for patients with equivalent urgency markers.
-              </p>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-2.5 h-full bg-blue-500" />
-              <div className="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-wider">
-                <Info className="w-4 h-4" />
-                <span>Budget-vs-Demand Mismatch</span>
-              </div>
-              <h4 className="text-sm font-bold text-white">Decoupled Fiscal Allocations</h4>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Diagnostic scanner operational budgets are allocated primarily based on historic facility spend rather than live wait-list pressure or local population expansion rates, leaving high-demand areas under-equipped.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">AHS Strategic CT & MRI Recovery Commitments</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-850 space-y-2">
-                <span className="text-[10px] text-cyan-400 font-mono font-bold uppercase">Priority Action 1: Centralized Booking Intake</span>
-                <p className="text-xs text-slate-300">
-                  Consolidating CT/MRI booking requests into a single province-wide electronic portal. This prevents patients from being backlogged at one site while nearby scanners sit underutilized during evening shifts.
-                </p>
-              </div>
-
-              <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-850 space-y-2">
-                <span className="text-[10px] text-cyan-400 font-mono font-bold uppercase">Priority Action 2: Operational Capacity Expansion</span>
-                <p className="text-xs text-slate-300">
-                  Expanding daily scanner operational hours to run 24/7 or late evening blocks at major trauma centres (UAH, FMC, RAH). This aims to clear the semi-urgent (P3) outpatient backlog.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
