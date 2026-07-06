@@ -18,7 +18,6 @@ import {
   BarChart2,
   ListOrdered,
   HeartPulse,
-  RefreshCw,
   Users,
   Home,
   MapPin,
@@ -1091,7 +1090,7 @@ export default function SystemFlowDashboard() {
                               fillOpacity={isSelected ? 0.95 : 0.65}
                               stroke={isSelected ? '#fff' : isCrisis ? '#f87171' : '#60a5fa'}
                               strokeWidth={isSelected ? 3 : 1.5}
-                              className="cursor-pointer transition-all duration-300 hover:scale-125"
+                              className="cursor-pointer"
                             />
                           );
                         })}
