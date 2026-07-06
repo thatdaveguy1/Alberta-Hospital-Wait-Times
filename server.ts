@@ -3,7 +3,7 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import axios from 'axios';
 import fs from 'fs';
-import { Hospital, WaitTimeSnapshot, ServiceDisruption } from './src/types';
+import { ServiceDisruption } from './src/types';
 import { startScheduler, setDailyOrchestrator, setAlertCheckFn, getHospitalsData, getSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
 import { runAllPipelines } from './src/pipelines/orchestrator';
 import { getSyncStatus } from './src/pipelines/syncStatus';

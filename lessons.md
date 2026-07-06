@@ -4,6 +4,13 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 
 ---
 
+## Session: 2026-07-06 (Scheduler Dead Code — 18h KV Outage)
+
+### Lesson: Scheduler module was dead code — never wired into the server
+- **Mistake:** `src/pipelines/scheduler.ts` had the correct logic to fetch ER wait times, update `data-sync-status.json`, and push to Cloudflare KV every 10 minutes, but `startScheduler()` was never called by anything. Meanwhile, `server.ts` had inline `setInterval` calls that only updated in-memory state and `data-snapshots.json`, so the dashboard (which reads from KV) went stale after the last manual `npm run pipeline` run at 2026-07-05T18:17:44Z.
+- **Solution:** Wired `startScheduler()` + `setDailyOrchestrator(runAllPipelines)` into `startServer()` after `app.listen()`. Removed the inline `fetchAndSyncWaitTimes`, `fetchAndSyncDisruptions`, `syncOtherDatasetsDaily`, and their `setInterval` calls. Routed API endpoints to `getHospitalsData()`/`getSnapshotsData()` from the scheduler. Fixed the `require()` ESM bug in `scheduler.ts` and made the initial daily sync non-blocking.
+- **Prevention:** When a module is written to replace inline code, verify it's actually imported and called. Dead code that duplicates live code is worse than no code — it creates a false sense of completeness. Also confirm the production server is scheduled by a real job (launchd/cron), not just a dev process.
+
 ## Session: 2026-07-04 (Initial Analysis & Planning)
 
 ### Finding: Fake daily sync

@@ -9,8 +9,8 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 64,
-      "timestamp": "2026-07-06T14:00:39.656Z"
+      "durationMs": 67,
+      "timestamp": "2026-07-06T14:14:37.190Z"
     },
     {
       "domain": "disruptions",
@@ -291,6 +291,6 @@
       "timestamp": "2026-07-06T14:04:42.969Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-06T14:00:39.656Z",
-  "erWaitTimesNextUpdate": "2026-07-06T14:10:39.720Z"
+  "erWaitTimesLastUpdate": "2026-07-06T14:14:37.190Z",
+  "erWaitTimesNextUpdate": "2026-07-06T14:24:37.257Z"
 }

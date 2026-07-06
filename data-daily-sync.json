@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "lastSyncTimestamp": "2026-07-06T01:51:17.170Z",
+  "lastSyncTimestamp": "2026-07-06T12:52:05.348Z",
   "endpoints": [
     {
       "name": "Open Alberta CKAN API (Health Datasets Search)",
@@ -10,8 +10,8 @@
       "status": "success",
       "statusCode": 200,
       "recordsFound": 7621,
-      "responseTimeMs": 215,
-      "lastChecked": "2026-07-06T01:51:16.522Z",
+      "responseTimeMs": 540,
+      "lastChecked": "2026-07-06T12:52:01.709Z",
       "statusText": "Success"
     },
     {
@@ -22,8 +22,8 @@
       "status": "success",
       "statusCode": 200,
       "recordsFound": 8216,
-      "responseTimeMs": 647,
-      "lastChecked": "2026-07-06T01:51:17.170Z",
+      "responseTimeMs": 3639,
+      "lastChecked": "2026-07-06T12:52:05.348Z",
       "statusText": "Success"
     }
   ],
