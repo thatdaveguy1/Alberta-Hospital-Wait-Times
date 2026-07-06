@@ -39,7 +39,9 @@ import {
   Home,
   HeartHandshake,
   Coins,
-  Phone
+  Phone,
+  Ribbon,
+  Shield
 } from 'lucide-react';
 import { 
   XAxis, 
@@ -76,12 +78,35 @@ import { useSyncStatus } from './hooks/useSyncStatus';
 import { LiveDataBadge } from './components/LiveDataBadge';
 
 
+const CATEGORIES = [
+  { id: 'all', label: 'All' },
+  { id: 'acute-urgent', label: 'Acute & Urgent' },
+  { id: 'system-capacity', label: 'System Capacity' },
+  { id: 'community-care', label: 'Community Care' },
+  { id: 'prevention-surveillance', label: 'Prevention' },
+  { id: 'equity-outcomes', label: 'Equity & Outcomes' },
+] as const;
+
+type CategoryId = (typeof CATEGORIES)[number]['id'];
+
+const CATEGORY_TITLE_BY_ID: Record<CategoryId, string> = {
+  all: 'All Modules',
+  'acute-urgent': 'Acute & Urgent Care',
+  'system-capacity': 'System Capacity & Flow',
+  'community-care': 'Community & Continuing Care',
+  'prevention-surveillance': 'Prevention & Surveillance',
+  'equity-outcomes': 'Equity & Outcomes',
+};
+
+const getCategoryTitle = (id: CategoryId | string) =>
+  CATEGORY_TITLE_BY_ID[id as CategoryId] ?? id;
+
 const DASHBOARDS = [
   {
     id: 'er-waits' as const,
     title: 'ER Wait Times',
     shortName: 'ER waits',
-    category: 'Acute & Urgent Care',
+    category: 'acute-urgent' as CategoryId,
     description: 'Real-time emergency department tracking, wait estimates, facility mapping, and geographic proximity alerts.',
     icon: Activity,
     color: 'text-red-400',
@@ -96,7 +121,7 @@ const DASHBOARDS = [
     id: 'disruptions' as const,
     title: 'Service Disruptions',
     shortName: 'Disruptions',
-    category: 'Acute & Urgent Care',
+    category: 'acute-urgent' as CategoryId,
     description: 'Active facility closures, temporary service shutdowns, and clinical emergency alerts across Alberta.',
     icon: AlertTriangle,
     color: 'text-amber-500',
@@ -111,7 +136,7 @@ const DASHBOARDS = [
     id: 'system-flow' as const,
     title: 'Hospital System Flow',
     shortName: 'System Flow',
-    category: 'System Capacity & Flow',
+    category: 'system-capacity' as CategoryId,
     description: 'Inpatient occupancy metrics, emergency admission bottlenecks, and medical discharge delay statistics.',
     icon: Layers,
     color: 'text-indigo-400',
@@ -126,7 +151,7 @@ const DASHBOARDS = [
     id: 'surgical-waits' as const,
     title: 'Surgical Waitlists',
     shortName: 'Surgical waits',
-    category: 'System Capacity & Flow',
+    category: 'system-capacity' as CategoryId,
     description: 'Surgical waitlist queues, specialty-specific wait distributions, and diagnostic timeline targets.',
     icon: TrendingUp,
     color: 'text-blue-400',
@@ -138,25 +163,10 @@ const DASHBOARDS = [
     updateFrequency: 'Monthly stats',
   },
   {
-    id: 'primary-care' as const,
-    title: 'Primary Care Access',
-    shortName: 'Primary Care',
-    category: 'Community & Prevention',
-    description: 'Family doctor attachment rates, accepting provider directories, and Local Geographic Area community healthcare needs.',
-    icon: Stethoscope,
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'border-emerald-500/20',
-    badge: 'COMMUNITY',
-    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    source: 'HQA FOCUS & StatsCan Profiles',
-    updateFrequency: 'Annual surveys',
-  },
-  {
     id: 'workforce' as const,
     title: 'Health Workforce & Supply',
     shortName: 'Health Workforce',
-    category: 'Community & Prevention',
+    category: 'system-capacity' as CategoryId,
     description: 'Physician registries, nursing supply indicators, allied health benchmarks, age profiles, and job vacancy trends.',
     icon: Users,
     color: 'text-sky-400',
@@ -171,7 +181,7 @@ const DASHBOARDS = [
     id: 'diagnostics' as const,
     title: 'Diagnostic Imaging + Labs',
     shortName: 'Diagnostics & Labs',
-    category: 'Community & Prevention',
+    category: 'system-capacity' as CategoryId,
     description: 'Live community lab waits, CT & MRI backlogs, compliance targets, and pathology result turnarounds.',
     icon: FlaskConical,
     color: 'text-cyan-400',
@@ -183,26 +193,101 @@ const DASHBOARDS = [
     updateFrequency: 'Every 15 minutes',
   },
   {
-    id: 'cancer' as const,
-    title: 'Cancer Screening & Care',
-    shortName: 'Cancer Care',
-    category: 'Community & Prevention',
-    description: 'Oncology burden, cancer screening participation rates by health zone, surgery wait times, and treatment locations.',
-    icon: HeartPulse,
+    id: 'primary-care' as const,
+    title: 'Primary Care Access',
+    shortName: 'Primary Care',
+    category: 'community-care' as CategoryId,
+    description: 'Family doctor attachment rates, accepting provider directories, and Local Geographic Area community healthcare needs.',
+    icon: Stethoscope,
     color: 'text-emerald-400',
     bgColor: 'bg-emerald-500/10',
     borderColor: 'border-emerald-500/20',
-    badge: 'ONCOLOGY',
+    badge: 'COMMUNITY',
     badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    source: 'CIHI Shared Health Priorities & StatsCan Profiles',
+    updateFrequency: 'Annual surveys',
+  },
+  {
+    id: 'long-term-care' as const,
+    title: 'Long Term Care & Seniors Care',
+    shortName: 'Long Term Care',
+    category: 'community-care' as CategoryId,
+    description: 'Placement timelines, clinical outcome standards, home care professional continuity, and facility compliance registries.',
+    icon: Home,
+    color: 'text-teal-400',
+    bgColor: 'bg-teal-500/10',
+    borderColor: 'border-teal-500/20',
+    badge: 'CONTINUING CARE',
+    badgeColor: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+    source: 'HQA FOCUS & CIHI CCRS Registry',
+    updateFrequency: 'Quarterly Audits',
+  },
+  {
+    id: 'patient-experience' as const,
+    title: 'Patient Experience & Care Quality',
+    shortName: 'Patient Experience',
+    category: 'community-care' as CategoryId,
+    description: 'Patient-reported satisfaction, clinician communication efficacy, hospital harm rates, and advocacy diagnostics.',
+    icon: HeartHandshake,
+    color: 'text-violet-400',
+    bgColor: 'bg-violet-500/10',
+    borderColor: 'border-violet-500/20',
+    badge: 'FOCUS SURVEY',
+    badgeColor: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+    source: 'HQA FOCUS & CIHI Inpatient CPES-IC',
+    updateFrequency: 'Quarterly Release',
+  },
+  {
+    id: 'virtual-care' as const,
+    title: 'Virtual Care & 811 Access',
+    shortName: 'Virtual Care',
+    category: 'community-care' as CategoryId,
+    description: 'Health Link 811 call volumes, Virtual MD physician consult outcomes, 911-to-811 diversion pathways, and digital care access.',
+    icon: Phone,
+    color: 'text-fuchsia-400',
+    bgColor: 'bg-fuchsia-500/10',
+    borderColor: 'border-fuchsia-500/20',
+    badge: 'VIRTUAL CARE',
+    badgeColor: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20',
+    source: 'AHS Quick Facts • CJEM Study • Primary Care Alberta',
+    updateFrequency: 'Quarterly Audits',
+  },
+  {
+    id: 'cancer' as const,
+    title: 'Cancer Screening & Care',
+    shortName: 'Cancer Care',
+    category: 'prevention-surveillance' as CategoryId,
+    description: 'Oncology burden, cancer screening participation rates by health zone, surgery wait times, and treatment locations.',
+    icon: Ribbon,
+    color: 'text-pink-400',
+    bgColor: 'bg-pink-500/10',
+    borderColor: 'border-pink-500/20',
+    badge: 'ONCOLOGY',
+    badgeColor: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
     source: 'Cancer Care Alberta & CIHI',
     updateFrequency: 'Q1 2026 Release',
+  },
+  {
+    id: 'public-health' as const,
+    title: 'Public Health & Outbreaks',
+    shortName: 'Public Health',
+    category: 'prevention-surveillance' as CategoryId,
+    description: 'Respiratory pathogens, wastewater early-warning monitors, childhood immunization gaps, and active environmental advisories.',
+    icon: Shield,
+    color: 'text-lime-400',
+    bgColor: 'bg-lime-500/10',
+    borderColor: 'border-lime-500/20',
+    badge: 'SURVEILLANCE',
+    badgeColor: 'bg-lime-500/10 text-lime-400 border-lime-500/20',
+    source: 'AHS ProvLab & PHAC Wastewater Feed',
+    updateFrequency: 'Weekly Updates',
   },
   {
     id: 'mental-health' as const,
     title: 'Mental Health & Addictions',
     shortName: 'Mental Health',
-    category: 'Community & Prevention',
-    description: 'Oncology, substance-related harms, live detoxification and recovery bed availability, and counselling wait times.',
+    category: 'prevention-surveillance' as CategoryId,
+    description: 'Substance-related harms, live detoxification and recovery bed availability, and counselling wait times.',
     icon: Brain,
     color: 'text-purple-400',
     bgColor: 'bg-purple-500/10',
@@ -213,55 +298,10 @@ const DASHBOARDS = [
     updateFrequency: 'Daily updates',
   },
   {
-    id: 'long-term-care' as const,
-    title: 'Long Term Care & Seniors Care',
-    shortName: 'Long Term Care',
-    category: 'Community & Prevention',
-    description: 'Placement timelines, clinical outcome standards, home care professional continuity, and facility compliance registries.',
-    icon: Home,
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'border-emerald-500/20',
-    badge: 'CONTINUING CARE',
-    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    source: 'HQA FOCUS & CIHI CCRS Registry',
-    updateFrequency: 'Quarterly Audits',
-  },
-  {
-    id: 'patient-experience' as const,
-    title: 'Patient Experience & Care Quality',
-    shortName: 'Patient Experience',
-    category: 'Community & Prevention',
-    description: 'Patient-reported satisfaction, clinician communication efficacy, hospital harm rates, and advocacy diagnostics.',
-    icon: HeartHandshake,
-    color: 'text-cyan-400',
-    bgColor: 'bg-cyan-500/10',
-    borderColor: 'border-cyan-500/20',
-    badge: 'FOCUS SURVEY',
-    badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-    source: 'HQA FOCUS & CIHI Inpatient CPES-IC',
-    updateFrequency: 'Quarterly Release',
-  },
-  {
-    id: 'public-health' as const,
-    title: 'Public Health & Outbreaks',
-    shortName: 'Public Health',
-    category: 'Community & Prevention',
-    description: 'Respiratory pathogens, wastewater early-warning monitors, childhood immunization gaps, and active environmental advisories.',
-    icon: HeartPulse,
-    color: 'text-indigo-400',
-    bgColor: 'bg-indigo-500/10',
-    borderColor: 'border-indigo-500/20',
-    badge: 'SURVEILLANCE',
-    badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-    source: 'AHS ProvLab & PHAC Wastewater Feed',
-    updateFrequency: 'Weekly Updates',
-  },
-  {
     id: 'regional-inequity' as const,
     title: 'Regional Health Inequity',
     shortName: 'Health Inequity',
-    category: 'Community & Prevention',
+    category: 'equity-outcomes' as CategoryId,
     description: 'Socioeconomic deprivation indicators, regional chronic disease burdens, emergency department reliance, and travel-for-care metrics.',
     icon: Compass,
     color: 'text-rose-400',
@@ -276,33 +316,18 @@ const DASHBOARDS = [
     id: 'health-spending' as const,
     title: 'Health Spending & Productivity',
     shortName: 'Health Spending',
-    category: 'System Capacity & Flow',
+    category: 'equity-outcomes' as CategoryId,
     description: 'CIHI spending benchmarks, hospital productivity indexes, case stay costs, and physician clinical payment analyses.',
     icon: Coins,
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'border-emerald-500/20',
+    color: 'text-orange-400',
+    bgColor: 'bg-orange-500/10',
+    borderColor: 'border-orange-500/20',
     badge: 'VALUE AUDIT',
-    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    badgeColor: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
     source: 'CIHI Spending Trends & AHCIP Supplement',
     updateFrequency: 'Annual Releases',
   },
-  {
-    id: 'virtual-care' as const,
-    title: 'Virtual Care & 811 Access',
-    shortName: 'Virtual Care',
-    category: 'Community & Prevention',
-    description: 'Health Link 811 call volumes, Virtual MD physician consult outcomes, 911-to-811 diversion pathways, and digital care access.',
-    icon: Phone,
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'border-emerald-500/20',
-    badge: 'VIRTUAL CARE',
-    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    source: 'AHS Quick Facts • CJEM Study • Primary Care Alberta',
-    updateFrequency: 'Quarterly Audits',
-  },
-];
+] as const;
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -516,7 +541,7 @@ export default function App() {
   const [expandedRegions, setExpandedRegions] = useState<{ [region: string]: boolean }>({});
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [activeTab, setActiveTab] = useState<'er-waits' | 'surgical-waits' | 'disruptions' | 'system-flow' | 'primary-care' | 'workforce' | 'diagnostics' | 'cancer' | 'mental-health' | 'long-term-care' | 'patient-experience' | 'public-health' | 'regional-inequity' | 'health-spending' | 'virtual-care'>('er-waits');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
   const [dashboardSearch, setDashboardSearch] = useState('');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
@@ -1258,7 +1283,7 @@ export default function App() {
                   </div>
                   <div>
                     <div className="text-[9px] text-slate-500 font-black uppercase tracking-wider">
-                      {activeDashboard.category}
+                      {getCategoryTitle(activeDashboard.category)}
                     </div>
                     <div className="text-sm font-extrabold text-white">
                       {activeDashboard.title}
@@ -1340,9 +1365,9 @@ export default function App() {
 
                 {/* Drawer Body - Scrollable */}
                 <div className="flex-1 overflow-y-auto pr-1 pb-8 space-y-6">
-                  {Array.from(new Set(DASHBOARDS.map(d => d.category))).map(category => {
-                    const items = DASHBOARDS.filter(d => 
-                      d.category === category &&
+                  {CATEGORIES.filter(c => c.id !== 'all').map(category => {
+                    const items = DASHBOARDS.filter(d =>
+                      d.category === category.id &&
                       (d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
                        d.description.toLowerCase().includes(dashboardSearch.toLowerCase()))
                     );
@@ -1350,9 +1375,9 @@ export default function App() {
                     if (items.length === 0) return null;
 
                     return (
-                      <div key={category} className="space-y-2">
+                      <div key={category.id} className="space-y-2">
                         <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">
-                          {category}
+                          {CATEGORY_TITLE_BY_ID[category.id]}
                         </h4>
                         <div className="grid grid-cols-1 gap-2">
                           {items.map(d => {
@@ -1369,8 +1394,8 @@ export default function App() {
                                   }
                                 }}
                                 className={`w-full flex items-start gap-3.5 p-3.5 rounded-xl text-xs transition-all text-left ${
-                                  isActive 
-                                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold border border-blue-400/30' 
+                                  isActive
+                                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold border border-blue-400/30'
                                     : 'bg-slate-950/40 text-slate-400 hover:text-slate-200 border border-slate-800/40'
                                 }`}
                               >
@@ -1403,7 +1428,7 @@ export default function App() {
                   })}
 
                   {/* No Results Drawer */}
-                  {DASHBOARDS.filter(d => 
+                  {DASHBOARDS.filter(d =>
                     d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
                     d.description.toLowerCase().includes(dashboardSearch.toLowerCase())
                   ).length === 0 && (
@@ -1425,8 +1450,9 @@ export default function App() {
         </AnimatePresence>
 
         {/* Horizontal Nav Bar (Desktop Only, under notice disclaimer) */}
-        <div className="hidden lg:block bg-[#090e21] border border-slate-800 rounded-2xl p-5 mb-8 shadow-xl w-full space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div className="hidden lg:block bg-[#090e21] border border-slate-800 rounded-2xl p-5 mb-8 shadow-xl w-full space-y-5">
+          {/* Header Row */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
                 <SlidersHorizontal className="w-4 h-4" />
@@ -1439,91 +1465,137 @@ export default function App() {
               </div>
             </div>
 
-            {/* Category selection and Search Row */}
-            <div className="flex items-center gap-3">
-              {/* Category Pills */}
-              <div className="flex items-center bg-slate-950/60 border border-slate-800/85 rounded-xl p-1 gap-1">
-                {['All', 'Acute & Urgent Care', 'System Capacity & Flow', 'Community & Prevention'].map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
-                      selectedCategory === cat
-                        ? 'bg-slate-800 text-white font-bold'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-                    }`}
-                  >
-                    {cat === 'All' ? 'All' : cat.split(' & ')[0]}
-                  </button>
-                ))}
-              </div>
-
-              {/* Compact Search Bar */}
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-2 w-3.5 h-3.5 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Search modules..."
-                  value={dashboardSearch}
-                  onChange={(e) => setDashboardSearch(e.target.value)}
-                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-1.5 pl-8.5 pr-8 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-                />
-                {dashboardSearch && (
-                  <button
-                    onClick={() => setDashboardSearch('')}
-                    className="absolute right-3 top-2 text-slate-500 hover:text-slate-300 text-xs font-bold"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
+            {/* Search Bar */}
+            <div className="relative w-full md:w-72">
+              <Search className="absolute left-3 top-2 w-3.5 h-3.5 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search modules..."
+                value={dashboardSearch}
+                onChange={(e) => setDashboardSearch(e.target.value)}
+                className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-1.5 pl-9 pr-8 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+              />
+              {dashboardSearch && (
+                <button
+                  onClick={() => setDashboardSearch('')}
+                  className="absolute right-3 top-2 text-slate-500 hover:text-slate-300 text-xs font-bold"
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Dashboards Pills list */}
-          <div className="flex flex-wrap gap-2 pt-1">
-            {DASHBOARDS.filter(d => {
-              const matchesCategory = selectedCategory === 'All' || d.category === selectedCategory;
-              const matchesSearch = d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) || 
-                                    d.description.toLowerCase().includes(dashboardSearch.toLowerCase());
-              return matchesCategory && matchesSearch;
-            }).map((d) => {
-              const Icon = d.icon;
-              const isActive = activeTab === d.id;
+          {/* Category Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+            {CATEGORIES.map((cat) => {
+              const count = DASHBOARDS.filter(d => d.category === cat.id).length;
               return (
                 <button
-                  key={d.id}
-                  onClick={() => {
-                    setActiveTab(d.id);
-                    if (isMapFullscreen) {
-                      setIsMapFullscreen(false);
-                    }
-                  }}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all text-left cursor-pointer border ${
-                    isActive
-                      ? 'bg-gradient-to-r from-blue-600/95 to-blue-500/85 text-white border-blue-500/30 font-bold shadow-lg shadow-blue-500/10'
-                      : 'bg-slate-950/40 text-slate-400 border-slate-800/40 hover:text-slate-200 hover:border-slate-800/80 hover:bg-slate-950/80'
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
+                    selectedCategory === cat.id
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 bg-slate-950/40 border border-slate-800/60'
                   }`}
                 >
-                  <div className={`p-1 rounded-lg shrink-0 ${
-                    isActive ? 'bg-white/10 text-white' : `${d.bgColor} ${d.color}`
-                  }`}>
-                    <Icon className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="font-semibold">{d.shortName}</span>
+                  {cat.label}
+                  {cat.id !== 'all' && (
+                    <span className={`ml-1.5 text-[9px] opacity-70 ${selectedCategory === cat.id ? 'text-blue-200' : 'text-slate-500'}`}>
+                      {count}
+                    </span>
+                  )}
                 </button>
+              );
+            })}
+          </div>
+
+          {/* Module Card Grid */}
+          <div className="space-y-6">
+            {(selectedCategory === 'all' ? CATEGORIES.filter(c => c.id !== 'all') : CATEGORIES.filter(c => c.id === selectedCategory)).map(category => {
+              const items = DASHBOARDS.filter(d =>
+                d.category === category.id &&
+                (d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+                 d.description.toLowerCase().includes(dashboardSearch.toLowerCase()))
+              );
+
+              if (items.length === 0) return null;
+
+              return (
+                <div key={category.id} className="space-y-3">
+                  <div className="flex items-center gap-2 border-b border-slate-800/60 pb-2">
+                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+                      {CATEGORY_TITLE_BY_ID[category.id]}
+                    </h4>
+                    <span className="text-[10px] text-slate-600 font-medium">
+                      {items.length} module{items.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 xl:grid-cols-4 gap-3">
+                    {items.map(d => {
+                      const Icon = d.icon;
+                      const isActive = activeTab === d.id;
+                      return (
+                        <button
+                          key={d.id}
+                          onClick={() => {
+                            setActiveTab(d.id);
+                            if (isMapFullscreen) {
+                              setIsMapFullscreen(false);
+                            }
+                          }}
+                          className={`relative group flex flex-col items-start gap-3 p-4 rounded-xl text-left transition-all border ${
+                            isActive
+                              ? 'bg-blue-500/5 border-blue-500/40 ring-1 ring-blue-500/30'
+                              : 'bg-slate-950/40 border-slate-800/60 hover:border-slate-700 hover:bg-slate-900/50'
+                          }`}
+                        >
+                          {isActive && (
+                            <div className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-blue-500" />
+                          )}
+                          <div className="flex items-start justify-between w-full">
+                            <div className={`p-2 rounded-lg ${d.bgColor} ${d.color}`}>
+                              <Icon className="w-5 h-5" />
+                            </div>
+                            {d.badge && (
+                              <span className={`text-[8px] px-1.5 py-0.5 rounded font-extrabold uppercase tracking-widest border ${d.badgeColor}`}>
+                                {d.badge}
+                              </span>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <h5 className={`text-sm font-semibold ${isActive ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
+                              {d.shortName}
+                            </h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
+                              {d.description}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
 
             {/* Empty search results */}
             {DASHBOARDS.filter(d => {
-              const matchesCategory = selectedCategory === 'All' || d.category === selectedCategory;
-              const matchesSearch = d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) || 
+              const matchesCategory = selectedCategory === 'all' || d.category === selectedCategory;
+              const matchesSearch = d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
                                     d.description.toLowerCase().includes(dashboardSearch.toLowerCase());
               return matchesCategory && matchesSearch;
             }).length === 0 && (
-              <div className="text-center py-4 w-full text-xs text-slate-500 font-medium">
-                No matching analytical modules found for your search criteria.
+              <div className="text-center py-8 bg-slate-950/20 border border-dashed border-slate-800 rounded-2xl space-y-2">
+                <Search className="w-8 h-8 text-slate-600 mx-auto" />
+                <p className="text-xs text-slate-400 font-medium">No matching analytical modules found</p>
+                <button
+                  onClick={() => { setDashboardSearch(''); setSelectedCategory('all'); }}
+                  className="text-[10px] text-blue-400 font-black uppercase tracking-wider"
+                >
+                  Reset Filters
+                </button>
               </div>
             )}
           </div>
