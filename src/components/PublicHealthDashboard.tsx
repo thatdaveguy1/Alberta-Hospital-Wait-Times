@@ -60,7 +60,17 @@ export default function PublicHealthDashboard() {
   const [immunizationZone, setImmunizationZone] = useState<string>('All');
   const [selectedProtocolSetting, setSelectedProtocolSetting] = useState<string>('Acute Care Wards');
   const [advisoryTypeFilter, setAdvisoryTypeFilter] = useState<string>('All');
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
+  const covidTrends = useMemo(() => RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.virus === 'COVID-19'), []);
+  const fluATrends = useMemo(() => RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.virus === 'Influenza A'), []);
+  const rsvTrends = useMemo(() => RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.virus === 'RSV'), []);
+  const icuTrends = useMemo(() => {
+    return ['2024-2025', '2025-2026'].map(season => ({
+      season,
+      icuAdmissions: RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.season === season).reduce((sum, r) => sum + r.icuAdmissions, 0)
+    }));
+  }, []);
   // Respiratory data filtration
   const filteredRespiratoryData = useMemo(() => {
     return RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.season === selectedSeason);
@@ -175,49 +185,121 @@ export default function PublicHealthDashboard() {
           <DataTimestamp compact metadata={publicHealthDataMetadata} arrayKey="RESPIRATORY_VIRUS_SURVEILLANCE" />
           {/* Top-line Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <button
+              onClick={() => setExpandedCard(expandedCard === 'covid' ? null : 'covid')}
+              className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-rose-500/50 ${
+                expandedCard === 'covid' ? 'border-rose-500 ring-1 ring-rose-500/30' : 'border-slate-800'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">COVID-19 Positivity Rate</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-rose-400">12.3%</span>
                 <span className="text-[10px] text-slate-400">Peak Season: 14.8%</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1 border-t border-slate-850 font-medium">
-                SARS-CoV-2 positivity remains a persistent year-round bed occupancy driver in hospital wards.
+                SARS-CoV-2 positivity remains a persistent year-round bed occupancy driver in hospital wards. Click to view trend.
               </p>
-            </div>
+              {expandedCard === 'covid' && (
+                <div className="h-40 mt-3 pt-3 border-t border-slate-850 animate-fadeIn" onClick={(e) => e.stopPropagation()}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={covidTrends} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="season" stroke="#64748b" fontSize={9} />
+                      <YAxis stroke="#64748b" fontSize={9} unit="%" />
+                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 10 }} />
+                      <Bar dataKey="positivityRatePct" name="Positivity %" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </button>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <button
+              onClick={() => setExpandedCard(expandedCard === 'flua' ? null : 'flua')}
+              className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-amber-500/50 ${
+                expandedCard === 'flua' ? 'border-amber-500 ring-1 ring-amber-500/30' : 'border-slate-800'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Influenza A Positivity Rate</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-amber-500">9.8%</span>
                 <span className="text-[10px] text-slate-400">Peak Season: 11.2%</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1 border-t border-slate-850 font-medium">
-                Dominant winter seasonal flu driver triggering critical care alerts across multiple zones.
+                Dominant winter seasonal flu driver triggering critical care alerts across multiple zones. Click to view trend.
               </p>
-            </div>
+              {expandedCard === 'flua' && (
+                <div className="h-40 mt-3 pt-3 border-t border-slate-850 animate-fadeIn" onClick={(e) => e.stopPropagation()}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={fluATrends} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="season" stroke="#64748b" fontSize={9} />
+                      <YAxis stroke="#64748b" fontSize={9} unit="%" />
+                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 10 }} />
+                      <Bar dataKey="positivityRatePct" name="Positivity %" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </button>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <button
+              onClick={() => setExpandedCard(expandedCard === 'rsv' ? null : 'rsv')}
+              className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-indigo-500/50 ${
+                expandedCard === 'rsv' ? 'border-indigo-500 ring-1 ring-indigo-500/30' : 'border-slate-800'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">RSV Lab Positive Prevalence</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-indigo-400">7.2%</span>
                 <span className="text-[10px] text-slate-400">Peak Season: 8.5%</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1 border-t border-slate-850 font-medium">
-                Presents high clinical severity risks for pediatric emergency services and neonatal ICU capacities.
+                Presents high clinical severity risks for pediatric emergency services and neonatal ICU capacities. Click to view trend.
               </p>
-            </div>
+              {expandedCard === 'rsv' && (
+                <div className="h-40 mt-3 pt-3 border-t border-slate-850 animate-fadeIn" onClick={(e) => e.stopPropagation()}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={rsvTrends} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="season" stroke="#64748b" fontSize={9} />
+                      <YAxis stroke="#64748b" fontSize={9} unit="%" />
+                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 10 }} />
+                      <Bar dataKey="positivityRatePct" name="Prevalence %" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </button>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <button
+              onClick={() => setExpandedCard(expandedCard === 'icu' ? null : 'icu')}
+              className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-red-500/50 ${
+                expandedCard === 'icu' ? 'border-red-500 ring-1 ring-red-500/30' : 'border-slate-800'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Seasonal Respiratory ICU Burden</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-red-500">245 cases</span>
                 <span className="text-[10px] text-slate-400">2025-2026 Season</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1 border-t border-slate-850 font-medium">
-                Total critical ICU respiratory admissions requiring ventilation or supportive therapy.
+                Total critical ICU respiratory admissions requiring ventilation or supportive therapy. Click to view trend.
               </p>
-            </div>
+              {expandedCard === 'icu' && (
+                <div className="h-40 mt-3 pt-3 border-t border-slate-850 animate-fadeIn" onClick={(e) => e.stopPropagation()}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={icuTrends} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="season" stroke="#64748b" fontSize={9} />
+                      <YAxis stroke="#64748b" fontSize={9} />
+                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 10 }} />
+                      <Bar dataKey="icuAdmissions" name="ICU Admissions" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </button>
           </div>
 
           {/* Interactive Charts Area */}
