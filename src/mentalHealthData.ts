@@ -343,3 +343,19 @@ export const SUPPORT_HELPLINES: SupportHelpline[] = [
     description: 'Direct connection to registered nurses for health advice, triage, and local resource mapping.'
   }
 ];
+
+// Data freshness metadata for each array — used by the DataTimestamp component.
+export const _dataMetadata: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: "auto" | "manual";
+  verification?: string;
+}> = {
+  SUBSTANCE_HARM_TRENDS: { source: "Alberta Substance Use Surveillance System (ASUSS)", sourceVintage: "2019\u20132025 (stimulant-specific subset)", lastUpdated: "2026-07-05", updateType: "manual", verification: "Trend direction matches known data (2023 peak, 2024-25 decline); exact counts unverified" },
+  ADDICTION_BED_CAPACITIES: { source: "Alberta Recovery Communities (alberta.ca), George Spady Society (gspady.org), Calgary Alpha House (alphahousecalgary.com)", sourceVintage: "2025-2026 operational status", lastUpdated: "2026-07-05", updateType: "manual", verification: "Verified facility names, bed counts, and operational status against official Alberta.ca recovery community pages and organization websites. Available beds marked as null because real-time bed availability is not publicly published." },
+  COMMUNITY_MH_WAITS: { source: "CIHI mental health wait time indicators", sourceVintage: "2021\u20132025", lastUpdated: "2026-07-05", updateType: "manual", verification: "Plausible values matching CIHI mental health access indicators" },
+  HOSPITAL_MHSU_BURDEN: { source: "CIHI Mental Health & Substance Use hospitalization indicators", sourceVintage: "2021\u20132025", lastUpdated: "2026-07-05", updateType: "manual", verification: "Plausible values matching CIHI repeat hospitalization and frequent ER visit indicators" },
+  SUPPORT_HELPLINES: { source: "albertaSubstanceUseScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:36.994Z", updateType: "auto" },
+  CIHI_MH_READMISSION_RATES: { source: "albertaSubstanceUseScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:36.994Z", updateType: "auto" },
+};

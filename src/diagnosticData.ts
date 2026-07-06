@@ -1111,3 +1111,53 @@ export const PRIORITY_TARGET_COMPLIANCE: PriorityTarget[] = [
     albertaMriCompliancePct: 52.4
   }
 ];
+
+// Data freshness metadata for each array — used by the DataTimestamp component.
+export const _dataMetadata: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: 'auto' | 'manual';
+  verification?: string;
+}> = {
+  LAB_LOCATION_WAITS: {
+    source: 'Alberta Precision Laboratories (APL) directory',
+    sourceVintage: 'APL directory (approximate 2024-2025)',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'APL is the real provincial lab service. Location names and addresses are likely real. Wait time minutes are point-in-time estimates.',
+  },
+  TEST_TURNAROUND_METRICS: {
+    source: 'Alberta Precision Labs (APL) clinical standards',
+    sourceVintage: 'Reference standards',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Plausible APL STAT/routine turnaround targets; no structured feed.',
+  },
+  IMAGING_WAIT_TRENDS: {
+    source: 'CIHI wait times download',
+    sourceVintage: 'Live data',
+    lastUpdated: '2026-07-05',
+    updateType: 'auto',
+  },
+  FACILITY_IMAGING_WAITS: {
+    source: 'AHS imaging wait times (estimated from Power BI)',
+    sourceVintage: 'Estimated (approximate 2024-2025)',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Facility names are real AHS facilities. P50/P90 wait day metrics are estimates.',
+  },
+  PRIORITY_TARGET_COMPLIANCE: {
+    source: 'Alberta Health performance reports / diagnostic imaging targets',
+    sourceVintage: 'Approximate 2023-2024',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Compliance percentages are plausible but could not be confirmed against a specific published report.',
+  },
+  CIHI_DIAGNOSTIC_WAIT_TIMES: {
+    source: 'CIHI wait times download',
+    sourceVintage: 'Live data',
+    lastUpdated: '2026-07-05',
+    updateType: 'auto',
+  },
+};

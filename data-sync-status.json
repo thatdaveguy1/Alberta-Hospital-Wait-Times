@@ -1,0 +1,298 @@
+{
+  "status": "partial_success",
+  "lastSyncTimestamp": "2026-07-05T15:57:43.564Z",
+  "nextSyncTimestamp": "2026-07-06T15:57:43.564Z",
+  "results": [
+    {
+      "domain": "er-waittimes",
+      "pipeline": "erWaitTimesFetcher",
+      "status": "success",
+      "recordsFetched": 29,
+      "recordsWritten": 29,
+      "durationMs": 58,
+      "timestamp": "2026-07-05T18:17:44.025Z"
+    },
+    {
+      "domain": "disruptions",
+      "pipeline": "disruptionsScraper",
+      "status": "success",
+      "recordsFetched": 18,
+      "recordsWritten": 27,
+      "durationMs": 152,
+      "timestamp": "2026-07-05T15:53:55.191Z"
+    },
+    {
+      "domain": "workforce",
+      "pipeline": "statscanFetcher",
+      "status": "success",
+      "recordsFetched": 8,
+      "recordsWritten": 8,
+      "durationMs": 2439,
+      "timestamp": "2026-07-05T15:53:55.624Z"
+    },
+    {
+      "domain": "public-health",
+      "pipeline": "phacFetcher",
+      "status": "partial",
+      "recordsFetched": 40,
+      "recordsWritten": 46,
+      "durationMs": 2129,
+      "error": "PHAC provides Alberta-specific wastewater data only (Edmonton Goldbar). Immunization coverage, notifiable disease incidence, respiratory surveillance, environmental advisories, and outbreak protocols are not available Alberta-specifically via the PHAC Infobase API and were left at their hand-authored values.",
+      "timestamp": "2026-07-05T15:53:59.067Z"
+    },
+    {
+      "domain": "spending",
+      "pipeline": "openAlbertaFetcher",
+      "status": "skipped",
+      "recordsFetched": 100,
+      "recordsWritten": 100,
+      "durationMs": 2555,
+      "error": "Structured resources found (46) but none mapped to existing domain shapes; catalog written for manual review",
+      "timestamp": "2026-07-05T15:54:02.198Z"
+    },
+    {
+      "domain": "surgical",
+      "pipeline": "powerbiScraper",
+      "status": "success",
+      "recordsFetched": 119,
+      "recordsWritten": 119,
+      "durationMs": 40073,
+      "timestamp": "2026-07-05T15:54:07.161Z"
+    },
+    {
+      "domain": "surgical",
+      "pipeline": "abjhiScraper",
+      "status": "success",
+      "recordsFetched": 24,
+      "recordsWritten": 24,
+      "durationMs": 550,
+      "timestamp": "2026-07-05T15:54:46.832Z"
+    },
+    {
+      "domain": "continuing-care",
+      "pipeline": "ahsAsiScraper",
+      "status": "partial",
+      "recordsFetched": 12,
+      "recordsWritten": 37,
+      "durationMs": 4071,
+      "error": "continuing-care: unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca",
+      "timestamp": "2026-07-05T15:54:48.382Z"
+    },
+    {
+      "domain": "system-flow",
+      "pipeline": "acuteCareScraper",
+      "status": "success",
+      "recordsFetched": 38,
+      "recordsWritten": 85,
+      "durationMs": 19,
+      "timestamp": "2026-07-05T15:54:53.456Z"
+    },
+    {
+      "domain": "system-flow",
+      "pipeline": "ahsWeeklyEdLosScraper",
+      "status": "success",
+      "recordsFetched": 10,
+      "recordsWritten": 29,
+      "durationMs": 2082,
+      "timestamp": "2026-07-05T15:54:54.477Z"
+    },
+    {
+      "domain": "workforce",
+      "pipeline": "cpsaScraper",
+      "status": "success",
+      "recordsFetched": 6,
+      "recordsWritten": 6,
+      "durationMs": 2110,
+      "timestamp": "2026-07-05T15:54:57.559Z"
+    },
+    {
+      "domain": "patient-experience",
+      "pipeline": "goodcaringScraper",
+      "status": "success",
+      "recordsFetched": 12,
+      "recordsWritten": 12,
+      "durationMs": 2637,
+      "timestamp": "2026-07-05T15:55:00.670Z"
+    },
+    {
+      "domain": "cancer",
+      "pipeline": "ahsCancerCentresScraper",
+      "status": "success",
+      "recordsFetched": 17,
+      "recordsWritten": 17,
+      "durationMs": 2127,
+      "timestamp": "2026-07-05T15:55:04.308Z"
+    },
+    {
+      "domain": "spending",
+      "pipeline": "cihiDownloader",
+      "status": "success",
+      "recordsFetched": 73,
+      "recordsWritten": 73,
+      "durationMs": 5703,
+      "timestamp": "2026-07-05T15:55:07.435Z"
+    },
+    {
+      "domain": "diagnostic",
+      "pipeline": "cihiWaitTimesDownloader",
+      "status": "success",
+      "recordsFetched": 16,
+      "recordsWritten": 16,
+      "durationMs": 2842,
+      "timestamp": "2026-07-05T15:55:14.140Z"
+    },
+    {
+      "domain": "cancer",
+      "pipeline": "cihiWaitTimesDownloader",
+      "status": "success",
+      "recordsFetched": 81,
+      "recordsWritten": 81,
+      "durationMs": 38,
+      "timestamp": "2026-07-05T15:55:17.994Z"
+    },
+    {
+      "domain": "surgical",
+      "pipeline": "cihiWaitTimesDownloader",
+      "status": "success",
+      "recordsFetched": 96,
+      "recordsWritten": 96,
+      "durationMs": 71,
+      "timestamp": "2026-07-05T15:55:19.035Z"
+    },
+    {
+      "domain": "primary-care",
+      "pipeline": "primaryCareFetcher",
+      "status": "failed",
+      "recordsFetched": 0,
+      "recordsWritten": 0,
+      "durationMs": 4140,
+      "error": "Python extraction failed: Command failed: python3 ${HOME}/Antigravity/AlbertaHospitals/scripts/extract_cihi_attachment.py /var/folders/ht/ttvvpp212y11702znwm1fyrm0000gn/T/cihi-indicator-library-1783266923939.xlsx\nTraceback (most recent call last):\n  File \"${HOME}/Antigravity/AlbertaHospitals/scripts/extract_cihi_attachment.py\", line 15, in <module>\n    import openpyxl\nModuleNotFoundError: No module named 'openpyxl'\n\nTraceback (most recent call last):\n  File \"${HOME}/Antigravity/AlbertaHospitals/scripts/extract_cihi_attachment.py\", line 15, in <module>\n    import openpyxl\nModuleNotFoundError: No module named 'openpyxl'\n",
+      "timestamp": "2026-07-05T15:55:24.249Z"
+    },
+    {
+      "domain": "primary-care",
+      "pipeline": "albertaFindAProviderScraper",
+      "status": "success",
+      "recordsFetched": 2214,
+      "recordsWritten": 2214,
+      "durationMs": 41412,
+      "timestamp": "2026-07-05T15:55:25.250Z"
+    },
+    {
+      "domain": "continuing-care",
+      "pipeline": "hqcaContinuingCareFetcher",
+      "status": "success",
+      "recordsFetched": 35,
+      "recordsWritten": 35,
+      "durationMs": 5514,
+      "timestamp": "2026-07-05T15:56:07.666Z"
+    },
+    {
+      "domain": "regional-inequity",
+      "pipeline": "openAlbertaInequityFetcher",
+      "status": "success",
+      "recordsFetched": 396,
+      "recordsWritten": 405,
+      "durationMs": 4632,
+      "timestamp": "2026-07-05T15:56:14.181Z"
+    },
+    {
+      "domain": "primary-care",
+      "pipeline": "openAlbertaInequityFetcher",
+      "status": "skipped",
+      "recordsFetched": 0,
+      "recordsWritten": 0,
+      "durationMs": 18,
+      "timestamp": "2026-07-05T15:56:19.815Z",
+      "error": "No matching LGAs between COMMUNITY_NEED_PROFILES and existing LGA_COMMUNITY_NEEDS"
+    },
+    {
+      "domain": "virtual-care",
+      "pipeline": "virtualCareFetcher",
+      "status": "partial",
+      "recordsFetched": 1,
+      "recordsWritten": 0,
+      "durationMs": 4357,
+      "error": "Verified PMID 40465166: \"Health system utilization following medical advice from Alberta's Virtual MD: a descriptive analysis.\" (CJEM, 2025 Dec) — DOI: 10.1007/s43678-025-00928-z | No new Health Link volume announcements found on AHS news listing.",
+      "timestamp": "2026-07-05T15:56:20.851Z"
+    },
+    {
+      "domain": "spending",
+      "pipeline": "fraserDownloader",
+      "status": "skipped",
+      "recordsFetched": 0,
+      "recordsWritten": 0,
+      "durationMs": 123,
+      "error": "Fraser Institute blocks automated access (403) — relying on CIHI/Open Alberta for spending data",
+      "timestamp": "2026-07-05T15:56:26.334Z"
+    },
+    {
+      "domain": "spending",
+      "pipeline": "openAlbertaBillingFetcher",
+      "status": "skipped",
+      "recordsFetched": 0,
+      "recordsWritten": 0,
+      "durationMs": 28026,
+      "timestamp": "2026-07-05T15:56:27.339Z",
+      "error": "No physician billing records matched the expected shape"
+    },
+    {
+      "domain": "mental-health",
+      "pipeline": "alberta211Scraper",
+      "status": "skipped",
+      "recordsFetched": 0,
+      "recordsWritten": 0,
+      "durationMs": 17309,
+      "timestamp": "2026-07-05T15:56:56.368Z",
+      "error": "No helpline records found via 211 Alberta API"
+    },
+    {
+      "domain": "patient-experience",
+      "pipeline": "hqcaFocusScraper",
+      "status": "success",
+      "recordsFetched": 568,
+      "recordsWritten": 568,
+      "durationMs": 8491,
+      "timestamp": "2026-07-05T15:57:14.680Z"
+    },
+    {
+      "domain": "public-health",
+      "pipeline": "albertaRespiratoryVirusScraper",
+      "status": "success",
+      "recordsFetched": 10,
+      "recordsWritten": 10,
+      "durationMs": 2145,
+      "timestamp": "2026-07-05T15:57:24.174Z"
+    },
+    {
+      "domain": "workforce",
+      "pipeline": "cihiWorkforceFetcher",
+      "status": "success",
+      "recordsFetched": 510,
+      "recordsWritten": 510,
+      "durationMs": 2888,
+      "timestamp": "2026-07-05T15:57:27.322Z"
+    },
+    {
+      "domain": "mental-health",
+      "pipeline": "albertaSubstanceUseScraper",
+      "status": "success",
+      "recordsFetched": 1,
+      "recordsWritten": 5,
+      "durationMs": 4783,
+      "timestamp": "2026-07-05T15:57:31.211Z"
+    },
+    {
+      "domain": "mental-health",
+      "pipeline": "cihiMhSafetyFetcher",
+      "status": "skipped",
+      "recordsFetched": 0,
+      "recordsWritten": 0,
+      "durationMs": 6569,
+      "timestamp": "2026-07-05T15:57:36.994Z",
+      "error": "CIHI indicator API returned no parseable records"
+    }
+  ],
+  "erWaitTimesLastUpdate": "2026-07-05T18:17:44.025Z",
+  "erWaitTimesNextUpdate": "2026-07-05T18:27:44.084Z"
+}

@@ -919,3 +919,41 @@ export const HISTORICAL_FLOW_TIMELINES: HistoricalFlowSnapshot[] = [
     p90LosAdmittedHours: 58.8
   }
 ];
+
+// Data freshness metadata for each array — used by the DataTimestamp component.
+export const _dataMetadata: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: 'auto' | 'manual';
+  verification?: string;
+}> = {
+  FACILITY_FLOW_METRICS: {
+    source: 'HQA FOCUS acute care facility metrics',
+    sourceVintage: '2025/2026 compiled data',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Compiled from Health Quality Alberta FOCUS dashboard and AHS weekly performance reports.',
+  },
+  AHS_WEEKLY_ED_LOS: {
+    source: 'AHS Weekly Performance Reports',
+    sourceVintage: '2025/2026 weekly PDFs',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Directly from AHS weekly ED wait and throughput PDFs.',
+  },
+  CIHI_COMPARATORS: {
+    source: 'CIHI NACRS / Hospital Beds / ALC Indicators',
+    sourceVintage: '2024/2025 CIHI official releases',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Standardized national comparator metrics from CIHI.',
+  },
+  HISTORICAL_FLOW_TIMELINES: {
+    source: 'AHS quarterly performance reports',
+    sourceVintage: 'Approximate 2021-Q1 2026',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Quarterly figures compiled from HQA FOCUS datasets; plausible but could not be confirmed against specific published quarterly reports.',
+  },
+};

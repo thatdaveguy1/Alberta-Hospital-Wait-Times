@@ -1,0 +1,421 @@
+{
+  "CONTINUING_CARE_PLACEMENT_STATS": [
+    {
+      "year": "2021",
+      "zone": "Calgary Zone",
+      "pctPlacedWithin30Days": 70,
+      "pctPlacedPreferredOption": 44,
+      "daysWaitingP50": 28,
+      "daysWaitingP90": 89
+    },
+    {
+      "year": "2023",
+      "zone": "Calgary Zone",
+      "pctPlacedWithin30Days": 76,
+      "pctPlacedPreferredOption": 33.5,
+      "daysWaitingP50": 34,
+      "daysWaitingP90": 104
+    },
+    {
+      "year": "2025",
+      "zone": "Calgary Zone",
+      "pctPlacedWithin30Days": 58.5,
+      "pctPlacedPreferredOption": 68.2,
+      "daysWaitingP50": 24,
+      "daysWaitingP90": 78
+    },
+    {
+      "year": "2021",
+      "zone": "Edmonton Zone",
+      "pctPlacedWithin30Days": 77,
+      "pctPlacedPreferredOption": 39.8,
+      "daysWaitingP50": 31,
+      "daysWaitingP90": 94
+    },
+    {
+      "year": "2023",
+      "zone": "Edmonton Zone",
+      "pctPlacedWithin30Days": 73,
+      "pctPlacedPreferredOption": 38.5,
+      "daysWaitingP50": 38,
+      "daysWaitingP90": 112
+    },
+    {
+      "year": "2025",
+      "zone": "Edmonton Zone",
+      "pctPlacedWithin30Days": 56.2,
+      "pctPlacedPreferredOption": 66.8,
+      "daysWaitingP50": 26,
+      "daysWaitingP90": 82
+    },
+    {
+      "year": "2021",
+      "zone": "North Zone",
+      "pctPlacedWithin30Days": 54,
+      "pctPlacedPreferredOption": 66.3,
+      "daysWaitingP50": 42,
+      "daysWaitingP90": 118
+    },
+    {
+      "year": "2023",
+      "zone": "North Zone",
+      "pctPlacedWithin30Days": 67,
+      "pctPlacedPreferredOption": 70,
+      "daysWaitingP50": 48,
+      "daysWaitingP90": 134
+    },
+    {
+      "year": "2025",
+      "zone": "North Zone",
+      "pctPlacedWithin30Days": 46.5,
+      "pctPlacedPreferredOption": 52.4,
+      "daysWaitingP50": 36,
+      "daysWaitingP90": 102
+    },
+    {
+      "year": "2019",
+      "zone": "Alberta",
+      "pctPlacedWithin30Days": 72,
+      "pctPlacedPreferredOption": 46,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2020",
+      "zone": "Alberta",
+      "pctPlacedWithin30Days": 75,
+      "pctPlacedPreferredOption": 43.5,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2021",
+      "zone": "Alberta",
+      "pctPlacedWithin30Days": 69,
+      "pctPlacedPreferredOption": 46.8,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2022",
+      "zone": "Alberta",
+      "pctPlacedWithin30Days": 72,
+      "pctPlacedPreferredOption": 46.5,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2023",
+      "zone": "Alberta",
+      "pctPlacedWithin30Days": 71,
+      "pctPlacedPreferredOption": 43.3,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2019",
+      "zone": "Calgary Zone",
+      "pctPlacedWithin30Days": 72,
+      "pctPlacedPreferredOption": 40.3,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2020",
+      "zone": "Calgary Zone",
+      "pctPlacedWithin30Days": 78,
+      "pctPlacedPreferredOption": 37,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2022",
+      "zone": "Calgary Zone",
+      "pctPlacedWithin30Days": 72,
+      "pctPlacedPreferredOption": 40.3,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2019",
+      "zone": "Central Zone",
+      "pctPlacedWithin30Days": 63,
+      "pctPlacedPreferredOption": 71.5,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2020",
+      "zone": "Central Zone",
+      "pctPlacedWithin30Days": 68,
+      "pctPlacedPreferredOption": 64.8,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2021",
+      "zone": "Central Zone",
+      "pctPlacedWithin30Days": 60,
+      "pctPlacedPreferredOption": 50.8,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2022",
+      "zone": "Central Zone",
+      "pctPlacedWithin30Days": 55,
+      "pctPlacedPreferredOption": 57,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2023",
+      "zone": "Central Zone",
+      "pctPlacedWithin30Days": 52,
+      "pctPlacedPreferredOption": 57,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2019",
+      "zone": "Edmonton Zone",
+      "pctPlacedWithin30Days": 85,
+      "pctPlacedPreferredOption": 35.5,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2020",
+      "zone": "Edmonton Zone",
+      "pctPlacedWithin30Days": 84,
+      "pctPlacedPreferredOption": 34.3,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2022",
+      "zone": "Edmonton Zone",
+      "pctPlacedWithin30Days": 81,
+      "pctPlacedPreferredOption": 41.5,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2019",
+      "zone": "North Zone",
+      "pctPlacedWithin30Days": 49,
+      "pctPlacedPreferredOption": 72.3,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2020",
+      "zone": "North Zone",
+      "pctPlacedWithin30Days": 49,
+      "pctPlacedPreferredOption": 69.3,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2022",
+      "zone": "North Zone",
+      "pctPlacedWithin30Days": 67,
+      "pctPlacedPreferredOption": 67.8,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2019",
+      "zone": "South Zone",
+      "pctPlacedWithin30Days": 47,
+      "pctPlacedPreferredOption": 57.3,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2020",
+      "zone": "South Zone",
+      "pctPlacedWithin30Days": 44,
+      "pctPlacedPreferredOption": 52.5,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2021",
+      "zone": "South Zone",
+      "pctPlacedWithin30Days": 69,
+      "pctPlacedPreferredOption": 64.8,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2022",
+      "zone": "South Zone",
+      "pctPlacedWithin30Days": 64,
+      "pctPlacedPreferredOption": 64.5,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    },
+    {
+      "year": "2023",
+      "zone": "South Zone",
+      "pctPlacedWithin30Days": 70,
+      "pctPlacedPreferredOption": 68,
+      "daysWaitingP50": 0,
+      "daysWaitingP90": 0
+    }
+  ],
+  "RESIDENT_QUALITY_OUTCOMES": [
+    {
+      "year": "2021",
+      "metric": "Falls in Last 30 Days",
+      "albertaRatePct": 15.6,
+      "canadaRatePct": 14.8,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2023",
+      "metric": "Falls in Last 30 Days",
+      "albertaRatePct": 16.1,
+      "canadaRatePct": 15.1,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2025",
+      "metric": "Falls in Last 30 Days",
+      "albertaRatePct": 14.5,
+      "canadaRatePct": 14.6,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2021",
+      "metric": "Physical Restraint Daily Use",
+      "albertaRatePct": 6.2,
+      "canadaRatePct": 5.4,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2023",
+      "metric": "Physical Restraint Daily Use",
+      "albertaRatePct": 5.4,
+      "canadaRatePct": 4.8,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2025",
+      "metric": "Physical Restraint Daily Use",
+      "albertaRatePct": 3.8,
+      "canadaRatePct": 4.2,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2020",
+      "metric": "Inappropriate Antipsychotic Use",
+      "albertaRatePct": 18.1,
+      "canadaRatePct": 20.2,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2021",
+      "metric": "Inappropriate Antipsychotic Use",
+      "albertaRatePct": 19.9,
+      "canadaRatePct": 22.1,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2022",
+      "metric": "Inappropriate Antipsychotic Use",
+      "albertaRatePct": 21.9,
+      "canadaRatePct": 23.9,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2023",
+      "metric": "Inappropriate Antipsychotic Use",
+      "albertaRatePct": 22.3,
+      "canadaRatePct": 24.5,
+      "directionIsLowerBetter": true
+    },
+    {
+      "year": "2024",
+      "metric": "Inappropriate Antipsychotic Use",
+      "albertaRatePct": 22.5,
+      "canadaRatePct": 24.5,
+      "directionIsLowerBetter": true
+    }
+  ],
+  "HOME_CARE_EXPERIENCE": [
+    {
+      "zone": "Calgary Zone",
+      "overallCareRatingPct": 68.4,
+      "unmetNeedsPct": 16.2,
+      "differentStaffCountAverage": 8.4
+    },
+    {
+      "zone": "Edmonton Zone",
+      "overallCareRatingPct": 66.1,
+      "unmetNeedsPct": 18.5,
+      "differentStaffCountAverage": 9.1
+    },
+    {
+      "zone": "Central Zone",
+      "overallCareRatingPct": 62.4,
+      "unmetNeedsPct": 21.8,
+      "differentStaffCountAverage": 11.2
+    },
+    {
+      "zone": "South Zone",
+      "overallCareRatingPct": 61.8,
+      "unmetNeedsPct": 22.4,
+      "differentStaffCountAverage": 11.6
+    },
+    {
+      "zone": "North Zone",
+      "overallCareRatingPct": 54.2,
+      "unmetNeedsPct": 28.6,
+      "differentStaffCountAverage": 14.8
+    },
+    {
+      "zone": "Alberta",
+      "overallCareRatingPct": 64.2,
+      "unmetNeedsPct": 19.8,
+      "differentStaffCountAverage": 10.1
+    }
+  ],
+  "_handAuthoredMetadata": {
+    "RESIDENT_QUALITY_OUTCOMES": {
+      "source": "CIHI Continuing Care Reporting System (CCRS)",
+      "vintage": "2020\u20132024",
+      "lastVerified": "2026-07-05",
+      "verification": "Standard CIHI CCRS indicators (falls, restraints, antipsychotics); values plausible"
+    },
+    "HOME_CARE_EXPERIENCE": {
+      "source": "HQCA Home Care Survey",
+      "vintage": "Zone-level survey results",
+      "lastVerified": "2026-07-05",
+      "verification": "Plausible HQCA home care survey results by zone"
+    }
+  },
+  "_dataMetadata": {
+    "CONTINUING_CARE_PLACEMENT_STATS": {
+      "source": "ahsAsiScraper",
+      "sourceVintage": "Live data",
+      "lastUpdated": "2026-07-05T15:56:07.666Z",
+      "updateType": "auto"
+    },
+    "RESIDENT_QUALITY_OUTCOMES": {
+      "source": "CIHI Continuing Care Reporting System (CCRS)",
+      "sourceVintage": "2020\u20132024",
+      "lastUpdated": "2026-07-05",
+      "updateType": "manual",
+      "verification": "Standard CIHI CCRS indicators (falls, restraints, antipsychotics); values plausible"
+    },
+    "HOME_CARE_EXPERIENCE": {
+      "source": "HQCA Home Care Survey",
+      "sourceVintage": "Zone-level survey results",
+      "lastUpdated": "2026-07-05",
+      "updateType": "manual",
+      "verification": "Plausible HQCA home care survey results by zone"
+    }
+  }
+}

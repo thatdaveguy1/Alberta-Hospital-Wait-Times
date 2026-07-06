@@ -270,3 +270,16 @@ export const SERVICE_ACCESS_METRICS: ServiceAccessMetric[] = [
     providersAcceptingPatients: 0
   }
 ];
+
+// Data freshness metadata for each array — used by the DataTimestamp component.
+export const _dataMetadata: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: "auto" | "manual";
+  verification?: string;
+}> = {
+  COMMUNITY_NEED_PROFILES: { source: "openAlbertaInequityFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:14.181Z", updateType: "auto" },
+  CHRONIC_DISEASE_BURDEN: { source: "openAlbertaInequityFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:14.181Z", updateType: "auto" },
+  ED_RELIANCE_METRICS: { source: "openAlbertaInequityFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:14.181Z", updateType: "auto" },
+};

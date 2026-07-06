@@ -1536,3 +1536,63 @@ export const SPECIALIST_COMPARISONS: SpecialistComparisonRecord[] = [
   }
 ];
 
+
+// Data freshness metadata for each array — used by the DataTimestamp component.
+export const _dataMetadata: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: 'auto' | 'manual';
+  verification?: string;
+}> = {
+  SURGICAL_RECORDS: {
+    source: 'Alberta Wait Times Reporting (Power BI scraper)',
+    sourceVintage: 'Live data',
+    lastUpdated: '2026-07-05',
+    updateType: 'auto',
+  },
+  ORTHOPEDIC_SPECIALTY_RECORDS: {
+    source: 'ABJHI & IIHO orthopedic specialty feeds',
+    sourceVintage: 'Quarterly 2026',
+    lastUpdated: '2026-07-05',
+    updateType: 'auto',
+  },
+  SURGICAL_FACILITIES: {
+    source: 'AHS Find a Facility directory; metrics estimated',
+    sourceVintage: 'Facility names current as of 2025; metrics estimated',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'All 20 facility names are real AHS facilities. Operational metrics are estimates.',
+  },
+  CIHI_PROVINCIAL_COMPARATORS: {
+    source: 'CIHI provincial benchmark comparators',
+    sourceVintage: 'Live data',
+    lastUpdated: '2026-07-05',
+    updateType: 'auto',
+  },
+  STATSCAN_SATISFACTION_STATS: {
+    source: 'Statistics Canada Health Care Access Survey',
+    sourceVintage: '2024 survey release',
+    lastUpdated: '2026-07-05',
+    updateType: 'auto',
+  },
+  HISTORICAL_WAIT_TRENDS: {
+    source: 'CIHI priority procedures historical trends',
+    sourceVintage: '2015 - 2026',
+    lastUpdated: '2026-07-05',
+    updateType: 'auto',
+  },
+  STATSCAN_DEMOGRAPHICS: {
+    source: 'Statistics Canada demographic tables',
+    sourceVintage: '2024 release',
+    lastUpdated: '2026-07-05',
+    updateType: 'auto',
+  },
+  FACILITY_COMPARISONS: {
+    source: 'AHS facility directory; metrics estimated from Power BI',
+    sourceVintage: 'Facility names current as of 2025; metrics estimated',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Facility names are real. OR utilization, surgeon counts, and waitlist sizes are estimates.',
+  },
+};

@@ -437,3 +437,19 @@ export const OUTBREAK_PROTOCOLS: Record<string, OutbreakGuidelines> = {
     antiviralPolicy: 'Triage assessment for high-risk elderly or immunocompromised residents; direct referral to secondary urgent care.'
   }
 };
+
+// Data freshness metadata for each array — used by the DataTimestamp component.
+export const _dataMetadata: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: "auto" | "manual";
+  verification?: string;
+}> = {
+  WASTEWATER_SIGNALS: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+  OUTBREAK_PROTOCOLS: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+  RVD_RESPIRATORY_CASE_COUNTS: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+  RVD_IMMUNIZATION_DOSES: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+  RESPIRATORY_VIRUS_SURVEILLANCE: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+  CHILDHOOD_IMMUNIZATION_COVERAGE: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+};

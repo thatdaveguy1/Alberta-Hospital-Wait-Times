@@ -191,3 +191,47 @@ export const ADJACENT_HELPLINES: AdjacentHelplineVolume[] = [
     availability: '7 Days a Week'
   }
 ];
+
+// Data freshness metadata mirroring data-virtual-care.json _dataMetadata.
+// Used by the DataTimestamp component to show source vintage and last update.
+export const VIRTUAL_CARE_METADATA: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: 'auto' | 'manual';
+  verification?: string;
+}> = {
+  HEALTH_LINK_VOLUMES: {
+    source: 'virtualCareFetcher',
+    sourceVintage: 'Live data',
+    lastUpdated: '2026-07-05T15:56:20.851Z',
+    updateType: 'auto',
+  },
+  VIRTUAL_MD_COHORT_STUDY: {
+    source: 'CJEM Peer-Reviewed Study (Springer Link 2025)',
+    sourceVintage: 'Unknown',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Exact match to published study (cohort=19312, 55.7%/60%/52.5%)',
+  },
+  VIRTUAL_MD_DISPOSITIONS: {
+    source: 'AHS program-reported milestone',
+    sourceVintage: 'Program-reported estimate',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Matches AHS statement that ~50% of callers self-manage at home',
+  },
+  EMS_811_DIVERSION_DATA: {
+    source: 'AHS program milestone announcement',
+    sourceVintage: 'Approximate',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Could not verify exact percentages — marked as estimate',
+  },
+  ADJACENT_HELPLINES: {
+    source: 'virtualCareFetcher',
+    sourceVintage: 'Live data',
+    lastUpdated: '2026-07-05T15:56:20.851Z',
+    updateType: 'auto',
+  },
+};

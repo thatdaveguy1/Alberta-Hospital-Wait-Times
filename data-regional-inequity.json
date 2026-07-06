@@ -1,0 +1,3538 @@
+{
+  "COMMUNITY_NEED_PROFILES": [
+    {
+      "lgaName": "Calgary - West Bow",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 275,
+      "claimsOutsideLgaPct": 18.2,
+      "acscRatePer100k": 361.86,
+      "deprivationIndex": 8.95,
+      "medianHouseholdIncome": 112500,
+      "highSchoolGradPct": 94.5
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft",
+      "zone": "Edmonton Zone",
+      "type": "Suburban",
+      "physiciansPer100k": 114.2,
+      "claimsOutsideLgaPct": 35.6,
+      "acscRatePer100k": 295.4,
+      "deprivationIndex": 2,
+      "medianHouseholdIncome": 84300,
+      "highSchoolGradPct": 88.2
+    },
+    {
+      "lgaName": "Red Deer - North",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 67,
+      "claimsOutsideLgaPct": 54.1,
+      "acscRatePer100k": 325.34,
+      "deprivationIndex": 12.61,
+      "medianHouseholdIncome": 74200,
+      "highSchoolGradPct": 81.4
+    },
+    {
+      "lgaName": "South rural (Lethbridge/Cardston area)",
+      "zone": "South Zone",
+      "type": "Rural",
+      "physiciansPer100k": 58.2,
+      "claimsOutsideLgaPct": 68.4,
+      "acscRatePer100k": 589.5,
+      "deprivationIndex": 4,
+      "medianHouseholdIncome": 63100,
+      "highSchoolGradPct": 76.5
+    },
+    {
+      "lgaName": "Wood Buffalo / Fort McKay",
+      "zone": "North Zone",
+      "type": "Remote / Indigenous",
+      "physiciansPer100k": 32.4,
+      "claimsOutsideLgaPct": 82.3,
+      "acscRatePer100k": 845.1,
+      "deprivationIndex": 5,
+      "medianHouseholdIncome": 58900,
+      "highSchoolGradPct": 64.1
+    },
+    {
+      "lgaName": "Crowsnest Pass",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 269,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 573.89,
+      "deprivationIndex": 10.55,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Pincher Creek",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 130,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 475.62,
+      "deprivationIndex": 6.4,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Fort Macleod",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 88,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 434.95,
+      "deprivationIndex": 6.68,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Cardston-Kainai",
+      "zone": "South Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 91,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 396.43,
+      "deprivationIndex": 8.12,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "County of Lethbridge excluding the City of Lethbridge",
+      "zone": "South Zone",
+      "type": "Rural",
+      "physiciansPer100k": 35,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 174.07,
+      "deprivationIndex": 5.9,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Taber MD",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 68,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 211.95,
+      "deprivationIndex": 8.21,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "County of Warner",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 98,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 201.27,
+      "deprivationIndex": 10.71,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "County of Forty Mile",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 78,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 274.89,
+      "deprivationIndex": 6.68,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Newell",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 105,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 300.62,
+      "deprivationIndex": 9.83,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Oyen",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 114.99999999999999,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 434.05,
+      "deprivationIndex": 7.29,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Cypress County excluding Medicine Hat",
+      "zone": "South Zone",
+      "type": "Rural",
+      "physiciansPer100k": 9,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 271.48,
+      "deprivationIndex": 10.8,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Medicine Hat",
+      "zone": "South Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 122,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 311.29,
+      "deprivationIndex": 9.69,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Lethbridge - West",
+      "zone": "South Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 44,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 117.38,
+      "deprivationIndex": 5.39,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Lethbridge - North",
+      "zone": "North Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 21,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 296.43,
+      "deprivationIndex": 11.35,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Lethbridge - South",
+      "zone": "South Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 301,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 246.43,
+      "deprivationIndex": 8.61,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Upper NW",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 94,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 122.93,
+      "deprivationIndex": 2.92,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - North",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 53,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 156.02,
+      "deprivationIndex": 3.57,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Nose Hill",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 89,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 171.13,
+      "deprivationIndex": 6.54,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Lower NW",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 123,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 92.74,
+      "deprivationIndex": 2.65,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Centre North",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 501,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 244.56,
+      "deprivationIndex": 10.79,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Upper NE",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 160,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 212.77,
+      "deprivationIndex": 5.75,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Lower NE",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 109.00000000000001,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 266.66,
+      "deprivationIndex": 7.96,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - East",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 57.99999999999999,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 452.66,
+      "deprivationIndex": 11.71,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - SE",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 119,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 165.75,
+      "deprivationIndex": 2.54,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - West",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 114.99999999999999,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 129.72,
+      "deprivationIndex": 3.88,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Centre",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 261,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 337.36,
+      "deprivationIndex": 13.48,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Centre West",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 129,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 238.67,
+      "deprivationIndex": 6.88,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Elbow",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 408,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 211.95,
+      "deprivationIndex": 4.47,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - Fish Creek",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 132,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 192.69,
+      "deprivationIndex": 5.89,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Calgary - SW",
+      "zone": "Calgary Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 100,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 154.47,
+      "deprivationIndex": 5.43,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Okotoks-Priddis",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 111.00000000000001,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 149.91,
+      "deprivationIndex": 4.38,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Black Diamond",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 137,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 427.78,
+      "deprivationIndex": 5.65,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "High River",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 167,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 164.52,
+      "deprivationIndex": 7.46,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Claresholm",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 159,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 211.15,
+      "deprivationIndex": 7.25,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Vulcan",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 104,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 160.31,
+      "deprivationIndex": 6.37,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Airdrie",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 108,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 189.45,
+      "deprivationIndex": 5.67,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Chestermere",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 50,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 117.21,
+      "deprivationIndex": 3.84,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Strathmore",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 75,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 327.48,
+      "deprivationIndex": 7.31,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Crossfield",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 0,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 176.09,
+      "deprivationIndex": 5.22,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Didsbury",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 84,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 168.19,
+      "deprivationIndex": 5.8,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Cochrane-Springbank",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 93,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 100.05,
+      "deprivationIndex": 3.55,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Canmore",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 185,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 250.66,
+      "deprivationIndex": 5.22,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Banff",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 231,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 188.22,
+      "deprivationIndex": 6.66,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Rocky Mountain House",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 88,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 439.7,
+      "deprivationIndex": 8.36,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Drayton Valley",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 138,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 228.95,
+      "deprivationIndex": 8.02,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Sundre",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 250.99999999999997,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 355.17,
+      "deprivationIndex": 8.22,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Olds",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 165,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 198.61,
+      "deprivationIndex": 6.12,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Innisfail",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 125,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 334.61,
+      "deprivationIndex": 6.48,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Red Deer County excluding the City of Red Deer",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 17,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 256.73,
+      "deprivationIndex": 8.31,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Sylvan Lake",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 114.99999999999999,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 164.67,
+      "deprivationIndex": 7.63,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Three Hills/Highway 21",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 83,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 267.7,
+      "deprivationIndex": 6.12,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Starland County/Drumheller",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 153,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 461.45,
+      "deprivationIndex": 8.02,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Planning & Special Area 2",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 112.00000000000001,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 301.62,
+      "deprivationIndex": 7.37,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Stettler & County",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 137,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 239.42,
+      "deprivationIndex": 10.18,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Castor/Coronation/Consort",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 99,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 333.01,
+      "deprivationIndex": 6.26,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Wetaskiwin County",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 122,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 680.9,
+      "deprivationIndex": 6.88,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Ponoka",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 128,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 328.29,
+      "deprivationIndex": 6.54,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Rimbey",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 79,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 367.66,
+      "deprivationIndex": 7.86,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Lacombe",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 80,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 288.73,
+      "deprivationIndex": 7.66,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Camrose & County",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 129,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 164.44,
+      "deprivationIndex": 11.33,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Tofield",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 39,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 466.68,
+      "deprivationIndex": 6.42,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Viking",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 254.99999999999997,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 259.12,
+      "deprivationIndex": 6.63,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Flagstaff County",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 118,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 304.93,
+      "deprivationIndex": 6.65,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "MD of Provost",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 103,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 199.21,
+      "deprivationIndex": 7.05,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "MD of Wainwright",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 117,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 367.02,
+      "deprivationIndex": 9.41,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Lamont County",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 109.00000000000001,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 401.38,
+      "deprivationIndex": 7.09,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Two Hills County",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 90,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 387.79,
+      "deprivationIndex": 7.45,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Vegreville/Minburn County",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 77,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 333.2,
+      "deprivationIndex": 9.87,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Vermilion River County",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 68,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 161.35,
+      "deprivationIndex": 5.99,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Red Deer - SW",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 498.00000000000006,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 478.16,
+      "deprivationIndex": 13.16,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Red Deer - East",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 43,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 201.82,
+      "deprivationIndex": 7.15,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft East",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 215,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 371.69,
+      "deprivationIndex": 16.06,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft West",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 102,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 295.2,
+      "deprivationIndex": 10.32,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Jasper Place",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 272,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 300.62,
+      "deprivationIndex": 13.13,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - West Jasper Place",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 32,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 168.1,
+      "deprivationIndex": 5.26,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Castle Downs",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 61,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 190.61,
+      "deprivationIndex": 5.47,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Northgate",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 63,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 245.32,
+      "deprivationIndex": 11.71,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Eastwood",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 210,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 643.24,
+      "deprivationIndex": 16.02,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Abbottsfield",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 132,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 382.71,
+      "deprivationIndex": 8.85,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - NE",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 46,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 292.75,
+      "deprivationIndex": 10.29,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Bonnie Doon",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 195,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 251.79,
+      "deprivationIndex": 8.56,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Mill Woods West",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 221,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 227.1,
+      "deprivationIndex": 7.88,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Mill Woods South & East",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 35,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 153.12,
+      "deprivationIndex": 3.61,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Duggan",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 173,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 170.02,
+      "deprivationIndex": 11.01,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Twin Brooks",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 95,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 98.82,
+      "deprivationIndex": 2.67,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edmonton - Rutherford",
+      "zone": "Edmonton Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 78,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 118.02,
+      "deprivationIndex": 3.79,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Sturgeon County West",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 16,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 188.46,
+      "deprivationIndex": 8.81,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Sturgeon County East",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 16,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 69.2,
+      "deprivationIndex": 7.48,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Fort Saskatchewan",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 114.99999999999999,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 148.42,
+      "deprivationIndex": 5.02,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Sherwood Park",
+      "zone": "Central Zone",
+      "type": "Suburban",
+      "physiciansPer100k": 112.99999999999999,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 129.55,
+      "deprivationIndex": 3.25,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Strathcona County excluding Sherwood Park",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 0,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 90.15,
+      "deprivationIndex": 3.82,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Beaumont",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 65,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 163.08,
+      "deprivationIndex": 4.67,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Leduc & Devon",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 133,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 229.98,
+      "deprivationIndex": 5.96,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Thorsby",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 33,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 228.4,
+      "deprivationIndex": 5.8,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Stony Plain & Spruce Grove",
+      "zone": "Central Zone",
+      "type": "Suburban",
+      "physiciansPer100k": 143,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 231.78,
+      "deprivationIndex": 6.51,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Westview excluding Stony Plain and Spruce Grove",
+      "zone": "Central Zone",
+      "type": "Suburban",
+      "physiciansPer100k": 5,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 237.58,
+      "deprivationIndex": 6.39,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "St. Albert",
+      "zone": "Central Zone",
+      "type": "Suburban",
+      "physiciansPer100k": 151,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 127.02,
+      "deprivationIndex": 3.4,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Jasper",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 115.99999999999999,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 297.16,
+      "deprivationIndex": 6.98,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Hinton",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 156,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 363.02,
+      "deprivationIndex": 7.81,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Edson",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 100,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 398.91,
+      "deprivationIndex": 6.56,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Whitecourt",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 122,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 343.32,
+      "deprivationIndex": 7.83,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Mayerthorpe",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 56.00000000000001,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 351.09,
+      "deprivationIndex": 8.29,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Barrhead",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 91,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 325.48,
+      "deprivationIndex": 7.06,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Westlock",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 131,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 294.51,
+      "deprivationIndex": 7.74,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Frog Lake",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 104,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 930.72,
+      "deprivationIndex": 6.67,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "St. Paul",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 111.00000000000001,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 616.94,
+      "deprivationIndex": 6.58,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Smoky Lake",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 106,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 455.43,
+      "deprivationIndex": 8.23,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Cold Lake",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 82,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 415.97,
+      "deprivationIndex": 5.84,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Bonnyville",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 187,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 529.43,
+      "deprivationIndex": 7.46,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Boyle",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 112.99999999999999,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 263.66,
+      "deprivationIndex": 6.79,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Athabasca",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 84,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 341.27,
+      "deprivationIndex": 7.47,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Lac La Biche",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 106,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 741.34,
+      "deprivationIndex": 9.22,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Grande Cache",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 145,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 484.11,
+      "deprivationIndex": 6.54,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Fox Creek",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 320,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 421.56,
+      "deprivationIndex": 6.94,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Valleyview",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 56.00000000000001,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 867.41,
+      "deprivationIndex": 8.65,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Beaverlodge",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 90,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 290.65,
+      "deprivationIndex": 8.09,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Grande Prairie County excluding the City of Grande Prairie",
+      "zone": "Central Zone",
+      "type": "Rural",
+      "physiciansPer100k": 19,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 160.6,
+      "deprivationIndex": 6.18,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Swan Hills",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 154,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 745.41,
+      "deprivationIndex": 8.94,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Slave Lake",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 77,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 470.5,
+      "deprivationIndex": 7.97,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Wabasca",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 237,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 589.24,
+      "deprivationIndex": 7.69,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "High Prairie",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 95,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 1130.75,
+      "deprivationIndex": 6.87,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "High Level",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 95,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 660.99,
+      "deprivationIndex": 7.64,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Manning",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 182,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 643.74,
+      "deprivationIndex": 6.79,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Peace River",
+      "zone": "North Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 135,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 402.45,
+      "deprivationIndex": 7.98,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Falher",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 114.99999999999999,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 913.13,
+      "deprivationIndex": 6.74,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Spirit River",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 82,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 343.05,
+      "deprivationIndex": 6.24,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Fairview",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 111.00000000000001,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 374.15,
+      "deprivationIndex": 8.23,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Wood Buffalo excluding Fort McMurray",
+      "zone": "North Zone",
+      "type": "Remote / Indigenous",
+      "physiciansPer100k": 25,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 351.15,
+      "deprivationIndex": 6.95,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "Fort McMurray",
+      "zone": "North Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 73,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 291.07,
+      "deprivationIndex": 5.56,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    },
+    {
+      "lgaName": "City of Grande Prairie",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 94,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 305.84,
+      "deprivationIndex": 9.71,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0
+    }
+  ],
+  "CHRONIC_DISEASE_BURDEN": [
+    {
+      "lgaName": "Calgary - West Bow",
+      "diabetesPrevalencePct": 4.8,
+      "copdPrevalencePct": 1.9,
+      "hypertensionPrevalencePct": 15.2,
+      "infantMortalityPer1000": 2.1,
+      "lifeExpectancyYears": 79.04
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft",
+      "diabetesPrevalencePct": 6.5,
+      "copdPrevalencePct": 3.1,
+      "hypertensionPrevalencePct": 19.8,
+      "infantMortalityPer1000": 3.8,
+      "lifeExpectancyYears": 81.2
+    },
+    {
+      "lgaName": "Red Deer - North",
+      "diabetesPrevalencePct": 8.1,
+      "copdPrevalencePct": 4.4,
+      "hypertensionPrevalencePct": 23.5,
+      "infantMortalityPer1000": 4.9,
+      "lifeExpectancyYears": 80.16
+    },
+    {
+      "lgaName": "South rural (Lethbridge/Cardston area)",
+      "diabetesPrevalencePct": 9.4,
+      "copdPrevalencePct": 5.8,
+      "hypertensionPrevalencePct": 27.2,
+      "infantMortalityPer1000": 5.6,
+      "lifeExpectancyYears": 77.1
+    },
+    {
+      "lgaName": "Wood Buffalo / Fort McKay",
+      "diabetesPrevalencePct": 12.8,
+      "copdPrevalencePct": 8.4,
+      "hypertensionPrevalencePct": 32.1,
+      "infantMortalityPer1000": 8.2,
+      "lifeExpectancyYears": 72.8
+    },
+    {
+      "lgaName": "Crowsnest Pass",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79
+    },
+    {
+      "lgaName": "Pincher Creek",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.41
+    },
+    {
+      "lgaName": "Fort Macleod",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.25
+    },
+    {
+      "lgaName": "Cardston-Kainai",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 75.15
+    },
+    {
+      "lgaName": "County of Lethbridge excluding the City of Lethbridge",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.72
+    },
+    {
+      "lgaName": "Taber MD",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.7
+    },
+    {
+      "lgaName": "County of Warner",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.11
+    },
+    {
+      "lgaName": "County of Forty Mile",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.14
+    },
+    {
+      "lgaName": "Newell",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.25
+    },
+    {
+      "lgaName": "Oyen",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.05
+    },
+    {
+      "lgaName": "Cypress County excluding Medicine Hat",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.94
+    },
+    {
+      "lgaName": "Medicine Hat",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.21
+    },
+    {
+      "lgaName": "Lethbridge - West",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.02
+    },
+    {
+      "lgaName": "Lethbridge - North",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.58
+    },
+    {
+      "lgaName": "Lethbridge - South",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.92
+    },
+    {
+      "lgaName": "Calgary - Upper NW",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 86.13
+    },
+    {
+      "lgaName": "Calgary - North",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 84.26
+    },
+    {
+      "lgaName": "Calgary - Nose Hill",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.91
+    },
+    {
+      "lgaName": "Calgary - Lower NW",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 85.95
+    },
+    {
+      "lgaName": "Calgary - Centre North",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.95
+    },
+    {
+      "lgaName": "Calgary - Upper NE",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.74
+    },
+    {
+      "lgaName": "Calgary - Lower NE",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.19
+    },
+    {
+      "lgaName": "Calgary - East",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.53
+    },
+    {
+      "lgaName": "Calgary - SE",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.23
+    },
+    {
+      "lgaName": "Calgary - West",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 85.23
+    },
+    {
+      "lgaName": "Calgary - Centre",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.44
+    },
+    {
+      "lgaName": "Calgary - Centre West",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.18
+    },
+    {
+      "lgaName": "Calgary - Elbow",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.8
+    },
+    {
+      "lgaName": "Calgary - Fish Creek",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.43
+    },
+    {
+      "lgaName": "Calgary - SW",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.63
+    },
+    {
+      "lgaName": "Okotoks-Priddis",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.77
+    },
+    {
+      "lgaName": "Black Diamond",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.64
+    },
+    {
+      "lgaName": "High River",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.13
+    },
+    {
+      "lgaName": "Claresholm",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.72
+    },
+    {
+      "lgaName": "Vulcan",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.99
+    },
+    {
+      "lgaName": "Airdrie",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.93
+    },
+    {
+      "lgaName": "Chestermere",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.35
+    },
+    {
+      "lgaName": "Strathmore",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.22
+    },
+    {
+      "lgaName": "Crossfield",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.13
+    },
+    {
+      "lgaName": "Didsbury",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.56
+    },
+    {
+      "lgaName": "Cochrane-Springbank",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 84.56
+    },
+    {
+      "lgaName": "Canmore",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.59
+    },
+    {
+      "lgaName": "Banff",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 86.69
+    },
+    {
+      "lgaName": "Rocky Mountain House",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.68
+    },
+    {
+      "lgaName": "Drayton Valley",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.48
+    },
+    {
+      "lgaName": "Sundre",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.14
+    },
+    {
+      "lgaName": "Olds",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.47
+    },
+    {
+      "lgaName": "Innisfail",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.89
+    },
+    {
+      "lgaName": "Red Deer County excluding the City of Red Deer",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.22
+    },
+    {
+      "lgaName": "Sylvan Lake",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.63
+    },
+    {
+      "lgaName": "Three Hills/Highway 21",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.3
+    },
+    {
+      "lgaName": "Starland County/Drumheller",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.59
+    },
+    {
+      "lgaName": "Planning & Special Area 2",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.23
+    },
+    {
+      "lgaName": "Stettler & County",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.56
+    },
+    {
+      "lgaName": "Castor/Coronation/Consort",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.11
+    },
+    {
+      "lgaName": "Wetaskiwin County",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 76.18
+    },
+    {
+      "lgaName": "Ponoka",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.08
+    },
+    {
+      "lgaName": "Rimbey",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.99
+    },
+    {
+      "lgaName": "Lacombe",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.57
+    },
+    {
+      "lgaName": "Camrose & County",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.86
+    },
+    {
+      "lgaName": "Tofield",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.28
+    },
+    {
+      "lgaName": "Viking",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.07
+    },
+    {
+      "lgaName": "Flagstaff County",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.98
+    },
+    {
+      "lgaName": "MD of Provost",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.1
+    },
+    {
+      "lgaName": "MD of Wainwright",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.61
+    },
+    {
+      "lgaName": "Lamont County",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.41
+    },
+    {
+      "lgaName": "Two Hills County",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.13
+    },
+    {
+      "lgaName": "Vegreville/Minburn County",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.04
+    },
+    {
+      "lgaName": "Vermilion River County",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 86.6
+    },
+    {
+      "lgaName": "Red Deer - SW",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.1
+    },
+    {
+      "lgaName": "Red Deer - East",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.41
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft East",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.39
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft West",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.99
+    },
+    {
+      "lgaName": "Edmonton - Jasper Place",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.57
+    },
+    {
+      "lgaName": "Edmonton - West Jasper Place",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.44
+    },
+    {
+      "lgaName": "Edmonton - Castle Downs",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.33
+    },
+    {
+      "lgaName": "Edmonton - Northgate",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.69
+    },
+    {
+      "lgaName": "Edmonton - Eastwood",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.47
+    },
+    {
+      "lgaName": "Edmonton - Abbottsfield",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.44
+    },
+    {
+      "lgaName": "Edmonton - NE",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81
+    },
+    {
+      "lgaName": "Edmonton - Bonnie Doon",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.56
+    },
+    {
+      "lgaName": "Edmonton - Mill Woods West",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.1
+    },
+    {
+      "lgaName": "Edmonton - Mill Woods South & East",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.92
+    },
+    {
+      "lgaName": "Edmonton - Duggan",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.03
+    },
+    {
+      "lgaName": "Edmonton - Twin Brooks",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 85.38
+    },
+    {
+      "lgaName": "Edmonton - Rutherford",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.48
+    },
+    {
+      "lgaName": "Sturgeon County West",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.84
+    },
+    {
+      "lgaName": "Sturgeon County East",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.8
+    },
+    {
+      "lgaName": "Fort Saskatchewan",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.7
+    },
+    {
+      "lgaName": "Sherwood Park",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.35
+    },
+    {
+      "lgaName": "Strathcona County excluding Sherwood Park",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.32
+    },
+    {
+      "lgaName": "Beaumont",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.86
+    },
+    {
+      "lgaName": "Leduc & Devon",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.93
+    },
+    {
+      "lgaName": "Thorsby",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.06
+    },
+    {
+      "lgaName": "Stony Plain & Spruce Grove",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.53
+    },
+    {
+      "lgaName": "Westview excluding Stony Plain and Spruce Grove",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.49
+    },
+    {
+      "lgaName": "St. Albert",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.43
+    },
+    {
+      "lgaName": "Jasper",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.74
+    },
+    {
+      "lgaName": "Hinton",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.36
+    },
+    {
+      "lgaName": "Edson",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.72
+    },
+    {
+      "lgaName": "Whitecourt",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.9
+    },
+    {
+      "lgaName": "Mayerthorpe",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.34
+    },
+    {
+      "lgaName": "Barrhead",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.4
+    },
+    {
+      "lgaName": "Westlock",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.64
+    },
+    {
+      "lgaName": "Frog Lake",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 75.71
+    },
+    {
+      "lgaName": "St. Paul",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 76.26
+    },
+    {
+      "lgaName": "Smoky Lake",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.42
+    },
+    {
+      "lgaName": "Cold Lake",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.27
+    },
+    {
+      "lgaName": "Bonnyville",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.04
+    },
+    {
+      "lgaName": "Boyle",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 76.55
+    },
+    {
+      "lgaName": "Athabasca",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.58
+    },
+    {
+      "lgaName": "Lac La Biche",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.7
+    },
+    {
+      "lgaName": "Grande Cache",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.03
+    },
+    {
+      "lgaName": "Fox Creek",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.43
+    },
+    {
+      "lgaName": "Valleyview",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.03
+    },
+    {
+      "lgaName": "Beaverlodge",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.09
+    },
+    {
+      "lgaName": "Grande Prairie County excluding the City of Grande Prairie",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.5
+    },
+    {
+      "lgaName": "Swan Hills",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.74
+    },
+    {
+      "lgaName": "Slave Lake",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.05
+    },
+    {
+      "lgaName": "Wabasca",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 72.52
+    },
+    {
+      "lgaName": "High Prairie",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 75.58
+    },
+    {
+      "lgaName": "High Level",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.14
+    },
+    {
+      "lgaName": "Manning",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.21
+    },
+    {
+      "lgaName": "Peace River",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.99
+    },
+    {
+      "lgaName": "Falher",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.76
+    },
+    {
+      "lgaName": "Spirit River",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.73
+    },
+    {
+      "lgaName": "Fairview",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.19
+    },
+    {
+      "lgaName": "Wood Buffalo excluding Fort McMurray",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 73.05
+    },
+    {
+      "lgaName": "Fort McMurray",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.1
+    },
+    {
+      "lgaName": "City of Grande Prairie",
+      "diabetesPrevalencePct": 0,
+      "copdPrevalencePct": 0,
+      "hypertensionPrevalencePct": 0,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.96
+    }
+  ],
+  "ED_RELIANCE_METRICS": [
+    {
+      "lgaName": "Calgary - West Bow",
+      "totalEdVisitsPer1000": 142,
+      "lowAcuityCtas45Pct": 24.5,
+      "afterHoursEdPct": 31.4,
+      "moodAnxietyEdRatePer100k": 1152.78
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft",
+      "totalEdVisitsPer1000": 220,
+      "lowAcuityCtas45Pct": 38.2,
+      "afterHoursEdPct": 45.1,
+      "moodAnxietyEdRatePer100k": 580
+    },
+    {
+      "lgaName": "Red Deer - North",
+      "totalEdVisitsPer1000": 410,
+      "lowAcuityCtas45Pct": 52.3,
+      "afterHoursEdPct": 54.8,
+      "moodAnxietyEdRatePer100k": 1351.68
+    },
+    {
+      "lgaName": "South rural (Lethbridge/Cardston area)",
+      "totalEdVisitsPer1000": 640,
+      "lowAcuityCtas45Pct": 64.8,
+      "afterHoursEdPct": 61.2,
+      "moodAnxietyEdRatePer100k": 1120
+    },
+    {
+      "lgaName": "Wood Buffalo / Fort McKay",
+      "totalEdVisitsPer1000": 950,
+      "lowAcuityCtas45Pct": 78.5,
+      "afterHoursEdPct": 69.8,
+      "moodAnxietyEdRatePer100k": 1840
+    },
+    {
+      "lgaName": "Crowsnest Pass",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2654.82
+    },
+    {
+      "lgaName": "Pincher Creek",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2808.7
+    },
+    {
+      "lgaName": "Fort Macleod",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2070.79
+    },
+    {
+      "lgaName": "Cardston-Kainai",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1997.34
+    },
+    {
+      "lgaName": "County of Lethbridge excluding the City of Lethbridge",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 769.71
+    },
+    {
+      "lgaName": "Taber MD",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1291.63
+    },
+    {
+      "lgaName": "County of Warner",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1472.53
+    },
+    {
+      "lgaName": "County of Forty Mile",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2208.81
+    },
+    {
+      "lgaName": "Newell",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1493.08
+    },
+    {
+      "lgaName": "Oyen",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1105.96
+    },
+    {
+      "lgaName": "Cypress County excluding Medicine Hat",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 933.99
+    },
+    {
+      "lgaName": "Medicine Hat",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1702.45
+    },
+    {
+      "lgaName": "Lethbridge - West",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1139.71
+    },
+    {
+      "lgaName": "Lethbridge - North",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1379.47
+    },
+    {
+      "lgaName": "Lethbridge - South",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1549.51
+    },
+    {
+      "lgaName": "Calgary - Upper NW",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 628.63
+    },
+    {
+      "lgaName": "Calgary - North",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 628.21
+    },
+    {
+      "lgaName": "Calgary - Nose Hill",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1097.74
+    },
+    {
+      "lgaName": "Calgary - Lower NW",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 629.7
+    },
+    {
+      "lgaName": "Calgary - Centre North",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1177.17
+    },
+    {
+      "lgaName": "Calgary - Upper NE",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 653.29
+    },
+    {
+      "lgaName": "Calgary - Lower NE",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 633.46
+    },
+    {
+      "lgaName": "Calgary - East",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1040.25
+    },
+    {
+      "lgaName": "Calgary - SE",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 783.47
+    },
+    {
+      "lgaName": "Calgary - West",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 649.1
+    },
+    {
+      "lgaName": "Calgary - Centre",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1511.01
+    },
+    {
+      "lgaName": "Calgary - Centre West",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1133.18
+    },
+    {
+      "lgaName": "Calgary - Elbow",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1113.9
+    },
+    {
+      "lgaName": "Calgary - Fish Creek",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 963.7
+    },
+    {
+      "lgaName": "Calgary - SW",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 787.45
+    },
+    {
+      "lgaName": "Okotoks-Priddis",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1127.81
+    },
+    {
+      "lgaName": "Black Diamond",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1942.99
+    },
+    {
+      "lgaName": "High River",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1232.67
+    },
+    {
+      "lgaName": "Claresholm",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1903.06
+    },
+    {
+      "lgaName": "Vulcan",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1628.63
+    },
+    {
+      "lgaName": "Airdrie",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1370.09
+    },
+    {
+      "lgaName": "Chestermere",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 674.02
+    },
+    {
+      "lgaName": "Strathmore",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1247.33
+    },
+    {
+      "lgaName": "Crossfield",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1171.21
+    },
+    {
+      "lgaName": "Didsbury",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2148.21
+    },
+    {
+      "lgaName": "Cochrane-Springbank",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1173.43
+    },
+    {
+      "lgaName": "Canmore",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1277.16
+    },
+    {
+      "lgaName": "Banff",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 712.69
+    },
+    {
+      "lgaName": "Rocky Mountain House",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2288.9
+    },
+    {
+      "lgaName": "Drayton Valley",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1435.46
+    },
+    {
+      "lgaName": "Sundre",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1533.72
+    },
+    {
+      "lgaName": "Olds",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1378.29
+    },
+    {
+      "lgaName": "Innisfail",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1193.24
+    },
+    {
+      "lgaName": "Red Deer County excluding the City of Red Deer",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1140.88
+    },
+    {
+      "lgaName": "Sylvan Lake",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1755.09
+    },
+    {
+      "lgaName": "Three Hills/Highway 21",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1263.58
+    },
+    {
+      "lgaName": "Starland County/Drumheller",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1329.26
+    },
+    {
+      "lgaName": "Planning & Special Area 2",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1642.21
+    },
+    {
+      "lgaName": "Stettler & County",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2102.64
+    },
+    {
+      "lgaName": "Castor/Coronation/Consort",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2594.51
+    },
+    {
+      "lgaName": "Wetaskiwin County",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 3086.31
+    },
+    {
+      "lgaName": "Ponoka",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1343.54
+    },
+    {
+      "lgaName": "Rimbey",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1390.3
+    },
+    {
+      "lgaName": "Lacombe",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1200.76
+    },
+    {
+      "lgaName": "Camrose & County",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1663.96
+    },
+    {
+      "lgaName": "Tofield",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1668.09
+    },
+    {
+      "lgaName": "Viking",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1520.47
+    },
+    {
+      "lgaName": "Flagstaff County",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1176.77
+    },
+    {
+      "lgaName": "MD of Provost",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1390.69
+    },
+    {
+      "lgaName": "MD of Wainwright",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1964.21
+    },
+    {
+      "lgaName": "Lamont County",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1979.26
+    },
+    {
+      "lgaName": "Two Hills County",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1545.85
+    },
+    {
+      "lgaName": "Vegreville/Minburn County",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1990.46
+    },
+    {
+      "lgaName": "Vermilion River County",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 628
+    },
+    {
+      "lgaName": "Red Deer - SW",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 3151.48
+    },
+    {
+      "lgaName": "Red Deer - East",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1130.17
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft East",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1111.38
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft West",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 955.82
+    },
+    {
+      "lgaName": "Edmonton - Jasper Place",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1126.04
+    },
+    {
+      "lgaName": "Edmonton - West Jasper Place",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 547.21
+    },
+    {
+      "lgaName": "Edmonton - Castle Downs",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 730.23
+    },
+    {
+      "lgaName": "Edmonton - Northgate",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 782.94
+    },
+    {
+      "lgaName": "Edmonton - Eastwood",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1372.86
+    },
+    {
+      "lgaName": "Edmonton - Abbottsfield",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1162.07
+    },
+    {
+      "lgaName": "Edmonton - NE",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 820.09
+    },
+    {
+      "lgaName": "Edmonton - Bonnie Doon",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 826.7
+    },
+    {
+      "lgaName": "Edmonton - Mill Woods West",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 742.21
+    },
+    {
+      "lgaName": "Edmonton - Mill Woods South & East",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 519.51
+    },
+    {
+      "lgaName": "Edmonton - Duggan",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 645.21
+    },
+    {
+      "lgaName": "Edmonton - Twin Brooks",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 445.77
+    },
+    {
+      "lgaName": "Edmonton - Rutherford",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 515.86
+    },
+    {
+      "lgaName": "Sturgeon County West",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 870.59
+    },
+    {
+      "lgaName": "Sturgeon County East",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1044.2
+    },
+    {
+      "lgaName": "Fort Saskatchewan",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1371.92
+    },
+    {
+      "lgaName": "Sherwood Park",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 636.42
+    },
+    {
+      "lgaName": "Strathcona County excluding Sherwood Park",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 561.61
+    },
+    {
+      "lgaName": "Beaumont",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 692.74
+    },
+    {
+      "lgaName": "Leduc & Devon",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1053.41
+    },
+    {
+      "lgaName": "Thorsby",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 810.24
+    },
+    {
+      "lgaName": "Stony Plain & Spruce Grove",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 746.8
+    },
+    {
+      "lgaName": "Westview excluding Stony Plain and Spruce Grove",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 702.27
+    },
+    {
+      "lgaName": "St. Albert",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 939.3
+    },
+    {
+      "lgaName": "Jasper",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1211.22
+    },
+    {
+      "lgaName": "Hinton",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1221.54
+    },
+    {
+      "lgaName": "Edson",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1507.87
+    },
+    {
+      "lgaName": "Whitecourt",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1801.63
+    },
+    {
+      "lgaName": "Mayerthorpe",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1603.89
+    },
+    {
+      "lgaName": "Barrhead",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2217.93
+    },
+    {
+      "lgaName": "Westlock",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1340.53
+    },
+    {
+      "lgaName": "Frog Lake",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2663.7
+    },
+    {
+      "lgaName": "St. Paul",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2612.44
+    },
+    {
+      "lgaName": "Smoky Lake",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1863.61
+    },
+    {
+      "lgaName": "Cold Lake",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2557.27
+    },
+    {
+      "lgaName": "Bonnyville",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2757.01
+    },
+    {
+      "lgaName": "Boyle",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2224.04
+    },
+    {
+      "lgaName": "Athabasca",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2063.91
+    },
+    {
+      "lgaName": "Lac La Biche",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1630.97
+    },
+    {
+      "lgaName": "Grande Cache",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1825.58
+    },
+    {
+      "lgaName": "Fox Creek",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2715.47
+    },
+    {
+      "lgaName": "Valleyview",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 5133.86
+    },
+    {
+      "lgaName": "Beaverlodge",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1330.2
+    },
+    {
+      "lgaName": "Grande Prairie County excluding the City of Grande Prairie",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 803.85
+    },
+    {
+      "lgaName": "Swan Hills",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1663.16
+    },
+    {
+      "lgaName": "Slave Lake",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2252.92
+    },
+    {
+      "lgaName": "Wabasca",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 4258.15
+    },
+    {
+      "lgaName": "High Prairie",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2813.83
+    },
+    {
+      "lgaName": "High Level",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 3201.33
+    },
+    {
+      "lgaName": "Manning",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 4138.69
+    },
+    {
+      "lgaName": "Peace River",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 3035.86
+    },
+    {
+      "lgaName": "Falher",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 3006.96
+    },
+    {
+      "lgaName": "Spirit River",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1404.19
+    },
+    {
+      "lgaName": "Fairview",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 2210.84
+    },
+    {
+      "lgaName": "Wood Buffalo excluding Fort McMurray",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1961.57
+    },
+    {
+      "lgaName": "Fort McMurray",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1293.45
+    },
+    {
+      "lgaName": "City of Grande Prairie",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1245.09
+    }
+  ],
+  "_dataMetadata": {
+    "COMMUNITY_NEED_PROFILES": {
+      "source": "openAlbertaInequityFetcher",
+      "sourceVintage": "Live data",
+      "lastUpdated": "2026-07-05T15:56:14.181Z",
+      "updateType": "auto"
+    },
+    "CHRONIC_DISEASE_BURDEN": {
+      "source": "openAlbertaInequityFetcher",
+      "sourceVintage": "Live data",
+      "lastUpdated": "2026-07-05T15:56:14.181Z",
+      "updateType": "auto"
+    },
+    "ED_RELIANCE_METRICS": {
+      "source": "openAlbertaInequityFetcher",
+      "sourceVintage": "Live data",
+      "lastUpdated": "2026-07-05T15:56:14.181Z",
+      "updateType": "auto"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "lastSyncTimestamp": "2026-07-06T01:51:17.170Z",
+  "endpoints": [
+    {
+      "name": "Open Alberta CKAN API (Health Datasets Search)",
+      "url": "https://open.alberta.ca/api/3/action/package_search?q=health",
+      "type": "Open Data CKAN API",
+      "description": "Used to sweep and cross-reference cataloged health data (LGA emergency visits, physician counts, PCNs, chronic disease prevalence).",
+      "status": "success",
+      "statusCode": 200,
+      "recordsFound": 7621,
+      "responseTimeMs": 215,
+      "lastChecked": "2026-07-06T01:51:16.522Z",
+      "statusText": "Success"
+    },
+    {
+      "name": "Statistics Canada Web Data Service (WDS API)",
+      "url": "https://www150.statcan.gc.ca/t1/wds/rest/getAllCubesListLite",
+      "type": "StatsCan WDS JSON API",
+      "description": "Retrieves table inventories and indicators mapping unmet healthcare needs, specialist access satisfaction, and wait time surveys.",
+      "status": "success",
+      "statusCode": 200,
+      "recordsFound": 8216,
+      "responseTimeMs": 647,
+      "lastChecked": "2026-07-06T01:51:17.170Z",
+      "statusText": "Success"
+    }
+  ],
+  "explanation": "All secondary metric dashboards (Surgical queues, Diagnostics, Cancer waitlists, Workforce profiles) load rich baseline datasets compiled from the Health Quality Council of Alberta (HQCA FOCUS), the Canadian Institute for Health Information (CIHI), Statistics Canada, and Alberta Precision Labs. The daily automated background sweeps query these live API endpoints to check for updated catalog tables and metadata versions."
+}

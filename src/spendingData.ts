@@ -272,3 +272,20 @@ export const ALBERTA_USE_OF_FUNDS: SpendingByUseOfFunds[] = [
   { category: 'Administration & Infrastructure', amountBillions: 0.85, percentageShare: 4.0 },
   { category: 'Allied & Other Professionals', amountBillions: 1.45, percentageShare: 6.9 }
 ];
+
+// Data freshness metadata for each array — used by the DataTimestamp component.
+export const _dataMetadata: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: "auto" | "manual";
+  verification?: string;
+}> = {
+  NATIONAL_SPENDING_COMPARE: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  ALBERTA_ACTIVITY_VOLUME_TREND: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  HOSPITAL_EFFICIENCY_TREND: { source: "CIHI Hospital Cost Performance report", sourceVintage: "CIHI report (approximate 2021-2024)", lastUpdated: "2026-07-05", updateType: "manual", verification: "CIHI publishes hospital cost performance indicators including spending per staffed bed and hospitalizations per bed. Fiscal year figures are plausible but could not be confirmed against a specific CIHI publication." },
+  PHYSICIAN_SPECIALTY_BILLING: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  ALBERTA_USE_OF_FUNDS: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  CIHI_RESOURCE_USE_INTENSITY: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  CIHI_SPENDING_PER_PERSON: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+};

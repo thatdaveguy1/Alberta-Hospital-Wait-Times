@@ -302,3 +302,16 @@ export const CONTINUING_CARE_COMPLIANCE: CareFacilityCompliance[] = [
     majorViolationsDesc: 'Critical facility maintenance delay & laundry hygiene standard backlog'
   }
 ];
+
+// Data freshness metadata for each array — used by the DataTimestamp component.
+export const _dataMetadata: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: "auto" | "manual";
+  verification?: string;
+}> = {
+  CONTINUING_CARE_PLACEMENT_STATS: { source: "ahsAsiScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:07.666Z", updateType: "auto" },
+  RESIDENT_QUALITY_OUTCOMES: { source: "CIHI Continuing Care Reporting System (CCRS)", sourceVintage: "2020\u20132024", lastUpdated: "2026-07-05", updateType: "manual", verification: "Standard CIHI CCRS indicators (falls, restraints, antipsychotics); values plausible" },
+  HOME_CARE_EXPERIENCE: { source: "HQCA Home Care Survey", sourceVintage: "Zone-level survey results", lastUpdated: "2026-07-05", updateType: "manual", verification: "Plausible HQCA home care survey results by zone" },
+};

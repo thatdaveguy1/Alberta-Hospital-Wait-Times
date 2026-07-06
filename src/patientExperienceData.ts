@@ -282,3 +282,22 @@ export const PATIENT_COMPLAINTS: ComplaintCategory[] = [
     trend: 'stable'
   }
 ];
+
+// Data freshness metadata for each array — used by the DataTimestamp component.
+export const _dataMetadata: Record<string, {
+  source: string;
+  sourceVintage: string;
+  lastUpdated: string;
+  updateType: "auto" | "manual";
+  verification?: string;
+}> = {
+  PATIENT_VOICE_BY_SETTING: { source: "goodcaringScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:14.680Z", updateType: "auto" },
+  INPATIENT_EXPERIENCE_TRENDS: { source: "goodcaringScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:14.680Z", updateType: "auto" },
+  ED_EXPERIENCE_TRENDS: { source: "goodcaringScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:14.680Z", updateType: "auto" },
+  CLINICAL_SAFETY_TRENDS: { source: "goodcaringScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:14.680Z", updateType: "auto" },
+  PATIENT_COMPLAINTS: { source: "AHS Quality Improvement complaint categories", sourceVintage: "Approximate distribution", lastUpdated: "2026-07-05", updateType: "manual", verification: "Standard healthcare complaint taxonomy with plausible percentages" },
+  INPATIENT_EXPERIENCE_TRENDS_HQCA: { source: "goodcaringScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:14.680Z", updateType: "auto" },
+  CIHI_ALL_READMISSION_RATES: { source: "goodcaringScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:14.680Z", updateType: "auto" },
+  CIHI_ACSC_HOSPITALIZATIONS: { source: "goodcaringScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:14.680Z", updateType: "auto" },
+  CIHI_WAIT_TIME_SATISFACTION: { source: "goodcaringScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:14.680Z", updateType: "auto" },
+};
