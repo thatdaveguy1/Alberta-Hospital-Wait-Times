@@ -6,3 +6,16 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Cloudflare Wrangler local state (Miniflare SQLite KV)
+.wrangler/
+
+# Scratch
+tmp/
+
+# AI Studio internal metadata
+assets/.aistudio/
+
+# Generated chart screenshots (regeneratable)
+*_top.png
+*_mid.png

@@ -1,6 +1,0 @@
-{
-  "name": "Alberta Hospital Wait Times Dashboard",
-  "description": "A professional dashboard tracking live wait times and historical trends for Alberta hospitals.",
-  "requestFramePermissions": ["geolocation"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
