@@ -4,8 +4,9 @@ import {
   MessageSquare, 
   Heart, 
   AlertTriangle, 
-  ShieldAlert, 
-  CheckCircle2, 
+  Building2,
+  Layers,
+  ShieldAlert,
   Info,
   Activity,
   HeartHandshake,
@@ -46,6 +47,8 @@ import {
   HospitalHarmMetric,
   ComplaintCategory
 } from '../patientExperienceData';
+import { DataTimestamp } from './DataTimestamp';
+import { _dataMetadata as patientExperienceDataMetadata } from '../patientExperienceData';
 
 export default function PatientExperienceDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'voice' | 'inpatient' | 'emergency' | 'safety' | 'complaints'>('voice');
@@ -202,82 +205,76 @@ export default function PatientExperienceDashboard() {
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute left-1/3 top-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -z-10" />
-        
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                Patient Experience & Quality
-              </span>
-              <span className="text-xs text-slate-500 font-mono">
-                Sources: HQA FOCUS, CIHI Inpatient CPES-IC, AHS Patient Relations
-              </span>
-            </div>
-            <h1 className="text-2xl font-black text-white tracking-tight sm:text-3xl">
-              Patient Experience & Care Quality
-            </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-              Monitor patient-reported satisfaction, doctor & nurse communication efficacy, 
-              hospital-preventable harm occurrences, and patient advocacy routing diagnostics.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 bg-slate-950/60 p-1 rounded-xl border border-slate-850 self-start lg:self-auto shrink-0">
-            <button
-              onClick={() => setActiveSubTab('voice')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'voice' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Voice of Patient
-            </button>
-            <button
-              onClick={() => setActiveSubTab('inpatient')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'inpatient' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Inpatient Care
-            </button>
-            <button
-              onClick={() => setActiveSubTab('emergency')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'emergency' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              ED Experience
-            </button>
-            <button
-              onClick={() => setActiveSubTab('safety')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'safety' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Clinical Safety Harm
-            </button>
-            <button
-              onClick={() => setActiveSubTab('complaints')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'complaints' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Feedback & Advocacy
-            </button>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <Users className="w-5 h-5 text-cyan-400" />
+            <span>Patient Experience & Care Quality</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Monitor patient-reported satisfaction, communication quality, and clinical safety.
+          </p>
+          <DataTimestamp metadata={patientExperienceDataMetadata} arrayKey="PATIENT_SATISFACTION_STATS" />
         </div>
+      </div>
+
+      {/* Sub-tab Navigation */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+        <button
+          onClick={() => setActiveSubTab('voice')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'voice'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Patient Voice</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('inpatient')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'inpatient'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Building2 className="w-4 h-4" />
+          <span>Inpatient Surveys</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('emergency')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'emergency'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>Emergency Surveys</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('safety')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'safety'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <ShieldAlert className="w-4 h-4" />
+          <span>Clinical Safety</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('complaints')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'complaints'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Patient Complaints</span>
+        </button>
       </div>
 
       {/* Narrative quality impact disclaimer */}
@@ -424,6 +421,7 @@ export default function PatientExperienceDashboard() {
       {/* SUBTAB 2: Hospital Inpatient Care */}
       {activeSubTab === 'inpatient' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={patientExperienceDataMetadata} arrayKey="INPATIENT_EXPERIENCE_TRENDS" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
               <div>
@@ -493,6 +491,7 @@ export default function PatientExperienceDashboard() {
       {/* SUBTAB 3: Emergency Department Experience */}
       {activeSubTab === 'emergency' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={patientExperienceDataMetadata} arrayKey="ED_EXPERIENCE_TRENDS" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
               <div>
@@ -554,6 +553,7 @@ export default function PatientExperienceDashboard() {
       {/* SUBTAB 4: Hospital Harm & Clinical Safety */}
       {activeSubTab === 'safety' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={patientExperienceDataMetadata} arrayKey="CLINICAL_SAFETY_TRENDS" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">CIHI Hospital Harm Rate & Unplanned Readmissions</h3>
@@ -634,6 +634,7 @@ export default function PatientExperienceDashboard() {
       {/* SUBTAB 5: Complaints & Advocacy Routing */}
       {activeSubTab === 'complaints' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={patientExperienceDataMetadata} arrayKey="PATIENT_COMPLAINTS" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col sm:flex-row gap-3 items-center justify-between">

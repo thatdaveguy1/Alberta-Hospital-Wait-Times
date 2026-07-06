@@ -19,7 +19,8 @@ import {
   ChevronRight,
   ShieldAlert,
   SlidersHorizontal,
-  XCircle
+  XCircle,
+  Building2
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -45,6 +46,8 @@ import {
   HomeCareContinuity,
   CareFacilityCompliance
 } from '../continuingCareData';
+import { DataTimestamp } from './DataTimestamp';
+import { _dataMetadata as continuingCareDataMetadata } from '../continuingCareData';
 
 export default function ContinuingCareDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'placement' | 'resident-quality' | 'home-care' | 'compliance'>('placement');
@@ -91,73 +94,66 @@ export default function ContinuingCareDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Executive Header Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute left-1/3 top-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl -z-10" />
-        
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                Continuing Care Dashboard
-              </span>
-              <span className="text-xs text-slate-500 font-mono">
-                Data Sources: HQA FOCUS, CIHI CCRS, Open Alberta
-              </span>
-            </div>
-            <h1 className="text-2xl font-black text-white tracking-tight sm:text-3xl">
-              Continuing & Long Term Care
-            </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-              Analyze waitlist placement timelines, clinical outcome measures, home-care professional 
-              continuity indices, and operator accommodation standards compliance registries.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 bg-slate-950/60 p-1 rounded-xl border border-slate-850 self-start lg:self-auto shrink-0">
-            <button
-              onClick={() => setActiveSubTab('placement')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'placement' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Placement & Flow
-            </button>
-            <button
-              onClick={() => setActiveSubTab('resident-quality')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'resident-quality' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Clinical Quality
-            </button>
-            <button
-              onClick={() => setActiveSubTab('home-care')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'home-care' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Home Care Continuity
-            </button>
-            <button
-              onClick={() => setActiveSubTab('compliance')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'compliance' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Compliance Registry
-            </button>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-emerald-400" />
+            <span>Continuing & Long Term Care</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Monitor facility placement timelines, quality outcomes, and standards compliance.
+          </p>
+          <DataTimestamp metadata={continuingCareDataMetadata} arrayKey="CONTINUING_CARE_PLACEMENT_STATS" />
         </div>
+      </div>
+
+      {/* Sub-Tab Navigation */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+        <button
+          onClick={() => setActiveSubTab('placement')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'placement'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>Placement & Flow</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('resident-quality')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'resident-quality'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <ShieldAlert className="w-4 h-4" />
+          <span>Clinical Quality</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('home-care')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'home-care'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Home Care Continuity</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('compliance')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'compliance'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Building2 className="w-4 h-4" />
+          <span>Compliance Registry</span>
+        </button>
       </div>
 
       {/* SUBTAB 1: Placement & Flow (HQA FOCUS) */}
@@ -302,6 +298,7 @@ export default function ContinuingCareDashboard() {
       {/* SUBTAB 2: Resident quality outcomes (CIHI LTC Indicators) */}
       {activeSubTab === 'resident-quality' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={continuingCareDataMetadata} arrayKey="RESIDENT_QUALITY_OUTCOMES" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">CIHI Clinical Care Quality Indicators</h3>
@@ -388,6 +385,7 @@ export default function ContinuingCareDashboard() {
       {/* SUBTAB 3: Home care client experience (HQA FOCUS Survey) */}
       {activeSubTab === 'home-care' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={continuingCareDataMetadata} arrayKey="HOME_CARE_EXPERIENCE" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {HOME_CARE_EXPERIENCE.map((exp, idx) => {
               const isProvincial = exp.zone === 'Alberta';

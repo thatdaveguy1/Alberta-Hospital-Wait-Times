@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  Users, 
-  Search, 
+  Users,
+  Building2,
+  Search,
   Activity, 
   MapPin, 
   CheckCircle, 
@@ -12,7 +13,6 @@ import {
   TrendingDown, 
   TrendingUp, 
   AlertTriangle, 
-  FileText, 
   Stethoscope, 
   DollarSign, 
   Sliders, 
@@ -34,23 +34,51 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { 
-  ATTACHMENT_RATES, 
-  ACCEPTING_PROVIDERS, 
-  PCN_CAPACITY, 
-  LGA_COMMUNITY_NEEDS, 
-  ED_RELIANCE_BY_CONTINUITY, 
-  CONTINUITY_SATISFACTION,
+import type { 
   AttachmentRate,
   AcceptingProvider,
   PCNCapacity,
-  LGACommunityNeed,
   EDRelianceMetric,
   ContinuityAndSatisfaction
 } from '../primaryCareData';
+import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
+
+type PrimaryCareData = {
+  ATTACHMENT_RATES: AttachmentRate[];
+  ACCEPTING_PROVIDERS: AcceptingProvider[];
+  PCN_CAPACITY: PCNCapacity[];
+  ED_RELIANCE_BY_CONTINUITY: EDRelianceMetric[];
+  CONTINUITY_SATISFACTION: ContinuityAndSatisfaction[];
+  _dataMetadata?: DataMetadataMap;
+};
 
 export default function PrimaryCareDashboard() {
-  const [activeSubTab, setActiveSubTab] = useState<'attachment' | 'directory' | 'pcn' | 'needs' | 'er-link'>('attachment');
+  const [primaryCareData, setPrimaryCareData] = useState<PrimaryCareData>({
+    ATTACHMENT_RATES: [],
+    ACCEPTING_PROVIDERS: [],
+    PCN_CAPACITY: [],
+    ED_RELIANCE_BY_CONTINUITY: [],
+    CONTINUITY_SATISFACTION: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/data/primary-care')
+      .then(res => res.json())
+      .then((data: PrimaryCareData) => {
+        if (!cancelled) {
+          setPrimaryCareData(data);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const [activeSubTab, setActiveSubTab] = useState<'attachment' | 'directory' | 'pcn' | 'er-link'>('attachment');
   
   // Interactive State for Provider Directory
   const [directorySearch, setDirectorySearch] = useState('');
@@ -60,13 +88,10 @@ export default function PrimaryCareDashboard() {
   const [filterAfterHours, setFilterAfterHours] = useState(false);
   const [filterVirtual, setFilterVirtual] = useState(false);
 
-  // Interactive State for Community Needs (LGA filter)
-  const [selectedNeedsZone, setSelectedNeedsZone] = useState<string>('All');
-  const [needsSortBy, setNeedsSortBy] = useState<'physicians' | 'travel' | 'acsc' | 'population'>('physicians');
 
   // Filtered Provider Directory logic
   const filteredProviders = useMemo(() => {
-    return ACCEPTING_PROVIDERS.filter(prov => {
+    return primaryCareData.ACCEPTING_PROVIDERS.filter(prov => {
       const matchesSearch = 
         prov.name.toLowerCase().includes(directorySearch.toLowerCase()) ||
         prov.clinicName.toLowerCase().includes(directorySearch.toLowerCase()) ||
@@ -82,114 +107,125 @@ export default function PrimaryCareDashboard() {
       
       return matchesSearch && matchesZone && matchesType && matchesWalkIn && matchesAfterHours && matchesVirtual;
     });
-  }, [directorySearch, selectedZoneFilter, selectedTypeFilter, filterWalkIn, filterAfterHours, filterVirtual]);
+  }, [directorySearch, selectedZoneFilter, selectedTypeFilter, filterWalkIn, filterAfterHours, filterVirtual, primaryCareData]);
 
   // Unique list of cities from providers for directory filter
   const uniqueCities = useMemo(() => {
-    const cities = ACCEPTING_PROVIDERS.map(p => p.city);
+    const cities = primaryCareData.ACCEPTING_PROVIDERS.map(p => p.city);
     return Array.from(new Set(cities));
-  }, []);
+  }, [primaryCareData]);
 
-  // Filtered and Sorted LGA Community Needs
-  const sortedLGAData = useMemo(() => {
-    const filtered = LGA_COMMUNITY_NEEDS.filter(lga => 
-      selectedNeedsZone === 'All' || lga.zone === selectedNeedsZone
-    );
-
-    return [...filtered].sort((a, b) => {
-      if (needsSortBy === 'physicians') {
-        return a.familyPhysiciansPer100k - b.familyPhysiciansPer100k; // Lower is higher need
-      } else if (needsSortBy === 'travel') {
-        return b.pctClaimsOutsideLGA - a.pctClaimsOutsideLGA; // Higher travel is higher need
-      } else if (needsSortBy === 'acsc') {
-        return b.acscHospitalizationRatePer100k - a.acscHospitalizationRatePer100k; // Higher avoidable hospitalization is higher need
-      } else {
-        return b.population - a.population;
-      }
-    });
-  }, [selectedNeedsZone, needsSortBy]);
 
   // Executive summary counts
-  const totalAcceptingCount = ACCEPTING_PROVIDERS.filter(p => p.acceptingNewPatients).length;
+  const totalAcceptingCount = primaryCareData.ACCEPTING_PROVIDERS.filter(p => p.acceptingNewPatients).length;
+
+  // Data-driven computed values (avoid hardcoded KPIs)
+  const albertaAttachment = primaryCareData.ATTACHMENT_RATES
+    .filter(r => r.geography === 'Alberta' && r.demographic_group === 'All Residents')
+    .sort((a, b) => b.reporting_year.localeCompare(a.reporting_year))[0];
+  const canadaAttachment = primaryCareData.ATTACHMENT_RATES
+    .filter(r => r.geography === 'Canada' && r.demographic_group === 'All Residents')
+    .sort((a, b) => b.reporting_year.localeCompare(a.reporting_year))[0];
+  const attachmentRate = albertaAttachment?.metric_value ?? 0;
+  const canadaAvg = canadaAttachment?.metric_value ?? 0;
+  const reportingYear = albertaAttachment?.reporting_year ?? '';
+
+  // Latest-year Alberta attachment rates by demographic group (for chart + insights)
+  const latestAlbertaRates = useMemo(() => {
+    const latestYear = primaryCareData.ATTACHMENT_RATES
+      .filter(r => r.geography === 'Alberta')
+      .map(r => r.reporting_year)
+      .sort((a, b) => b.localeCompare(a))[0] ?? reportingYear;
+    const year = latestYear || reportingYear;
+    return primaryCareData.ATTACHMENT_RATES
+      .filter(r => r.geography === 'Alberta' && r.reporting_year === year)
+      .sort((a, b) => b.metric_value - a.metric_value);
+  }, [primaryCareData, reportingYear]);
+  const getRate = (group: string) => latestAlbertaRates.find(r => r.demographic_group === group)?.metric_value ?? 0;
+  const lowIncomeRate = getRate('Lowest Income Quintile');
+  const youngAdultsRate = getRate('Adults (18-64)');
+  const ruralRate = getRate('Rural / Remote Areas');
+  const seniorsRate = getRate('Seniors (65+)');
+
+  const albertaContinuity = primaryCareData.CONTINUITY_SATISFACTION.find(c => c.zone === 'Alberta');
+  const sameDayAccess = albertaContinuity?.sameNextDayAccessPct ?? 0;
+  const waitSatisfaction = albertaContinuity?.satisfiedWithWaitTimePct ?? 0;
+  const clinicContinuity = albertaContinuity?.highClinicContinuityPct ?? 0;
+  const careRatingExcellent = albertaContinuity?.overallCareRatingExcellentPct ?? 0;
+
+  const albertaEdReliance = primaryCareData.ED_RELIANCE_BY_CONTINUITY.find(e => e.group === 'Alberta Average');
+  const minorConditionEdRate = albertaEdReliance?.minorConditionEdVisitsPer1000 ?? 0;
+
+  const albertaPcn = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'Alberta');
+  const provincialFundingPerPatient = albertaPcn?.fundingPerPatient ?? 0;
+  const provincialProvidersPer100k = albertaPcn?.providersPer100k ?? 0;
+  const northZone = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'North Zone');
+  const edmontonZone = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'Edmonton Zone');
+  const calgaryZone = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'Calgary Zone');
   
+  if (isLoading) return <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">Loading...</div>;
+
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute left-1/3 top-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -z-10" />
-        
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                Primary Healthcare Analytics
-              </span>
-              <span className="text-xs text-slate-500">
-                Data Updated: Q2 2026
-              </span>
-            </div>
-            <h1 className="text-2xl font-black text-white tracking-tight sm:text-3xl">
-              Primary Care Access & Attachment
-            </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-2xl">
-              Analyzing community family physician capacity, clinic availability, and Primary Care Network (PCN) resource distribution across Alberta.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setActiveSubTab('attachment')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'attachment' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-slate-800/60 text-slate-400 hover:text-white'
-              }`}
-            >
-              Attachment & Access
-            </button>
-            <button
-              onClick={() => setActiveSubTab('directory')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'directory' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-slate-800/60 text-slate-400 hover:text-white'
-              }`}
-            >
-              Accepting Providers
-            </button>
-            <button
-              onClick={() => setActiveSubTab('needs')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'needs' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-slate-800/60 text-slate-400 hover:text-white'
-              }`}
-            >
-              Community Need (LGA)
-            </button>
-            <button
-              onClick={() => setActiveSubTab('pcn')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'pcn' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-slate-800/60 text-slate-400 hover:text-white'
-              }`}
-            >
-              PCN Capacity
-            </button>
-            <button
-              onClick={() => setActiveSubTab('er-link')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'er-link' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-slate-800/60 text-slate-400 hover:text-white'
-              }`}
-            >
-              ER Overreliance Link
-            </button>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <Stethoscope className="w-5 h-5 text-indigo-400" />
+            <span>Primary Care & Providers</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Track family medicine attachment rates and locate accepting clinics.
+          </p>
+          <DataTimestamp metadata={primaryCareData._dataMetadata} arrayKey="ATTACHMENT_RATES" />
         </div>
+      </div>
+
+      {/* Sub-tab Navigation */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+        <button
+          onClick={() => setActiveSubTab('attachment')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'attachment'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>Attachment & Access</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('directory')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'directory'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Accepting Providers</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('pcn')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'pcn'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Building2 className="w-4 h-4" />
+          <span>PCN Capacity</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('er-link')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'er-link'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          <span>ER Overreliance</span>
+        </button>
       </div>
 
       {/* Top Level Strategic Metrics */}
@@ -202,12 +238,12 @@ export default function PrimaryCareDashboard() {
           <div>
             <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Attached to Regular GP</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-white">83.2%</span>
+              <span className="text-2xl font-black text-white">{attachmentRate}%</span>
               <span className="text-[10px] text-amber-500 font-bold flex items-center gap-0.5">
-                <TrendingDown className="w-3 h-3" /> -1.6% vs 2021
+                <TrendingDown className="w-3 h-3" /> CIHI {reportingYear}
               </span>
             </div>
-            <span className="text-[10px] text-slate-400 mt-1 block">Canada Avg: 82.5% (CIHI 2024)</span>
+            <span className="text-[10px] text-slate-400 mt-1 block">Canada Avg: {canadaAvg}% (CIHI {reportingYear})</span>
           </div>
         </div>
 
@@ -219,10 +255,10 @@ export default function PrimaryCareDashboard() {
           <div>
             <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Accepting Patients (Listed)</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-white">{totalAcceptingCount} Clinics</span>
-              <span className="text-[10px] text-emerald-400 font-bold">Directory Active</span>
+              <span className="text-2xl font-black text-white">{totalAcceptingCount.toLocaleString()} Providers</span>
+              <span className="text-[10px] text-emerald-400 font-bold">Live Directory</span>
             </div>
-            <span className="text-[10px] text-slate-400 mt-1 block">Source: Alberta Find a Provider 2026</span>
+            <span className="text-[10px] text-slate-400 mt-1 block">Source: Alberta Find a Provider · {primaryCareData.ACCEPTING_PROVIDERS.length} providers province-wide</span>
           </div>
         </div>
 
@@ -234,10 +270,10 @@ export default function PrimaryCareDashboard() {
           <div>
             <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Same / Next Day Access</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-white">38.2%</span>
+              <span className="text-2xl font-black text-white">{sameDayAccess}%</span>
               <span className="text-[10px] text-rose-500 font-bold">Access Gap</span>
             </div>
-            <span className="text-[10px] text-slate-400 mt-1 block">Only 3.8 in 10 get immediate non-urgent care</span>
+            <span className="text-[10px] text-slate-400 mt-1 block">Only {Math.round(sameDayAccess / 10 * 10) / 10} in 10 get immediate non-urgent care</span>
           </div>
         </div>
 
@@ -249,7 +285,7 @@ export default function PrimaryCareDashboard() {
           <div>
             <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Minor-Condition ER Rate</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-white">210.5</span>
+              <span className="text-2xl font-black text-white">{minorConditionEdRate}</span>
               <span className="text-[10px] text-slate-400">per 1k pop</span>
             </div>
             <span className="text-[10px] text-amber-500 mt-1 block">Over 1M low-acuity ER visits annually</span>
@@ -268,7 +304,8 @@ export default function PrimaryCareDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-900 pb-4">
                 <div>
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">Primary Care Attachment Rates by Demographic Group</h3>
-                  <p className="text-xs text-slate-400">Percent of Albertans who report having access to a regular health provider (2024)</p>
+                  <p className="text-xs text-slate-400">Percent of Albertans who report having access to a regular health provider ({reportingYear})</p>
+                  <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="ATTACHMENT_RATES" />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-sm bg-indigo-500"></span>
@@ -279,27 +316,27 @@ export default function PrimaryCareDashboard() {
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={ATTACHMENT_RATES.filter(r => r.geography === 'Alberta')}
+                    data={latestAlbertaRates}
                     layout="vertical"
                     margin={{ top: 25, right: 30, left: 160, bottom: 10 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
                     <XAxis type="number" domain={[0, 100]} stroke="#475569" tickFormatter={(v) => `${v}%`} className="text-[10px] font-mono" />
                     <YAxis dataKey="demographic_group" type="category" stroke="#475569" className="text-[10px] font-bold" width={150} tickLine={false} axisLine={false} />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ backgroundColor: '#090d16', borderColor: '#1e293b' }}
-                      formatter={(v: any) => [`${v}%`, 'Attached Patients']}
+                      formatter={(v: number) => [`${v}%`, 'Attached Patients']}
                     />
-                    <Bar dataKey="metric_value" fill="#6366f1" radius={[0, 4, 4, 0]} maxBarSize={28}>
-                      {ATTACHMENT_RATES.filter(r => r.geography === 'Alberta').map((entry, index) => {
+                    <Bar dataKey="metric_value" fill="#6366f1" radius={[0, 4, 4, 0]} maxBarSize={28} isAnimationActive={false}>
+                      {latestAlbertaRates.map((entry, index) => {
                         let barColor = '#6366f1';
                         if (entry.demographic_group.includes('Lowest')) barColor = '#f43f5e';
                         if (entry.demographic_group.includes('Seniors')) barColor = '#10b981';
                         return <Cell key={`cell-${index}`} fill={barColor} />;
                       })}
                     </Bar>
-                    <ReferenceLine x={82.5} stroke="#f59e0b" strokeDasharray="3 3">
-                      <Label value="Canada Avg (82.5%)" position="top" offset={10} fill="#f59e0b" className="text-[9px] font-mono font-bold" />
+                    <ReferenceLine x={canadaAvg} stroke="#f59e0b" strokeDasharray="3 3">
+                      <Label value={`Canada Avg (${canadaAvg}%)`} position="top" offset={10} fill="#f59e0b" className="text-[9px] font-mono font-bold" />
                     </ReferenceLine>
                   </BarChart>
                 </ResponsiveContainer>
@@ -308,7 +345,7 @@ export default function PrimaryCareDashboard() {
               <div className="p-3 bg-slate-900/60 border border-slate-900 rounded-lg flex items-start gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <div className="text-xs text-slate-300">
-                  <strong>Critical Vulnerability identified:</strong> Access to a regular healthcare provider varies substantially across demographics. Low-income earners (<span className="text-rose-400 font-bold">74.8%</span>), young adults (<span className="text-amber-400 font-bold">79.1%</span>), and rural residents (<span className="text-rose-400 font-bold">77.5%</span>) experience severe gaps compared to seniors (<span className="text-emerald-400 font-bold">93.4%</span>).
+                  <strong>Critical Vulnerability identified:</strong> Access to a regular healthcare provider varies substantially across demographics. Low-income earners (<span className="text-rose-400 font-bold">{lowIncomeRate}%</span>), young adults (<span className="text-amber-400 font-bold">{youngAdultsRate}%</span>), and rural residents (<span className="text-rose-400 font-bold">{ruralRate}%</span>) experience severe gaps compared to seniors (<span className="text-emerald-400 font-bold">{seniorsRate}%</span>).
                 </div>
               </div>
             </div>
@@ -325,10 +362,10 @@ export default function PrimaryCareDashboard() {
                 <div className="p-3 bg-slate-900/40 border border-slate-900 rounded-lg">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-xs text-slate-300 font-bold">Same/Next Day Doctor Access</span>
-                    <span className="text-xs font-mono font-bold text-rose-500">38.2%</span>
+                    <span className="text-xs font-mono font-bold text-rose-500">{sameDayAccess}%</span>
                   </div>
                   <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-rose-500 h-full rounded-full" style={{ width: '38.2%' }}></div>
+                    <div className="bg-rose-500 h-full rounded-full" style={{ width: `${sameDayAccess}%` }}></div>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1.5">
                     Percentage of Albertans who are able to obtain a same-day or next-day appointment with their primary care team when sick.
@@ -339,10 +376,10 @@ export default function PrimaryCareDashboard() {
                 <div className="p-3 bg-slate-900/40 border border-slate-900 rounded-lg">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-xs text-slate-300 font-bold">Satisfaction with Wait Time</span>
-                    <span className="text-xs font-mono font-bold text-amber-500">53.0%</span>
+                    <span className="text-xs font-mono font-bold text-amber-500">{waitSatisfaction}%</span>
                   </div>
                   <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-amber-500 h-full rounded-full" style={{ width: '53.0%' }}></div>
+                    <div className="bg-amber-500 h-full rounded-full" style={{ width: `${waitSatisfaction}%` }}></div>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1.5">
                     Percentage of paneled patients satisfied or very satisfied with the wait time for a non-urgent care appointment.
@@ -353,10 +390,10 @@ export default function PrimaryCareDashboard() {
                 <div className="p-3 bg-slate-900/40 border border-slate-900 rounded-lg">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-xs text-slate-300 font-bold">High Clinic Continuity</span>
-                    <span className="text-xs font-mono font-bold text-indigo-400">70.9%</span>
+                    <span className="text-xs font-mono font-bold text-indigo-400">{clinicContinuity}%</span>
                   </div>
                   <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-indigo-500 h-full rounded-full" style={{ width: '70.9%' }}></div>
+                    <div className="bg-indigo-500 h-full rounded-full" style={{ width: `${clinicContinuity}%` }}></div>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1.5">
                     Patients visiting the same clinic for over 80% of their annual primary care consultations.
@@ -367,13 +404,13 @@ export default function PrimaryCareDashboard() {
                 <div className="p-3 bg-slate-900/40 border border-slate-900 rounded-lg">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-xs text-slate-300 font-bold">Primary Care Rating (Excellent)</span>
-                    <span className="text-xs font-mono font-bold text-emerald-400">73.1%</span>
+                    <span className="text-xs font-mono font-bold text-emerald-400">{careRatingExcellent}%</span>
                   </div>
                   <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-emerald-500 h-full rounded-full" style={{ width: '73.1%' }}></div>
+                    <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${careRatingExcellent}%` }}></div>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1.5">
-                    Patients rating their overall primary healthcare experience as Excellent or Very Good (HQA FOCUS Survey).
+                    Patients rating their overall primary healthcare experience as Excellent or Very Good (HQCA FOCUS Survey).
                   </p>
                 </div>
               </div>
@@ -389,7 +426,6 @@ export default function PrimaryCareDashboard() {
         </div>
       )}
 
-      {/* 2. FIND A PROVIDER DIRECTORY */}
       {activeSubTab === 'directory' && (
         <div className="space-y-6">
           {/* Filters Panel */}
@@ -397,6 +433,7 @@ export default function PrimaryCareDashboard() {
             <div className="flex items-center gap-2 border-b border-slate-900 pb-3">
               <Sliders className="w-4 h-4 text-indigo-400" />
               <h3 className="text-xs font-black text-white uppercase tracking-wider">Search & Filter Clinics Accepting New Patients</h3>
+              <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="ACCEPTING_PROVIDERS" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -475,7 +512,7 @@ export default function PrimaryCareDashboard() {
 
             <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-900">
               <span>Showing <strong>{filteredProviders.length}</strong> providers accepting new patients matching criteria.</span>
-              <button 
+              <button
                 onClick={() => {
                   setDirectorySearch('');
                   setSelectedZoneFilter('All');
@@ -493,10 +530,16 @@ export default function PrimaryCareDashboard() {
 
           {/* Directory Listings Grid */}
           {filteredProviders.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProviders.map(prov => (
-                <div 
-                  key={prov.id} 
+            <div className="space-y-4">
+              {filteredProviders.length > 60 && (
+                <div className="text-xs text-amber-400 bg-amber-500/5 border border-amber-500/15 rounded-lg p-3">
+                  Showing first 60 of {filteredProviders.length} matching providers. Narrow your search or filter to see more.
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProviders.slice(0, 60).map(prov => (
+                <div
+                  key={prov.id}
                   className="bg-slate-950 border border-slate-900 hover:border-indigo-500/40 rounded-xl p-5 flex flex-col justify-between transition-all shadow-md relative group"
                 >
                   <div className="absolute top-4 right-4 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -573,7 +616,7 @@ export default function PrimaryCareDashboard() {
                     <div className="flex items-center justify-between text-[10px] text-slate-500">
                       <div className="flex items-center gap-1">
                         <Globe className="w-3 h-3 text-slate-500" />
-                        <span>{prov.languages.join(', ')}</span>
+                        <span>{(prov.languages ?? []).join(', ') || '—'}</span>
                       </div>
                       {prov.gender && (
                         <span>Gender: <strong className="text-slate-400">{prov.gender}</strong></span>
@@ -582,6 +625,7 @@ export default function PrimaryCareDashboard() {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           ) : (
             <div className="bg-slate-950 border border-slate-900 rounded-xl p-12 text-center space-y-4">
@@ -597,155 +641,7 @@ export default function PrimaryCareDashboard() {
         </div>
       )}
 
-      {/* 3. LGA COMMUNITY NEED */}
-      {activeSubTab === 'needs' && (
-        <div className="space-y-6">
-          {/* Controls */}
-          <div className="bg-slate-950 border border-slate-900 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">Local Geographic Area (LGA) Primary Care Gaps</h3>
-              <p className="text-xs text-slate-400">Analyze localized shortages and the corresponding impact on diagnostic and hospital burdens.</p>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400 font-bold whitespace-nowrap">Zone:</span>
-                <select
-                  value={selectedNeedsZone}
-                  onChange={(e) => setSelectedNeedsZone(e.target.value)}
-                  className="px-2.5 py-1.5 rounded bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none"
-                >
-                  <option value="All">All Zones</option>
-                  <option value="Calgary Zone">Calgary Zone</option>
-                  <option value="Edmonton Zone">Edmonton Zone</option>
-                  <option value="Central Zone">Central Zone</option>
-                  <option value="South Zone">South Zone</option>
-                  <option value="North Zone">North Zone</option>
-                </select>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400 font-bold whitespace-nowrap">Sort by Need:</span>
-                <select
-                  value={needsSortBy}
-                  onChange={(e) => setNeedsSortBy(e.target.value as any)}
-                  className="px-2.5 py-1.5 rounded bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none"
-                >
-                  <option value="physicians">Physicians per 100k (Lowest Supply)</option>
-                  <option value="travel">Claims Outside LGA (Highest Travel)</option>
-                  <option value="acsc">Avoidable Hospitalization (ACSC)</option>
-                  <option value="population">Population (Size)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Grid Layout of LGAs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedLGAData.map((lga, idx) => {
-              // Threshold indicators
-              const isShortage = lga.familyPhysiciansPer100k < 75;
-              const isHighTravel = lga.pctClaimsOutsideLGA > 40;
-              const isHighACSC = lga.acscHospitalizationRatePer100k > 350;
-
-              return (
-                <div key={idx} className="bg-slate-950 border border-slate-900 rounded-xl p-5 space-y-4">
-                  {/* Title Bar */}
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">
-                        {lga.zone}
-                      </span>
-                      <h4 className="text-base font-black text-white mt-0.5">
-                        {lga.lgaName}
-                      </h4>
-                      <span className="text-[10px] text-slate-400 font-medium">
-                        Population: {lga.population.toLocaleString()}
-                      </span>
-                    </div>
-
-                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                      lga.socioeconomicRiskIndex === 'High' 
-                        ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                        : lga.socioeconomicRiskIndex.includes('High')
-                        ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    }`}>
-                      Risk: {lga.socioeconomicRiskIndex}
-                    </span>
-                  </div>
-
-                  {/* Core Metrics */}
-                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-900">
-                    <div className="p-2.5 bg-slate-900/40 border border-slate-900 rounded-lg">
-                      <span className="text-[9px] text-slate-500 uppercase font-bold tracking-wider block">GP Supply</span>
-                      <span className={`text-sm font-mono font-bold block mt-1 ${isShortage ? 'text-rose-400' : 'text-emerald-400'}`}>
-                        {lga.familyPhysiciansPer100k} / 100k
-                      </span>
-                      <span className="text-[9px] text-slate-400">Prov Avg: ~102.3</span>
-                    </div>
-
-                    <div className="p-2.5 bg-slate-900/40 border border-slate-900 rounded-lg">
-                      <span className="text-[9px] text-slate-500 uppercase font-bold tracking-wider block">Travel Reliance</span>
-                      <span className={`text-sm font-mono font-bold block mt-1 ${isHighTravel ? 'text-amber-400' : 'text-slate-300'}`}>
-                        {lga.pctClaimsOutsideLGA}%
-                      </span>
-                      <span className="text-[9px] text-slate-400">Consult outside LGA</span>
-                    </div>
-                  </div>
-
-                  {/* Avoidable Hospitalizations & Mental Health Reliance */}
-                  <div className="space-y-2 pt-2 border-t border-slate-900">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">Avoidable Hospitalizations (ACSC Rate)</span>
-                      <span className={`font-mono font-bold ${isHighACSC ? 'text-rose-400' : 'text-slate-300'}`}>
-                        {lga.acscHospitalizationRatePer100k} <span className="text-[10px] text-slate-500">/100k</span>
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">ED Mood/Anxiety Access Rate</span>
-                      <span className="font-mono font-bold text-indigo-400">
-                        {lga.moodAnxietyEdRatePer100k} <span className="text-[10px] text-slate-500">/100k</span>
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">ED Substance Use Access Rate</span>
-                      <span className="font-mono font-bold text-violet-400">
-                        {lga.substanceAbuseEdRatePer100k} <span className="text-[10px] text-slate-500">/100k</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Vulnerability Warnings */}
-                  {(isShortage || isHighTravel || isHighACSC) && (
-                    <div className="pt-2.5 border-t border-slate-900 flex flex-wrap gap-1">
-                      {isShortage && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400">
-                          Severe GP Shortage
-                        </span>
-                      )}
-                      {isHighTravel && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">
-                          Out-of-Area Care Reliance
-                        </span>
-                      )}
-                      {isHighACSC && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400">
-                          High Preventable Admission
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* 4. PCN CAPACITY & FUNDING */}
       {activeSubTab === 'pcn' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -754,12 +650,13 @@ export default function PrimaryCareDashboard() {
               <div>
                 <h3 className="text-sm font-black text-white uppercase tracking-wider">Primary Care Network (PCN) Resource Distribution</h3>
                 <p className="text-xs text-slate-400">Comparison of active primary care providers and payments per patient across health zones.</p>
+              <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="PCN_CAPACITY" />
               </div>
 
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={PCN_CAPACITY.filter(c => c.zone !== 'Alberta')}
+                    data={primaryCareData.PCN_CAPACITY.filter(c => c.zone !== 'Alberta')}
                     margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -772,14 +669,14 @@ export default function PrimaryCareDashboard() {
                     </YAxis>
                     <Tooltip contentStyle={{ backgroundColor: '#090d16', borderColor: '#1e293b' }} />
                     <Legend />
-                    <Bar yAxisId="left" dataKey="activeProviders" name="Active GP Providers" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={35} />
-                    <Bar yAxisId="right" dataKey="fundingPerPatient" name="Annual Funding per Patient" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={35} />
+                    <Bar yAxisId="left" dataKey="activeProviders" name="Active GP Providers" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={35}  isAnimationActive={false} />
+                    <Bar yAxisId="right" dataKey="fundingPerPatient" name="Annual Funding per Patient" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={35}  isAnimationActive={false} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
               <div className="p-3 bg-slate-900/50 border border-slate-900 rounded-lg text-xs text-slate-300">
-                <strong>Funding Distribution Insight:</strong> The provincial average funding per patient is <strong className="text-emerald-400">$84.55</strong>. While rural/remote regions like the <strong>North Zone</strong> receive higher relative patient funding (<strong className="text-emerald-400">$87.50</strong>), they suffer from severe provider shortages with only <strong className="text-rose-400">79.1 GP providers per 100k population</strong> compared to Edmonton (<strong className="text-indigo-400">113.8</strong>) and Calgary (<strong className="text-indigo-400">110.3</strong>).
+                <strong>Funding Distribution Insight:</strong> The provincial average funding per patient is <strong className="text-emerald-400">${provincialFundingPerPatient}</strong>. While rural/remote regions like the <strong>North Zone</strong> receive higher relative patient funding (<strong className="text-emerald-400">${northZone?.fundingPerPatient ?? 0}</strong>), they suffer from severe provider shortages with only <strong className="text-rose-400">{northZone?.providersPer100k ?? 0} GP providers per 100k population</strong> compared to Edmonton (<strong className="text-indigo-400">{edmontonZone?.providersPer100k ?? 0}</strong>) and Calgary (<strong className="text-indigo-400">{calgaryZone?.providersPer100k ?? 0}</strong>).
               </div>
             </div>
 
@@ -791,7 +688,7 @@ export default function PrimaryCareDashboard() {
               </div>
 
               <div className="divide-y divide-slate-900 overflow-hidden">
-                {PCN_CAPACITY.map((zone, idx) => (
+                {primaryCareData.PCN_CAPACITY.map((zone, idx) => (
                   <div key={idx} className={`py-2.5 flex justify-between items-center text-xs ${zone.zone === 'Alberta' ? 'bg-indigo-950/20 px-2 rounded-lg border border-indigo-900/30' : ''}`}>
                     <div>
                       <strong className={`font-bold block ${zone.zone === 'Alberta' ? 'text-indigo-300' : 'text-white'}`}>
@@ -814,16 +711,14 @@ export default function PrimaryCareDashboard() {
                 ))}
               </div>
 
-              <div className="pt-2 border-t border-slate-900 text-[10px] text-slate-500 flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5" />
-                <span>Source: AHCIP Statistical Supplement Supplement Table 10.2</span>
+              <div className="pt-2 border-t border-slate-900">
+                <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="PCN_CAPACITY" />
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 5. CAUSAL ER LINK */}
       {activeSubTab === 'er-link' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -834,12 +729,13 @@ export default function PrimaryCareDashboard() {
                 <p className="text-xs text-slate-400">
                   Annual minor-condition (CTAS 4 & 5) emergency room visits per 1,000 patients, grouped by care continuity with their primary care provider.
                 </p>
+              <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="ED_RELIANCE_BY_CONTINUITY" />
               </div>
 
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={ED_RELIANCE_BY_CONTINUITY}
+                    data={primaryCareData.ED_RELIANCE_BY_CONTINUITY}
                     margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -849,10 +745,10 @@ export default function PrimaryCareDashboard() {
                     </YAxis>
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#090d16', borderColor: '#1e293b' }}
-                      formatter={(v: any) => [`${v} visits`, 'Visits per 1,000']}
+                      formatter={(v: number) => [`${v} visits`, 'Visits per 1,000']}
                     />
-                    <Bar dataKey="minorConditionEdVisitsPer1000" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={45}>
-                      {ED_RELIANCE_BY_CONTINUITY.map((entry, index) => {
+                    <Bar dataKey="minorConditionEdVisitsPer1000" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={45} isAnimationActive={false}>
+                      {primaryCareData.ED_RELIANCE_BY_CONTINUITY.map((entry, index) => {
                         let barColor = '#3b82f6';
                         if (entry.group.includes('High')) barColor = '#10b981';
                         if (entry.group.includes('Low')) barColor = '#f59e0b';
@@ -871,7 +767,7 @@ export default function PrimaryCareDashboard() {
                   <strong className="text-xs text-white">The "Primary Care Collapse to ER Overreliance" Loop:</strong>
                 </div>
                 <p className="text-xs text-slate-300">
-                  HQA FOCUS healthcare datasets demonstrate a direct correlation between primary care continuity and emergency room pressure. Patients who have no family doctor, or have extremely low continuity (&lt;30%), consume over <span className="text-rose-400 font-black">3x more ER visits</span> for simple minor conditions (sore throats, minor rashes, routine medication renewal) than attached patients with high continuity.
+                  Analytical model based on CIHI Shared Health Priorities and HQCA FOCUS survey data. Patients who have no family doctor, or have extremely low continuity (&lt;30%), consume over <span className="text-rose-400 font-black">3x more ER visits</span> for simple minor conditions (sore throats, minor rashes, routine medication renewal) than attached patients with high continuity.
                 </p>
               </div>
             </div>
@@ -888,7 +784,7 @@ export default function PrimaryCareDashboard() {
                 <div className="p-3 bg-slate-900/40 border border-slate-900 rounded-lg space-y-1">
                   <span className="text-[10px] text-indigo-400 uppercase font-black tracking-wider block">1. Panel Expansion & Attachment Support</span>
                   <p className="text-slate-400 leading-relaxed">
-                    Formalize relationships via CPAR. Target the <strong className="text-white">16.8% unattached residents</strong>, prioritizing low-income and remote geographies with active nurse practitioner integration.
+                    Formalize relationships via CPAR. Target the <strong className="text-white">{Math.round((100 - attachmentRate) * 10) / 10}% unattached residents</strong>, prioritizing low-income and remote geographies with active nurse practitioner integration.
                   </p>
                 </div>
 
@@ -910,7 +806,7 @@ export default function PrimaryCareDashboard() {
               </div>
 
               <div className="pt-2 border-t border-slate-900 text-[10px] text-slate-500">
-                <span>Indicators verified from HQA FOCUS &amp; CIHI priority health guidelines.</span>
+                <span>Unofficial analytical model · CIHI Shared Health Priorities &amp; HQCA FOCUS survey references</span>
               </div>
             </div>
           </div>

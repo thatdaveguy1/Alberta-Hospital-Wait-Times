@@ -43,6 +43,8 @@ import {
   FACILITY_COMPARISONS,
   SPECIALIST_COMPARISONS,
 } from '../surgicalData';
+import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
+import { _dataMetadata as surgicalDataMetadata } from '../surgicalData';
 
 export default function SurgicalDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'overview' | 'ortho' | 'comparisons' | 'statscan'>('overview');
@@ -110,15 +112,17 @@ export default function SurgicalDashboard() {
   return (
     <div className="space-y-6">
       
-      {/* Top Banner & Context Header */}
-      <div className="p-5 bg-gradient-to-br from-[#0c142c] to-[#040713] border border-blue-500/10 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1.5">
-          <h2 className="text-xl font-black text-white tracking-tight sm:text-2xl flex items-center gap-2">
-            Alberta Surgical Wait Times Intelligence Portal
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <Activity className="w-5 h-5 text-blue-400" />
+            <span>Surgical Wait Times</span>
           </h2>
-          <p className="text-xs text-slate-400 max-w-2xl">
-            A comprehensive clinical operations dashboard tracking authoritative data feeds across geography, facilities, specialists, and historical timelines. Built to satisfy standard medical database reporting schemas.
+          <p className="text-xs text-slate-400 mt-1">
+            Track surgery waitlists, volumes, and priority benchmark compliance across facilities.
           </p>
+          <DataTimestamp metadata={surgicalDataMetadata} arrayKey="SURGICAL_RECORDS" />
         </div>
       </div>
 
@@ -254,6 +258,7 @@ export default function SurgicalDashboard() {
                 <p className="text-[11px] text-slate-400 leading-normal mb-4">
                   Official reporting parameters showing the median and 90th percentile (the timeframe in which 90% of procedures are performed).
                 </p>
+                <DataTimestamp compact metadata={surgicalDataMetadata} arrayKey="SURGICAL_RECORDS" />
               </div>
 
               <div className="overflow-x-auto">
@@ -588,6 +593,7 @@ export default function SurgicalDashboard() {
               <p className="text-xs text-slate-400">
                 Detailed metrics by geography comparing hip and knee replacement wait segments and historical median values.
               </p>
+              <DataTimestamp compact metadata={surgicalDataMetadata} arrayKey="ORTHOPEDIC_SPECIALTY_RECORDS" />
             </div>
 
             {/* Procedure toggle */}
@@ -733,6 +739,7 @@ export default function SurgicalDashboard() {
               <div>
                 <h3 className="font-extrabold text-sm text-white uppercase tracking-wider">Facility Head-to-Head</h3>
                 <p className="text-[10px] text-slate-400">Select any two surgical facilities to compare operational metrics and waitlist counts side-by-side.</p>
+                <DataTimestamp compact metadata={surgicalDataMetadata} arrayKey="FACILITY_COMPARISONS" />
               </div>
             </div>
 
@@ -1075,6 +1082,7 @@ export default function SurgicalDashboard() {
               <p className="text-[11px] text-slate-400 leading-relaxed">
                 This captures patient-reported outcomes on medical specialist initial consultation access. Prolonged waiting represents a severe bottleneck prior to decision-for-surgery scheduling.
               </p>
+              <DataTimestamp compact metadata={surgicalDataMetadata} arrayKey="STATSCAN_SATISFACTION_STATS" />
             </div>
           </div>
 

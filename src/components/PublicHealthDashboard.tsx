@@ -47,6 +47,8 @@ import {
   NotifiableDiseaseIncidence,
   EnvironmentalAdvisory
 } from '../publicHealthData';
+import { DataTimestamp } from './DataTimestamp';
+import { _dataMetadata as publicHealthDataMetadata } from '../publicHealthData';
 
 export default function PublicHealthDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'respiratory' | 'wastewater' | 'notifiable' | 'immunization' | 'advisories'>('respiratory');
@@ -99,82 +101,54 @@ export default function PublicHealthDashboard() {
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
-      <div id="ph-header-banner" className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute left-1/3 top-0 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl -z-10" />
-        
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                Public Health & Epidemic Surveillance
-              </span>
-              <span className="text-xs text-slate-500 font-mono">
-                Data Sources: AHS Respiratory Virus Portal, PHAC Wastewater Feed, Open Alberta Registry
-              </span>
-            </div>
-            <h1 className="text-2xl font-black text-white tracking-tight sm:text-3xl">
-              Public Health & Outbreak Monitor
-            </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-              Track real-time pathogen surveillance, community wastewater viral loads, childhood immunization 
-              vulnerability indices, communicable disease spikes, and active regional environmental health advisories.
-            </p>
-          </div>
-
-          <div id="ph-navigation-tabs" className="flex flex-wrap gap-1.5 bg-slate-950/60 p-1 rounded-xl border border-slate-850 self-start lg:self-auto shrink-0">
-            <button
-              onClick={() => setActiveSubTab('respiratory')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'respiratory' 
-                  ? 'bg-indigo-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Pathogen Activity
-            </button>
-            <button
-              onClick={() => setActiveSubTab('wastewater')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'wastewater' 
-                  ? 'bg-indigo-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Wastewater Signals
-            </button>
-            <button
-              onClick={() => setActiveSubTab('notifiable')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'notifiable' 
-                  ? 'bg-indigo-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Notifiable Diseases
-            </button>
-            <button
-              onClick={() => setActiveSubTab('immunization')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'immunization' 
-                  ? 'bg-indigo-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Vaccination Gap
-            </button>
-            <button
-              onClick={() => setActiveSubTab('advisories')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'advisories' 
-                  ? 'bg-indigo-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Environmental Health
-            </button>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-indigo-400" />
+            <span>Public Health & Surveillance</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Track respiratory viruses, wastewater pathogen loads, and immunization rates.
+          </p>
+          <DataTimestamp metadata={publicHealthDataMetadata} arrayKey="RVD_RESPIRATORY_CASE_COUNTS" />
         </div>
+      </div>
+
+      {/* Primary Sub-Tab Navigation */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+        <button
+          onClick={() => setActiveSubTab('respiratory')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'respiratory'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>Respiratory Viruses</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('wastewater')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'wastewater'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Wastewater Signals</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('immunization')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'immunization'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <ShieldAlert className="w-4 h-4" />
+          <span>Childhood Immunization</span>
+        </button>
       </div>
 
       {/* Warning Narrative Chain */}
@@ -198,6 +172,7 @@ export default function PublicHealthDashboard() {
       {/* SUBTAB 1: Respiratory Virus Burden */}
       {activeSubTab === 'respiratory' && (
         <div id="ph-respiratory-subtab" className="space-y-6 animate-fadeIn">
+          <DataTimestamp compact metadata={publicHealthDataMetadata} arrayKey="RESPIRATORY_VIRUS_SURVEILLANCE" />
           {/* Top-line Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
@@ -343,6 +318,7 @@ export default function PublicHealthDashboard() {
       {/* SUBTAB 2: Wastewater Pathogen Signal */}
       {activeSubTab === 'wastewater' && (
         <div id="ph-wastewater-subtab" className="space-y-6 animate-fadeIn">
+          <DataTimestamp compact metadata={publicHealthDataMetadata} arrayKey="WASTEWATER_SIGNALS" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Wastewater Early Warning Pathogen Logs</h3>
@@ -525,6 +501,7 @@ export default function PublicHealthDashboard() {
       {/* SUBTAB 4: Childhood Immunization Gap */}
       {activeSubTab === 'immunization' && (
         <div id="ph-immunization-subtab" className="space-y-6 animate-fadeIn">
+          <DataTimestamp compact metadata={publicHealthDataMetadata} arrayKey="CHILDHOOD_IMMUNIZATION_COVERAGE" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Childhood Immunization Coverage Gap (Age 2)</h3>
@@ -630,6 +607,7 @@ export default function PublicHealthDashboard() {
       {/* SUBTAB 5: Environmental Health Advisories */}
       {activeSubTab === 'advisories' && (
         <div id="ph-advisories-subtab" className="space-y-6 animate-fadeIn">
+          <DataTimestamp compact metadata={publicHealthDataMetadata} arrayKey="OUTBREAK_PROTOCOLS" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
               {['All', 'Cyanobacteria (Blue-Green Algae)', 'Air Quality Advisory', 'Boil Water Advisory', 'Water Quality Advisory'].map(type => (

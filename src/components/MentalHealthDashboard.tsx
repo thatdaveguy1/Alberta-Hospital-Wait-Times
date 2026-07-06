@@ -11,6 +11,7 @@ import {
   Info,
   ChevronRight,
   Heart,
+  Layers,
   ShieldAlert,
   PhoneCall,
   Activity,
@@ -44,6 +45,8 @@ import {
   CommunityMHWait,
   HospitalMHSUBurden
 } from '../mentalHealthData';
+import { DataTimestamp } from './DataTimestamp';
+import { _dataMetadata as mentalHealthDataMetadata } from '../mentalHealthData';
 
 export default function MentalHealthDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'substance-harms' | 'addiction-beds' | 'community-access' | 'er-pressure' | 'helplines'>('substance-harms');
@@ -102,82 +105,76 @@ export default function MentalHealthDashboard() {
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute left-1/4 top-0 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl -z-10" />
-        
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                Mental Health & Addictions Console
-              </span>
-              <span className="text-xs text-slate-500 font-mono">
-                Data Feeds: Recovery Alberta & ABED Registry
-              </span>
-            </div>
-            <h1 className="text-2xl font-black text-white tracking-tight sm:text-3xl">
-              Mental Health & Addictions Performance
-            </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-              Track substance-related harms, live detoxification & recovery bed availability, 
-              community counselling waiting durations, hospital readmission indicators, and crisis care helpline directories.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 bg-slate-950/60 p-1 rounded-xl border border-slate-850 self-start lg:self-auto shrink-0">
-            <button
-              onClick={() => setActiveSubTab('substance-harms')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'substance-harms' 
-                  ? 'bg-purple-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Overdose & Harms
-            </button>
-            <button
-              onClick={() => setActiveSubTab('addiction-beds')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'addiction-beds' 
-                  ? 'bg-purple-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Addiction Beds
-            </button>
-            <button
-              onClick={() => setActiveSubTab('community-access')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'community-access' 
-                  ? 'bg-purple-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Counselling Access
-            </button>
-            <button
-              onClick={() => setActiveSubTab('er-pressure')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'er-pressure' 
-                  ? 'bg-purple-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              ER & Hospital Pressure
-            </button>
-            <button
-              onClick={() => setActiveSubTab('helplines')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'helplines' 
-                  ? 'bg-purple-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Crisis Helplines
-            </button>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <Brain className="w-5 h-5 text-purple-400" />
+            <span>Mental Health & Addictions</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Track substance use harms, treatment bed capacity, and helpline volumes.
+          </p>
+          <DataTimestamp metadata={mentalHealthDataMetadata} arrayKey="SUBSTANCE_HARM_TRENDS" />
         </div>
+      </div>
+
+      {/* Sub-tab Navigation */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+        <button
+          onClick={() => setActiveSubTab('substance-harms')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'substance-harms'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          <span>Substance Harms</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('addiction-beds')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'addiction-beds'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Addiction Beds</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('community-access')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'community-access'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Community Access</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('er-pressure')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'er-pressure'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>ER Pressure</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('helplines')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'helplines'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Clock className="w-4 h-4" />
+          <span>Crisis Helplines</span>
+        </button>
       </div>
 
       {/* SUBTAB 1: Overdose & Substance Harms */}
@@ -327,6 +324,7 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB 2: Daily Bed Capacity (findaddictionbeds.alberta.ca) */}
       {activeSubTab === 'addiction-beds' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={mentalHealthDataMetadata} arrayKey="ADDICTION_BED_CAPACITIES" />
           {/* Bed search & corridor filters */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
@@ -451,6 +449,7 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB 3: Community MH Counselling (CIHI Indicators) */}
       {activeSubTab === 'community-access' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={mentalHealthDataMetadata} arrayKey="COMMUNITY_MH_WAITS" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Counselling waits chart */}
@@ -541,6 +540,7 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB 4: ER & Hospital Pressure */}
       {activeSubTab === 'er-pressure' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={mentalHealthDataMetadata} arrayKey="HOSPITAL_MHSU_BURDEN" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Readmissions & ER Overloads */}
@@ -611,6 +611,7 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB 5: Helplines & Support Pathways */}
       {activeSubTab === 'helplines' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={mentalHealthDataMetadata} arrayKey="SUPPORT_HELPLINES" />
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Crisis Helplines & Navigation Pathways</h3>

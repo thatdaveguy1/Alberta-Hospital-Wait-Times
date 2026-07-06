@@ -19,11 +19,14 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { ServiceDisruption } from '../types';
+import { useSyncStatus, formatRelativeTime, getDomainResult } from '../hooks/useSyncStatus';
 
 export default function ServiceDisruptionsDashboard() {
   const [disruptions, setDisruptions] = useState<ServiceDisruption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { syncStatus } = useSyncStatus();
+  const disruptionsSync = getDomainResult(syncStatus, 'disruptions');
 
   // Filters state
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,44 +110,37 @@ export default function ServiceDisruptionsDashboard() {
 
   const formatDate = (isoString: string) => {
     if (!isoString) return '';
+    const cleanStr = isoString.trim();
+    if (['ongoing', 'tbd', 'indefinite', 'unknown'].includes(cleanStr.toLowerCase())) {
+      return cleanStr;
+    }
     try {
-      const date = new Date(isoString);
+      const date = new Date(cleanStr);
+      if (isNaN(date.getTime())) {
+        return cleanStr;
+      }
       return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
       });
     } catch {
-      return isoString;
+      return cleanStr;
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Top Banner & Status Panel */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-900/40 border border-slate-800 p-6 rounded-3xl shadow-lg">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="p-1 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg">
-              <ShieldAlert className="w-5 h-5" />
-            </span>
-            <h2 className="text-xl font-black text-white tracking-tight">AHS Temporary Service Disruptions</h2>
-          </div>
-          <p className="text-xs text-slate-400 leading-normal max-w-2xl">
-            Monitor real-time closures, emergency room closures, bed reductions, and specialty suspensions across Alberta.
-            Updates scraped directly from the official Alberta Health Services temporary service advisory portal.
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-red-400" />
+            <span>Temporary Service Disruptions</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Monitor real-time closures, reduced hours, and bed reductions across Alberta.
           </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2 shrink-0 w-full lg:w-auto">
-          <button
-            onClick={fetchDisruptions}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
-            title="Force scrape / refresh disruptions"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>Refresh State</span>
-          </button>
         </div>
       </div>
 

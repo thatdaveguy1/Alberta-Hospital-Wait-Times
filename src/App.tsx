@@ -11,6 +11,8 @@ import {
   BarChart3,
   RefreshCw,
   Info,
+  FileText,
+  Database,
   Compass,
   Map,
   SlidersHorizontal,
@@ -70,6 +72,8 @@ import PublicHealthDashboard from './components/PublicHealthDashboard';
 import RegionalInequityDashboard from './components/RegionalInequityDashboard';
 import SpendingDashboard from './components/SpendingDashboard';
 import VirtualCareDashboard from './components/VirtualCareDashboard';
+import { useSyncStatus } from './hooks/useSyncStatus';
+import { LiveDataBadge } from './components/LiveDataBadge';
 
 
 const DASHBOARDS = [
@@ -362,8 +366,121 @@ const formatChartXAxis = (tick: string, range: string) => {
   }
 };
 
+const TAB_METADATA_MAP: Record<string, {
+  updateType: 'auto' | 'manual';
+  interval: string;
+  sourceVintage: string;
+  source: string;
+  domain?: string;
+}> = {
+  'er-waits': {
+    updateType: 'auto',
+    interval: 'every 30 mins',
+    sourceVintage: 'Real-time feed',
+    source: 'Alberta Health Services Portal'
+  },
+  'disruptions': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: 'Live Active Alerts',
+    source: 'AHS Emergency Advisories'
+  },
+  'system-flow': {
+    updateType: 'manual',
+    interval: 'on demand',
+    sourceVintage: '2025/2026 compiled data',
+    source: 'HQA FOCUS & AHS Weekly reports'
+  },
+  'surgical-waits': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: 'Live / April 2026',
+    source: 'AHCIP Surgical Wait Time Registry & ABJHI Orthopedic feeds',
+    domain: 'surgical'
+  },
+  'primary-care': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2024-2026',
+    source: 'CIHI Shared Health Priorities & accepting providers database',
+    domain: 'primary-care'
+  },
+  'workforce': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2015-2024',
+    source: 'CIHI Health Workforce Database & CPSA Registry',
+    domain: 'workforce'
+  },
+  'diagnostics': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2025-2026',
+    source: 'APL QMe, AHS Imaging & CIHI Diagnostic Imaging',
+    domain: 'diagnostic'
+  },
+  'cancer': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2025 screening & wait trends',
+    source: 'Cancer Care Alberta & CIHI priority procedure waits',
+    domain: 'cancer'
+  },
+  'mental-health': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2019-2026 MHSU indicators',
+    source: 'Recovery Alberta, ASUSS & CIHI indicators',
+    domain: 'mental-health'
+  },
+  'long-term-care': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2020-2026 placement stats',
+    source: 'HQA FOCUS, CIHI CCRS & AHS Continuing Care Registry',
+    domain: 'continuing-care'
+  },
+  'patient-experience': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2026 survey data',
+    source: 'HQA FOCUS & CIHI CPES-IC',
+    domain: 'patient-experience'
+  },
+  'public-health': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: 'July 2026 surveillance indicators',
+    source: 'AHS ProvLab, PHAC Wastewater Feed & Alberta RVD',
+    domain: 'public-health'
+  },
+  'regional-inequity': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2026 LGA Community Profiles',
+    source: 'Alberta Health Community Profiles (135 LGAs)',
+    domain: 'regional-inequity'
+  },
+  'health-spending': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2025 spending benchmarks',
+    source: 'CIHI Spending Trends & AHCIP Supplement',
+    domain: 'spending'
+  },
+  'virtual-care': {
+    updateType: 'auto',
+    interval: 'every 24 hours',
+    sourceVintage: '2025-2026 program statistics',
+    source: 'AHS Quick Facts, CJEM Study & PubMed API',
+    domain: 'virtual-care'
+  }
+};
+
 export default function App() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const { syncStatus } = useSyncStatus();
+  const [isSourcesModalOpen, setIsSourcesModalOpen] = useState(false);
   const [zoneTrends, setZoneTrends] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -867,17 +984,6 @@ export default function App() {
       console.warn("Delete subscription failure:", err);
     }
   };
-
-  const refreshAll = () => {
-    fetchHospitals();
-    fetchZoneTrends(zoneRange);
-    fetchAlertsAndLogs();
-    fetchMaxStats();
-    if (selectedHospital) {
-      fetchTrends(selectedHospital.id, hospitalRange);
-    }
-  };
-
   // Get unique region list
   const regions = ['All', ...Array.from(new Set(hospitals.map(h => h.region)))];
 
@@ -1121,10 +1227,7 @@ export default function App() {
               </button>
             )}
 
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-              <Clock className="w-3.5 h-3.5 text-slate-500" />
-              <span>Synced: {hospitals.length > 0 ? format(new Date(hospitals[0].updatedAt), 'HH:mm:ss') : '--:--:--'}</span>
-            </div>
+
           </div>
         </div>
       </header>
@@ -1426,144 +1529,101 @@ export default function App() {
           </div>
         </div>
 
+        {/* STANDARDIZED LAST UPDATED BANNER */}
+        {(() => {
+          const activeTabMeta = TAB_METADATA_MAP[activeTab] || {
+            updateType: 'manual',
+            interval: 'on demand',
+            sourceVintage: '2025/2026',
+            source: 'AHS datasets'
+          };
+          const isAuto = activeTabMeta.updateType === 'auto';
+          let lastUpdatedDisplay = 'July 5, 2026 at 12:00 PM';
+          let sourceVintageDisplay = activeTabMeta.sourceVintage;
+
+          if (isAuto) {
+            if (activeTab === 'er-waits') {
+              if (syncStatus?.erWaitTimesLastUpdate) {
+                lastUpdatedDisplay = new Date(syncStatus.erWaitTimesLastUpdate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                sourceVintageDisplay = lastUpdatedDisplay;
+              } else {
+                lastUpdatedDisplay = 'Live Feed';
+              }
+            } else if (activeTab === 'disruptions') {
+              const result = syncStatus?.results?.find(r => r.domain === 'disruptions' || r.pipeline === 'disruptionsScraper');
+              if (result?.timestamp) {
+                lastUpdatedDisplay = new Date(result.timestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                sourceVintageDisplay = lastUpdatedDisplay;
+              } else {
+                lastUpdatedDisplay = 'Scraped daily';
+              }
+            } else {
+              const result = syncStatus?.results?.find(r => r.domain === activeTabMeta.domain);
+              if (result?.timestamp) {
+                lastUpdatedDisplay = new Date(result.timestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+              } else if (syncStatus?.lastSyncTimestamp) {
+                lastUpdatedDisplay = new Date(syncStatus.lastSyncTimestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+              } else {
+                lastUpdatedDisplay = 'July 5, 2026 at 12:00 PM';
+              }
+            }
+          } else {
+            lastUpdatedDisplay = 'July 5, 2026 at 12:00 PM';
+          }
+
+          return (
+            <div className="bg-slate-900 border border-slate-800/80 px-4 py-3 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 mb-6 shadow-md relative overflow-hidden">
+              <div className="flex items-center gap-3">
+                <div className={`p-1.5 rounded-lg shrink-0 border ${
+                  isAuto 
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                    : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                }`}>
+                  {isAuto ? <RefreshCw className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full border ${
+                      isAuto 
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                    }`}>
+                      {isAuto ? `Auto-updated (${activeTabMeta.interval})` : `Manual (${activeTabMeta.interval})`}
+                    </span>
+                    <span className="text-xs font-bold text-slate-200">
+                      Last Update: <span className="font-mono text-white font-black">{lastUpdatedDisplay}</span>
+                    </span>
+                    <span className="text-slate-600 text-xs hidden sm:inline">·</span>
+                    <span className="text-[11px] text-slate-400">
+                      Data Timestamp: <span className="font-extrabold text-slate-200">{sourceVintageDisplay}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* ACTIVE CONTENT CHANNEL (Full Width Layout) */}
         <div className="w-full min-w-0">
             {activeTab === 'er-waits' ? (
           <>
-            {/* Proximity / Geolocation Control Banner */}
-            <div id="geolocation-banner" className="mb-6 p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950/20 border border-slate-800 rounded-2xl shadow-xl relative overflow-hidden">
-          {/* Subtle background glow */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
-          
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-            {/* Left Side: Title and Feature Explanation */}
-            <div className="max-w-2xl space-y-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="p-1.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400">
-                  <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
-                </span>
-                <h3 className="text-xs font-black text-slate-100 uppercase tracking-wider">
-                  Door-to-Doctor Queue Calculator
-                </h3>
-                <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[9px] font-bold uppercase tracking-widest">
-                  Best Feature
-                </span>
-              </div>
-              
-              <h4 className="text-base sm:text-lg font-black text-white tracking-tight leading-snug">
-                Calculate your exact travel time combined with live emergency waiting queues.
-              </h4>
-              
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Standard wait times don't tell the whole story. A closer hospital with a long queue might take longer than a farther hospital with zero wait. This app calculates your driving time to each ER and adds it to the live wait time to show you the <strong className="text-blue-400 font-bold">absolute fastest path to being treated</strong>.
-              </p>
-
-              {/* Formula Visualization */}
-              <div className="pt-1.5">
-                <div className="inline-flex flex-wrap items-center gap-2 p-2 bg-slate-950/80 border border-slate-800/80 rounded-xl text-[10px] sm:text-xs font-mono text-slate-300">
-                  <span className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-900 border border-slate-800/50 rounded-lg text-slate-200">
-                    <Clock className="w-3 h-3 text-blue-400" />
-                    🏥 ER Wait Queue
-                  </span>
-                  <span className="text-slate-500 font-bold">+</span>
-                  <span className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-900 border border-slate-800/50 rounded-lg text-slate-200">
-                    <Navigation className="w-3 h-3 text-cyan-400" />
-                    🚗 Driving Time
-                  </span>
-                  <span className="text-slate-500 font-bold">=</span>
-                  <span className="flex items-center gap-1.5 px-2 py-0.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold">
-                    ⏱️ Net Treatment Time
-                  </span>
-                </div>
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+              <div>
+                <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-400" />
+                  <span>Real-time Emergency Department Wait Times</span>
+                  <LiveDataBadge domain="er-waittimes" />
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Track estimated wait times from registration to physician assessment at regional emergency facilities.
+                </p>
               </div>
             </div>
-
-            {/* Right Side: Interactive Geolocation Form */}
-            <div className="bg-slate-950/60 border border-slate-800/80 p-4 sm:p-5 rounded-2xl lg:w-[350px] shrink-0 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  Select Location Method:
-                </span>
-                {userLocation ? (
-                  <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
-                    userLocation.isGPS 
-                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 animate-pulse' 
-                      : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400'
-                  }`}>
-                    {userLocation.isGPS ? 'Auto-Detected' : 'Custom Location'}
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded text-[8px] font-black uppercase tracking-widest">
-                    Default Mode
-                  </span>
-                )}
-              </div>
-
-              {userLocation && (
-                <div className="p-2 bg-slate-900 border border-slate-800/50 rounded-xl">
-                  <p className="text-[10px] text-slate-400 leading-normal">
-                    Currently estimating drive times relative to:
-                  </p>
-                  <p className="text-xs text-white font-extrabold mt-0.5 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-blue-400" />
-                    <span>{userLocation.city}, AB</span>
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <button
-                  onClick={requestGPSLocation}
-                  disabled={loadingGeo}
-                  className={`w-full py-2 text-xs font-black rounded-xl border transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    userLocation?.isGPS 
-                      ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/10' 
-                      : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
-                  }`}
-                  title="Find my location automatically"
-                >
-                  <Compass className={`w-3.5 h-3.5 ${loadingGeo ? 'animate-spin' : ''}`} />
-                  <span>{loadingGeo ? 'Locating...' : 'Use My Current Location'}</span>
-                </button>
-
-                <div className="relative flex items-center justify-center py-1 select-none">
-                  <span className="absolute bg-slate-950 px-2 text-[8px] font-extrabold text-slate-600 uppercase tracking-wider">
-                    Or Enter Manually
-                  </span>
-                  <div className="w-full border-t border-slate-800"></div>
-                </div>
-
-                <form onSubmit={handleAddressSubmit} className="flex gap-2">
-                  <div className="relative flex-1">
-                    <input
-                      id="manual-location-input"
-                      type="text"
-                      placeholder="e.g. Calgary or T2P 2M5"
-                      value={addressInput}
-                      onChange={(e) => setAddressInput(e.target.value)}
-                      className="w-full h-9 px-3 pl-8 text-xs bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all font-medium"
-                    />
-                    <MapPin className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-500" />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isGeocoding}
-                    className="px-4 h-9 text-xs font-black rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-50 shrink-0 cursor-pointer shadow-md shadow-blue-600/10"
-                  >
-                    {isGeocoding ? '...' : 'Calculate'}
-                  </button>
-                </form>
-              </div>
-
-              {geocodingError && (
-                <p className="text-[10px] text-red-400 font-medium pl-1 leading-normal">{geocodingError}</p>
-              )}
-            </div>
-          </div>
-        </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
           {/* Provincial Avg Wait Card Breakdown */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between">
             <div>
@@ -1661,6 +1721,108 @@ export default function App() {
                   {maxStats?.max30d ? maxStats.max30d.hospitalName.replace('Community Hospital', '').replace('General Hospital', '').trim() : 'Syncing...'}
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* Travel & Treatment Calculator Card */}
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between space-y-3">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
+                  <Compass className="w-4 h-4 text-blue-400" />
+                </div>
+                {userLocation ? (
+                  <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
+                    userLocation.isGPS 
+                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' 
+                      : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400'
+                  }`}>
+                    {userLocation.isGPS ? 'Auto-Detected' : 'Custom'}
+                  </span>
+                ) : (
+                  <span className="px-1.5 py-0.5 bg-slate-800 border border-slate-700/60 text-slate-400 rounded text-[8px] font-black uppercase tracking-widest">
+                    Inactive
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-baseline gap-2 mb-1.5">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  Treatment Calculator
+                </h3>
+              </div>
+              <p className="text-[10px] text-slate-400 leading-normal">
+                Combine your driving time with live ER wait times to find the fastest care.
+              </p>
+            </div>
+
+            <div className="space-y-2 mt-1">
+              {userLocation ? (
+                <div className="p-2 bg-slate-950/60 border border-slate-850 rounded-xl flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-[8px] text-slate-500 uppercase font-bold">Location Origin</p>
+                    <p className="text-[11px] text-white font-extrabold truncate flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-blue-400 shrink-0" />
+                      <span>{userLocation.city}, AB</span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setUserLocation(null);
+                      setAddressInput('');
+                    }}
+                    className="px-2 py-1 text-[9px] font-black bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg uppercase tracking-wider hover:bg-red-500/25 transition-all cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    onClick={requestGPSLocation}
+                    disabled={loadingGeo}
+                    className="py-1.5 px-2 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <Compass className={`w-3 h-3 ${loadingGeo ? 'animate-spin' : ''}`} />
+                    <span>{loadingGeo ? '...' : 'Use GPS'}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const inp = document.getElementById('manual-location-input');
+                      if (inp) inp.focus();
+                    }}
+                    className="py-1.5 px-2 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <MapPin className="w-3 h-3" />
+                    <span>Manual</span>
+                  </button>
+                </div>
+              )}
+
+              <form onSubmit={handleAddressSubmit} className="flex gap-1.5">
+                <div className="relative flex-1">
+                  <input
+                    id="manual-location-input"
+                    type="text"
+                    placeholder="Calgary, T2P..."
+                    value={addressInput}
+                    onChange={(e) => setAddressInput(e.target.value)}
+                    className="w-full h-8 px-2.5 pl-7 text-[10px] bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-all font-medium"
+                  />
+                  <MapPin className="absolute left-2 top-2.5 w-3 h-3 text-slate-600" />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isGeocoding}
+                  className="px-3 h-8 text-[10px] font-black rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-50 shrink-0 cursor-pointer shadow-md shadow-blue-600/10"
+                >
+                  {isGeocoding ? '...' : 'Go'}
+                </button>
+              </form>
+
+              {geocodingError && (
+                <p className="text-[9px] text-red-400 font-medium pl-1 leading-none">{geocodingError}</p>
+              )}
             </div>
           </div>
         </div>
@@ -1787,12 +1949,12 @@ export default function App() {
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-[#0b1329] border border-slate-800 p-4 rounded-2xl shadow-xl space-y-1.5 text-xs max-w-xs">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{format(new Date(payload[0].payload.timestamp), 'MMM d, h:mm a')}</p>
+                          <div className="chart-tooltip space-y-1.5 text-xs max-w-xs">
+                            <p className="chart-tooltip-title">{format(new Date(payload[0].payload.timestamp), 'MMM d, h:mm a')}</p>
                             {payload.map((series: any) => (
-                              <div key={series.name} className="flex justify-between gap-4">
-                                <span style={{ color: series.color || '#cbd5e1' }} className="font-semibold">{series.name}:</span>
-                                <span className="font-bold text-white">{formatMinutesToHm(Number(series.value))}</span>
+                              <div key={series.name} className="chart-tooltip-row">
+                                <span style={{ color: series.color || '#cbd5e1' }} className="chart-tooltip-label">{series.name}:</span>
+                                <span className="chart-tooltip-value">{formatMinutesToHm(Number(series.value))}</span>
                               </div>
                             ))}
                           </div>
@@ -2008,9 +2170,9 @@ export default function App() {
                               content={({ active, payload }) => {
                                 if (active && payload && payload.length) {
                                   return (
-                                    <div className="bg-[#0b1329] border border-slate-800 p-1.5 rounded-lg shadow-lg text-[10px]">
-                                      <p className="font-extrabold text-blue-400">{formatMinutesToHm(Number(payload[0].value))}</p>
-                                      <p className="text-[8px] text-slate-500">{format(new Date(payload[0].payload.timestamp), 'MMM d, HH:mm')}</p>
+                                    <div className="chart-tooltip text-[10px] !p-2">
+                                      <p className="chart-tooltip-value !text-blue-400">{formatMinutesToHm(Number(payload[0].value))}</p>
+                                      <p className="text-[8px] text-slate-500 font-mono mt-0.5">{format(new Date(payload[0].payload.timestamp), 'MMM d, HH:mm')}</p>
                                     </div>
                                   );
                                 }
@@ -2284,11 +2446,87 @@ export default function App() {
             </p>
           </div>
           <div className="flex items-center gap-6 text-xs shrink-0 font-bold uppercase tracking-wider">
+            <button 
+              onClick={() => setIsSourcesModalOpen(true)} 
+              className="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer border-0 bg-transparent p-0 font-bold uppercase tracking-wider"
+            >
+              Data Sources
+            </button>
             <a href="https://www.albertahealthservices.ca/" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-300 transition-colors">Official AHS Web</a>
             <a href="#" className="text-slate-500 hover:text-slate-300 transition-colors">System Diagnostics</a>
           </div>
         </div>
       </footer>
+
+      {/* DATA SOURCES MODAL */}
+      {isSourcesModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-905 border border-slate-800 rounded-3xl max-w-3xl w-full max-h-[80vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="p-6 border-b border-slate-800/80 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-black text-white">Data Sources & Registries</h3>
+                <p className="text-xs text-slate-400 mt-1">Detailed registry of dataset origins and update frequencies across all consoles</p>
+              </div>
+              <button 
+                onClick={() => setIsSourcesModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {/* Scrollable Content */}
+            <div className="p-6 overflow-y-auto space-y-4 flex-1">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-widest text-[9px] font-black">
+                      <th className="py-2.5 pr-4">Console</th>
+                      <th className="py-2.5 px-4">Update Type</th>
+                      <th className="py-2.5 px-4">Frequency</th>
+                      <th className="py-2.5 pl-4">Data Source Registry</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/40 text-slate-300 font-medium">
+                    {Object.entries(TAB_METADATA_MAP).map(([key, meta]) => {
+                      const dashboard = DASHBOARDS.find(d => d.id === key);
+                      const name = dashboard ? dashboard.shortName : key;
+                      const isAuto = meta.updateType === 'auto';
+                      return (
+                        <tr key={key} className="hover:bg-slate-800/20 transition-colors">
+                          <td className="py-3 pr-4 font-bold text-white">{name}</td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${
+                              isAuto 
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                            }`}>
+                              {isAuto ? 'Auto' : 'Manual'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-slate-400 font-mono">{meta.interval}</td>
+                          <td className="py-3 pl-4 text-slate-500 leading-normal">{meta.source}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t border-slate-800/80 flex justify-end">
+              <button
+                onClick={() => setIsSourcesModalOpen(false)}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-lg shadow-blue-500/20"
+              >
+                Close Registry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

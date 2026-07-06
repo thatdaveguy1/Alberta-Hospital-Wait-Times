@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Phone, 
+  PhoneCall, 
   MessageSquare, 
   Clock, 
   Users, 
@@ -12,7 +13,7 @@ import {
   Info, 
   Calendar, 
   ArrowUpRight, 
-  Heart, 
+  Layers,
   Sparkles,
   TrendingUp,
   MapPin,
@@ -43,8 +44,10 @@ import {
   VIRTUAL_MD_COHORT_STUDY,
   VIRTUAL_MD_DISPOSITIONS,
   EMS_811_DIVERSION_DATA,
-  ADJACENT_HELPLINES
+  ADJACENT_HELPLINES,
+  VIRTUAL_CARE_METADATA
 } from '../virtualCareData';
+import { DataTimestamp } from './DataTimestamp';
 
 export default function VirtualCareDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'demand' | 'access-modes' | 'virtual-md' | 'ems-diversion' | 'adjacent-lines'>('demand');
@@ -73,85 +76,77 @@ export default function VirtualCareDashboard() {
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
-      <div id="vc-header-banner" className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute left-1/3 top-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl -z-10" />
-        
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                Virtual & Digital Navigation
-              </span>
-              <span className="text-xs text-slate-500 font-mono">
-                Primary Sources: AHS Quick Facts • CJEM Study • Primary Care Alberta
-              </span>
-            </div>
-            <h1 className="text-2xl font-black text-white tracking-tight sm:text-3xl">
-              Virtual Care, Navigation & 811 Access
-            </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-              Explore Alberta’s Health Link 811 system performance, Virtual MD physician referral outcomes, 
-              911-to-811 emergency diversions, digital access innovations, and adjacent specialized advice networks.
-            </p>
-          </div>
-
-          <div id="vc-navigation-tabs" className="flex flex-wrap gap-1.5 bg-slate-950/60 p-1 rounded-xl border border-slate-850 self-start lg:self-auto shrink-0">
-            <button
-              onClick={() => setActiveSubTab('demand')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'demand' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              811 Demand
-            </button>
-            <button
-              onClick={() => setActiveSubTab('access-modes')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'access-modes' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Access Modes
-            </button>
-            <button
-              onClick={() => setActiveSubTab('virtual-md')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'virtual-md' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Virtual MD Outcomes
-            </button>
-            <button
-              onClick={() => setActiveSubTab('ems-diversion')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'ems-diversion' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              EMS Diversion
-            </button>
-            <button
-              onClick={() => setActiveSubTab('adjacent-lines')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'adjacent-lines' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Adjacent Advice Lines
-            </button>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <PhoneCall className="w-5 h-5 text-emerald-400" />
+            <span>Virtual Care & 811 Navigation</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Track Health Link 811 performance, Virtual MD outcomes, and EMS diversions.
+          </p>
+          <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="HEALTH_LINK_VOLUMES" />
         </div>
       </div>
 
-      {/* SUB-TAB PANELS */}
+      {/* Navigation Sub-Tabs */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+        <button
+          onClick={() => setActiveSubTab('demand')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'demand'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>Health Link 811</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('access-modes')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'access-modes'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Patient Access Modes</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('virtual-md')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'virtual-md'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Virtual MD Cohort</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('ems-diversion')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'ems-diversion'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          <span>EMS 811 Diversion</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('adjacent-lines')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'adjacent-lines'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Clock className="w-4 h-4" />
+          <span>Adjacent Helplines</span>
+        </button>
+      </div>
 
       {/* 1. 811 DEMAND TRENDS */}
       {activeSubTab === 'demand' && (
@@ -500,6 +495,9 @@ export default function VirtualCareDashboard() {
               <p className="text-slate-400 text-xs leading-relaxed">
                 A validation study tracked whether patients referred to Virtual MD followed physician instructions or subsequently flooded emergency departments. 
               </p>
+              <div className="mt-1">
+                <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="VIRTUAL_MD_COHORT_STUDY" compact />
+              </div>
 
               <div className="space-y-4 pt-2">
                 {VIRTUAL_MD_COHORT_STUDY.map((s, index) => (
@@ -535,6 +533,9 @@ export default function VirtualCareDashboard() {
               <div>
                 <h3 className="text-base font-bold text-white mb-1">Virtual MD Dispositions</h3>
                 <p className="text-slate-400 text-xs mb-4">Aesthetic breakdown of final advice categories across first 100,000 patients</p>
+                <div className="mb-4">
+                  <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="VIRTUAL_MD_DISPOSITIONS" compact />
+                </div>
                 
                 <div className="space-y-3.5">
                   {VIRTUAL_MD_DISPOSITIONS.map((d, index) => {
@@ -626,6 +627,9 @@ export default function VirtualCareDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 lg:col-span-2">
               <h3 className="text-sm font-bold text-white mb-4">Estimated Diversion Outcome Split (50,000+ Redirections)</h3>
+              <div className="mb-4">
+                <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="EMS_811_DIVERSION_DATA" compact />
+              </div>
               <div className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={EMS_811_DIVERSION_DATA} layout="vertical" margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
@@ -673,9 +677,12 @@ export default function VirtualCareDashboard() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
             <h3 className="text-base font-bold text-white mb-2">Adjacent Navigation & Specialty Lines</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Health Link 811 acts as a central triage gateway. Callers can dial 811 to be seamlessly transferred to clinical specialists 
+              Health Link 811 acts as a central triage gateway. Callers can dial 811 to be seamlessly transferred to clinical specialists
               across a range of provincial sub-lines. This prevents redundant inquiries and reduces friction for patients seeking specialized care.
             </p>
+            <div className="mt-3">
+              <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="ADJACENT_HELPLINES" compact />
+            </div>
           </div>
 
           {/* Grid layout of helplines */}

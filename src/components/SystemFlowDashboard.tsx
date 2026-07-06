@@ -17,7 +17,6 @@ import {
   ShieldAlert,
   BarChart2,
   ListOrdered,
-  Gauge,
   HeartPulse,
   RefreshCw,
   Users,
@@ -59,13 +58,13 @@ import {
   WeeklyEDLOS,
   CIHIComparator,
   LGADemand,
-  HistoricalFlowSnapshot
+  HistoricalFlowSnapshot,
+  _dataMetadata as systemFlowDataMetadata
 } from '../systemFlowData';
-
+import { DataTimestamp } from './DataTimestamp';
 export default function SystemFlowDashboard() {
   // Navigation Tabs
-  const [subTab, setSubTab] = useState<'causal-chain' | 'ranked' | 'scatterplot' | 'trends-weekly' | 'cihi-lga'>('causal-chain');
-  
+  const [subTab, setSubTab] = useState<'ranked' | 'scatterplot' | 'trends-weekly' | 'cihi-lga'>('ranked');
   // Interactive Filters
   const [selectedZone, setSelectedZone] = useState<string>('All');
   const [selectedType, setSelectedType] = useState<string>('All');
@@ -78,15 +77,89 @@ export default function SystemFlowDashboard() {
   // Selected Hospital for deep-dive panel (defaults to Royal Alex)
   const [selectedHospitalId, setSelectedHospitalId] = useState<string>('rah-edmonton');
 
-  // Interactive Causal Chain Simulator Stress State
-  const [simulatorStress, setSimulatorStress] = useState<number>(100); // represents acute occupancy
-
   // Interactive Historical Quarter Selector
   const [selectedQuarter, setSelectedQuarter] = useState<string>('2026-Q1');
 
   // Interactive Quadrant Highlight for Scatterplot
   const [activeQuadrant, setActiveQuadrant] = useState<'all' | 'gridlock' | 'stress' | 'stable'>('all');
 
+  // Interactive KPI selected state for historical trend panel
+  const [selectedKpi, setSelectedKpi] = useState<'occupancy' | 'p90BedWaitHours' | 'lwbsRate' | 'alcRate' | null>(null);
+
+  const kpiStats = useMemo(() => {
+    if (!selectedKpi) return null;
+    const values = HISTORICAL_FLOW_TIMELINES.map(t => t[selectedKpi] as number).filter(v => typeof v === 'number');
+    if (values.length === 0) return null;
+
+    const baseline = values[0];
+    const latest = values[values.length - 1];
+    const peak = Math.max(...values);
+    const minVal = Math.min(...values);
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+
+    return {
+      baseline: baseline.toFixed(1),
+      latest: latest.toFixed(1),
+      peak: peak.toFixed(1),
+      minVal: minVal.toFixed(1),
+      delta: rawDelta > 0 ? `+${rawDelta.toFixed(1)}` : rawDelta.toFixed(1),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0
+    };
+  }, [selectedKpi]);
+
+  const selectedKpiDetails = useMemo(() => {
+    if (!selectedKpi) return null;
+    switch (selectedKpi) {
+      case 'occupancy':
+        return {
+          label: 'Provincial Bed Occupancy',
+          description: 'Long-term trend of acute inpatient bed utilization across all provincial hospitals. Occupancies exceeding 100% represent critical boarding states where patients are held in hallways, transition spaces, or emergency wards.',
+          colorClass: 'text-rose-500',
+          bgClass: 'bg-rose-500/10',
+          strokeColor: '#f43f5e',
+          gradientId: 'colorOccupancyTrend',
+          unit: '%',
+          icon: Building2
+        };
+      case 'p90BedWaitHours':
+        return {
+          label: 'Average ED Bed Wait (P90)',
+          description: 'Historical tracking of the 90th percentile wait times from a decision-to-admit to actual ward bed placement. Rising wait times signal severe inpatient bed gridlock.',
+          colorClass: 'text-amber-500',
+          bgClass: 'bg-amber-500/10',
+          strokeColor: '#f59e0b',
+          gradientId: 'colorWaitTrend',
+          unit: 'h',
+          icon: Clock
+        };
+      case 'lwbsRate':
+        return {
+          label: 'Left Without Being Seen (LWBS)',
+          description: 'Percentage of patients registered in the emergency department who choose to self-discharge before receiving a medical assessment. High walkout rates correlate strongly with wait times.',
+          colorClass: 'text-blue-400',
+          bgClass: 'bg-blue-500/10',
+          strokeColor: '#3b82f6',
+          gradientId: 'colorLwbsTrend',
+          unit: '%',
+          icon: Activity
+        };
+      case 'alcRate':
+        return {
+          label: 'Alternate Level of Care (ALC) Rate',
+          description: 'Percentage of acute inpatient beds occupied by patients who no longer require acute clinical services but are waiting for continuing care, rehabilitation, or supportive living placement.',
+          colorClass: 'text-violet-400',
+          bgClass: 'bg-violet-500/10',
+          strokeColor: '#a78bfa',
+          gradientId: 'colorAlcTrend',
+          unit: '%',
+          icon: Layers
+        };
+      default:
+        return null;
+    }
+  }, [selectedKpi]);
   // Computed Provincial Core Metrics
   const provincialOverview = useMemo(() => {
     const facilities = FACILITY_FLOW_METRICS;
@@ -218,33 +291,6 @@ export default function SystemFlowDashboard() {
     });
   }, [scatterData, activeQuadrant]);
 
-  // Dynamic calculations for Causal Chain Stress Simulator
-  const simulatedValues = useMemo(() => {
-    const baseOcc = simulatorStress;
-    // Non-linear escalation of bed wait times based on occupancy
-    // Wait time starts rising exponentially above 95% occupancy
-    let waitMultiplier = 1;
-    if (baseOcc > 100) {
-      waitMultiplier = 1 + Math.pow((baseOcc - 100) * 1.5, 1.4);
-    } else if (baseOcc > 90) {
-      waitMultiplier = 1 + (baseOcc - 90) * 0.12;
-    } else {
-      waitMultiplier = 0.5 + (baseOcc / 180);
-    }
-
-    const simulatedWait = parseFloat((4.5 * waitMultiplier).toFixed(1));
-    const simulatedBoarders = Math.round(1.5 * waitMultiplier);
-    const simulatedLwbs = parseFloat(Math.min(15, 2.0 + (baseOcc > 95 ? (baseOcc - 95) * 1.05 : (baseOcc - 85) * 0.15)).toFixed(1));
-    const simulatedDischargePlacement = parseFloat(Math.max(10, 85.0 - (baseOcc - 85) * 6.5).toFixed(1));
-
-    return {
-      wait: simulatedWait,
-      boarders: simulatedBoarders,
-      lwbs: simulatedLwbs,
-      placement: simulatedDischargePlacement
-    };
-  }, [simulatorStress]);
-
   // Selected Quarter snapshot
   const activeQuarterSnapshot = useMemo(() => {
     return HISTORICAL_FLOW_TIMELINES.find(q => q.quarter === selectedQuarter) || HISTORICAL_FLOW_TIMELINES[HISTORICAL_FLOW_TIMELINES.length - 1];
@@ -253,11 +299,93 @@ export default function SystemFlowDashboard() {
   return (
     <div id="system-flow-dashboard-root" className="space-y-6 text-slate-100 font-sans">
       
+      {/* Standardized Tab bar header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-indigo-400" />
+            <span>Hospital System Flow</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Monitor occupancy, average ED wait times, and alternate level of care bottlenecks.
+          </p>
+          <DataTimestamp metadata={systemFlowDataMetadata} arrayKey="FACILITY_FLOW_METRICS" />
+        </div>
+      </div>
+
+      {/* Primary Sub-Tab Navigation */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+
+        <button
+          onClick={() => setSubTab('ranked')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            subTab === 'ranked'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <ListOrdered className="w-4 h-4" />
+          <span>Hospital Flow Grid</span>
+        </button>
+
+        <button
+          onClick={() => setSubTab('scatterplot')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            subTab === 'scatterplot'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>Bottleneck Correlation</span>
+        </button>
+
+        <button
+          onClick={() => setSubTab('trends-weekly')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            subTab === 'trends-weekly'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <BarChart2 className="w-4 h-4" />
+          <span>Historical Degradation</span>
+        </button>
+
+        <button
+          onClick={() => setSubTab('cihi-lga')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            subTab === 'cihi-lga'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          <span>Benchmarks & Profiles</span>
+        </button>
+      </div>
+
       {/* Dynamic Key Performance Indicators (SURFACING PROVINCIAL METRICS DYNAMICALLY) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Metric 1 */}
-        <div id="metric-prov-occupancy" className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between shadow-lg relative overflow-hidden group hover:border-rose-500/30 transition-all duration-300">
+        <div
+          id="metric-prov-occupancy"
+          role="button"
+          tabIndex={0}
+          onClick={() => setSelectedKpi(selectedKpi === 'occupancy' ? null : 'occupancy')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedKpi(selectedKpi === 'occupancy' ? null : 'occupancy');
+            }
+          }}
+          className={`p-4 rounded-xl flex items-center justify-between shadow-lg relative overflow-hidden group cursor-pointer transition-all duration-300 border select-none hover:scale-[1.02] hover:shadow-xl ${
+            selectedKpi === 'occupancy'
+              ? 'bg-slate-900/90 border-rose-500/50 ring-1 ring-rose-500/30 shadow-rose-500/5'
+              : 'bg-slate-900/60 border-slate-800 hover:border-rose-500/30'
+          }`}
+        >
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Provincial Bed Occupancy</span>
             <div className="flex items-baseline gap-1.5">
@@ -265,6 +393,10 @@ export default function SystemFlowDashboard() {
               <span className="text-[10px] text-rose-400/80 font-bold font-mono">CRITICAL STATE</span>
             </div>
             <span className="text-[10px] text-slate-500 block leading-tight">Weighted across {provincialOverview.totalBeds} active acute beds</span>
+            <span className="text-[9px] text-slate-500 group-hover:text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+              <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+              {selectedKpi === 'occupancy' ? 'Active: Hide Trend' : 'Click to View Trend'}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-rose-500/10 text-rose-500 shrink-0 border border-rose-500/20 group-hover:scale-110 transition-transform duration-300">
             <Building2 className="w-5 h-5" />
@@ -273,7 +405,23 @@ export default function SystemFlowDashboard() {
         </div>
 
         {/* Metric 2 */}
-        <div id="metric-mean-bedwait" className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between shadow-lg relative overflow-hidden group hover:border-amber-500/30 transition-all duration-300">
+        <div
+          id="metric-mean-bedwait"
+          role="button"
+          tabIndex={0}
+          onClick={() => setSelectedKpi(selectedKpi === 'p90BedWaitHours' ? null : 'p90BedWaitHours')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedKpi(selectedKpi === 'p90BedWaitHours' ? null : 'p90BedWaitHours');
+            }
+          }}
+          className={`p-4 rounded-xl flex items-center justify-between shadow-lg relative overflow-hidden group cursor-pointer transition-all duration-300 border select-none hover:scale-[1.02] hover:shadow-xl ${
+            selectedKpi === 'p90BedWaitHours'
+              ? 'bg-slate-900/90 border-amber-500/50 ring-1 ring-amber-500/30 shadow-amber-500/5'
+              : 'bg-slate-900/60 border-slate-800 hover:border-amber-500/30'
+          }`}
+        >
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Average ED Bed Wait (P90)</span>
             <div className="flex items-baseline gap-1.5">
@@ -281,6 +429,10 @@ export default function SystemFlowDashboard() {
               <span className="text-[10px] text-amber-400 font-bold font-mono">+12.4h since 2021</span>
             </div>
             <span className="text-[10px] text-slate-500 block leading-tight">From decision-to-admit to ward placement</span>
+            <span className="text-[9px] text-slate-500 group-hover:text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+              <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+              {selectedKpi === 'p90BedWaitHours' ? 'Active: Hide Trend' : 'Click to View Trend'}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-amber-500/10 text-amber-500 shrink-0 border border-amber-500/20 group-hover:scale-110 transition-transform duration-300">
             <Clock className="w-5 h-5" />
@@ -289,7 +441,23 @@ export default function SystemFlowDashboard() {
         </div>
 
         {/* Metric 3 */}
-        <div id="metric-mean-lwbs" className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between shadow-lg relative overflow-hidden group hover:border-blue-500/30 transition-all duration-300">
+        <div
+          id="metric-mean-lwbs"
+          role="button"
+          tabIndex={0}
+          onClick={() => setSelectedKpi(selectedKpi === 'lwbsRate' ? null : 'lwbsRate')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedKpi(selectedKpi === 'lwbsRate' ? null : 'lwbsRate');
+            }
+          }}
+          className={`p-4 rounded-xl flex items-center justify-between shadow-lg relative overflow-hidden group cursor-pointer transition-all duration-300 border select-none hover:scale-[1.02] hover:shadow-xl ${
+            selectedKpi === 'lwbsRate'
+              ? 'bg-slate-900/90 border-blue-500/50 ring-1 ring-blue-500/30 shadow-blue-500/5'
+              : 'bg-slate-900/60 border-slate-800 hover:border-blue-500/30'
+          }`}
+        >
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Left Without Being Seen</span>
             <div className="flex items-baseline gap-1.5">
@@ -297,6 +465,10 @@ export default function SystemFlowDashboard() {
               <span className="text-[10px] text-blue-400/80 font-bold font-mono">HIGH RISK</span>
             </div>
             <span className="text-[10px] text-slate-500 block leading-tight">Provincial average self-discharge rate</span>
+            <span className="text-[9px] text-slate-500 group-hover:text-blue-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+              <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+              {selectedKpi === 'lwbsRate' ? 'Active: Hide Trend' : 'Click to View Trend'}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-blue-500/10 text-blue-400 shrink-0 border border-blue-500/20 group-hover:scale-110 transition-transform duration-300">
             <Activity className="w-5 h-5" />
@@ -305,7 +477,23 @@ export default function SystemFlowDashboard() {
         </div>
 
         {/* Metric 4 */}
-        <div id="metric-mean-alc" className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between shadow-lg relative overflow-hidden group hover:border-violet-500/30 transition-all duration-300">
+        <div
+          id="metric-mean-alc"
+          role="button"
+          tabIndex={0}
+          onClick={() => setSelectedKpi(selectedKpi === 'alcRate' ? null : 'alcRate')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedKpi(selectedKpi === 'alcRate' ? null : 'alcRate');
+            }
+          }}
+          className={`p-4 rounded-xl flex items-center justify-between shadow-lg relative overflow-hidden group cursor-pointer transition-all duration-300 border select-none hover:scale-[1.02] hover:shadow-xl ${
+            selectedKpi === 'alcRate'
+              ? 'bg-slate-900/90 border-violet-500/50 ring-1 ring-violet-500/30 shadow-violet-500/5'
+              : 'bg-slate-900/60 border-slate-800 hover:border-violet-500/30'
+          }`}
+        >
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Alternate Level of Care (ALC)</span>
             <div className="flex items-baseline gap-1.5">
@@ -313,426 +501,120 @@ export default function SystemFlowDashboard() {
               <span className="text-[10px] text-violet-400 font-bold font-mono">DISCHARGE BLOCKED</span>
             </div>
             <span className="text-[10px] text-slate-500 block leading-tight">Inpatient acute bed-days occupied by non-acute cases</span>
+            <span className="text-[9px] text-slate-500 group-hover:text-violet-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+              <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+              {selectedKpi === 'alcRate' ? 'Active: Hide Trend' : 'Click to View Trend'}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-violet-500/10 text-violet-500 shrink-0 border border-violet-500/20 group-hover:scale-110 transition-transform duration-300">
             <Layers className="w-5 h-5" />
           </div>
           <div className="absolute top-0 right-0 h-1.5 w-16 bg-gradient-to-l from-violet-500 to-violet-600 rounded-bl" />
         </div>
-
       </div>
 
-      {/* Primary Header Info Block */}
-      <div className="p-6 rounded-2xl bg-gradient-to-b from-[#0a0f25] to-[#060a1a] border border-slate-800/80 shadow-2xl space-y-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-widest uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-500" />
-                HQA FOCUS Standardized Feed
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-widest uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                CIHI / AHS Certified
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-mono font-bold">Live Data Verified</span>
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-              Hospital System Flow &amp; Bed Bottlenecks
-            </h1>
-            <p className="text-xs text-slate-400 max-w-4xl leading-relaxed">
-              An advanced analytical model tracking the end-to-end causal path of hospital flow gridlock. Explore how acute-care bed blocking by alternate-level-of-care (ALC) patients precipitates boarding in the ED, resulting in wait time explosions, ambulance offload bottlenecks, and elevated patient walkout (LWBS) rates.
-            </p>
-          </div>
-          
-          {/* Quick Stats Panel */}
-          <div className="flex flex-row items-center gap-3 shrink-0 bg-slate-950/50 p-3 rounded-xl border border-slate-850">
-            <div className="text-center px-3 border-r border-slate-800">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block font-mono">Provincial Beds</span>
-              <span className="text-lg font-black text-blue-400 font-mono">{provincialOverview.totalBeds}</span>
-            </div>
-            <div className="text-center px-2">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block font-mono">Daily ED Visits</span>
-              <span className="text-lg font-black text-indigo-400 font-mono">~{provincialOverview.totalVolume.toLocaleString()}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation Sub-Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-950/60 rounded-xl border border-slate-850/80 overflow-x-auto scrollbar-none">
-        <button
-          onClick={() => setSubTab('causal-chain')}
-          className={`px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
-            subTab === 'causal-chain'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-          }`}
-        >
-          <Layers className="w-3.5 h-3.5" />
-          <span>1. Causal Flow Chain Simulator</span>
-        </button>
-        <button
-          onClick={() => setSubTab('ranked')}
-          className={`px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
-            subTab === 'ranked'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-          }`}
-        >
-          <ListOrdered className="w-3.5 h-3.5" />
-          <span>2. Hospital Flow Grid &amp; Deep-Dive</span>
-        </button>
-        <button
-          onClick={() => setSubTab('scatterplot')}
-          className={`px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
-            subTab === 'scatterplot'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-          }`}
-        >
-          <Activity className="w-3.5 h-3.5" />
-          <span>3. Bottleneck Correlation Engine</span>
-        </button>
-        <button
-          onClick={() => setSubTab('trends-weekly')}
-          className={`px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
-            subTab === 'trends-weekly'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-          }`}
-        >
-          <BarChart2 className="w-3.5 h-3.5" />
-          <span>4. Historical Degradation Tracker</span>
-        </button>
-        <button
-          onClick={() => setSubTab('cihi-lga')}
-          className={`px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
-            subTab === 'cihi-lga'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-          }`}
-        >
-          <TrendingUp className="w-3.5 h-3.5" />
-          <span>5. National Benchmarks &amp; LGA Profiles</span>
-        </button>
-      </div>
-
-      {/* ---------------- SUB-TAB 1: CAUSAL CHAIN SIMULATOR ---------------- */}
+      {/* KPI Trend Explorer Panel */}
       <AnimatePresence mode="wait">
-        {subTab === 'causal-chain' && (
+        {selectedKpi && selectedKpiDetails && kpiStats && (
           <motion.div
-            key="causal-chain-tab"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
+            key={`kpi-trend-${selectedKpi}`}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="space-y-6"
+            className="overflow-hidden"
           >
-            
-            {/* Interactive Simulator Controller */}
-            <div className="p-6 rounded-2xl bg-gradient-to-b from-[#0a0f25] to-[#070b1e] border border-slate-800 shadow-xl space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div className="p-6 rounded-2xl bg-[#090e21] border border-slate-800 space-y-6 shadow-xl relative">
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedKpi(null)}
+                className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                title="Close panel"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Title and description */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
                 <div className="space-y-1">
-                  <h3 className="text-sm font-black uppercase text-slate-100 tracking-widest flex items-center gap-2">
-                    <Gauge className="w-4 h-4 text-blue-500" />
-                    <span>Interactive Hospital Stress &amp; Gridlock Simulator</span>
+                  <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                    {React.createElement(selectedKpiDetails.icon, {
+                      className: `w-4 h-4 ${selectedKpiDetails.colorClass}`
+                    })}
+                    <span>{selectedKpiDetails.label} Historical Trend Explorer</span>
                   </h3>
-                  <p className="text-xs text-slate-400">
-                    Slide the inpatient occupancy level to model how downstream gridlock triggers a rapid, non-linear explosion of emergency department wait times.
+                  <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                    {selectedKpiDetails.description}
                   </p>
                 </div>
-                <div className="px-3 py-1.5 bg-slate-950/60 border border-slate-850 rounded-lg text-[10px] font-bold text-slate-400 font-mono uppercase">
-                  Mathematical Non-Linear Model
+              </div>
+
+              {/* Stats highlights */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (Q1 2021)</span>
+                  <span className="text-xl font-black text-slate-300 font-mono">{kpiStats.baseline}{selectedKpiDetails.unit}</span>
+                </div>
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (Q1 2026)</span>
+                  <span className="text-xl font-black text-white font-mono">{kpiStats.latest}{selectedKpiDetails.unit}</span>
+                </div>
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">5-Year Peak</span>
+                  <span className={`text-xl font-black font-mono ${selectedKpiDetails.colorClass}`}>{kpiStats.peak}{selectedKpiDetails.unit}</span>
+                </div>
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                  <span className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
+                    kpiStats.isIncrease ? 'text-rose-500' : 'text-emerald-500'
+                  }`}>
+                    {kpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                    <span>{kpiStats.delta}{selectedKpiDetails.unit} ({kpiStats.pctChange})</span>
+                  </span>
                 </div>
               </div>
 
-              {/* Slider Controller */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                <div className="lg:col-span-4 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-300">Acute Ward Occupancy Rate:</span>
-                    <span className={`text-lg font-mono font-black ${
-                      simulatorStress >= 105 ? 'text-red-500' : simulatorStress >= 98 ? 'text-amber-500' : 'text-emerald-500'
-                    }`}>
-                      {simulatorStress}%
-                    </span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="85" 
-                    max="112" 
-                    value={simulatorStress} 
-                    onChange={(e) => setSimulatorStress(parseInt(e.target.value))}
-                    className="w-full h-2 rounded-lg bg-slate-950 border border-slate-800 appearance-none cursor-pointer accent-blue-500"
-                  />
-                  <div className="flex justify-between text-[9px] font-bold font-mono text-slate-500 uppercase">
-                    <span>85% (Target)</span>
-                    <span>95% (Risk Threshold)</span>
-                    <span>100% (Ward Full)</span>
-                    <span>112% (Extreme Crisis)</span>
-                  </div>
-                </div>
-
-                {/* Simulated Output Metrics */}
-                <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  
-                  {/* Output 1 */}
-                  <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-850 space-y-1">
-                    <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wider block">ED Bed Wait (P90)</span>
-                    <div className="text-xl font-black text-rose-500 font-mono">
-                      {simulatedValues.wait} <span className="text-[10px] text-slate-400 font-sans font-medium">hrs</span>
-                    </div>
-                    <span className="text-[9px] text-slate-400 block leading-tight">Wait to leave ED after admission</span>
-                  </div>
-
-                  {/* Output 2 */}
-                  <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-850 space-y-1">
-                    <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wider block">Hallway Boarders</span>
-                    <div className="text-xl font-black text-amber-500 font-mono">
-                      {simulatedValues.boarders} <span className="text-[10px] text-slate-400 font-sans font-medium">pt/hr</span>
-                    </div>
-                    <span className="text-[9px] text-slate-400 block leading-tight">Average boarding patients stuck in ED</span>
-                  </div>
-
-                  {/* Output 3 */}
-                  <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-850 space-y-1">
-                    <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wider block">LWBS Walkout Rate</span>
-                    <div className="text-xl font-black text-blue-400 font-mono">
-                      {simulatedValues.lwbs}%
-                    </div>
-                    <span className="text-[9px] text-slate-400 block leading-tight">Left without assessment due to delay</span>
-                  </div>
-
-                  {/* Output 4 */}
-                  <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-850 space-y-1">
-                    <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wider block">Continuing Care placements</span>
-                    <div className="text-xl font-black text-violet-400 font-mono">
-                      {simulatedValues.placement}%
-                    </div>
-                    <span className="text-[9px] text-slate-400 block leading-tight">Secured placement within 30 days</span>
-                  </div>
-
-                </div>
-              </div>
-
-              {/* Dynamic Simulated Clinical Brief */}
-              <div className={`p-4 rounded-xl border ${
-                simulatorStress >= 105 
-                  ? 'bg-red-950/20 border-red-900/40 text-red-300' 
-                  : simulatorStress >= 98 
-                    ? 'bg-amber-950/20 border-amber-900/40 text-amber-300' 
-                    : 'bg-emerald-950/20 border-emerald-900/40 text-emerald-300'
-              } text-xs leading-relaxed space-y-1.5`}>
-                <div className="flex items-center gap-2 font-bold uppercase tracking-wider">
-                  <ShieldAlert className="w-4 h-4" />
-                  <span>System State: {
-                    simulatorStress >= 105 ? 'SEVERE GRIDLOCK CRISIS' : simulatorStress >= 98 ? 'HIGH SYSTEM STRESS & BOARDING' : 'STABLE SYSTEM CIRCULATION'
-                  }</span>
-                </div>
-                <p>
-                  {simulatorStress >= 105 
-                    ? `With acute ward occupancy at ${simulatorStress}%, inpatient wards are completely blocked. New emergency patients requiring admission have nowhere to go and board indefinitely in the emergency department (averaging ${simulatedValues.boarders} hallway patients/hour). Decisions-to-admit remain stuck for ${simulatedValues.wait} hours, completely paralyzing the active triage streams and causing a massive walkout rate of ${simulatedValues.lwbs}% of self-triaged cases.`
-                    : simulatorStress >= 98
-                      ? `At ${simulatorStress}% occupancy, active bed buffering is exhausted. Although inpatient discharge coordinates are active, delay blocks cause admitted emergency patients to spend an average of ${simulatedValues.wait} hours in ED boarding beds. Emergency department physical assets are degraded by holding hallway boarders, elevating wait times and forcing a walkout rate of ${simulatedValues.lwbs}%.`
-                      : `At a healthy ${simulatorStress}% occupancy level, inpatient units circulate effectively. Admitted patients undergo rapid ward transfers (under 5 hours), which keeps emergency room assessment bays open. Wait times remain minimal, and patient walkout rates are negligible (under 3%), indicating a stable and highly safe environment.`
-                  }
-                </p>
+              {/* Chart container */}
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={HISTORICAL_FLOW_TIMELINES} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id={selectedKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <XAxis dataKey="quarter" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                    <YAxis 
+                      stroke="#64748b" 
+                      style={{ fontSize: 10, fontFamily: 'monospace' }}
+                      domain={['auto', 'auto']}
+                    />
+                    <RechartsTooltip 
+                      contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
+                      labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                      itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey={selectedKpi} 
+                      name={selectedKpiDetails.label} 
+                      stroke={selectedKpiDetails.strokeColor} 
+                      strokeWidth={2.5} 
+                      fillOpacity={1} 
+                      fill={`url(#${selectedKpiDetails.gradientId})`} 
+                      dot={{ r: 4, strokeWidth: 1 }}
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
-
-            {/* Interactive Graphical Flow Chain Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 relative">
-              
-              {/* Step 1 */}
-              <div className="p-5 rounded-2xl bg-[#090e21] border border-slate-800 flex flex-col justify-between space-y-4 hover:border-blue-500/40 transition-all duration-300 shadow-xl group">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-blue-400 bg-blue-400/10 px-2.5 py-0.5 rounded-full uppercase tracking-widest border border-blue-500/10">Step 1: Deficits</span>
-                    <span className="text-xs font-mono font-bold text-slate-600">01</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-blue-400" />
-                      Community Gaps
-                    </h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                      Deficits in family medicine and rural clinics channel heavy non-urgent primary care cases directly into metropolitan EDs.
-                    </p>
-                  </div>
-                </div>
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850/50">
-                  <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest font-mono">Provincial Daily Intake</div>
-                  <div className="text-lg font-mono font-extrabold text-blue-400 mt-0.5">3,248 <span className="text-[10px] text-slate-500 font-sans font-medium">visits</span></div>
-                </div>
-              </div>
-
-              {/* Step 2 */}
-              <div className="p-5 rounded-2xl bg-[#090e21] border border-slate-800 flex flex-col justify-between space-y-4 hover:border-indigo-500/40 transition-all duration-300 shadow-xl group">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-indigo-400 bg-indigo-400/10 px-2.5 py-0.5 rounded-full uppercase tracking-widest border border-indigo-500/10">Step 2: Exit Rate</span>
-                    <span className="text-xs font-mono font-bold text-slate-600">02</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <TrendingDown className="w-3.5 h-3.5 text-indigo-400" />
-                      ED Front Backups
-                    </h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                      Prolonged wait times (discharged patients wait up to 15h) trigger severe patient walkouts (LWBS) before assessments.
-                    </p>
-                  </div>
-                </div>
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850/50">
-                  <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest font-mono">Simulated LWBS Rate</div>
-                  <div className="text-lg font-mono font-extrabold text-indigo-400 mt-0.5">{simulatedValues.lwbs}% <span className="text-[9px] text-slate-500 font-sans font-semibold">walkouts</span></div>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="p-5 rounded-2xl bg-[#090e21] border border-slate-800 flex flex-col justify-between space-y-4 hover:border-amber-500/40 transition-all duration-300 shadow-xl group">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full uppercase tracking-widest border border-amber-500/10">Step 3: Boarders</span>
-                    <span className="text-xs font-mono font-bold text-slate-600">03</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-amber-400" />
-                      ED Boarding Lock
-                    </h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                      Admitted patients wait in hallway stretchers, locking emergency bays and paralyzing paramedics on offload.
-                    </p>
-                  </div>
-                </div>
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850/50">
-                  <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest font-mono">Simulated Bed Wait</div>
-                  <div className="text-lg font-mono font-extrabold text-amber-500 mt-0.5">{simulatedValues.wait} <span className="text-[10px] text-slate-500 font-sans font-medium">hours</span></div>
-                </div>
-              </div>
-
-              {/* Step 4 */}
-              <div className="p-5 rounded-2xl bg-[#090e21] border border-slate-800 flex flex-col justify-between space-y-4 hover:border-red-500/40 transition-all duration-300 shadow-xl group">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-red-500 bg-red-500/10 px-2.5 py-0.5 rounded-full uppercase tracking-widest border border-red-500/10">Step 4: Beds Blocked</span>
-                    <span className="text-xs font-mono font-bold text-slate-600">04</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-red-400" />
-                      Acute Ward Full
-                    </h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                      With ward occupancy far above 100%, transfers are suspended, forcing ED physicians to hold inpatients in acute exam rooms.
-                    </p>
-                  </div>
-                </div>
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850/50">
-                  <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest font-mono">Ward Occupancy</div>
-                  <div className="text-lg font-mono font-extrabold text-red-500 mt-0.5">{simulatorStress}% <span className="text-[9px] text-slate-500 font-sans font-semibold">capacity</span></div>
-                </div>
-              </div>
-
-              {/* Step 5 */}
-              <div className="p-5 rounded-2xl bg-[#090e21] border border-slate-800 flex flex-col justify-between space-y-4 hover:border-violet-500/40 transition-all duration-300 shadow-xl group">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-violet-400 bg-violet-400/10 px-2.5 py-0.5 rounded-full uppercase tracking-widest border border-violet-500/10">Step 5: ALC Trap</span>
-                    <span className="text-xs font-mono font-bold text-slate-600">05</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-violet-400" />
-                      Discharge Block
-                    </h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                      Ward beds remain locked by patients ready for discharge but stranded by community continuing-care shortfalls.
-                    </p>
-                  </div>
-                </div>
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850/50">
-                  <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest font-mono">SimulatedPlacement</div>
-                  <div className="text-lg font-mono font-extrabold text-violet-400 mt-0.5">{simulatedValues.placement}% <span className="text-[9px] text-slate-500 font-sans font-semibold">30d place</span></div>
-                </div>
-              </div>
-
-            </div>
-
-            {/* In-Depth Zone Averages Bento Grid */}
-            <div className="space-y-3 pt-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-indigo-400" />
-                  <span>Provincial Regional Performance (HQA FOCUS Live Feed)</span>
-                </h4>
-                <span className="text-[10px] text-slate-500 font-mono">Calculated across all designated emergency network facilities</span>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {zoneAverages.map((z, idx) => {
-                  if (!z) return null;
-                  const isCrisis = z.avgOccupancy >= 104;
-                  const isHigh = z.avgOccupancy >= 100 && z.avgOccupancy < 104;
-                  
-                  return (
-                    <div key={idx} className="p-4 bg-[#090e21] rounded-2xl border border-slate-800/80 space-y-3 hover:border-slate-700 transition-all shadow-lg flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-black text-white">{z.zone.replace(' Zone', '')}</span>
-                          <span className="text-[9px] bg-slate-950 px-2 py-0.5 rounded-full text-slate-400 font-mono font-bold border border-slate-800">
-                            {z.facilityCount} facilities
-                          </span>
-                        </div>
-                        
-                        {/* Occupancy Indicator */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between items-center text-[10px] font-mono">
-                            <span className="text-slate-400">Mean Occupancy</span>
-                            <span className={`font-black ${isCrisis ? 'text-red-400' : isHigh ? 'text-amber-500' : 'text-emerald-400'}`}>
-                              {z.avgOccupancy}%
-                            </span>
-                          </div>
-                          <div className="h-2 rounded-full bg-slate-950 overflow-hidden border border-slate-850">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-500 ${
-                                isCrisis ? 'bg-gradient-to-r from-red-500 to-rose-600' : isHigh ? 'bg-amber-500' : 'bg-emerald-500'
-                              }`}
-                              style={{ width: `${Math.min(100, (z.avgOccupancy / 112) * 100)}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Split parameters */}
-                        <div className="grid grid-cols-2 gap-2 pt-1 text-[10px] font-mono">
-                          <div className="bg-slate-950/60 p-2 rounded border border-slate-850">
-                            <span className="text-[9px] text-slate-500 uppercase font-black block">Bed Wait</span>
-                            <span className="text-slate-200 font-extrabold">{z.avgBedWait}h</span>
-                          </div>
-                          <div className="bg-slate-950/60 p-2 rounded border border-slate-850">
-                            <span className="text-[9px] text-slate-500 uppercase font-black block">LWBS</span>
-                            <span className="text-amber-500 font-extrabold">{z.avgLwbs}%</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-slate-850/60 flex items-center justify-between text-[9px] font-mono text-slate-400">
-                        <span>Staffed Beds: <strong className="text-white font-bold">{z.totalBeds}</strong></span>
-                        <span>Visits: <strong className="text-slate-300">{z.totalVolume}/d</strong></span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
           </motion.div>
         )}
       </AnimatePresence>
+
 
       {/* ---------------- SUB-TAB 2: HOSPITAL GRID & DEEP DIVE ---------------- */}
       <AnimatePresence mode="wait">

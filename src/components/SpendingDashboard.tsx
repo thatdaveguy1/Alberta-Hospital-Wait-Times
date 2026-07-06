@@ -35,6 +35,8 @@ import {
   PHYSICIAN_SPECIALTY_BILLING, 
   ALBERTA_USE_OF_FUNDS
 } from '../spendingData';
+import { DataTimestamp } from './DataTimestamp';
+import { _dataMetadata as spendingDataMetadata } from '../spendingData';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#ef4444', '#8b5cf6', '#06b6d4'];
 
@@ -73,61 +75,65 @@ export default function SpendingDashboard() {
   return (
     <div id="spending-dashboard-container" className="space-y-6">
       {/* Tab bar header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
         <div>
           <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
             <Coins className="w-5 h-5 text-emerald-400" />
-            <span>Health Expenditures & System Efficiency</span>
+            <span>Health Expenditures & Efficiency</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Analyze fiscal allocations, national scoreboards, hospital asset metrics, and doctor billings
+            Analyze fiscal allocations, national scoreboards, and physician billings.
           </p>
+          <DataTimestamp metadata={spendingDataMetadata} arrayKey="NATIONAL_SPENDING_COMPARE" />
         </div>
+      </div>
 
-        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-850">
-          <div className="flex flex-wrap gap-1">
-            <button
-              onClick={() => setActiveSpendingTab('spending-access')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSpendingTab === 'spending-access' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Spending vs Access
-            </button>
-            <button
-              onClick={() => setActiveSpendingTab('national-scoreboard')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSpendingTab === 'national-scoreboard' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              National Scoreboard
-            </button>
-            <button
-              onClick={() => setActiveSpendingTab('hospital-efficiency')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSpendingTab === 'hospital-efficiency' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Hospital Efficiency
-            </button>
-            <button
-              onClick={() => setActiveSpendingTab('physician-payments')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSpendingTab === 'physician-payments' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Physician Payments
-            </button>
-          </div>
-        </div>
+      {/* Primary Sub-Tab Navigation */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+        <button
+          onClick={() => setActiveSpendingTab('spending-access')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSpendingTab === 'spending-access'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>Spending & Access</span>
+        </button>
+        <button
+          onClick={() => setActiveSpendingTab('national-scoreboard')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSpendingTab === 'national-scoreboard'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>National Scoreboard</span>
+        </button>
+        <button
+          onClick={() => setActiveSpendingTab('hospital-efficiency')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSpendingTab === 'hospital-efficiency'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          <span>Hospital Efficiency</span>
+        </button>
+        <button
+          onClick={() => setActiveSpendingTab('physician-payments')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSpendingTab === 'physician-payments'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Physician Payments</span>
+        </button>
       </div>
 
       {/* Warning Narrative Chain / Ingestion Insights */}
@@ -149,6 +155,7 @@ export default function SpendingDashboard() {
       {/* Primary Panels based on Tabs */}
       {activeSpendingTab === 'spending-access' && (
         <div id="sd-spending-access-panel" className="space-y-6">
+          <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="ALBERTA_USE_OF_FUNDS" />
           {/* Key Alberta Statistics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2 flex flex-col justify-between hover:border-slate-700 transition-all">
@@ -337,6 +344,7 @@ export default function SpendingDashboard() {
 
       {activeSpendingTab === 'national-scoreboard' && (
         <div id="sd-national-scoreboard-panel" className="space-y-6">
+          <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="CIHI_SPENDING_PER_PERSON" />
           {/* Province focus row */}
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -487,6 +495,7 @@ export default function SpendingDashboard() {
 
       {activeSpendingTab === 'hospital-efficiency' && (
         <div id="sd-hospital-efficiency-panel" className="space-y-6">
+          <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="HOSPITAL_EFFICIENCY_TREND" />
           {/* Metrics grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1 flex flex-col justify-between hover:border-slate-700 transition-all">
@@ -592,6 +601,7 @@ export default function SpendingDashboard() {
 
       {activeSpendingTab === 'physician-payments' && (
         <div id="sd-physician-payments-panel" className="space-y-6">
+          <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="PHYSICIAN_SPECIALTY_BILLING" />
           {/* Selector & Details row */}
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">

@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   Sliders,
   TrendingUp,
+  TrendingDown,
   Map,
   Users
 } from 'lucide-react';
@@ -48,8 +49,10 @@ import {
   TestTurnaround,
   ImagingWaitTrend,
   FacilityImagingWait,
-  PriorityTarget
+  PriorityTarget,
+  _dataMetadata as diagnosticDataMetadata,
 } from '../diagnosticData';
+import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
 
 export default function DiagnosticDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'labs' | 'imaging-waits' | 'facilities' | 'turnaround' | 'bottlenecks'>('labs');
@@ -119,87 +122,83 @@ export default function DiagnosticDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Executive Header Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute left-1/4 top-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -z-10" />
-        
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                Diagnostic Services Console
-              </span>
-              <span className="text-xs text-slate-500">
-                Data Refresh: Q1 2026 Release
-              </span>
-            </div>
-            <h1 className="text-2xl font-black text-white tracking-tight sm:text-3xl">
-              Diagnostic Imaging & Lab Access
-            </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-2xl">
-              Live patient service center wait times, CT & MRI historical backlogs, national benchmark comparisons, and diagnostic turnaround-time diagnostic profiles.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 bg-slate-950/60 p-1 rounded-xl border border-slate-800">
-            <button
-              onClick={() => setActiveSubTab('labs')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'labs' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Live Lab Waits
-            </button>
-            <button
-              onClick={() => setActiveSubTab('imaging-waits')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'imaging-waits' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              CT & MRI Waits
-            </button>
-            <button
-              onClick={() => setActiveSubTab('facilities')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'facilities' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Facility Access
-            </button>
-            <button
-              onClick={() => setActiveSubTab('turnaround')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'turnaround' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Test Turnaround
-            </button>
-            <button
-              onClick={() => setActiveSubTab('bottlenecks')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeSubTab === 'bottlenecks' 
-                  ? 'bg-cyan-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              System Bottlenecks
-            </button>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <Activity className="w-5 h-5 text-cyan-400" />
+            <span>Diagnostic & Lab Services</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Monitor laboratory wait times and diagnostic imaging benchmark compliance.
+          </p>
+          <DataTimestamp metadata={diagnosticDataMetadata} arrayKey="LAB_LOCATION_WAITS" />
         </div>
+      </div>
+
+      {/* Sub-Tab Navigation */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+        <button
+          onClick={() => setActiveSubTab('labs')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'labs'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>Laboratory Waits</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('imaging-waits')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'imaging-waits'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Clock className="w-4 h-4" />
+          <span>Imaging Gaps</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('facilities')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'facilities'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <MapPin className="w-4 h-4" />
+          <span>Diagnostic Sites</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('turnaround')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'turnaround'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <TrendingDown className="w-4 h-4" />
+          <span>Lab Turnaround</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('bottlenecks')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'bottlenecks'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Flow Bottlenecks</span>
+        </button>
       </div>
 
       {/* SUBTAB 1: Live Lab Waits */}
       {activeSubTab === 'labs' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="LAB_LOCATION_WAITS" />
           {/* Lab location filters & search */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
@@ -382,6 +381,7 @@ export default function DiagnosticDashboard() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">CIHI CT & MRI Diagnostic Wait Days</h3>
                   <p className="text-[10px] text-slate-500">Comparing Alberta (P50 and P90 percentile days) against Canadian averages (2019 - 2025)</p>
+                  <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="IMAGING_WAIT_TRENDS" />
                 </div>
 
                 <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
@@ -486,6 +486,7 @@ export default function DiagnosticDashboard() {
               <div>
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Facility Diagnostic Volume & Utilization</h3>
                 <p className="text-[10px] text-slate-500">Individual medical-surgical hospital scanner statistics and local P50 / P90 wait ranges</p>
+                <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="FACILITY_IMAGING_WAITS" />
               </div>
 
               <div className="relative w-full sm:w-64">
@@ -557,6 +558,7 @@ export default function DiagnosticDashboard() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Test Turnaround Duration Benchmarks</h3>
                   <p className="text-[10px] text-slate-500">Required specimen analytical processing timeline from collection to report</p>
+                  <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="TEST_TURNAROUND_METRICS" />
                 </div>
                 <span className="text-[9px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
                   Source: APL Test Directory
@@ -623,6 +625,7 @@ export default function DiagnosticDashboard() {
       {activeSubTab === 'bottlenecks' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="PRIORITY_TARGET_COMPLIANCE" />
             
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-2.5 h-full bg-red-500" />

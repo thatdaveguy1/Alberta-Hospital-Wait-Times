@@ -54,3 +54,89 @@
 .leaflet-container .leaflet-control-attribution a:hover {
   text-decoration: underline !important;
 }
+
+/* Standardized Chart Tooltip styles across all charts (both Recharts and custom tooltips) */
+.recharts-default-tooltip,
+.chart-tooltip {
+  background-color: rgba(9, 13, 22, 0.95) !important;
+  border: 1px solid rgba(59, 130, 246, 0.25) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 1rem !important;
+  padding: 0.75rem 1rem !important;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif !important;
+  backdrop-filter: blur(12px) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Custom Tooltip subelements */
+.chart-tooltip-title {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 0.5rem !important;
+  letter-spacing: -0.01em !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding-bottom: 0.35rem !important;
+  text-transform: none !important;
+}
+
+.chart-tooltip-subtitle {
+  color: #94a3b8 !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  margin-top: -0.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.chart-tooltip-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 1.5rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  padding: 0.15rem 0 !important;
+}
+
+.chart-tooltip-label {
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+}
+
+.chart-tooltip-value {
+  font-family: monospace !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+}
+
+/* Default Recharts Tooltip inner classes overrides */
+.recharts-tooltip-label {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 0.5rem !important;
+  letter-spacing: -0.01em !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding-bottom: 0.35rem !important;
+}
+
+.recharts-tooltip-item {
+  color: #cbd5e1 !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  padding: 0.15rem 0 !important;
+}
+
+.recharts-tooltip-item-name {
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+}
+
+.recharts-tooltip-item-value {
+  font-family: monospace !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin-left: 0.25rem !important;
+}
+

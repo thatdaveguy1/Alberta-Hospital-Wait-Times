@@ -57,6 +57,8 @@ import {
   TravelForCare,
   ServiceAccessMetric
 } from '../regionalInequityData';
+import { DataTimestamp } from './DataTimestamp';
+import { _dataMetadata as regionalInequityDataMetadata } from '../regionalInequityData';
 
 // ----------------------------------------------------------------------------
 // PROVINCIAL BENCHMARKS (DYNAMICALLY CALCULATED FROM THE 5 REPRESENTATIVE LGAs)
@@ -336,94 +338,87 @@ export default function RegionalInequityDashboard() {
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
-      <div id="ri-header-banner" className="bg-[#0b1226] border border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-xl">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-rose-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute left-1/3 top-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -z-10" />
-        
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                Community Health Equity Dashboard
-              </span>
-              <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
-                Primary Source: Alberta Health Community Profiles & StatsCan CIMD (132 LGAs)
-              </span>
-            </div>
-            <h1 className="text-xl font-extrabold text-white tracking-tight sm:text-3xl">
-              Regional Health Inequity & Community Need
-            </h1>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-3xl leading-relaxed">
-              Examine health system disparities across Alberta. Compare local geographic areas (LGAs) by primary care 
-              capacity, socioeconomic deprivation indices, chronic disease burden, emergency room reliance, and outward travel burdens.
-            </p>
-          </div>
-
-          <div id="ri-navigation-tabs" className="flex flex-wrap gap-1 bg-slate-950/60 p-1 rounded-xl border border-slate-850 self-start lg:self-auto shrink-0 select-none">
-            <button
-              onClick={() => setActiveSubTab('lga-needs')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                activeSubTab === 'lga-needs' 
-                  ? 'bg-rose-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900/30'
-              }`}
-            >
-              Needs & Deprivation
-            </button>
-            <button
-              onClick={() => setActiveSubTab('disease-burden')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                activeSubTab === 'disease-burden' 
-                  ? 'bg-rose-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900/30'
-              }`}
-            >
-              Chronic Burden
-            </button>
-            <button
-              onClick={() => setActiveSubTab('ed-reliance')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                activeSubTab === 'ed-reliance' 
-                  ? 'bg-rose-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900/30'
-              }`}
-            >
-              ER Reliance Index
-            </button>
-            <button
-              onClick={() => setActiveSubTab('access-travel')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                activeSubTab === 'access-travel' 
-                  ? 'bg-rose-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900/30'
-              }`}
-            >
-              Access & Travel
-            </button>
-            <button
-              onClick={() => setActiveSubTab('compare-matrix')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeSubTab === 'compare-matrix' 
-                  ? 'bg-blue-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900/30'
-              }`}
-            >
-              <ArrowRightLeft className="w-3 h-3" />
-              <span>Compare LGAs</span>
-            </button>
-            <button
-              onClick={() => setActiveSubTab('data-explorer')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeSubTab === 'data-explorer' 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900/30'
-              }`}
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>Data Explorer</span>
-            </button>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-rose-400" />
+            <span>Health Inequity & Community Need</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Analyze geographic disparities, chronic disease burden, and care travel patterns.
+          </p>
+          <DataTimestamp metadata={regionalInequityDataMetadata} arrayKey="PROVINCIAL_BENCHMARKS" />
         </div>
+      </div>
+
+      {/* Primary Sub-Tab Navigation */}
+      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+        <button
+          onClick={() => setActiveSubTab('lga-needs')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'lga-needs'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Community Profile</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('disease-burden')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'disease-burden'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          <span>Disease Burden</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('ed-reliance')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'ed-reliance'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>ED Reliance</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('access-travel')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'access-travel'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <MapPin className="w-4 h-4" />
+          <span>Travel For Care</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('compare-matrix')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'compare-matrix'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Compare Matrix</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('data-explorer')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'data-explorer'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Search className="w-4 h-4" />
+          <span>Data Explorer</span>
+        </button>
       </div>
 
       {/* Warning Narrative Chain */}
@@ -651,6 +646,7 @@ export default function RegionalInequityDashboard() {
           {/* SUBTAB 2: Chronic Disease Burden */}
           {activeSubTab === 'disease-burden' && (
             <div id="ri-diseases-view" className="space-y-6 animate-fadeIn">
+              <DataTimestamp compact metadata={regionalInequityDataMetadata} arrayKey="CHRONIC_DISEASE_BURDEN" />
               {/* Outcome Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
@@ -759,6 +755,7 @@ export default function RegionalInequityDashboard() {
           {/* SUBTAB 3: ER Reliance Index */}
           {activeSubTab === 'ed-reliance' && (
             <div id="ri-ed-view" className="space-y-6 animate-fadeIn">
+              <DataTimestamp compact metadata={regionalInequityDataMetadata} arrayKey="ED_RELIANCE_METRICS" />
               {/* ED metrics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
