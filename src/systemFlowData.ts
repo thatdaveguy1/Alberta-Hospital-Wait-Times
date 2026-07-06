@@ -41,7 +41,7 @@ export interface CIHIComparator {
   metric: string;
   albertaValue: number;
   canadaValue: number;
-  unit: 'percent' | 'hours' | 'beds_per_1000' | 'count';
+  unit: 'percent' | 'hours' | 'beds_per_1000' | 'count' | 'days';
   description: string;
 }
 

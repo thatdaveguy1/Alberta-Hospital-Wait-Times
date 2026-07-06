@@ -203,9 +203,10 @@ export const VIRTUAL_CARE_METADATA: Record<string, {
 }> = {
   HEALTH_LINK_VOLUMES: {
     source: 'virtualCareFetcher',
-    sourceVintage: 'Live data',
-    lastUpdated: '2026-07-05T15:56:20.851Z',
-    updateType: 'auto',
+    sourceVintage: 'AHS reports (no new publications)',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'PubMed checked but no new AHS program milestones are published, requiring manual monitoring.',
   },
   VIRTUAL_MD_COHORT_STUDY: {
     source: 'CJEM Peer-Reviewed Study (Springer Link 2025)',
@@ -229,9 +230,10 @@ export const VIRTUAL_CARE_METADATA: Record<string, {
     verification: 'Could not verify exact percentages — marked as estimate',
   },
   ADJACENT_HELPLINES: {
-    source: 'virtualCareFetcher',
-    sourceVintage: 'Live data',
-    lastUpdated: '2026-07-05T15:56:20.851Z',
-    updateType: 'auto',
+    source: 'alberta211Scraper',
+    sourceVintage: 'Alberta 211 (API limitations)',
+    lastUpdated: '2026-07-05',
+    updateType: 'manual',
+    verification: 'Helplines database is static due to 211 API limits, requiring manual registry checks.',
   },
 };

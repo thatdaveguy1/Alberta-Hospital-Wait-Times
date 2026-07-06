@@ -446,10 +446,10 @@ export const _dataMetadata: Record<string, {
   updateType: "auto" | "manual";
   verification?: string;
 }> = {
-  WASTEWATER_SIGNALS: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
-  OUTBREAK_PROTOCOLS: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
-  RVD_RESPIRATORY_CASE_COUNTS: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
-  RVD_IMMUNIZATION_DOSES: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
-  RESPIRATORY_VIRUS_SURVEILLANCE: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
-  CHILDHOOD_IMMUNIZATION_COVERAGE: { source: "phacFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+  WASTEWATER_SIGNALS: { source: "phacFetcher (Edmonton only)", sourceVintage: "PHAC / AVD (partial)", lastUpdated: "2026-07-05", updateType: "manual", verification: "PHAC only provides Edmonton wastewater data; other zones must be manually parsed or estimated." },
+  OUTBREAK_PROTOCOLS: { source: "AHS CDC Guidelines", sourceVintage: "AHS CDC Protocols", lastUpdated: "2026-07-05", updateType: "manual", verification: "Standard provincial outbreak management guidelines; changes occur rarely." },
+  RVD_RESPIRATORY_CASE_COUNTS: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+  RVD_IMMUNIZATION_DOSES: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+  RESPIRATORY_VIRUS_SURVEILLANCE: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
+  CHILDHOOD_IMMUNIZATION_COVERAGE: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: "auto" },
 };

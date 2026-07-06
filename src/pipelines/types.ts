@@ -3,7 +3,7 @@
 export interface SyncResult {
   domain: string;
   pipeline: string;
-  status: 'success' | 'failed' | 'partial' | 'skipped';
+  status: 'success' | 'failed' | 'partial' | 'skipped' | 'manual';
   recordsFetched: number;
   recordsWritten: number;
   durationMs: number;

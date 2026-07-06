@@ -371,7 +371,7 @@ function buildRegionalLgaDemand(): LGADemand[] {
 
   // Approximate population from COMMUNITY_NEED_PROFILES where available;
   // fall back to a per-1000-visit derived estimate otherwise.
-  const candidates: LGADemand[] = edReliance.map(ed => {
+  const candidates = edReliance.map(ed => {
     const profile = needByLga.get(ed.lgaName);
     const zone = profile?.zone ?? 'North Zone';
     // Estimate annual ED visits from per-1000 rate and population (if present)
@@ -401,7 +401,19 @@ function buildRegionalLgaDemand(): LGADemand[] {
     const inZone = candidates.filter(c => c.zone === zone);
     if (inZone.length === 0) continue;
     inZone.sort((a, b) => b.edVisitsPer1000 - a.edVisitsPer1000);
-    picked.push(inZone[0]);
+    const best = inZone[0];
+    if (best) {
+      picked.push({
+        lgaName: best.lgaName,
+        zone: best.zone,
+        population: best.population,
+        annualEdVisits: best.annualEdVisits,
+        ctas1_2_Pct: best.ctas1_2_Pct,
+        ctas3_Pct: best.ctas3_Pct,
+        ctas4_5_Pct: best.ctas4_5_Pct,
+        topDiagnosis: best.topDiagnosis,
+      });
+    }
   }
 
   return picked;

@@ -279,7 +279,7 @@ export const _dataMetadata: Record<string, {
   updateType: "auto" | "manual";
   verification?: string;
 }> = {
-  COMMUNITY_NEED_PROFILES: { source: "openAlbertaInequityFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:14.181Z", updateType: "auto" },
-  CHRONIC_DISEASE_BURDEN: { source: "openAlbertaInequityFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:14.181Z", updateType: "auto" },
-  ED_RELIANCE_METRICS: { source: "openAlbertaInequityFetcher", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:14.181Z", updateType: "auto" },
+  COMMUNITY_NEED_PROFILES: { source: "openAlbertaInequityFetcher", sourceVintage: "Open Alberta (mapping/no-match limits)", lastUpdated: "2026-07-05", updateType: "manual", verification: "Open Alberta community need profiling workbook has mapping and alignment limits, requiring manual reconciliation." },
+  CHRONIC_DISEASE_BURDEN: { source: "openAlbertaInequityFetcher", sourceVintage: "Open Alberta (mapping/no-match limits)", lastUpdated: "2026-07-05", updateType: "manual", verification: "Chronic disease burden sheet has alignment limits, requiring manual reconciliation." },
+  ED_RELIANCE_METRICS: { source: "openAlbertaInequityFetcher", sourceVintage: "Open Alberta (mapping/no-match limits)", lastUpdated: "2026-07-05", updateType: "manual", verification: "Emergency Department reliance sheet has mapping limits, requiring manual reconciliation." },
 };

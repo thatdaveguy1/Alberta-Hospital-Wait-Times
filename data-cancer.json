@@ -1074,5 +1074,4507 @@
       "latitude": 52.2618,
       "longitude": -113.8115
     }
+  ],
+  "CIHI_CANCER_WAIT_TIMES": [
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2008",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2008",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2008",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2008",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2008",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2008",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2009",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2009",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2009",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2009",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2009",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2009",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2010",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2010",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2010",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2010",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2010",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2010",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2011",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2011",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2011",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2011",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2011",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2011",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2012",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2012",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2012",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2012",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2012",
+      "unit": "Days",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2012",
+      "unit": "Number of cases",
+      "result": "n/a"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "28"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "57"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2013",
+      "unit": "Number of cases",
+      "result": "477"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "15"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "40"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2013",
+      "unit": "Number of cases",
+      "result": "1,169"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "20"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "46"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2013",
+      "unit": "Number of cases",
+      "result": "476"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "41"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "85"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2013",
+      "unit": "Number of cases",
+      "result": "253"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "41"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2013",
+      "unit": "Days",
+      "result": "86"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2013",
+      "unit": "Number of cases",
+      "result": "633"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "29"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "64"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2014",
+      "unit": "Number of cases",
+      "result": "488"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "20"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "47"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2014",
+      "unit": "Number of cases",
+      "result": "1,169"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "24"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "56"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2014",
+      "unit": "Number of cases",
+      "result": "518"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "35"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "68"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2014",
+      "unit": "Number of cases",
+      "result": "259"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "39"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2014",
+      "unit": "Days",
+      "result": "87"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2014",
+      "unit": "Number of cases",
+      "result": "567"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "28"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "70"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2015",
+      "unit": "Number of cases",
+      "result": "542"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "20"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "50"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2015",
+      "unit": "Number of cases",
+      "result": "1,240"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "70"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2015",
+      "unit": "Number of cases",
+      "result": "495"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "31"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "62"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2015",
+      "unit": "Number of cases",
+      "result": "296"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "43"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2015",
+      "unit": "Days",
+      "result": "109"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2015",
+      "unit": "Number of cases",
+      "result": "546"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "30"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "70"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2016",
+      "unit": "Number of cases",
+      "result": "448"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "20"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "49"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2016",
+      "unit": "Number of cases",
+      "result": "1,074"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "68"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2016",
+      "unit": "Number of cases",
+      "result": "419"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "33"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "63"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2016",
+      "unit": "Number of cases",
+      "result": "290"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "48"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2016",
+      "unit": "Days",
+      "result": "116"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2016",
+      "unit": "Number of cases",
+      "result": "571"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "30"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "69"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2017",
+      "unit": "Number of cases",
+      "result": "573"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "19"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "48"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2017",
+      "unit": "Number of cases",
+      "result": "1,273"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "28"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "67"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2017",
+      "unit": "Number of cases",
+      "result": "473"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "29"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "57"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2017",
+      "unit": "Number of cases",
+      "result": "309"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "48"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2017",
+      "unit": "Days",
+      "result": "122"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2017",
+      "unit": "Number of cases",
+      "result": "634"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "32"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "73"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2018",
+      "unit": "Number of cases",
+      "result": "528"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "20"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "59"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2018",
+      "unit": "Number of cases",
+      "result": "1,257"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "23"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "56"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2018",
+      "unit": "Number of cases",
+      "result": "472"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "34"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "69"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2018",
+      "unit": "Number of cases",
+      "result": "314"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "43"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2018",
+      "unit": "Days",
+      "result": "98"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2018",
+      "unit": "Number of cases",
+      "result": "676"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "29"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "68"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019",
+      "unit": "Number of cases",
+      "result": "1,149"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "17"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "36"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019",
+      "unit": "Number of cases",
+      "result": "1,928"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "24"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "52"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019",
+      "unit": "Number of cases",
+      "result": "743"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "21"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "46"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019",
+      "unit": "Number of cases",
+      "result": "385"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "45"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019",
+      "unit": "Days",
+      "result": "104"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019",
+      "unit": "Number of cases",
+      "result": "583"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "20"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "64"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020",
+      "unit": "Number of cases",
+      "result": "1,024"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "15"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "34"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020",
+      "unit": "Number of cases",
+      "result": "1,513"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "20"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "48"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020",
+      "unit": "Number of cases",
+      "result": "638"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "22"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "49"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020",
+      "unit": "Number of cases",
+      "result": "342"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "49"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020",
+      "unit": "Days",
+      "result": "162"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020",
+      "unit": "Number of cases",
+      "result": "499"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "26"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "64"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021",
+      "unit": "Number of cases",
+      "result": "1,080"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "18"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "36"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021",
+      "unit": "Number of cases",
+      "result": "1,796"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "23"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "55"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021",
+      "unit": "Number of cases",
+      "result": "711"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "58"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021",
+      "unit": "Number of cases",
+      "result": "359"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "62"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021",
+      "unit": "Days",
+      "result": "146"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021",
+      "unit": "Number of cases",
+      "result": "475"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "29"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "68"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019FY",
+      "unit": "Number of cases",
+      "result": "2,312"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "19"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "36"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019FY",
+      "unit": "Number of cases",
+      "result": "3,787"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "24"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "54"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019FY",
+      "unit": "Number of cases",
+      "result": "1,243"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "21"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "48"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019FY",
+      "unit": "Number of cases",
+      "result": "750"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "52"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019FY",
+      "unit": "Days",
+      "result": "119"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019FY",
+      "unit": "Number of cases",
+      "result": "1,165"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "29"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "68"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019Q3Q4",
+      "unit": "Number of cases",
+      "result": "1,163"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "21"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "37"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019Q3Q4",
+      "unit": "Number of cases",
+      "result": "1,859"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "24"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "57"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019Q3Q4",
+      "unit": "Number of cases",
+      "result": "500"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "21"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "50"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019Q3Q4",
+      "unit": "Number of cases",
+      "result": "365"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "56"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2019Q3Q4",
+      "unit": "Days",
+      "result": "128"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2019Q3Q4",
+      "unit": "Number of cases",
+      "result": "582"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "22"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "62"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020FY",
+      "unit": "Number of cases",
+      "result": "2,136"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "17"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "36"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020FY",
+      "unit": "Number of cases",
+      "result": "3,298"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "21"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "46"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020FY",
+      "unit": "Number of cases",
+      "result": "1,166"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "24"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "49"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020FY",
+      "unit": "Number of cases",
+      "result": "692"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "46"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020FY",
+      "unit": "Days",
+      "result": "151"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020FY",
+      "unit": "Number of cases",
+      "result": "1,063"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "23"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "61"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020Q3Q4",
+      "unit": "Number of cases",
+      "result": "1,112"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "20"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "36"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020Q3Q4",
+      "unit": "Number of cases",
+      "result": "1,785"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "22"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "49"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020Q3Q4",
+      "unit": "Number of cases",
+      "result": "528"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "24"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "49"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020Q3Q4",
+      "unit": "Number of cases",
+      "result": "350"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "44"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2020Q3Q4",
+      "unit": "Days",
+      "result": "134"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2020Q3Q4",
+      "unit": "Number of cases",
+      "result": "564"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "25"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "65"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021FY",
+      "unit": "Number of cases",
+      "result": "2,136"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "18"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "38"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021FY",
+      "unit": "Number of cases",
+      "result": "3,525"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "22"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "55"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021FY",
+      "unit": "Number of cases",
+      "result": "1,384"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "29"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "62"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021FY",
+      "unit": "Number of cases",
+      "result": "731"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "67"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021FY",
+      "unit": "Days",
+      "result": "148"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021FY",
+      "unit": "Number of cases",
+      "result": "944"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "25"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "69"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021Q3Q4",
+      "unit": "Number of cases",
+      "result": "1,056"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "18"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "40"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021Q3Q4",
+      "unit": "Number of cases",
+      "result": "1,729"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "22"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "55"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021Q3Q4",
+      "unit": "Number of cases",
+      "result": "673"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "33"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "67"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021Q3Q4",
+      "unit": "Number of cases",
+      "result": "372"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "75"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2021Q3Q4",
+      "unit": "Days",
+      "result": "155"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2021Q3Q4",
+      "unit": "Number of cases",
+      "result": "469"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "30"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "78"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022",
+      "unit": "Number of cases",
+      "result": "977"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "21"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "43"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022",
+      "unit": "Number of cases",
+      "result": "1,679"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "25"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "63"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022",
+      "unit": "Number of cases",
+      "result": "692"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "34"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "71"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022",
+      "unit": "Number of cases",
+      "result": "389"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "76"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022",
+      "unit": "Days",
+      "result": "168"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022",
+      "unit": "Number of cases",
+      "result": "523"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "30"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "77"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022FY",
+      "unit": "Number of cases",
+      "result": "2,027"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "21"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "42"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022FY",
+      "unit": "Number of cases",
+      "result": "3,715"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "67"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022FY",
+      "unit": "Number of cases",
+      "result": "1,407"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "32"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "74"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022FY",
+      "unit": "Number of cases",
+      "result": "800"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "75"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022FY",
+      "unit": "Days",
+      "result": "167"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022FY",
+      "unit": "Number of cases",
+      "result": "1,053"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "30"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "75"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022Q3Q4",
+      "unit": "Number of cases",
+      "result": "1,050"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "21"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "41"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022Q3Q4",
+      "unit": "Number of cases",
+      "result": "2,036"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "70"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022Q3Q4",
+      "unit": "Number of cases",
+      "result": "715"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "31"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "80"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022Q3Q4",
+      "unit": "Number of cases",
+      "result": "411"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "74"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2022Q3Q4",
+      "unit": "Days",
+      "result": "164"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2022Q3Q4",
+      "unit": "Number of cases",
+      "result": "530"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "34"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "76"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023",
+      "unit": "Number of cases",
+      "result": "1,125"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "22"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "44"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023",
+      "unit": "Number of cases",
+      "result": "2,133"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "26"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "62"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023",
+      "unit": "Number of cases",
+      "result": "712"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "31"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "65"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023",
+      "unit": "Number of cases",
+      "result": "415"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "57"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023",
+      "unit": "Days",
+      "result": "150"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023",
+      "unit": "Number of cases",
+      "result": "502"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "33"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "79"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023FY",
+      "unit": "Number of cases",
+      "result": "2,301"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "22"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "45"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023FY",
+      "unit": "Number of cases",
+      "result": "4,262"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "25"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "58"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023FY",
+      "unit": "Number of cases",
+      "result": "1,437"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "32"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "64"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023FY",
+      "unit": "Number of cases",
+      "result": "828"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "56"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023FY",
+      "unit": "Days",
+      "result": "150"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023FY",
+      "unit": "Number of cases",
+      "result": "1,031"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "33"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "84"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023Q3Q4",
+      "unit": "Number of cases",
+      "result": "1,176"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "22"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "45"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023Q3Q4",
+      "unit": "Number of cases",
+      "result": "2,129"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "61"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023Q3Q4",
+      "unit": "Number of cases",
+      "result": "708"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "34"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "63"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023Q3Q4",
+      "unit": "Number of cases",
+      "result": "413"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "55"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2023Q3Q4",
+      "unit": "Days",
+      "result": "148"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2023Q3Q4",
+      "unit": "Number of cases",
+      "result": "529"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "33"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "76"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024",
+      "unit": "Number of cases",
+      "result": "1,174"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "23"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "55"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024",
+      "unit": "Number of cases",
+      "result": "1,983"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "24"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "55"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024",
+      "unit": "Number of cases",
+      "result": "724"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "34"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "64"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024",
+      "unit": "Number of cases",
+      "result": "416"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "67"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024",
+      "unit": "Days",
+      "result": "140"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024",
+      "unit": "Number of cases",
+      "result": "529"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "31"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "76"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024FY",
+      "unit": "Number of cases",
+      "result": "2,454"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "26"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "58"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024FY",
+      "unit": "Number of cases",
+      "result": "4,287"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "61"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024FY",
+      "unit": "Number of cases",
+      "result": "1,466"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "30"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "63"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024FY",
+      "unit": "Number of cases",
+      "result": "894"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "70"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024FY",
+      "unit": "Days",
+      "result": "154"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024FY",
+      "unit": "Number of cases",
+      "result": "1,083"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "30"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "76"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024Q3Q4",
+      "unit": "Number of cases",
+      "result": "1,280"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "28"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "61"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024Q3Q4",
+      "unit": "Number of cases",
+      "result": "2,304"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "61"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024Q3Q4",
+      "unit": "Number of cases",
+      "result": "742"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "62"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024Q3Q4",
+      "unit": "Number of cases",
+      "result": "478"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "76"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2024Q3Q4",
+      "unit": "Days",
+      "result": "166"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2024Q3Q4",
+      "unit": "Number of cases",
+      "result": "554"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "30"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "74"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Bladder Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2025",
+      "unit": "Number of cases",
+      "result": "1,255"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "27"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "57"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Breast Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2025",
+      "unit": "Number of cases",
+      "result": "2,305"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "26"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "60"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Colorectal Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2025",
+      "unit": "Number of cases",
+      "result": "726"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "28"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "61"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Lung Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2025",
+      "unit": "Number of cases",
+      "result": "454"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "50th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "78"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "90th percentile",
+      "dataYear": "2025",
+      "unit": "Days",
+      "result": "174"
+    },
+    {
+      "reportingLevel": "Provincial",
+      "province": "Alberta",
+      "region": "n/a",
+      "indicator": "Prostate Cancer Surgery",
+      "metric": "Volume",
+      "dataYear": "2025",
+      "unit": "Number of cases",
+      "result": "540"
+    }
   ]
 }

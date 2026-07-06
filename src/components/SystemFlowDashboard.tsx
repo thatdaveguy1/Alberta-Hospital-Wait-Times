@@ -1368,8 +1368,8 @@ export default function SystemFlowDashboard() {
                       <div className="flex items-center gap-4 text-xs font-mono pt-1">
                         <div className="flex-1 space-y-1.5">
                           <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-slate-400">Alberta: <strong className="text-white font-extrabold">{comp.albertaValue}{comp.unit === 'percent' ? '%' : comp.unit === 'hours' ? ' hrs' : ''}</strong></span>
-                            <span className="text-slate-500">Canada Avg: <strong className="text-slate-400 font-extrabold">{comp.canadaValue}{comp.unit === 'percent' ? '%' : comp.unit === 'hours' ? ' hrs' : ''}</strong></span>
+                            <span className="text-slate-400">Alberta: <strong className="text-white font-extrabold">{comp.albertaValue}{comp.unit === 'percent' ? '%' : comp.unit === 'hours' ? ' hrs' : comp.unit === 'days' ? ' days' : ''}</strong></span>
+                            <span className="text-slate-500">Canada Avg: <strong className="text-slate-400 font-extrabold">{comp.canadaValue}{comp.unit === 'percent' ? '%' : comp.unit === 'hours' ? ' hrs' : comp.unit === 'days' ? ' days' : ''}</strong></span>
                           </div>
                           
                           {/* visual progress comparing alberta vs canada */}

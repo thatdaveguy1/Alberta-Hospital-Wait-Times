@@ -80,7 +80,7 @@ function runPythonExtraction(xlsxPath: string): Promise<AttachmentRate[]> {
   execFile(
     'python3',
     [PYTHON_SCRIPT, xlsxPath],
-    { timeout: PYTHON_TIMEOUT_MS, maxBuffer: 10 * 1024 * 1024 },
+    { timeout: PYTHON_TIMEOUT_MS, maxBuffer: 10 * 1024 * 1024, env: process.env },
     (err, stdout, stderr) => {
       if (err) {
         reject(new Error(`Python extraction failed: ${err.message}${stderr ? `\n${stderr}` : ''}`));

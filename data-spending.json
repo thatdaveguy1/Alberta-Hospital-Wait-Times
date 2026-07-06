@@ -3252,10 +3252,11 @@
       "verification": "CIHI publishes hospital cost performance indicators including spending per staffed bed and hospitalizations per bed. Fiscal year figures are plausible but could not be confirmed against a specific CIHI publication."
     },
     "PHYSICIAN_SPECIALTY_BILLING": {
-      "source": "cihiDownloader",
-      "sourceVintage": "Live data",
-      "lastUpdated": "2026-07-05T15:56:27.339Z",
-      "updateType": "auto"
+      "source": "openAlbertaBillingFetcher",
+      "sourceVintage": "Open Alberta (mismatched schema)",
+      "lastUpdated": "2026-07-05",
+      "updateType": "manual",
+      "verification": "Physician billing data has schema alignment issues on Open Alberta, requiring manual data cleansing and verification."
     },
     "ALBERTA_USE_OF_FUNDS": {
       "source": "cihiDownloader",
