@@ -57,7 +57,7 @@ export default function PatientExperienceDashboard() {
   const [settingFilter, setSettingFilter] = useState<string>('All');
   const [safetyZoneFilter, setSafetyZoneFilter] = useState<string>('All');
   const [complaintSearch, setComplaintSearch] = useState<string>('');
-
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
   // Complaint routing simulator state
   const [simulatedComplaintText, setSimulatedComplaintText] = useState<string>('');
   const [selectedFacility, setSelectedFacility] = useState<string>('');
@@ -310,38 +310,92 @@ export default function PatientExperienceDashboard() {
               </p>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <button
+              onClick={() => setExpandedCard(expandedCard === 'ed-communication' ? null : 'ed-communication')}
+              className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-rose-500/50 ${
+                expandedCard === 'ed-communication' ? 'border-rose-500 ring-1 ring-rose-500/30' : 'border-slate-800'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Emergency Dept Communication</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-rose-400">56.4%</span>
                 <span className="text-[10px] text-slate-400">National: 59.2%</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1 border-t border-slate-850">
-                Strained by waiting room bottlenecks and staff rotation frequencies.
+                Strained by waiting room bottlenecks and staff rotation frequencies. Click to view historical trend.
               </p>
-            </div>
+              {expandedCard === 'ed-communication' && (
+                <div className="h-40 mt-3 pt-3 border-t border-slate-850 animate-fadeIn" onClick={(e) => e.stopPropagation()}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={ED_EXPERIENCE_TRENDS} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="year" stroke="#64748b" fontSize={9} />
+                      <YAxis stroke="#64748b" fontSize={9} domain={[30, 80]} />
+                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 10 }} />
+                      <Line type="monotone" dataKey="overallCommunication" name="Communication %" stroke="#f43f5e" strokeWidth={2} activeDot={{ r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </button>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <button
+              onClick={() => setExpandedCard(expandedCard === 'inpatient-nurse' ? null : 'inpatient-nurse')}
+              className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-cyan-500/50 ${
+                expandedCard === 'inpatient-nurse' ? 'border-cyan-500 ring-1 ring-cyan-500/30' : 'border-slate-800'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Inpatient Nurse Responsiveness</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-cyan-400">72.8%</span>
                 <span className="text-[10px] text-slate-400">National: 74.2%</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1 border-t border-slate-850">
-                Slight gains in late 2025 as ward resource retention models began stabilizing teams.
+                Slight gains in late 2025 as ward resource retention models began stabilizing teams. Click to view historical trend.
               </p>
-            </div>
+              {expandedCard === 'inpatient-nurse' && (
+                <div className="h-40 mt-3 pt-3 border-t border-slate-850 animate-fadeIn" onClick={(e) => e.stopPropagation()}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={INPATIENT_EXPERIENCE_TRENDS} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="year" stroke="#64748b" fontSize={9} />
+                      <YAxis stroke="#64748b" fontSize={9} domain={[50, 90]} />
+                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 10 }} />
+                      <Line type="monotone" dataKey="nursesCommunication" name="Responsiveness %" stroke="#22d3ee" strokeWidth={2} activeDot={{ r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </button>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <button
+              onClick={() => setExpandedCard(expandedCard === 'transition-planning' ? null : 'transition-planning')}
+              className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-amber-500/50 ${
+                expandedCard === 'transition-planning' ? 'border-amber-500 ring-1 ring-amber-500/30' : 'border-slate-800'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Transition & Discharge Planning</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-amber-500">58.2%</span>
                 <span className="text-[10px] text-slate-400">National: 61.4%</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1 border-t border-slate-850">
-                A chronic system gap. Nearly 42% of patients leave without clear home help guidelines.
+                A chronic system gap. Nearly 42% of patients leave without clear home help guidelines. Click to view historical trend.
               </p>
-            </div>
+              {expandedCard === 'transition-planning' && (
+                <div className="h-40 mt-3 pt-3 border-t border-slate-850 animate-fadeIn" onClick={(e) => e.stopPropagation()}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={INPATIENT_EXPERIENCE_TRENDS} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="year" stroke="#64748b" fontSize={9} />
+                      <YAxis stroke="#64748b" fontSize={9} domain={[40, 80]} />
+                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 10 }} />
+                      <Line type="monotone" dataKey="dischargeInformation" name="Discharge Planning %" stroke="#fbbf24" strokeWidth={2} activeDot={{ r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
