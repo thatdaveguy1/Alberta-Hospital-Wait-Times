@@ -367,4 +367,5 @@
 - [x] Add id='manual-location-input' so header buttons focus the modal input
 - [x] Remove unused detectIPLocation fallback
 - [x] Verify typecheck, build, and dev server health
+- [x] Fix map to center on user location with nearby hospitals via fitBounds
 - [x] Commit to main (8aa7a06)
