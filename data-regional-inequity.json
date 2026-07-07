@@ -3517,25 +3517,22 @@
   ],
   "_dataMetadata": {
     "COMMUNITY_NEED_PROFILES": {
-      "source": "openAlbertaInequityFetcher",
-      "sourceVintage": "Open Alberta (mapping/no-match limits)",
-      "lastUpdated": "2026-07-05",
-      "updateType": "manual",
-      "verification": "Open Alberta community need profiling workbook has mapping and alignment limits, requiring manual reconciliation."
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:02:07.852Z",
+      "source": "Open Alberta CKAN LGA community profiles (Table 10.1)",
+      "sourceVintage": "Latest Open Alberta Table 10.1 release"
     },
     "CHRONIC_DISEASE_BURDEN": {
-      "source": "openAlbertaInequityFetcher",
-      "sourceVintage": "Open Alberta (mapping/no-match limits)",
-      "lastUpdated": "2026-07-05",
-      "updateType": "manual",
-      "verification": "Chronic disease burden sheet has alignment limits, requiring manual reconciliation."
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:02:07.852Z",
+      "source": "Open Alberta CKAN chronic disease indicators (Figure 4.2 + Table 10.1)",
+      "sourceVintage": "Latest Open Alberta Figure 4.2 release"
     },
     "ED_RELIANCE_METRICS": {
-      "source": "openAlbertaInequityFetcher",
-      "sourceVintage": "Open Alberta (mapping/no-match limits)",
-      "lastUpdated": "2026-07-05",
-      "updateType": "manual",
-      "verification": "Emergency Department reliance sheet has mapping limits, requiring manual reconciliation."
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:02:07.852Z",
+      "source": "Open Alberta CKAN LGA community profiles (Table 10.1 mood/anxiety)",
+      "sourceVintage": "Latest Open Alberta Table 10.1 release"
     }
   }
 }

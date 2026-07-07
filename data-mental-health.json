@@ -303,6 +303,44 @@
       "description": "© 6 Alberta Health Services |Terms & Conditions|Privacy"
     }
   ],
+  "_dataMetadata": {
+    "SUBSTANCE_HARM_TRENDS": {
+      "source": "Alberta Substance Use Surveillance",
+      "sourceVintage": "2019–latest surveillance year",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-05T15:55:14Z"
+    },
+    "ADDICTION_BED_CAPACITIES": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:00:02.820Z",
+      "source": "AHS Addiction & Mental Health bed availability",
+      "sourceVintage": "Live AHS bed-availability page"
+    },
+    "COMMUNITY_MH_WAITS": {
+      "source": "Alberta community mental-health median waits",
+      "sourceVintage": "2021 hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "HOSPITAL_MHSU_BURDEN": {
+      "source": "Alberta hospital mental-health/substance-use burden",
+      "sourceVintage": "2021 hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "SUPPORT_HELPLINES": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:00:02.820Z",
+      "source": "AHS Mental Health helplines + 211 Alberta directory",
+      "sourceVintage": "Live helpline directories"
+    },
+    "CIHI_MH_READMISSION_RATES": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:03:30.240Z",
+      "source": "CIHI 30-day mental-health readmission data table",
+      "sourceVintage": "CIHI latest release"
+    }
+  },
   "CIHI_MH_READMISSION_RATES": [
     {
       "Indicator": "30-Day Readmission for Mental Health and Substance Use",
@@ -4904,43 +4942,5 @@
       "Risk-adjusted rate: Top results": "Not a top result",
       "Risk-adjusted rate: Relative standing scatter plot confidence intervals": "Outside 99.8% CI"
     }
-  ],
-  "_dataMetadata": {
-    "SUBSTANCE_HARM_TRENDS": {
-      "source": "Alberta Substance Use Surveillance",
-      "sourceVintage": "2019–latest surveillance year",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "ADDICTION_BED_CAPACITIES": {
-      "source": "AHS Addiction & Mental Health bed availability",
-      "sourceVintage": "Live AHS bed-availability page",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "COMMUNITY_MH_WAITS": {
-      "source": "Alberta community mental-health median waits",
-      "sourceVintage": "2021 hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "HOSPITAL_MHSU_BURDEN": {
-      "source": "Alberta hospital mental-health/substance-use burden",
-      "sourceVintage": "2021 hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "SUPPORT_HELPLINES": {
-      "source": "AHS Mental Health helplines + 211 Alberta directory",
-      "sourceVintage": "Live helpline directories",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "CIHI_MH_READMISSION_RATES": {
-      "source": "CIHI 30-day mental-health readmission data table",
-      "sourceVintage": "CIHI latest release",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    }
-  }
+  ]
 }

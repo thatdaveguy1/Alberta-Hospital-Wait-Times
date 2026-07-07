@@ -339,6 +339,62 @@
       "trend": "stable"
     }
   ],
+  "_dataMetadata": {
+    "PATIENT_VOICE_BY_SETTING": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:00:16.512Z",
+      "source": "GoodCaring.ca Alberta specialist wait times",
+      "sourceVintage": "Live GoodCaring scrape"
+    },
+    "INPATIENT_EXPERIENCE_TRENDS": {
+      "source": "Alberta inpatient experience trends",
+      "sourceVintage": "2021 hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "ED_EXPERIENCE_TRENDS": {
+      "source": "Alberta ED experience trends",
+      "sourceVintage": "2021 hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "CLINICAL_SAFETY_TRENDS": {
+      "source": "Alberta clinical safety / hospital harm trends",
+      "sourceVintage": "2021 hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "PATIENT_COMPLAINTS": {
+      "source": "Alberta patient complaint categories",
+      "sourceVintage": "Hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "INPATIENT_EXPERIENCE_TRENDS_HQCA": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:03:08.420Z",
+      "source": "HQCA FOCUS patient experience CSV",
+      "sourceVintage": "Apr 2021 onward"
+    },
+    "CIHI_ALL_READMISSION_RATES": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:03:30.240Z",
+      "source": "CIHI all-patients readmitted data table",
+      "sourceVintage": "CIHI latest release"
+    },
+    "CIHI_ACSC_HOSPITALIZATIONS": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:03:30.240Z",
+      "source": "CIHI ambulatory-care-sensitive-conditions hospitalizations",
+      "sourceVintage": "CIHI latest release"
+    },
+    "CIHI_WAIT_TIME_SATISFACTION": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:03:30.240Z",
+      "source": "CIHI wait-time satisfaction data table",
+      "sourceVintage": "CIHI latest release"
+    }
+  },
   "INPATIENT_EXPERIENCE_TRENDS_HQCA": [
     {
       "year": "Apr 2021 - Mar 2022",
@@ -22138,61 +22194,5 @@
       "Denominator (Weighted)": "743,700",
       "__EMPTY_19": ""
     }
-  ],
-  "_dataMetadata": {
-    "PATIENT_VOICE_BY_SETTING": {
-      "source": "GoodCaring.ca Alberta specialist wait times",
-      "sourceVintage": "Live GoodCaring scrape",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "INPATIENT_EXPERIENCE_TRENDS": {
-      "source": "Alberta inpatient experience trends",
-      "sourceVintage": "2021 hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "ED_EXPERIENCE_TRENDS": {
-      "source": "Alberta ED experience trends",
-      "sourceVintage": "2021 hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "CLINICAL_SAFETY_TRENDS": {
-      "source": "Alberta clinical safety / hospital harm trends",
-      "sourceVintage": "2021 hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "PATIENT_COMPLAINTS": {
-      "source": "Alberta patient complaint categories",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "INPATIENT_EXPERIENCE_TRENDS_HQCA": {
-      "source": "HQCA FOCUS patient experience CSV",
-      "sourceVintage": "Apr 2021 onward",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "CIHI_ALL_READMISSION_RATES": {
-      "source": "CIHI all-patients readmitted data table",
-      "sourceVintage": "CIHI latest release",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "CIHI_ACSC_HOSPITALIZATIONS": {
-      "source": "CIHI ambulatory-care-sensitive-conditions hospitalizations",
-      "sourceVintage": "CIHI latest release",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "CIHI_WAIT_TIME_SATISFACTION": {
-      "source": "CIHI wait-time satisfaction data table",
-      "sourceVintage": "CIHI latest release",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    }
-  }
+  ]
 }

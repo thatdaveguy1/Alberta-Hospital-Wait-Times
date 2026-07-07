@@ -1,88 +1,16 @@
 {
   "status": "partial_success",
-  "lastSyncTimestamp": "2026-07-07T14:38:41.631Z",
-  "nextSyncTimestamp": "2026-07-08T14:38:41.631Z",
+  "lastSyncTimestamp": "2026-07-07T19:03:58.120Z",
+  "nextSyncTimestamp": "2026-07-08T19:03:58.120Z",
   "results": [
-    {
-      "domain": "er-waittimes",
-      "pipeline": "erWaitTimesFetcher",
-      "status": "success",
-      "recordsFetched": 29,
-      "recordsWritten": 29,
-      "durationMs": 62,
-      "timestamp": "2026-07-07T17:33:09.473Z"
-    },
-    {
-      "domain": "diagnostic",
-      "pipeline": "aplLabWaitTimesFetcher",
-      "status": "success",
-      "recordsFetched": 153,
-      "recordsWritten": 153,
-      "durationMs": 60,
-      "timestamp": "2026-07-07T17:13:09.439Z"
-    },
-    {
-      "domain": "diagnostic",
-      "pipeline": "aplLabWaitTimesFetcher",
-      "status": "success",
-      "recordsFetched": 153,
-      "recordsWritten": 153,
-      "durationMs": 73,
-      "timestamp": "2026-07-07T02:20:19.981Z"
-    },
-    {
-      "domain": "diagnostic",
-      "pipeline": "aplLabWaitTimesFetcher",
-      "status": "success",
-      "recordsFetched": 153,
-      "recordsWritten": 153,
-      "durationMs": 42,
-      "timestamp": "2026-07-07T03:16:16.069Z"
-    },
-    {
-      "domain": "diagnostic",
-      "pipeline": "aplLabWaitTimesFetcher",
-      "status": "success",
-      "recordsFetched": 153,
-      "recordsWritten": 153,
-      "durationMs": 33,
-      "timestamp": "2026-07-07T03:42:38.671Z"
-    },
-    {
-      "domain": "diagnostic",
-      "pipeline": "aplLabWaitTimesFetcher",
-      "status": "success",
-      "recordsFetched": 153,
-      "recordsWritten": 153,
-      "durationMs": 31,
-      "timestamp": "2026-07-07T05:45:16.928Z"
-    },
-    {
-      "domain": "diagnostic",
-      "pipeline": "aplLabWaitTimesFetcher",
-      "status": "success",
-      "recordsFetched": 153,
-      "recordsWritten": 153,
-      "durationMs": 33,
-      "timestamp": "2026-07-07T06:00:51.731Z"
-    },
-    {
-      "domain": "diagnostic",
-      "pipeline": "aplLabWaitTimesFetcher",
-      "status": "success",
-      "recordsFetched": 153,
-      "recordsWritten": 153,
-      "durationMs": 75,
-      "timestamp": "2026-07-07T13:16:19.690Z"
-    },
     {
       "domain": "disruptions",
       "pipeline": "disruptionsScraper",
       "status": "success",
       "recordsFetched": 18,
       "recordsWritten": 27,
-      "durationMs": 76,
-      "timestamp": "2026-07-07T14:34:01.231Z"
+      "durationMs": 159,
+      "timestamp": "2026-07-07T18:59:11.140Z"
     },
     {
       "domain": "workforce",
@@ -90,8 +18,8 @@
       "status": "success",
       "recordsFetched": 8,
       "recordsWritten": 8,
-      "durationMs": 2455,
-      "timestamp": "2026-07-07T14:34:01.673Z"
+      "durationMs": 2464,
+      "timestamp": "2026-07-07T18:59:11.694Z"
     },
     {
       "domain": "public-health",
@@ -99,9 +27,9 @@
       "status": "manual",
       "recordsFetched": 40,
       "recordsWritten": 33,
-      "durationMs": 2120,
+      "durationMs": 3179,
       "error": "Manual update required — automated source unavailable or partial",
-      "timestamp": "2026-07-07T14:34:05.130Z"
+      "timestamp": "2026-07-07T18:59:15.158Z"
     },
     {
       "domain": "spending",
@@ -109,9 +37,9 @@
       "status": "manual",
       "recordsFetched": 100,
       "recordsWritten": 100,
-      "durationMs": 2556,
+      "durationMs": 2519,
       "error": "Manual update required — automated source unavailable or partial",
-      "timestamp": "2026-07-07T14:34:08.251Z"
+      "timestamp": "2026-07-07T18:59:19.338Z"
     },
     {
       "domain": "diagnostic",
@@ -119,8 +47,8 @@
       "status": "success",
       "recordsFetched": 153,
       "recordsWritten": 153,
-      "durationMs": 221,
-      "timestamp": "2026-07-07T14:34:11.808Z"
+      "durationMs": 52,
+      "timestamp": "2026-07-07T18:59:22.860Z"
     },
     {
       "domain": "surgical",
@@ -128,8 +56,8 @@
       "status": "success",
       "recordsFetched": 119,
       "recordsWritten": 119,
-      "durationMs": 35905,
-      "timestamp": "2026-07-07T14:34:13.890Z"
+      "durationMs": 35714,
+      "timestamp": "2026-07-07T18:59:24.799Z"
     },
     {
       "domain": "surgical",
@@ -137,8 +65,8 @@
       "status": "success",
       "recordsFetched": 24,
       "recordsWritten": 24,
-      "durationMs": 801,
-      "timestamp": "2026-07-07T14:34:49.938Z"
+      "durationMs": 1184,
+      "timestamp": "2026-07-07T19:00:00.632Z"
     },
     {
       "domain": "continuing-care",
@@ -146,8 +74,8 @@
       "status": "success",
       "recordsFetched": 12,
       "recordsWritten": 36,
-      "durationMs": 4778,
-      "timestamp": "2026-07-07T14:34:51.741Z"
+      "durationMs": 4090,
+      "timestamp": "2026-07-07T19:00:02.820Z"
     },
     {
       "domain": "system-flow",
@@ -156,7 +84,7 @@
       "recordsFetched": 38,
       "recordsWritten": 85,
       "durationMs": 30,
-      "timestamp": "2026-07-07T14:34:57.520Z"
+      "timestamp": "2026-07-07T19:00:07.913Z"
     },
     {
       "domain": "system-flow",
@@ -164,8 +92,8 @@
       "status": "success",
       "recordsFetched": 10,
       "recordsWritten": 29,
-      "durationMs": 2098,
-      "timestamp": "2026-07-07T14:34:58.552Z"
+      "durationMs": 2286,
+      "timestamp": "2026-07-07T19:00:08.946Z"
     },
     {
       "domain": "workforce",
@@ -173,8 +101,8 @@
       "status": "success",
       "recordsFetched": 6,
       "recordsWritten": 6,
-      "durationMs": 2111,
-      "timestamp": "2026-07-07T14:35:01.651Z"
+      "durationMs": 3275,
+      "timestamp": "2026-07-07T19:00:12.235Z"
     },
     {
       "domain": "patient-experience",
@@ -182,8 +110,8 @@
       "status": "success",
       "recordsFetched": 12,
       "recordsWritten": 12,
-      "durationMs": 2687,
-      "timestamp": "2026-07-07T14:35:04.764Z"
+      "durationMs": 3039,
+      "timestamp": "2026-07-07T19:00:16.512Z"
     },
     {
       "domain": "cancer",
@@ -191,8 +119,8 @@
       "status": "success",
       "recordsFetched": 17,
       "recordsWritten": 17,
-      "durationMs": 2134,
-      "timestamp": "2026-07-07T14:35:08.452Z"
+      "durationMs": 2135,
+      "timestamp": "2026-07-07T19:00:20.553Z"
     },
     {
       "domain": "spending",
@@ -200,8 +128,8 @@
       "status": "success",
       "recordsFetched": 73,
       "recordsWritten": 73,
-      "durationMs": 4814,
-      "timestamp": "2026-07-07T14:35:11.587Z"
+      "durationMs": 4812,
+      "timestamp": "2026-07-07T19:00:23.692Z"
     },
     {
       "domain": "diagnostic",
@@ -209,8 +137,8 @@
       "status": "success",
       "recordsFetched": 16,
       "recordsWritten": 16,
-      "durationMs": 2336,
-      "timestamp": "2026-07-07T14:35:17.401Z"
+      "durationMs": 2375,
+      "timestamp": "2026-07-07T19:00:29.507Z"
     },
     {
       "domain": "cancer",
@@ -218,8 +146,8 @@
       "status": "success",
       "recordsFetched": 81,
       "recordsWritten": 81,
-      "durationMs": 1,
-      "timestamp": "2026-07-07T14:35:20.741Z"
+      "durationMs": 4,
+      "timestamp": "2026-07-07T19:00:32.884Z"
     },
     {
       "domain": "surgical",
@@ -228,7 +156,7 @@
       "recordsFetched": 96,
       "recordsWritten": 96,
       "durationMs": 11,
-      "timestamp": "2026-07-07T14:35:21.743Z"
+      "timestamp": "2026-07-07T19:00:33.889Z"
     },
     {
       "domain": "primary-care",
@@ -236,17 +164,17 @@
       "status": "success",
       "recordsFetched": 59,
       "recordsWritten": 59,
-      "durationMs": 38829,
-      "timestamp": "2026-07-07T14:35:22.756Z"
+      "durationMs": 40393,
+      "timestamp": "2026-07-07T19:00:34.902Z"
     },
     {
       "domain": "primary-care",
       "pipeline": "albertaFindAProviderScraper",
       "status": "success",
-      "recordsFetched": 2214,
+      "recordsFetched": 2210,
       "recordsWritten": 2232,
-      "durationMs": 42543,
-      "timestamp": "2026-07-07T14:36:02.589Z"
+      "durationMs": 44198,
+      "timestamp": "2026-07-07T19:01:16.300Z"
     },
     {
       "domain": "continuing-care",
@@ -254,8 +182,8 @@
       "status": "success",
       "recordsFetched": 35,
       "recordsWritten": 35,
-      "durationMs": 5250,
-      "timestamp": "2026-07-07T14:36:46.134Z"
+      "durationMs": 5349,
+      "timestamp": "2026-07-07T19:02:01.500Z"
     },
     {
       "domain": "regional-inequity",
@@ -263,8 +191,8 @@
       "status": "manual",
       "recordsFetched": 396,
       "recordsWritten": 405,
-      "durationMs": 4195,
-      "timestamp": "2026-07-07T14:36:52.386Z",
+      "durationMs": 4331,
+      "timestamp": "2026-07-07T19:02:07.852Z",
       "error": "Manual update required — automated source unavailable or partial"
     },
     {
@@ -273,8 +201,8 @@
       "status": "manual",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 8,
-      "timestamp": "2026-07-07T14:36:57.599Z",
+      "durationMs": 10,
+      "timestamp": "2026-07-07T19:02:13.186Z",
       "error": "Manual update required — automated source unavailable or partial"
     },
     {
@@ -283,9 +211,9 @@
       "status": "manual",
       "recordsFetched": 1,
       "recordsWritten": 0,
-      "durationMs": 4367,
+      "durationMs": 4365,
       "error": "Manual update required — automated source unavailable or partial",
-      "timestamp": "2026-07-07T14:36:58.610Z"
+      "timestamp": "2026-07-07T19:02:14.199Z"
     },
     {
       "domain": "spending",
@@ -293,9 +221,9 @@
       "status": "manual",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 130,
+      "durationMs": 129,
       "error": "Manual update required — automated source unavailable or partial",
-      "timestamp": "2026-07-07T14:37:04.109Z"
+      "timestamp": "2026-07-07T19:02:19.695Z"
     },
     {
       "domain": "spending",
@@ -303,8 +231,8 @@
       "status": "manual",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 28665,
-      "timestamp": "2026-07-07T14:37:05.111Z",
+      "durationMs": 28364,
+      "timestamp": "2026-07-07T19:02:20.699Z",
       "error": "Manual update required — automated source unavailable or partial"
     },
     {
@@ -313,8 +241,8 @@
       "status": "manual",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 17337,
-      "timestamp": "2026-07-07T14:37:34.777Z",
+      "durationMs": 17354,
+      "timestamp": "2026-07-07T19:02:50.065Z",
       "error": "Manual update required — automated source unavailable or partial"
     },
     {
@@ -323,8 +251,8 @@
       "status": "success",
       "recordsFetched": 568,
       "recordsWritten": 568,
-      "durationMs": 8445,
-      "timestamp": "2026-07-07T14:37:53.117Z"
+      "durationMs": 8478,
+      "timestamp": "2026-07-07T19:03:08.420Z"
     },
     {
       "domain": "public-health",
@@ -332,8 +260,8 @@
       "status": "success",
       "recordsFetched": 473,
       "recordsWritten": 473,
-      "durationMs": 6396,
-      "timestamp": "2026-07-07T14:38:02.564Z"
+      "durationMs": 7394,
+      "timestamp": "2026-07-07T19:03:17.899Z"
     },
     {
       "domain": "workforce",
@@ -341,8 +269,8 @@
       "status": "success",
       "recordsFetched": 600,
       "recordsWritten": 600,
-      "durationMs": 2915,
-      "timestamp": "2026-07-07T14:38:09.962Z"
+      "durationMs": 2942,
+      "timestamp": "2026-07-07T19:03:26.296Z"
     },
     {
       "domain": "mental-health",
@@ -350,8 +278,8 @@
       "status": "success",
       "recordsFetched": 2187,
       "recordsWritten": 2187,
-      "durationMs": 24325,
-      "timestamp": "2026-07-07T14:38:13.880Z"
+      "durationMs": 24454,
+      "timestamp": "2026-07-07T19:03:30.240Z"
     },
     {
       "domain": "surgical",
@@ -360,11 +288,11 @@
       "recordsFetched": 1828,
       "recordsWritten": 1828,
       "durationMs": 2423,
-      "timestamp": "2026-07-07T14:38:39.208Z"
+      "timestamp": "2026-07-07T19:03:55.697Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-07T17:33:09.473Z",
-  "erWaitTimesNextUpdate": "2026-07-07T17:43:09.536Z",
-  "labWaitsLastUpdate": "2026-07-07T17:13:09.439Z",
-  "labWaitsNextUpdate": "2026-07-07T17:43:09.499Z"
+  "erWaitTimesLastUpdate": null,
+  "erWaitTimesNextUpdate": null,
+  "labWaitsLastUpdate": null,
+  "labWaitsNextUpdate": null
 }

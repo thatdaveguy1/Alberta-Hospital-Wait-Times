@@ -1482,6 +1482,129 @@
       ]
     },
     {
+      "id": "0a312cd4-2d3f-49b2-8f94-edb19a70742e",
+      "name": "alberta-population-projections-2026-2051",
+      "title": "Alberta population projections, 2026-2051 - Alberta and local geographic areas (LGAs) - data tables",
+      "organization": "Treasury Board and Finance",
+      "notes": "These long-term population projections by single year of age and gender have been developed by applying the component cohort survival model to assumptions about future trends in fertility, mortality and migration, under three different sets of assumptions (i.e. low, medium and high scenarios) at the Alberta level. Includes estimated (2001-2025) and projected (2026-2051) population of Alberta and its sub-regions, by single year of age and gender, as well as selected summary tables.",
+      "structuredResourceCount": 16,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "27356952-4ac4-4d2e-9ba5-0808ef548768",
+          "name": "Alberta population projections 2026-2051 - local geographic areas (LGAs)",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/27356952-4ac4-4d2e-9ba5-0808ef548768/download/tbf-alberta-population-projections-2026-2051-lga.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "33a5f834-f3e0-4664-bdea-92cbdeb0f6b4",
+          "name": "Alberta population projections 2026-2051 - all assumptions (low, medium and high)",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/33a5f834-f3e0-4664-bdea-92cbdeb0f6b4/download/tbf-alberta-population-projections-2026-2051-all-scenarios.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "a35c1477-dc38-4508-8e90-568c9f0c7717",
+          "name": "Alberta population projections 2026-2051 - summary - medium growth assumption",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/a35c1477-dc38-4508-8e90-568c9f0c7717/download/tbf-alberta-population-projections-2026-2051-summary.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "78bff0c2-9970-45d6-94cd-535563418a26",
+          "name": "Alberta population projections 2026-2051 - aggregated local geographic areas (ALGAs)",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/78bff0c2-9970-45d6-94cd-535563418a26/download/tbf-alberta-population-projections-2026-2051-alga.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "32865a90-f69f-4b76-928a-2698169f4973",
+          "name": "Alberta population projections 2026-2051 - census divisions (CDs)",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/32865a90-f69f-4b76-928a-2698169f4973/download/tbf-alberta-population-projections-2026-2051-cd.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "8ec3e93a-5013-4bd3-b1ec-06e5d7329d01",
+          "name": "Alberta population projections 2026-2051 - census metropolitan areas (CMAs)",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/8ec3e93a-5013-4bd3-b1ec-06e5d7329d01/download/tbf-alberta-population-projections-2026-2051-cma.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "5bb8b239-887f-46bd-928c-cd7c0529f11f",
+          "name": "Alberta population projections 2026-2051 - Community and Social Services regions (CSS)",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/5bb8b239-887f-46bd-928c-cd7c0529f11f/download/tbf-alberta-population-projections-2026-2051-css2.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "b6cec541-583b-4e0b-88a2-aede66f33712",
+          "name": "Alberta population projections 2026-2051 - school authorities, francophone",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/b6cec541-583b-4e0b-88a2-aede66f33712/download/tbf-alberta-population-projections-2026-2051-ed-francophone.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "39fbbfd8-4f19-4a32-9a8a-08a57fbf4acb",
+          "name": "Alberta population projections 2026-2051 - school authorities, public",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/39fbbfd8-4f19-4a32-9a8a-08a57fbf4acb/download/tbf-alberta-population-projections-2026-2051-ed-public.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "f3b59630-21d1-4cc9-b9e3-f16b58ad6757",
+          "name": "Alberta population projections 2026-2051 - school authorities, separate",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/f3b59630-21d1-4cc9-b9e3-f16b58ad6757/download/tbf-alberta-population-projections-2026-2051-ed-separate.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "70db5cac-4385-4852-bac7-f25ececd8cc8",
+          "name": "Alberta population projections 2026-2051 - economic regions (ERs)",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/70db5cac-4385-4852-bac7-f25ececd8cc8/download/tbf-alberta-population-projections-2026-2051-er.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "7051864a-54e5-4418-8807-98932251b5db",
+          "name": "Alberta population projections 2026-2051 - health peer groups",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/7051864a-54e5-4418-8807-98932251b5db/download/tbf-alberta-population-projections-2026-2051-health-peer.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "83848d92-160f-4c92-ab2b-c9f79538413e",
+          "name": "Alberta population projections 2026-2051 - health corridors",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/83848d92-160f-4c92-ab2b-c9f79538413e/download/tbf-alberta-population-projections-2026-2051-health-corridor.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "075cf8b5-7d2d-4390-a9e4-d605b39d2945",
+          "name": "Alberta population projections 2026-2051 - health status areas (HSAs)",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/075cf8b5-7d2d-4390-a9e4-d605b39d2945/download/tbf-alberta-population-projections-2026-2051-hsa.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "172fa38f-d22b-44bd-8954-bef28e04747f",
+          "name": "Alberta population projections 2026-2051 - health subzones",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/172fa38f-d22b-44bd-8954-bef28e04747f/download/tbf-alberta-population-projections-2026-2051-szone.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "412d7939-b5f7-4850-a58f-84fb5beb2e74",
+          "name": "Alberta population projections 2026-2051 - Land Use Framework regions (LUF)",
+          "url": "https://open.alberta.ca/dataset/0a312cd4-2d3f-49b2-8f94-edb19a70742e/resource/412d7939-b5f7-4850-a58f-84fb5beb2e74/download/tbf-alberta-population-projections-2026-2051-luf.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        }
+      ]
+    },
+    {
       "id": "428e6cb3-e5db-4786-a810-4f45e35ea195",
       "name": "assistant-deputy-minister-newsletter-indigenous-health-division",
       "title": "Assistant Deputy Minister Newsletter - Indigenous Health Division",
@@ -4308,24 +4431,6 @@
       ]
     },
     {
-      "id": "cfa7dbb2-8293-4db2-bba3-4e40b45e2cac",
-      "name": "2026_140",
-      "title": "Dual Practice Records Regulation",
-      "organization": "King's Printer",
-      "notes": "The Dual Practice Records Regulation establishes the specific record keeping and reporting obligations for dual practice (flexibly participating) and fully private (non-participating) physicians.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "1aa285bd-e491-4440-8a77-d79ae627c30d",
-          "name": "Dual Practice Records Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863372&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
       "id": "2e4f4c3b-2bf4-4213-b9a1-62f2d6f8e62f",
       "name": "2026_134",
       "title": "Primary Care Corridor Provincial Health Corporations Regulation",
@@ -4338,6 +4443,24 @@
           "id": "601d376c-76a9-45c8-a5f2-2c6cde1deeb7",
           "name": "Primary Care Corridor Provincial Health Corporations Regulation",
           "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863273&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "cfa7dbb2-8293-4db2-bba3-4e40b45e2cac",
+      "name": "2026_140",
+      "title": "Dual Practice Records Regulation",
+      "organization": "King's Printer",
+      "notes": "The Dual Practice Records Regulation establishes the specific record keeping and reporting obligations for dual practice (flexibly participating) and fully private (non-participating) physicians.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "1aa285bd-e491-4440-8a77-d79ae627c30d",
+          "name": "Dual Practice Records Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863372&search_by=link",
           "format": "URI",
           "isStructured": false
         }
@@ -4593,45 +4716,6 @@
           "url": "https://open.alberta.ca/dataset/adfb8959-5a88-4b7c-a2f0-8cefb7dc6b09/resource/261d1728-019c-4874-9ee0-bc8d79f5fa88/download/guidelines-yellow-fever-2012.pdf",
           "format": "PDF",
           "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "76a54113-1381-4824-b39c-2b32d2dfc652",
-      "name": "cyanobacterial-blooms-in-alberta-recreational-waters",
-      "title": "Cyanobacterial blooms in Alberta recreational waters",
-      "organization": "Health",
-      "notes": "Cyanobacteria (also referred to as blue-green algae) are common photosynthetic bacteria that live in surface waters. Under favorable conditions, such as warm water and high nutrient content, these bacteria can form nuisance “blooms”. The presence of blooms in recreational water causes unpleasant aesthetics and exposure to some toxin-producing blooms may pose potential health risks. Contact with blooms can cause skin rashes and irritation, itchy eyes, and ear infections. Inhaling water may cause allergic-like reactions, runny noses or sore throats. Ingestion of toxins can cause a range of symptoms (e.g., hepatotoxic or neurotoxic effects, and even death). There has been increased public awareness as a result of research over the past 25 years, recent monitoring efforts, and increased public education on the topic.\r\nIn 2009, Alberta Health and Alberta Health Services began seasonal monitoring for cyanobacterial blooms at high use recreational beaches. In 2019, beach operators took over the sampling role from Alberta Health Services under the Alberta Safe Beach Protocol. Water is collected from shallow water adjacent to beaches and submitted to laboratories for analysis of cyanobacterial bloom indicators. These data, along with visual inspection, are used to characterize potential cyanobacterial blooms and issue recreational water use advisories when cyanobacteria are found in a waterbody at levels that can affect human health.\r\nThe data presented below is organized into two files that contain supporting data and key cyanobacterial bloom indicators, and counts of individual cyanobacteria species, respectively. Each row represents a water sample collected from an Alberta beach. In the cyanobacteria species data, each water sample will have many associated rows of data. Each column represents a piece of information about that water sample (e.g., key indicators and supporting information) that is used to characterize cyanobacterial blooms.  Data from the current year (2026) should be considered preliminary and might change with further quality control/quality assurance steps. This dataset is updated monthly between June and September each year.  For more information on these indicators please refer to the column descriptions “Usage Considerations” associated with this dataset. ",
-      "structuredResourceCount": 4,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "7e33a646-00e5-4ae8-aedd-dd2872eb4dde",
-          "name": "Key Cyanobacterial Bloom Indicators and Supporting Data 2009-2026 Column Descriptions",
-          "url": "https://open.alberta.ca/dataset/76a54113-1381-4824-b39c-2b32d2dfc652/resource/7e33a646-00e5-4ae8-aedd-dd2872eb4dde/download/all-bloom-indicators-column-descriptions_10252024.xlsx",
-          "format": "XLSX",
-          "isStructured": true
-        },
-        {
-          "id": "3b6dfea5-e3d6-4405-aef5-3d39a74e2c39",
-          "name": "Key Cyanobacterial Bloom Indicators and Supporting Data 2009-2026",
-          "url": "https://open.alberta.ca/dataset/76a54113-1381-4824-b39c-2b32d2dfc652/resource/3b6dfea5-e3d6-4405-aef5-3d39a74e2c39/download/ogp.all-bloom-indicators.09122025.xlsx",
-          "format": "XLSX",
-          "isStructured": true
-        },
-        {
-          "id": "2689934f-3c15-4eb9-9503-91deaf2a206f",
-          "name": "Counts of Individual Cyanobacterial Species 2009-2026 Column Descriptions",
-          "url": "https://open.alberta.ca/dataset/76a54113-1381-4824-b39c-2b32d2dfc652/resource/2689934f-3c15-4eb9-9503-91deaf2a206f/download/species-column-descriptions.xlsx",
-          "format": "XLSX",
-          "isStructured": true
-        },
-        {
-          "id": "ea1d5197-5a8f-4924-9fbb-fb9fa8f089b9",
-          "name": "Counts of Individual Cyanobacterial Species 2009-2026",
-          "url": "https://open.alberta.ca/dataset/76a54113-1381-4824-b39c-2b32d2dfc652/resource/ea1d5197-5a8f-4924-9fbb-fb9fa8f089b9/download/ogp.species.09122025.xlsx",
-          "format": "XLSX",
-          "isStructured": true
         }
       ]
     }

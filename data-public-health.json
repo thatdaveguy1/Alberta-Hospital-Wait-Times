@@ -287,6 +287,56 @@
       "antiviralPolicy": "Triage assessment for high-risk elderly or immunocompromised residents; direct referral to secondary urgent care."
     }
   },
+  "_dataMetadata": {
+    "RESPIRATORY_VIRUS_SURVEILLANCE": {
+      "source": "Alberta respiratory virus surveillance summary",
+      "sourceVintage": "Hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "WASTEWATER_SIGNALS": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:03:17.899Z",
+      "source": "PHAC Health Infobase wastewater API + Alberta RVD",
+      "sourceVintage": "Live weekly wastewater signals"
+    },
+    "CHILDHOOD_IMMUNIZATION_COVERAGE": {
+      "source": "Alberta childhood immunization coverage by zone",
+      "sourceVintage": "2025 reporting year baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "NOTIFIABLE_DISEASE_INCIDENCE": {
+      "source": "Alberta notifiable disease incidence",
+      "sourceVintage": "Hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "ENVIRONMENTAL_ADVISORIES": {
+      "source": "Alberta environmental health advisories",
+      "sourceVintage": "Hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "OUTBREAK_PROTOCOLS": {
+      "source": "Alberta outbreak management protocols",
+      "sourceVintage": "Hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "RVD_RESPIRATORY_CASE_COUNTS": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:03:17.899Z",
+      "source": "Alberta Respiratory Virus Dashboard summary",
+      "sourceVintage": "2025-08-24 to 2026-08-23"
+    },
+    "RVD_IMMUNIZATION_DOSES": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:03:17.899Z",
+      "source": "Alberta Respiratory Virus Dashboard immunizations",
+      "sourceVintage": "2025-08-24 to 2026-08-23"
+    }
+  },
   "RVD_RESPIRATORY_CASE_COUNTS": [
     {
       "virus": "Influenza A (H1N1)",
@@ -2605,55 +2655,5 @@
       "weekEnding": "2026-06-14",
       "doses": 1035695
     }
-  ],
-  "_dataMetadata": {
-    "RESPIRATORY_VIRUS_SURVEILLANCE": {
-      "source": "Alberta respiratory virus surveillance summary",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "WASTEWATER_SIGNALS": {
-      "source": "PHAC Health Infobase wastewater API + Alberta RVD",
-      "sourceVintage": "Live weekly wastewater signals",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "CHILDHOOD_IMMUNIZATION_COVERAGE": {
-      "source": "Alberta childhood immunization coverage by zone",
-      "sourceVintage": "2025 reporting year baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "NOTIFIABLE_DISEASE_INCIDENCE": {
-      "source": "Alberta notifiable disease incidence",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "ENVIRONMENTAL_ADVISORIES": {
-      "source": "Alberta environmental health advisories",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "OUTBREAK_PROTOCOLS": {
-      "source": "Alberta outbreak management protocols",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "RVD_RESPIRATORY_CASE_COUNTS": {
-      "source": "Alberta Respiratory Virus Dashboard summary",
-      "sourceVintage": "2025-08-24 to 2026-08-23",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "RVD_IMMUNIZATION_DOSES": {
-      "source": "Alberta Respiratory Virus Dashboard immunizations",
-      "sourceVintage": "2025-08-24 to 2026-08-23",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    }
-  }
+  ]
 }

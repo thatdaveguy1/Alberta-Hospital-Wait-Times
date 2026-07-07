@@ -3233,16 +3233,16 @@
   },
   "_dataMetadata": {
     "NATIONAL_SPENDING_COMPARE": {
-      "source": "cihiDownloader",
-      "sourceVintage": "Live data",
-      "lastUpdated": "2026-07-05T15:56:27.339Z",
-      "updateType": "auto"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:00:23.692Z",
+      "source": "CIHI NHEX 2025 full data tables (Table O.1)",
+      "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },
     "ALBERTA_ACTIVITY_VOLUME_TREND": {
-      "source": "cihiDownloader",
-      "sourceVintage": "Live data",
-      "lastUpdated": "2026-07-05T15:56:27.339Z",
-      "updateType": "auto"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:00:23.692Z",
+      "source": "CIHI NHEX 2025 full data tables (Table O.1, derived activity volume)",
+      "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },
     "HOSPITAL_EFFICIENCY_TREND": {
       "source": "CIHI Hospital Cost Performance report",
@@ -3259,10 +3259,10 @@
       "verification": "Physician billing data has schema alignment issues on Open Alberta, requiring manual data cleansing and verification."
     },
     "ALBERTA_USE_OF_FUNDS": {
-      "source": "cihiDownloader",
-      "sourceVintage": "Live data",
-      "lastUpdated": "2026-07-05T15:56:27.339Z",
-      "updateType": "auto"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:00:23.692Z",
+      "source": "CIHI NHEX 2025 full data tables (Series D1, Alberta sheet)",
+      "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },
     "CIHI_RESOURCE_USE_INTENSITY": {
       "source": "cihiDownloader",

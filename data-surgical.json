@@ -20130,15 +20130,15 @@
   "_dataMetadata": {
     "SURGICAL_RECORDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T17:07:31.310Z",
+      "lastUpdated": "2026-07-07T18:59:59.553Z",
       "source": "Alberta Wait Times Reporting (Power BI scraper)",
       "sourceVintage": "April 2026"
     },
     "ORTHOPEDIC_SPECIALTY_RECORDS": {
-      "source": "powerbiScraper",
-      "sourceVintage": "Live data",
-      "lastUpdated": "2026-07-05T15:55:19.035Z",
-      "updateType": "auto"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:00:00.632Z",
+      "source": "Alberta Bone & Joint Health Institute wait times page",
+      "sourceVintage": "Live weekly orthopedic hip & knee wait times"
     },
     "SURGICAL_FACILITIES": {
       "source": "AHS Find a Facility directory (facility names); metrics estimated",
@@ -20197,10 +20197,10 @@
       "updateType": "auto"
     },
     "CIHI_PRIORITY_PROCEDURE_WAITS": {
-      "source": "powerbiScraper",
-      "sourceVintage": "Live data",
-      "lastUpdated": "2026-07-05T15:55:19.035Z",
-      "updateType": "auto"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T19:03:55.697Z",
+      "source": "CIHI Wait Times Priority Procedures in Canada",
+      "sourceVintage": "2008–2025"
     }
   }
 }

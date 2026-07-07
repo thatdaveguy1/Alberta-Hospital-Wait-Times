@@ -6243,10 +6243,10 @@
   ],
   "_dataMetadata": {
     "PHYSICIAN_SPECIALTY_ZONE": {
-      "source": "CPSA quarterly statistics",
-      "sourceVintage": "Latest CPSA quarterly release",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:00:12.235Z",
+      "source": "CPSA quarterly statistics",
+      "sourceVintage": "Latest CPSA quarterly release"
     },
     "NURSING_SUPPLY_TRENDS": {
       "source": "Alberta nursing supply trends (CRNA/AHS-derived)",
@@ -6261,10 +6261,10 @@
       "lastUpdated": "2026-07-05T00:00:00Z"
     },
     "JOB_VACANCY_TRENDS": {
-      "source": "StatCan table 14100371 via WDS CSV",
-      "sourceVintage": "2023-Q1 to 2024-Q4",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T18:59:11.694Z",
+      "source": "StatCan table 14100371 via WDS CSV",
+      "sourceVintage": "2023-Q1 to 2024-Q4"
     },
     "SPECIALIST_RECRUITMENT_NEEDS": {
       "source": "Alberta specialist recruitment needs / 10-yr forecast",
@@ -6279,46 +6279,46 @@
       "lastUpdated": "2026-07-05T00:00:00Z"
     },
     "PHYSICIAN_SUPPLY_CIHI": {
-      "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2015–2024",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "source": "CIHI Health Workforce Quick Stats 2024",
+      "sourceVintage": "2015–2024"
     },
     "NURSE_SUPPLY_CIHI": {
-      "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2015–2024",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "source": "CIHI Health Workforce Quick Stats 2024",
+      "sourceVintage": "2015–2024"
     },
     "ALLIED_HEALTH_FLOW_CIHI": {
-      "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2015–2024",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "source": "CIHI Health Workforce Quick Stats 2024",
+      "sourceVintage": "2015–2024"
     },
     "ALLIED_HEALTH_SUPPLY_CIHI": {
-      "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "Latest CIHI profile-sheet year",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "source": "CIHI Health Workforce Quick Stats 2024",
+      "sourceVintage": "Latest CIHI profile-sheet year"
     },
     "NURSING_SUPPLY_TRENDS_CIHI": {
-      "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2015–2024",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "source": "CIHI Health Workforce Quick Stats 2024",
+      "sourceVintage": "2015–2024"
     },
     "WORKFORCE_AGE_PROFILE_CIHI": {
-      "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2023–2024",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "source": "CIHI Health Workforce Quick Stats 2024",
+      "sourceVintage": "2023–2024"
     },
     "JOB_VACANCY_TRENDS_CIHI": {
-      "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2015-Q4 to 2024-Q4",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "source": "CIHI Health Workforce Quick Stats 2024",
+      "sourceVintage": "2015-Q4 to 2024-Q4"
     }
   }
 }

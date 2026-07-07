@@ -385,16 +385,16 @@
   "CONTINUING_CARE_COMPLIANCE": [],
   "_dataMetadata": {
     "CONTINUING_CARE_PLACEMENT_STATS": {
-      "source": "HQCA FOCUS continuing-care CSVs",
-      "sourceVintage": "2021–latest HQCA reporting period",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:02:01.500Z",
+      "source": "HQCA FOCUS continuing-care CSVs",
+      "sourceVintage": "2021–latest HQCA reporting period"
     },
     "RESIDENT_QUALITY_OUTCOMES": {
-      "source": "HQCA FOCUS continuing-care CSVs + CIHI LTCC indicators",
-      "sourceVintage": "2021–latest HQCA/CIHI reporting period",
       "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
+      "lastUpdated": "2026-07-07T19:02:01.500Z",
+      "source": "HQCA FOCUS continuing-care CSVs + CIHI LTCC indicators",
+      "sourceVintage": "2021–latest HQCA/CIHI reporting period"
     },
     "HOME_CARE_EXPERIENCE": {
       "source": "HQCA home-care experience zone ratings",
