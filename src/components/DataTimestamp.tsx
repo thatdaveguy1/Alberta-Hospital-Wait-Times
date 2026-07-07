@@ -76,26 +76,6 @@ function formatTimestamp(ts: string): string {
   }
 }
 
-function formatRelative(ts: string): string {
-  if (!ts || ts === 'Unknown') return '';
-  try {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return '';
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHrs / 24);
-    if (diffHrs < 1) return 'just now';
-    if (diffHrs < 24) return `${diffHrs}h ago`;
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 30) return `${diffDays} days ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-    return `${Math.floor(diffDays / 365)} years ago`;
-  } catch {
-    return '';
-  }
-}
-
 export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimestampProps): React.ReactElement | null {
   const entry = metadata?.[arrayKey];
   if (!entry) return null;
@@ -103,7 +83,6 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
   const isAuto = entry.updateType === 'auto';
   const sanitizedSource = sanitizeSource(entry.source);
   const lastUpdated = formatTimestamp(entry.lastUpdated);
-  const relative = formatRelative(entry.lastUpdated);
 
   if (compact) {
     return (
@@ -120,7 +99,6 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
         </span>
         <span className="font-medium">
           Updated: <span className="font-mono text-slate-200 font-semibold">{lastUpdated}</span>
-          {relative && <span className="text-slate-500 ml-1">({relative})</span>}
         </span>
         <span className="text-slate-600">·</span>
         <span className="text-slate-400">Source: <span className="text-slate-200 font-semibold">{sanitizedSource}</span></span>
@@ -152,7 +130,6 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
           </span>
           <span className="text-xs font-bold text-slate-200">
             Last Update: <span className="font-mono text-white font-black">{lastUpdated}</span>
-            {relative && <span className="text-slate-500 ml-1 font-normal">({relative})</span>}
           </span>
           <span className="text-slate-600 text-xs hidden sm:inline">·</span>
           <span className="text-[11px] text-slate-400">
