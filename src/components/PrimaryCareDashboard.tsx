@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
+import { motion, AnimatePresence } from 'motion/react';
+import {
   Users,
   Building2,
   Search,
@@ -17,7 +18,9 @@ import {
   DollarSign, 
   Sliders, 
   HelpCircle,
-  Eye
+  Eye,
+  BarChart3,
+  BarChart2
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -79,7 +82,10 @@ export default function PrimaryCareDashboard() {
   }, []);
 
   const [activeSubTab, setActiveSubTab] = useState<'attachment' | 'directory' | 'pcn' | 'er-link'>('attachment');
-  
+
+  // Interactive KPI selected state for attachment trend panel
+  const [selectedKpi, setSelectedKpi] = useState<'attachment_rate' | null>(null);
+
   // Interactive State for Provider Directory
   const [directorySearch, setDirectorySearch] = useState('');
   const [selectedZoneFilter, setSelectedZoneFilter] = useState<string>('All');
@@ -162,6 +168,61 @@ export default function PrimaryCareDashboard() {
   const northZone = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'North Zone');
   const edmontonZone = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'Edmonton Zone');
   const calgaryZone = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'Calgary Zone');
+
+  // Trend panel stats for the attachment rate KPI
+  const kpiStats = useMemo(() => {
+    if (!selectedKpi) return null;
+    // Build a historical series of Alberta "All Residents" attachment rates by year
+    const series = primaryCareData.ATTACHMENT_RATES
+      .filter(r => r.geography === 'Alberta' && r.demographic_group === 'All Residents')
+      .sort((a, b) => a.reporting_year.localeCompare(b.reporting_year))
+      .map(r => r.metric_value);
+    if (series.length === 0) return null;
+
+    const baseline = series[0];
+    const latest = series[series.length - 1];
+    const peak = Math.max(...series);
+    const minVal = Math.min(...series);
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+
+    return {
+      baseline: baseline.toFixed(1),
+      latest: latest.toFixed(1),
+      peak: peak.toFixed(1),
+      minVal: minVal.toFixed(1),
+      delta: rawDelta > 0 ? `+${rawDelta.toFixed(1)}` : rawDelta.toFixed(1),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0
+    };
+  }, [selectedKpi, primaryCareData.ATTACHMENT_RATES]);
+
+  const selectedKpiDetails = useMemo(() => {
+    if (!selectedKpi) return null;
+    switch (selectedKpi) {
+      case 'attachment_rate':
+        return {
+          label: 'Primary Care Attachment Rate',
+          description: 'Historical trend of the percentage of Albertans reporting access to a regular family doctor or health provider. Attachment has eroded modestly in recent years due to provider retirements and panel caps, with persistent gaps for low-income, young-adult, and rural residents.',
+          colorClass: 'text-indigo-400',
+          bgClass: 'bg-indigo-500/10',
+          strokeColor: '#6366f1',
+          gradientId: 'colorAttachmentTrend',
+          unit: '%',
+          icon: Users
+        };
+      default:
+        return null;
+    }
+  }, [selectedKpi]);
+
+  // Historical trend series for the attachment rate AreaChart
+  const attachmentTrendSeries = useMemo(() => {
+    return primaryCareData.ATTACHMENT_RATES
+      .filter(r => r.geography === 'Alberta' && r.demographic_group === 'All Residents')
+      .sort((a, b) => a.reporting_year.localeCompare(b.reporting_year))
+      .map(r => ({ year: r.reporting_year, attachment_rate: r.metric_value }));
+  }, [primaryCareData.ATTACHMENT_RATES]);
   
   if (isLoading) return <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">Loading...</div>;
 
@@ -231,28 +292,57 @@ export default function PrimaryCareDashboard() {
       {/* Top Level Strategic Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1 */}
-        <div className="bg-slate-950 border border-slate-900 rounded-xl p-4 flex items-start gap-4">
+        <div
+          tabIndex={0}
+          role="button"
+          aria-pressed={selectedKpi === 'attachment_rate'}
+          onClick={() => setSelectedKpi(selectedKpi === 'attachment_rate' ? null : 'attachment_rate')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedKpi(selectedKpi === 'attachment_rate' ? null : 'attachment_rate');
+            }
+          }}
+          className={`bg-slate-950 border rounded-xl p-4 flex items-start gap-4 cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl group relative ${
+            selectedKpi === 'attachment_rate'
+              ? 'border-indigo-500 ring-1 ring-indigo-500/30 bg-slate-900/80 shadow-indigo-500/5'
+              : 'border-slate-900 hover:border-indigo-500/30 hover:bg-slate-900/50'
+          }`}
+        >
           <div className="p-3 rounded-lg bg-indigo-500/10 text-indigo-400 shrink-0">
             <Users className="w-5 h-5" />
           </div>
-          <div>
-            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Attached to Regular GP</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Attached to Regular GP</span>
+              <span className="p-1 bg-slate-900 border border-slate-800 rounded text-slate-500 group-hover:text-indigo-400 group-hover:border-indigo-500/30 transition-all shrink-0" title="Click to view trend">
+                <BarChart2 className="w-3 h-3" />
+              </span>
+            </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl font-black text-white">{attachmentRate}%</span>
               <span className="text-[10px] text-amber-500 font-bold flex items-center gap-0.5">
                 <TrendingDown className="w-3 h-3" /> CIHI {reportingYear}
               </span>
             </div>
-            <span className="text-[10px] text-slate-400 mt-1 block">Canada Avg: {canadaAvg}% (CIHI {reportingYear})</span>
+            <div className="flex items-center justify-between gap-1 mt-1">
+              <span className="text-[10px] text-slate-400 block">Canada Avg: {canadaAvg}% (CIHI {reportingYear})</span>
+              <span className={`text-[9px] font-bold flex items-center gap-0.5 transition-opacity ${
+                selectedKpi === 'attachment_rate'
+                  ? 'text-indigo-400 opacity-100'
+                  : 'text-indigo-400/80 opacity-100 group-hover:opacity-100'
+              }`}>
+                <span>{selectedKpi === 'attachment_rate' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+              </span>
+            </div>
           </div>
         </div>
-
         {/* Metric 2 */}
         <div className="bg-slate-950 border border-slate-900 rounded-xl p-4 flex items-start gap-4">
           <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
             <Stethoscope className="w-5 h-5" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Accepting Patients (Listed)</span>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl font-black text-white">{totalAcceptingCount.toLocaleString()} Providers</span>
@@ -263,35 +353,144 @@ export default function PrimaryCareDashboard() {
         </div>
 
         {/* Metric 3 */}
-        <div className="bg-slate-950 border border-slate-900 rounded-xl p-4 flex items-start gap-4">
+        <button
+          onClick={() => setActiveSubTab('attachment')}
+          className="w-full text-left bg-slate-950 border border-slate-900 rounded-xl p-4 flex items-start gap-4 hover:border-blue-500/30 hover:bg-slate-900/50 cursor-pointer transition-all group relative"
+        >
           <div className="p-3 rounded-lg bg-blue-500/10 text-blue-400 shrink-0">
             <Clock className="w-5 h-5" />
           </div>
-          <div>
-            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Same / Next Day Access</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Same / Next Day Access</span>
+              <span className="p-1 bg-slate-900 border border-slate-800 rounded text-slate-500 group-hover:text-blue-400 group-hover:border-blue-500/30 transition-all shrink-0" title="Click to view details">
+                <BarChart3 className="w-3 h-3" />
+              </span>
+            </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl font-black text-white">{sameDayAccess}%</span>
               <span className="text-[10px] text-rose-500 font-bold">Access Gap</span>
             </div>
-            <span className="text-[10px] text-slate-400 mt-1 block">Only {Math.round(sameDayAccess / 10 * 10) / 10} in 10 get immediate non-urgent care</span>
+            <div className="flex items-center justify-between gap-1 mt-1">
+              <span className="text-[10px] text-slate-400 block">Only {Math.round(sameDayAccess / 10 * 10) / 10} in 10 get immediate non-urgent care</span>
+              <span className="text-[9px] text-blue-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                View Details
+              </span>
+            </div>
           </div>
-        </div>
+        </button>
 
         {/* Metric 4 */}
-        <div className="bg-slate-950 border border-slate-900 rounded-xl p-4 flex items-start gap-4">
+        <button
+          onClick={() => setActiveSubTab('er-link')}
+          className="w-full text-left bg-slate-950 border border-slate-900 rounded-xl p-4 flex items-start gap-4 hover:border-rose-500/30 hover:bg-slate-900/50 cursor-pointer transition-all group relative"
+        >
           <div className="p-3 rounded-lg bg-rose-500/10 text-rose-400 shrink-0">
             <Activity className="w-5 h-5" />
           </div>
-          <div>
-            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Minor-Condition ER Rate</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Minor-Condition ER Rate</span>
+              <span className="p-1 bg-slate-900 border border-slate-800 rounded text-slate-500 group-hover:text-rose-400 group-hover:border-rose-500/30 transition-all shrink-0" title="Click to view chart">
+                <BarChart3 className="w-3 h-3" />
+              </span>
+            </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl font-black text-white">{minorConditionEdRate}</span>
               <span className="text-[10px] text-slate-400">per 1k pop</span>
             </div>
-            <span className="text-[10px] text-amber-500 mt-1 block">Over 1M low-acuity ER visits annually</span>
+            <div className="flex items-center justify-between gap-1 mt-1">
+              <span className="text-[10px] text-amber-500 block">Over 1M low-acuity ER visits annually</span>
+              <span className="text-[9px] text-rose-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                View Chart
+              </span>
+            </div>
           </div>
-        </div>
+        </button>
       </div>
+
+      {/* KPI Trend Explorer Panel */}
+      <AnimatePresence mode="wait">
+        {selectedKpi && selectedKpiDetails && kpiStats && (
+          <motion.div
+            key={`kpi-trend-${selectedKpi}`}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-slate-950/80 border border-slate-850 p-4 sm:p-5 rounded-2xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800/60">
+                <div className="space-y-1">
+                  <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                    {React.createElement(selectedKpiDetails.icon, {
+                      className: `w-4 h-4 ${selectedKpiDetails.colorClass}`
+                    })}
+                    <span>{selectedKpiDetails.label} Historical Trend Explorer</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                    {selectedKpiDetails.description}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline</span>
+                  <span className="text-xl font-black text-slate-300 font-mono">{kpiStats.baseline}{selectedKpiDetails.unit}</span>
+                </div>
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current</span>
+                  <span className="text-xl font-black text-white font-mono">{kpiStats.latest}{selectedKpiDetails.unit}</span>
+                </div>
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Peak</span>
+                  <span className={`text-xl font-black font-mono ${selectedKpiDetails.colorClass}`}>{kpiStats.peak}{selectedKpiDetails.unit}</span>
+                </div>
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                  <span className={`text-xs font-extrabold flex items-center justify-center sm:justify-start gap-1 ${kpiStats.isIncrease ? 'text-rose-400' : 'text-emerald-400'}`}>
+                    {kpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                    <span>{kpiStats.delta}{selectedKpiDetails.unit} ({kpiStats.pctChange})</span>
+                  </span>
+                </div>
+              </div>
+
+              <div className="h-60 mt-3 pt-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={attachmentTrendSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id={selectedKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
+                    <YAxis stroke="#64748b" fontSize={10} unit={selectedKpiDetails.unit} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 11 }}
+                      formatter={(v: number) => [`${v}${selectedKpiDetails.unit}`, 'Attached']}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="attachment_rate"
+                      name={selectedKpiDetails.label}
+                      stroke={selectedKpiDetails.strokeColor}
+                      strokeWidth={2.5}
+                      fillOpacity={1}
+                      fill={`url(#${selectedKpiDetails.gradientId})`}
+                      dot={{ r: 4, strokeWidth: 1 }}
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* SUB-TAB CONTENTS */}
 
