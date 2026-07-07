@@ -103,7 +103,48 @@ export default function SurgicalDashboard() {
   const SURGICAL_FACILITIES = data?.SURGICAL_FACILITIES ?? [];
   const SPECIALISTS_LIST = data?.SPECIALISTS_LIST ?? [];
   const STATSCAN_SATISFACTION_STATS = data?.STATSCAN_SATISFACTION_STATS ?? EMPTY_SATISFACTION_STATS;
-  const HISTORICAL_WAIT_TRENDS = data?.HISTORICAL_WAIT_TRENDS ?? [];
+  const rawHistoricalTrends = data?.HISTORICAL_WAIT_TRENDS ?? [];
+  const HISTORICAL_WAIT_TRENDS = useMemo(() => {
+    if (!rawHistoricalTrends || rawHistoricalTrends.length === 0) return [];
+    // If the data is already parsed/pivoted, return it directly
+    const first = rawHistoricalTrends[0];
+    if (first && 'hip_replacement_median' in first) {
+      return rawHistoricalTrends as unknown as HistoricalTrend[];
+    }
+    
+    // Otherwise, pivot the flat array grouped by year
+    const map = new Map<string, Partial<HistoricalTrend>>();
+    for (const rawItem of rawHistoricalTrends) {
+      const item = rawItem as unknown as { year: string; procedure: string; medianWaitDays: number };
+      const year = item.year;
+      if (!year) continue;
+      let entry = map.get(year);
+      if (!entry) {
+        entry = { year };
+        map.set(year, entry);
+      }
+      const days = item.medianWaitDays || 0;
+      const weeks = Number((days / 7).toFixed(1));
+      switch (item.procedure) {
+        case 'Hip Replacement':
+          entry.hip_replacement_median = weeks;
+          break;
+        case 'Knee Replacement':
+          entry.knee_replacement_median = weeks;
+          break;
+        case 'Cataract Surgery':
+          entry.cataract_surgery_median = weeks;
+          break;
+        case 'MRI Scan':
+          entry.mri_scan_median = weeks;
+          break;
+        case 'CT Scan':
+          entry.ct_scan_median = weeks;
+          break;
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.year.localeCompare(b.year)) as HistoricalTrend[];
+  }, [rawHistoricalTrends]);
   const STATSCAN_DEMOGRAPHICS = data?.STATSCAN_DEMOGRAPHICS ?? [];
   const FACILITY_COMPARISONS = data?.FACILITY_COMPARISONS ?? [];
   const SPECIALIST_COMPARISONS = data?.SPECIALIST_COMPARISONS ?? [];
@@ -685,30 +726,57 @@ export default function SurgicalDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {SURGICAL_RECORDS.filter(r => r.geography_type === 'Province' && r.metric_name === 'Median wait').map((rec, i) => {
-                      const matching90th = SURGICAL_RECORDS.find(
-                        r => r.procedure_name === rec.procedure_name && r.metric_name === '90th percentile'
-                      );
-                      return (
-                        <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-all">
-                          <td className="py-2.5 px-3 font-semibold text-white">{rec.procedure_name}</td>
-                          <td className="py-2.5 px-3 text-center font-bold text-slate-200">
-                            {rec.metric_value} {rec.unit}
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <span className="px-1.5 py-0.5 rounded bg-slate-800 font-extrabold text-slate-300">
-                              {matching90th ? `${matching90th.metric_value} weeks` : 'Not Reported'}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 text-slate-400 italic font-mono text-[10px]">
-                            {rec.benchmark_value || 'None established'}
-                          </td>
-                          <td className="py-2.5 px-3 text-right">
-                            <span className="text-[9px] font-bold text-blue-400 uppercase">{rec.source_name}</span>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {(() => {
+                      const formatWaitTime = (val: number | string) => {
+                        if (typeof val === 'number') return val.toFixed(1);
+                        const num = parseFloat(val);
+                        return isNaN(num) ? val : num.toFixed(1);
+                      };
+
+                      const getWaitSegmentLabel = (segment: string) => {
+                        if (segment === 'Decision-to-surgery') return 'Wait 2 (Decision to Surgery)';
+                        if (segment === 'Referral-to-treatment') return 'Wait 1 (Referral to Treatment)';
+                        return segment;
+                      };
+
+                      const getSourceLabel = (source: string) => {
+                        if (source.includes('Power BI')) return 'AHS Power BI';
+                        if (source.includes('Wait Times')) return 'AHS Registry';
+                        return source;
+                      };
+
+                      return SURGICAL_RECORDS.filter(r => r.geography_type === 'Province' && r.metric_name === 'Median wait').map((rec, i) => {
+                        const matching90th = SURGICAL_RECORDS.find(
+                          r => r.procedure_name === rec.procedure_name && 
+                               r.metric_name === '90th percentile' &&
+                               r.wait_segment === rec.wait_segment
+                        );
+                        return (
+                          <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-all font-sans">
+                            <td className="py-2.5 px-3">
+                              <div className="font-semibold text-white text-[13px]">{rec.procedure_name}</div>
+                              <span className="inline-block mt-0.5 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-850">
+                                {getWaitSegmentLabel(rec.wait_segment)}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-center font-mono font-black text-slate-200">
+                              {formatWaitTime(rec.metric_value)} weeks
+                            </td>
+                            <td className="py-2.5 px-3 text-center font-mono font-black text-slate-200">
+                              {matching90th ? `${formatWaitTime(matching90th.metric_value)} weeks` : <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">—</span>}
+                            </td>
+                            <td className="py-2.5 px-3 text-slate-400 font-semibold text-[11px]">
+                              {rec.benchmark_value ? `${rec.benchmark_value} weeks` : <span className="text-slate-600 font-normal">—</span>}
+                            </td>
+                            <td className="py-2.5 px-3 text-right">
+                              <span className="text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded bg-slate-950 border border-slate-850 text-blue-400">
+                                {getSourceLabel(rec.source_name)}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
                   </tbody>
                 </table>
               </div>
