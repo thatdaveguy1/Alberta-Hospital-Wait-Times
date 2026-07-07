@@ -1,212 +1,263 @@
-# Plan: 30-Minute Diagnostic & Lab Services Updates
+# Implementation Plan: 30-Minute APL Community Lab Wait Times Updates
 
-## Research Summary
+We have discovered that instead of scraping the protected Blazor SPA booking site (`qme.albertaprecisionlabs.ca`), Alberta Precision Laboratories (APL) exposes a public, unauthenticated, and CAPTCHA-free REST API that provides community lab site listings and real-time wait times:
 
-The Diagnostic & Lab dashboard (`src/components/DiagnosticDashboard.tsx`) draws from four distinct datasets in `data-diagnostic.json`:
+```
+GET https://qmeapi.albertaprecisionlabs.ca/api/location
+```
 
-| Dataset | Records | Current Source | Realistic Cadence | 30-min Possible? |
-|---|---|---|---|---|
-| `LAB_LOCATION_WAITS` | 52 APL sites | Hand-authored static snapshot | Static (claims "15 min") | **Yes — if QMe guest flow exposes wait times** |
-| `IMAGING_WAIT_TRENDS` | CT/MRI P50/P90 | CIHI annual XLSX (2008-2025) | Daily poll | No — annual publication |
-| `FACILITY_IMAGING_WAITS` | 12 facilities | Dead `waittimes.alberta.ca` + hand-authored | Static | No — source shut down Jan 2026 |
-| `TEST_TURNAROUND_METRICS` | 16 tests | APL test directory + lab standards | Static/manual | No — no structured public feed |
+This endpoint returns `application/json` with CORS headers open. It lists 153 sites under `{ Sites: [...] }`. Each site contains fields including `Code`, `Name`, `Address`, `City`, `Region`, `WaitTime` (e.g. `"Closed"`, `"25 min"`, or `"1 hr 30 min"`), and `SaveMyPlace` (boolean).
 
-Key findings:
-- **No public API** exists for APL lab wait times. Alberta Precision Labs exposes the data only through the QMe booking tool.
-- QMe lives at `https://qme.albertaprecisionlabs.ca/` (the old `mylabbooking.albertaprecisionlabs.ca` subdomain no longer resolves).
-- QMe is a **Blazor Server SPA** using SignalR over WebSocket — there is no REST/HTTP GET endpoint returning wait times. `_framework/blazor.server.js` is present and `/api/*` routes return the SPA shell.
-- The AHS wait-times JSON API (`/Webapps/WaitTimes/api/waittimes/en`) only covers Emergency/Urgent Care, not labs.
-- QMe has a **"Book as Guest"** button and a stepper UI (`1. Location → 2. Date and Time → 3. Personal Details → 4. Summary`). The Location step has a zone selector and a map/list view, suggesting per-location estimated wait times may be reachable without login.
-- The existing `powerbiScraper.ts` already uses the same pattern we need: headed Puppeteer, run as a child process via `execFileSync('npx', ['tsx', 'src/pipelines/powerbiScraper.ts'])`, because Puppeteer is ESM-only and the server bundles as CJS.
+This allows us to implement a lightweight, robust, high-frequency pipeline (every 30 minutes) mirroring `erWaitTimesFetcher.ts` without browser automation.
 
-## Goal
+---
 
-Deliver a plan that enables **genuine updates at least every 30 minutes** for the only dataset that can support it (`LAB_LOCATION_WAITS`), while correcting the false "Every 15 minutes" label and setting honest cadences for the other three datasets.
+## Files to Touch and Create
 
-## Plan
+*   `src/pipelines/aplLabWaitTimesFetcher.ts` (New)
+*   `src/pipelines/types.ts` (Modify)
+*   `src/pipelines/syncStatus.ts` (Modify)
+*   `src/pipelines/scheduler.ts` (Modify)
+*   `src/components/DiagnosticDashboard.tsx` (Modify)
+*   `src/App.tsx` (Modify)
 
-### Phase 0 — Feasibility Probe (1-2 hours)
+---
 
-Use a **headed Puppeteer probe** (the same tool the eventual scraper will use) to navigate QMe and answer one question: can a non-logged-in user reach per-location lab wait times?
+## Detailed Phases
 
-1. Launch Puppeteer with the existing `CHROME_PATH` used by `powerbiScraper.ts`.
-2. Navigate to `https://qme.albertaprecisionlabs.ca/`.
-3. Wait for Blazor circuit initialization (network idle or DOM stable).
-4. Click the **"Book as Guest"** flow.
-5. Select the **"General Testing"** / **"Community Lab Locations"** path.
-6. Interact with the **zone selector** (Edmonton, Calgary, Central, South, North).
-7. Inspect the rendered location list for wait-time text (e.g., "Estimated wait: 25 min", "Wait time: 1 hr 15 min", or similar).
-8. Document the DOM structure, class names, and interaction sequence needed to collect all 52 sites.
+### Phase 1 — Create `src/pipelines/aplLabWaitTimesFetcher.ts`
 
-**Go/No-go decision:**
-- **Go** — wait times are visible without credentials and the DOM is stable enough to scrape. Proceed to Phase 1.
-- **No-go (login wall)** — automated 30-min polling is blocked. Pivot to the **Fallback** below (manual-entry CLI or credentialled scraper with explicit user-managed session).
+Create a new file `src/pipelines/aplLabWaitTimesFetcher.ts`. This module will fetch from the APL REST API, parse the `WaitTime` values, and merge them into `data-diagnostic.json`'s `LAB_LOCATION_WAITS` array.
 
-### Phase 1 — Build `src/pipelines/aplQmeScraper.ts`
+1.  **Wait Time Parser**:
+    Write a parser that converts wait-time strings to minutes:
+    *   If wait-time matches `"Closed"` (case-insensitive), return `"Closed"`.
+    *   If wait-time matches `"Appointments Only"` or `"Appt Only"`, return `"Appointments Only"`.
+    *   If wait-time contains hour/min indicators, parse and sum them (e.g. `"1 hr 30 min"` → `90`, `"45 min"` → `45`).
+    *   If it's just a number, parse it as a number.
+    *   Fallback to `"Closed"` if empty or unparseable.
 
-Create a new standalone scraper, modeled on `powerbiScraper.ts`, that runs as a child process.
+2.  **Code Mappings**:
+    Since codes in the local `diagnosticData.ts` and the REST API do not align perfectly, use a hardcoded mapping dictionary to match local clinic codes to the API's site codes:
+    ```typescript
+    const CODE_MAPPING: Record<string, string> = {
+      'LCH-L': 'LEDUC', // Leduc Community Hospital Lab -> Leduc
+      'FSCH': 'FSCC',  // Fort Saskatchewan Community Hospital Lab -> Fort Saskatchewan
+      'STAH': 'STAB',  // St. Albert Sturgeon Community Hospital Lab -> St. Albert
+      'SMCC': 'SMC',   // Sheldon M. Chumir Health Centre Lab -> Sheldon M Chumir
+      'SPBL': 'SUN',   // Sunridge Professional Building Lab -> Sunridge
+      'CCHC': 'COCH',  // Cochrane Community Health Centre Lab -> Cochrane
+      'ACHC': 'AIR',   // Airdrie Community Health Centre Lab -> Airdrie
+      'OHWC': 'OK',    // Okotoks Health and Wellness Centre Lab -> Okotoks
+      'HRGH': 'HRIV',  // High River General Hospital Lab -> High River
+      'COLB': 'CMR',   // Camrose Outpatient Lab -> Camrose
+      'DHCL': 'DRUM',  // Drumheller Health Centre Lab -> Drumheller Health Centre
+      'SHCC': 'SHCC',  // Stettler Hospital and Care Centre Lab -> Stettler Hospital & Care Centre
+      'WHCL': 'WNW',   // Wainwright Health Centre Lab -> Wainwright Health Centre
+      'RMHC': 'RMH',   // Rocky Mountain House Health Centre Lab -> Rocky Mountain House Health Centre
+      'BHCL': 'BROOK', // Brooks Health Centre Lab -> Brooks Lab Patient Collection Site
+      'THCL': 'TAB',   // Taber Health Centre Lab -> Taber
+      'CHCL': 'CARD',  // Cardston Health Centre Lab -> Cardston
+      'PCHC': 'PINCH', // Pincher Creek Health Centre Lab -> Pincher Creek
+      'PRCH': 'PRC',   // Peace River Community Health Centre Lab -> Peace River
+      'AHCC': 'ATHA',  // Athabasca Healthcare Centre Lab -> Athabasca
+      'NWHC': 'HLIV',  // High Level - Northwest Health Centre Lab -> High Level
+      'CLHC': 'CLAK',  // Cold Lake Healthcare Centre Lab -> Cold Lake
+      'BHCB': 'BONN',  // Bonnyville Healthcare Centre Lab -> Bonnyville
+      'SPTH': 'STP',   // St. Paul - Therese Healthcare Centre Lab -> St. Therese - St. Paul Healthcare Centre
+    };
+    ```
 
-1. **Module shape**
-   - Export `run(): Promise<SyncResult>`.
-   - CLI entry point `if (import.meta.url === \`file://${process.argv[1]}\`)` so `tsx src/pipelines/aplQmeScraper.ts` works standalone.
-   - Use `puppeteer` with `headless: 'shell'` (or headed if Blazor requires it) and `CHROME_PATH`.
+3.  **Merge Strategy**:
+    *   Read existing `data-diagnostic.json`.
+    *   For each location in the `LAB_LOCATION_WAITS` array:
+        *   Determine the matching API code (`CODE_MAPPING[local.code] || local.code`).
+        *   Find the site in the API response matching this code (case-insensitively).
+        *   If found:
+            *   Update `waitTimeMin` with the parsed wait time.
+            *   Update `saveMyPlaceAvailable` to `apiSite.SaveMyPlace`.
+            *   If wait time is `"Appointments Only"`, set `appointmentRequired: true` and `walkInAvailable: false`.
+        *   If not found (e.g. hospital outpatient clinics that do not use QMe booking), preserve its current values.
+    *   Update `_dataMetadata.LAB_LOCATION_WAITS`:
+        *   `source: 'APL QMe API'`
+        *   `sourceVintage`: `'Live data'`
+        *   `lastUpdated`: Current timestamp
+        *   `updateType`: `'auto'`
+    *   Write the updated JSON atomically back to `data-diagnostic.json`.
+    *   Return a standard `SyncResult`.
 
-2. **Scrape flow**
-   - Launch browser → `qme.albertaprecisionlabs.ca`.
-   - Wait for the Blazor circuit (e.g., `document.querySelector('.k-step-link')` or a guest button).
-   - Click "Book as Guest".
-   - Select the lab-services path (likely "General Testing").
-   - Iterate the five AHS zones in the location selector.
-   - For each zone, wait for the location list, then extract each row's:
-     - `name` (PSC/lab name)
-     - `city` / `address` if shown
-     - `waitTimeMin` (parse text like "25 min" or "1 hr 30 min" into minutes)
-     - `walkInAvailable` / `appointmentRequired` / `saveMyPlaceAvailable` (badges or button text)
-   - Map scraped names to the existing `LAB_LOCATION_WAITS` records by normalized name (add aliases as needed, e.g., "Fort Sask" → "Fort Saskatchewan").
-   - Preserve static fields we cannot scrape (`latitude`, `longitude`, `address`, `code`, `dailyVolume`, `peakHours`).
+---
 
-3. **Output and merge**
-   - Read `data-diagnostic.json`.
-   - Merge new `waitTimeMin`, `saveMyPlaceAvailable`, `appointmentRequired`, `walkInAvailable` into `LAB_LOCATION_WAITS` only when scraped values are present.
-   - Update `_dataMetadata.LAB_LOCATION_WAITS` with `lastUpdated`, `source`, `updateType: 'auto'`, `interval: 'every 30 minutes'`.
-   - Write the file atomically.
-   - Return `SyncResult` with `domain: 'diagnostic'`, `pipeline: 'aplQmeScraper'`, `status: 'success'`, and `recordsWritten`.
+### Phase 2 — Update Sync Status Tracking
 
-4. **Defensive behavior**
-   - If QMe returns an error, CAPTCHA, or login wall, return `status: 'skipped'` with a descriptive error, preserving existing data.
-   - Add a short wait between zone interactions so we don't hammer the SignalR circuit.
-   - Cap the scrape at 60 seconds per zone.
+1.  **Modify `src/pipelines/types.ts`**:
+    Add the new timestamp trackers to the `SyncStatus` interface:
+    ```typescript
+    export interface SyncStatus {
+      // ... existing fields
+      labWaitsLastUpdate: string | null;
+      labWaitsNextUpdate: string | null;
+    }
+    ```
 
-### Phase 2 — Wire into `src/pipelines/scheduler.ts`
+2.  **Modify `src/pipelines/syncStatus.ts`**:
+    *   Initialize `labWaitsLastUpdate: null` and `labWaitsNextUpdate: null` in the `currentStatus` object.
+    *   Implement `recordLabWaitsUpdate(result: SyncResult)`:
+        ```typescript
+        export function recordLabWaitsUpdate(result: SyncResult): void {
+          currentStatus.labWaitsLastUpdate = result.timestamp;
+          currentStatus.labWaitsNextUpdate = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+          
+          const existingIdx = currentStatus.results.findIndex(r => r.pipeline === result.pipeline);
+          if (existingIdx >= 0) {
+            currentStatus.results[existingIdx] = result;
+          } else {
+            currentStatus.results.push(result);
+          }
+          saveToDisk();
+        }
+        ```
+    *   Update `recordDailySyncResults(results: SyncResult[])` to protect both high-frequency pipelines from deletion:
+        ```typescript
+        // Keep ER wait times and Lab wait times results (different cadences)
+        const keepPipelines = ['erWaitTimesFetcher', 'aplLabWaitTimesFetcher'];
+        const preservedResults = currentStatus.results.filter(r => keepPipelines.includes(r.pipeline));
+        currentStatus.results = [...preservedResults, ...results];
+        ```
 
-Add a 30-minute interval alongside the existing 10-minute ER interval.
+---
 
-**Important:** `aplQmeScraper.ts` uses Puppeteer, which is ESM-only, while the server bundles as CJS. Therefore the scheduler **cannot directly import** the scraper. It must spawn it as a child process, exactly like `orchestrator.ts` does for `powerbiScraper.ts`.
+### Phase 3 — Wire Scheduler and Cloudflare Push
 
-1. Do not import `aplQmeScraper` directly. Instead, add a helper that runs it as a child process:
-   ```ts
-   import { execFileSync } from 'child_process';
-   import type { SyncResult } from './types';
+1.  **Modify `src/pipelines/scheduler.ts`**:
+    *   Import the new fetcher: `import { run as runAplLabWaitTimes } from './aplLabWaitTimesFetcher';`
+    *   Import `recordLabWaitsUpdate` from `./syncStatus`.
+    *   Implement `runLabWaitTimesPipeline()`:
+        ```typescript
+        async function runLabWaitTimesPipeline(): Promise<void> {
+          const result = await runAplLabWaitTimes();
+          recordLabWaitsUpdate(result);
+          
+          if (result.status === 'success') {
+            const { pushToCloudflare } = await import('./pushClient');
+            const fs = await import('fs');
+            const path = await import('path');
+            const diagnosticFile = path.join(process.cwd(), 'data-diagnostic.json');
+            try {
+              const data = fs.readFileSync(diagnosticFile, 'utf8');
+              const parsed = JSON.parse(data);
+              await pushToCloudflare('diagnostic', parsed);
+            } catch (err) {
+              console.warn('[Scheduler] Failed to push diagnostic to Cloudflare:', err);
+            }
+          }
+        }
+        ```
+    *   In `startScheduler()`:
+        *   Trigger an initial run of `runLabWaitTimesPipeline()` after server boots up (non-blocking).
+        *   Schedule `runLabWaitTimesPipeline()` on a 30-minute interval:
+            ```typescript
+            labIntervalId = setInterval(() => {
+              runLabWaitTimesPipeline().catch(err => {
+                console.error('[Scheduler] Lab wait times pipeline error:', err);
+              });
+            }, 30 * 60 * 1000);
+            ```
+    *   In `stopScheduler()`, clear `labIntervalId`.
+    *   Update the startup logging statement to include APL labs.
 
-   function spawnAplQmeScraper(): SyncResult {
-     const stdout = execFileSync('npx', ['tsx', 'src/pipelines/aplQmeScraper.ts'], {
-       cwd: process.cwd(),
-       timeout: 120000,
-       encoding: 'utf-8',
-     });
+---
 
-     // The scraper prints the JSON SyncResult as the last line of stdout.
-     const lines = stdout.trim().split('\n');
-     const lastLine = lines[lines.length - 1];
-     return JSON.parse(lastLine) as SyncResult;
-   }
-   ```
+### Phase 4 — Refactor `DiagnosticDashboard.tsx` for Runtime Data
 
-2. Add a new scheduler function:
-   ```ts
-   async function runAplQmeScraper(): Promise<void> {
-     const result = spawnAplQmeScraper();
-     recordLabWaitsUpdate(result); // see Phase 3
-     if (result.status === 'success') {
-       const { pushToCloudflare } = await import('./pushClient');
-       const fs = await import('fs');
-       const diagnosticFile = path.join(process.cwd(), 'data-diagnostic.json');
-       const data = JSON.parse(fs.readFileSync(diagnosticFile, 'utf8'));
-       await pushToCloudflare('diagnostic', data);
-     }
-   }
-   ```
-3. Add a `labIntervalId` and schedule it every 30 minutes:
-   ```ts
-   labIntervalId = setInterval(() => {
-     runAplQmeScraper().catch(err => console.error('[Scheduler] APL QMe scraper error:', err));
-   }, 30 * 60 * 1000);
-   ```
-4. Update `stopScheduler()` to clear `labIntervalId`.
-5. Update the startup log: `ER wait times: every 10 min. APL lab waits: every 30 min. Daily sync: every 24 hr.`
-6. Run an initial non-blocking scrape after server startup so the first 30-min tick is not delayed.
+We must replace the static import of diagnostic data with a dynamic fetch from `/api/data/diagnostic` at runtime, using a React state and loading spinner:
 
-### Phase 3 — Update Sync Status Tracking
+1.  **Imports**:
+    Remove static array imports (`LAB_LOCATION_WAITS`, `TEST_TURNAROUND_METRICS`, `IMAGING_WAIT_TRENDS`, `FACILITY_IMAGING_WAITS`, `PRIORITY_TARGET_COMPLIANCE`, `_dataMetadata`) from `../diagnosticData`.
+    Keep only the TypeScript interfaces: `LabLocationWait`, `TestTurnaround`, `ImagingWaitTrend`, `FacilityImagingWait`, `PriorityTarget`.
 
-Extend `src/pipelines/syncStatus.ts` to track the new cadence.
+2.  **Add State**:
+    Add `domainData` state:
+    ```typescript
+    const [domainData, setDomainData] = useState<{
+      LAB_LOCATION_WAITS: LabLocationWait[];
+      TEST_TURNAROUND_METRICS: TestTurnaround[];
+      IMAGING_WAIT_TRENDS: ImagingWaitTrend[];
+      FACILITY_IMAGING_WAITS: FacilityImagingWait[];
+      PRIORITY_TARGET_COMPLIANCE: PriorityTarget[];
+      _dataMetadata?: DataMetadataMap;
+    }>({
+      LAB_LOCATION_WAITS: [],
+      TEST_TURNAROUND_METRICS: [],
+      IMAGING_WAIT_TRENDS: [],
+      FACILITY_IMAGING_WAITS: [],
+      PRIORITY_TARGET_COMPLIANCE: [],
+    });
+    const [isLoading, setIsLoading] = useState(true);
+    ```
 
-1. Add fields to `SyncStatus`:
-   ```ts
-   labWaitsLastUpdate: string | null;
-   labWaitsNextUpdate: string | null;
-   ```
-2. Add `recordLabWaitsUpdate(result: SyncResult)` that sets `labWaitsLastUpdate` and `labWaitsNextUpdate = now + 30 min`, similar to `recordErWaitTimesUpdate`.
-3. Ensure `recordDailySyncResults` keeps the ER and lab-waits results when it replaces the daily results array.
+3.  **Fetch Data in `useEffect`**:
+    ```typescript
+    useEffect(() => {
+      fetch('/api/data/diagnostic')
+        .then(res => res.json())
+        .then(data => {
+          setDomainData(data);
+          setIsLoading(false);
+        })
+        .catch(err => {
+          console.error('Failed to load diagnostic data:', err);
+          setIsLoading(false);
+        });
+    }, []);
+    ```
 
-### Phase 4 — Correct Frontend Labels and Metadata
+4.  **Replace Array Access**:
+    Modify all references inside render/logic from:
+    *   `LAB_LOCATION_WAITS` → `domainData.LAB_LOCATION_WAITS`
+    *   `TEST_TURNAROUND_METRICS` → `domainData.TEST_TURNAROUND_METRICS`
+    *   `IMAGING_WAIT_TRENDS` → `domainData.IMAGING_WAIT_TRENDS`
+    *   `FACILITY_IMAGING_WAITS` → `domainData.FACILITY_IMAGING_WAITS`
+    *   `PRIORITY_TARGET_COMPLIANCE` → `domainData.PRIORITY_TARGET_COMPLIANCE`
+    *   `diagnosticDataMetadata` → `domainData._dataMetadata`
 
-Update the dashboard to reflect the real cadence of each dataset.
+5.  **Update `useMemo` Dependencies**:
+    For all `useMemo` hooks (such as `labStats`, `filteredLabs`, `filteredFacilities`, `filteredTrendData`, `trendKpiStats`), add `domainData` as a dependency.
 
-1. `src/App.tsx` DASHBOARDS entry for `diagnostics`:
-   - Change `updateFrequency: 'Every 15 minutes'` → `updateFrequency: 'Lab waits every 30 min; imaging annually'`.
-2. `src/App.tsx` `DASHBOARD_METADATA['diagnostics']`:
-   - Change `interval: 'every 24 hours'` → `interval: 'lab waits every 30 min; imaging & turnaround static'`.
-   - Update `source` to distinguish the two sources: e.g., `'APL QMe lab waits (auto); CIHI imaging (annual); curated turnaround metrics'`.
-3. `DiagnosticDashboard.tsx`:
-   - Add a `DataTimestamp` for `IMAGING_WAIT_TRENDS` with an honest label.
-   - Ensure `LAB_LOCATION_WAITS` timestamp is shown on the Laboratory Waits subtab.
-   - Add user-facing text explaining that lab waits are refreshed every 30 minutes while imaging/turnaround are updated less frequently.
+6.  **Add Loading State Rendering**:
+    ```typescript
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+          Loading diagnostic and lab data...
+        </div>
+      );
+    }
+    ```
 
-### Phase 5 — Push to Cloudflare KV
+---
 
-1. In `src/pipelines/scheduler.ts`, after each successful 30-min scrape, push the full `data-diagnostic.json` to KV domain `diagnostic` using `pushToCloudflare`.
-2. After the push, also push updated `sync-status` to KV so the dashboard shows the correct `labWaitsLastUpdate` / `labWaitsNextUpdate`.
+### Phase 5 — Adjust Cadence Labels in Frontend
 
-### Phase 6 — Verification
+1.  **Modify `src/App.tsx`**:
+    *   In the `DASHBOARDS` array:
+        Change `updateFrequency: 'Every 15 minutes'` → `updateFrequency: 'Every 30 minutes'` (or `'Lab waits every 30 min'`).
+    *   In `DASHBOARD_METADATA['diagnostics']`:
+        Change `interval: 'every 24 hours'` → `interval: 'lab waits every 30 min; imaging annually'`.
+        Change `source` → `'APL QMe API & CIHI CT/MRI wait-times'`.
 
-1. Run the scraper standalone: `npx tsx src/pipelines/aplQmeScraper.ts`. Confirm it produces a valid `SyncResult` and updates `data-diagnostic.json` without corrupting other arrays.
-2. Start the server locally (`npm run dev`) and verify the scheduler fires the scraper on the 30-minute interval.
-3. Check `/api/sync/status` includes `labWaitsLastUpdate` and `labWaitsNextUpdate`.
-4. Load the Diagnostic dashboard in a browser. Confirm:
-   - Laboratory Waits subtab shows updated timestamps and the new cadence label.
-   - Imaging/turnaround subtabs show honest static/annual labels.
-   - No console errors.
-5. Run `npx tsc --noEmit` to confirm type safety.
+---
 
-## Fallback (if QMe requires login)
+## Verification & Acceptance Criteria
 
-If Phase 0 discovers that per-location wait times are behind a login wall:
-
-1. **Short-term:** Build a lightweight manual-entry CLI (`scripts/update-lab-waits.ts`) that reads a user-provided JSON snippet and merges it into `LAB_LOCATION_WAITS`. This still lets the user achieve 30-minute updates if they manually collect the data.
-2. **Medium-term:** If the user has legitimate APL credentials (e.g., a healthcare provider account), build a **credentialled scraper** that:
-   - Stores a username/password or session cookie in `.env` (never committed).
-   - Logs in via Puppeteer, scrapes the authenticated location list, and logs out.
-   - Clearly marks the data source as "APL QMe (authenticated)" in `_dataMetadata`.
-3. **Label correction:** Even if automated scraping is impossible, implement Phase 4 immediately to fix the false "Every 15 minutes" label.
-
-## Risks and Mitigations
-
-| Risk | Mitigation |
-|---|---|
-| QMe rate-limits or blocks headless Chrome | Run at 30 min (not 10 min), add polite waits between zone clicks, use a single browser session per scrape, and fall back to `skipped` on HTTP 403/429. |
-| Blazor DOM changes break selector | Keep selectors loose (text-based), and add a `Phase 0` probe that runs before every scrape to detect structural changes. |
-| Scraping violates APL Terms of Use | Scrape only the **guest-facing, publicly visible** wait-time text; do not submit bookings or personal data. If login is required, stop and use the fallback. |
-| Puppeteer child process adds memory/CPU cost | Reuse the same `powerbiScraper.ts` pattern: launch, scrape, close, exit. The process runs once every 30 minutes, so cost is minimal. |
-| 52 static sites change (new PSC opens, closes) | Add a reconciliation step that reports any unmatched scraped names in the `SyncResult.error` field so they can be added to the static location list. |
-
-## Files to Touch
-
-- `src/pipelines/aplQmeScraper.ts` — new
-- `src/pipelines/scheduler.ts` — add 30-min interval and lab-waits push
-- `src/pipelines/syncStatus.ts` — add lab-waits timestamp fields and helper
-- `src/pipelines/types.ts` — no change needed (SyncResult shape is sufficient)
-- `src/App.tsx` — correct `updateFrequency` and `DASHBOARD_METADATA['diagnostics']`
-- `src/components/DiagnosticDashboard.tsx` — add honest cadence labels and timestamps
-- `data-diagnostic.json` — updated by the scraper (metadata + `LAB_LOCATION_WAITS`)
-- `data-sync-status.json` — updated by the new sync-status helper
-
-## Success Criteria
-
-- [ ] Phase 0 confirms QMe guest flow exposes per-location wait times without login.
-- [ ] `aplQmeScraper.ts` runs standalone and returns a valid `SyncResult`.
-- [ ] `LAB_LOCATION_WAITS` updates automatically every 30 minutes with fresh `waitTimeMin` values.
-- [ ] Scheduler pushes `diagnostic` domain to Cloudflare KV after every successful scrape.
-- [ ] Sync status exposes `labWaitsLastUpdate` / `labWaitsNextUpdate`.
-- [ ] App.tsx no longer claims the whole Diagnostic tab updates every 15 minutes.
-- [ ] `npx tsc --noEmit` passes.
-- [ ] Browser verification shows correct timestamps and no errors.
+1.  **Type Check**: Run `npm run lint` (`tsc --noEmit`) and ensure it compiles without errors.
+2.  **Standalone Fetcher Run**: Execute `npx tsx src/pipelines/aplLabWaitTimesFetcher.ts` to confirm it fetches wait times from `qmeapi.albertaprecisionlabs.ca`, merges them successfully, and writes a correctly structured file to `data-diagnostic.json`.
+3.  **Local Run & API Verification**:
+    *   Start local server with `npm run dev`.
+    *   Confirm in the server logs: `[Scheduler] Running. ER wait times: every 10 min. APL lab waits: every 30 min. Daily sync: every 24 hr.`
+    *   Check `/api/sync/status` contains `labWaitsLastUpdate` and `labWaitsNextUpdate`.
+    *   Confirm `/api/data/diagnostic` loads the merged JSON.
+4.  **UI Verification**:
+    *   Load the dashboard in the browser and navigate to **Diagnostics & Labs**.
+    *   Ensure the Laboratory tab mounts, displays a spinner/loading indicator briefly, and then renders location cards with wait times.
+    *   Confirm the updated cadence ("Every 30 minutes") and source labels are clearly displayed.
