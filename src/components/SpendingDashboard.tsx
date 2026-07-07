@@ -1,17 +1,19 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   TrendingUp, 
-  MapPin, 
+  TrendingDown,
   Users, 
   DollarSign, 
-  AlertTriangle, 
   Building2, 
   Activity, 
   FileSpreadsheet,
   Layers,
   HeartPulse,
   Coins,
-  Scale
+  Scale,
+  BarChart2,
+  X
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -26,14 +28,18 @@ import {
   Legend, 
   PieChart, 
   Pie, 
-  Cell
+  Cell,
+  AreaChart,
+  Area
 } from 'recharts';
 import { 
   NATIONAL_SPENDING_COMPARE, 
   ALBERTA_ACTIVITY_VOLUME_TREND, 
   HOSPITAL_EFFICIENCY_TREND, 
   PHYSICIAN_SPECIALTY_BILLING, 
-  ALBERTA_USE_OF_FUNDS
+  ALBERTA_USE_OF_FUNDS,
+  ActivityVolumeTrend,
+  HospitalEfficiencyMetric
 } from '../spendingData';
 import { DataTimestamp } from './DataTimestamp';
 import { _dataMetadata as spendingDataMetadata } from '../spendingData';
@@ -51,6 +57,10 @@ export default function SpendingDashboard() {
   const [activeSpendingTab, setActiveSpendingTab] = useState<'spending-access' | 'national-scoreboard' | 'hospital-efficiency' | 'physician-payments'>('spending-access');
   const [selectedProvince, setSelectedProvince] = useState<string>('Alberta');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('General Practice / Family Medicine');
+  // Interactive KPI selected state for spending-access historical trend panel
+  const [selectedActivityKpi, setSelectedActivityKpi] = useState<keyof Omit<ActivityVolumeTrend, 'fiscalYear'> | null>(null);
+  // Interactive KPI selected state for hospital-efficiency historical trend panel
+  const [selectedEfficiencyKpi, setSelectedEfficiencyKpi] = useState<keyof Omit<HospitalEfficiencyMetric, 'fiscalYear'> | null>(null);
 
   const selectedProvinceData = useMemo(() => {
     return NATIONAL_SPENDING_COMPARE.find(p => p.province === selectedProvince) || NATIONAL_SPENDING_COMPARE[0];
@@ -78,6 +88,126 @@ export default function SpendingDashboard() {
   }, []);
 
   const latestAlbertaActivity = ALBERTA_ACTIVITY_VOLUME_TREND[ALBERTA_ACTIVITY_VOLUME_TREND.length - 1];
+
+  // KPI detail metadata for spending-access cards (backed by ALBERTA_ACTIVITY_VOLUME_TREND)
+  const activityKpiDetails = useMemo(() => {
+    if (!selectedActivityKpi) return null;
+    const map: Record<string, { label: string; description: string; colorClass: string; strokeColor: string; gradientId: string; unit: string; icon: typeof Coins }> = {
+      totalExpenseBillions: {
+        label: 'AHS Total Expense',
+        description: 'Annual budget consumed by Alberta Health Services infrastructure. Rising expense outpacing service volume signals declining system productivity.',
+        colorClass: 'text-emerald-400', strokeColor: '#10b981', gradientId: 'colorActivityExpense', unit: 'B', icon: Coins
+      },
+      surgeriesCount: {
+        label: 'Annual Surgeries',
+        description: 'Total day-surgeries and inpatient procedures executed across Alberta facilities each fiscal year.',
+        colorClass: 'text-indigo-400', strokeColor: '#6366f1', gradientId: 'colorActivitySurgeries', unit: '', icon: Activity
+      },
+      ctExamsCount: {
+        label: 'CT Scan Imaging',
+        description: 'Annual CT scanning exams executed, a proxy for diagnostic imaging capacity utilization.',
+        colorClass: 'text-amber-500', strokeColor: '#f59e0b', gradientId: 'colorActivityCt', unit: '', icon: Layers
+      },
+      labTestsMillions: {
+        label: 'Laboratory Tests',
+        description: 'Insured clinical lab test volume processed annually across the provincial laboratory network.',
+        colorClass: 'text-cyan-400', strokeColor: '#06b6d4', gradientId: 'colorActivityLab', unit: 'M', icon: FileSpreadsheet
+      },
+      edVisitsMillions: {
+        label: 'ER Department Visits',
+        description: 'Total annual emergency department visits, reflecting acute demand on hospital front-doors.',
+        colorClass: 'text-emerald-400', strokeColor: '#34d399', gradientId: 'colorActivityEd', unit: 'M', icon: HeartPulse
+      },
+      hospitalAdmissions: {
+        label: 'Hospital Admissions',
+        description: 'Acute standard admissions handled annually, a core measure of inpatient throughput.',
+        colorClass: 'text-rose-400', strokeColor: '#f43f5e', gradientId: 'colorActivityAdm', unit: '', icon: Building2
+      },
+      physiciansCount: {
+        label: 'Physicians (FTE)',
+        description: 'Full-time-equivalent physicians receiving clinical payments, tracking human-resource capacity.',
+        colorClass: 'text-pink-400', strokeColor: '#ec4899', gradientId: 'colorActivityPhys', unit: '', icon: Users
+      }
+    };
+    return map[selectedActivityKpi] ?? null;
+  }, [selectedActivityKpi]);
+
+  const activityKpiStats = useMemo(() => {
+    if (!selectedActivityKpi) return null;
+    const values = ALBERTA_ACTIVITY_VOLUME_TREND.map(t => t[selectedActivityKpi] as number);
+    if (values.length === 0) return null;
+    const baseline = values[0];
+    const latest = values[values.length - 1];
+    const peak = Math.max(...values);
+    const minVal = Math.min(...values);
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+    const fmt = (v: number) => v >= 1000 ? v.toLocaleString() : v.toFixed(1);
+    return {
+      baseline: fmt(baseline),
+      latest: fmt(latest),
+      peak: fmt(peak),
+      minVal: fmt(minVal),
+      delta: rawDelta > 0 ? `+${fmt(rawDelta)}` : fmt(rawDelta),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0
+    };
+  }, [selectedActivityKpi]);
+
+  // KPI detail metadata for hospital-efficiency cards (backed by HOSPITAL_EFFICIENCY_TREND)
+  const efficiencyKpiDetails = useMemo(() => {
+    if (!selectedEfficiencyKpi) return null;
+    const map: Record<string, { label: string; description: string; colorClass: string; strokeColor: string; gradientId: string; unit: string; icon: typeof Coins }> = {
+      standardStayCost: {
+        label: 'Standard Stay Cost',
+        description: 'CIHI Cost of a Standard Hospital Stay (CSHS) — the adjusted unit cost of a standard acute-care hospitalization in Alberta.',
+        colorClass: 'text-rose-400', strokeColor: '#f43f5e', gradientId: 'colorEffStayCost', unit: '$', icon: Coins
+      },
+      spendingPerStaffedBed: {
+        label: 'Spend per Staffed Bed',
+        description: 'Annual clinical overhead, supply, and nurse staffing expense per operating staffed bed.',
+        colorClass: 'text-orange-400', strokeColor: '#fb923c', gradientId: 'colorEffSpendBed', unit: '$', icon: TrendingUp
+      },
+      hoursWorkedPerBed: {
+        label: 'Staff Hours per Bed',
+        description: 'Cumulative annual hours worked by healthcare practitioners per operating staffed bed.',
+        colorClass: 'text-amber-500', strokeColor: '#f59e0b', gradientId: 'colorEffHours', unit: ' hrs', icon: Activity
+      },
+      hospitalizationsPerBed: {
+        label: 'Hospitalizations per Bed',
+        description: 'Average acute stays/admissions handled annually per staffed bed — a direct measure of bed asset productivity.',
+        colorClass: 'text-cyan-400', strokeColor: '#06b6d4', gradientId: 'colorEffHospBed', unit: '', icon: Building2
+      },
+      surgeriesPerBed: {
+        label: 'Surgeries per Bed',
+        description: 'Total operations and surgeries performed annually divided by staffed beds.',
+        colorClass: 'text-indigo-400', strokeColor: '#6366f1', gradientId: 'colorEffSurgBed', unit: '', icon: Activity
+      }
+    };
+    return map[selectedEfficiencyKpi] ?? null;
+  }, [selectedEfficiencyKpi]);
+
+  const efficiencyKpiStats = useMemo(() => {
+    if (!selectedEfficiencyKpi) return null;
+    const values = HOSPITAL_EFFICIENCY_TREND.map(t => t[selectedEfficiencyKpi] as number);
+    if (values.length === 0) return null;
+    const baseline = values[0];
+    const latest = values[values.length - 1];
+    const peak = Math.max(...values);
+    const minVal = Math.min(...values);
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+    const fmt = (v: number) => v >= 1000 ? v.toLocaleString() : v.toFixed(1);
+    return {
+      baseline: fmt(baseline),
+      latest: fmt(latest),
+      peak: fmt(peak),
+      minVal: fmt(minVal),
+      delta: rawDelta > 0 ? `+${fmt(rawDelta)}` : fmt(rawDelta),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0
+    };
+  }, [selectedEfficiencyKpi]);
 
   return (
     <div id="spending-dashboard-container" className="space-y-6">
@@ -165,7 +295,22 @@ export default function SpendingDashboard() {
           <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="ALBERTA_USE_OF_FUNDS" />
           {/* Key Alberta Statistics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedActivityKpi(selectedActivityKpi === 'totalExpenseBillions' ? null : 'totalExpenseBillions')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedActivityKpi(selectedActivityKpi === 'totalExpenseBillions' ? null : 'totalExpenseBillions');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-2 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedActivityKpi === 'totalExpenseBillions'
+                  ? 'border-emerald-500/50 ring-1 ring-emerald-500/30 shadow-emerald-500/5'
+                  : 'border-slate-800 hover:border-emerald-500/30'
+              }`}
+            >
               <div className="flex justify-between items-start gap-1">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">AHS Expense</span>
                 <Coins className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -179,9 +324,28 @@ export default function SpendingDashboard() {
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
                 Annual budget consumed by health infrastructure.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedActivityKpi === 'totalExpenseBillions' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedActivityKpi(selectedActivityKpi === 'surgeriesCount' ? null : 'surgeriesCount')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedActivityKpi(selectedActivityKpi === 'surgeriesCount' ? null : 'surgeriesCount');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-2 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedActivityKpi === 'surgeriesCount'
+                  ? 'border-indigo-500/50 ring-1 ring-indigo-500/30 shadow-indigo-500/5'
+                  : 'border-slate-800 hover:border-indigo-500/30'
+              }`}
+            >
               <div className="flex justify-between items-start gap-1">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Annual Surgeries</span>
                 <Activity className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
@@ -193,9 +357,28 @@ export default function SpendingDashboard() {
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
                 Total day-surgeries and inpatient procedures.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-indigo-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedActivityKpi === 'surgeriesCount' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedActivityKpi(selectedActivityKpi === 'ctExamsCount' ? null : 'ctExamsCount')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedActivityKpi(selectedActivityKpi === 'ctExamsCount' ? null : 'ctExamsCount');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-2 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedActivityKpi === 'ctExamsCount'
+                  ? 'border-amber-500/50 ring-1 ring-amber-500/30 shadow-amber-500/5'
+                  : 'border-slate-800 hover:border-amber-500/30'
+              }`}
+            >
               <div className="flex justify-between items-start gap-1">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">CT Scan Imaging</span>
                 <Layers className="w-3.5 h-3.5 text-amber-500 shrink-0" />
@@ -207,9 +390,28 @@ export default function SpendingDashboard() {
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
                 Annual CT scanning exams executed.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-amber-500 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedActivityKpi === 'ctExamsCount' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedActivityKpi(selectedActivityKpi === 'labTestsMillions' ? null : 'labTestsMillions')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedActivityKpi(selectedActivityKpi === 'labTestsMillions' ? null : 'labTestsMillions');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-2 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedActivityKpi === 'labTestsMillions'
+                  ? 'border-cyan-500/50 ring-1 ring-cyan-500/30 shadow-cyan-500/5'
+                  : 'border-slate-800 hover:border-cyan-500/30'
+              }`}
+            >
               <div className="flex justify-between items-start gap-1">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Laboratory Tests</span>
                 <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
@@ -221,9 +423,28 @@ export default function SpendingDashboard() {
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
                 Insured clinical lab test volume.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedActivityKpi === 'labTestsMillions' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedActivityKpi(selectedActivityKpi === 'edVisitsMillions' ? null : 'edVisitsMillions')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedActivityKpi(selectedActivityKpi === 'edVisitsMillions' ? null : 'edVisitsMillions');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-2 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedActivityKpi === 'edVisitsMillions'
+                  ? 'border-emerald-500/50 ring-1 ring-emerald-500/30 shadow-emerald-500/5'
+                  : 'border-slate-800 hover:border-emerald-500/30'
+              }`}
+            >
               <div className="flex justify-between items-start gap-1">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">ER Dept Visits</span>
                 <HeartPulse className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -235,9 +456,28 @@ export default function SpendingDashboard() {
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
                 Total annual emergency visits.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedActivityKpi === 'edVisitsMillions' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedActivityKpi(selectedActivityKpi === 'hospitalAdmissions' ? null : 'hospitalAdmissions')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedActivityKpi(selectedActivityKpi === 'hospitalAdmissions' ? null : 'hospitalAdmissions');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-2 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedActivityKpi === 'hospitalAdmissions'
+                  ? 'border-rose-500/50 ring-1 ring-rose-500/30 shadow-rose-500/5'
+                  : 'border-slate-800 hover:border-rose-500/30'
+              }`}
+            >
               <div className="flex justify-between items-start gap-1">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Hospital Admissions</span>
                 <Building2 className="w-3.5 h-3.5 text-rose-400 shrink-0" />
@@ -249,9 +489,28 @@ export default function SpendingDashboard() {
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
                 Acute standard admissions handled.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedActivityKpi === 'hospitalAdmissions' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedActivityKpi(selectedActivityKpi === 'physiciansCount' ? null : 'physiciansCount')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedActivityKpi(selectedActivityKpi === 'physiciansCount' ? null : 'physiciansCount');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-2 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedActivityKpi === 'physiciansCount'
+                  ? 'border-pink-500/50 ring-1 ring-pink-500/30 shadow-pink-500/5'
+                  : 'border-slate-800 hover:border-pink-500/30'
+              }`}
+            >
               <div className="flex justify-between items-start gap-1">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Physicians (FTE)</span>
                 <Users className="w-3.5 h-3.5 text-pink-400 shrink-0" />
@@ -263,8 +522,103 @@ export default function SpendingDashboard() {
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
                 Physicians receiving clinical payments.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-pink-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedActivityKpi === 'physiciansCount' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
           </div>
+
+          {/* Spending & Access KPI Trend Explorer Panel */}
+          <AnimatePresence mode="wait">
+            {selectedActivityKpi && activityKpiDetails && activityKpiStats && (
+              <motion.div
+                key={`activity-kpi-trend-${selectedActivityKpi}`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6 shadow-xl relative">
+                  <button
+                    onClick={() => setSelectedActivityKpi(null)}
+                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    title="Close panel"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                        {React.createElement(activityKpiDetails.icon, {
+                          className: `w-4 h-4 ${activityKpiDetails.colorClass}`
+                        })}
+                        <span>{activityKpiDetails.label} Historical Trend Explorer</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                        {activityKpiDetails.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (2021-22)</span>
+                      <span className="text-xl font-black text-slate-300 font-mono">{activityKpiStats.baseline}{activityKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (2025-26)</span>
+                      <span className="text-xl font-black text-white font-mono">{activityKpiStats.latest}{activityKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">5-Year Peak</span>
+                      <span className={`text-xl font-black font-mono ${activityKpiDetails.colorClass}`}>{activityKpiStats.peak}{activityKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                      <span className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
+                        activityKpiStats.isIncrease ? 'text-rose-500' : 'text-emerald-500'
+                      }`}>
+                        {activityKpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                        <span>{activityKpiStats.delta}{activityKpiDetails.unit} ({activityKpiStats.pctChange})</span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={ALBERTA_ACTIVITY_VOLUME_TREND} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id={activityKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={activityKpiDetails.strokeColor} stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor={activityKpiDetails.strokeColor} stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="fiscalYear" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                        <YAxis stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} domain={['auto', 'auto']} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: 8 }}
+                          labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                          itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey={selectedActivityKpi}
+                          name={activityKpiDetails.label}
+                          stroke={activityKpiDetails.strokeColor}
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill={`url(#${activityKpiDetails.gradientId})`}
+                          dot={{ r: 4, strokeWidth: 1 }}
+                          isAnimationActive={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Productivity Disconnect: Index Growth Analysis */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -505,46 +859,232 @@ export default function SpendingDashboard() {
           <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="HOSPITAL_EFFICIENCY_TREND" />
           {/* Metrics grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'standardStayCost' ? null : 'standardStayCost')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'standardStayCost' ? null : 'standardStayCost');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-1 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedEfficiencyKpi === 'standardStayCost'
+                  ? 'border-rose-500/50 ring-1 ring-rose-500/30 shadow-rose-500/5'
+                  : 'border-slate-800 hover:border-rose-500/30'
+              }`}
+            >
               <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Standard Stay Cost</span>
               <div className="text-xl font-black text-rose-400">${HOSPITAL_EFFICIENCY_TREND[HOSPITAL_EFFICIENCY_TREND.length - 1].standardStayCost.toLocaleString()}</div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-850 font-medium mt-2">
                 Adjusted unit cost of standard acute-care hospitalization in Alberta.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors mt-2">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedEfficiencyKpi === 'standardStayCost' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'spendingPerStaffedBed' ? null : 'spendingPerStaffedBed')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'spendingPerStaffedBed' ? null : 'spendingPerStaffedBed');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-1 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedEfficiencyKpi === 'spendingPerStaffedBed'
+                  ? 'border-orange-500/50 ring-1 ring-orange-500/30 shadow-orange-500/5'
+                  : 'border-slate-800 hover:border-orange-500/30'
+              }`}
+            >
               <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Spend per Staffed Bed</span>
               <div className="text-xl font-black text-orange-400">${HOSPITAL_EFFICIENCY_TREND[HOSPITAL_EFFICIENCY_TREND.length - 1].spendingPerStaffedBed.toLocaleString()}</div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-850 font-medium mt-2">
                 Annual clinical overhead, supply, and nurse staffing expense per operating bed.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-orange-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors mt-2">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedEfficiencyKpi === 'spendingPerStaffedBed' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'hoursWorkedPerBed' ? null : 'hoursWorkedPerBed')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'hoursWorkedPerBed' ? null : 'hoursWorkedPerBed');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-1 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedEfficiencyKpi === 'hoursWorkedPerBed'
+                  ? 'border-amber-500/50 ring-1 ring-amber-500/30 shadow-amber-500/5'
+                  : 'border-slate-800 hover:border-amber-500/30'
+              }`}
+            >
               <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Staff Hours per Bed</span>
               <div className="text-xl font-black text-amber-500">{HOSPITAL_EFFICIENCY_TREND[HOSPITAL_EFFICIENCY_TREND.length - 1].hoursWorkedPerBed.toLocaleString()} hrs</div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-850 font-medium mt-2">
                 Cumulative annual hours worked by healthcare practitioners per operating bed.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-amber-500 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors mt-2">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedEfficiencyKpi === 'hoursWorkedPerBed' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'hospitalizationsPerBed' ? null : 'hospitalizationsPerBed')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'hospitalizationsPerBed' ? null : 'hospitalizationsPerBed');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-1 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedEfficiencyKpi === 'hospitalizationsPerBed'
+                  ? 'border-cyan-500/50 ring-1 ring-cyan-500/30 shadow-cyan-500/5'
+                  : 'border-slate-800 hover:border-cyan-500/30'
+              }`}
+            >
               <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Hospitalizations / Bed</span>
               <div className="text-xl font-black text-cyan-400">{HOSPITAL_EFFICIENCY_TREND[HOSPITAL_EFFICIENCY_TREND.length - 1].hospitalizationsPerBed.toLocaleString()} stays</div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-850 font-medium mt-2">
                 Average acute stays/admissions handled annually per staffed bed.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors mt-2">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedEfficiencyKpi === 'hospitalizationsPerBed' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'surgeriesPerBed' ? null : 'surgeriesPerBed')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedEfficiencyKpi(selectedEfficiencyKpi === 'surgeriesPerBed' ? null : 'surgeriesPerBed');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-1 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedEfficiencyKpi === 'surgeriesPerBed'
+                  ? 'border-indigo-500/50 ring-1 ring-indigo-500/30 shadow-indigo-500/5'
+                  : 'border-slate-800 hover:border-indigo-500/30'
+              }`}
+            >
               <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Surgeries per Bed</span>
               <div className="text-xl font-black text-indigo-400">{HOSPITAL_EFFICIENCY_TREND[HOSPITAL_EFFICIENCY_TREND.length - 1].surgeriesPerBed.toLocaleString()} cases</div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-850 font-medium mt-2">
                 Total operations and surgeries performed annually divided by staffed beds.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-indigo-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors mt-2">
+                <BarChart2 className="w-3 h-3 animate-pulse" />
+                {selectedEfficiencyKpi === 'surgeriesPerBed' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
           </div>
+
+          {/* Hospital Efficiency KPI Trend Explorer Panel */}
+          <AnimatePresence mode="wait">
+            {selectedEfficiencyKpi && efficiencyKpiDetails && efficiencyKpiStats && (
+              <motion.div
+                key={`efficiency-kpi-trend-${selectedEfficiencyKpi}`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6 shadow-xl relative">
+                  <button
+                    onClick={() => setSelectedEfficiencyKpi(null)}
+                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    title="Close panel"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                        {React.createElement(efficiencyKpiDetails.icon, {
+                          className: `w-4 h-4 ${efficiencyKpiDetails.colorClass}`
+                        })}
+                        <span>{efficiencyKpiDetails.label} Historical Trend Explorer</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                        {efficiencyKpiDetails.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (2021-22)</span>
+                      <span className="text-xl font-black text-slate-300 font-mono">{efficiencyKpiStats.baseline}{efficiencyKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (2025-26)</span>
+                      <span className="text-xl font-black text-white font-mono">{efficiencyKpiStats.latest}{efficiencyKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">5-Year Peak</span>
+                      <span className={`text-xl font-black font-mono ${efficiencyKpiDetails.colorClass}`}>{efficiencyKpiStats.peak}{efficiencyKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                      <span className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
+                        efficiencyKpiStats.isIncrease ? 'text-rose-500' : 'text-emerald-500'
+                      }`}>
+                        {efficiencyKpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                        <span>{efficiencyKpiStats.delta}{efficiencyKpiDetails.unit} ({efficiencyKpiStats.pctChange})</span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={HOSPITAL_EFFICIENCY_TREND} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id={efficiencyKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={efficiencyKpiDetails.strokeColor} stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor={efficiencyKpiDetails.strokeColor} stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="fiscalYear" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                        <YAxis stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} domain={['auto', 'auto']} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: 8 }}
+                          labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                          itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey={selectedEfficiencyKpi}
+                          name={efficiencyKpiDetails.label}
+                          stroke={efficiencyKpiDetails.strokeColor}
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill={`url(#${efficiencyKpiDetails.gradientId})`}
+                          dot={{ r: 4, strokeWidth: 1 }}
+                          isAnimationActive={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Efficiency trend chart */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

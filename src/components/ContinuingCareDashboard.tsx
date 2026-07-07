@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, 
   Search, 
@@ -6,6 +7,7 @@ import {
   AlertTriangle, 
   Sparkles, 
   TrendingUp, 
+  TrendingDown,
   CheckCircle2, 
   Calendar, 
   Info,
@@ -20,7 +22,9 @@ import {
   ShieldAlert,
   SlidersHorizontal,
   XCircle,
-  Building2
+  Building2,
+  BarChart2,
+  X
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -52,6 +56,72 @@ import { _dataMetadata as continuingCareDataMetadata } from '../continuingCareDa
 export default function ContinuingCareDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'placement' | 'resident-quality' | 'home-care' | 'compliance'>('placement');
   
+  // Interactive KPI selected state for historical trend panel
+  const [selectedKpi, setSelectedKpi] = useState<'daysWaitingP50' | 'pctPlacedWithin30Days' | null>(null);
+
+  const kpiStats = useMemo(() => {
+    if (!selectedKpi) return null;
+    // Get combined Calgary & Edmonton (or provincial representation) trend across years
+    const yearlyData = ['2021', '2023', '2025'].map(y => {
+      const records = CONTINUING_CARE_PLACEMENT_STATS.filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
+      const sum = records.reduce((acc, r) => acc + (r[selectedKpi] as number), 0);
+      return sum / (records.length || 1);
+    });
+
+    const baseline = yearlyData[0];
+    const latest = yearlyData[yearlyData.length - 1];
+    const peak = selectedKpi === 'daysWaitingP50' ? Math.max(...yearlyData) : Math.max(...yearlyData);
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+
+    return {
+      baseline: baseline.toFixed(1),
+      latest: latest.toFixed(1),
+      peak: peak.toFixed(1),
+      delta: rawDelta > 0 ? `+${rawDelta.toFixed(1)}` : rawDelta.toFixed(1),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0
+    };
+  }, [selectedKpi]);
+
+  const selectedKpiDetails = useMemo(() => {
+    if (!selectedKpi) return null;
+    switch (selectedKpi) {
+      case 'pctPlacedWithin30Days':
+        return {
+          label: 'Average Placement within 30 Days',
+          description: 'Historical trend of patients placed into continuing care facilities within 30 days of their clinical assessment (Calgary and Edmonton Zone average). Target is 60% or higher.',
+          colorClass: 'text-emerald-400',
+          bgClass: 'bg-emerald-500/10',
+          strokeColor: '#10b981',
+          gradientId: 'colorPlacementTrend',
+          unit: '%',
+          icon: CheckCircle2
+        };
+      case 'daysWaitingP50':
+        return {
+          label: 'Median Wait Days to Placement',
+          description: 'Historical trend of median (P50) wait times (days) from assessment to continuing care admission (Calgary and Edmonton Zone average). Lower is better.',
+          colorClass: 'text-blue-400',
+          bgClass: 'bg-blue-500/10',
+          strokeColor: '#3b82f6',
+          gradientId: 'colorWaitTrend',
+          unit: ' Days',
+          icon: Clock
+        };
+      default:
+        return null;
+    }
+  }, [selectedKpi]);
+
+  const trendData = useMemo(() => {
+    if (!selectedKpi) return [];
+    return ['2021', '2023', '2025'].map(y => {
+      const records = CONTINUING_CARE_PLACEMENT_STATS.filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
+      const val = records.reduce((acc, r) => acc + (r[selectedKpi] as number), 0) / (records.length || 1);
+      return { year: y, value: val };
+    });
+  }, [selectedKpi]);
   // Interactive Filters
   const [selectedZone, setSelectedZone] = useState<string>('All');
   const [operatorFilter, setOperatorFilter] = useState<string>('All');
@@ -160,7 +230,19 @@ export default function ContinuingCareDashboard() {
       {activeSubTab === 'placement' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <div 
+              tabIndex={0}
+              onClick={() => setSelectedKpi(selectedKpi === 'pctPlacedWithin30Days' ? null : 'pctPlacedWithin30Days')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedKpi(selectedKpi === 'pctPlacedWithin30Days' ? null : 'pctPlacedWithin30Days');
+                }
+              }}
+              className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-emerald-500/50 ${
+                selectedKpi === 'pctPlacedWithin30Days' ? 'border-emerald-500 ring-1 ring-emerald-500/30 font-medium' : 'border-slate-800'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Avg Placement Within 30 Days</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-emerald-400">57.3%</span>
@@ -169,9 +251,25 @@ export default function ContinuingCareDashboard() {
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
                 Gradual recovery seen in 2025 as capacity expands but rural placement targets remain strained.
               </p>
+              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-emerald-400/80 group-hover:text-emerald-400 transition-colors">
+                <BarChart2 className="w-3 h-3" />
+                <span>{selectedKpi === 'pctPlacedWithin30Days' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+              </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <div 
+              tabIndex={0}
+              onClick={() => setSelectedKpi(selectedKpi === 'daysWaitingP50' ? null : 'daysWaitingP50')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedKpi(selectedKpi === 'daysWaitingP50' ? null : 'daysWaitingP50');
+                }
+              }}
+              className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-blue-500/50 ${
+                selectedKpi === 'daysWaitingP50' ? 'border-blue-500 ring-1 ring-blue-500/30' : 'border-slate-800'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Median Wait Days (Calgary & Edmonton)</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-white">25 days</span>
@@ -180,6 +278,10 @@ export default function ContinuingCareDashboard() {
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
                 Wait times decreased from a peak average of 36 days in 2023 through proactive transitional care.
               </p>
+              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-blue-400/80 group-hover:text-blue-400 transition-colors">
+                <BarChart2 className="w-3 h-3" />
+                <span>{selectedKpi === 'daysWaitingP50' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+              </div>
             </div>
 
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
@@ -191,8 +293,91 @@ export default function ContinuingCareDashboard() {
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
                 Improves resident and family experience scores significantly when accommodation choices are respected.
               </p>
+              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-slate-500">
+                <span>No Trend Data Available</span>
+              </div>
             </div>
           </div>
+
+          {/* Trend Panel */}
+          <AnimatePresence mode="wait">
+            {selectedKpi && selectedKpiDetails && kpiStats && (
+              <motion.div
+                key={`kpi-trend-${selectedKpi}`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-slate-950/80 border border-slate-850 p-4 sm:p-5 rounded-2xl space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800/60">
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                        {React.createElement(selectedKpiDetails.icon, {
+                          className: `w-4 h-4 ${selectedKpiDetails.colorClass}`
+                        })}
+                        <span>{selectedKpiDetails.label} Historical Trend Explorer</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                        {selectedKpiDetails.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (2021)</span>
+                      <span className="text-xl font-black text-slate-300 font-mono">{kpiStats.baseline}{selectedKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (2025)</span>
+                      <span className="text-xl font-black text-white font-mono">{kpiStats.latest}{selectedKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Peak</span>
+                      <span className={`text-xl font-black font-mono ${selectedKpiDetails.colorClass}`}>{kpiStats.peak}{selectedKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                      <span className={`text-xs font-extrabold flex items-center justify-center sm:justify-start gap-1 ${kpiStats.isIncrease ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        {kpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                        <span>{kpiStats.delta}{selectedKpiDetails.unit} ({kpiStats.pctChange})</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="h-60 mt-3 pt-3">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id={selectedKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
+                        <YAxis stroke="#64748b" fontSize={10} unit={selectedKpiDetails.unit} />
+                        <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 11 }} />
+                        <Area
+                          type="monotone"
+                          dataKey="value"
+                          name={selectedKpiDetails.label}
+                          stroke={selectedKpiDetails.strokeColor}
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill={`url(#${selectedKpiDetails.gradientId})`}
+                          dot={{ r: 4, strokeWidth: 1 }}
+                          isAnimationActive={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Placement Chart */}

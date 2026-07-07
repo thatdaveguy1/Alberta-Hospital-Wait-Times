@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Users, 
   Search, 
@@ -18,8 +19,10 @@ import {
   UserCheck,
   Briefcase,
   AlertCircle,
+  BarChart2,
   Building,
-  GraduationCap
+  GraduationCap,
+  X
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -50,6 +53,8 @@ import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
 
 export default function WorkforceDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'physicians' | 'nursing' | 'allied' | 'retirement' | 'vacancies'>('physicians');
+  // Interactive trend panel selector for overview cards backed by historical arrays
+  const [selectedTrend, setSelectedTrend] = useState<'nursingSupply' | 'jobVacancies' | null>(null);
   
   // Interactive Filters
   const [selectedZone, setSelectedZone] = useState<string>('Alberta');
@@ -177,6 +182,85 @@ export default function WorkforceDashboard() {
     return ((latest - peak2024) / peak2024) * 100;
   }, [domainData]);
 
+  // Trend panel metadata for the selected overview card
+  const selectedTrendDetails = useMemo(() => {
+    if (!selectedTrend) return null;
+    switch (selectedTrend) {
+      case 'nursingSupply':
+        return {
+          label: 'Nursing & Health Care Aide Supply',
+          description: 'Active permit counts by nursing profession from CIHI & CRNA/CLPAUA registers. Rising permit counts alongside persistent vacancy rates indicate supply growth is being outpaced by demand.',
+          colorClass: 'text-blue-400',
+          strokeColor: '#3b82f6',
+          gradientId: 'colorNursingSupplyTrend',
+          icon: Activity
+        };
+      case 'jobVacancies':
+        return {
+          label: 'Health Care Job Vacancies',
+          description: 'StatsCan JVWS quarterly open vacancy counts and offered hourly wages in the Health Care & Social Assistance sector. Declining counts from 2024 peaks signal modest labour-market easing.',
+          colorClass: 'text-amber-500',
+          strokeColor: '#f59e0b',
+          gradientId: 'colorJobVacancyTrend',
+          icon: Briefcase
+        };
+      default:
+        return null;
+    }
+  }, [selectedTrend]);
+
+  // Job vacancy chart series pivoted from JOB_VACANCY_TRENDS by quarter
+  const vacancyChartData = useMemo(() => {
+    return domainData.JOB_VACANCY_TRENDS
+      .filter(t => t.sector === 'Health Care & Social Assistance')
+      .map(t => ({
+        quarter: t.quarter,
+        vacanciesCount: t.vacanciesCount,
+        vacancyRatePct: t.vacancyRatePct,
+        avgOfferedHourlyWage: t.avgOfferedHourlyWage,
+      }));
+  }, [domainData]);
+
+  // Trend panel summary statistics for the selected series
+  const selectedTrendStats = useMemo(() => {
+    if (!selectedTrend) return null;
+    if (selectedTrend === 'nursingSupply') {
+      const rnSeries = domainData.NURSING_SUPPLY_TRENDS.filter(n => n.profession === 'Registered Nurse (RN)').sort((a, b) => a.year.localeCompare(b.year));
+      if (rnSeries.length === 0) return null;
+      const baseline = rnSeries[0].activePermits;
+      const latest = rnSeries[rnSeries.length - 1].activePermits;
+      const peak = Math.max(...rnSeries.map(n => n.activePermits));
+      const rawDelta = latest - baseline;
+      const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+      return {
+        baseline: baseline.toLocaleString(),
+        latest: latest.toLocaleString(),
+        peak: peak.toLocaleString(),
+        delta: rawDelta > 0 ? `+${rawDelta.toLocaleString()}` : rawDelta.toLocaleString(),
+        pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+        isIncrease: rawDelta > 0,
+        unit: ''
+      };
+    }
+    // jobVacancies
+    const series = vacancyChartData;
+    if (series.length === 0) return null;
+    const baseline = series[0].vacanciesCount;
+    const latest = series[series.length - 1].vacanciesCount;
+    const peak = Math.max(...series.map(s => s.vacanciesCount));
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+    return {
+      baseline: baseline.toLocaleString(),
+      latest: latest.toLocaleString(),
+      peak: peak.toLocaleString(),
+      delta: rawDelta > 0 ? `+${rawDelta.toLocaleString()}` : rawDelta.toLocaleString(),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0,
+      unit: ''
+    };
+  }, [selectedTrend, domainData, vacancyChartData]);
+
   if (isLoading) return <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">Loading...</div>;
 
   return (
@@ -264,13 +348,31 @@ export default function WorkforceDashboard() {
               <TrendingUp className="w-3 h-3" />
               +2.4% Annual Increase (illustrative)
             </p>
+            <span className="text-[9px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5">
+              No Trend Data Available
+            </span>
           </div>
           <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 hidden sm:block">
             <Stethoscope className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-[#090e21] border border-slate-800/80 p-4 rounded-xl flex items-center justify-between">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setSelectedTrend(selectedTrend === 'nursingSupply' ? null : 'nursingSupply')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedTrend(selectedTrend === 'nursingSupply' ? null : 'nursingSupply');
+            }
+          }}
+          className={`bg-[#090e21] border p-4 rounded-xl flex items-center justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+            selectedTrend === 'nursingSupply'
+              ? 'border-blue-500 ring-1 ring-blue-500/30 shadow-blue-500/5'
+              : 'border-slate-800/80 hover:border-blue-500/30'
+          }`}
+        >
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Active RN Permits</span>
             <div className="text-lg sm:text-2xl font-black text-white">{aggregateStats.totalRNs.toLocaleString()}</div>
@@ -278,13 +380,32 @@ export default function WorkforceDashboard() {
               <TrendingUp className="w-3 h-3" />
               +{rnGrowthPct.toFixed(1)}% Registered Growth
             </p>
+            <span className="text-[9px] text-slate-500 group-hover:text-blue-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+              <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+              {selectedTrend === 'nursingSupply' ? 'Active: Hide Trend' : 'Click to View Trend'}
+            </span>
           </div>
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 hidden sm:block">
+          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 hidden sm:block group-hover:scale-110 transition-transform duration-300">
             <Users className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-[#090e21] border border-slate-800/80 p-4 rounded-xl flex items-center justify-between">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setSelectedTrend(selectedTrend === 'jobVacancies' ? null : 'jobVacancies')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedTrend(selectedTrend === 'jobVacancies' ? null : 'jobVacancies');
+            }
+          }}
+          className={`bg-[#090e21] border p-4 rounded-xl flex items-center justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+            selectedTrend === 'jobVacancies'
+              ? 'border-amber-500 ring-1 ring-amber-500/30 shadow-amber-500/5'
+              : 'border-slate-800/80 hover:border-amber-500/30'
+          }`}
+        >
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Health Care Vacancies</span>
             <div className="text-lg sm:text-2xl font-black text-white">{aggregateStats.activeVacancies.toLocaleString()}</div>
@@ -292,8 +413,12 @@ export default function WorkforceDashboard() {
               <TrendingDown className="w-3 h-3" />
               {vacancyChangePct.toFixed(1)}% vs 2024 Peaks
             </p>
+            <span className="text-[9px] text-slate-500 group-hover:text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+              <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+              {selectedTrend === 'jobVacancies' ? 'Active: Hide Trend' : 'Click to View Trend'}
+            </span>
           </div>
-          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 hidden sm:block">
+          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 hidden sm:block group-hover:scale-110 transition-transform duration-300">
             <Briefcase className="w-5 h-5" />
           </div>
         </div>
@@ -306,12 +431,137 @@ export default function WorkforceDashboard() {
               <ShieldAlert className="w-3 h-3 text-red-400" />
               Physicians Over Age 55
             </p>
+            <span className="text-[9px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5">
+              No Trend Data Available
+            </span>
           </div>
           <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 hidden sm:block">
             <Clock className="w-5 h-5" />
           </div>
         </div>
       </div>
+
+      {/* Overview KPI Trend Explorer Panel */}
+      <AnimatePresence mode="wait">
+        {selectedTrend && selectedTrendDetails && selectedTrendStats && (
+          <motion.div
+            key={`overview-trend-${selectedTrend}`}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="p-6 rounded-2xl bg-[#090e21] border border-slate-800 space-y-6 shadow-xl relative">
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedTrend(null)}
+                className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                title="Close panel"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Title and description */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                    {React.createElement(selectedTrendDetails.icon, {
+                      className: `w-4 h-4 ${selectedTrendDetails.colorClass}`
+                    })}
+                    <span>{selectedTrendDetails.label} Historical Trend Explorer</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                    {selectedTrendDetails.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stats highlights */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline</span>
+                  <span className="text-xl font-black text-slate-300 font-mono">{selectedTrendStats.baseline}</span>
+                </div>
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Latest</span>
+                  <span className="text-xl font-black text-white font-mono">{selectedTrendStats.latest}</span>
+                </div>
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Series Peak</span>
+                  <span className={`text-xl font-black font-mono ${selectedTrendDetails.colorClass}`}>{selectedTrendStats.peak}</span>
+                </div>
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                  <span className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
+                    selectedTrendStats.isIncrease ? 'text-amber-500' : 'text-emerald-500'
+                  }`}>
+                    {selectedTrendStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                    <span>{selectedTrendStats.delta} ({selectedTrendStats.pctChange})</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Chart container */}
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  {selectedTrend === 'nursingSupply' ? (
+                    <AreaChart data={nursingChartData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorNursingRNTrend" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorNursingLPNTrend" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorNursingHCATrend" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="year" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                      <YAxis stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
+                        labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                        itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
+                      />
+                      <Area type="monotone" dataKey="RN" name="Registered Nurses" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingRNTrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
+                      <Area type="monotone" dataKey="LPN" name="Licensed Practical Nurses" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingLPNTrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
+                      <Area type="monotone" dataKey="HCA" name="Health Care Aides" stroke="#f59e0b" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingHCATrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
+                      <Legend wrapperStyle={{ fontSize: 10 }} />
+                    </AreaChart>
+                  ) : (
+                    <AreaChart data={vacancyChartData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id={selectedTrendDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={selectedTrendDetails.strokeColor} stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor={selectedTrendDetails.strokeColor} stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="quarter" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                      <YAxis yAxisId="left" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                      <YAxis yAxisId="right" orientation="right" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
+                        labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                        itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
+                      />
+                      <Area yAxisId="left" type="monotone" dataKey="vacanciesCount" name="Open Vacancies" stroke={selectedTrendDetails.strokeColor} strokeWidth={2.5} fillOpacity={1} fill={`url(#${selectedTrendDetails.gradientId})`} dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
+                      <Area yAxisId="right" type="monotone" dataKey="avgOfferedHourlyWage" name="Avg Offered Wage ($/Hr)" stroke="#10b981" strokeWidth={2.5} fillOpacity={0} dot={{ r: 3, strokeWidth: 1 }} isAnimationActive={false} />
+                      <Legend wrapperStyle={{ fontSize: 10 }} />
+                    </AreaChart>
+                  )}
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* SUBTAB 1: Physician Supply & 10-Yr Specialty Forecast */}
       {activeSubTab === 'physicians' && (

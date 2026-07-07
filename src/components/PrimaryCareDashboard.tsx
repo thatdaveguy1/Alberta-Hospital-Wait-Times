@@ -332,6 +332,7 @@ export default function PrimaryCareDashboard() {
                   ? 'text-indigo-400 opacity-100'
                   : 'text-indigo-400/80 opacity-100 group-hover:opacity-100'
               }`}>
+                <BarChart2 className="w-3 h-3" />
                 <span>{selectedKpi === 'attachment_rate' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
               </span>
             </div>

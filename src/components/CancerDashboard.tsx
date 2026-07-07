@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Activity, 
   Search, 
@@ -14,7 +15,9 @@ import {
   UserCheck,
   HeartPulse,
   Award,
-  Clock
+  Clock,
+  BarChart2,
+  TrendingDown,
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -106,6 +109,87 @@ export default function CancerDashboard() {
     const recoveryDelta = latest && year2022 ? Math.round((latest.albertaPctWithinBenchmark - year2022.albertaPctWithinBenchmark) * 10) / 10 : 0;
     return { latest, year2022, recoveryDelta };
   }, [domainData]);
+
+  // Interactive trend selector for wait-time historical trend panel
+  const [selectedTrend, setSelectedTrend] = useState<'cancer_surgery' | 'radiation_therapy' | null>(null);
+
+  const trendDetails = useMemo(() => {
+    if (!selectedTrend) return null;
+    switch (selectedTrend) {
+      case 'cancer_surgery':
+        return {
+          label: 'Cancer Surgery Wait Times',
+          description: 'Historical tracking of Alberta median (P50) and 90th percentile (P90) wait times in days for priority cancer surgeries, benchmarked against the Canadian national standard. Spikes in the P90 series reflect secondary backlog development in elective oncology cohorts.',
+          colorClass: 'text-rose-400',
+          bgClass: 'bg-rose-500/10',
+          strokeColor: '#e11d48',
+          gradientId: 'colorSurgeryTrend',
+          unit: ' days',
+          icon: Activity
+        };
+      case 'radiation_therapy':
+        return {
+          label: 'Radiation Therapy Wait Times',
+          description: 'Historical tracking of the percentage of oncology patients receiving first radiation therapy treatment within the recommended 28-day national clinical target, alongside P50/P90 wait day percentiles. Recovery follows pandemic-era throughput expansions.',
+          colorClass: 'text-emerald-400',
+          bgClass: 'bg-emerald-500/10',
+          strokeColor: '#10b981',
+          gradientId: 'colorRadiationTrend',
+          unit: '%',
+          icon: Clock
+        };
+      default:
+        return null;
+    }
+  }, [selectedTrend]);
+
+  const trendStats = useMemo(() => {
+    if (!selectedTrend) return null;
+    if (selectedTrend === 'cancer_surgery') {
+      const trends = [...domainData.CANCER_SURGERY_WAIT_TRENDS]
+        .filter(t => t.cancerType === 'Breast')
+        .sort((a, b) => a.year.localeCompare(b.year));
+      const values = trends.map(t => t.albertaP90Days).filter(v => typeof v === 'number');
+      if (values.length === 0) return null;
+      const baseline = values[0];
+      const latest = values[values.length - 1];
+      const peak = Math.max(...values);
+      const minVal = Math.min(...values);
+      const rawDelta = latest - baseline;
+      const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+      return {
+        baseline: baseline.toFixed(1),
+        latest: latest.toFixed(1),
+        peak: peak.toFixed(1),
+        minVal: minVal.toFixed(1),
+        delta: rawDelta > 0 ? `+${rawDelta.toFixed(1)}` : rawDelta.toFixed(1),
+        pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+        isIncrease: rawDelta > 0
+      };
+    }
+    if (selectedTrend === 'radiation_therapy') {
+      const trends = [...domainData.RADIATION_THERAPY_WAIT_TRENDS].sort((a, b) => a.year.localeCompare(b.year));
+      const values = trends.map(t => t.albertaPctWithinBenchmark).filter(v => typeof v === 'number');
+      if (values.length === 0) return null;
+      const baseline = values[0];
+      const latest = values[values.length - 1];
+      const peak = Math.max(...values);
+      const minVal = Math.min(...values);
+      const rawDelta = latest - baseline;
+      const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+      return {
+        baseline: baseline.toFixed(1),
+        latest: latest.toFixed(1),
+        peak: peak.toFixed(1),
+        minVal: minVal.toFixed(1),
+        delta: rawDelta > 0 ? `+${rawDelta.toFixed(1)}` : rawDelta.toFixed(1),
+        pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+        // For compliance %, a decrease is the worsening direction.
+        isIncrease: rawDelta < 0
+      };
+    }
+    return null;
+  }, [selectedTrend, domainData]);
 
   if (isLoading) return <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">Loading...</div>;
 
@@ -346,7 +430,21 @@ export default function CancerDashboard() {
               </div>
 
               <div className="space-y-3 grow pt-2">
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-1">
+                <div
+                  tabIndex={0}
+                  onClick={() => setSelectedTrend(selectedTrend === 'cancer_surgery' ? null : 'cancer_surgery')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedTrend(selectedTrend === 'cancer_surgery' ? null : 'cancer_surgery');
+                    }
+                  }}
+                  className={`p-3 bg-slate-950/40 rounded-xl border space-y-1 cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl group ${
+                    selectedTrend === 'cancer_surgery'
+                      ? 'border-emerald-500 ring-1 ring-emerald-500/30 shadow-emerald-500/5'
+                      : 'border-slate-850 hover:border-emerald-500/30'
+                  }`}
+                >
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-white">Priority 1 (Urgent Care)</span>
                     <span className="text-[10px] text-emerald-400 font-mono font-bold">14 Days Max</span>
@@ -354,9 +452,27 @@ export default function CancerDashboard() {
                   <p className="text-[10px] text-slate-400 leading-relaxed">
                     Acute cases with rapid localized growth. Current AHS performance targets are generally met with 94.2% of patients receiving surgery within 14 days (program-reported estimate; no public registry source).
                   </p>
+                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-emerald-400/80 group-hover:text-emerald-400 transition-colors">
+                    <BarChart2 className="w-3 h-3" />
+                    <span>{selectedTrend === 'cancer_surgery' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+                  </div>
                 </div>
 
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-1">
+                <div
+                  tabIndex={0}
+                  onClick={() => setSelectedTrend(selectedTrend === 'cancer_surgery' ? null : 'cancer_surgery')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedTrend(selectedTrend === 'cancer_surgery' ? null : 'cancer_surgery');
+                    }
+                  }}
+                  className={`p-3 bg-slate-950/40 rounded-xl border space-y-1 cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl group ${
+                    selectedTrend === 'cancer_surgery'
+                      ? 'border-amber-500 ring-1 ring-amber-500/30 shadow-amber-500/5'
+                      : 'border-slate-850 hover:border-amber-500/30'
+                  }`}
+                >
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-white">Priority 2 (Semi-Urgent)</span>
                     <span className="text-[10px] text-amber-500 font-mono font-bold">28 Days Max</span>
@@ -364,9 +480,27 @@ export default function CancerDashboard() {
                   <p className="text-[10px] text-slate-400 leading-relaxed">
                     Established primary solid tumors. 84.1% compliance rate within Alberta's central and metropolitan cancer hubs (program-reported estimate; no public registry source).
                   </p>
+                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-amber-500/80 group-hover:text-amber-500 transition-colors">
+                    <BarChart2 className="w-3 h-3" />
+                    <span>{selectedTrend === 'cancer_surgery' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+                  </div>
                 </div>
 
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-1">
+                <div
+                  tabIndex={0}
+                  onClick={() => setSelectedTrend(selectedTrend === 'cancer_surgery' ? null : 'cancer_surgery')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedTrend(selectedTrend === 'cancer_surgery' ? null : 'cancer_surgery');
+                    }
+                  }}
+                  className={`p-3 bg-slate-950/40 rounded-xl border space-y-1 cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl group ${
+                    selectedTrend === 'cancer_surgery'
+                      ? 'border-indigo-500 ring-1 ring-indigo-500/30 shadow-indigo-500/5'
+                      : 'border-slate-850 hover:border-indigo-500/30'
+                  }`}
+                >
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-white">Priority 3 (Elective)</span>
                     <span className="text-[10px] text-indigo-400 font-mono font-bold">42 Days Max</span>
@@ -374,10 +508,85 @@ export default function CancerDashboard() {
                   <p className="text-[10px] text-slate-400 leading-relaxed">
                     Post-chemotherapy margin reconstruction or slow-growing prostate monitors. Compliance falls to 72.5% during high peak surgical volumes (program-reported estimate; no public registry source).
                   </p>
+                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-indigo-400/80 group-hover:text-indigo-400 transition-colors">
+                    <BarChart2 className="w-3 h-3" />
+                    <span>{selectedTrend === 'cancer_surgery' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Trend Panel */}
+          <AnimatePresence mode="wait">
+            {selectedTrend === 'cancer_surgery' && trendDetails && trendStats && (
+              <motion.div
+                key="cancer-surgery-trend"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-slate-950/80 border border-slate-850 p-4 sm:p-5 rounded-2xl space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800/60">
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                        {React.createElement(trendDetails.icon, {
+                          className: `w-4 h-4 ${trendDetails.colorClass}`
+                        })}
+                        <span>{trendDetails.label} Historical Trend Explorer</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                        {trendDetails.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (Breast P90)</span>
+                      <span className="text-xl font-black text-slate-300 font-mono">{trendStats.baseline}{trendDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (Breast P90)</span>
+                      <span className="text-xl font-black text-white font-mono">{trendStats.latest}{trendDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">5-Year Peak</span>
+                      <span className={`text-xl font-black font-mono ${trendDetails.colorClass}`}>{trendStats.peak}{trendDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                      <span className={`text-xs font-extrabold flex items-center justify-center sm:justify-start gap-1 ${trendStats.isIncrease ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        {trendStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                        <span>{trendStats.delta}{trendDetails.unit} ({trendStats.pctChange})</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="h-60 mt-3 pt-3">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={domainData.CANCER_SURGERY_WAIT_TRENDS.filter(t => t.cancerType === 'Breast' || t.cancerType === 'Colorectal')}
+                        margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
+                        <YAxis label={{ value: 'Wait Days', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} stroke="#64748b" fontSize={9} />
+                        <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                        <Legend wrapperStyle={{ fontSize: 10 }} />
+                        <Line type="monotone" dataKey="albertaP90Days" name="Alberta 90th Percentile (Days)" stroke="#e11d48" strokeWidth={2.5} dot isAnimationActive={false} />
+                        <Line type="monotone" dataKey="canadaP90Days" name="Canada 90th Percentile (Days)" stroke="#e11d48" strokeWidth={1.5} strokeDasharray="3 3" dot isAnimationActive={false} />
+                        <Line type="monotone" dataKey="albertaP50Days" name="Alberta Median (Days)" stroke="#10b981" strokeWidth={2} dot isAnimationActive={false} />
+                        <Line type="monotone" dataKey="canadaP50Days" name="Canada Median (Days)" stroke="#10b981" strokeWidth={1} strokeDasharray="3 3" dot isAnimationActive={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 
@@ -436,7 +645,21 @@ export default function CancerDashboard() {
               </div>
 
               <div className="space-y-4 pt-2">
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-2">
+                <div
+                  tabIndex={0}
+                  onClick={() => setSelectedTrend(selectedTrend === 'radiation_therapy' ? null : 'radiation_therapy')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedTrend(selectedTrend === 'radiation_therapy' ? null : 'radiation_therapy');
+                    }
+                  }}
+                  className={`p-3 bg-slate-950/40 rounded-xl border space-y-2 cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl group ${
+                    selectedTrend === 'radiation_therapy'
+                      ? 'border-emerald-500 ring-1 ring-emerald-500/30 shadow-emerald-500/5'
+                      : 'border-slate-850 hover:border-emerald-500/30'
+                  }`}
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white">Median Wait (P50)</span>
                     <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono font-bold">
@@ -446,9 +669,27 @@ export default function CancerDashboard() {
                   <p className="text-[10px] text-slate-400">
                     Half of all patients referred for urgent or routine palliative radiation treatment receive their first fraction within {radiationSummary.latest?.albertaP50WaitDays ?? 0} days of the clinical directive ({radiationSummary.latest?.year ?? '2025'} reporting period).
                   </p>
+                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-emerald-400/80 group-hover:text-emerald-400 transition-colors">
+                    <BarChart2 className="w-3 h-3" />
+                    <span>{selectedTrend === 'radiation_therapy' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+                  </div>
                 </div>
 
-                <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-2">
+                <div
+                  tabIndex={0}
+                  onClick={() => setSelectedTrend(selectedTrend === 'radiation_therapy' ? null : 'radiation_therapy')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedTrend(selectedTrend === 'radiation_therapy' ? null : 'radiation_therapy');
+                    }
+                  }}
+                  className={`p-3 bg-slate-950/40 rounded-xl border space-y-2 cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl group ${
+                    selectedTrend === 'radiation_therapy'
+                      ? 'border-amber-500 ring-1 ring-amber-500/30 shadow-amber-500/5'
+                      : 'border-slate-850 hover:border-amber-500/30'
+                  }`}
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white">90th Percentile Wait (P90)</span>
                     <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded font-mono font-bold">
@@ -458,6 +699,10 @@ export default function CancerDashboard() {
                   <p className="text-[10px] text-slate-400">
                     90% of all oncology cohorts receive radiation within {radiationSummary.latest?.albertaP90WaitDays ?? 0} days, comfortably meeting the Canadian Association of Radiologists standard of 28 days ({radiationSummary.latest?.year ?? '2025'} reporting period).
                   </p>
+                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-amber-500/80 group-hover:text-amber-500 transition-colors">
+                    <BarChart2 className="w-3 h-3" />
+                    <span>{selectedTrend === 'radiation_therapy' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+                  </div>
                 </div>
               </div>
 
@@ -467,6 +712,85 @@ export default function CancerDashboard() {
               </div>
             </div>
           </div>
+
+          {/* Trend Panel */}
+          <AnimatePresence mode="wait">
+            {selectedTrend === 'radiation_therapy' && trendDetails && trendStats && (
+              <motion.div
+                key="radiation-therapy-trend"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-slate-950/80 border border-slate-850 p-4 sm:p-5 rounded-2xl space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800/60">
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                        {React.createElement(trendDetails.icon, {
+                          className: `w-4 h-4 ${trendDetails.colorClass}`
+                        })}
+                        <span>{trendDetails.label} Historical Trend Explorer</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                        {trendDetails.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline Within Benchmark</span>
+                      <span className="text-xl font-black text-slate-300 font-mono">{trendStats.baseline}{trendDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current Within Benchmark</span>
+                      <span className="text-xl font-black text-white font-mono">{trendStats.latest}{trendDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">5-Year Peak</span>
+                      <span className={`text-xl font-black font-mono ${trendDetails.colorClass}`}>{trendStats.peak}{trendDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                      <span className={`text-xs font-extrabold flex items-center justify-center sm:justify-start gap-1 ${trendStats.isIncrease ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        {trendStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                        <span>{trendStats.delta}{trendDetails.unit} ({trendStats.pctChange})</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="h-60 mt-3 pt-3">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={domainData.RADIATION_THERAPY_WAIT_TRENDS}
+                        margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                      >
+                        <defs>
+                          <linearGradient id={trendDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={trendDetails.strokeColor} stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor={trendDetails.strokeColor} stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorCanadaRadTrend" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
+                        <YAxis label={{ value: 'Within Benchmark %', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} stroke="#64748b" fontSize={9} domain={[70, 100]} />
+                        <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                        <Legend wrapperStyle={{ fontSize: 10 }} />
+                        <Area type="monotone" dataKey="albertaPctWithinBenchmark" name="Alberta % Within Benchmark" stroke={trendDetails.strokeColor} fillOpacity={1} fill={`url(#${trendDetails.gradientId})`} strokeWidth={2.5} isAnimationActive={false} />
+                        <Area type="monotone" dataKey="canadaPctWithinBenchmark" name="Canadian Average %" stroke="#6366f1" fillOpacity={1} fill="url(#colorCanadaRadTrend)" strokeWidth={1.5} strokeDasharray="5 5" isAnimationActive={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 

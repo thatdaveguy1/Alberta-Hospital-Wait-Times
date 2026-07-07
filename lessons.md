@@ -511,3 +511,26 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Solution:** Replaced "Scraped daily" with a dynamic timestamp fallback (or "Updated daily") in `App.tsx`. Restored `DataTimestamp.tsx` to render both full and compact banner layouts. Added a `sanitizeSource()` helper that maps internal pipeline IDs to human labels (e.g., `powerbiScraper` → "Alberta Wait Times Reporting", `albertaSubstanceUseScraper` → "Alberta Substance Use Surveillance"). Forced all date formatting to `timeZone: 'America/Edmonton'` so every banner shows the same Edmonton time.
 - **Prevention:** Centralize source-name sanitization in the display component rather than editing every data file. Always use explicit `timeZone` options in `toLocaleString`/`toLocaleDateString` calls for data freshness; never rely on browser-local time. Audit banner text for implementation jargon before shipping.
 
+
+## Session: 2026-07-07 (Dashboard Trend Panel Interactivity)
+
+### Lesson: Dashboard metrics clickability to show historical trends
+- **Mistake:** Dashboard overview/KPI metrics were static and non-interactive, giving users no indication that historical trend data exists behind them.
+- **Solution:** Implemented the proven toggle-trend pattern (from SystemFlowDashboard) consistently across all other dashboards. Clickable overview cards are styled with hover:scale-[1.02], active outline borders, tabIndex={0}, and a BarChart2 icon showing "Click to View Trend" / "Active: Hide Trend" labels. AnimatePresence-wrapped AreaCharts expand immediately below the card grid when clicked or key-activated (Space/Enter).
+- **Prevention:** Ensure dashboard KPIs that have backing time-series data provide visible affordance of interactivity and render detailed trend panels to give context to latest values.
+
+### Lesson: Recharts AreaChart requires Area/AreaChart imports, not LineChart/Line
+- **Mistake:** Added `LineChart` and `Line` imports to Recharts in `ContinuingCareDashboard.tsx` and `SurgicalDashboard.tsx` even though the trend panels were changed to render `AreaChart` and `Area`. This introduced unused imports.
+- **Solution:** Cleaned up unused Recharts imports to prevent TypeScript build warnings/errors.
+- **Prevention:** Always match imports exactly with the JSX elements actually rendered in the file.
+
+### Lesson: Map trend years to actual populated data years to prevent NaN values
+- **Mistake:** Toggled trend stats and charts mapped a static list of years `['2021', '2022', '2023', '2024', '2025']` for continuing care, but the dataset `CONTINUING_CARE_PLACEMENT_STATS` only had records for 2021, 2023, and 2025. This caused the chart and stats calculation to divide by zero on unpopulated years, leading to `NaN` values.
+- **Solution:** Restricted the years array to only contain populated years: `['2021', '2023', '2025']`.
+- **Prevention:** When computing aggregations over year groups, verify that the dataset contains records for all mapped years, or filter out NaN values dynamically from the computed series.
+
+### Lesson: Subagents may silently fail to write files they report as completed
+- **Mistake:** The `ContinuingCareTrend` subagent claimed completion but did not actually write its modifications to `ContinuingCareDashboard.tsx`, leaving it with no changes and no diff.
+- **Solution:** Manually verified the file changes in the workspace, implemented the clickable trend cards and trend panels in `ContinuingCareDashboard.tsx` directly, and confirmed a clean project-wide compile.
+- **Prevention:** Do not rely solely on subagent execution logs. Always verify file diffs and search for key symbols (`AnimatePresence`, `motion`) in the target files before declaring success.
+

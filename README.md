@@ -5,6 +5,7 @@ A 15-tab dashboard visualizing Alberta's healthcare system performance — ER wa
 ## Architecture
 
 - **Frontend:** React 19 + Vite + TailwindCSS + Recharts + Leaflet
+  - **Interactive Trends:** Dashboard overview metrics cards are clickable and keyboard-accessible, toggling dynamic `AnimatePresence`-wrapped historical trend panels (`AreaChart` and `LineChart`) directly below the cards grid where trend data is available.
 - **Backend:** Express server (`server.ts`) with 28 data pipelines (`src/pipelines/`) that fetch, scrape, and parse data from provincial and federal sources
 - **Read layer:** Cloudflare Worker (`cloudflare/worker.ts`) serving from KV, deployed alongside the frontend on Cloudflare Pages with a Pages Function proxy (`functions/api/[[path]].js`)
 - **Scheduling:** Local launchd job runs the orchestrator on intervals; pipelines push updates to Cloudflare KV via HMAC-signed requests

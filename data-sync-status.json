@@ -1,7 +1,7 @@
 {
-  "status": "partial_success",
-  "lastSyncTimestamp": "2026-07-06T15:44:20.922Z",
-  "nextSyncTimestamp": "2026-07-07T15:44:20.922Z",
+  "status": "failed",
+  "lastSyncTimestamp": "2026-07-07T01:04:40.809Z",
+  "nextSyncTimestamp": "2026-07-08T01:04:40.810Z",
   "results": [
     {
       "domain": "er-waittimes",
@@ -9,8 +9,8 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 49,
-      "timestamp": "2026-07-06T15:52:20.796Z"
+      "durationMs": 55,
+      "timestamp": "2026-07-07T01:15:33.542Z"
     },
     {
       "domain": "disruptions",
@@ -18,8 +18,8 @@
       "status": "success",
       "recordsFetched": 18,
       "recordsWritten": 27,
-      "durationMs": 74,
-      "timestamp": "2026-07-06T15:40:09.244Z"
+      "durationMs": 693,
+      "timestamp": "2026-07-07T00:59:54.519Z"
     },
     {
       "domain": "workforce",
@@ -27,8 +27,8 @@
       "status": "success",
       "recordsFetched": 8,
       "recordsWritten": 8,
-      "durationMs": 2535,
-      "timestamp": "2026-07-06T15:40:09.615Z"
+      "durationMs": 2483,
+      "timestamp": "2026-07-07T00:59:55.467Z"
     },
     {
       "domain": "public-health",
@@ -36,9 +36,9 @@
       "status": "manual",
       "recordsFetched": 40,
       "recordsWritten": 33,
-      "durationMs": 2166,
-      "error": "Manual update required — automated source unavailable",
-      "timestamp": "2026-07-06T15:40:13.156Z"
+      "durationMs": 2135,
+      "error": "Manual update required — automated source unavailable or partial",
+      "timestamp": "2026-07-07T00:59:58.952Z"
     },
     {
       "domain": "spending",
@@ -46,9 +46,9 @@
       "status": "manual",
       "recordsFetched": 100,
       "recordsWritten": 100,
-      "durationMs": 2549,
-      "error": "Manual update required — automated source unavailable",
-      "timestamp": "2026-07-06T15:40:16.324Z"
+      "durationMs": 2533,
+      "error": "Manual update required — automated source unavailable or partial",
+      "timestamp": "2026-07-07T01:00:02.089Z"
     },
     {
       "domain": "surgical",
@@ -56,8 +56,8 @@
       "status": "success",
       "recordsFetched": 119,
       "recordsWritten": 119,
-      "durationMs": 41084,
-      "timestamp": "2026-07-06T15:40:22.198Z"
+      "durationMs": 35869,
+      "timestamp": "2026-07-07T01:00:06.588Z"
     },
     {
       "domain": "surgical",
@@ -65,8 +65,8 @@
       "status": "success",
       "recordsFetched": 24,
       "recordsWritten": 24,
-      "durationMs": 919,
-      "timestamp": "2026-07-06T15:41:01.962Z"
+      "durationMs": 896,
+      "timestamp": "2026-07-07T01:00:42.495Z"
     },
     {
       "domain": "continuing-care",
@@ -74,8 +74,8 @@
       "status": "success",
       "recordsFetched": 12,
       "recordsWritten": 36,
-      "durationMs": 4069,
-      "timestamp": "2026-07-06T15:41:03.881Z"
+      "durationMs": 4611,
+      "timestamp": "2026-07-07T01:00:44.393Z"
     },
     {
       "domain": "system-flow",
@@ -83,8 +83,8 @@
       "status": "success",
       "recordsFetched": 38,
       "recordsWritten": 85,
-      "durationMs": 26,
-      "timestamp": "2026-07-06T15:41:08.952Z"
+      "durationMs": 31,
+      "timestamp": "2026-07-07T01:00:50.007Z"
     },
     {
       "domain": "system-flow",
@@ -92,8 +92,8 @@
       "status": "success",
       "recordsFetched": 10,
       "recordsWritten": 29,
-      "durationMs": 2100,
-      "timestamp": "2026-07-06T15:41:09.979Z"
+      "durationMs": 2113,
+      "timestamp": "2026-07-07T01:00:51.040Z"
     },
     {
       "domain": "workforce",
@@ -101,8 +101,8 @@
       "status": "success",
       "recordsFetched": 6,
       "recordsWritten": 6,
-      "durationMs": 2095,
-      "timestamp": "2026-07-06T15:41:13.080Z"
+      "durationMs": 2105,
+      "timestamp": "2026-07-07T01:00:54.154Z"
     },
     {
       "domain": "patient-experience",
@@ -110,8 +110,8 @@
       "status": "success",
       "recordsFetched": 12,
       "recordsWritten": 12,
-      "durationMs": 2935,
-      "timestamp": "2026-07-06T15:41:16.177Z"
+      "durationMs": 2662,
+      "timestamp": "2026-07-07T01:00:57.260Z"
     },
     {
       "domain": "cancer",
@@ -119,8 +119,8 @@
       "status": "success",
       "recordsFetched": 17,
       "recordsWritten": 17,
-      "durationMs": 2121,
-      "timestamp": "2026-07-06T15:41:20.114Z"
+      "durationMs": 2138,
+      "timestamp": "2026-07-07T01:01:00.924Z"
     },
     {
       "domain": "spending",
@@ -128,8 +128,8 @@
       "status": "success",
       "recordsFetched": 73,
       "recordsWritten": 73,
-      "durationMs": 5127,
-      "timestamp": "2026-07-06T15:41:23.237Z"
+      "durationMs": 6329,
+      "timestamp": "2026-07-07T01:01:04.064Z"
     },
     {
       "domain": "diagnostic",
@@ -137,8 +137,8 @@
       "status": "success",
       "recordsFetched": 16,
       "recordsWritten": 16,
-      "durationMs": 2460,
-      "timestamp": "2026-07-06T15:41:29.366Z"
+      "durationMs": 2444,
+      "timestamp": "2026-07-07T01:01:11.395Z"
     },
     {
       "domain": "cancer",
@@ -146,8 +146,8 @@
       "status": "success",
       "recordsFetched": 81,
       "recordsWritten": 81,
-      "durationMs": 2,
-      "timestamp": "2026-07-06T15:41:32.831Z"
+      "durationMs": 1,
+      "timestamp": "2026-07-07T01:01:14.840Z"
     },
     {
       "domain": "surgical",
@@ -156,26 +156,25 @@
       "recordsFetched": 96,
       "recordsWritten": 96,
       "durationMs": 10,
-      "timestamp": "2026-07-06T15:41:33.834Z"
+      "timestamp": "2026-07-07T01:01:15.842Z"
     },
     {
       "domain": "primary-care",
       "pipeline": "primaryCareFetcher",
-      "status": "failed",
-      "recordsFetched": 0,
-      "recordsWritten": 0,
-      "durationMs": 5671,
-      "error": "Python extraction failed: Command failed: python3 ${HOME}/Antigravity/AlbertaHospitals/scripts/extract_cihi_attachment.py /var/folders/ht/ttvvpp212y11702znwm1fyrm0000gn/T/cihi-indicator-library-1783352500426.xlsx\nTraceback (most recent call last):\n  File \"${HOME}/Antigravity/AlbertaHospitals/scripts/extract_cihi_attachment.py\", line 15, in <module>\n    import openpyxl\nModuleNotFoundError: No module named 'openpyxl'\n\nTraceback (most recent call last):\n  File \"${HOME}/Antigravity/AlbertaHospitals/scripts/extract_cihi_attachment.py\", line 15, in <module>\n    import openpyxl\nModuleNotFoundError: No module named 'openpyxl'\n",
-      "timestamp": "2026-07-06T15:41:40.516Z"
+      "status": "success",
+      "recordsFetched": 59,
+      "recordsWritten": 59,
+      "durationMs": 42824,
+      "timestamp": "2026-07-07T01:01:16.854Z"
     },
     {
       "domain": "primary-care",
       "pipeline": "albertaFindAProviderScraper",
       "status": "success",
-      "recordsFetched": 2213,
-      "recordsWritten": 2219,
-      "durationMs": 41729,
-      "timestamp": "2026-07-06T15:41:41.518Z"
+      "recordsFetched": 2214,
+      "recordsWritten": 2227,
+      "durationMs": 41997,
+      "timestamp": "2026-07-07T01:02:00.680Z"
     },
     {
       "domain": "continuing-care",
@@ -183,17 +182,18 @@
       "status": "success",
       "recordsFetched": 35,
       "recordsWritten": 35,
-      "durationMs": 5335,
-      "timestamp": "2026-07-06T15:42:24.249Z"
+      "durationMs": 5321,
+      "timestamp": "2026-07-07T01:02:43.678Z"
     },
     {
       "domain": "regional-inequity",
       "pipeline": "openAlbertaInequityFetcher",
-      "status": "success",
+      "status": "manual",
       "recordsFetched": 396,
       "recordsWritten": 405,
-      "durationMs": 4319,
-      "timestamp": "2026-07-06T15:42:30.585Z"
+      "durationMs": 4480,
+      "timestamp": "2026-07-07T01:02:50.000Z",
+      "error": "Manual update required — automated source unavailable or partial"
     },
     {
       "domain": "primary-care",
@@ -201,9 +201,9 @@
       "status": "manual",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 9,
-      "timestamp": "2026-07-06T15:42:35.933Z",
-      "error": "Manual update required — automated source unavailable"
+      "durationMs": 22,
+      "timestamp": "2026-07-07T01:02:55.481Z",
+      "error": "Manual update required — automated source unavailable or partial"
     },
     {
       "domain": "virtual-care",
@@ -211,9 +211,9 @@
       "status": "manual",
       "recordsFetched": 1,
       "recordsWritten": 0,
-      "durationMs": 5311,
-      "error": "Manual update required — automated source unavailable",
-      "timestamp": "2026-07-06T15:42:36.944Z"
+      "durationMs": 4394,
+      "error": "Manual update required — automated source unavailable or partial",
+      "timestamp": "2026-07-07T01:02:56.505Z"
     },
     {
       "domain": "spending",
@@ -221,9 +221,9 @@
       "status": "manual",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 133,
-      "error": "Manual update required — automated source unavailable",
-      "timestamp": "2026-07-06T15:42:43.391Z"
+      "durationMs": 132,
+      "error": "Manual update required — automated source unavailable or partial",
+      "timestamp": "2026-07-07T01:03:02.034Z"
     },
     {
       "domain": "spending",
@@ -231,9 +231,9 @@
       "status": "manual",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 27713,
-      "timestamp": "2026-07-06T15:42:44.393Z",
-      "error": "Manual update required — automated source unavailable"
+      "durationMs": 29408,
+      "timestamp": "2026-07-07T01:03:03.037Z",
+      "error": "Manual update required — automated source unavailable or partial"
     },
     {
       "domain": "mental-health",
@@ -241,9 +241,9 @@
       "status": "manual",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 17301,
-      "timestamp": "2026-07-06T15:43:13.108Z",
-      "error": "Manual update required — automated source unavailable"
+      "durationMs": 17317,
+      "timestamp": "2026-07-07T01:03:33.447Z",
+      "error": "Manual update required — automated source unavailable or partial"
     },
     {
       "domain": "patient-experience",
@@ -251,8 +251,8 @@
       "status": "success",
       "recordsFetched": 568,
       "recordsWritten": 568,
-      "durationMs": 8452,
-      "timestamp": "2026-07-06T15:43:31.410Z"
+      "durationMs": 8507,
+      "timestamp": "2026-07-07T01:03:51.765Z"
     },
     {
       "domain": "public-health",
@@ -260,8 +260,8 @@
       "status": "success",
       "recordsFetched": 473,
       "recordsWritten": 473,
-      "durationMs": 7407,
-      "timestamp": "2026-07-06T15:43:40.863Z"
+      "durationMs": 6436,
+      "timestamp": "2026-07-07T01:04:01.274Z"
     },
     {
       "domain": "workforce",
@@ -269,8 +269,8 @@
       "status": "success",
       "recordsFetched": 600,
       "recordsWritten": 600,
-      "durationMs": 2985,
-      "timestamp": "2026-07-06T15:43:49.272Z"
+      "durationMs": 3183,
+      "timestamp": "2026-07-07T01:04:08.713Z"
     },
     {
       "domain": "mental-health",
@@ -278,8 +278,8 @@
       "status": "success",
       "recordsFetched": 2187,
       "recordsWritten": 2187,
-      "durationMs": 24280,
-      "timestamp": "2026-07-06T15:43:53.258Z"
+      "durationMs": 24488,
+      "timestamp": "2026-07-07T01:04:12.898Z"
     },
     {
       "domain": "surgical",
@@ -287,10 +287,10 @@
       "status": "success",
       "recordsFetched": 1828,
       "recordsWritten": 1828,
-      "durationMs": 2381,
-      "timestamp": "2026-07-06T15:44:18.540Z"
+      "durationMs": 2421,
+      "timestamp": "2026-07-07T01:04:38.388Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-06T15:52:20.796Z",
-  "erWaitTimesNextUpdate": "2026-07-06T16:02:20.845Z"
+  "erWaitTimesLastUpdate": "2026-07-07T01:15:33.542Z",
+  "erWaitTimesNextUpdate": "2026-07-07T01:25:33.597Z"
 }

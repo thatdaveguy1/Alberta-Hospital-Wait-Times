@@ -51830,6 +51830,195 @@
         "onlineBooking": false
       },
       "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-3219-29140",
+      "name": "Dr. T. Okeke",
+      "type": "Family Doctor",
+      "clinicName": "Gilead Family Practice",
+      "city": "calgary",
+      "zone": "Calgary Zone",
+      "address": "150, 198 Nolanridge Cres NW",
+      "postalCode": "T3R 1W9",
+      "phone": "587-777-8309",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Calgary Foothills PCN"
+    },
+    {
+      "id": "anp-3128-29139",
+      "name": "Dr. N. Fouche",
+      "type": "Family Doctor",
+      "clinicName": "Pinnacle Medical Centre (Harmony)",
+      "city": "rocky view county",
+      "zone": "Calgary Zone",
+      "address": "254 S Harmony Dr",
+      "postalCode": "T3Z 0H7",
+      "phone": "403-265-8148",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Afrikaans"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Calgary Foothills PCN"
+    },
+    {
+      "id": "anp-491-29154",
+      "name": "Dr. U. Nnaji",
+      "type": "Family Doctor",
+      "clinicName": "Care and Cure Medical Clinic",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "225, 3545 32 Ave NE",
+      "postalCode": "T1Y 6M6",
+      "phone": "403-453-5003",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Igbo"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-478-29157",
+      "name": "Dr. Y. Kang",
+      "type": "Family Doctor",
+      "clinicName": "Essence Medical Centres - Westwinds",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "150, 3650 Westwinds Dr NE",
+      "postalCode": "T3J 0W9",
+      "phone": "403-475-6001",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Korean"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-283-29148",
+      "name": "Dr. I. Iloekwe",
+      "type": "Family Doctor",
+      "clinicName": "Marlborough Medical Clinic",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "160, 495 36 St NE",
+      "postalCode": "T2A 6K3",
+      "phone": "403-514-6001",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-283-29145",
+      "name": "Dr. D. Keer",
+      "type": "Family Doctor",
+      "clinicName": "Marlborough Medical Clinic",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "160, 495 36 St NE",
+      "postalCode": "T2A 6K3",
+      "phone": "403-514-6001",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [
+        "Hindi",
+        "Punjabi"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-289-29153",
+      "name": "Dr. R. Dogar",
+      "type": "Family Doctor",
+      "clinicName": "MediPlus 2 Clinic",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "1146, 4818 Westwinds Dr NE",
+      "postalCode": "T3J 3Z5",
+      "phone": "403-293-5435",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Hindi",
+        "Punjabi",
+        "Urdu"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-2228-29146",
+      "name": "Dr. F. Mustapha",
+      "type": "Family Doctor",
+      "clinicName": "Supreme Care Medical Clinic",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "3130, 4150 109 Avenue NE",
+      "postalCode": "T3N 2B3",
+      "phone": "403-254-0042",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
     }
   ],
   "PCN_CAPACITY": [

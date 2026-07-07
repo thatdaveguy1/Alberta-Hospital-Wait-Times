@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Activity, 
   Droplet, 
@@ -18,7 +19,10 @@ import {
   SlidersHorizontal,
   ChevronRight,
   ShieldAlert,
-  Dna
+  Dna,
+  BarChart2,
+  X,
+  TrendingDown
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -61,6 +65,7 @@ export default function PublicHealthDashboard() {
   const [selectedProtocolSetting, setSelectedProtocolSetting] = useState<string>('Acute Care Wards');
   const [advisoryTypeFilter, setAdvisoryTypeFilter] = useState<string>('All');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [selectedDiseaseKpi, setSelectedDiseaseKpi] = useState<'pertussis' | 'measles' | 'salmonellosis' | 'hepatitisC' | null>(null);
 
   const covidTrends = useMemo(() => RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.virus === 'COVID-19'), []);
   const fluATrends = useMemo(() => RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.virus === 'Influenza A'), []);
@@ -90,6 +95,56 @@ export default function PublicHealthDashboard() {
     // or the breakdown by Zone for year 2025.
     return NOTIFIABLE_DISEASE_INCIDENCE.filter(d => d.disease === diseaseFilter);
   }, [diseaseFilter]);
+
+  // Notifiable disease KPI card configuration and trend data
+  const diseaseKpiConfigs = useMemo(() => ({
+    pertussis: { label: 'Pertussis (Whooping Cough)', disease: 'Pertussis (Whooping Cough)' as const, shortLabel: 'Pertussis', colorClass: 'text-rose-400', bgClass: 'bg-rose-500/10', borderClass: 'border-rose-500/20', strokeColor: '#f43f5e', gradientId: 'colorPertussisTrend', icon: ShieldAlert, blurb: 'Vaccine-preventable resurgence driven by DTaP-IPV-Hib coverage deficits.' },
+    measles: { label: 'Measles', disease: 'Measles' as const, shortLabel: 'Measles', colorClass: 'text-amber-400', bgClass: 'bg-amber-500/10', borderClass: 'border-amber-500/20', strokeColor: '#f59e0b', gradientId: 'colorMeaslesTrend', icon: AlertTriangle, blurb: 'Imported exposures gaining traction as MMR Dose 1 coverage falls below herd immunity.' },
+    salmonellosis: { label: 'Salmonellosis', disease: 'Salmonellosis' as const, shortLabel: 'Salmonellosis', colorClass: 'text-blue-400', bgClass: 'bg-blue-500/10', borderClass: 'border-blue-500/20', strokeColor: '#3b82f6', gradientId: 'colorSalmonellosisTrend', icon: Activity, blurb: 'Enteric disease burden tracked via mandatory lab-confirmed case reporting.' },
+    hepatitisC: { label: 'Hepatitis C (Acute/Chronic)', disease: 'Hepatitis C (Acute/Chronic)' as const, shortLabel: 'Hepatitis C', colorClass: 'text-violet-400', bgClass: 'bg-violet-500/10', borderClass: 'border-violet-500/20', strokeColor: '#a78bfa', gradientId: 'colorHepatitisCTrend', icon: Dna, blurb: 'Chronic blood-borne infection incidence monitored under provincial reporting mandates.' }
+  }), []);
+
+  const diseaseKpiLatest = useMemo(() => {
+    return (Object.keys(diseaseKpiConfigs) as Array<keyof typeof diseaseKpiConfigs>).reduce((acc, key) => {
+      const cfg = diseaseKpiConfigs[key];
+      const albertaRecords = NOTIFIABLE_DISEASE_INCIDENCE
+        .filter(d => d.disease === cfg.disease && d.zone === 'Alberta')
+        .sort((a, b) => a.year.localeCompare(b.year));
+      acc[key] = albertaRecords[albertaRecords.length - 1] || null;
+      return acc;
+    }, {} as Record<keyof typeof diseaseKpiConfigs, NotifiableDiseaseIncidence | null>);
+  }, [diseaseKpiConfigs]);
+
+  const diseaseKpiTrend = useMemo(() => {
+    if (!selectedDiseaseKpi) return null;
+    const cfg = diseaseKpiConfigs[selectedDiseaseKpi];
+    return NOTIFIABLE_DISEASE_INCIDENCE
+      .filter(d => d.disease === cfg.disease && d.zone === 'Alberta')
+      .sort((a, b) => a.year.localeCompare(b.year));
+  }, [selectedDiseaseKpi, diseaseKpiConfigs]);
+
+  const diseaseKpiStats = useMemo(() => {
+    if (!selectedDiseaseKpi || !diseaseKpiTrend || diseaseKpiTrend.length === 0) return null;
+    const rates = diseaseKpiTrend.map(r => r.ratePer100k);
+    const cases = diseaseKpiTrend.map(r => r.casesCount);
+    const baseline = rates[0];
+    const latest = rates[rates.length - 1];
+    const peak = Math.max(...rates);
+    const totalCases = cases.reduce((s, c) => s + c, 0);
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+    return {
+      baseline: baseline.toFixed(1),
+      latest: latest.toFixed(1),
+      peak: peak.toFixed(1),
+      totalCases: totalCases.toLocaleString(),
+      delta: rawDelta > 0 ? `+${rawDelta.toFixed(1)}` : rawDelta.toFixed(1),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0,
+      firstYear: diseaseKpiTrend[0].year,
+      lastYear: diseaseKpiTrend[diseaseKpiTrend.length - 1].year
+    };
+  }, [selectedDiseaseKpi, diseaseKpiTrend]);
 
   // Immunization coverage data filtration
   const filteredImmunization = useMemo(() => {
@@ -520,6 +575,147 @@ export default function PublicHealthDashboard() {
               ))}
             </div>
           </div>
+          {/* Notifiable Disease KPI Cards - Click to View Trend */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {(Object.keys(diseaseKpiConfigs) as Array<keyof typeof diseaseKpiConfigs>).map(key => {
+              const cfg = diseaseKpiConfigs[key];
+              const latest = diseaseKpiLatest[key];
+              const isActive = selectedDiseaseKpi === key;
+              return (
+                <div
+                  key={key}
+                  id={`metric-disease-${String(key)}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedDiseaseKpi(isActive ? null : key)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedDiseaseKpi(isActive ? null : key);
+                    }
+                  }}
+                  className={`p-4 rounded-xl flex items-center justify-between shadow-lg relative overflow-hidden group cursor-pointer transition-all duration-300 border select-none hover:scale-[1.02] hover:shadow-xl ${
+                    isActive
+                      ? `bg-slate-900/90 ${cfg.borderClass.replace('/20', '/50')} ring-1 ${cfg.borderClass.replace('/20', '/30')}`
+                      : 'bg-slate-900/60 border-slate-800 hover:' + cfg.borderClass.replace('/20', '/30')
+                  }`}
+                >
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">{cfg.shortLabel}</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className={`text-2xl font-black font-mono ${cfg.colorClass}`}>{latest ? latest.ratePer100k.toFixed(1) : '—'}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">per 100k</span>
+                    </div>
+                    <span className="text-[10px] text-slate-500 block leading-tight">
+                      {latest ? `${latest.casesCount.toLocaleString()} cases (${latest.year})` : 'No data'}
+                    </span>
+                    <span className="text-[9px] text-slate-500 group-hover:text-slate-300 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+                      <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+                      {isActive ? 'Active: Hide Trend' : 'Click to View Trend'}
+                    </span>
+                  </div>
+                  <div className={`p-3 rounded-lg ${cfg.bgClass} ${cfg.colorClass} shrink-0 border ${cfg.borderClass} group-hover:scale-110 transition-transform duration-300`}>
+                    <cfg.icon className="w-5 h-5" />
+                  </div>
+                  <div className={`absolute top-0 right-0 h-1.5 w-16 bg-gradient-to-l ${cfg.bgClass.replace('/10', '/100')} to-slate-900 rounded-bl`} />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Notifiable Disease KPI Trend Explorer Panel */}
+          <AnimatePresence mode="wait">
+            {selectedDiseaseKpi && diseaseKpiTrend && diseaseKpiStats && (
+              <motion.div
+                key={`disease-kpi-trend-${selectedDiseaseKpi}`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="p-6 rounded-2xl bg-[#090e21] border border-slate-800 space-y-6 shadow-xl relative">
+                  <button
+                    onClick={() => setSelectedDiseaseKpi(null)}
+                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    title="Close panel"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                        {React.createElement(diseaseKpiConfigs[selectedDiseaseKpi].icon, {
+                          className: `w-4 h-4 ${diseaseKpiConfigs[selectedDiseaseKpi].colorClass}`
+                        })}
+                        <span>{diseaseKpiConfigs[selectedDiseaseKpi].label} Historical Trend Explorer</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                        {diseaseKpiConfigs[selectedDiseaseKpi].blurb} Annual Alberta-aggregated incidence rate per 100,000 population.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline ({diseaseKpiStats.firstYear})</span>
+                      <span className="text-xl font-black text-slate-300 font-mono">{diseaseKpiStats.baseline}<span className="text-[10px] text-slate-500 ml-0.5">/100k</span></span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current ({diseaseKpiStats.lastYear})</span>
+                      <span className="text-xl font-black text-white font-mono">{diseaseKpiStats.latest}<span className="text-[10px] text-slate-500 ml-0.5">/100k</span></span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Peak Rate</span>
+                      <span className={`text-xl font-black font-mono ${diseaseKpiConfigs[selectedDiseaseKpi].colorClass}`}>{diseaseKpiStats.peak}<span className="text-[10px] text-slate-500 ml-0.5">/100k</span></span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                      <span className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
+                        diseaseKpiStats.isIncrease ? 'text-rose-500' : 'text-emerald-500'
+                      }`}>
+                        {diseaseKpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                        <span>{diseaseKpiStats.delta} ({diseaseKpiStats.pctChange})</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={diseaseKpiTrend} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id={diseaseKpiConfigs[selectedDiseaseKpi].gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={diseaseKpiConfigs[selectedDiseaseKpi].strokeColor} stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor={diseaseKpiConfigs[selectedDiseaseKpi].strokeColor} stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="year" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                        <YAxis stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} domain={['auto', 'auto']} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
+                          labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                          itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="ratePer100k"
+                          name="Incidence Rate per 100k"
+                          stroke={diseaseKpiConfigs[selectedDiseaseKpi].strokeColor}
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill={`url(#${diseaseKpiConfigs[selectedDiseaseKpi].gradientId})`}
+                          dot={{ r: 4, strokeWidth: 1 }}
+                          isAnimationActive={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Diseases Trends */}

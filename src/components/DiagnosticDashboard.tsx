@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Building, 
   Clock, 
@@ -12,6 +13,7 @@ import {
   Calendar,
   FlaskConical,
   Activity,
+  BarChart2,
   Award,
   CheckCircle,
   HelpCircle,
@@ -22,7 +24,8 @@ import {
   TrendingUp,
   TrendingDown,
   Map,
-  Users
+  Users,
+  X
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -63,6 +66,8 @@ export default function DiagnosticDashboard() {
   const [facilitySearch, setFacilitySearch] = useState<string>('');
   const [selectedModality, setSelectedModality] = useState<'CT Scan' | 'MRI Scan'>('MRI Scan');
   const [selectedLabId, setSelectedLabId] = useState<string | null>(null);
+  // Interactive KPI selected state for historical trend panel
+  const [selectedKpi, setSelectedKpi] = useState<'CT Scan' | 'MRI Scan' | null>(null);
 
   const formatMinutesToHm = (minutes: number): string => {
     if (!minutes || isNaN(minutes)) return '0m';
@@ -165,6 +170,61 @@ export default function DiagnosticDashboard() {
   const filteredTrendData = useMemo(() => {
     return IMAGING_WAIT_TRENDS.filter(trend => trend.modality === selectedModality);
   }, [selectedModality]);
+
+  // KPI trend stats for the selected modality trend panel
+  const kpiStats = useMemo(() => {
+    if (!selectedKpi) return null;
+    const series = IMAGING_WAIT_TRENDS.filter(t => t.modality === selectedKpi);
+    const values = series.map(t => t.albertaP90Days).filter(v => typeof v === 'number');
+    if (values.length === 0) return null;
+
+    const baseline = values[0];
+    const latest = values[values.length - 1];
+    const peak = Math.max(...values);
+    const minVal = Math.min(...values);
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+
+    return {
+      baseline: baseline.toFixed(0),
+      latest: latest.toFixed(0),
+      peak: peak.toFixed(0),
+      minVal: minVal.toFixed(0),
+      delta: rawDelta > 0 ? `+${rawDelta.toFixed(0)}` : rawDelta.toFixed(0),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0
+    };
+  }, [selectedKpi]);
+
+  const selectedKpiDetails = useMemo(() => {
+    if (!selectedKpi) return null;
+    switch (selectedKpi) {
+      case 'CT Scan':
+        return {
+          label: 'CT Scan Wait Days (P90)',
+          description: 'Historical tracking of Alberta 90th-percentile wait days for CT scans, benchmarked against the Canadian national average. Rising P90 values signal structural wait-list accumulation for lower-priority outpatient imaging.',
+          colorClass: 'text-cyan-400',
+          bgClass: 'bg-cyan-500/10',
+          strokeColor: '#06b6d4',
+          gradientId: 'colorCtTrend',
+          unit: 'd',
+          icon: Activity
+        };
+      case 'MRI Scan':
+        return {
+          label: 'MRI Scan Wait Days (P90)',
+          description: 'Historical tracking of Alberta 90th-percentile wait days for MRI scans, benchmarked against the Canadian national average. MRI waits are persistently the longest of all modalities and a leading indicator of diagnostic access strain.',
+          colorClass: 'text-indigo-400',
+          bgClass: 'bg-indigo-500/10',
+          strokeColor: '#6366f1',
+          gradientId: 'colorMriTrend',
+          unit: 'd',
+          icon: Activity
+        };
+      default:
+        return null;
+    }
+  }, [selectedKpi]);
 
   return (
     <div className="space-y-6">
@@ -527,6 +587,193 @@ export default function DiagnosticDashboard() {
       {/* SUBTAB 2: CT & MRI Public Wait Times */}
       {activeSubTab === 'imaging-waits' && (
         <div className="space-y-6">
+          {/* Clickable KPI overview cards — toggle historical trend panel */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* CT Scan KPI Card */}
+            <div
+              tabIndex={0}
+              role="button"
+              aria-pressed={selectedKpi === 'CT Scan'}
+              onClick={() => setSelectedKpi(selectedKpi === 'CT Scan' ? null : 'CT Scan')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedKpi(selectedKpi === 'CT Scan' ? null : 'CT Scan');
+                }
+              }}
+              className={`p-4 rounded-2xl bg-slate-900 border shadow-lg relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedKpi === 'CT Scan'
+                  ? 'border-cyan-500 ring-1 ring-cyan-500/30 shadow-cyan-500/5'
+                  : 'border-slate-800 hover:border-cyan-500/30'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
+                  <Activity className="w-4 h-4 text-cyan-400" />
+                </div>
+                <span className="text-[8px] font-extrabold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                  CT Scan P90
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2 mb-1.5">
+                <p className="text-2xl font-black text-white tracking-tight leading-none font-mono">
+                  {IMAGING_WAIT_TRENDS.filter(t => t.modality === 'CT Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
+                </p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  Alberta 90th Percentile Wait (Days)
+                </p>
+              </div>
+              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-cyan-400/80 group-hover:text-cyan-400 transition-colors">
+                <BarChart2 className="w-3 h-3" />
+                <span>{selectedKpi === 'CT Scan' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+              </div>
+            </div>
+
+            {/* MRI Scan KPI Card */}
+            <div
+              tabIndex={0}
+              role="button"
+              aria-pressed={selectedKpi === 'MRI Scan'}
+              onClick={() => setSelectedKpi(selectedKpi === 'MRI Scan' ? null : 'MRI Scan')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedKpi(selectedKpi === 'MRI Scan' ? null : 'MRI Scan');
+                }
+              }}
+              className={`p-4 rounded-2xl bg-slate-900 border shadow-lg relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedKpi === 'MRI Scan'
+                  ? 'border-indigo-500 ring-1 ring-indigo-500/30 shadow-indigo-500/5'
+                  : 'border-slate-800 hover:border-indigo-500/30'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
+                  <Activity className="w-4 h-4 text-indigo-400" />
+                </div>
+                <span className="text-[8px] font-extrabold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                  MRI Scan P90
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2 mb-1.5">
+                <p className="text-2xl font-black text-white tracking-tight leading-none font-mono">
+                  {IMAGING_WAIT_TRENDS.filter(t => t.modality === 'MRI Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
+                </p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  Alberta 90th Percentile Wait (Days)
+                </p>
+              </div>
+              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-indigo-400/80 group-hover:text-indigo-400 transition-colors">
+                <BarChart2 className="w-3 h-3" />
+                <span>{selectedKpi === 'MRI Scan' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* KPI Trend Explorer Panel */}
+          <AnimatePresence mode="wait">
+            {selectedKpi && selectedKpiDetails && kpiStats && (
+              <motion.div
+                key={`kpi-trend-${selectedKpi}`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="p-6 rounded-2xl bg-[#090e21] border border-slate-800 space-y-6 shadow-xl relative">
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setSelectedKpi(null)}
+                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    title="Close panel"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  {/* Title and description */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                        {React.createElement(selectedKpiDetails.icon, {
+                          className: `w-4 h-4 ${selectedKpiDetails.colorClass}`
+                        })}
+                        <span>{selectedKpiDetails.label} Historical Trend Explorer</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                        {selectedKpiDetails.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Stats highlights */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (2019)</span>
+                      <span className="text-xl font-black text-slate-300 font-mono">{kpiStats.baseline}{selectedKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (2025)</span>
+                      <span className="text-xl font-black text-white font-mono">{kpiStats.latest}{selectedKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Peak</span>
+                      <span className={`text-xl font-black font-mono ${selectedKpiDetails.colorClass}`}>{kpiStats.peak}{selectedKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                      <span className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
+                        kpiStats.isIncrease ? 'text-rose-500' : 'text-emerald-500'
+                      }`}>
+                        {kpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                        <span>{kpiStats.delta}{selectedKpiDetails.unit} ({kpiStats.pctChange})</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Chart container */}
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={IMAGING_WAIT_TRENDS.filter(t => t.modality === selectedKpi)}
+                        margin={{ top: 10, right: 15, left: -20, bottom: 0 }}
+                      >
+                        <defs>
+                          <linearGradient id={selectedKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="year" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                        <YAxis
+                          stroke="#64748b"
+                          style={{ fontSize: 10, fontFamily: 'monospace' }}
+                          domain={['auto', 'auto']}
+                        />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
+                          labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                          itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="albertaP90Days"
+                          name="Alberta 90th Percentile (Days)"
+                          stroke={selectedKpiDetails.strokeColor}
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill={`url(#${selectedKpiDetails.gradientId})`}
+                          dot={{ r: 4, strokeWidth: 1 }}
+                          isAnimationActive={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* National Wait Trends Comparison Chart */}

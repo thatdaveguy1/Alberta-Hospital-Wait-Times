@@ -258,7 +258,22 @@ export default function MentalHealthDashboard() {
       {activeSubTab === 'substance-harms' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedHarmKpi(selectedHarmKpi === 'apparentDeaths' ? null : 'apparentDeaths')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedHarmKpi(selectedHarmKpi === 'apparentDeaths' ? null : 'apparentDeaths');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-1 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedHarmKpi === 'apparentDeaths'
+                  ? 'border-rose-500/50 ring-1 ring-rose-500/30 shadow-rose-500/5'
+                  : 'border-slate-800 hover:border-rose-500/30'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Alberta Apparent Toxicity Deaths (2025)</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-rose-500">~1,960</span>
@@ -267,9 +282,28 @@ export default function MentalHealthDashboard() {
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
                 Gradual reduction from the record 2023 surge (~2,670 deaths) following active expansion of Recovery Communities.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+                <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+                {selectedHarmKpi === 'apparentDeaths' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedHarmKpi(selectedHarmKpi === 'emsOverdoseResponses' ? null : 'emsOverdoseResponses')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedHarmKpi(selectedHarmKpi === 'emsOverdoseResponses' ? null : 'emsOverdoseResponses');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-1 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedHarmKpi === 'emsOverdoseResponses'
+                  ? 'border-violet-500/50 ring-1 ring-violet-500/30 shadow-violet-500/5'
+                  : 'border-slate-800 hover:border-violet-500/30'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Emergency EMS overdose dispatches (2025)</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-violet-400">~11,000</span>
@@ -278,9 +312,28 @@ export default function MentalHealthDashboard() {
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
                 Opioid agonist treatments and rapid naloxone kit distribution networks help suppress overall fatality curves.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-violet-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+                <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+                {selectedHarmKpi === 'emsOverdoseResponses' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedHarmKpi(selectedHarmKpi === 'hospitalizations' ? null : 'hospitalizations')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedHarmKpi(selectedHarmKpi === 'hospitalizations' ? null : 'hospitalizations');
+                }
+              }}
+              className={`bg-slate-900 border p-4 rounded-xl space-y-1 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedHarmKpi === 'hospitalizations'
+                  ? 'border-emerald-500/50 ring-1 ring-emerald-500/30 shadow-emerald-500/5'
+                  : 'border-slate-800 hover:border-emerald-500/30'
+              }`}
+            >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Poisoning Hospital Admissions (2025)</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-emerald-400">~4,300</span>
@@ -289,8 +342,102 @@ export default function MentalHealthDashboard() {
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
                 Toxic substance poisonings and accidental overdoses requiring inpatient hospitalization care.
               </p>
+              <span className="text-[9px] text-slate-500 group-hover:text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+                <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+                {selectedHarmKpi === 'hospitalizations' ? 'Active: Hide Trend' : 'Click to View Trend'}
+              </span>
             </div>
           </div>
+
+          {/* Substance Harms Historical Trend Explorer Panel */}
+          <AnimatePresence mode="wait">
+            {selectedHarmKpi && selectedHarmKpiDetails && harmKpiStats && (
+              <motion.div
+                key={`harm-kpi-trend-${selectedHarmKpi}`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6 shadow-xl relative">
+                  <button
+                    onClick={() => setSelectedHarmKpi(null)}
+                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    title="Close panel"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                        {React.createElement(selectedHarmKpiDetails.icon, {
+                          className: `w-4 h-4 ${selectedHarmKpiDetails.colorClass}`
+                        })}
+                        <span>{selectedHarmKpiDetails.label} Historical Trend Explorer</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                        {selectedHarmKpiDetails.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (2019)</span>
+                      <span className="text-xl font-black text-slate-300 font-mono">{harmKpiStats.baseline}{selectedHarmKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (2025)</span>
+                      <span className="text-xl font-black text-white font-mono">{harmKpiStats.latest}{selectedHarmKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Period Peak</span>
+                      <span className={`text-xl font-black font-mono ${selectedHarmKpiDetails.colorClass}`}>{harmKpiStats.peak}{selectedHarmKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                      <span className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
+                        harmKpiStats.isIncrease ? 'text-rose-500' : 'text-emerald-500'
+                      }`}>
+                        {harmKpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                        <span>{harmKpiStats.delta}{selectedHarmKpiDetails.unit} ({harmKpiStats.pctChange})</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={filteredHarmData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id={selectedHarmKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={selectedHarmKpiDetails.strokeColor} stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor={selectedHarmKpiDetails.strokeColor} stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="year" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                        <YAxis stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                        <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: 8 }} />
+                        <Area
+                          type="monotone"
+                          dataKey={selectedHarmKpi}
+                          name={selectedHarmKpiDetails.label}
+                          stroke={selectedHarmKpiDetails.strokeColor}
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill={`url(#${selectedHarmKpiDetails.gradientId})`}
+                          dot={{ r: 4, strokeWidth: 1 }}
+                          isAnimationActive={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Harms Trend Chart */}
