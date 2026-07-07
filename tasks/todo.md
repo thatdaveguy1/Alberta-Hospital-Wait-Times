@@ -355,3 +355,16 @@
 - [x] Remove daily orchestrator from server setInterval (keep ER 10min + lab 30min)
 - [x] Update App.tsx system-flow cadence labels
 - [x] Verify end-to-end: typecheck, pipeline run, dashboard badge, launchd load
+
+## Phase 24: GPS-Default Location Modal
+- [x] Unload production launchd job and start LAN dev server on 0.0.0.0:3004
+- [x] Change GPS-denied flow to open the location modal instead of IP fallback
+- [x] Build LocationModal JSX at top level of App.tsx return
+- [x] Replace inline sidebar manual-location form with modal trigger button
+- [x] Wire header location badge to 'Location: CITY | Change' and open modal on click
+- [x] Clean postal-code city display (no FSA suffix) and Nominatim display_name parsing
+- [x] Add setShowManualInput(false) to GPS, postal code, and Nominatim success paths
+- [x] Add id='manual-location-input' so header buttons focus the modal input
+- [x] Remove unused detectIPLocation fallback
+- [x] Verify typecheck, build, and dev server health
+- [x] Commit to main (8aa7a06)
