@@ -77,17 +77,49 @@ function normalizeLabel(s: string): string {
 // signal is present (central is the most demographically average zone).
 function deriveZone(lgaName: string): Zone {
   const n = normalizeLabel(lgaName);
+  
+  if (n.includes('twin brooks')) return 'Edmonton Zone';
   if (n.includes('calgary')) return 'Calgary Zone';
   if (n.includes('edmonton')) return 'Edmonton Zone';
-  if (n.includes('north') || n.includes('wood buffalo') || n.includes('fort mcmurray') || n.includes('peace') || n.includes('grand prairie')) {
-    return 'North Zone';
+  
+  const calgaryTowns = ['okotoks', 'priddis', 'black diamond', 'high river', 'chestermere', 'strathmore', 'crossfield', 'didsbury', 'cochrane', 'springbank', 'canmore', 'banff'];
+  const edmontonTowns = ['sturgeon', 'beaumont', 'thorsby', 'devon', 'leduc', 'sherwood', 'st. albert', 'spruce grove', 'stony plain', 'lamont', 'morinville', 'fort saskatchewan'];
+  const southTowns = ['claresholm', 'vulcan', 'crowsnest', 'pincher', 'macleod', 'cardston', 'kainai', 'lethbridge', 'taber', 'warner', 'forty mile', 'newell', 'oyen', 'cypress', 'medicine hat', 'milk river', 'bow island', 'raymond', 'vauxhall', 'brooks'];
+  const centralTowns = ['drayton valley', 'sundre', 'innisfail', 'wetaskiwin', 'ponoka', 'lacombe', 'camrose', 'tofield', 'flagstaff', 'red deer', 'olds', 'stettler', 'drumheller', 'sylvan', 'rocky mountain', 'rimbey', 'three hills', 'coronation', 'hardisty', 'consort', 'wainwright', 'vermilion', 'provost', 'hanna', 'special area 2'];
+  const northTowns = [
+    'mayerthorpe', 'westlock', 'barrhead', 'athabasca', 'boyle', 'smoky lake', 'cold lake', 'bonnyville', 'lac la biche', 'st. paul', 'two hills', 'vegreville', 'minburn', 'viking', 'edson', 'hinton', 'jasper', 'whitecourt', 'grande prairie', 'wood buffalo', 'fort mcmurray', 'mckay', 'high level', 'high prairie', 'slave lake', 'grimshaw', 'berwyn', 'peace', 'fairview', 'fort vermilion', 'la crete', 'beaverlodge', 'elk point', 'wabasca', 'red earth', 'valleyview', 'peace river', 'manning', 'fort chipewyan', 'falcon', 'spirit river', 'frog lake', 'grande cache', 'fox creek', 'falher', 'swan hills'
+  ];
+
+  for (const town of calgaryTowns) {
+    if (n.includes(town)) return 'Calgary Zone';
   }
-  if (n.includes('south') || n.includes('lethbridge') || n.includes('cardston') || n.includes('medicine hat') || n.includes('waterton')) {
-    return 'South Zone';
+  for (const town of edmontonTowns) {
+    if (n.includes(town)) return 'Edmonton Zone';
   }
-  if (n.includes('red deer') || n.includes('central') || n.includes('stettler') || n.includes('drumheller')) {
-    return 'Central Zone';
+  for (const town of southTowns) {
+    if (n.includes(town)) return 'South Zone';
   }
+  for (const town of centralTowns) {
+    if (n.includes(town)) return 'Central Zone';
+  }
+  for (const town of northTowns) {
+    if (n.includes(town)) return 'North Zone';
+  }
+
+  try {
+    const zoneByCityPath = path.join(process.cwd(), 'data-zone-by-city.json');
+    if (fs.existsSync(zoneByCityPath)) {
+      const zoneByCity = JSON.parse(fs.readFileSync(zoneByCityPath, 'utf8'));
+      for (const [city, zone] of Object.entries(zoneByCity)) {
+        if (n.includes(city.toLowerCase())) {
+          return zone as Zone;
+        }
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+
   return 'Central Zone';
 }
 
@@ -192,10 +224,13 @@ function pivotSheet(rows: unknown[][]): Map<string, PivotedLga> {
   for (let r = headerRow + 1; r < rows.length; r++) {
     const row = rows[r];
     if (!row) continue;
-    const name = asString(row[columns.localName]);
+    let name = asString(row[columns.localName]);
     const indicator = asString(row[columns.indicator]);
     const value = asNumber(row[columns.lgaValue]);
     if (!name || !indicator || value === undefined) continue;
+    if (name === "Edmonton - Woodcroft") {
+      name = "Edmonton - Woodcroft (North Central)";
+    }
     let entry = byLga.get(name);
     if (!entry) {
       entry = { lgaName: name, indicators: new Map<string, number>() };

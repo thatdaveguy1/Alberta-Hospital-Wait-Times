@@ -69,7 +69,7 @@ export const COMMUNITY_NEED_PROFILES: CommunityNeedMetric[] = [
     highSchoolGradPct: 94.5
   },
   {
-    lgaName: 'Edmonton - Woodcroft',
+    lgaName: 'Edmonton - Woodcroft (North Central)',
     zone: 'Edmonton Zone',
     type: 'Suburban',
     physiciansPer100k: 114.2,
@@ -124,7 +124,7 @@ export const CHRONIC_DISEASE_BURDEN: ChronicDiseaseBurden[] = [
     lifeExpectancyYears: 84.6
   },
   {
-    lgaName: 'Edmonton - Woodcroft',
+    lgaName: 'Edmonton - Woodcroft (North Central)',
     diabetesPrevalencePct: 6.5,
     copdPrevalencePct: 3.1,
     hypertensionPrevalencePct: 19.8,
@@ -166,7 +166,7 @@ export const ED_RELIANCE_METRICS: EDRelianceMetric[] = [
     moodAnxietyEdRatePer100k: 310
   },
   {
-    lgaName: 'Edmonton - Woodcroft',
+    lgaName: 'Edmonton - Woodcroft (North Central)',
     totalEdVisitsPer1000: 220,
     lowAcuityCtas45Pct: 38.2,
     afterHoursEdPct: 45.1,
@@ -204,7 +204,7 @@ export const TRAVEL_FOR_CARE: TravelForCare[] = [
     localBedLeakagePct: 11.2
   },
   {
-    lgaName: 'Edmonton - Woodcroft',
+    lgaName: 'Edmonton - Woodcroft (North Central)',
     careDeliveredOutsideLgaPct: 35.6,
     topDestinationFacility: 'Royal Alexandra Hospital',
     avgTravelDistanceKm: 12.4,
@@ -242,7 +242,7 @@ export const SERVICE_ACCESS_METRICS: ServiceAccessMetric[] = [
     providersAcceptingPatients: 18
   },
   {
-    lgaName: 'Edmonton - Woodcroft',
+    lgaName: 'Edmonton - Woodcroft (North Central)',
     facilitiesPer10k: 8.5,
     distanceToNearestEdKm: 6.4,
     distanceToNearestImagingKm: 4.5,

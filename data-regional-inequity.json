@@ -12,7 +12,7 @@
       "highSchoolGradPct": 94.5
     },
     {
-      "lgaName": "Edmonton - Woodcroft",
+      "lgaName": "Edmonton - Woodcroft (North Central)",
       "zone": "Edmonton Zone",
       "type": "Suburban",
       "physiciansPer100k": 114.2,
@@ -57,7 +57,7 @@
     },
     {
       "lgaName": "Crowsnest Pass",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 269,
       "claimsOutsideLgaPct": 0,
@@ -68,7 +68,7 @@
     },
     {
       "lgaName": "Pincher Creek",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 130,
       "claimsOutsideLgaPct": 0,
@@ -79,7 +79,7 @@
     },
     {
       "lgaName": "Fort Macleod",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 88,
       "claimsOutsideLgaPct": 0,
@@ -112,7 +112,7 @@
     },
     {
       "lgaName": "Taber MD",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 68,
       "claimsOutsideLgaPct": 0,
@@ -123,7 +123,7 @@
     },
     {
       "lgaName": "County of Warner",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Rural",
       "physiciansPer100k": 98,
       "claimsOutsideLgaPct": 0,
@@ -134,7 +134,7 @@
     },
     {
       "lgaName": "County of Forty Mile",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Rural",
       "physiciansPer100k": 78,
       "claimsOutsideLgaPct": 0,
@@ -145,7 +145,7 @@
     },
     {
       "lgaName": "Newell",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 105,
       "claimsOutsideLgaPct": 0,
@@ -156,7 +156,7 @@
     },
     {
       "lgaName": "Oyen",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 114.99999999999999,
       "claimsOutsideLgaPct": 0,
@@ -200,7 +200,7 @@
     },
     {
       "lgaName": "Lethbridge - North",
-      "zone": "North Zone",
+      "zone": "South Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 21,
       "claimsOutsideLgaPct": 0,
@@ -387,7 +387,7 @@
     },
     {
       "lgaName": "Okotoks-Priddis",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 111.00000000000001,
       "claimsOutsideLgaPct": 0,
@@ -398,7 +398,7 @@
     },
     {
       "lgaName": "Black Diamond",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 137,
       "claimsOutsideLgaPct": 0,
@@ -409,7 +409,7 @@
     },
     {
       "lgaName": "High River",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 167,
       "claimsOutsideLgaPct": 0,
@@ -420,7 +420,7 @@
     },
     {
       "lgaName": "Claresholm",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 159,
       "claimsOutsideLgaPct": 0,
@@ -431,7 +431,7 @@
     },
     {
       "lgaName": "Vulcan",
-      "zone": "Central Zone",
+      "zone": "South Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 104,
       "claimsOutsideLgaPct": 0,
@@ -442,7 +442,7 @@
     },
     {
       "lgaName": "Airdrie",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 108,
       "claimsOutsideLgaPct": 0,
@@ -453,7 +453,7 @@
     },
     {
       "lgaName": "Chestermere",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 50,
       "claimsOutsideLgaPct": 0,
@@ -464,7 +464,7 @@
     },
     {
       "lgaName": "Strathmore",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 75,
       "claimsOutsideLgaPct": 0,
@@ -475,7 +475,7 @@
     },
     {
       "lgaName": "Crossfield",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 0,
       "claimsOutsideLgaPct": 0,
@@ -486,7 +486,7 @@
     },
     {
       "lgaName": "Didsbury",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 84,
       "claimsOutsideLgaPct": 0,
@@ -497,7 +497,7 @@
     },
     {
       "lgaName": "Cochrane-Springbank",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 93,
       "claimsOutsideLgaPct": 0,
@@ -508,7 +508,7 @@
     },
     {
       "lgaName": "Canmore",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 185,
       "claimsOutsideLgaPct": 0,
@@ -519,7 +519,7 @@
     },
     {
       "lgaName": "Banff",
-      "zone": "Central Zone",
+      "zone": "Calgary Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 231,
       "claimsOutsideLgaPct": 0,
@@ -728,7 +728,7 @@
     },
     {
       "lgaName": "Viking",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 254.99999999999997,
       "claimsOutsideLgaPct": 0,
@@ -772,7 +772,7 @@
     },
     {
       "lgaName": "Lamont County",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Rural",
       "physiciansPer100k": 109.00000000000001,
       "claimsOutsideLgaPct": 0,
@@ -783,7 +783,7 @@
     },
     {
       "lgaName": "Two Hills County",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Rural",
       "physiciansPer100k": 90,
       "claimsOutsideLgaPct": 0,
@@ -794,7 +794,7 @@
     },
     {
       "lgaName": "Vegreville/Minburn County",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Rural",
       "physiciansPer100k": 77,
       "claimsOutsideLgaPct": 0,
@@ -1003,7 +1003,7 @@
     },
     {
       "lgaName": "Sturgeon County West",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Rural",
       "physiciansPer100k": 16,
       "claimsOutsideLgaPct": 0,
@@ -1014,7 +1014,7 @@
     },
     {
       "lgaName": "Sturgeon County East",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Rural",
       "physiciansPer100k": 16,
       "claimsOutsideLgaPct": 0,
@@ -1025,7 +1025,7 @@
     },
     {
       "lgaName": "Fort Saskatchewan",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 114.99999999999999,
       "claimsOutsideLgaPct": 0,
@@ -1036,7 +1036,7 @@
     },
     {
       "lgaName": "Sherwood Park",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Suburban",
       "physiciansPer100k": 112.99999999999999,
       "claimsOutsideLgaPct": 0,
@@ -1047,7 +1047,7 @@
     },
     {
       "lgaName": "Strathcona County excluding Sherwood Park",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Rural",
       "physiciansPer100k": 0,
       "claimsOutsideLgaPct": 0,
@@ -1058,7 +1058,7 @@
     },
     {
       "lgaName": "Beaumont",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 65,
       "claimsOutsideLgaPct": 0,
@@ -1069,7 +1069,7 @@
     },
     {
       "lgaName": "Leduc & Devon",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 133,
       "claimsOutsideLgaPct": 0,
@@ -1080,7 +1080,7 @@
     },
     {
       "lgaName": "Thorsby",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 33,
       "claimsOutsideLgaPct": 0,
@@ -1091,7 +1091,7 @@
     },
     {
       "lgaName": "Stony Plain & Spruce Grove",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Suburban",
       "physiciansPer100k": 143,
       "claimsOutsideLgaPct": 0,
@@ -1102,7 +1102,7 @@
     },
     {
       "lgaName": "Westview excluding Stony Plain and Spruce Grove",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Suburban",
       "physiciansPer100k": 5,
       "claimsOutsideLgaPct": 0,
@@ -1113,7 +1113,7 @@
     },
     {
       "lgaName": "St. Albert",
-      "zone": "Central Zone",
+      "zone": "Edmonton Zone",
       "type": "Suburban",
       "physiciansPer100k": 151,
       "claimsOutsideLgaPct": 0,
@@ -1124,7 +1124,7 @@
     },
     {
       "lgaName": "Jasper",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 115.99999999999999,
       "claimsOutsideLgaPct": 0,
@@ -1135,7 +1135,7 @@
     },
     {
       "lgaName": "Hinton",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 156,
       "claimsOutsideLgaPct": 0,
@@ -1146,7 +1146,7 @@
     },
     {
       "lgaName": "Edson",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 100,
       "claimsOutsideLgaPct": 0,
@@ -1157,7 +1157,7 @@
     },
     {
       "lgaName": "Whitecourt",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 122,
       "claimsOutsideLgaPct": 0,
@@ -1168,7 +1168,7 @@
     },
     {
       "lgaName": "Mayerthorpe",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 56.00000000000001,
       "claimsOutsideLgaPct": 0,
@@ -1179,7 +1179,7 @@
     },
     {
       "lgaName": "Barrhead",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 91,
       "claimsOutsideLgaPct": 0,
@@ -1190,7 +1190,7 @@
     },
     {
       "lgaName": "Westlock",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 131,
       "claimsOutsideLgaPct": 0,
@@ -1201,7 +1201,7 @@
     },
     {
       "lgaName": "Frog Lake",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 104,
       "claimsOutsideLgaPct": 0,
@@ -1212,7 +1212,7 @@
     },
     {
       "lgaName": "St. Paul",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 111.00000000000001,
       "claimsOutsideLgaPct": 0,
@@ -1223,7 +1223,7 @@
     },
     {
       "lgaName": "Smoky Lake",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 106,
       "claimsOutsideLgaPct": 0,
@@ -1234,7 +1234,7 @@
     },
     {
       "lgaName": "Cold Lake",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 82,
       "claimsOutsideLgaPct": 0,
@@ -1245,7 +1245,7 @@
     },
     {
       "lgaName": "Bonnyville",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 187,
       "claimsOutsideLgaPct": 0,
@@ -1256,7 +1256,7 @@
     },
     {
       "lgaName": "Boyle",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 112.99999999999999,
       "claimsOutsideLgaPct": 0,
@@ -1267,7 +1267,7 @@
     },
     {
       "lgaName": "Athabasca",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 84,
       "claimsOutsideLgaPct": 0,
@@ -1278,7 +1278,7 @@
     },
     {
       "lgaName": "Lac La Biche",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 106,
       "claimsOutsideLgaPct": 0,
@@ -1289,7 +1289,7 @@
     },
     {
       "lgaName": "Grande Cache",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 145,
       "claimsOutsideLgaPct": 0,
@@ -1300,7 +1300,7 @@
     },
     {
       "lgaName": "Fox Creek",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 320,
       "claimsOutsideLgaPct": 0,
@@ -1311,7 +1311,7 @@
     },
     {
       "lgaName": "Valleyview",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 56.00000000000001,
       "claimsOutsideLgaPct": 0,
@@ -1322,7 +1322,7 @@
     },
     {
       "lgaName": "Beaverlodge",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 90,
       "claimsOutsideLgaPct": 0,
@@ -1333,7 +1333,7 @@
     },
     {
       "lgaName": "Grande Prairie County excluding the City of Grande Prairie",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Rural",
       "physiciansPer100k": 19,
       "claimsOutsideLgaPct": 0,
@@ -1344,7 +1344,7 @@
     },
     {
       "lgaName": "Swan Hills",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 154,
       "claimsOutsideLgaPct": 0,
@@ -1355,7 +1355,7 @@
     },
     {
       "lgaName": "Slave Lake",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 77,
       "claimsOutsideLgaPct": 0,
@@ -1366,7 +1366,7 @@
     },
     {
       "lgaName": "Wabasca",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 237,
       "claimsOutsideLgaPct": 0,
@@ -1377,7 +1377,7 @@
     },
     {
       "lgaName": "High Prairie",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 95,
       "claimsOutsideLgaPct": 0,
@@ -1388,7 +1388,7 @@
     },
     {
       "lgaName": "High Level",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 95,
       "claimsOutsideLgaPct": 0,
@@ -1399,7 +1399,7 @@
     },
     {
       "lgaName": "Manning",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 182,
       "claimsOutsideLgaPct": 0,
@@ -1421,7 +1421,7 @@
     },
     {
       "lgaName": "Falher",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 114.99999999999999,
       "claimsOutsideLgaPct": 0,
@@ -1432,7 +1432,7 @@
     },
     {
       "lgaName": "Spirit River",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 82,
       "claimsOutsideLgaPct": 0,
@@ -1443,7 +1443,7 @@
     },
     {
       "lgaName": "Fairview",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 111.00000000000001,
       "claimsOutsideLgaPct": 0,
@@ -1476,7 +1476,7 @@
     },
     {
       "lgaName": "City of Grande Prairie",
-      "zone": "Central Zone",
+      "zone": "North Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 94,
       "claimsOutsideLgaPct": 0,
@@ -1496,7 +1496,7 @@
       "lifeExpectancyYears": 79.04
     },
     {
-      "lgaName": "Edmonton - Woodcroft",
+      "lgaName": "Edmonton - Woodcroft (North Central)",
       "diabetesPrevalencePct": 6.5,
       "copdPrevalencePct": 3.1,
       "hypertensionPrevalencePct": 19.8,
@@ -2577,7 +2577,7 @@
       "moodAnxietyEdRatePer100k": 1152.78
     },
     {
-      "lgaName": "Edmonton - Woodcroft",
+      "lgaName": "Edmonton - Woodcroft (North Central)",
       "totalEdVisitsPer1000": 220,
       "lowAcuityCtas45Pct": 38.2,
       "afterHoursEdPct": 45.1,
