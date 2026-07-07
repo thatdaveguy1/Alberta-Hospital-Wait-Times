@@ -13,7 +13,7 @@ coverage/
 # Scratch
 tmp/
 
-# AI Studio internal metadata
+# Local tool metadata
 assets/.aistudio/
 
 # Generated chart screenshots (regeneratable)

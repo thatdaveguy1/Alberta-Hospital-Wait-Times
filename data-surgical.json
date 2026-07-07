@@ -20129,10 +20129,10 @@
   },
   "_dataMetadata": {
     "SURGICAL_RECORDS": {
-      "source": "powerbiScraper",
-      "sourceVintage": "Live data",
-      "lastUpdated": "2026-07-05T15:55:19.035Z",
-      "updateType": "auto"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-07T17:07:31.310Z",
+      "source": "Alberta Wait Times Reporting (Power BI scraper)",
+      "sourceVintage": "April 2026"
     },
     "ORTHOPEDIC_SPECIALTY_RECORDS": {
       "source": "powerbiScraper",
