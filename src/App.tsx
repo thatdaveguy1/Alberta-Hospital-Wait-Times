@@ -1450,9 +1450,9 @@ export default function App() {
         </AnimatePresence>
 
         {/* Horizontal Nav Bar (Desktop Only, under notice disclaimer) */}
-        <div className="hidden lg:block bg-[#090e21] border border-slate-800 rounded-2xl p-5 mb-8 shadow-xl w-full space-y-5">
+        <div className="hidden lg:block bg-[#090e21] border border-slate-800 rounded-2xl p-4 mb-8 shadow-xl w-full space-y-4">
           {/* Header Row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
                 <SlidersHorizontal className="w-4 h-4" />
@@ -1466,7 +1466,7 @@ export default function App() {
             </div>
 
             {/* Search Bar */}
-            <div className="relative w-full md:w-72">
+            <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-2 w-3.5 h-3.5 text-slate-500" />
               <input
                 type="text"
@@ -1494,7 +1494,7 @@ export default function App() {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
+                  className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
                     selectedCategory === cat.id
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 bg-slate-950/40 border border-slate-800/60'
@@ -1511,74 +1511,108 @@ export default function App() {
             })}
           </div>
 
-          {/* Module Card Grid */}
-          <div className="space-y-6">
-            {(selectedCategory === 'all' ? CATEGORIES.filter(c => c.id !== 'all') : CATEGORIES.filter(c => c.id === selectedCategory)).map(category => {
-              const items = DASHBOARDS.filter(d =>
-                d.category === category.id &&
-                (d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
-                 d.description.toLowerCase().includes(dashboardSearch.toLowerCase()))
-              );
+          {/* Module Tiles */}
+          <div className="space-y-4">
+            {selectedCategory === 'all' ? (
+              <div className="grid grid-cols-4 xl:grid-cols-5 gap-2">
+                {DASHBOARDS.filter(d =>
+                  d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+                  d.description.toLowerCase().includes(dashboardSearch.toLowerCase())
+                ).map(d => {
+                  const Icon = d.icon;
+                  const isActive = activeTab === d.id;
+                  return (
+                    <button
+                      key={d.id}
+                      onClick={() => {
+                        setActiveTab(d.id);
+                        if (isMapFullscreen) setIsMapFullscreen(false);
+                      }}
+                      className={`relative group flex items-center gap-2 p-2.5 rounded-lg text-left transition-all border ${
+                        isActive
+                          ? 'bg-blue-500/5 border-blue-500/40 ring-1 ring-blue-500/30'
+                          : 'bg-slate-950/40 border-slate-800/60 hover:border-slate-700 hover:bg-slate-900/50'
+                      }`}
+                    >
+                      {isActive && (
+                        <div className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-blue-500" />
+                      )}
+                      <div className={`p-1.5 rounded-md shrink-0 ${d.bgColor} ${d.color}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <h5 className={`text-xs font-semibold truncate ${isActive ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
+                            {d.shortName}
+                          </h5>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-snug line-clamp-1">
+                          {d.description}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              CATEGORIES.filter(c => c.id === selectedCategory).map(category => {
+                const items = DASHBOARDS.filter(d =>
+                  d.category === category.id &&
+                  (d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+                   d.description.toLowerCase().includes(dashboardSearch.toLowerCase()))
+                );
 
-              if (items.length === 0) return null;
+                if (items.length === 0) return null;
 
-              return (
-                <div key={category.id} className="space-y-3">
-                  <div className="flex items-center gap-2 border-b border-slate-800/60 pb-2">
-                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
-                      {CATEGORY_TITLE_BY_ID[category.id]}
-                    </h4>
-                    <span className="text-[10px] text-slate-600 font-medium">
-                      {items.length} module{items.length !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-3 xl:grid-cols-4 gap-3">
-                    {items.map(d => {
-                      const Icon = d.icon;
-                      const isActive = activeTab === d.id;
-                      return (
-                        <button
-                          key={d.id}
-                          onClick={() => {
-                            setActiveTab(d.id);
-                            if (isMapFullscreen) {
-                              setIsMapFullscreen(false);
-                            }
-                          }}
-                          className={`relative group flex flex-col items-start gap-3 p-4 rounded-xl text-left transition-all border ${
-                            isActive
-                              ? 'bg-blue-500/5 border-blue-500/40 ring-1 ring-blue-500/30'
-                              : 'bg-slate-950/40 border-slate-800/60 hover:border-slate-700 hover:bg-slate-900/50'
-                          }`}
-                        >
-                          {isActive && (
-                            <div className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-blue-500" />
-                          )}
-                          <div className="flex items-start justify-between w-full">
-                            <div className={`p-2 rounded-lg ${d.bgColor} ${d.color}`}>
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            {d.badge && (
-                              <span className={`text-[8px] px-1.5 py-0.5 rounded font-extrabold uppercase tracking-widest border ${d.badgeColor}`}>
-                                {d.badge}
-                              </span>
+                return (
+                  <div key={category.id} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+                        {CATEGORY_TITLE_BY_ID[category.id]}
+                      </h4>
+                      <span className="text-[10px] text-slate-600 font-medium">
+                        {items.length} module{items.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 xl:grid-cols-5 gap-2">
+                      {items.map(d => {
+                        const Icon = d.icon;
+                        const isActive = activeTab === d.id;
+                        return (
+                          <button
+                            key={d.id}
+                            onClick={() => {
+                              setActiveTab(d.id);
+                              if (isMapFullscreen) setIsMapFullscreen(false);
+                            }}
+                            className={`relative group flex items-center gap-2 p-2.5 rounded-lg text-left transition-all border ${
+                              isActive
+                                ? 'bg-blue-500/5 border-blue-500/40 ring-1 ring-blue-500/30'
+                                : 'bg-slate-950/40 border-slate-800/60 hover:border-slate-700 hover:bg-slate-900/50'
+                            }`}
+                          >
+                            {isActive && (
+                              <div className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-blue-500" />
                             )}
-                          </div>
-                          <div className="space-y-1">
-                            <h5 className={`text-sm font-semibold ${isActive ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
-                              {d.shortName}
-                            </h5>
-                            <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
-                              {d.description}
-                            </p>
-                          </div>
-                        </button>
-                      );
-                    })}
+                            <div className={`p-1.5 rounded-md shrink-0 ${d.bgColor} ${d.color}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h5 className={`text-xs font-semibold truncate ${isActive ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
+                                {d.shortName}
+                              </h5>
+                              <p className="text-[10px] text-slate-500 leading-snug line-clamp-1">
+                                {d.description}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
 
             {/* Empty search results */}
             {DASHBOARDS.filter(d => {
@@ -1587,8 +1621,8 @@ export default function App() {
                                     d.description.toLowerCase().includes(dashboardSearch.toLowerCase());
               return matchesCategory && matchesSearch;
             }).length === 0 && (
-              <div className="text-center py-8 bg-slate-950/20 border border-dashed border-slate-800 rounded-2xl space-y-2">
-                <Search className="w-8 h-8 text-slate-600 mx-auto" />
+              <div className="text-center py-6 bg-slate-950/20 border border-dashed border-slate-800 rounded-2xl space-y-2">
+                <Search className="w-6 h-6 text-slate-600 mx-auto" />
                 <p className="text-xs text-slate-400 font-medium">No matching analytical modules found</p>
                 <button
                   onClick={() => { setDashboardSearch(''); setSelectedCategory('all'); }}
