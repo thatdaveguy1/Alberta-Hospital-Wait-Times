@@ -246,7 +246,7 @@ export default function PatientExperienceDashboard() {
         title="Patient Experience & Care Quality"
         description="Monitor patient-reported satisfaction, communication quality, and clinical safety."
         metadata={metadata ?? undefined}
-        arrayKey="PATIENT_SATISFACTION_STATS"
+        arrayKey="PATIENT_VOICE_BY_SETTING"
       />
 
       {/* Sub-tab Navigation */}

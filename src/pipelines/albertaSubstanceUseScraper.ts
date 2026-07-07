@@ -19,6 +19,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 
 const OUTPUT_FILE = path.join(process.cwd(), 'data-mental-health.json');
 
@@ -280,7 +281,23 @@ export async function run(): Promise<SyncResult> {
     }
 
     const mergedTrends = Array.from(existingByYear.values());
-    const output = { ...existing, SUBSTANCE_HARM_TRENDS: mergedTrends };
+    const ownedMetadata: DataMetadata = {
+      SUBSTANCE_HARM_TRENDS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Alberta Substance Use Surveillance',
+        sourceVintage: '2019–latest surveillance year',
+        verification: 'Auto-scraped from Alberta Substance Use Surveillance PDF report.',
+        lastUpdated: timestamp,
+      }),
+    };
+    const output = {
+      ...existing,
+      SUBSTANCE_HARM_TRENDS: mergedTrends,
+      _dataMetadata: mergeDataMetadata(
+        existing._dataMetadata as DataMetadata | undefined,
+        ownedMetadata,
+      ),
+    };
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf8');
 
     console.log(

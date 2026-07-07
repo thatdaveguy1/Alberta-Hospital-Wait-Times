@@ -5576,5 +5576,43 @@
       "unit": "Number of cases",
       "result": "540"
     }
-  ]
+  ],
+  "_dataMetadata": {
+    "CANCER_BURDEN_STATS": {
+      "source": "Alberta Cancer Registry projected incidence/mortality",
+      "sourceVintage": "2026 projected baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "CANCER_SCREENING_RATES": {
+      "source": "Alberta screening program zone rates",
+      "sourceVintage": "Hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "CANCER_SURGERY_WAIT_TRENDS": {
+      "source": "CIHI Wait Times Priority Procedures in Canada",
+      "sourceVintage": "2013–2025",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-05T15:55:14Z"
+    },
+    "RADIATION_THERAPY_WAIT_TRENDS": {
+      "source": "CIHI Wait Times Priority Procedures in Canada",
+      "sourceVintage": "2010–2025",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-05T15:55:14Z"
+    },
+    "ALBERTA_CANCER_CENTRES": {
+      "source": "AHS Cancer Centre directory",
+      "sourceVintage": "Live AHS directory",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-05T15:55:14Z"
+    },
+    "CIHI_CANCER_WAIT_TIMES": {
+      "source": "CIHI Wait Times Priority Procedures in Canada",
+      "sourceVintage": "2008–2025",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-05T15:55:14Z"
+    }
+  }
 }

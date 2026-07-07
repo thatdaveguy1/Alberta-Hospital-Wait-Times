@@ -17,6 +17,11 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 
 const PRIMARY_CARE_FILE = path.join(process.cwd(), 'data-primary-care.json');
 const PATIENT_EXPERIENCE_FILE = path.join(process.cwd(), 'data-patient-experience.json');
@@ -259,7 +264,22 @@ export async function run(): Promise<SyncResult> {
         rating: r.rating,
         percentage: r.percentage,
       }));
-      const merged = { ...existing, INPATIENT_EXPERIENCE_TRENDS_HQCA: experienceData };
+      const ownedMetadata: DataMetadata = {
+        INPATIENT_EXPERIENCE_TRENDS_HQCA: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'HQCA FOCUS patient experience CSV',
+          sourceVintage: 'Apr 2021 onward',
+          lastUpdated: timestamp,
+        }),
+      };
+      const merged = {
+        ...existing,
+        INPATIENT_EXPERIENCE_TRENDS_HQCA: experienceData,
+        _dataMetadata: mergeDataMetadata(
+          existing._dataMetadata as DataMetadata | undefined,
+          ownedMetadata,
+        ),
+      };
       fs.writeFileSync(PATIENT_EXPERIENCE_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
     }
 

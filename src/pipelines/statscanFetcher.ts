@@ -31,6 +31,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -74,8 +75,8 @@ interface WorkforceJson {
   NURSING_SUPPLY_TRENDS?: unknown[];
   WORKFORCE_AGE_PROFILE?: unknown[];
   JOB_VACANCY_TRENDS?: JobVacancyTrendRecord[];
-  SPECIALIST_RECRUITMENT_NEEDS?: unknown[];
   ALLIED_HEALTH_SUPPLY?: unknown[];
+  _dataMetadata?: DataMetadata;
 }
 
 interface JobVacancyTrendRecord {
@@ -471,6 +472,19 @@ export async function run(): Promise<SyncResult> {
       ...existing,
       JOB_VACANCY_TRENDS: records,
     };
+
+    // Refresh _dataMetadata for JOB_VACANCY_TRENDS; preserve all other entries
+    // (sibling writers' and hand-authored arrays) via mergeDataMetadata.
+    const ownedMetadata: DataMetadata = {
+      JOB_VACANCY_TRENDS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'StatCan table 14100371 via WDS CSV',
+        sourceVintage: '2023-Q1 to 2024-Q4',
+        lastUpdated: timestamp,
+      }),
+    };
+    merged._dataMetadata = mergeDataMetadata(existing._dataMetadata, ownedMetadata);
+
     fs.writeFileSync(WORKFORCE_FILE, JSON.stringify(merged, null, 2), 'utf8');
 
     const durationMs = Date.now() - startTime;

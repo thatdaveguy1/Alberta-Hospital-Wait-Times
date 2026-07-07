@@ -15,6 +15,11 @@ import axios from 'axios';
 import fs from 'fs';
 import * as XLSX from 'xlsx';
 import path from 'path';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type { SyncResult } from './types';
 
 const CANCER_FILE = path.join(process.cwd(), 'data-cancer.json');
@@ -200,7 +205,22 @@ export async function run(): Promise<SyncResult> {
     // Write to domain files
     if (cancerRecords.length > 0) {
       const existing = loadJsonFile(CANCER_FILE);
-      const merged = { ...existing, CIHI_CANCER_WAIT_TIMES: cancerRecords };
+      const ownedMetadata: DataMetadata = {
+        CIHI_CANCER_WAIT_TIMES: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'CIHI Wait Times Priority Procedures in Canada',
+          sourceVintage: '2008–2025',
+          lastUpdated: timestamp,
+        }),
+      };
+      const merged = {
+        ...existing,
+        CIHI_CANCER_WAIT_TIMES: cancerRecords,
+        _dataMetadata: mergeDataMetadata(
+          existing._dataMetadata as DataMetadata | undefined,
+          ownedMetadata,
+        ),
+      };
       fs.writeFileSync(CANCER_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
       console.log(`[CihiWaitTimesPriority] Wrote ${cancerRecords.length} cancer records to data-cancer.json`);
     }

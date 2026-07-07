@@ -18,6 +18,11 @@ import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type {
   PlacementMetric,
   ResidentOutcomeQuality,
@@ -311,6 +316,7 @@ interface ContinuingCareJson {
   RESIDENT_QUALITY_OUTCOMES: ResidentOutcomeQuality[];
   HOME_CARE_EXPERIENCE: HomeCareContinuity[];
   CONTINUING_CARE_COMPLIANCE: CareFacilityCompliance[];
+  _dataMetadata?: DataMetadata;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -333,6 +339,7 @@ function coerceJson(raw: unknown): ContinuingCareJson {
       base.HOME_CARE_EXPERIENCE = raw.HOME_CARE_EXPERIENCE as HomeCareContinuity[];
     if (Array.isArray(raw.CONTINUING_CARE_COMPLIANCE))
       base.CONTINUING_CARE_COMPLIANCE = raw.CONTINUING_CARE_COMPLIANCE as CareFacilityCompliance[];
+    if (isRecord(raw._dataMetadata)) base._dataMetadata = raw._dataMetadata as DataMetadata;
   }
   return base;
 }
@@ -522,10 +529,26 @@ export async function run(): Promise<SyncResult> {
       outcomeMap,
     );
 
+    const mergedMetadata = mergeDataMetadata(existing._dataMetadata, {
+      CONTINUING_CARE_PLACEMENT_STATS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'HQCA FOCUS continuing-care CSVs',
+        sourceVintage: '2021–latest HQCA reporting period',
+        lastUpdated: timestamp,
+      }),
+      RESIDENT_QUALITY_OUTCOMES: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'HQCA FOCUS continuing-care CSVs + CIHI LTCC indicators',
+        sourceVintage: '2021–latest HQCA/CIHI reporting period',
+        lastUpdated: timestamp,
+      }),
+    });
+
     const merged: ContinuingCareJson = {
       ...existing,
       CONTINUING_CARE_PLACEMENT_STATS: mergedPlacement,
       RESIDENT_QUALITY_OUTCOMES: mergedOutcomes,
+      _dataMetadata: mergedMetadata,
     };
 
     fs.writeFileSync(CONTINUING_CARE_FILE, JSON.stringify(merged, null, 2), 'utf8');

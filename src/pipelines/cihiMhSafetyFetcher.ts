@@ -91,26 +91,63 @@ const INDICATOR_URLS: { url: string; domain: string; key: string }[] = [
   },
 ];
 
-// _dataMetadata entries this writer owns in data-system-flow.json. Only the
-// keys actually refreshed in a given run are stamped (see run()), and sibling
-// writers' entries are preserved via mergeDataMetadata.
-const SYSTEM_FLOW_METADATA_BUILDERS: Record<string, (ts: string) => DataMetadata[string]> = {
-  CIHI_OCCUPANCY_RATES: (ts) =>
-    buildMetadataEntry({
-      updateType: 'auto',
-      source: 'CIHI indicator XLSX (878 average acute occupancy rate)',
-      sourceVintage: 'CIHI indicator data table (latest available)',
-      verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
-      lastUpdated: ts,
-    }),
-  CIHI_ED_WAIT_INITIAL_ASSESSMENT: (ts) =>
-    buildMetadataEntry({
-      updateType: 'auto',
-      source: 'CIHI indicator XLSX (811 ED wait time for physician initial assessment)',
-      sourceVintage: 'CIHI indicator data table (latest available)',
-      verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
-      lastUpdated: ts,
-    }),
+// _dataMetadata entries this writer owns, grouped by domain data file. Only
+// the keys actually refreshed in a given run are stamped (see run()), and
+// sibling writers' entries are preserved via mergeDataMetadata.
+const DOMAIN_METADATA_BUILDERS: Record<
+  string,
+  Record<string, (ts: string) => DataMetadata[string]>
+> = {
+  'system-flow': {
+    CIHI_OCCUPANCY_RATES: (ts) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI indicator XLSX (878 average acute occupancy rate)',
+        sourceVintage: 'CIHI indicator data table (latest available)',
+        verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
+        lastUpdated: ts,
+      }),
+    CIHI_ED_WAIT_INITIAL_ASSESSMENT: (ts) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI indicator XLSX (811 ED wait time for physician initial assessment)',
+        sourceVintage: 'CIHI indicator data table (latest available)',
+        verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
+        lastUpdated: ts,
+      }),
+  },
+  'mental-health': {
+    CIHI_MH_READMISSION_RATES: (ts) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI 30-day mental-health readmission data table',
+        sourceVintage: 'CIHI latest release',
+        lastUpdated: ts,
+      }),
+  },
+  'patient-experience': {
+    CIHI_ALL_READMISSION_RATES: (ts) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI all-patients readmitted data table',
+        sourceVintage: 'CIHI latest release',
+        lastUpdated: ts,
+      }),
+    CIHI_ACSC_HOSPITALIZATIONS: (ts) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI ambulatory-care-sensitive-conditions hospitalizations',
+        sourceVintage: 'CIHI latest release',
+        lastUpdated: ts,
+      }),
+    CIHI_WAIT_TIME_SATISFACTION: (ts) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI wait-time satisfaction data table',
+        sourceVintage: 'CIHI latest release',
+        lastUpdated: ts,
+      }),
+  },
 };
 
 interface LoadedJson {
@@ -266,13 +303,15 @@ export async function run(): Promise<SyncResult> {
       const existing = loadJsonFile(file);
       const merged: LoadedJson = { ...existing, ...domainUpdates };
 
-      // For data-system-flow.json, refresh _dataMetadata for the owned arrays
-      // actually updated this run, preserving entries owned by the other
-      // system-flow writers (acuteCareScraper, ahsWeeklyEdLosScraper).
-      if (domain === 'system-flow') {
+      // Refresh _dataMetadata for the owned arrays actually updated this run
+      // for any domain this writer stamps, preserving entries owned by sibling
+      // writers (e.g. acuteCareScraper, ahsWeeklyEdLosScraper for system-flow,
+      // goodcaringScraper/hqcaFocusScraper for patient-experience).
+      const domainBuilders = DOMAIN_METADATA_BUILDERS[domain];
+      if (domainBuilders) {
         const ownedMetadata: DataMetadata = {};
         for (const key of Object.keys(domainUpdates)) {
-          const builder = SYSTEM_FLOW_METADATA_BUILDERS[key];
+          const builder = domainBuilders[key];
           if (builder) {
             ownedMetadata[key] = builder(timestamp);
           }

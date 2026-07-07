@@ -23,6 +23,11 @@ import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type { ImagingWaitTrend } from '../diagnosticData';
 import type {
   CancerSurgeryWaitTrend,
@@ -531,19 +536,40 @@ function loadJsonFile(file: string): LoadedJson {
   }
   return {};
 }
-
 // Merge new arrays into an existing JSON object, only overwriting keys that
-// carry non-empty new data. Returns the number of records written.
-function mergeAndWrite(file: string, newPartial: LoadedJson): number {
+// carry non-empty new data. When `ownedMetadata` is supplied, stamp those
+// entries into `_dataMetadata` (preserving sibling writers' entries via
+// mergeDataMetadata) for every array actually refreshed this run. Returns the
+// number of records written.
+function mergeAndWrite(
+  file: string,
+  newPartial: LoadedJson,
+  ownedMetadata?: DataMetadata,
+): number {
   const existing = loadJsonFile(file);
   let written = 0;
+  const refreshedKeys: string[] = [];
   for (const [key, value] of Object.entries(newPartial)) {
     if (Array.isArray(value) && value.length > 0) {
       existing[key] = value;
       written += value.length;
+      refreshedKeys.push(key);
     }
   }
   if (written > 0) {
+    if (ownedMetadata) {
+      // Only stamp metadata for arrays actually refreshed this run.
+      const stamped: DataMetadata = {};
+      for (const key of refreshedKeys) {
+        if (key in ownedMetadata) stamped[key] = ownedMetadata[key];
+      }
+      if (Object.keys(stamped).length > 0) {
+        existing._dataMetadata = mergeDataMetadata(
+          existing._dataMetadata as DataMetadata | undefined,
+          stamped,
+        );
+      }
+    }
     fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
   }
   return written;
@@ -628,10 +654,27 @@ export async function runCancer(): Promise<SyncResult> {
       };
     }
 
-    const recordsWritten = mergeAndWrite(CANCER_FILE, {
-      CANCER_SURGERY_WAIT_TRENDS: parsed.cancerSurgery,
-      RADIATION_THERAPY_WAIT_TRENDS: parsed.radiation,
-    });
+    const recordsWritten = mergeAndWrite(
+      CANCER_FILE,
+      {
+        CANCER_SURGERY_WAIT_TRENDS: parsed.cancerSurgery,
+        RADIATION_THERAPY_WAIT_TRENDS: parsed.radiation,
+      },
+      {
+        CANCER_SURGERY_WAIT_TRENDS: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'CIHI Wait Times Priority Procedures in Canada',
+          sourceVintage: '2013–2025',
+          lastUpdated: timestamp,
+        }),
+        RADIATION_THERAPY_WAIT_TRENDS: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'CIHI Wait Times Priority Procedures in Canada',
+          sourceVintage: '2010–2025',
+          lastUpdated: timestamp,
+        }),
+      },
+    );
     const status: SyncResult['status'] = recordsWritten > 0 ? 'success' : 'skipped';
     console.log(
       `[CIHIWaitTimes] Cancer complete. fetched=${recordsFetched} written=${recordsWritten} in ${Date.now() - startTime}ms`,

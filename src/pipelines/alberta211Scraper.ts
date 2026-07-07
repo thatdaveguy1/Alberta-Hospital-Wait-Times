@@ -10,6 +10,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 
 const MENTAL_HEALTH_FILE = path.join(process.cwd(), 'data-mental-health.json');
 const VIRTUAL_CARE_FILE = path.join(process.cwd(), 'data-virtual-care.json');
@@ -164,9 +165,24 @@ export async function run(): Promise<SyncResult> {
       .map(mapToAdjacentHelpline)
       .filter((h): h is AdjacentHelplineVolume => h !== null);
 
-    // Merge into mental-health data
     const mhJson = loadJsonFile(MENTAL_HEALTH_FILE);
-    const mhMerged = { ...mhJson, SUPPORT_HELPLINES: helplines };
+    const mhOwnedMetadata: DataMetadata = {
+      SUPPORT_HELPLINES: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'AHS Mental Health helplines + 211 Alberta directory',
+        sourceVintage: 'Live helpline directories',
+        verification: 'Auto-scraped from AHS helplines page and 211 Alberta API.',
+        lastUpdated: timestamp,
+      }),
+    };
+    const mhMerged = {
+      ...mhJson,
+      SUPPORT_HELPLINES: helplines,
+      _dataMetadata: mergeDataMetadata(
+        mhJson._dataMetadata as DataMetadata | undefined,
+        mhOwnedMetadata,
+      ),
+    };
     fs.writeFileSync(MENTAL_HEALTH_FILE, JSON.stringify(mhMerged, null, 2) + '\n', 'utf8');
 
     // Merge into virtual-care data

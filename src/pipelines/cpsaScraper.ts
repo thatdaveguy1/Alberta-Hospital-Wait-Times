@@ -21,14 +21,8 @@ import type { AnyNode } from 'domhandler';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
-import type {
-  PhysicianSpecialtyZone,
-  NursingSupplyGroup,
-  WorkforceAgeProfile,
-  JobVacancyTrend,
-  SpecialistRecruitmentNeed,
-  AlliedHealthSupply,
-} from '../workforceData';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import type { PhysicianSpecialtyZone } from '../workforceData';
 
 const CPSA_QUARTERLY_URL =
   'https://cpsa.ca/about-cpsa/statistics/quarterly-statistics/';
@@ -67,57 +61,10 @@ const SPECIALTY_MIX_PROPORTIONS: Record<
   'North Zone': { familyMedicine: 0.747, medicalSpecialties: 0.122, surgicalSpecialties: 0.081, laboratorySpecialties: 0.016, psychiatry: 0.035 },
 };
 
-interface WorkforceJson {
-  PHYSICIAN_SPECIALTY_ZONE: PhysicianSpecialtyZone[];
-  NURSING_SUPPLY_TRENDS: NursingSupplyGroup[];
-  WORKFORCE_AGE_PROFILE: WorkforceAgeProfile[];
-  JOB_VACANCY_TRENDS: JobVacancyTrend[];
-  SPECIALIST_RECRUITMENT_NEEDS: SpecialistRecruitmentNeed[];
-  ALLIED_HEALTH_SUPPLY: AlliedHealthSupply[];
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-
-// Validate that a parsed JSON blob matches the expected workforce shape well
-// enough to safely merge. Unknown/missing keys default to empty arrays.
-function coerceWorkforceJson(raw: unknown): WorkforceJson {
-  const base: WorkforceJson = {
-    PHYSICIAN_SPECIALTY_ZONE: [],
-    NURSING_SUPPLY_TRENDS: [],
-    WORKFORCE_AGE_PROFILE: [],
-    JOB_VACANCY_TRENDS: [],
-    SPECIALIST_RECRUITMENT_NEEDS: [],
-    ALLIED_HEALTH_SUPPLY: [],
-  };
-  if (isRecord(raw)) {
-    if (Array.isArray(raw.PHYSICIAN_SPECIALTY_ZONE)) base.PHYSICIAN_SPECIALTY_ZONE = raw.PHYSICIAN_SPECIALTY_ZONE as PhysicianSpecialtyZone[];
-    if (Array.isArray(raw.NURSING_SUPPLY_TRENDS)) base.NURSING_SUPPLY_TRENDS = raw.NURSING_SUPPLY_TRENDS as NursingSupplyGroup[];
-    if (Array.isArray(raw.WORKFORCE_AGE_PROFILE)) base.WORKFORCE_AGE_PROFILE = raw.WORKFORCE_AGE_PROFILE as WorkforceAgeProfile[];
-    if (Array.isArray(raw.JOB_VACANCY_TRENDS)) base.JOB_VACANCY_TRENDS = raw.JOB_VACANCY_TRENDS as JobVacancyTrend[];
-    if (Array.isArray(raw.SPECIALIST_RECRUITMENT_NEEDS)) base.SPECIALIST_RECRUITMENT_NEEDS = raw.SPECIALIST_RECRUITMENT_NEEDS as SpecialistRecruitmentNeed[];
-    if (Array.isArray(raw.ALLIED_HEALTH_SUPPLY)) base.ALLIED_HEALTH_SUPPLY = raw.ALLIED_HEALTH_SUPPLY as AlliedHealthSupply[];
-  }
-  return base;
-}
-
-function loadExistingWorkforce(): WorkforceJson {
-  try {
-    const text = fs.readFileSync(WORKFORCE_FILE, 'utf8');
-    return coerceWorkforceJson(JSON.parse(text));
-  } catch {
-    return {
-      PHYSICIAN_SPECIALTY_ZONE: [],
-      NURSING_SUPPLY_TRENDS: [],
-      WORKFORCE_AGE_PROFILE: [],
-      JOB_VACANCY_TRENDS: [],
-      SPECIALIST_RECRUITMENT_NEEDS: [],
-      ALLIED_HEALTH_SUPPLY: [],
-    };
-  }
-}
 
 // Extract the headline fully-registered physician total from the CPSA page.
 // The page renders the count in a highlighted list item, e.g.:
@@ -302,14 +249,35 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // Merge-and-preserve: load the existing workforce JSON, replace only the
-    // PHYSICIAN_SPECIALTY_ZONE key, and keep every other dataset intact so
-    // sibling pipelines (StatsCan JOB_VACANCY_TRENDS, etc.) are not clobbered.
-    const existing = loadExistingWorkforce();
-    const merged: WorkforceJson = {
-      ...existing,
+    // Merge-and-preserve: load the existing workforce JSON as a raw record so
+    // every key survives — not just the six base arrays in WorkforceJson, but
+    // also the CIHI arrays and _dataMetadata owned by sibling pipelines. Only
+    // PHYSICIAN_SPECIALTY_ZONE is replaced; everything else passes through.
+    let existingRaw: Record<string, unknown> = {};
+    try {
+      const text = fs.readFileSync(WORKFORCE_FILE, 'utf8');
+      const parsed = JSON.parse(text) as unknown;
+      if (isRecord(parsed)) existingRaw = parsed as Record<string, unknown>;
+    } catch {
+      // First run / missing file — start from an empty record.
+    }
+    const merged: Record<string, unknown> = {
+      ...existingRaw,
       PHYSICIAN_SPECIALTY_ZONE: outcome.physicianSpecialtyZone,
     };
+
+    // Refresh _dataMetadata for PHYSICIAN_SPECIALTY_ZONE; preserve all other
+    // entries (sibling writers' and hand-authored arrays) via mergeDataMetadata.
+    const existingMeta = existingRaw._dataMetadata as DataMetadata | undefined;
+    const ownedMetadata: DataMetadata = {
+      PHYSICIAN_SPECIALTY_ZONE: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CPSA quarterly statistics',
+        sourceVintage: 'Latest CPSA quarterly release',
+        lastUpdated: timestamp,
+      }),
+    };
+    merged._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
 
     fs.writeFileSync(
       WORKFORCE_FILE,

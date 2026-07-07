@@ -389,7 +389,7 @@ export default function RegionalInequityDashboard() {
         title="Health Inequity & Community Need"
         description="Analyze geographic disparities, chronic disease burden, and care travel patterns."
         metadata={metadata ?? undefined}
-        arrayKey="PROVINCIAL_BENCHMARKS"
+        arrayKey="COMMUNITY_NEED_PROFILES"
       />
 
       {/* Primary Sub-Tab Navigation */}

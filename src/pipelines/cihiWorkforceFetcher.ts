@@ -15,6 +15,7 @@ import fs from 'fs';
 import path from 'path';
 import * as XLSX from 'xlsx';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 
 const OUTPUT_FILE = path.join(process.cwd(), 'data-workforce.json');
 
@@ -577,8 +578,72 @@ export async function run(): Promise<SyncResult> {
     // Profile-sheet allied supply (matches hand-authored ALLIED_HEALTH_SUPPLY shape)
     if (parsed.alliedHealthSupply.length > 0) merged.ALLIED_HEALTH_SUPPLY_CIHI = parsed.alliedHealthSupply;
     if (parsed.nursingSupplyTrends.length > 0) merged.NURSING_SUPPLY_TRENDS_CIHI = parsed.nursingSupplyTrends;
-    if (parsed.workforceAgeProfile.length > 0) merged.WORKFORCE_AGE_PROFILE_CIHI = parsed.workforceAgeProfile;
     if (parsed.jobVacancyTrends.length > 0) merged.JOB_VACANCY_TRENDS_CIHI = parsed.jobVacancyTrends;
+
+    // Refresh _dataMetadata for the CIHI arrays this writer owns. Only arrays
+    // actually refreshed this run are stamped; every other entry (sibling
+    // writers' and hand-authored arrays) is preserved via mergeDataMetadata.
+    const existingMeta = existing._dataMetadata as DataMetadata | undefined;
+    const ownedMetadata: DataMetadata = {};
+    if (parsed.physicians.length > 0) {
+      ownedMetadata.PHYSICIAN_SUPPLY_CIHI = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Health Workforce Quick Stats 2024',
+        sourceVintage: '2015–2024',
+        lastUpdated: timestamp,
+      });
+    }
+    if (parsed.nurses.length > 0) {
+      ownedMetadata.NURSE_SUPPLY_CIHI = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Health Workforce Quick Stats 2024',
+        sourceVintage: '2015–2024',
+        lastUpdated: timestamp,
+      });
+    }
+    if (parsed.allied.length > 0) {
+      ownedMetadata.ALLIED_HEALTH_FLOW_CIHI = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Health Workforce Quick Stats 2024',
+        sourceVintage: '2015–2024',
+        lastUpdated: timestamp,
+      });
+    }
+    if (parsed.alliedHealthSupply.length > 0) {
+      ownedMetadata.ALLIED_HEALTH_SUPPLY_CIHI = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Health Workforce Quick Stats 2024',
+        sourceVintage: 'Latest CIHI profile-sheet year',
+        lastUpdated: timestamp,
+      });
+    }
+    if (parsed.nursingSupplyTrends.length > 0) {
+      ownedMetadata.NURSING_SUPPLY_TRENDS_CIHI = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Health Workforce Quick Stats 2024',
+        sourceVintage: '2015–2024',
+        lastUpdated: timestamp,
+      });
+    }
+    if (parsed.workforceAgeProfile.length > 0) {
+      ownedMetadata.WORKFORCE_AGE_PROFILE_CIHI = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Health Workforce Quick Stats 2024',
+        sourceVintage: '2023–2024',
+        lastUpdated: timestamp,
+      });
+    }
+    if (parsed.jobVacancyTrends.length > 0) {
+      ownedMetadata.JOB_VACANCY_TRENDS_CIHI = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Health Workforce Quick Stats 2024',
+        sourceVintage: '2015-Q4 to 2024-Q4',
+        lastUpdated: timestamp,
+      });
+    }
+    if (Object.keys(ownedMetadata).length > 0) {
+      merged._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
+    }
 
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
 

@@ -22,6 +22,7 @@
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 import type { SyncResult } from './types';
 import type {
   WastewaterSignal,
@@ -111,6 +112,7 @@ interface PublicHealthDataFile {
   NOTIFIABLE_DISEASE_INCIDENCE: NotifiableDiseaseIncidence[];
   ENVIRONMENTAL_ADVISORIES: EnvironmentalAdvisory[];
   OUTBREAK_PROTOCOLS: Record<string, OutbreakGuidelines>;
+  _dataMetadata?: DataMetadata;
 }
 
 function loadExistingData(): PublicHealthDataFile | null {
@@ -141,6 +143,9 @@ function loadExistingData(): PublicHealthDataFile | null {
       OUTBREAK_PROTOCOLS: isRecord(parsed['OUTBREAK_PROTOCOLS'])
         ? (parsed['OUTBREAK_PROTOCOLS'] as Record<string, OutbreakGuidelines>)
         : {},
+      _dataMetadata: isRecord(parsed['_dataMetadata'])
+        ? (parsed['_dataMetadata'] as DataMetadata)
+        : undefined,
     };
   } catch {
     return null;
@@ -406,6 +411,17 @@ export async function run(): Promise<SyncResult> {
       console.log(`[PhacFetcher] Updated ${nonEdmontonUpdates.length} non-Edmonton wastewater sites.`);
     }
 
+    // Stamp WASTEWATER_SIGNALS freshness; preserve other _dataMetadata entries
+    // (manual arrays are owned by hand-authored baselines, not this pipeline).
+    const ownedMetadata: DataMetadata = {
+      WASTEWATER_SIGNALS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'PHAC Health Infobase wastewater API + Alberta RVD',
+        sourceVintage: 'Live weekly wastewater signals',
+        lastUpdated: timestamp,
+      }),
+    };
+
     const output: PublicHealthDataFile = {
       RESPIRATORY_VIRUS_SURVEILLANCE: existing.RESPIRATORY_VIRUS_SURVEILLANCE,
       WASTEWATER_SIGNALS: mergedSignals,
@@ -413,6 +429,7 @@ export async function run(): Promise<SyncResult> {
       NOTIFIABLE_DISEASE_INCIDENCE: existing.NOTIFIABLE_DISEASE_INCIDENCE,
       ENVIRONMENTAL_ADVISORIES: existing.ENVIRONMENTAL_ADVISORIES,
       OUTBREAK_PROTOCOLS: existing.OUTBREAK_PROTOCOLS,
+      _dataMetadata: mergeDataMetadata(existing._dataMetadata, ownedMetadata),
     };
 
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf-8');

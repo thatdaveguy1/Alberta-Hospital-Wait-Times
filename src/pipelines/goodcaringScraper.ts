@@ -21,6 +21,11 @@ import * as cheerio from 'cheerio';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type {
   SettingExperience,
   InpatientDetail,
@@ -52,6 +57,7 @@ interface PatientExperienceJson {
   ED_EXPERIENCE_TRENDS: EDExperienceTrend[];
   CLINICAL_SAFETY_TRENDS: HospitalHarmMetric[];
   PATIENT_COMPLAINTS: ComplaintCategory[];
+  _dataMetadata?: DataMetadata;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -72,6 +78,7 @@ function coercePatientExperienceJson(raw: unknown): PatientExperienceJson {
     if (Array.isArray(raw.ED_EXPERIENCE_TRENDS)) base.ED_EXPERIENCE_TRENDS = raw.ED_EXPERIENCE_TRENDS as EDExperienceTrend[];
     if (Array.isArray(raw.CLINICAL_SAFETY_TRENDS)) base.CLINICAL_SAFETY_TRENDS = raw.CLINICAL_SAFETY_TRENDS as HospitalHarmMetric[];
     if (Array.isArray(raw.PATIENT_COMPLAINTS)) base.PATIENT_COMPLAINTS = raw.PATIENT_COMPLAINTS as ComplaintCategory[];
+    if (isRecord(raw._dataMetadata)) base._dataMetadata = raw._dataMetadata as DataMetadata;
   }
   return base;
 }
@@ -230,9 +237,19 @@ export async function run(): Promise<SyncResult> {
     );
     const mergedVoiceRows = [...preservedVoiceRows, ...scrapedRows];
 
+    const ownedMetadata: DataMetadata = {
+      PATIENT_VOICE_BY_SETTING: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'GoodCaring.ca Alberta specialist wait times',
+        sourceVintage: 'Live GoodCaring scrape',
+        lastUpdated: timestamp,
+      }),
+    };
+
     const merged: PatientExperienceJson = {
       ...existing,
       PATIENT_VOICE_BY_SETTING: mergedVoiceRows,
+      _dataMetadata: mergeDataMetadata(existing._dataMetadata, ownedMetadata),
     };
 
     fs.writeFileSync(

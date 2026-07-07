@@ -15,6 +15,11 @@ import type { AnyNode } from 'domhandler';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type {
   PlacementMetric,
   ResidentOutcomeQuality,
@@ -117,6 +122,7 @@ interface ContinuingCareJson {
   RESIDENT_QUALITY_OUTCOMES: ResidentOutcomeQuality[];
   HOME_CARE_EXPERIENCE: HomeCareContinuity[];
   CONTINUING_CARE_COMPLIANCE: CareFacilityCompliance[];
+  _dataMetadata?: DataMetadata;
 }
 
 // ---- Mental health JSON shape ---------------------------------------------
@@ -127,6 +133,7 @@ interface MentalHealthJson {
   COMMUNITY_MH_WAITS: CommunityMHWait[];
   HOSPITAL_MHSU_BURDEN: HospitalMHSUBurden[];
   SUPPORT_HELPLINES: SupportHelpline[];
+  _dataMetadata?: DataMetadata;
 }
 
 // ---- Loaders (preserve existing hand-authored data) -----------------------
@@ -148,6 +155,7 @@ function loadContinuingCare(): ContinuingCareJson {
       RESIDENT_QUALITY_OUTCOMES: existing.RESIDENT_QUALITY_OUTCOMES ?? [],
       HOME_CARE_EXPERIENCE: existing.HOME_CARE_EXPERIENCE ?? [],
       CONTINUING_CARE_COMPLIANCE: existing.CONTINUING_CARE_COMPLIANCE ?? [],
+      _dataMetadata: existing._dataMetadata,
     };
   }
   return {
@@ -167,6 +175,7 @@ function loadMentalHealth(): MentalHealthJson {
       COMMUNITY_MH_WAITS: existing.COMMUNITY_MH_WAITS ?? [],
       HOSPITAL_MHSU_BURDEN: existing.HOSPITAL_MHSU_BURDEN ?? [],
       SUPPORT_HELPLINES: existing.SUPPORT_HELPLINES ?? [],
+      _dataMetadata: existing._dataMetadata,
     };
   }
   return {
@@ -673,9 +682,20 @@ export async function run(): Promise<SyncResult> {
   // --- Write files ---
   if (continuingCareUpdated) {
     try {
+      // AHS ASI refreshes only the CONTINUING_CARE_COMPLIANCE array. Preserve
+      // existing metadata (HQCA-owned arrays, hand-authored HOME_CARE_EXPERIENCE)
+      // via mergeDataMetadata and stamp only the array this scraper owns.
+      const ccMetadata = mergeDataMetadata(ccData._dataMetadata, {
+        CONTINUING_CARE_COMPLIANCE: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'AHS Continuing Care registry',
+          sourceVintage: 'Live AHS facility registry',
+          lastUpdated: timestamp,
+        }),
+      });
       fs.writeFileSync(
         CONTINUING_CARE_FILE,
-        JSON.stringify(ccData, null, 2),
+        JSON.stringify({ ...ccData, _dataMetadata: ccMetadata }, null, 2),
         'utf8',
       );
       recordsWritten +=
@@ -693,9 +713,27 @@ export async function run(): Promise<SyncResult> {
 
   if (mentalHealthUpdated) {
     try {
+      // AHS ASI refreshes ADDICTION_BED_CAPACITIES and SUPPORT_HELPLINES.
+      // Preserve existing metadata (Alberta Substance Use Surveillance,
+      // hand-authored COMMUNITY_MH_WAITS / HOSPITAL_MHSU_BURDEN, CIHI) via
+      // mergeDataMetadata and stamp only the arrays this scraper owns.
+      const mhMetadata = mergeDataMetadata(mhData._dataMetadata, {
+        ADDICTION_BED_CAPACITIES: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'AHS Addiction & Mental Health bed availability',
+          sourceVintage: 'Live AHS bed-availability page',
+          lastUpdated: timestamp,
+        }),
+        SUPPORT_HELPLINES: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'AHS Mental Health helplines + 211 Alberta directory',
+          sourceVintage: 'Live helpline directories',
+          lastUpdated: timestamp,
+        }),
+      });
       fs.writeFileSync(
         MENTAL_HEALTH_FILE,
-        JSON.stringify(mhData, null, 2),
+        JSON.stringify({ ...mhData, _dataMetadata: mhMetadata }, null, 2),
         'utf8',
       );
       recordsWritten +=

@@ -21,6 +21,11 @@ import * as cheerio from 'cheerio';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type {
   CancerCentreLocation,
   CancerBurdenItem,
@@ -125,8 +130,11 @@ interface CancerJson {
   CANCER_SURGERY_WAIT_TRENDS: CancerSurgeryWaitTrend[];
   RADIATION_THERAPY_WAIT_TRENDS: RadiationTherapyCompliance[];
   ALBERTA_CANCER_CENTRES: CancerCentreLocation[];
+  // Preserved unknown keys (e.g. CIHI_CANCER_WAIT_TIMES, _dataMetadata) so
+  // the read-modify-write cycle does not clobber sibling writers' data.
+  [key: string]: unknown;
+  _dataMetadata?: DataMetadata;
 }
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -140,6 +148,11 @@ function coerceCancerJson(raw: unknown): CancerJson {
     ALBERTA_CANCER_CENTRES: [],
   };
   if (isRecord(raw)) {
+    // Preserve every unknown key (e.g. CIHI_CANCER_WAIT_TIMES, _dataMetadata)
+    // so sibling writers' data survives this read-modify-write cycle.
+    for (const [key, value] of Object.entries(raw)) {
+      if (!(key in base)) base[key] = value;
+    }
     if (Array.isArray(raw.CANCER_BURDEN_STATS))
       base.CANCER_BURDEN_STATS = raw.CANCER_BURDEN_STATS as CancerBurdenItem[];
     if (Array.isArray(raw.CANCER_SCREENING_RATES))
@@ -319,6 +332,18 @@ export async function run(): Promise<SyncResult> {
       ALBERTA_CANCER_CENTRES: mergedCentres,
     };
 
+    // Stamp freshness for the array this scraper owns; preserve all other
+    // _dataMetadata entries (manual arrays + sibling CIHI writers) via merge.
+    const ownedMetadata: DataMetadata = {
+      ALBERTA_CANCER_CENTRES: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'AHS Cancer Centre directory',
+        sourceVintage: 'Live AHS directory',
+        lastUpdated: timestamp,
+      }),
+    };
+    merged._dataMetadata = mergeDataMetadata(existing._dataMetadata, ownedMetadata);
+
     fs.writeFileSync(CANCER_FILE, JSON.stringify(merged, null, 2), 'utf8');
 
     const durationMs = Date.now() - startTime;
@@ -352,8 +377,6 @@ export async function run(): Promise<SyncResult> {
     };
   }
 }
-
-// Backward-compatible named export matching the pipeline table convention.
 export async function scrapeAhsCancerCentres(): Promise<SyncResult> {
   return run();
 }

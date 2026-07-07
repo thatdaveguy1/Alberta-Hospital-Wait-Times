@@ -382,5 +382,31 @@
       "differentStaffCountAverage": 10.1
     }
   ],
-  "CONTINUING_CARE_COMPLIANCE": []
+  "CONTINUING_CARE_COMPLIANCE": [],
+  "_dataMetadata": {
+    "CONTINUING_CARE_PLACEMENT_STATS": {
+      "source": "HQCA FOCUS continuing-care CSVs",
+      "sourceVintage": "2021–latest HQCA reporting period",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-05T15:55:14Z"
+    },
+    "RESIDENT_QUALITY_OUTCOMES": {
+      "source": "HQCA FOCUS continuing-care CSVs + CIHI LTCC indicators",
+      "sourceVintage": "2021–latest HQCA/CIHI reporting period",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-05T15:55:14Z"
+    },
+    "HOME_CARE_EXPERIENCE": {
+      "source": "HQCA home-care experience zone ratings",
+      "sourceVintage": "Hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "CONTINUING_CARE_COMPLIANCE": {
+      "source": "AHS Continuing Care registry",
+      "sourceVintage": "Live AHS facility registry",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-05T15:55:14Z"
+    }
+  }
 }

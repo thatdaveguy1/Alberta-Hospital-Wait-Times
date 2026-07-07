@@ -20,6 +20,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 import type { WastewaterSignal } from '../publicHealthData';
 
 const OUTPUT_FILE = path.join(process.cwd(), 'data-public-health.json');
@@ -278,6 +279,16 @@ function parseImmunizationTraces(traces: unknown[]): ImmunizationEntry[] {
   }
   return entries;
 }
+// Build a "YYYY-MM-DD to YYYY-MM-DD" vintage label from the week-ending dates
+// present in a scraped array. Falls back to a descriptive label when empty.
+function deriveDateRange(weekEndings: string[]): string {
+  const dates = weekEndings.filter((d) => typeof d === 'string' && d.length > 0).sort();
+  if (dates.length === 0) return 'Alberta RVD dashboard (latest weekly data)';
+  const first = dates[0];
+  const last = dates[dates.length - 1];
+  return first === last ? first : `${first} to ${last}`;
+}
+
 
 export async function run(): Promise<SyncResult> {
   const startTime = Date.now();
@@ -362,6 +373,40 @@ export async function run(): Promise<SyncResult> {
     if (immEntries.length > 0) {
       output.RVD_IMMUNIZATION_DOSES = immEntries;
     }
+
+    // Stamp _dataMetadata for the arrays this scraper refreshes; preserve
+    // hand-authored entries (RESPIRATORY_VIRUS_SURVEILLANCE, immunization
+    // coverage, notifiable disease, advisories, outbreak protocols) via merge.
+    const ownedMetadata: DataMetadata = {};
+    if (parsed.length > 0) {
+      ownedMetadata.WASTEWATER_SIGNALS = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'PHAC Health Infobase wastewater API + Alberta RVD',
+        sourceVintage: 'Live weekly wastewater signals',
+        lastUpdated: timestamp,
+      });
+    }
+    if (summaryEntries.length > 0) {
+      ownedMetadata.RVD_RESPIRATORY_CASE_COUNTS = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Alberta Respiratory Virus Dashboard summary',
+        sourceVintage: deriveDateRange(summaryEntries.map((e) => e.weekEnding)),
+        lastUpdated: timestamp,
+      });
+    }
+    if (immEntries.length > 0) {
+      ownedMetadata.RVD_IMMUNIZATION_DOSES = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Alberta Respiratory Virus Dashboard immunizations',
+        sourceVintage: deriveDateRange(immEntries.map((e) => e.weekEnding)),
+        lastUpdated: timestamp,
+      });
+    }
+    const existingMeta = isRecord(existing._dataMetadata)
+      ? (existing._dataMetadata as DataMetadata)
+      : undefined;
+    output._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
+
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf8');
 
     const totalFetched = parsed.length + summaryEntries.length + immEntries.length;
