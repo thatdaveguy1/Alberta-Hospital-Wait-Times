@@ -247,18 +247,33 @@ export function MapComponent({
           .addTo(map);
       }
 
-      // Automatically center map on user location with a focused zoom level
-      map.setView([userLocation.lat, userLocation.lng], 8, {
-        animate: true,
-        duration: 1
-      });
+      // Automatically center map on user location and nearby hospitals
+      const hospitalCoords = hospitals
+        .filter((h): h is typeof h & { latitude: number; longitude: number } =>
+          h.distance !== undefined && h.distance <= 100 &&
+          h.latitude !== null && h.longitude !== null &&
+          !isNaN(h.latitude) && !isNaN(h.longitude)
+        )
+        .map(h => [h.latitude, h.longitude] as [number, number]);
+
+      map.invalidateSize();
+      if (hospitalCoords.length > 0) {
+        const bounds = L.latLngBounds(hospitalCoords);
+        bounds.extend([userLocation.lat, userLocation.lng]);
+        map.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 1 });
+      } else {
+        map.setView([userLocation.lat, userLocation.lng], 11, {
+          animate: true,
+          duration: 1
+        });
+      }
     } else {
       if (userMarkerRef.current) {
         userMarkerRef.current.remove();
         userMarkerRef.current = null;
       }
     }
-  }, [userLocation]);
+  }, [userLocation, hospitals]);
 
   // Handle container resizing to make sure map fills container perfectly
   useEffect(() => {
