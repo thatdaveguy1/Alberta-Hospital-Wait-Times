@@ -487,7 +487,7 @@ export const LGA_COMMUNITY_NEEDS: LGACommunityNeed[] = [
   },
   // Edmonton Zone LGAs
   {
-    lgaName: 'Edmonton Woodcroft East',
+    lgaName: 'Edmonton Woodcroft East (North Central)',
     zone: 'Edmonton Zone',
     population: 68000,
     familyPhysiciansPer100k: 125.6,

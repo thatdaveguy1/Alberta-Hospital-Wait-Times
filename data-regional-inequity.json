@@ -837,7 +837,7 @@
       "highSchoolGradPct": 0
     },
     {
-      "lgaName": "Edmonton - Woodcroft East",
+      "lgaName": "Edmonton - Woodcroft East (North Central)",
       "zone": "Edmonton Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 215,
@@ -848,7 +848,7 @@
       "highSchoolGradPct": 0
     },
     {
-      "lgaName": "Edmonton - Woodcroft West",
+      "lgaName": "Edmonton - Woodcroft West (North Central)",
       "zone": "Edmonton Zone",
       "type": "Urban Hub",
       "physiciansPer100k": 102,
@@ -2096,7 +2096,7 @@
       "lifeExpectancyYears": 81.41
     },
     {
-      "lgaName": "Edmonton - Woodcroft East",
+      "lgaName": "Edmonton - Woodcroft East (North Central)",
       "diabetesPrevalencePct": 0,
       "copdPrevalencePct": 0,
       "hypertensionPrevalencePct": 0,
@@ -2104,7 +2104,7 @@
       "lifeExpectancyYears": 79.39
     },
     {
-      "lgaName": "Edmonton - Woodcroft West",
+      "lgaName": "Edmonton - Woodcroft West (North Central)",
       "diabetesPrevalencePct": 0,
       "copdPrevalencePct": 0,
       "hypertensionPrevalencePct": 0,
@@ -3102,14 +3102,14 @@
       "moodAnxietyEdRatePer100k": 1130.17
     },
     {
-      "lgaName": "Edmonton - Woodcroft East",
+      "lgaName": "Edmonton - Woodcroft East (North Central)",
       "totalEdVisitsPer1000": 0,
       "lowAcuityCtas45Pct": 0,
       "afterHoursEdPct": 0,
       "moodAnxietyEdRatePer100k": 1111.38
     },
     {
-      "lgaName": "Edmonton - Woodcroft West",
+      "lgaName": "Edmonton - Woodcroft West (North Central)",
       "totalEdVisitsPer1000": 0,
       "lowAcuityCtas45Pct": 0,
       "afterHoursEdPct": 0,

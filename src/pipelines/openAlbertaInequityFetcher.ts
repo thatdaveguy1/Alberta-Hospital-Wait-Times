@@ -230,6 +230,10 @@ function pivotSheet(rows: unknown[][]): Map<string, PivotedLga> {
     if (!name || !indicator || value === undefined) continue;
     if (name === "Edmonton - Woodcroft") {
       name = "Edmonton - Woodcroft (North Central)";
+    } else if (name === "Edmonton - Woodcroft East") {
+      name = "Edmonton - Woodcroft East (North Central)";
+    } else if (name === "Edmonton - Woodcroft West") {
+      name = "Edmonton - Woodcroft West (North Central)";
     }
     let entry = byLga.get(name);
     if (!entry) {
