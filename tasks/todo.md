@@ -345,3 +345,13 @@
   - Each key holds ~4,320 entries (~200KB), well under 25MB KV value limit
   - 182 total writes per cycle (29 hospitals + 153 labs), not 459
   - Worker reads raw key and filters by range on read
+
+## Phase 23: System Flow Auto-Update & Daily Sync Reliability
+- [ ] Convert SystemFlowDashboard to fetch from /api/data/system-flow
+- [ ] Add _dataMetadata to data-system-flow.json writers (preserve others' keys)
+- [ ] Fix sync status rollup so 'manual' ≠ 'failed'
+- [ ] Create standalone daily-sync script (npm run daily-sync)
+- [ ] Create calendar-scheduled launchd plist for daily-sync at 06:00 MT
+- [ ] Remove daily orchestrator from server setInterval (keep ER 10min + lab 30min)
+- [ ] Update App.tsx system-flow cadence labels
+- [ ] Verify end-to-end: typecheck, pipeline run, dashboard badge, launchd load
