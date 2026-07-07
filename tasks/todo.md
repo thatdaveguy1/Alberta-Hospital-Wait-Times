@@ -315,3 +315,19 @@
 - [x] Corrected cadence labels in App.tsx: "Lab waits: every 30 min · Imaging/turnaround: annual/manual"
 - [x] `npx tsc --noEmit` passes with exit 0
 - [x] Browser verified: 153 sites render, APL QMe REST API source label, auto-updated timestamp, zero console errors
+
+## Phase 24: Diagnostic Lab Wait Trend Charting (2026-07-07)
+- [x] Added `LabWaitSnapshot` interface + in-memory `currentLabSnapshots` array to `aplLabWaitTimesFetcher.ts`
+- [x] Added `loadLabSnapshotsFromDisk()` + `getLabSnapshots()` export (mirrors ER fetcher pattern)
+- [x] Append numeric-only snapshots on each 30-min fetch (skips 'Appointments Only' / 'Closed' sentinels)
+- [x] 90-day retention cap (153 labs × 48/day × 365d would be 2.7M entries / ~400MB — too large)
+- [x] Persist to `data-lab-snapshots.json` on each fetch
+- [x] Fixed pre-existing `parseWaitTime` bug: `totalMins` was never accumulated from hr/min matches
+- [x] Exported `getLabSnapshotsData()` from `scheduler.ts`
+- [x] Added `GET /api/trends/labs` (provincial avg over time) and `GET /api/trends/labs/:labId` (per-lab) endpoints
+- [x] Added provincial lab wait trend chart card with 24h/7d/30d range selector on Laboratory Waits subtab
+- [x] Added per-lab trend panel (AnimatePresence) on lab card click with same range selector
+- [x] Empty state messages for when no snapshot data exists yet
+- [x] `npx tsc --noEmit` passes, `npm run build` succeeds
+- [x] Browser verified: trend card renders, empty state shows, zero console errors
+- [ ] Cloudflare worker `trends-labs-*` KV keys (follow-up for deployed parity)

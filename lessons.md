@@ -556,3 +556,20 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** The scheduler uses `await import('./pushClient')` and `await import('./syncStatus')` inside pipeline functions. This looks like a violation of the "no dynamic imports" rule, but the dynamic imports are intentional: they lazy-load the push client only when a push actually happens, avoiding circular dependency issues at module load time.
 - **Solution:** Matched the existing dynamic import pattern when adding `runLabWaitsPipeline()`. Did not refactor the existing `runErWaitTimesPipeline` or `runDailySync` to static imports.
 - **Prevention:** When adding new code to an existing module, match the established pattern even if it looks suboptimal. The pattern may exist for a reason (circular deps, lazy loading, conditional initialization). Refactoring existing code is scope creep — do it in a dedicated cleanup sprint, not while adding a feature.
+
+## Session: 2026-07-07 (Lab Wait Trend Logging — Snapshot Layer & Charting)
+
+### Lesson: parseWaitTime had a pre-existing accumulation bug — totalMins was never summed
+- **Mistake:** `parseWaitTime()` in `aplLabWaitTimesFetcher.ts` matched `hrMatch` and `minMatch` but returned `totalMins` (always 0) without first adding `parseInt(hrMatch[1]) * 60` and `parseInt(minMatch[1])`. Every numeric lab wait would have been logged as 0 minutes in snapshots.
+- **Solution:** Added the two `totalMins +=` lines before the `if (hrMatch || minMatch) return totalMins` guard.
+- **Prevention:** When adding logging that depends on an existing parser, unit-test the parser with real inputs ("1 hr 30 min", "45 min") before relying on its output. A parser that returns the right type but wrong value is worse than one that throws.
+
+### Lesson: Snapshot retention must scale with site count, not copy the ER fetcher blindly
+- **Mistake:** Mirrored the ER fetcher's 365-day retention for lab snapshots. But 153 labs × 48 fetches/day × 365 days ≈ 2.7M entries (~400MB) loaded into memory and rewritten every 30 min — the ER fetcher has far fewer sites so 365 days is fine there.
+- **Solution:** Capped lab retention to 90 days (~660K entries, ~100MB), preserving seasonal trend visibility without unbounded growth.
+- **Prevention:** When copying a pattern from one pipeline to another, scale the retention/cadence parameters by the new data volume. Don't assume the same numbers work for a 10× larger site count.
+
+### Lesson: APL API returns "Closed" for all 153 sites overnight — empty snapshots are expected, not a bug
+- **Mistake:** After running the fetcher at 3 AM, `data-lab-snapshots.json` was `[]` and it looked like the logging layer was broken. In fact the APL API genuinely returns `WaitTime: "Closed"` for every site overnight — the sentinel is correctly skipped by the `typeof waitTimeMin === 'number'` guard.
+- **Solution:** Verified the raw API response (all 153 `Closed`), then unit-tested the snapshot append logic with synthetic numeric/sentinel inputs to confirm 4/6 numeric waits were logged and 2 sentinels skipped.
+- **Prevention:** When a data pipeline produces empty output, check the source API's actual response first — it may be a time-of-day artifact, not a code bug. Keep a synthetic test handy to prove the logging path works independently of source data availability.

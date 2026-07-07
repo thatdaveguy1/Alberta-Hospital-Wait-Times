@@ -9,8 +9,8 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 104,
-      "timestamp": "2026-07-07T02:20:08.547Z"
+      "durationMs": 85,
+      "timestamp": "2026-07-07T03:16:04.914Z"
     },
     {
       "domain": "diagnostic",
@@ -18,8 +18,8 @@
       "status": "success",
       "recordsFetched": 153,
       "recordsWritten": 153,
-      "durationMs": 318,
-      "timestamp": "2026-07-07T02:20:09.109Z"
+      "durationMs": 139,
+      "timestamp": "2026-07-07T03:16:05.428Z"
     },
     {
       "domain": "disruptions",
@@ -310,8 +310,8 @@
       "timestamp": "2026-07-07T02:27:28.281Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-07T02:20:08.547Z",
-  "erWaitTimesNextUpdate": "2026-07-07T02:30:08.651Z",
-  "labWaitsLastUpdate": "2026-07-07T02:20:09.109Z",
-  "labWaitsNextUpdate": "2026-07-07T02:50:09.428Z"
+  "erWaitTimesLastUpdate": "2026-07-07T03:16:04.914Z",
+  "erWaitTimesNextUpdate": "2026-07-07T03:26:05.000Z",
+  "labWaitsLastUpdate": "2026-07-07T03:16:05.428Z",
+  "labWaitsNextUpdate": "2026-07-07T03:46:05.567Z"
 }

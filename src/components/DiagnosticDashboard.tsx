@@ -62,6 +62,11 @@ export default function DiagnosticDashboard() {
   const [selectedLabId, setSelectedLabId] = useState<string | null>(null);
   // Interactive KPI selected state for historical trend panel
   const [selectedKpi, setSelectedKpi] = useState<'CT Scan' | 'MRI Scan' | null>(null);
+  // Lab wait trends — provincial average and per-lab historical snapshots
+  const [labTrends, setLabTrends] = useState<{ timestamp: string; waitTime: number }[]>([]);
+  const [selectedLabTrends, setSelectedLabTrends] = useState<{ labId: string; waitTime: number; timestamp: string }[]>([]);
+  const [loadingLabTrends, setLoadingLabTrends] = useState(false);
+  const [labTrendRange, setLabTrendRange] = useState<'24h' | '7d' | '30d'>('24h');
 
   // Diagnostic data loaded at runtime from /api/data/diagnostic so that
  // 30-min refreshed data-diagnostic.json reaches the browser without a rebuild.
@@ -95,6 +100,29 @@ export default function DiagnosticDashboard() {
       .then(data => { setDiagnosticData(data); setRefreshing(false); })
       .catch(() => setRefreshing(false));
   };
+  // Fetch provincial lab wait trend (averaged across all labs per timestamp)
+  const fetchLabTrends = (range: '24h' | '7d' | '30d' = labTrendRange) => {
+    setLoadingLabTrends(true);
+    fetch(`/api/trends/labs?range=${range}`)
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data)) setLabTrends(data); else setLabTrends([]); })
+      .catch(() => setLabTrends([]))
+      .finally(() => setLoadingLabTrends(false));
+  };
+
+  // Fetch per-lab historical trend when a lab card is selected
+  useEffect(() => {
+    if (!selectedLabId) { setSelectedLabTrends([]); return; }
+    fetch(`/api/trends/labs/${encodeURIComponent(selectedLabId)}?range=${labTrendRange}`)
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data)) setSelectedLabTrends(data); else setSelectedLabTrends([]); })
+      .catch(() => setSelectedLabTrends([]));
+  }, [selectedLabId, labTrendRange]);
+
+  // Fetch provincial lab trend when labs subtab is active
+  useEffect(() => {
+    if (activeSubTab === 'labs') fetchLabTrends(labTrendRange);
+  }, [activeSubTab, labTrendRange]);
 
   const formatMinutesToHm = (minutes: number): string => {
     if (!minutes || isNaN(minutes)) return '0m';
@@ -455,6 +483,91 @@ export default function DiagnosticDashboard() {
               </div>
             </div>
           </div>
+          {/* Provincial Lab Wait Trend Chart */}
+          <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-cyan-400" />
+                  Provincial Lab Wait Time Trend
+                </h3>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  Average wait time across all monitored APL community labs, sampled every 30 minutes.
+                </p>
+              </div>
+              <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+                {(['24h', '7d', '30d'] as const).map(r => (
+                  <button
+                    key={r}
+                    onClick={() => setLabTrendRange(r)}
+                    className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
+                      labTrendRange === r ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {loadingLabTrends ? (
+              <div className="h-64 flex items-center justify-center text-slate-500 text-xs">
+                <Activity className="w-4 h-4 animate-pulse mr-2" /> Loading lab wait trends...
+              </div>
+            ) : labTrends.length > 0 ? (
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={labTrends} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorLabTrend" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <XAxis
+                      dataKey="timestamp"
+                      stroke="#64748b"
+                      style={{ fontSize: 10, fontFamily: 'monospace' }}
+                      tickFormatter={(ts: string) => {
+                        const d = new Date(ts);
+                        return labTrendRange === '24h'
+                          ? d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                          : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                      }}
+                    />
+                    <YAxis
+                      stroke="#64748b"
+                      style={{ fontSize: 10, fontFamily: 'monospace' }}
+                      label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }}
+                    />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
+                      labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                      itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
+                      labelFormatter={(ts: string) => new Date(ts).toLocaleString('en-US')}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="waitTime"
+                      name="Avg Lab Wait (min)"
+                      stroke="#06b6d4"
+                      strokeWidth={2.5}
+                      fillOpacity={1}
+                      fill="url(#colorLabTrend)"
+                      dot={false}
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-64 flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
+                <Clock className="w-6 h-6 text-slate-600" />
+                <p>No trend data yet. Lab wait snapshots are collected every 30 minutes — check back shortly.</p>
+              </div>
+            )}
+          </div>
 
           {/* Lab location filters & search */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
@@ -636,6 +749,93 @@ export default function DiagnosticDashboard() {
               </div>
             )}
           </div>
+          {/* Per-lab historical trend panel — shown when a lab card is selected */}
+          <AnimatePresence mode="wait">
+            {selectedLabId && (
+              <motion.div
+                key={`lab-trend-${selectedLabId}`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="p-6 rounded-2xl bg-[#090e21] border border-slate-800 space-y-6 shadow-xl relative">
+                  <button
+                    onClick={() => setSelectedLabId(null)}
+                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    title="Close panel"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  <div className="space-y-1 pr-8">
+                    <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                      <TrendingUp className="w-4 h-4 text-cyan-400" />
+                      <span>{filteredLabs.find(l => l.id === selectedLabId)?.name ?? selectedLabId} — Wait Time Trend</span>
+                    </h3>
+                    <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                      Historical wait time for this lab site, sampled every 30 minutes from live APL QMe API data. Only numeric wait times are charted; 'Appointments Only' and 'Closed' states are excluded.
+                    </p>
+                  </div>
+
+                  {selectedLabTrends.length > 0 ? (
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={selectedLabTrends} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorLabSiteTrend" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                          <XAxis
+                            dataKey="timestamp"
+                            stroke="#64748b"
+                            style={{ fontSize: 10, fontFamily: 'monospace' }}
+                            tickFormatter={(ts: string) => {
+                              const d = new Date(ts);
+                              return labTrendRange === '24h'
+                                ? d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                                : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            }}
+                          />
+                          <YAxis
+                            stroke="#64748b"
+                            style={{ fontSize: 10, fontFamily: 'monospace' }}
+                            label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }}
+                          />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
+                            labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                            itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
+                            labelFormatter={(ts: string) => new Date(ts).toLocaleString('en-US')}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="waitTime"
+                            name="Wait Time (min)"
+                            stroke="#06b6d4"
+                            strokeWidth={2.5}
+                            fillOpacity={1}
+                            fill="url(#colorLabSiteTrend)"
+                            dot={false}
+                            isAnimationActive={false}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : (
+                    <div className="h-64 flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
+                      <Clock className="w-6 h-6 text-slate-600" />
+                      <p>No trend data yet for this lab. Snapshots are collected every 30 minutes — check back shortly.</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 

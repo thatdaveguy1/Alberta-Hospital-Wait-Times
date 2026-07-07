@@ -3,6 +3,7 @@
 // ER wait times: every 10 minutes. Lab waits: every 30 minutes. Daily orchestrator: every 24 hours.
 
 import { fetchErWaitTimes, getHospitals, getSnapshots, setAlertChecker } from './erWaitTimesFetcher';
+import { getLabSnapshots } from './aplLabWaitTimesFetcher';
 import { scrapeDisruptions } from './disruptionsScraper';
 import { recordErWaitTimesUpdate, recordLabWaitsUpdate, recordDailySyncResults, loadSyncStatusFromDisk, getSyncStatus } from './syncStatus';
 import type { SyncResult } from './types';
@@ -27,6 +28,9 @@ export function getHospitalsData() {
 }
 export function getSnapshotsData() {
   return getSnapshots();
+}
+export function getLabSnapshotsData() {
+  return getLabSnapshots();
 }
 
 async function runErWaitTimesPipeline(): Promise<void> {

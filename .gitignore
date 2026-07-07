@@ -19,3 +19,7 @@ assets/.aistudio/
 # Generated chart screenshots (regeneratable)
 *_top.png
 *_mid.png
+
+
+# Lab wait snapshots (runtime-generated, grows every 30 min)
+data-lab-snapshots.json

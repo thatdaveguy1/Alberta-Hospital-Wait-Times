@@ -4,7 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import axios from 'axios';
 import fs from 'fs';
 import { ServiceDisruption } from './src/types';
-import { startScheduler, setDailyOrchestrator, setAlertCheckFn, getHospitalsData, getSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
+import { startScheduler, setDailyOrchestrator, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
 import { runAllPipelines } from './src/pipelines/orchestrator';
 import { getSyncStatus } from './src/pipelines/syncStatus';
 
@@ -406,6 +406,34 @@ async function startServer() {
     });
   });
 
+  // Lab wait trends — provincial average over time (grouped by timestamp)
+  app.get('/api/trends/labs', (req, res) => {
+    const range = (req.query.range as string) || '24h';
+    const cutoff = getRangeCutoff(range);
+    const filtered = getLabSnapshotsData().filter(s => new Date(s.timestamp).getTime() >= cutoff);
+
+    const groups: { [timestamp: string]: number[] } = {};
+    for (const snap of filtered) {
+      if (!groups[snap.timestamp]) groups[snap.timestamp] = [];
+      groups[snap.timestamp].push(snap.waitTime);
+    }
+
+    const averages = Object.entries(groups).map(([timestamp, waits]) => {
+      const sum = waits.reduce((acc, w) => acc + w, 0);
+      return { timestamp, waitTime: waits.length > 0 ? Math.round(sum / waits.length) : 0 };
+    });
+    averages.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    res.json(averages);
+  });
+
+  // Lab wait trends — individual lab site over time
+  app.get('/api/trends/labs/:labId', (req, res) => {
+    const { labId } = req.params;
+    const range = (req.query.range as string) || '24h';
+    const cutoff = getRangeCutoff(range);
+    const trends = getLabSnapshotsData().filter(s => s.labId === labId && new Date(s.timestamp).getTime() >= cutoff);
+    res.json(trends);
+  });
   // Fetch individual facility historical trend
   app.get('/api/trends/:hospitalId', (req, res) => {
     const { hospitalId } = req.params;

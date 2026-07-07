@@ -16,7 +16,37 @@ import type { SyncResult } from './types';
 
 const APL_API_URL = 'https://qmeapi.albertaprecisionlabs.ca/api/location';
 const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
+const LAB_SNAPSHOTS_FILE = path.join(process.cwd(), 'data-lab-snapshots.json');
 
+// Snapshot shape for historical lab wait trends — numeric waits only.
+// Sentinel values ('Appointments Only' / 'Closed') are NOT logged so trend
+// charts stay purely numeric, mirroring the ER fetcher's waitTime >= 0 guard.
+export interface LabWaitSnapshot {
+  labId: string;
+  waitTime: number;
+  timestamp: string;
+}
+
+// In-memory snapshot store — shared with server.ts via getLabSnapshots().
+let currentLabSnapshots: LabWaitSnapshot[] = [];
+
+export function getLabSnapshots(): LabWaitSnapshot[] {
+  return currentLabSnapshots;
+}
+
+function loadLabSnapshotsFromDisk(): LabWaitSnapshot[] {
+  try {
+    if (fs.existsSync(LAB_SNAPSHOTS_FILE)) {
+      const data = fs.readFileSync(LAB_SNAPSHOTS_FILE, 'utf8');
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) return parsed as LabWaitSnapshot[];
+      console.warn('[AplLabWaitTimesFetcher] lab snapshots file is not an array — starting fresh.');
+    }
+  } catch (err) {
+    console.error('[AplLabWaitTimesFetcher] Error loading lab snapshots:', err);
+  }
+  return [];
+}
 // API site shape — matches the raw JSON from qmeapi.albertaprecisionlabs.ca
 interface AplSite {
   Id: number;
@@ -85,6 +115,10 @@ export async function run(): Promise<SyncResult> {
   const startTime = Date.now();
   const timestamp = new Date().toISOString();
   console.log('[AplLabWaitTimesFetcher] Fetching live APL lab wait times...');
+  // Load existing snapshots from disk on first run
+  if (currentLabSnapshots.length === 0) {
+    currentLabSnapshots = loadLabSnapshotsFromDisk();
+  }
 
   try {
     const response = await axios.get(APL_API_URL, {
@@ -155,6 +189,27 @@ export async function run(): Promise<SyncResult> {
     // Write back
     fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(existingData, null, 2), 'utf8');
     console.log(`[AplLabWaitTimesFetcher] Wrote ${labLocations.length} lab locations to data-diagnostic.json`);
+    // Append numeric-only wait snapshots for historical trend charting.
+    // Sentinel values ('Appointments Only' / 'Closed') are skipped so trends stay numeric.
+    for (const lab of labLocations) {
+      if (typeof lab.waitTimeMin === 'number' && lab.waitTimeMin >= 0) {
+        currentLabSnapshots.push({
+          labId: lab.id,
+          waitTime: lab.waitTimeMin,
+          timestamp,
+        });
+      }
+    }
+
+    // Retain only last 90 days of lab snapshots.
+    // 153 labs × 48 fetches/day × 365 days ≈ 2.7M entries (~400MB) — too large.
+    // 90 days keeps ~660K entries (~100MB) while preserving seasonal trend visibility.
+    const retentionCutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
+    currentLabSnapshots = currentLabSnapshots.filter(s => new Date(s.timestamp).getTime() > retentionCutoff);
+
+    // Persist lab snapshots
+    fs.writeFileSync(LAB_SNAPSHOTS_FILE, JSON.stringify(currentLabSnapshots, null, 2), 'utf8');
+    console.log(`[AplLabWaitTimesFetcher] Persisted ${currentLabSnapshots.length} lab wait snapshots`);
 
     return {
       domain: 'diagnostic',
