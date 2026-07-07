@@ -18,7 +18,8 @@ import {
   Sparkles,
   ArrowRight,
   SlidersHorizontal,
-  ChevronRight
+  ChevronRight,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -35,22 +36,33 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
-import { 
-  PATIENT_VOICE_BY_SETTING, 
-  INPATIENT_EXPERIENCE_TRENDS, 
-  ED_EXPERIENCE_TRENDS, 
-  CLINICAL_SAFETY_TRENDS, 
-  PATIENT_COMPLAINTS,
+import type {
   SettingExperience,
   InpatientDetail,
   EDExperienceTrend,
   HospitalHarmMetric,
-  ComplaintCategory
+  ComplaintCategory,
 } from '../patientExperienceData';
-import { DataTimestamp } from './DataTimestamp';
-import { _dataMetadata as patientExperienceDataMetadata } from '../patientExperienceData';
+import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
+import { useDomainData } from '../hooks/useDomainData';
+
+type PatientExperienceData = {
+  PATIENT_VOICE_BY_SETTING: SettingExperience[];
+  INPATIENT_EXPERIENCE_TRENDS: InpatientDetail[];
+  ED_EXPERIENCE_TRENDS: EDExperienceTrend[];
+  CLINICAL_SAFETY_TRENDS: HospitalHarmMetric[];
+  PATIENT_COMPLAINTS: ComplaintCategory[];
+};
 
 export default function PatientExperienceDashboard() {
+  const { data, metadata, isLoading, error, refresh } = useDomainData<PatientExperienceData>('patient-experience');
+
+  const PATIENT_VOICE_BY_SETTING = data?.PATIENT_VOICE_BY_SETTING ?? [];
+  const INPATIENT_EXPERIENCE_TRENDS = data?.INPATIENT_EXPERIENCE_TRENDS ?? [];
+  const ED_EXPERIENCE_TRENDS = data?.ED_EXPERIENCE_TRENDS ?? [];
+  const CLINICAL_SAFETY_TRENDS = data?.CLINICAL_SAFETY_TRENDS ?? [];
+  const PATIENT_COMPLAINTS = data?.PATIENT_COMPLAINTS ?? [];
+
   const [activeSubTab, setActiveSubTab] = useState<'voice' | 'inpatient' | 'emergency' | 'safety' | 'complaints'>('voice');
   
   // Filters & State
@@ -136,7 +148,7 @@ export default function PatientExperienceDashboard() {
   const filteredVoiceData = useMemo(() => {
     if (settingFilter === 'All') return PATIENT_VOICE_BY_SETTING;
     return PATIENT_VOICE_BY_SETTING.filter(v => v.setting === settingFilter);
-  }, [settingFilter]);
+  }, [settingFilter, PATIENT_VOICE_BY_SETTING]);
 
   // Filtered safety metrics
   const filteredSafetyData = useMemo(() => {
@@ -144,7 +156,7 @@ export default function PatientExperienceDashboard() {
       return CLINICAL_SAFETY_TRENDS.filter(s => s.zone === 'Calgary Zone' || s.zone === 'Edmonton Zone');
     }
     return CLINICAL_SAFETY_TRENDS.filter(s => s.zone === safetyZoneFilter);
-  }, [safetyZoneFilter]);
+  }, [safetyZoneFilter, CLINICAL_SAFETY_TRENDS]);
 
   // Filtered complaints categories
   const filteredComplaints = useMemo(() => {
@@ -152,7 +164,7 @@ export default function PatientExperienceDashboard() {
       c.category.toLowerCase().includes(complaintSearch.toLowerCase()) ||
       c.description.toLowerCase().includes(complaintSearch.toLowerCase())
     );
-  }, [complaintSearch]);
+  }, [complaintSearch, PATIENT_COMPLAINTS]);
 
   const COLORS = ['#10b981', '#06b6d4', '#f59e0b', '#ef4444'];
 
@@ -202,6 +214,29 @@ export default function PatientExperienceDashboard() {
     setSimulationResponse(null);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading patient experience data...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load patient experience data: {error}</span>
+        <button
+          onClick={refresh}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
@@ -214,7 +249,7 @@ export default function PatientExperienceDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Monitor patient-reported satisfaction, communication quality, and clinical safety.
           </p>
-          <DataTimestamp metadata={patientExperienceDataMetadata} arrayKey="PATIENT_SATISFACTION_STATS" />
+          <DataTimestamp metadata={metadata ?? undefined} arrayKey="PATIENT_SATISFACTION_STATS" />
         </div>
       </div>
 
@@ -475,7 +510,7 @@ export default function PatientExperienceDashboard() {
       {/* SUBTAB 2: Hospital Inpatient Care */}
       {activeSubTab === 'inpatient' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={patientExperienceDataMetadata} arrayKey="INPATIENT_EXPERIENCE_TRENDS" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="INPATIENT_EXPERIENCE_TRENDS" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
               <div>
@@ -545,7 +580,7 @@ export default function PatientExperienceDashboard() {
       {/* SUBTAB 3: Emergency Department Experience */}
       {activeSubTab === 'emergency' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={patientExperienceDataMetadata} arrayKey="ED_EXPERIENCE_TRENDS" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="ED_EXPERIENCE_TRENDS" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
               <div>
@@ -607,7 +642,7 @@ export default function PatientExperienceDashboard() {
       {/* SUBTAB 4: Hospital Harm & Clinical Safety */}
       {activeSubTab === 'safety' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={patientExperienceDataMetadata} arrayKey="CLINICAL_SAFETY_TRENDS" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="CLINICAL_SAFETY_TRENDS" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">CIHI Hospital Harm Rate & Unplanned Readmissions</h3>
@@ -688,7 +723,7 @@ export default function PatientExperienceDashboard() {
       {/* SUBTAB 5: Complaints & Advocacy Routing */}
       {activeSubTab === 'complaints' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={patientExperienceDataMetadata} arrayKey="PATIENT_COMPLAINTS" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="PATIENT_COMPLAINTS" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col sm:flex-row gap-3 items-center justify-between">

@@ -17,7 +17,8 @@ import {
   Search,
   Check,
   AlertTriangle,
-  BarChart2
+  BarChart2,
+  RefreshCw
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -34,25 +35,77 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { 
-  SURGICAL_RECORDS, 
-  ORTHOPEDIC_SPECIALTY_RECORDS, 
-  SURGICAL_FACILITIES, 
-  SPECIALISTS_LIST, 
-  STATSCAN_SATISFACTION_STATS, 
-  HISTORICAL_WAIT_TRENDS,
-  STATSCAN_DEMOGRAPHICS,
-  FACILITY_COMPARISONS,
-  SPECIALIST_COMPARISONS,
+import type {
+  SurgicalRecord,
+  Specialist,
+  FacilitySurgicalCapacity,
+  JointWaitRecord,
+  HistoricalTrend,
+  StatsCanDemographic,
+  FacilityComparisonRecord,
+  SpecialistComparisonRecord,
 } from '../surgicalData';
-import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
-import { _dataMetadata as surgicalDataMetadata } from '../surgicalData';
+import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
+import { useDomainData } from '../hooks/useDomainData';
+
+interface StatsCanSatisfactionSegment {
+  segment: string;
+  value: number;
+}
+
+interface StatsCanSatisfactionStats {
+  reporting_title: string;
+  survey_period: string;
+  metrics_alberta: {
+    satisfied_with_wait: number;
+    unsatisfied_with_wait: number;
+    wait_affected_life_negatively: number;
+    waiting_segment_distribution: StatsCanSatisfactionSegment[];
+    life_impact_categories: { impact: string; value: number }[];
+  };
+}
+
+type SurgicalData = {
+  SURGICAL_RECORDS: SurgicalRecord[];
+  ORTHOPEDIC_SPECIALTY_RECORDS: JointWaitRecord[];
+  SURGICAL_FACILITIES: FacilitySurgicalCapacity[];
+  SPECIALISTS_LIST?: Specialist[];
+  STATSCAN_SATISFACTION_STATS: StatsCanSatisfactionStats;
+  HISTORICAL_WAIT_TRENDS: HistoricalTrend[];
+  STATSCAN_DEMOGRAPHICS: StatsCanDemographic[];
+  FACILITY_COMPARISONS: FacilityComparisonRecord[];
+  SPECIALIST_COMPARISONS?: SpecialistComparisonRecord[];
+  _dataMetadata?: DataMetadataMap;
+};
+
+const EMPTY_SATISFACTION_STATS: StatsCanSatisfactionStats = {
+  reporting_title: '',
+  survey_period: '',
+  metrics_alberta: {
+    satisfied_with_wait: 0,
+    unsatisfied_with_wait: 0,
+    wait_affected_life_negatively: 0,
+    waiting_segment_distribution: [],
+    life_impact_categories: [],
+  },
+};
 
 export default function SurgicalDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'overview' | 'ortho' | 'comparisons' | 'statscan'>('overview');
   
   // Interactive KPI selected state for historical trend panel
   const [selectedKpi, setSelectedKpi] = useState<'hip_replacement_median' | 'knee_replacement_median' | 'cataract_surgery_median' | null>(null);
+  // Live data fetched from /api/data/surgical
+  const { data, metadata, isLoading, error, refresh } = useDomainData<SurgicalData>('surgical');
+  const SURGICAL_RECORDS = data?.SURGICAL_RECORDS ?? [];
+  const ORTHOPEDIC_SPECIALTY_RECORDS = data?.ORTHOPEDIC_SPECIALTY_RECORDS ?? [];
+  const SURGICAL_FACILITIES = data?.SURGICAL_FACILITIES ?? [];
+  const SPECIALISTS_LIST = data?.SPECIALISTS_LIST ?? [];
+  const STATSCAN_SATISFACTION_STATS = data?.STATSCAN_SATISFACTION_STATS ?? EMPTY_SATISFACTION_STATS;
+  const HISTORICAL_WAIT_TRENDS = data?.HISTORICAL_WAIT_TRENDS ?? [];
+  const STATSCAN_DEMOGRAPHICS = data?.STATSCAN_DEMOGRAPHICS ?? [];
+  const FACILITY_COMPARISONS = data?.FACILITY_COMPARISONS ?? [];
+  const SPECIALIST_COMPARISONS = data?.SPECIALIST_COMPARISONS ?? [];
 
   const kpiStats = useMemo(() => {
     if (!selectedKpi) return null;
@@ -75,7 +128,7 @@ export default function SurgicalDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedKpi]);
+  }, [selectedKpi, HISTORICAL_WAIT_TRENDS]);
 
   const selectedKpiDetails = useMemo(() => {
     if (!selectedKpi) return null;
@@ -178,6 +231,29 @@ export default function SurgicalDashboard() {
     { name: 'Unsatisfied with wait time', value: STATSCAN_SATISFACTION_STATS.metrics_alberta.unsatisfied_with_wait, color: '#ef4444' }
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading surgical data...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load surgical data: {error}</span>
+        <button
+          onClick={refresh}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       
@@ -191,7 +267,7 @@ export default function SurgicalDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Track surgery waitlists, volumes, and priority benchmark compliance across facilities.
           </p>
-          <DataTimestamp metadata={surgicalDataMetadata} arrayKey="SURGICAL_RECORDS" />
+          <DataTimestamp metadata={metadata} arrayKey="SURGICAL_RECORDS" />
         </div>
       </div>
 
@@ -464,7 +540,7 @@ export default function SurgicalDashboard() {
                 <p className="text-[11px] text-slate-400 leading-normal mb-4">
                   Official reporting parameters showing the median and 90th percentile (the timeframe in which 90% of procedures are performed).
                 </p>
-                <DataTimestamp compact metadata={surgicalDataMetadata} arrayKey="SURGICAL_RECORDS" />
+                <DataTimestamp compact metadata={metadata} arrayKey="SURGICAL_RECORDS" />
               </div>
 
               <div className="overflow-x-auto">
@@ -799,7 +875,7 @@ export default function SurgicalDashboard() {
               <p className="text-xs text-slate-400">
                 Detailed metrics by geography comparing hip and knee replacement wait segments and historical median values.
               </p>
-              <DataTimestamp compact metadata={surgicalDataMetadata} arrayKey="ORTHOPEDIC_SPECIALTY_RECORDS" />
+              <DataTimestamp compact metadata={metadata} arrayKey="ORTHOPEDIC_SPECIALTY_RECORDS" />
             </div>
 
             {/* Procedure toggle */}
@@ -945,7 +1021,7 @@ export default function SurgicalDashboard() {
               <div>
                 <h3 className="font-extrabold text-sm text-white uppercase tracking-wider">Facility Head-to-Head</h3>
                 <p className="text-[10px] text-slate-400">Select any two surgical facilities to compare operational metrics and waitlist counts side-by-side.</p>
-                <DataTimestamp compact metadata={surgicalDataMetadata} arrayKey="FACILITY_COMPARISONS" />
+              <DataTimestamp compact metadata={metadata} arrayKey="FACILITY_COMPARISONS" />
               </div>
             </div>
 
@@ -1288,7 +1364,7 @@ export default function SurgicalDashboard() {
               <p className="text-[11px] text-slate-400 leading-relaxed">
                 This captures patient-reported outcomes on medical specialist initial consultation access. Prolonged waiting represents a severe bottleneck prior to decision-for-surgery scheduling.
               </p>
-              <DataTimestamp compact metadata={surgicalDataMetadata} arrayKey="STATSCAN_SATISFACTION_STATS" />
+              <DataTimestamp compact metadata={metadata} arrayKey="STATSCAN_SATISFACTION_STATS" />
             </div>
           </div>
 

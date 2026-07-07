@@ -18,6 +18,7 @@ import path from 'path';
 import puppeteer, { type Browser, type Page, type HTTPResponse } from 'puppeteer';
 import type { SurgicalRecord } from '../surgicalData';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 
 const POWERBI_REPORT_URL =
   'https://app.powerbi.com/view?r=eyJrIjoiMjUzNjc1MWQtYjcxZC00NTMzLWIwNDctZTA0ZTNiMWQzODBlIiwidCI6IjJiYjUxYzA2LWFmOWItNDJjNS04YmY1LTNjM2I3YjEwODUwYiJ9';
@@ -475,9 +476,17 @@ interface SurgicalJson {
   SPECIALISTS_LIST: unknown[];
   CIHI_PROVINCIAL_COMPARATORS: unknown[];
   STATSCAN_SATISFACTION_STATS: unknown[];
+  _dataMetadata?: DataMetadata;
 }
 
-function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[]): number {
+function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], periodLabel: string): number {
+  const sourceVintage = periodLabel || 'Live data';
+  const surgicalMeta = buildMetadataEntry({
+    updateType: 'auto',
+    source: 'Alberta Wait Times Reporting (Power BI scraper)',
+    sourceVintage,
+  });
+
   if (!fs.existsSync(filePath)) {
     console.warn(`[PowerBIScraper] ${filePath} not found — creating new file`);
     const data: SurgicalJson = {
@@ -487,6 +496,7 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[]): n
       SPECIALISTS_LIST: [],
       CIHI_PROVINCIAL_COMPARATORS: [],
       STATSCAN_SATISFACTION_STATS: [],
+      _dataMetadata: { SURGICAL_RECORDS: surgicalMeta },
     };
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     return newRecords.length;
@@ -501,6 +511,10 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[]): n
   );
 
   parsed.SURGICAL_RECORDS = [...otherRecords, ...newRecords];
+  // Stamp SURGICAL_RECORDS freshness; preserve other _dataMetadata entries.
+  parsed._dataMetadata = mergeDataMetadata(parsed._dataMetadata, {
+    SURGICAL_RECORDS: surgicalMeta,
+  });
   fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2));
   return newRecords.length;
 }
@@ -535,7 +549,7 @@ export async function run(): Promise<SyncResult> {
     }
 
     const records = buildSurgicalRecords(scraped);
-    const written = mergeSurgicalRecords(SURGICAL_FILE, records);
+    const written = mergeSurgicalRecords(SURGICAL_FILE, records, scraped.periodLabel);
 
     console.log(
       `[PowerBIScraper] Complete. ${records.length} records built, ${written} written to data-surgical.json in ${Date.now() - startTime}ms`,

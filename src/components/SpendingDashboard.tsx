@@ -13,7 +13,9 @@ import {
   Coins,
   Scale,
   BarChart2,
-  X
+  X,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -32,17 +34,23 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { 
-  NATIONAL_SPENDING_COMPARE, 
-  ALBERTA_ACTIVITY_VOLUME_TREND, 
-  HOSPITAL_EFFICIENCY_TREND, 
-  PHYSICIAN_SPECIALTY_BILLING, 
-  ALBERTA_USE_OF_FUNDS,
+import type {
+  NationalSpendingCompare,
   ActivityVolumeTrend,
-  HospitalEfficiencyMetric
+  HospitalEfficiencyMetric,
+  PhysicianPaymentSpecialty,
+  SpendingByUseOfFunds,
 } from '../spendingData';
 import { DataTimestamp } from './DataTimestamp';
-import { _dataMetadata as spendingDataMetadata } from '../spendingData';
+import { useDomainData } from '../hooks/useDomainData';
+
+type SpendingData = {
+  NATIONAL_SPENDING_COMPARE: NationalSpendingCompare[];
+  ALBERTA_ACTIVITY_VOLUME_TREND: ActivityVolumeTrend[];
+  HOSPITAL_EFFICIENCY_TREND: HospitalEfficiencyMetric[];
+  PHYSICIAN_SPECIALTY_BILLING: PhysicianPaymentSpecialty[];
+  ALBERTA_USE_OF_FUNDS: SpendingByUseOfFunds[];
+};
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#ef4444', '#8b5cf6', '#06b6d4'];
 
@@ -54,6 +62,13 @@ const getSpecialtyLabel = (name: string): string => {
 };
 
 export default function SpendingDashboard() {
+  // Live data fetched from /api/data/spending
+  const { data, metadata, isLoading, error, refresh } = useDomainData<SpendingData>('spending');
+  const NATIONAL_SPENDING_COMPARE = data?.NATIONAL_SPENDING_COMPARE ?? [];
+  const ALBERTA_ACTIVITY_VOLUME_TREND = data?.ALBERTA_ACTIVITY_VOLUME_TREND ?? [];
+  const HOSPITAL_EFFICIENCY_TREND = data?.HOSPITAL_EFFICIENCY_TREND ?? [];
+  const PHYSICIAN_SPECIALTY_BILLING = data?.PHYSICIAN_SPECIALTY_BILLING ?? [];
+  const ALBERTA_USE_OF_FUNDS = data?.ALBERTA_USE_OF_FUNDS ?? [];
   const [activeSpendingTab, setActiveSpendingTab] = useState<'spending-access' | 'national-scoreboard' | 'hospital-efficiency' | 'physician-payments'>('spending-access');
   const [selectedProvince, setSelectedProvince] = useState<string>('Alberta');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('General Practice / Family Medicine');
@@ -64,11 +79,11 @@ export default function SpendingDashboard() {
 
   const selectedProvinceData = useMemo(() => {
     return NATIONAL_SPENDING_COMPARE.find(p => p.province === selectedProvince) || NATIONAL_SPENDING_COMPARE[0];
-  }, [selectedProvince]);
+  }, [selectedProvince, NATIONAL_SPENDING_COMPARE]);
 
   const selectedSpecialtyData = useMemo(() => {
     return PHYSICIAN_SPECIALTY_BILLING.find(s => s.specialtyGroup === selectedSpecialty) || PHYSICIAN_SPECIALTY_BILLING[0];
-  }, [selectedSpecialty]);
+  }, [selectedSpecialty, PHYSICIAN_SPECIALTY_BILLING]);
 
   // Derived growth index calculations relative to 2021-2022 baseline (index = 100)
   const derivedGrowthIndexes = useMemo(() => {
@@ -85,7 +100,7 @@ export default function SpendingDashboard() {
         'Physicians Index': (year.physiciansCount / baseline.physiciansCount) * 100
       };
     });
-  }, []);
+  }, [ALBERTA_ACTIVITY_VOLUME_TREND]);
 
   const latestAlbertaActivity = ALBERTA_ACTIVITY_VOLUME_TREND[ALBERTA_ACTIVITY_VOLUME_TREND.length - 1];
 
@@ -152,7 +167,7 @@ export default function SpendingDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedActivityKpi]);
+  }, [selectedActivityKpi, ALBERTA_ACTIVITY_VOLUME_TREND]);
 
   // KPI detail metadata for hospital-efficiency cards (backed by HOSPITAL_EFFICIENCY_TREND)
   const efficiencyKpiDetails = useMemo(() => {
@@ -207,8 +222,30 @@ export default function SpendingDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedEfficiencyKpi]);
+  }, [selectedEfficiencyKpi, HOSPITAL_EFFICIENCY_TREND]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading spending data...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load spending data: {error}</span>
+        <button
+          onClick={refresh}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
   return (
     <div id="spending-dashboard-container" className="space-y-6">
       {/* Tab bar header */}
@@ -221,7 +258,7 @@ export default function SpendingDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Analyze fiscal allocations, national scoreboards, and physician billings.
           </p>
-          <DataTimestamp metadata={spendingDataMetadata} arrayKey="NATIONAL_SPENDING_COMPARE" />
+          <DataTimestamp metadata={metadata ?? undefined} arrayKey="NATIONAL_SPENDING_COMPARE" />
         </div>
       </div>
 
@@ -292,7 +329,7 @@ export default function SpendingDashboard() {
       {/* Primary Panels based on Tabs */}
       {activeSpendingTab === 'spending-access' && (
         <div id="sd-spending-access-panel" className="space-y-6">
-          <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="ALBERTA_USE_OF_FUNDS" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="ALBERTA_USE_OF_FUNDS" />
           {/* Key Alberta Statistics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             <div
@@ -705,7 +742,7 @@ export default function SpendingDashboard() {
 
       {activeSpendingTab === 'national-scoreboard' && (
         <div id="sd-national-scoreboard-panel" className="space-y-6">
-          <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="CIHI_SPENDING_PER_PERSON" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="CIHI_SPENDING_PER_PERSON" />
           {/* Province focus row */}
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -856,7 +893,7 @@ export default function SpendingDashboard() {
 
       {activeSpendingTab === 'hospital-efficiency' && (
         <div id="sd-hospital-efficiency-panel" className="space-y-6">
-          <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="HOSPITAL_EFFICIENCY_TREND" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="HOSPITAL_EFFICIENCY_TREND" />
           {/* Metrics grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <div
@@ -1148,7 +1185,7 @@ export default function SpendingDashboard() {
 
       {activeSpendingTab === 'physician-payments' && (
         <div id="sd-physician-payments-panel" className="space-y-6">
-          <DataTimestamp compact metadata={spendingDataMetadata} arrayKey="PHYSICIAN_SPECIALTY_BILLING" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="PHYSICIAN_SPECIALTY_BILLING" />
           {/* Selector & Details row */}
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">

@@ -24,7 +24,8 @@ import {
   XCircle,
   Building2,
   BarChart2,
-  X
+  X,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -40,20 +41,24 @@ import {
   Tooltip, 
   Legend
 } from 'recharts';
-import { 
-  CONTINUING_CARE_PLACEMENT_STATS, 
-  RESIDENT_QUALITY_OUTCOMES, 
-  HOME_CARE_EXPERIENCE, 
-  CONTINUING_CARE_COMPLIANCE,
+import type {
   PlacementMetric,
   ResidentOutcomeQuality,
   HomeCareContinuity,
   CareFacilityCompliance
 } from '../continuingCareData';
 import { DataTimestamp } from './DataTimestamp';
-import { _dataMetadata as continuingCareDataMetadata } from '../continuingCareData';
+import { useDomainData } from '../hooks/useDomainData';
+
+type ContinuingCareData = {
+  CONTINUING_CARE_PLACEMENT_STATS: PlacementMetric[];
+  RESIDENT_QUALITY_OUTCOMES: ResidentOutcomeQuality[];
+  HOME_CARE_EXPERIENCE: HomeCareContinuity[];
+  CONTINUING_CARE_COMPLIANCE: CareFacilityCompliance[];
+};
 
 export default function ContinuingCareDashboard() {
+  const { data, metadata, isLoading, error, refresh } = useDomainData<ContinuingCareData>('continuing-care');
   const [activeSubTab, setActiveSubTab] = useState<'placement' | 'resident-quality' | 'home-care' | 'compliance'>('placement');
   
   // Interactive KPI selected state for historical trend panel
@@ -63,7 +68,7 @@ export default function ContinuingCareDashboard() {
     if (!selectedKpi) return null;
     // Get combined Calgary & Edmonton (or provincial representation) trend across years
     const yearlyData = ['2021', '2023', '2025'].map(y => {
-      const records = CONTINUING_CARE_PLACEMENT_STATS.filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
+      const records = (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
       const sum = records.reduce((acc, r) => acc + (r[selectedKpi] as number), 0);
       return sum / (records.length || 1);
     });
@@ -82,7 +87,7 @@ export default function ContinuingCareDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedKpi]);
+  }, [selectedKpi, data]);
 
   const selectedKpiDetails = useMemo(() => {
     if (!selectedKpi) return null;
@@ -117,11 +122,11 @@ export default function ContinuingCareDashboard() {
   const trendData = useMemo(() => {
     if (!selectedKpi) return [];
     return ['2021', '2023', '2025'].map(y => {
-      const records = CONTINUING_CARE_PLACEMENT_STATS.filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
+      const records = (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
       const val = records.reduce((acc, r) => acc + (r[selectedKpi] as number), 0) / (records.length || 1);
       return { year: y, value: val };
     });
-  }, [selectedKpi]);
+  }, [selectedKpi, data]);
   // Interactive Filters
   const [selectedZone, setSelectedZone] = useState<string>('All');
   const [operatorFilter, setOperatorFilter] = useState<string>('All');
@@ -132,36 +137,58 @@ export default function ContinuingCareDashboard() {
   const filteredPlacementData = useMemo(() => {
     if (selectedZone === 'All') {
       // average out by year or show all
-      return CONTINUING_CARE_PLACEMENT_STATS.filter(p => p.zone === 'Calgary Zone' || p.zone === 'Edmonton Zone');
+      return (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).filter(p => p.zone === 'Calgary Zone' || p.zone === 'Edmonton Zone');
     }
-    return CONTINUING_CARE_PLACEMENT_STATS.filter(p => p.zone === selectedZone);
-  }, [selectedZone]);
+    return (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).filter(p => p.zone === selectedZone);
+  }, [selectedZone, data]);
 
   // Filter Quality Metrics
   const filteredQualityData = useMemo(() => {
-    if (qualityMetricSelected === 'All') return RESIDENT_QUALITY_OUTCOMES;
-    return RESIDENT_QUALITY_OUTCOMES.filter(q => q.metric === qualityMetricSelected);
-  }, [qualityMetricSelected]);
+    if (qualityMetricSelected === 'All') return data?.RESIDENT_QUALITY_OUTCOMES ?? [];
+    return (data?.RESIDENT_QUALITY_OUTCOMES ?? []).filter(q => q.metric === qualityMetricSelected);
+  }, [qualityMetricSelected, data]);
 
   // Filter Compliance Directory
   const filteredCompliance = useMemo(() => {
-    return CONTINUING_CARE_COMPLIANCE.filter(fac => {
+    return (data?.CONTINUING_CARE_COMPLIANCE ?? []).filter(fac => {
       const matchesOperator = operatorFilter === 'All' || fac.operator === operatorFilter;
       const matchesSearch = fac.name.toLowerCase().includes(complianceSearch.toLowerCase()) ||
                             fac.city.toLowerCase().includes(complianceSearch.toLowerCase());
       return matchesOperator && matchesSearch;
     });
-  }, [operatorFilter, complianceSearch]);
+  }, [operatorFilter, complianceSearch, data]);
 
   // Aggregate stats
   const aggregateStats = useMemo(() => {
-    const totalFacilities = CONTINUING_CARE_COMPLIANCE.length;
-    const compliantCount = CONTINUING_CARE_COMPLIANCE.filter(f => f.standardsCompliant).length;
+    const totalFacilities = (data?.CONTINUING_CARE_COMPLIANCE ?? []).length;
+    const compliantCount = (data?.CONTINUING_CARE_COMPLIANCE ?? []).filter(f => f.standardsCompliant).length;
     const complianceRate = (compliantCount / totalFacilities) * 100;
-    const totalViolations = CONTINUING_CARE_COMPLIANCE.reduce((acc, curr) => acc + curr.violationsCount, 0);
+    const totalViolations = (data?.CONTINUING_CARE_COMPLIANCE ?? []).reduce((acc, curr) => acc + curr.violationsCount, 0);
     return { totalFacilities, complianceRate, totalViolations };
-  }, []);
+  }, [data]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading continuing care data...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load continuing care data: {error}</span>
+        <button
+          onClick={() => refresh()}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -174,7 +201,7 @@ export default function ContinuingCareDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Monitor facility placement timelines, quality outcomes, and standards compliance.
           </p>
-          <DataTimestamp metadata={continuingCareDataMetadata} arrayKey="CONTINUING_CARE_PLACEMENT_STATS" />
+          <DataTimestamp metadata={metadata} arrayKey="CONTINUING_CARE_PLACEMENT_STATS" />
         </div>
       </div>
 
@@ -483,7 +510,7 @@ export default function ContinuingCareDashboard() {
       {/* SUBTAB 2: Resident quality outcomes (CIHI LTC Indicators) */}
       {activeSubTab === 'resident-quality' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={continuingCareDataMetadata} arrayKey="RESIDENT_QUALITY_OUTCOMES" />
+          <DataTimestamp compact metadata={metadata} arrayKey="RESIDENT_QUALITY_OUTCOMES" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">CIHI Clinical Care Quality Indicators</h3>
@@ -539,7 +566,7 @@ export default function ContinuingCareDashboard() {
               <h4 className="text-xs font-bold text-slate-400 uppercase">Quality Benchmarks Breakdown</h4>
               
               <div className="space-y-3.5">
-                {RESIDENT_QUALITY_OUTCOMES.filter((_, i) => i % 3 === 2).map((item, idx) => (
+                {(data?.RESIDENT_QUALITY_OUTCOMES ?? []).filter((_, i) => i % 3 === 2).map((item, idx) => (
                   <div key={idx} className="p-4 bg-slate-950/40 border border-slate-850 rounded-xl space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-black text-white">{item.metric}</span>
@@ -570,9 +597,9 @@ export default function ContinuingCareDashboard() {
       {/* SUBTAB 3: Home care client experience (HQA FOCUS Survey) */}
       {activeSubTab === 'home-care' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={continuingCareDataMetadata} arrayKey="HOME_CARE_EXPERIENCE" />
+          <DataTimestamp compact metadata={metadata} arrayKey="HOME_CARE_EXPERIENCE" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {HOME_CARE_EXPERIENCE.map((exp, idx) => {
+            {(data?.HOME_CARE_EXPERIENCE ?? []).map((exp, idx) => {
               const isProvincial = exp.zone === 'Alberta';
               return (
                 <div 

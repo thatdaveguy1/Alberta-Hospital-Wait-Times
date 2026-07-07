@@ -19,7 +19,8 @@ import {
   Flame,
   HelpCircle,
   FileSpreadsheet,
-  Award
+  Award,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -38,17 +39,42 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
-import {
-  HEALTH_LINK_VOLUMES,
-  VIRTUAL_MD_COHORT_STUDY,
-  VIRTUAL_MD_DISPOSITIONS,
-  EMS_811_DIVERSION_DATA,
-  ADJACENT_HELPLINES,
-  VIRTUAL_CARE_METADATA
+import type {
+  HealthLinkVolume,
+  VirtualMDCohortStudy,
+  VirtualMDDisposition,
+  EmsDiversionMetric,
+  AdjacentHelplineVolume,
 } from '../virtualCareData';
-import { DataTimestamp } from './DataTimestamp';
+import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
+import { useDomainData } from '../hooks/useDomainData';
+
+type VirtualCareData = {
+  HEALTH_LINK_VOLUMES: HealthLinkVolume[];
+  VIRTUAL_MD_COHORT_STUDY: VirtualMDCohortStudy[];
+  VIRTUAL_MD_DISPOSITIONS: VirtualMDDisposition[];
+  EMS_811_DIVERSION_DATA: EmsDiversionMetric[];
+  ADJACENT_HELPLINES: AdjacentHelplineVolume[];
+};
+
+const DEFAULT_VOLUME: HealthLinkVolume = {
+  fiscalYear: '',
+  clinicalReceived: 0,
+  nonClinicalReceived: 0,
+  clinicalOutbound: 0,
+  nonClinicalOutbound: 0,
+  padisCalls: 0,
+};
 
 export default function VirtualCareDashboard() {
+  const { data, metadata, isLoading, error, refresh } = useDomainData<VirtualCareData>('virtual-care');
+
+  const HEALTH_LINK_VOLUMES = data?.HEALTH_LINK_VOLUMES ?? [];
+  const VIRTUAL_MD_COHORT_STUDY = data?.VIRTUAL_MD_COHORT_STUDY ?? [];
+  const VIRTUAL_MD_DISPOSITIONS = data?.VIRTUAL_MD_DISPOSITIONS ?? [];
+  const EMS_811_DIVERSION_DATA = data?.EMS_811_DIVERSION_DATA ?? [];
+  const ADJACENT_HELPLINES = data?.ADJACENT_HELPLINES ?? [];
+
   const [activeSubTab, setActiveSubTab] = useState<'demand' | 'virtual-md' | 'ems-diversion' | 'adjacent-lines'>('demand');
   const [activeFiscalYear, setActiveFiscalYear] = useState<string>('2024-2025');
 
@@ -65,8 +91,31 @@ export default function VirtualCareDashboard() {
   };
 
   const selectedYearData = useMemo(() => {
-    return HEALTH_LINK_VOLUMES.find(v => v.fiscalYear === activeFiscalYear) || HEALTH_LINK_VOLUMES[3];
-  }, [activeFiscalYear]);
+    return HEALTH_LINK_VOLUMES.find(v => v.fiscalYear === activeFiscalYear) || HEALTH_LINK_VOLUMES[0] || DEFAULT_VOLUME;
+  }, [activeFiscalYear, HEALTH_LINK_VOLUMES]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading virtual care data...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load virtual care data: {error}</span>
+        <button
+          onClick={refresh}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   // Aggregate totals
   const totalReceived = selectedYearData.clinicalReceived + selectedYearData.nonClinicalReceived;
@@ -84,7 +133,7 @@ export default function VirtualCareDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Track Health Link 811 performance, Virtual MD outcomes, and EMS diversions.
           </p>
-          <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="HEALTH_LINK_VOLUMES" />
+          <DataTimestamp metadata={metadata ?? undefined} arrayKey="HEALTH_LINK_VOLUMES" />
         </div>
       </div>
 
@@ -379,7 +428,7 @@ export default function VirtualCareDashboard() {
                 A validation study tracked whether patients referred to Virtual MD followed physician instructions or subsequently flooded emergency departments. 
               </p>
               <div className="mt-1">
-                <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="VIRTUAL_MD_COHORT_STUDY" compact />
+                <DataTimestamp metadata={metadata ?? undefined} arrayKey="VIRTUAL_MD_COHORT_STUDY" compact />
               </div>
 
               <div className="space-y-4 pt-2">
@@ -417,7 +466,7 @@ export default function VirtualCareDashboard() {
                 <h3 className="text-base font-bold text-white mb-1">Virtual MD Dispositions</h3>
                 <p className="text-slate-400 text-xs mb-4">Aesthetic breakdown of final advice categories across first 100,000 patients</p>
                 <div className="mb-4">
-                  <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="VIRTUAL_MD_DISPOSITIONS" compact />
+                  <DataTimestamp metadata={metadata ?? undefined} arrayKey="VIRTUAL_MD_DISPOSITIONS" compact />
                 </div>
                 
                 <div className="space-y-3.5">
@@ -511,7 +560,7 @@ export default function VirtualCareDashboard() {
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 lg:col-span-2">
               <h3 className="text-sm font-bold text-white mb-4">Estimated Diversion Outcome Split (50,000+ Redirections)</h3>
               <div className="mb-4">
-                <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="EMS_811_DIVERSION_DATA" compact />
+                <DataTimestamp metadata={metadata ?? undefined} arrayKey="EMS_811_DIVERSION_DATA" compact />
               </div>
               <div className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -564,7 +613,7 @@ export default function VirtualCareDashboard() {
               across a range of provincial sub-lines. This prevents redundant inquiries and reduces friction for patients seeking specialized care.
             </p>
             <div className="mt-3">
-              <DataTimestamp metadata={VIRTUAL_CARE_METADATA} arrayKey="ADJACENT_HELPLINES" compact />
+              <DataTimestamp metadata={metadata ?? undefined} arrayKey="ADJACENT_HELPLINES" compact />
             </div>
           </div>
 

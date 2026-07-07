@@ -22,7 +22,8 @@ import {
   Dna,
   BarChart2,
   X,
-  TrendingDown
+  TrendingDown,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -38,23 +39,28 @@ import {
   AreaChart, 
   Area 
 } from 'recharts';
-import { 
-  RESPIRATORY_VIRUS_SURVEILLANCE, 
-  WASTEWATER_SIGNALS, 
-  CHILDHOOD_IMMUNIZATION_COVERAGE, 
-  NOTIFIABLE_DISEASE_INCIDENCE, 
-  ENVIRONMENTAL_ADVISORIES, 
-  OUTBREAK_PROTOCOLS,
+import type {
   RespiratoryVirusMetric,
   WastewaterSignal,
   ImmunizationCoverage,
   NotifiableDiseaseIncidence,
-  EnvironmentalAdvisory
+  EnvironmentalAdvisory,
+  OutbreakGuidelines
 } from '../publicHealthData';
 import { DataTimestamp } from './DataTimestamp';
-import { _dataMetadata as publicHealthDataMetadata } from '../publicHealthData';
+import { useDomainData } from '../hooks/useDomainData';
+
+type PublicHealthData = {
+  RESPIRATORY_VIRUS_SURVEILLANCE: RespiratoryVirusMetric[];
+  WASTEWATER_SIGNALS: WastewaterSignal[];
+  CHILDHOOD_IMMUNIZATION_COVERAGE: ImmunizationCoverage[];
+  NOTIFIABLE_DISEASE_INCIDENCE: NotifiableDiseaseIncidence[];
+  ENVIRONMENTAL_ADVISORIES: EnvironmentalAdvisory[];
+  OUTBREAK_PROTOCOLS: Record<string, OutbreakGuidelines>;
+};
 
 export default function PublicHealthDashboard() {
+  const { data, metadata, isLoading, error, refresh } = useDomainData<PublicHealthData>('public-health');
   const [activeSubTab, setActiveSubTab] = useState<'respiratory' | 'wastewater' | 'notifiable' | 'immunization' | 'advisories'>('respiratory');
   
   // Filter States
@@ -67,34 +73,34 @@ export default function PublicHealthDashboard() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [selectedDiseaseKpi, setSelectedDiseaseKpi] = useState<'pertussis' | 'measles' | 'salmonellosis' | 'hepatitisC' | null>(null);
 
-  const covidTrends = useMemo(() => RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.virus === 'COVID-19'), []);
-  const fluATrends = useMemo(() => RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.virus === 'Influenza A'), []);
-  const rsvTrends = useMemo(() => RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.virus === 'RSV'), []);
+  const covidTrends = useMemo(() => (data?.RESPIRATORY_VIRUS_SURVEILLANCE ?? []).filter(r => r.virus === 'COVID-19'), [data]);
+  const fluATrends = useMemo(() => (data?.RESPIRATORY_VIRUS_SURVEILLANCE ?? []).filter(r => r.virus === 'Influenza A'), [data]);
+  const rsvTrends = useMemo(() => (data?.RESPIRATORY_VIRUS_SURVEILLANCE ?? []).filter(r => r.virus === 'RSV'), [data]);
   const icuTrends = useMemo(() => {
     return ['2024-2025', '2025-2026'].map(season => ({
       season,
-      icuAdmissions: RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.season === season).reduce((sum, r) => sum + r.icuAdmissions, 0)
+      icuAdmissions: (data?.RESPIRATORY_VIRUS_SURVEILLANCE ?? []).filter(r => r.season === season).reduce((sum, r) => sum + r.icuAdmissions, 0)
     }));
-  }, []);
+  }, [data]);
   // Respiratory data filtration
   const filteredRespiratoryData = useMemo(() => {
-    return RESPIRATORY_VIRUS_SURVEILLANCE.filter(r => r.season === selectedSeason);
-  }, [selectedSeason]);
+    return (data?.RESPIRATORY_VIRUS_SURVEILLANCE ?? []).filter(r => r.season === selectedSeason);
+  }, [selectedSeason, data]);
 
   // Wastewater plant filtration
   const filteredWastewater = useMemo(() => {
-    return WASTEWATER_SIGNALS.filter(w => 
+    return (data?.WASTEWATER_SIGNALS ?? []).filter(w =>
       w.site.toLowerCase().includes(wastewaterSearch.toLowerCase()) ||
       w.zone.toLowerCase().includes(wastewaterSearch.toLowerCase())
     );
-  }, [wastewaterSearch]);
+  }, [wastewaterSearch, data]);
 
   // Notifiable disease data filtration
   const filteredDiseases = useMemo(() => {
     // Show either the trend over years for selected disease (Alberta aggregated)
     // or the breakdown by Zone for year 2025.
-    return NOTIFIABLE_DISEASE_INCIDENCE.filter(d => d.disease === diseaseFilter);
-  }, [diseaseFilter]);
+    return (data?.NOTIFIABLE_DISEASE_INCIDENCE ?? []).filter(d => d.disease === diseaseFilter);
+  }, [diseaseFilter, data]);
 
   // Notifiable disease KPI card configuration and trend data
   const diseaseKpiConfigs = useMemo(() => ({
@@ -107,21 +113,21 @@ export default function PublicHealthDashboard() {
   const diseaseKpiLatest = useMemo(() => {
     return (Object.keys(diseaseKpiConfigs) as Array<keyof typeof diseaseKpiConfigs>).reduce((acc, key) => {
       const cfg = diseaseKpiConfigs[key];
-      const albertaRecords = NOTIFIABLE_DISEASE_INCIDENCE
+      const albertaRecords = (data?.NOTIFIABLE_DISEASE_INCIDENCE ?? [])
         .filter(d => d.disease === cfg.disease && d.zone === 'Alberta')
         .sort((a, b) => a.year.localeCompare(b.year));
       acc[key] = albertaRecords[albertaRecords.length - 1] || null;
       return acc;
     }, {} as Record<keyof typeof diseaseKpiConfigs, NotifiableDiseaseIncidence | null>);
-  }, [diseaseKpiConfigs]);
+  }, [diseaseKpiConfigs, data]);
 
   const diseaseKpiTrend = useMemo(() => {
     if (!selectedDiseaseKpi) return null;
     const cfg = diseaseKpiConfigs[selectedDiseaseKpi];
-    return NOTIFIABLE_DISEASE_INCIDENCE
+    return (data?.NOTIFIABLE_DISEASE_INCIDENCE ?? [])
       .filter(d => d.disease === cfg.disease && d.zone === 'Alberta')
       .sort((a, b) => a.year.localeCompare(b.year));
-  }, [selectedDiseaseKpi, diseaseKpiConfigs]);
+  }, [selectedDiseaseKpi, diseaseKpiConfigs, data]);
 
   const diseaseKpiStats = useMemo(() => {
     if (!selectedDiseaseKpi || !diseaseKpiTrend || diseaseKpiTrend.length === 0) return null;
@@ -149,20 +155,42 @@ export default function PublicHealthDashboard() {
   // Immunization coverage data filtration
   const filteredImmunization = useMemo(() => {
     if (immunizationZone === 'All') {
-      return CHILDHOOD_IMMUNIZATION_COVERAGE.filter(imm => imm.zone !== 'Alberta');
+      return (data?.CHILDHOOD_IMMUNIZATION_COVERAGE ?? []).filter(imm => imm.zone !== 'Alberta');
     }
-    return CHILDHOOD_IMMUNIZATION_COVERAGE.filter(imm => imm.zone === immunizationZone);
-  }, [immunizationZone]);
+    return (data?.CHILDHOOD_IMMUNIZATION_COVERAGE ?? []).filter(imm => imm.zone === immunizationZone);
+  }, [immunizationZone, data]);
 
   // Environmental advisories filtration
   const filteredAdvisories = useMemo(() => {
-    if (advisoryTypeFilter === 'All') return ENVIRONMENTAL_ADVISORIES;
-    return ENVIRONMENTAL_ADVISORIES.filter(adv => adv.type === advisoryTypeFilter);
-  }, [advisoryTypeFilter]);
+    if (advisoryTypeFilter === 'All') return data?.ENVIRONMENTAL_ADVISORIES ?? [];
+    return (data?.ENVIRONMENTAL_ADVISORIES ?? []).filter(adv => adv.type === advisoryTypeFilter);
+  }, [advisoryTypeFilter, data]);
 
   // Computed Stats
-  const activeAdvisoriesCount = ENVIRONMENTAL_ADVISORIES.filter(a => a.status === 'Active').length;
+  const activeAdvisoriesCount = (data?.ENVIRONMENTAL_ADVISORIES ?? []).filter(a => a.status === 'Active').length;
   
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading public health data...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load public health data: {error}</span>
+        <button
+          onClick={() => refresh()}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
@@ -175,7 +203,7 @@ export default function PublicHealthDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Track respiratory viruses, wastewater pathogen loads, and immunization rates.
           </p>
-          <DataTimestamp metadata={publicHealthDataMetadata} arrayKey="RVD_RESPIRATORY_CASE_COUNTS" />
+          <DataTimestamp metadata={metadata} arrayKey="RVD_RESPIRATORY_CASE_COUNTS" />
         </div>
       </div>
 
@@ -237,7 +265,7 @@ export default function PublicHealthDashboard() {
       {/* SUBTAB 1: Respiratory Virus Burden */}
       {activeSubTab === 'respiratory' && (
         <div id="ph-respiratory-subtab" className="space-y-6 animate-fadeIn">
-          <DataTimestamp compact metadata={publicHealthDataMetadata} arrayKey="RESPIRATORY_VIRUS_SURVEILLANCE" />
+          <DataTimestamp compact metadata={metadata} arrayKey="RESPIRATORY_VIRUS_SURVEILLANCE" />
           {/* Top-line Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button
@@ -455,7 +483,7 @@ export default function PublicHealthDashboard() {
       {/* SUBTAB 2: Wastewater Pathogen Signal */}
       {activeSubTab === 'wastewater' && (
         <div id="ph-wastewater-subtab" className="space-y-6 animate-fadeIn">
-          <DataTimestamp compact metadata={publicHealthDataMetadata} arrayKey="WASTEWATER_SIGNALS" />
+          <DataTimestamp compact metadata={metadata} arrayKey="WASTEWATER_SIGNALS" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Wastewater Early Warning Pathogen Logs</h3>
@@ -779,7 +807,7 @@ export default function PublicHealthDashboard() {
       {/* SUBTAB 4: Childhood Immunization Gap */}
       {activeSubTab === 'immunization' && (
         <div id="ph-immunization-subtab" className="space-y-6 animate-fadeIn">
-          <DataTimestamp compact metadata={publicHealthDataMetadata} arrayKey="CHILDHOOD_IMMUNIZATION_COVERAGE" />
+          <DataTimestamp compact metadata={metadata} arrayKey="CHILDHOOD_IMMUNIZATION_COVERAGE" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Childhood Immunization Coverage Gap (Age 2)</h3>
@@ -885,7 +913,7 @@ export default function PublicHealthDashboard() {
       {/* SUBTAB 5: Environmental Health Advisories */}
       {activeSubTab === 'advisories' && (
         <div id="ph-advisories-subtab" className="space-y-6 animate-fadeIn">
-          <DataTimestamp compact metadata={publicHealthDataMetadata} arrayKey="OUTBREAK_PROTOCOLS" />
+          <DataTimestamp compact metadata={metadata} arrayKey="OUTBREAK_PROTOCOLS" />
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
               {['All', 'Cyanobacteria (Blue-Green Algae)', 'Air Quality Advisory', 'Boil Water Advisory', 'Water Quality Advisory'].map(type => (
@@ -987,21 +1015,21 @@ export default function PublicHealthDashboard() {
           <div className="p-4 bg-slate-950/40 border border-slate-850 rounded-xl space-y-1">
             <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">1. Outbreak Declaration Trigger</span>
             <p className="text-xs font-medium text-white leading-relaxed">
-              {OUTBREAK_PROTOCOLS[selectedProtocolSetting].triggerThreshold}
+              {data?.OUTBREAK_PROTOCOLS[selectedProtocolSetting].triggerThreshold}
             </p>
           </div>
 
           <div className="p-4 bg-slate-950/40 border border-slate-850 rounded-xl space-y-1">
             <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">2. Isolation & Cohorting Protocols</span>
             <p className="text-xs font-medium text-white leading-relaxed">
-              {OUTBREAK_PROTOCOLS[selectedProtocolSetting].isolationProtocol}
+              {data?.OUTBREAK_PROTOCOLS[selectedProtocolSetting].isolationProtocol}
             </p>
           </div>
 
           <div className="p-4 bg-slate-950/40 border border-slate-850 rounded-xl space-y-1">
             <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">3. Antiviral / Prophylaxis Strategy</span>
             <p className="text-xs font-medium text-white leading-relaxed">
-              {OUTBREAK_PROTOCOLS[selectedProtocolSetting].antiviralPolicy}
+              {data?.OUTBREAK_PROTOCOLS[selectedProtocolSetting].antiviralPolicy}
             </p>
           </div>
         </div>

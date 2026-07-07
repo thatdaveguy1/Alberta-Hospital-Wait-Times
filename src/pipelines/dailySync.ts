@@ -6,7 +6,8 @@
 //   1. scrapeDisruptions()  → push `disruptions` domain to KV on success
 //   2. runAllPipelines()    → collect Tier 1-4 results (one failure never stops the rest)
 //   3. recordDailySyncResults(results) → write data-sync-status.json
-//   4. push `sync-status` to KV
+//   4. pushAllToCloudflare() → bulk-push all 15 domain data files to KV
+//   5. push `sync-status` to KV
 //
 // Exits 0 on completion, non-zero on fatal error. A single pipeline failure does
 // NOT abort the run — it is recorded as a failed SyncResult and the script continues.
@@ -17,7 +18,7 @@ import path from 'path';
 import { scrapeDisruptions } from './disruptionsScraper';
 import { runAllPipelines } from './orchestrator';
 import { recordDailySyncResults, getSyncStatus } from './syncStatus';
-import { pushToCloudflare } from './pushClient';
+import { pushToCloudflare, pushAllToCloudflare } from './pushClient';
 import type { SyncResult } from './types';
 
 // Shared daily-sync logic. Exported so the server's manual triggerDailySync() can
@@ -50,7 +51,20 @@ export async function runDailySyncFlow(): Promise<SyncResult[]> {
   // 3. Persist the rolled-up sync status to disk.
   recordDailySyncResults(results);
 
-  // 4. Push the fresh sync-status to KV.
+  // 4. Bulk-push every updated domain data file to Cloudflare KV. This covers
+  //    all 15 domains written by the orchestrator's pipelines (including a
+  //    fresh re-push of `disruptions` from the just-written file, which is
+  //    idempotent). `sync-status` is pushed separately below — it is not a
+  //    data domain and is not in pushAllToCloudflare's domain list.
+  try {
+    const pushResults = await pushAllToCloudflare();
+    const pushOk = pushResults.filter(r => r.success).length;
+    console.log(`[DailySync] Bulk KV push: ${pushOk}/${pushResults.length} domains succeeded`);
+  } catch (err) {
+    console.warn('[DailySync] Bulk KV push failed:', err);
+  }
+
+  // 5. Push the fresh sync-status to KV.
   await pushToCloudflare('sync-status', getSyncStatus());
 
   const successCount = results.filter(r => r.status === 'success').length;

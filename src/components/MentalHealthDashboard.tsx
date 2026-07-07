@@ -23,6 +23,7 @@ import {
   BarChart2,
   TrendingDown,
   X,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -38,18 +39,24 @@ import {
   Tooltip, 
   Legend
 } from 'recharts';
-import { 
-  SUBSTANCE_HARM_TRENDS, 
-  ADDICTION_BED_CAPACITIES, 
-  COMMUNITY_MH_WAITS, 
-  HOSPITAL_MHSU_BURDEN, 
-  SUPPORT_HELPLINES,
+import type {
+  SubstanceHarmTrend,
   AddictionBedStatus,
   CommunityMHWait,
-  HospitalMHSUBurden
+  HospitalMHSUBurden,
+  SupportHelpline,
 } from '../mentalHealthData';
-import { DataTimestamp } from './DataTimestamp';
-import { _dataMetadata as mentalHealthDataMetadata } from '../mentalHealthData';
+import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
+import { useDomainData } from '../hooks/useDomainData';
+
+type MentalHealthData = {
+  SUBSTANCE_HARM_TRENDS: SubstanceHarmTrend[];
+  ADDICTION_BED_CAPACITIES: AddictionBedStatus[];
+  COMMUNITY_MH_WAITS: CommunityMHWait[];
+  HOSPITAL_MHSU_BURDEN: HospitalMHSUBurden[];
+  SUPPORT_HELPLINES: SupportHelpline[];
+  _dataMetadata?: DataMetadataMap;
+};
 
 export default function MentalHealthDashboard() {
   // Interactive KPI selected state for substance harms historical trend panel
@@ -61,6 +68,13 @@ export default function MentalHealthDashboard() {
   const [bedTypeFilter, setBedTypeFilter] = useState<string>('All');
   const [siteSearch, setSiteSearch] = useState<string>('');
   const [waitAgeGroup, setWaitAgeGroup] = useState<string>('All');
+  // Live data fetched from /api/data/mental-health
+  const { data, metadata, isLoading, error, refresh } = useDomainData<MentalHealthData>('mental-health');
+  const SUBSTANCE_HARM_TRENDS = data?.SUBSTANCE_HARM_TRENDS ?? [];
+  const ADDICTION_BED_CAPACITIES = data?.ADDICTION_BED_CAPACITIES ?? [];
+  const COMMUNITY_MH_WAITS = data?.COMMUNITY_MH_WAITS ?? [];
+  const HOSPITAL_MHSU_BURDEN = data?.HOSPITAL_MHSU_BURDEN ?? [];
+  const SUPPORT_HELPLINES = data?.SUPPORT_HELPLINES ?? [];
 
   // Filter Harm Trends - merged into a single dataset (no selector)
   const filteredHarmData = useMemo(() => {
@@ -77,7 +91,7 @@ export default function MentalHealthDashboard() {
         emsOverdoseResponses
       };
     });
-  }, []);
+  }, [SUBSTANCE_HARM_TRENDS]);
 
   // Historical trend stats for the selected substance harm KPI
   const harmKpiStats = useMemo(() => {
@@ -146,7 +160,7 @@ export default function MentalHealthDashboard() {
     const available = ADDICTION_BED_CAPACITIES.reduce((acc, curr) => acc + curr.availableBeds, 0);
     const pctOccupied = ((total - available) / total) * 100;
     return { total, available, pctOccupied };
-  }, []);
+  }, [ADDICTION_BED_CAPACITIES]);
 
   // Filter ABED Beds
   const filteredBeds = useMemo(() => {
@@ -157,13 +171,13 @@ export default function MentalHealthDashboard() {
                             bed.corridor.toLowerCase().includes(siteSearch.toLowerCase());
       return matchesCorridor && matchesBedType && matchesSearch;
     });
-  }, [corridorFilter, bedTypeFilter, siteSearch]);
+  }, [corridorFilter, bedTypeFilter, siteSearch, ADDICTION_BED_CAPACITIES]);
 
   // Filter Counselling Waits
   const filteredWaits = useMemo(() => {
     if (waitAgeGroup === 'All') return COMMUNITY_MH_WAITS;
     return COMMUNITY_MH_WAITS.filter(w => w.ageGroup === waitAgeGroup);
-  }, [waitAgeGroup]);
+  }, [waitAgeGroup, COMMUNITY_MH_WAITS]);
 
   // Helper to color-code bed status
   const getBedStatusStyle = (status: 'Available' | 'Almost Full' | 'Full') => {
@@ -179,6 +193,29 @@ export default function MentalHealthDashboard() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading mental health data...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load mental health data: {error}</span>
+        <button
+          onClick={refresh}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
@@ -191,7 +228,7 @@ export default function MentalHealthDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Track substance use harms, treatment bed capacity, and helpline volumes.
           </p>
-          <DataTimestamp metadata={mentalHealthDataMetadata} arrayKey="SUBSTANCE_HARM_TRENDS" />
+          <DataTimestamp metadata={metadata} arrayKey="SUBSTANCE_HARM_TRENDS" />
         </div>
       </div>
 
@@ -527,7 +564,7 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB 2: Daily Bed Capacity (findaddictionbeds.alberta.ca) */}
       {activeSubTab === 'addiction-beds' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={mentalHealthDataMetadata} arrayKey="ADDICTION_BED_CAPACITIES" />
+          <DataTimestamp compact metadata={metadata} arrayKey="ADDICTION_BED_CAPACITIES" />
           {/* Bed search & corridor filters */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
@@ -652,7 +689,7 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB 3: Community MH Counselling (CIHI Indicators) */}
       {activeSubTab === 'community-access' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={mentalHealthDataMetadata} arrayKey="COMMUNITY_MH_WAITS" />
+          <DataTimestamp compact metadata={metadata} arrayKey="COMMUNITY_MH_WAITS" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Counselling waits chart */}
@@ -743,7 +780,7 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB 4: ER & Hospital Pressure */}
       {activeSubTab === 'er-pressure' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={mentalHealthDataMetadata} arrayKey="HOSPITAL_MHSU_BURDEN" />
+          <DataTimestamp compact metadata={metadata} arrayKey="HOSPITAL_MHSU_BURDEN" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Readmissions & ER Overloads */}
@@ -814,7 +851,7 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB 5: Helplines & Support Pathways */}
       {activeSubTab === 'helplines' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={mentalHealthDataMetadata} arrayKey="SUPPORT_HELPLINES" />
+          <DataTimestamp compact metadata={metadata} arrayKey="SUPPORT_HELPLINES" />
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div>
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Crisis Helplines & Navigation Pathways</h3>

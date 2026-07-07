@@ -24,7 +24,8 @@ import {
   Sparkles,
   BarChart3,
   CheckCircle,
-  HelpCircle
+  HelpCircle,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -45,54 +46,77 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { 
-  COMMUNITY_NEED_PROFILES, 
-  CHRONIC_DISEASE_BURDEN, 
-  ED_RELIANCE_METRICS, 
-  TRAVEL_FOR_CARE, 
-  SERVICE_ACCESS_METRICS,
+import type {
   CommunityNeedMetric,
   ChronicDiseaseBurden,
   EDRelianceMetric,
   TravelForCare,
-  ServiceAccessMetric
+  ServiceAccessMetric,
 } from '../regionalInequityData';
 import { DataTimestamp } from './DataTimestamp';
-import { _dataMetadata as regionalInequityDataMetadata } from '../regionalInequityData';
+import { useDomainData } from '../hooks/useDomainData';
 
-// ----------------------------------------------------------------------------
-// PROVINCIAL BENCHMARKS (DYNAMICALLY CALCULATED FROM THE 5 REPRESENTATIVE LGAs)
-// ----------------------------------------------------------------------------
-const PROVINCIAL_BENCHMARKS = {
-  medianHouseholdIncome: Math.round(COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.medianHouseholdIncome, 0) / 5),
-  physiciansPer100k: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.physiciansPer100k, 0) / 5).toFixed(1)),
-  claimsOutsideLgaPct: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.claimsOutsideLgaPct, 0) / 5).toFixed(1)),
-  acscRatePer100k: Math.round(COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.acscRatePer100k, 0) / 5),
-  highSchoolGradPct: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.highSchoolGradPct, 0) / 5).toFixed(1)),
-  deprivationIndex: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.deprivationIndex, 0) / 5).toFixed(1)),
-  
-  diabetesPrevalencePct: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.diabetesPrevalencePct, 0) / 5).toFixed(2)),
-  copdPrevalencePct: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.copdPrevalencePct, 0) / 5).toFixed(2)),
-  hypertensionPrevalencePct: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.hypertensionPrevalencePct, 0) / 5).toFixed(2)),
-  infantMortalityPer1000: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.infantMortalityPer1000, 0) / 5).toFixed(2)),
-  lifeExpectancyYears: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.lifeExpectancyYears, 0) / 5).toFixed(1)),
-  
-  totalEdVisitsPer1000: Math.round(ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.totalEdVisitsPer1000, 0) / 5),
-  lowAcuityCtas45Pct: parseFloat((ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.lowAcuityCtas45Pct, 0) / 5).toFixed(1)),
-  afterHoursEdPct: parseFloat((ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.afterHoursEdPct, 0) / 5).toFixed(1)),
-  moodAnxietyEdRatePer100k: Math.round(ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.moodAnxietyEdRatePer100k, 0) / 5),
-  
-  careDeliveredOutsideLgaPct: parseFloat((TRAVEL_FOR_CARE.reduce((acc, t) => acc + t.careDeliveredOutsideLgaPct, 0) / 5).toFixed(1)),
-  avgTravelDistanceKm: parseFloat((TRAVEL_FOR_CARE.reduce((acc, t) => acc + t.avgTravelDistanceKm, 0) / 5).toFixed(1)),
-  localBedLeakagePct: parseFloat((TRAVEL_FOR_CARE.reduce((acc, t) => acc + t.localBedLeakagePct, 0) / 5).toFixed(1)),
-  
-  facilitiesPer10k: parseFloat((SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.facilitiesPer10k, 0) / 5).toFixed(2)),
-  distanceToNearestEdKm: parseFloat((SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.distanceToNearestEdKm, 0) / 5).toFixed(1)),
-  distanceToNearestImagingKm: parseFloat((SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.distanceToNearestImagingKm, 0) / 5).toFixed(1)),
-  providersAcceptingPatients: Math.round(SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.providersAcceptingPatients, 0) / 5)
+type RegionalInequityData = {
+  COMMUNITY_NEED_PROFILES: CommunityNeedMetric[];
+  CHRONIC_DISEASE_BURDEN: ChronicDiseaseBurden[];
+  ED_RELIANCE_METRICS: EDRelianceMetric[];
+  TRAVEL_FOR_CARE: TravelForCare[];
+  SERVICE_ACCESS_METRICS: ServiceAccessMetric[];
 };
 
 export default function RegionalInequityDashboard() {
+  // Live data fetched from /api/data/regional-inequity
+  const { data, metadata, isLoading, error, refresh } = useDomainData<RegionalInequityData>('regional-inequity');
+  const COMMUNITY_NEED_PROFILES = data?.COMMUNITY_NEED_PROFILES ?? [];
+  const CHRONIC_DISEASE_BURDEN = data?.CHRONIC_DISEASE_BURDEN ?? [];
+  const ED_RELIANCE_METRICS = data?.ED_RELIANCE_METRICS ?? [];
+  const TRAVEL_FOR_CARE = data?.TRAVEL_FOR_CARE ?? [];
+  const SERVICE_ACCESS_METRICS = data?.SERVICE_ACCESS_METRICS ?? [];
+
+  // ----------------------------------------------------------------------------
+  // PROVINCIAL BENCHMARKS (DYNAMICALLY CALCULATED FROM THE 5 REPRESENTATIVE LGAs)
+  // ----------------------------------------------------------------------------
+  const PROVINCIAL_BENCHMARKS = useMemo(() => {
+    if (COMMUNITY_NEED_PROFILES.length === 0) {
+      return {
+        medianHouseholdIncome: 0, physiciansPer100k: 0, claimsOutsideLgaPct: 0, acscRatePer100k: 0,
+        highSchoolGradPct: 0, deprivationIndex: 0, diabetesPrevalencePct: 0, copdPrevalencePct: 0,
+        hypertensionPrevalencePct: 0, infantMortalityPer1000: 0, lifeExpectancyYears: 0,
+        totalEdVisitsPer1000: 0, lowAcuityCtas45Pct: 0, afterHoursEdPct: 0, moodAnxietyEdRatePer100k: 0,
+        careDeliveredOutsideLgaPct: 0, avgTravelDistanceKm: 0, localBedLeakagePct: 0,
+        facilitiesPer10k: 0, distanceToNearestEdKm: 0, distanceToNearestImagingKm: 0, providersAcceptingPatients: 0,
+      };
+    }
+    const n = COMMUNITY_NEED_PROFILES.length;
+    return {
+      medianHouseholdIncome: Math.round(COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.medianHouseholdIncome, 0) / n),
+      physiciansPer100k: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.physiciansPer100k, 0) / n).toFixed(1)),
+      claimsOutsideLgaPct: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.claimsOutsideLgaPct, 0) / n).toFixed(1)),
+      acscRatePer100k: Math.round(COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.acscRatePer100k, 0) / n),
+      highSchoolGradPct: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.highSchoolGradPct, 0) / n).toFixed(1)),
+      deprivationIndex: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.deprivationIndex, 0) / n).toFixed(1)),
+
+      diabetesPrevalencePct: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.diabetesPrevalencePct, 0) / n).toFixed(2)),
+      copdPrevalencePct: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.copdPrevalencePct, 0) / n).toFixed(2)),
+      hypertensionPrevalencePct: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.hypertensionPrevalencePct, 0) / n).toFixed(2)),
+      infantMortalityPer1000: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.infantMortalityPer1000, 0) / n).toFixed(2)),
+      lifeExpectancyYears: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.lifeExpectancyYears, 0) / n).toFixed(1)),
+
+      totalEdVisitsPer1000: Math.round(ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.totalEdVisitsPer1000, 0) / n),
+      lowAcuityCtas45Pct: parseFloat((ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.lowAcuityCtas45Pct, 0) / n).toFixed(1)),
+      afterHoursEdPct: parseFloat((ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.afterHoursEdPct, 0) / n).toFixed(1)),
+      moodAnxietyEdRatePer100k: Math.round(ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.moodAnxietyEdRatePer100k, 0) / n),
+
+      careDeliveredOutsideLgaPct: parseFloat((TRAVEL_FOR_CARE.reduce((acc, t) => acc + t.careDeliveredOutsideLgaPct, 0) / n).toFixed(1)),
+      avgTravelDistanceKm: parseFloat((TRAVEL_FOR_CARE.reduce((acc, t) => acc + t.avgTravelDistanceKm, 0) / n).toFixed(1)),
+      localBedLeakagePct: parseFloat((TRAVEL_FOR_CARE.reduce((acc, t) => acc + t.localBedLeakagePct, 0) / n).toFixed(1)),
+
+      facilitiesPer10k: parseFloat((SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.facilitiesPer10k, 0) / n).toFixed(2)),
+      distanceToNearestEdKm: parseFloat((SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.distanceToNearestEdKm, 0) / n).toFixed(1)),
+      distanceToNearestImagingKm: parseFloat((SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.distanceToNearestImagingKm, 0) / n).toFixed(1)),
+      providersAcceptingPatients: Math.round(SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.providersAcceptingPatients, 0) / n)
+    };
+  }, [COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, ED_RELIANCE_METRICS, TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS]);
   const [activeSubTab, setActiveSubTab] = useState<'lga-needs' | 'disease-burden' | 'ed-reliance' | 'access-travel' | 'compare-matrix' | 'data-explorer'>('lga-needs');
   
   // Search and selection states
@@ -245,7 +269,7 @@ export default function RegionalInequityDashboard() {
         ...access
       };
     });
-  }, []);
+  }, [COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, ED_RELIANCE_METRICS, TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS]);
 
   // Sorted explorer dataset
   const sortedExplorerData = useMemo(() => {
@@ -326,7 +350,7 @@ export default function RegionalInequityDashboard() {
       reliance: `Annual Emergency Department presentation rate stands at ${selectedFullData.totalEdVisitsPer1000} visits per 1,000 residents. This represents ${visitsComparison} (${avgEdVisits} visits).`,
       substitution: `${ERSubstitutionStatus}. Furthermore, ${selectedFullData.afterHoursEdPct}% of ED visits occur between 18:00 and 08:00, signaling a lack of after-hours primary clinics or integrated weekend primary networks.`
     };
-  }, [selectedFullData, selectedLgaDetail]);
+  }, [selectedFullData, selectedLgaDetail, PROVINCIAL_BENCHMARKS]);
 
   const dynamicAccessTravelInsight = useMemo(() => {
     return {
@@ -335,6 +359,28 @@ export default function RegionalInequityDashboard() {
     };
   }, [selectedFullData, selectedLgaDetail]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading regional inequity data...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load regional inequity data: {error}</span>
+        <button
+          onClick={refresh}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
@@ -347,7 +393,7 @@ export default function RegionalInequityDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Analyze geographic disparities, chronic disease burden, and care travel patterns.
           </p>
-          <DataTimestamp metadata={regionalInequityDataMetadata} arrayKey="PROVINCIAL_BENCHMARKS" />
+          <DataTimestamp metadata={metadata ?? undefined} arrayKey="PROVINCIAL_BENCHMARKS" />
         </div>
       </div>
 
@@ -646,7 +692,7 @@ export default function RegionalInequityDashboard() {
           {/* SUBTAB 2: Chronic Disease Burden */}
           {activeSubTab === 'disease-burden' && (
             <div id="ri-diseases-view" className="space-y-6 animate-fadeIn">
-              <DataTimestamp compact metadata={regionalInequityDataMetadata} arrayKey="CHRONIC_DISEASE_BURDEN" />
+              <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="CHRONIC_DISEASE_BURDEN" />
               {/* Outcome Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
@@ -755,7 +801,7 @@ export default function RegionalInequityDashboard() {
           {/* SUBTAB 3: ER Reliance Index */}
           {activeSubTab === 'ed-reliance' && (
             <div id="ri-ed-view" className="space-y-6 animate-fadeIn">
-              <DataTimestamp compact metadata={regionalInequityDataMetadata} arrayKey="ED_RELIANCE_METRICS" />
+              <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="ED_RELIANCE_METRICS" />
               {/* ED metrics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
