@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Activity, 
@@ -25,7 +25,8 @@ import {
   X,
   ChevronRight,
   Sparkles,
-  Award
+  Award,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -47,21 +48,54 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { 
-  FACILITY_FLOW_METRICS, 
-  AHS_WEEKLY_ED_LOS, 
-  CIHI_COMPARATORS, 
-  REGIONAL_LGA_DEMAND, 
-  HISTORICAL_FLOW_TIMELINES,
+import type {
   FacilityFlow,
   WeeklyEDLOS,
   CIHIComparator,
   LGADemand,
   HistoricalFlowSnapshot,
-  _dataMetadata as systemFlowDataMetadata
 } from '../systemFlowData';
-import { DataTimestamp } from './DataTimestamp';
+import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
+type SystemFlowData = {
+  FACILITY_FLOW_METRICS: FacilityFlow[];
+  AHS_WEEKLY_ED_LOS: WeeklyEDLOS[];
+  CIHI_COMPARATORS: CIHIComparator[];
+  REGIONAL_LGA_DEMAND: LGADemand[];
+  HISTORICAL_FLOW_TIMELINES: HistoricalFlowSnapshot[];
+  CIHI_OCCUPANCY_RATES?: Record<string, unknown>[];
+  CIHI_ED_WAIT_INITIAL_ASSESSMENT?: Record<string, unknown>[];
+  _dataMetadata?: DataMetadataMap;
+};
 export default function SystemFlowDashboard() {
+  // Live data fetched from /api/data/system-flow
+  const [systemFlowData, setSystemFlowData] = useState<SystemFlowData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshNonce, setRefreshNonce] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
+    fetch('/api/data/system-flow')
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data: SystemFlowData) => {
+        if (!cancelled) {
+          setSystemFlowData(data);
+          setIsLoading(false);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to load system flow data');
+          setIsLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [refreshNonce]);
   // Navigation Tabs
   const [subTab, setSubTab] = useState<'ranked' | 'scatterplot' | 'trends-weekly' | 'cihi-lga'>('ranked');
   // Interactive Filters
@@ -87,7 +121,7 @@ export default function SystemFlowDashboard() {
 
   const kpiStats = useMemo(() => {
     if (!selectedKpi) return null;
-    const values = HISTORICAL_FLOW_TIMELINES.map(t => t[selectedKpi] as number).filter(v => typeof v === 'number');
+    const values = (systemFlowData?.HISTORICAL_FLOW_TIMELINES ?? []).map(t => t[selectedKpi] as number).filter(v => typeof v === 'number');
     if (values.length === 0) return null;
 
     const baseline = values[0];
@@ -106,7 +140,7 @@ export default function SystemFlowDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedKpi]);
+  }, [selectedKpi, systemFlowData]);
 
   const selectedKpiDetails = useMemo(() => {
     if (!selectedKpi) return null;
@@ -161,7 +195,10 @@ export default function SystemFlowDashboard() {
   }, [selectedKpi]);
   // Computed Provincial Core Metrics
   const provincialOverview = useMemo(() => {
-    const facilities = FACILITY_FLOW_METRICS;
+    const facilities = systemFlowData?.FACILITY_FLOW_METRICS ?? [];
+    if (facilities.length === 0) {
+      return { avgOccupancy: 0, avgAlc: 0, avgLwbs: 0, avgP90Wait: 0, totalBeds: 0, totalVolume: 0 };
+    }
     const totalBeds = facilities.reduce((sum, f) => sum + f.staffedAcuteBeds, 0);
     const avgOccupancy = facilities.reduce((sum, f) => sum + (f.hospitalOccupancy * f.staffedAcuteBeds), 0) / totalBeds;
     const avgAlc = facilities.reduce((sum, f) => sum + f.alcRate, 0) / facilities.length;
@@ -177,11 +214,11 @@ export default function SystemFlowDashboard() {
       totalBeds,
       totalVolume
     };
-  }, []);
+  }, [systemFlowData]);
 
   // Filter & Search Facilities
   const filteredFacilities = useMemo(() => {
-    return FACILITY_FLOW_METRICS.filter(fac => {
+    return (systemFlowData?.FACILITY_FLOW_METRICS ?? []).filter(fac => {
       const matchesZone = selectedZone === 'All' || fac.zone === selectedZone;
       const matchesType = selectedType === 'All' || 
         (selectedType === 'Metro' && fac.type === 'Metro') ||
@@ -194,7 +231,7 @@ export default function SystemFlowDashboard() {
       
       return matchesZone && matchesType && matchesSearch;
     });
-  }, [selectedZone, selectedType, searchQuery]);
+  }, [selectedZone, selectedType, searchQuery, systemFlowData]);
 
   // Sorted Facilities
   const sortedFacilities = useMemo(() => {
@@ -209,12 +246,15 @@ export default function SystemFlowDashboard() {
 
   // Selected Hospital Details
   const selectedHospital = useMemo(() => {
-    return FACILITY_FLOW_METRICS.find(f => f.id === selectedHospitalId) || FACILITY_FLOW_METRICS[0];
-  }, [selectedHospitalId]);
+    const facilities = systemFlowData?.FACILITY_FLOW_METRICS ?? [];
+    return facilities.find(f => f.id === selectedHospitalId) || facilities[0];
+  }, [selectedHospitalId, systemFlowData]);
 
   // Regional comparisons for selected hospital
   const selectedHospitalZoneAvg = useMemo(() => {
-    const zoneFacilities = FACILITY_FLOW_METRICS.filter(f => f.zone === selectedHospital.zone);
+    if (!selectedHospital) return { occupancy: 0, p90Wait: 0, lwbs: 0, alc: 0 };
+    const zoneFacilities = (systemFlowData?.FACILITY_FLOW_METRICS ?? []).filter(f => f.zone === selectedHospital.zone);
+    if (zoneFacilities.length === 0) return { occupancy: 0, p90Wait: 0, lwbs: 0, alc: 0 };
     const avgOccupancy = zoneFacilities.reduce((sum, f) => sum + f.hospitalOccupancy, 0) / zoneFacilities.length;
     const avgWait = zoneFacilities.reduce((sum, f) => sum + f.p90BedWait, 0) / zoneFacilities.length;
     const avgLwbs = zoneFacilities.reduce((sum, f) => sum + f.lwbsRate, 0) / zoneFacilities.length;
@@ -226,13 +266,13 @@ export default function SystemFlowDashboard() {
       lwbs: parseFloat(avgLwbs.toFixed(1)),
       alc: parseFloat(avgAlc.toFixed(1))
     };
-  }, [selectedHospital]);
+  }, [selectedHospital, systemFlowData]);
 
   // Zone statistics
   const zoneAverages = useMemo(() => {
     const zones = ['Calgary Zone', 'Edmonton Zone', 'Central Zone', 'South Zone', 'North Zone'];
     return zones.map(zoneName => {
-      const facilitiesInZone = FACILITY_FLOW_METRICS.filter(f => f.zone === zoneName);
+      const facilitiesInZone = (systemFlowData?.FACILITY_FLOW_METRICS ?? []).filter(f => f.zone === zoneName);
       if (facilitiesInZone.length === 0) return null;
       const totalBeds = facilitiesInZone.reduce((sum, f) => sum + f.staffedAcuteBeds, 0);
       const avgOccupancy = facilitiesInZone.reduce((sum, f) => sum + f.hospitalOccupancy, 0) / facilitiesInZone.length;
@@ -250,7 +290,7 @@ export default function SystemFlowDashboard() {
         avgLwbs: parseFloat(avgLwbs.toFixed(1))
       };
     }).filter(Boolean);
-  }, []);
+  }, [systemFlowData]);
 
   const handleSort = (metric: keyof FacilityFlow) => {
     if (sortMetric === metric) {
@@ -263,7 +303,7 @@ export default function SystemFlowDashboard() {
 
   // Scatter plot data mapping
   const scatterData = useMemo(() => {
-    return FACILITY_FLOW_METRICS.map(f => ({
+    return (systemFlowData?.FACILITY_FLOW_METRICS ?? []).map(f => ({
       id: f.id,
       name: f.name,
       x: f.hospitalOccupancy,            // Hospital Occupancy (%)
@@ -274,7 +314,7 @@ export default function SystemFlowDashboard() {
       lwbs: f.lwbsRate,
       type: f.type
     }));
-  }, []);
+  }, [systemFlowData]);
 
   // Filtered scatter plot based on highlighted quadrant
   const filteredScatterData = useMemo(() => {
@@ -292,9 +332,33 @@ export default function SystemFlowDashboard() {
 
   // Selected Quarter snapshot
   const activeQuarterSnapshot = useMemo(() => {
-    return HISTORICAL_FLOW_TIMELINES.find(q => q.quarter === selectedQuarter) || HISTORICAL_FLOW_TIMELINES[HISTORICAL_FLOW_TIMELINES.length - 1];
-  }, [selectedQuarter]);
+    const timelines = systemFlowData?.HISTORICAL_FLOW_TIMELINES ?? [];
+    if (timelines.length === 0) return { quarter: '', occupancy: 0, alcRate: 0, lwbsRate: 0, p90BedWaitHours: 0, p90LosAdmittedHours: 0 };
+    return timelines.find(q => q.quarter === selectedQuarter) || timelines[timelines.length - 1];
+  }, [selectedQuarter, systemFlowData]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading system flow data...
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load system flow data: {error}</span>
+        <button
+          onClick={() => setRefreshNonce(n => n + 1)}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
   return (
     <div id="system-flow-dashboard-root" className="space-y-6 text-slate-100 font-sans">
       
@@ -308,8 +372,16 @@ export default function SystemFlowDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Monitor occupancy, average ED wait times, and alternate level of care bottlenecks.
           </p>
-          <DataTimestamp metadata={systemFlowDataMetadata} arrayKey="FACILITY_FLOW_METRICS" />
+          <DataTimestamp metadata={systemFlowData?._dataMetadata} arrayKey="FACILITY_FLOW_METRICS" />
         </div>
+        <button
+          onClick={() => setRefreshNonce(n => n + 1)}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer shrink-0"
+          title="Refresh system flow data"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Refresh
+        </button>
       </div>
 
       {/* Primary Sub-Tab Navigation */}
@@ -576,7 +648,7 @@ export default function SystemFlowDashboard() {
               {/* Chart container */}
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={HISTORICAL_FLOW_TIMELINES} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                  <AreaChart data={systemFlowData?.HISTORICAL_FLOW_TIMELINES ?? []} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id={selectedKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0.2}/>
@@ -1199,7 +1271,7 @@ export default function SystemFlowDashboard() {
 
               <div className="h-80 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={HISTORICAL_FLOW_TIMELINES} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                  <AreaChart data={systemFlowData?.HISTORICAL_FLOW_TIMELINES ?? []} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorOccupancy" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2}/>
@@ -1251,7 +1323,7 @@ export default function SystemFlowDashboard() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                  {HISTORICAL_FLOW_TIMELINES.map((timeline) => (
+                  {(systemFlowData?.HISTORICAL_FLOW_TIMELINES ?? []).map((timeline) => (
                     <button
                       key={timeline.quarter}
                       onClick={() => setSelectedQuarter(timeline.quarter)}
@@ -1342,7 +1414,7 @@ export default function SystemFlowDashboard() {
               </div>
 
               <div className="space-y-4">
-                {CIHI_COMPARATORS.map((comp, idx) => {
+                {(systemFlowData?.CIHI_COMPARATORS ?? []).map((comp, idx) => {
                   const isBetterThanCanada = comp.albertaValue < comp.canadaValue;
                   const isBeds = comp.unit === 'beds_per_1000';
                   // Staffed beds is better when higher, others are better when lower
@@ -1479,7 +1551,7 @@ export default function SystemFlowDashboard() {
               </div>
 
               <div className="space-y-4">
-                {REGIONAL_LGA_DEMAND.map((lga, idx) => {
+                {(systemFlowData?.REGIONAL_LGA_DEMAND ?? []).map((lga, idx) => {
                   const visitRate = Math.round((lga.annualEdVisits / lga.population) * 1000);
                   const isZoneFocused = selectedZone === lga.zone;
                   
@@ -1624,7 +1696,7 @@ export default function SystemFlowDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {AHS_WEEKLY_ED_LOS.map((item, idx) => {
+          {(systemFlowData?.AHS_WEEKLY_ED_LOS ?? []).map((item, idx) => {
             const isEdmonton = item.city === 'Edmonton';
             const warningDischarge = item.pctDischargedWithin4h < 30;
             const warningAdmit = item.pctAdmittedWithin8h < 20;

@@ -24,6 +24,8 @@ import type {
   HistoricalFlowSnapshot,
 } from '../systemFlowData';
 import { HISTORICAL_FLOW_TIMELINES } from '../systemFlowData';
+import type { DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata } from './metadataHelpers';
 
 // ---- Configuration --------------------------------------------------------
 
@@ -45,6 +47,7 @@ interface SystemFlowJson {
   CIHI_COMPARATORS: CIHIComparator[];
   REGIONAL_LGA_DEMAND: LGADemand[];
   HISTORICAL_FLOW_TIMELINES: HistoricalFlowSnapshot[];
+  _dataMetadata?: DataMetadata;
 }
 
 type AlbertaZone = 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'South Zone' | 'North Zone';
@@ -63,6 +66,7 @@ function loadSystemFlow(): SystemFlowJson {
       HISTORICAL_FLOW_TIMELINES: parsed.HISTORICAL_FLOW_TIMELINES?.length
         ? parsed.HISTORICAL_FLOW_TIMELINES
         : HISTORICAL_FLOW_TIMELINES,
+      _dataMetadata: parsed._dataMetadata,
     };
   } catch {
     return {
@@ -482,6 +486,37 @@ export async function run(): Promise<SyncResult> {
     const msg = err instanceof Error ? err.message : String(err);
     errors.push(`lga-demand: ${msg}`);
     console.error('[AcuteCareScraper] LGA demand build failed:', msg);
+  }
+
+  // --- Metadata ---
+  if (updated) {
+    const ownedMetadata: DataMetadata = {
+      FACILITY_FLOW_METRICS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'AHS public wait-times API + HQA FOCUS analytical estimates',
+        sourceVintage: 'Facility list live; metrics compiled from HQA FOCUS 2025/2026 reports',
+        verification: 'Facility names/cities/zones refreshed from AHS API. Occupancy, ALC, LWBS, bed wait, and ICU metrics are analytical estimates from HQA FOCUS reports.',
+      }),
+      CIHI_COMPARATORS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI NACRS / Hospital Beds / ALC Indicators (derived from diagnostic + cancer data)',
+        sourceVintage: 'Latest CIHI official releases',
+        verification: 'Derived from data-diagnostic.json and data-cancer.json populated by CIHI downloaders.',
+      }),
+      REGIONAL_LGA_DEMAND: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Open Alberta CKAN LGA community profiles (derived from regional-inequity data)',
+        sourceVintage: 'Latest Open Alberta release',
+        verification: 'Derived from data-regional-inequity.json populated by openAlbertaInequityFetcher.',
+      }),
+      HISTORICAL_FLOW_TIMELINES: buildMetadataEntry({
+        updateType: 'manual',
+        source: 'HQA FOCUS quarterly performance reports',
+        sourceVintage: '2021-Q1 to 2026-Q1 compiled estimates',
+        verification: 'Quarterly figures compiled from HQA FOCUS datasets; preserved across runs.',
+      }),
+    };
+    data._dataMetadata = mergeDataMetadata(data._dataMetadata, ownedMetadata);
   }
 
   // --- Write file ---

@@ -10,6 +10,7 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "pipeline": "tsx src/pipelines/orchestrator.ts",
+    "daily-sync": "tsx src/pipelines/dailySync.ts",
     "push:all": "tsx src/pipelines/pushClient.ts --all",
     "deploy:worker": "cd cloudflare && wrangler deploy",
     "deploy:pages": "wrangler pages deploy dist --project-name alberta-hospital-wait-times",

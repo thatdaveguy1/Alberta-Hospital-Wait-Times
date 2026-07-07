@@ -410,9 +410,9 @@ const TAB_METADATA_MAP: Record<string, {
     source: 'AHS Emergency Advisories'
   },
   'system-flow': {
-    updateType: 'manual',
-    interval: 'on demand',
-    sourceVintage: '2025/2026 compiled data',
+    updateType: 'auto',
+    interval: 'daily at 06:00 MT',
+    sourceVintage: 'Auto-refreshed daily',
     source: 'HQA FOCUS & AHS Weekly reports'
   },
   'surgical-waits': {

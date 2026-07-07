@@ -585,3 +585,30 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** Initially planned to push per-lab and per-hospital trend keys to KV. 153 labs × 3 ranges = 459 KV writes every 30 min, and 29 hospitals × 3 ranges = 87 writes every 10 min. Cloudflare may rate-limit or reject this volume.
 - **Solution:** Only push provincial/zone/max-stats aggregates to KV (7 keys for ER, 3 for labs). Per-facility trends are served by the local server from in-memory snapshots. The deployed dashboard shows provincial trends; per-facility detail is local-only.
 - **Prevention:** When pushing to Cloudflare KV, count the keys × frequency. KV is not designed for high-volume per-entity writes. Aggregate at the push layer and keep per-entity queries on the local server.
+
+## Session: 2026-07-07 (System Flow Auto-Update & Daily Sync Reliability)
+
+### Lesson: Subagent edits can be silently lost in a busy working tree
+- **Mistake:** Two subagents reported completing changes (adding `daily-sync` to `package.json`, fixing `syncStatus.ts` to treat `manual` as non-failure), but the edits did not persist in the final working tree. A third agent's write to `scheduler.ts` and a stash/re-apply cycle in `SystemFlowDashboard.tsx` likely clobbered the package.json and syncStatus.ts changes. The result was a broken `npm run daily-sync` and a `data-sync-status.json` still showing `status: "failed"` after a successful daily run.
+- **Solution:** Parent agent verified every claimed change by re-reading the file and re-running the affected command. Re-applied the missing `package.json` script, re-applied the `syncStatus.ts` rollup fix, and added `'manual'` to the `SyncStatus` union in `types.ts`.
+- **Prevention:** When multiple agents touch the same repo, do not trust "it passed" reports from subagents without reading the actual file or running the command that exercises the change. Parent agent must own final verification.
+
+### Lesson: Static `import type` and static module imports are enforced project rules
+- **Mistake:** `scheduler.ts` used dynamic `await import('./pushClient')` and `await import('./trendsPusher')` inside functions. The project rules require static imports for modules known at author time, and the linter/type checker rejected this pattern. After rewriting `scheduler.ts` to remove the dead daily `setInterval`, the dynamic imports also had to be converted to static imports.
+- **Solution:** Replaced all dynamic imports in `scheduler.ts` with top-level static imports (`pushToCloudflare`, `pushErTrends`, `pushLabTrends`, `runAplLabWaits`). This made the module dependency graph explicit and satisfied the rule.
+- **Prevention:** Read the project rules before editing. Prefer static imports by default; reserve dynamic imports for genuinely runtime-selected module specifiers.
+
+### Lesson: Multiple writers to one JSON file need a shared metadata merge contract
+- **Mistake:** Three pipelines (`acuteCareScraper`, `ahsWeeklyEdLosScraper`, `cihiMhSafetyFetcher`) all read-modify-write `data-system-flow.json`. Adding a top-level `_dataMetadata` block risked one writer clobbering another's metadata entries on every run.
+- **Solution:** Created a shared `metadataHelpers.ts` with `buildMetadataEntry()` and `mergeDataMetadata()`. Each writer only stamps metadata for the arrays it owns, merging into the existing `_dataMetadata` object so sibling entries survive. Verified by re-running each scraper individually and confirming the other writers' entries remained byte-identical.
+- **Prevention:** When several writers share a JSON file, never let any writer replace the whole metadata block. Establish a merge helper and per-writer ownership of keys before the first writer is modified.
+
+### Lesson: `setInterval(24h)` in the server is unreliable for daily sync
+- **Mistake:** The daily orchestrator ran inside the long-lived Express server via `setInterval(24h)`. This drifts, resets on every restart, and couples the heavy daily work (Puppeteer/CIHI) to the web server process. A crash in the daily sync could take the server down.
+- **Solution:** Decoupled the daily sync into a standalone `src/pipelines/dailySync.ts` run by `npm run daily-sync`. Added a second launchd job (`com.alberta-hospital-pipeline-daily.plist`) with `StartCalendarInterval` at 06:00 MT, independent of the server. Removed the 24-hour `setInterval` from `scheduler.ts`; the server now only schedules fast ER (10 min) and lab (30 min) cycles.
+- **Prevention:** Heavy, once-a-day batch work should not run inside the serving process. Use calendar-scheduled one-shot jobs (launchd, cron) for daily work and keep the server focused on fast, stateless intervals.
+
+### Lesson: "Manual" pipeline results must not be counted as failures
+- **Mistake:** `syncStatus.ts` rolled up daily results as `allSuccess ? 'success' : anyFailed || anyPartialOrSkipped ? 'partial_success' : 'failed'`. Pipelines returning `status: 'manual'` (sources that are blocked or partial) fell through to `'failed'`, so `data-sync-status.json` showed the entire daily run as failed even when 23/31 pipelines succeeded.
+- **Solution:** Updated `recordDailySyncResults()` to treat `manual` as a non-failure status: success + manual → `partial_success`; only manual (no success) → `manual`; any failed → `partial_success` if there are successes, otherwise `failed`. Added `'manual'` to the `SyncStatus['status']` union.
+- **Prevention:** Every distinct `SyncResult['status']` value must be handled explicitly in the rollup. Do not let a status fall through to a default that misrepresents the outcome.

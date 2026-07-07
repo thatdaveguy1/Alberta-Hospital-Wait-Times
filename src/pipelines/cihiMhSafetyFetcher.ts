@@ -15,6 +15,11 @@ import fs from 'fs';
 import * as XLSX from 'xlsx';
 import path from 'path';
 import type { SyncResult } from './types';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 
 const MENTAL_HEALTH_FILE = path.join(process.cwd(), 'data-mental-health.json');
 const PATIENT_EXPERIENCE_FILE = path.join(process.cwd(), 'data-patient-experience.json');
@@ -85,6 +90,28 @@ const INDICATOR_URLS: { url: string; domain: string; key: string }[] = [
     key: 'CIHI_ED_WAIT_INITIAL_ASSESSMENT',
   },
 ];
+
+// _dataMetadata entries this writer owns in data-system-flow.json. Only the
+// keys actually refreshed in a given run are stamped (see run()), and sibling
+// writers' entries are preserved via mergeDataMetadata.
+const SYSTEM_FLOW_METADATA_BUILDERS: Record<string, (ts: string) => DataMetadata[string]> = {
+  CIHI_OCCUPANCY_RATES: (ts) =>
+    buildMetadataEntry({
+      updateType: 'auto',
+      source: 'CIHI indicator XLSX (878 average acute occupancy rate)',
+      sourceVintage: 'CIHI indicator data table (latest available)',
+      verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
+      lastUpdated: ts,
+    }),
+  CIHI_ED_WAIT_INITIAL_ASSESSMENT: (ts) =>
+    buildMetadataEntry({
+      updateType: 'auto',
+      source: 'CIHI indicator XLSX (811 ED wait time for physician initial assessment)',
+      sourceVintage: 'CIHI indicator data table (latest available)',
+      verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
+      lastUpdated: ts,
+    }),
+};
 
 interface LoadedJson {
   [key: string]: unknown;
@@ -237,7 +264,27 @@ export async function run(): Promise<SyncResult> {
       const domainUpdates = updates[domain];
       if (!domainUpdates || Object.keys(domainUpdates).length === 0) continue;
       const existing = loadJsonFile(file);
-      const merged = { ...existing, ...domainUpdates };
+      const merged: LoadedJson = { ...existing, ...domainUpdates };
+
+      // For data-system-flow.json, refresh _dataMetadata for the owned arrays
+      // actually updated this run, preserving entries owned by the other
+      // system-flow writers (acuteCareScraper, ahsWeeklyEdLosScraper).
+      if (domain === 'system-flow') {
+        const ownedMetadata: DataMetadata = {};
+        for (const key of Object.keys(domainUpdates)) {
+          const builder = SYSTEM_FLOW_METADATA_BUILDERS[key];
+          if (builder) {
+            ownedMetadata[key] = builder(timestamp);
+          }
+        }
+        if (Object.keys(ownedMetadata).length > 0) {
+          merged._dataMetadata = mergeDataMetadata(
+            existing._dataMetadata as DataMetadata | undefined,
+            ownedMetadata,
+          );
+        }
+      }
+
       fs.writeFileSync(file, JSON.stringify(merged, null, 2) + '\n', 'utf8');
       console.log(`[CihiMhSafety] Wrote ${Object.keys(domainUpdates).length} keys to ${path.basename(file)}`);
     }

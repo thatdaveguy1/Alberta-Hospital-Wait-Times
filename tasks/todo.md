@@ -347,11 +347,11 @@
   - Worker reads raw key and filters by range on read
 
 ## Phase 23: System Flow Auto-Update & Daily Sync Reliability
-- [ ] Convert SystemFlowDashboard to fetch from /api/data/system-flow
-- [ ] Add _dataMetadata to data-system-flow.json writers (preserve others' keys)
-- [ ] Fix sync status rollup so 'manual' ≠ 'failed'
-- [ ] Create standalone daily-sync script (npm run daily-sync)
-- [ ] Create calendar-scheduled launchd plist for daily-sync at 06:00 MT
-- [ ] Remove daily orchestrator from server setInterval (keep ER 10min + lab 30min)
-- [ ] Update App.tsx system-flow cadence labels
-- [ ] Verify end-to-end: typecheck, pipeline run, dashboard badge, launchd load
+- [x] Convert SystemFlowDashboard to fetch from /api/data/system-flow
+- [x] Add _dataMetadata to data-system-flow.json writers (preserve others' keys)
+- [x] Fix sync status rollup so 'manual' ≠ 'failed'
+- [x] Create standalone daily-sync script (npm run daily-sync)
+- [x] Create calendar-scheduled launchd plist for daily-sync at 06:00 MT
+- [x] Remove daily orchestrator from server setInterval (keep ER 10min + lab 30min)
+- [x] Update App.tsx system-flow cadence labels
+- [x] Verify end-to-end: typecheck, pipeline run, dashboard badge, launchd load

@@ -12,7 +12,7 @@ export interface SyncResult {
 }
 
 export interface SyncStatus {
-  status: 'never_run' | 'running' | 'success' | 'partial_success' | 'failed';
+  status: 'never_run' | 'running' | 'success' | 'partial_success' | 'failed' | 'manual';
   lastSyncTimestamp: string | null;
   nextSyncTimestamp: string | null;
   results: SyncResult[];

@@ -4,8 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import axios from 'axios';
 import fs from 'fs';
 import { ServiceDisruption } from './src/types';
-import { startScheduler, setDailyOrchestrator, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
-import { runAllPipelines } from './src/pipelines/orchestrator';
+import { startScheduler, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
 import { getSyncStatus } from './src/pipelines/syncStatus';
 
 // Alert Interfaces
@@ -567,7 +566,6 @@ async function startServer() {
   // Wire the pipeline scheduler — ER wait times every 10 min, daily orchestrator every 24 hr.
   // Daily sync runs in the background so it never blocks the Express server from accepting connections.
   setAlertCheckFn(checkEmailAlerts);
-  setDailyOrchestrator(runAllPipelines);
   startScheduler().catch(err => {
     console.error('[Server] Failed to start scheduler:', err);
   });

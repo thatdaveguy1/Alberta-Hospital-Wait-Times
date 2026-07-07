@@ -21,6 +21,11 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import type { SyncResult } from './types';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type { WeeklyEDLOS } from '../systemFlowData';
 
 const EDMONTON_PDF_URL =
@@ -284,6 +289,23 @@ export async function run(): Promise<SyncResult> {
     data.AHS_WEEKLY_ED_LOS = merged;
     updated = true;
     recordsFetched = scrapedRecords.length;
+  }
+
+  // Refresh _dataMetadata for this writer's owned array (AHS_WEEKLY_ED_LOS).
+  // The rest of `data` (including other writers' _dataMetadata entries) is
+  // preserved because we write the whole read-modify-write object back.
+  if (updated) {
+    const existingMeta = data._dataMetadata as DataMetadata | undefined;
+    const ownedMetadata: DataMetadata = {
+      AHS_WEEKLY_ED_LOS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'AHS Weekly ED Performance Reports (Edmonton + Calgary PDFs)',
+        sourceVintage: 'AHS weekly ED LOS PDFs (week ending per report)',
+        verification: 'Auto-parsed from AHS weekly ED wait/throughput PDFs via pdftotext; facility names normalized to existing hand-authored IDs.',
+        lastUpdated: timestamp,
+      }),
+    };
+    data._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
   }
 
   let recordsWritten = 0;

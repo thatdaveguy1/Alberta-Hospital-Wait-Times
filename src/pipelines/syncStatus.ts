@@ -69,11 +69,26 @@ export function recordLabWaitsUpdate(result: SyncResult): void {
 export function recordDailySyncResults(results: SyncResult[]): void {
   const allSuccess = results.every(r => r.status === 'success');
   const anyFailed = results.some(r => r.status === 'failed');
-  const anyPartialOrSkipped = results.some(r => r.status === 'partial' || r.status === 'skipped');
+  const anySuccess = results.some(r => r.status === 'success');
+  const anyPartialSkippedOrManual = results.some(
+    r => r.status === 'partial' || r.status === 'skipped' || r.status === 'manual'
+  );
 
-  // success = all succeeded. partial_success = some succeeded, rest partial/skipped/failed.
-  // failed = all failed (no successes at all).
-  currentStatus.status = allSuccess ? 'success' : anyFailed || anyPartialOrSkipped ? 'partial_success' : 'failed';
+  // success = all succeeded.
+  // partial_success = some succeeded, rest partial/skipped/manual/failed; or any failed with success present.
+  // failed = all failed (no successes, no partial/skipped/manual).
+  // manual = no successes, only partial/skipped/manual (no failed).
+  let status: SyncStatus['status'];
+  if (allSuccess) {
+    status = 'success';
+  } else if (anyFailed) {
+    status = anySuccess ? 'partial_success' : 'failed';
+  } else if (anyPartialSkippedOrManual) {
+    status = anySuccess ? 'partial_success' : 'manual';
+  } else {
+    status = 'failed';
+  }
+  currentStatus.status = status;
   currentStatus.lastSyncTimestamp = new Date().toISOString();
   currentStatus.nextSyncTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
