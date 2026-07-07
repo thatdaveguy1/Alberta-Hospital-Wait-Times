@@ -65,6 +65,50 @@ type RegionalInequityData = {
   SERVICE_ACCESS_METRICS: ServiceAccessMetric[];
 };
 
+const defaultNeed: CommunityNeedMetric = {
+  lgaName: 'Loading...',
+  zone: 'Calgary Zone',
+  type: 'Urban Hub',
+  physiciansPer100k: 0,
+  claimsOutsideLgaPct: 0,
+  acscRatePer100k: 0,
+  deprivationIndex: 1,
+  medianHouseholdIncome: 0,
+  highSchoolGradPct: 0
+};
+
+const defaultDisease: ChronicDiseaseBurden = {
+  lgaName: 'Loading...',
+  diabetesPrevalencePct: 0,
+  copdPrevalencePct: 0,
+  hypertensionPrevalencePct: 0,
+  infantMortalityPer1000: 0,
+  lifeExpectancyYears: 0
+};
+
+const defaultEd: EDRelianceMetric = {
+  lgaName: 'Loading...',
+  totalEdVisitsPer1000: 0,
+  lowAcuityCtas45Pct: 0,
+  afterHoursEdPct: 0,
+  moodAnxietyEdRatePer100k: 0
+};
+
+const defaultTravel: TravelForCare = {
+  lgaName: 'Loading...',
+  careDeliveredOutsideLgaPct: 0,
+  topDestinationFacility: 'None',
+  avgTravelDistanceKm: 0,
+  localBedLeakagePct: 0
+};
+
+const defaultAccess: ServiceAccessMetric = {
+  lgaName: 'Loading...',
+  facilitiesPer10k: 0,
+  distanceToNearestEdKm: 0,
+  distanceToNearestImagingKm: 0,
+  providersAcceptingPatients: 0
+};
 export default function RegionalInequityDashboard() {
   // Live data fetched from /api/data/regional-inequity
   const { data, metadata, isLoading, error, refresh } = useDomainData<RegionalInequityData>('regional-inequity');
@@ -138,27 +182,27 @@ export default function RegionalInequityDashboard() {
       p.lgaName.toLowerCase().includes(lgaSearch.toLowerCase()) ||
       p.zone.toLowerCase().includes(lgaSearch.toLowerCase())
     );
-  }, [lgaSearch]);
+  }, [COMMUNITY_NEED_PROFILES, lgaSearch]);
 
   const selectedLgaNeed = useMemo(() => {
-    return COMMUNITY_NEED_PROFILES.find(p => p.lgaName === selectedLgaDetail) || COMMUNITY_NEED_PROFILES[4];
-  }, [selectedLgaDetail]);
+    return COMMUNITY_NEED_PROFILES.find(p => p.lgaName === selectedLgaDetail) || COMMUNITY_NEED_PROFILES[0] || defaultNeed;
+  }, [COMMUNITY_NEED_PROFILES, selectedLgaDetail]);
 
   const selectedLgaDisease = useMemo(() => {
-    return CHRONIC_DISEASE_BURDEN.find(d => d.lgaName === selectedLgaDetail) || CHRONIC_DISEASE_BURDEN[4];
-  }, [selectedLgaDetail]);
+    return CHRONIC_DISEASE_BURDEN.find(d => d.lgaName === selectedLgaDetail) || CHRONIC_DISEASE_BURDEN[0] || defaultDisease;
+  }, [CHRONIC_DISEASE_BURDEN, selectedLgaDetail]);
 
   const selectedLgaEd = useMemo(() => {
-    return ED_RELIANCE_METRICS.find(e => e.lgaName === selectedLgaDetail) || ED_RELIANCE_METRICS[4];
-  }, [selectedLgaDetail]);
+    return ED_RELIANCE_METRICS.find(e => e.lgaName === selectedLgaDetail) || ED_RELIANCE_METRICS[0] || defaultEd;
+  }, [ED_RELIANCE_METRICS, selectedLgaDetail]);
 
   const selectedLgaTravel = useMemo(() => {
-    return TRAVEL_FOR_CARE.find(t => t.lgaName === selectedLgaDetail) || TRAVEL_FOR_CARE[4];
-  }, [selectedLgaDetail]);
+    return TRAVEL_FOR_CARE.find(t => t.lgaName === selectedLgaDetail) || TRAVEL_FOR_CARE[0] || defaultTravel;
+  }, [TRAVEL_FOR_CARE, selectedLgaDetail]);
 
   const selectedLgaAccess = useMemo(() => {
-    return SERVICE_ACCESS_METRICS.find(s => s.lgaName === selectedLgaDetail) || SERVICE_ACCESS_METRICS[4];
-  }, [selectedLgaDetail]);
+    return SERVICE_ACCESS_METRICS.find(s => s.lgaName === selectedLgaDetail) || SERVICE_ACCESS_METRICS[0] || defaultAccess;
+  }, [SERVICE_ACCESS_METRICS, selectedLgaDetail]);
 
   // Combined full dataset of selected LGA
   const selectedFullData = useMemo(() => {
@@ -181,11 +225,11 @@ export default function RegionalInequityDashboard() {
         ...PROVINCIAL_BENCHMARKS
       };
     } else {
-      const need = COMMUNITY_NEED_PROFILES.find(p => p.lgaName === comparisonTarget) || COMMUNITY_NEED_PROFILES[0];
-      const disease = CHRONIC_DISEASE_BURDEN.find(d => d.lgaName === comparisonTarget) || CHRONIC_DISEASE_BURDEN[0];
-      const ed = ED_RELIANCE_METRICS.find(e => e.lgaName === comparisonTarget) || ED_RELIANCE_METRICS[0];
-      const travel = TRAVEL_FOR_CARE.find(t => t.lgaName === comparisonTarget) || TRAVEL_FOR_CARE[0];
-      const access = SERVICE_ACCESS_METRICS.find(s => s.lgaName === comparisonTarget) || SERVICE_ACCESS_METRICS[0];
+      const need = COMMUNITY_NEED_PROFILES.find(p => p.lgaName === comparisonTarget) || COMMUNITY_NEED_PROFILES[0] || defaultNeed;
+      const disease = CHRONIC_DISEASE_BURDEN.find(d => d.lgaName === comparisonTarget) || CHRONIC_DISEASE_BURDEN[0] || defaultDisease;
+      const ed = ED_RELIANCE_METRICS.find(e => e.lgaName === comparisonTarget) || ED_RELIANCE_METRICS[0] || defaultEd;
+      const travel = TRAVEL_FOR_CARE.find(t => t.lgaName === comparisonTarget) || TRAVEL_FOR_CARE[0] || defaultTravel;
+      const access = SERVICE_ACCESS_METRICS.find(s => s.lgaName === comparisonTarget) || SERVICE_ACCESS_METRICS[0] || defaultAccess;
       return {
         ...need,
         ...disease,
@@ -194,33 +238,43 @@ export default function RegionalInequityDashboard() {
         ...access
       };
     }
-  }, [comparisonTarget]);
+  }, [comparisonTarget, PROVINCIAL_BENCHMARKS, COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, ED_RELIANCE_METRICS, TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS]);
 
   // Normalized Radar Chart Data
   const radarChartData = useMemo(() => {
     // Normalization Helpers (0 - 100 score, higher is better)
     // 1. Doctor Density: Physicians per 100k relative to maximum (168.4)
-    const normalizePhysicians = (val: number) => Math.round((val / 168.4) * 100);
+    const normalizePhysicians = (val: number) => {
+      if (val === undefined || isNaN(val)) return 0;
+      return Math.round((val / 168.4) * 100);
+    };
     
     // 2. Economic strength: Median household income relative to max ($112,500)
-    const normalizeIncome = (val: number) => Math.round((val / 112500) * 100);
+    const normalizeIncome = (val: number) => {
+      if (val === undefined || isNaN(val)) return 0;
+      return Math.round((val / 112500) * 100);
+    };
     
     // 3. Preventative care efficacy: Inverse of ACSC rate (lower is better, max 845.1, min 184.2)
     // Map so 845.1 becomes 15 and 184.2 becomes 95
     const normalizePreventative = (val: number) => {
+      if (val === undefined || isNaN(val)) return 0;
       const progress = (val - 184.2) / (845.1 - 184.2);
       return Math.round(95 - (progress * 80));
     };
 
     // 4. Care proximity: Inverse of distance to ED (max 145.8, min 2.1)
     const normalizeProximity = (val: number) => {
+      if (val === undefined || isNaN(val)) return 0;
       const progress = (val - 2.1) / (145.8 - 2.1);
       return Math.round(98 - (progress * 90));
     };
 
     // 5. Care Retention: Retaining rostered patients locally (% rostered locally, which is 100 - claimsOutsideLgaPct)
-    const normalizeRetention = (val: number) => Math.round(100 - val);
-
+    const normalizeRetention = (val: number) => {
+      if (val === undefined || isNaN(val)) return 0;
+      return Math.round(100 - val);
+    };
     return [
       {
         subject: 'Primary Care Density',
@@ -258,10 +312,10 @@ export default function RegionalInequityDashboard() {
   // Combined full table array for All Data Explorer
   const fullCombinedDataset = useMemo(() => {
     return COMMUNITY_NEED_PROFILES.map(p => {
-      const disease = CHRONIC_DISEASE_BURDEN.find(d => d.lgaName === p.lgaName)!;
-      const ed = ED_RELIANCE_METRICS.find(e => e.lgaName === p.lgaName)!;
-      const travel = TRAVEL_FOR_CARE.find(t => t.lgaName === p.lgaName)!;
-      const access = SERVICE_ACCESS_METRICS.find(s => s.lgaName === p.lgaName)!;
+      const disease = CHRONIC_DISEASE_BURDEN.find(d => d.lgaName === p.lgaName) || defaultDisease;
+      const ed = ED_RELIANCE_METRICS.find(e => e.lgaName === p.lgaName) || defaultEd;
+      const travel = TRAVEL_FOR_CARE.find(t => t.lgaName === p.lgaName) || defaultTravel;
+      const access = SERVICE_ACCESS_METRICS.find(s => s.lgaName === p.lgaName) || defaultAccess;
       return {
         ...p,
         ...disease,
