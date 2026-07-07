@@ -714,6 +714,24 @@ export default function SurgicalDashboard() {
                 <DataTimestamp compact metadata={metadata} arrayKey="SURGICAL_RECORDS" />
               </div>
 
+              {/* Wait Times Legend */}
+              <div className="mb-4 p-3.5 bg-slate-950/60 border border-slate-850 rounded-xl space-y-2">
+                <h4 className="text-[10px] font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                  <span>Wait Times Legend &amp; Definitions</span>
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[10px] leading-relaxed">
+                  <div className="p-2.5 bg-slate-900/30 rounded-lg border border-slate-850/40">
+                    <strong className="text-slate-300 block mb-0.5">Wait 1 (GP Referral to Specialist Consult)</strong>
+                    <span className="text-slate-400">The total duration from when your Family Doctor submits a referral to when you have your initial consultation visit with the surgical specialist.</span>
+                  </div>
+                  <div className="p-2.5 bg-slate-900/30 rounded-lg border border-slate-850/40">
+                    <strong className="text-slate-300 block mb-0.5">Wait 2 (Decision to Surgical Procedure)</strong>
+                    <span className="text-slate-400">The duration from when you and the specialist decide to proceed with surgery (signed consent form) to the actual date the surgery is performed.</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
@@ -731,6 +749,13 @@ export default function SurgicalDashboard() {
                         if (typeof val === 'number') return val.toFixed(1);
                         const num = parseFloat(val);
                         return isNaN(num) ? val : num.toFixed(1);
+                      };
+
+                      const formatBenchmark = (val: string | null) => {
+                        if (!val) return null;
+                        const lower = val.toLowerCase();
+                        if (lower.includes('week') || lower.includes('day')) return val;
+                        return `${val} weeks`;
                       };
 
                       const getWaitSegmentLabel = (segment: string) => {
@@ -759,16 +784,16 @@ export default function SurgicalDashboard() {
                                 {getWaitSegmentLabel(rec.wait_segment)}
                               </span>
                             </td>
-                            <td className="py-2.5 px-3 text-center font-mono font-black text-slate-200">
+                            <td className="py-2.5 px-3 text-center font-mono font-black text-slate-200 whitespace-nowrap">
                               {formatWaitTime(rec.metric_value)} weeks
                             </td>
-                            <td className="py-2.5 px-3 text-center font-mono font-black text-slate-200">
+                            <td className="py-2.5 px-3 text-center font-mono font-black text-slate-200 whitespace-nowrap">
                               {matching90th ? `${formatWaitTime(matching90th.metric_value)} weeks` : <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">—</span>}
                             </td>
-                            <td className="py-2.5 px-3 text-slate-400 font-semibold text-[11px]">
-                              {rec.benchmark_value ? `${rec.benchmark_value} weeks` : <span className="text-slate-600 font-normal">—</span>}
+                            <td className="py-2.5 px-3 text-slate-400 font-semibold text-[11px] whitespace-nowrap">
+                              {rec.benchmark_value ? formatBenchmark(rec.benchmark_value) : <span className="text-slate-600 font-normal">—</span>}
                             </td>
-                            <td className="py-2.5 px-3 text-right">
+                            <td className="py-2.5 px-3 text-right whitespace-nowrap">
                               <span className="text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded bg-slate-950 border border-slate-850 text-blue-400">
                                 {getSourceLabel(rec.source_name)}
                               </span>
@@ -779,16 +804,6 @@ export default function SurgicalDashboard() {
                     })()}
                   </tbody>
                 </table>
-              </div>
-
-              <div className="mt-4 p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl flex items-start gap-2.5">
-                <Info className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <h4 className="text-[10px] font-bold text-white uppercase tracking-wider">Interpretation Guidelines</h4>
-                  <p className="text-[10px] text-slate-400 leading-normal">
-                    <strong>Wait 1</strong> represents the time from referral by a GP to your specialist consultation. <strong>Wait 2</strong> is the time from the decision to proceed with surgery to the date of the actual procedure. Percentile wait times are based on the previous three months of rolling data.
-                  </p>
-                </div>
               </div>
             </div>
 
