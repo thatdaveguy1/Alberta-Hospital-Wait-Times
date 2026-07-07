@@ -801,78 +801,72 @@ export default function SystemFlowDashboard() {
                   </div>
                 </div>
 
-                {/* Table Container */}
-                <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#090e21] shadow-2xl">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-950/80 border-b border-slate-800 text-[9px] font-black uppercase tracking-widest text-slate-400">
-                        <th className="p-3 text-center w-10">Select</th>
-                        <th className="p-3 min-w-[180px]">Hospital / Health Area</th>
-                        <th className="p-3 text-center">Daily visits</th>
-                        <th className="p-3 text-center">Occupancy</th>
-                        <th className="p-3 text-center">P90 Bed Wait</th>
-                        <th className="p-3 text-center">LWBS %</th>
-                        <th className="p-3 text-center">ALC %</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-850/50 font-mono text-xs">
-                      {sortedFacilities.map((fac, idx) => {
-                        const isSelected = fac.id === selectedHospitalId;
-                        const isCrisisOccupancy = fac.hospitalOccupancy >= 104;
-                        const isHighOccupancy = fac.hospitalOccupancy >= 100 && fac.hospitalOccupancy < 104;
-                        
-                        return (
-                          <tr 
-                            key={fac.id} 
-                            onClick={() => setSelectedHospitalId(fac.id)}
-                            className={`group hover:bg-slate-900/40 transition-all cursor-pointer ${
-                              isSelected ? 'bg-slate-900/70 border-l-4 border-l-blue-500' : ''
-                            }`}
-                          >
-                            <td className="p-3 text-center">
-                              <input 
-                                type="radio" 
-                                checked={isSelected} 
-                                onChange={() => setSelectedHospitalId(fac.id)}
-                                className="cursor-pointer accent-blue-500"
-                              />
-                            </td>
-                            <td className="p-3 font-sans">
-                              <div className="font-extrabold text-slate-100 group-hover:text-blue-400 transition-colors">{fac.name}</div>
-                              <div className="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-                                <span className="px-1 py-0.2 bg-slate-950 border border-slate-800 text-slate-400 text-[8px] font-black font-mono rounded uppercase">
-                                  {fac.zone.replace(' Zone', '')}
-                                </span>
-                                <span>{fac.city}</span>
+                {/* Modern Facility List */}
+                <div className="space-y-3">
+                  <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#090e21] shadow-2xl">
+                    <div className="overflow-x-auto">
+                      <div className="min-w-[680px]">
+                        {/* Header */}
+                        <div className="grid grid-cols-12 gap-3 px-4 py-3 bg-slate-950/80 border-b border-slate-800 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                          <div className="col-span-4">Hospital / Health Area</div>
+                          <div className="col-span-1 text-center">Visits</div>
+                          <div className="col-span-2 text-center">Occupancy</div>
+                          <div className="col-span-2 text-center">P90 Wait</div>
+                          <div className="col-span-1 text-center">LWBS</div>
+                          <div className="col-span-2 text-center">ALC</div>
+                        </div>
+                        {/* Rows */}
+                        <div className="divide-y divide-slate-850/50 font-mono text-xs">
+                          {sortedFacilities.map((fac) => {
+                            const isSelected = fac.id === selectedHospitalId;
+                            const isCrisisOccupancy = fac.hospitalOccupancy >= 104;
+                            const isHighOccupancy = fac.hospitalOccupancy >= 100 && fac.hospitalOccupancy < 104;
+                            return (
+                              <div
+                                key={fac.id}
+                                onClick={() => setSelectedHospitalId(fac.id)}
+                                className={`grid grid-cols-12 gap-3 px-4 py-3.5 items-center cursor-pointer transition-all group ${isSelected ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : 'hover:bg-slate-900/40 border-l-4 border-l-transparent'}`}
+                              >
+                                <div className="col-span-4">
+                                  <div className={`font-semibold text-sm transition-colors ${isSelected ? 'text-blue-100' : 'text-slate-200 group-hover:text-slate-100'}`}>
+                                    {fac.name}
+                                  </div>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <span className="px-1.5 py-0.5 bg-slate-950 border border-slate-700 rounded-md text-[9px] font-black text-slate-400 uppercase tracking-wide">
+                                      {fac.zone.replace(' Zone', '')}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500">{fac.city}</span>
+                                  </div>
+                                </div>
+                                <div className="col-span-1 text-center font-bold text-slate-300">
+                                  {fac.edDailyVolume}
+                                </div>
+                                <div className="col-span-2 text-center">
+                                  {fac.hospitalOccupancy > 0 ? (
+                                    <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-[10px] font-black ${isCrisisOccupancy ? 'bg-rose-500/15 text-rose-400 border border-rose-500/25' : isHighOccupancy ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'}`}>
+                                      {fac.hospitalOccupancy}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-600">—</span>
+                                  )}
+                                </div>
+                                <div className="col-span-2 text-center font-bold text-slate-200">
+                                  {fac.p90BedWait > 0 ? `${fac.p90BedWait}h` : <span className="text-slate-600">—</span>}
+                                </div>
+                                <div className="col-span-1 text-center font-black text-rose-400/90">
+                                  {fac.lwbsRate}%
+                                </div>
+                                <div className="col-span-2 text-center font-bold text-violet-400">
+                                  {fac.alcRate > 0 ? `${fac.alcRate}%` : <span className="text-slate-600">—</span>}
+                                </div>
                               </div>
-                            </td>
-                            <td className="p-3 text-center font-bold text-slate-300">
-                              {fac.edDailyVolume}
-                            </td>
-                            <td className="p-3 text-center">
-                              {fac.hospitalOccupancy > 0 ? (
-                                <span className={`font-black ${isCrisisOccupancy ? 'text-red-400' : isHighOccupancy ? 'text-amber-500' : 'text-emerald-400'}`}>
-                                  {fac.hospitalOccupancy}%
-                                </span>
-                              ) : (
-                                <span className="text-slate-600">—</span>
-                              )}
-                            </td>
-                            <td className="p-3 text-center font-bold text-slate-200">
-                              {fac.p90BedWait > 0 ? `${fac.p90BedWait}h` : <span className="text-slate-600">—</span>}
-                            </td>
-                            <td className="p-3 text-center font-black text-rose-400/90">
-                              {fac.lwbsRate}%
-                            </td>
-                            <td className="p-3 text-center font-bold text-violet-400">
-                              {fac.alcRate > 0 ? `${fac.alcRate}%` : <span className="text-slate-600">—</span>}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                  <div className="mt-3 flex items-start gap-2 text-[10px] text-slate-500 leading-relaxed">
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 text-[10px] text-slate-500 leading-relaxed">
                     <Info className="w-3.5 h-3.5 text-slate-600 shrink-0 mt-0.5" />
                     <p>
                       Flow metrics (occupancy, P90 bed wait, ALC) come from HQA FOCUS analytical estimates and are not available for all facility types.
