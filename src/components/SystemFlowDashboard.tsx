@@ -201,9 +201,12 @@ export default function SystemFlowDashboard() {
     }
     const totalBeds = facilities.reduce((sum, f) => sum + f.staffedAcuteBeds, 0);
     const avgOccupancy = facilities.reduce((sum, f) => sum + (f.hospitalOccupancy * f.staffedAcuteBeds), 0) / totalBeds;
-    const avgAlc = facilities.reduce((sum, f) => sum + f.alcRate, 0) / facilities.length;
-    const avgLwbs = facilities.reduce((sum, f) => sum + f.lwbsRate, 0) / facilities.length;
-    const avgP90Wait = facilities.reduce((sum, f) => sum + f.p90BedWait, 0) / facilities.length;
+    const alcValues = facilities.map(f => f.alcRate).filter(v => v > 0);
+    const lwbsValues = facilities.map(f => f.lwbsRate).filter(v => v > 0);
+    const p90WaitValues = facilities.map(f => f.p90BedWait).filter(v => v > 0);
+    const avgAlc = alcValues.length > 0 ? alcValues.reduce((sum, v) => sum + v, 0) / alcValues.length : 0;
+    const avgLwbs = lwbsValues.length > 0 ? lwbsValues.reduce((sum, v) => sum + v, 0) / lwbsValues.length : 0;
+    const avgP90Wait = p90WaitValues.length > 0 ? p90WaitValues.reduce((sum, v) => sum + v, 0) / p90WaitValues.length : 0;
     const totalVolume = facilities.reduce((sum, f) => sum + f.edDailyVolume, 0);
 
     return {
@@ -233,9 +236,18 @@ export default function SystemFlowDashboard() {
     });
   }, [selectedZone, selectedType, searchQuery, systemFlowData]);
 
+// Facilities with HQA FOCUS flow metrics available
+  const hasFlowData = (f: FacilityFlow) =>
+    f.hospitalOccupancy > 0 || f.p90BedWait > 0 || f.alcRate > 0;
+
   // Sorted Facilities
   const sortedFacilities = useMemo(() => {
     return [...filteredFacilities].sort((a, b) => {
+      // Show facilities with real HQA FOCUS data first
+      const aHasData = hasFlowData(a) ? 1 : 0;
+      const bHasData = hasFlowData(b) ? 1 : 0;
+      if (aHasData !== bHasData) return bHasData - aHasData;
+
       const valA = a[sortMetric] as number;
       const valB = b[sortMetric] as number;
       if (valA < valB) return sortDirection === 'desc' ? 1 : -1;
@@ -831,24 +843,35 @@ export default function SystemFlowDashboard() {
                               {fac.edDailyVolume}
                             </td>
                             <td className="p-3 text-center">
-                              <span className={`font-black ${isCrisisOccupancy ? 'text-red-400' : isHighOccupancy ? 'text-amber-500' : 'text-emerald-400'}`}>
-                                {fac.hospitalOccupancy}%
-                              </span>
+                              {fac.hospitalOccupancy > 0 ? (
+                                <span className={`font-black ${isCrisisOccupancy ? 'text-red-400' : isHighOccupancy ? 'text-amber-500' : 'text-emerald-400'}`}>
+                                  {fac.hospitalOccupancy}%
+                                </span>
+                              ) : (
+                                <span className="text-slate-600">—</span>
+                              )}
                             </td>
                             <td className="p-3 text-center font-bold text-slate-200">
-                              {fac.p90BedWait}h
+                              {fac.p90BedWait > 0 ? `${fac.p90BedWait}h` : <span className="text-slate-600">—</span>}
                             </td>
                             <td className="p-3 text-center font-black text-rose-400/90">
                               {fac.lwbsRate}%
                             </td>
                             <td className="p-3 text-center font-bold text-violet-400">
-                              {fac.alcRate}%
+                              {fac.alcRate > 0 ? `${fac.alcRate}%` : <span className="text-slate-600">—</span>}
                             </td>
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
+                  <div className="mt-3 flex items-start gap-2 text-[10px] text-slate-500 leading-relaxed">
+                    <Info className="w-3.5 h-3.5 text-slate-600 shrink-0 mt-0.5" />
+                    <p>
+                      Flow metrics (occupancy, P90 bed wait, ALC) come from HQA FOCUS analytical estimates and are not available for all facility types.
+                      Facilities without these metrics show "—".
+                    </p>
+                  </div>
                   {sortedFacilities.length === 0 && (
                     <div className="p-8 text-center text-slate-500 font-sans">
                       No facilities match the active filter criteria. Check your filters above.
