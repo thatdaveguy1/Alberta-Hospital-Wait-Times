@@ -816,8 +816,8 @@ export default function SystemFlowDashboard() {
                           <div className="col-span-2 text-center">ALC</div>
                         </div>
                         {/* Rows */}
-                        <div className="divide-y divide-slate-850/50 font-mono text-xs">
-                          {sortedFacilities.map((fac) => {
+                        {(() => {
+                          const renderRow = (fac: FacilityFlow) => {
                             const isSelected = fac.id === selectedHospitalId;
                             const isCrisisOccupancy = fac.hospitalOccupancy >= 104;
                             const isHighOccupancy = fac.hospitalOccupancy >= 100 && fac.hospitalOccupancy < 104;
@@ -861,8 +861,39 @@ export default function SystemFlowDashboard() {
                                 </div>
                               </div>
                             );
-                          })}
-                        </div>
+                          };
+
+                          // Find the boundary between rows that have HQA FOCUS flow metrics
+                          // and rows that don't, so we can insert an explanatory divider.
+                          let splitIndex = -1;
+                          for (let i = 0; i < sortedFacilities.length - 1; i++) {
+                            if (hasFlowData(sortedFacilities[i]) && !hasFlowData(sortedFacilities[i + 1])) {
+                              splitIndex = i;
+                              break;
+                            }
+                          }
+                          const head = splitIndex >= 0 ? sortedFacilities.slice(0, splitIndex + 1) : sortedFacilities;
+                          const tail = splitIndex >= 0 ? sortedFacilities.slice(splitIndex + 1) : [];
+
+                          return (
+                            <>
+                              <div className="divide-y divide-slate-850/50 font-mono text-xs">
+                                {head.map(fac => renderRow(fac))}
+                              </div>
+                              {splitIndex >= 0 && (
+                                <div className="px-4 py-2.5 bg-slate-950/60 border-y border-slate-800/80">
+                                  <p className="text-[10px] text-slate-400 font-sans leading-relaxed">
+                                    <span className="font-bold text-slate-300">Why the blanks?</span>{' '}
+                                    Occupancy, P90 bed wait, and ALC come from HQA FOCUS analytics and are only reported by acute-care hospitals that submit those metrics. The sites below report ED visits and LWBS only.
+                                  </p>
+                                </div>
+                              )}
+                              <div className="divide-y divide-slate-850/50 font-mono text-xs">
+                                {tail.map(fac => renderRow(fac))}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>

@@ -44,7 +44,8 @@ import {
   PolarRadiusAxis,
   Radar,
   AreaChart,
-  Area
+  Area,
+  Cell
 } from 'recharts';
 import type {
   CommunityNeedMetric,
@@ -215,6 +216,24 @@ export default function RegionalInequityDashboard() {
     };
   }, [selectedLgaNeed, selectedLgaDisease, selectedLgaEd, selectedLgaTravel, selectedLgaAccess]);
 
+  const zoneNeeds = useMemo(() => {
+    return COMMUNITY_NEED_PROFILES.filter(p => p.zone === selectedLgaNeed.zone);
+  }, [COMMUNITY_NEED_PROFILES, selectedLgaNeed.zone]);
+
+  const zoneChronic = useMemo(() => {
+    const lgasInZone = new Set(zoneNeeds.map(p => p.lgaName));
+    return CHRONIC_DISEASE_BURDEN.filter(d => lgasInZone.has(d.lgaName));
+  }, [CHRONIC_DISEASE_BURDEN, zoneNeeds]);
+
+  const zoneEd = useMemo(() => {
+    const lgasInZone = new Set(zoneNeeds.map(p => p.lgaName));
+    return ED_RELIANCE_METRICS.filter(e => lgasInZone.has(e.lgaName));
+  }, [ED_RELIANCE_METRICS, zoneNeeds]);
+
+  const zoneTravel = useMemo(() => {
+    const lgasInZone = new Set(zoneNeeds.map(p => p.lgaName));
+    return TRAVEL_FOR_CARE.filter(t => lgasInZone.has(t.lgaName));
+  }, [TRAVEL_FOR_CARE, zoneNeeds]);
   // Combined full dataset of comparison target
   const comparisonFullData = useMemo(() => {
     if (comparisonTarget === 'Provincial Average') {
@@ -371,9 +390,17 @@ export default function RegionalInequityDashboard() {
 
     const preventableAdmissionsMultiplier = (selectedFullData.acscRatePer100k / 184.2).toFixed(1);
 
+    const incomeString = selectedFullData.medianHouseholdIncome > 0
+      ? ` a median household income of $${selectedFullData.medianHouseholdIncome.toLocaleString()}`
+      : ' unspecified household income';
+
+    const gradString = selectedFullData.highSchoolGradPct > 0
+      ? ` high school graduation rates at ${selectedFullData.highSchoolGradPct}%`
+      : ' educational attainment statistics';
+
     return {
       title: `${selectedLgaDetail}: Demographic & Preventative Care Audit`,
-      summary: `Demographic audit classifies this LGA as ${classification}. Economic metrics reveal a median household income of $${selectedFullData.medianHouseholdIncome.toLocaleString()} and high school graduation rates at ${selectedFullData.highSchoolGradPct}%. This socioeconomic posture is a primary driver of downstream clinical pathways.`,
+      summary: `Demographic audit classifies this LGA as ${classification}.${selectedFullData.medianHouseholdIncome > 0 || selectedFullData.highSchoolGradPct > 0 ? ` Economic metrics reveal${selectedFullData.medianHouseholdIncome > 0 ? incomeString : ''}${selectedFullData.medianHouseholdIncome > 0 && selectedFullData.highSchoolGradPct > 0 ? ' and' : ''}${selectedFullData.highSchoolGradPct > 0 ? gradString : ''}.` : ''} This socioeconomic posture is a primary driver of downstream clinical pathways.`,
       infrastructure: `Healthcare supply and physicians density in this region ${docStatus}. Because local primary practices are so ${selectedFullData.physiciansPer100k < 100 ? 'congested or absent' : 'integrated'}, a substantial ${selectedFullData.claimsOutsideLgaPct}% of residents are rostered or treated outside of this LGA's boundaries.`,
       downstreamEffect: `A direct consequence of failing to anchor primary preventative care is the escalation of avoidable hospitalizations. ${selectedLgaDetail} exhibits an Ambulatory Care Sensitive Conditions (ACSC) rate of ${selectedFullData.acscRatePer100k} per 100k. Compared to Calgary - West Bow (the provincial optimum), this avoidable hospitalization rate is ${preventableAdmissionsMultiplier}x higher, indicating a critical need for localized primary clinic investments.`
     };
@@ -384,12 +411,19 @@ export default function RegionalInequityDashboard() {
     const diabetesMultiplier = (selectedFullData.diabetesPrevalencePct / 4.8).toFixed(1);
     const copdMultiplier = (selectedFullData.copdPrevalencePct / 1.9).toFixed(1);
     
+    const infantMortalityText = selectedFullData.infantMortalityPer1000 > 0
+      ? ` pediatric audits also register infant mortality at ${selectedFullData.infantMortalityPer1000} per 1,000 births, demonstrating how pre-natal counseling and pediatric access gaps degrade early childhood health outcomes.`
+      : ' maternal audits suggest focusing on early childhood health outcomes and pediatric access gaps.';
+
+    const burdenText = (selectedFullData.diabetesPrevalencePct > 0 && selectedFullData.copdPrevalencePct > 0)
+      ? `Standardized age prevalence shows that diabetes is ${diabetesMultiplier}x higher and COPD is ${copdMultiplier}x higher in ${selectedLgaDetail} than the provincial optimums.`
+      : 'Standardized age prevalence rates indicate localized health challenges across chronic condition profiles.';
+
     return {
       expectancy: `Life expectancy in ${selectedLgaDetail} stands at ${selectedFullData.lifeExpectancyYears} years. When compared to the provincial maximum of 84.6 years (Calgary West Bow), this reveals an active longevity gap of ${lifeExpectancyDelta} years, demonstrating the profound real-world cost of health resource inequity.`,
-      burdenMultiplier: `Standardized age prevalence shows that diabetes is ${diabetesMultiplier}x higher and COPD is ${copdMultiplier}x higher in ${selectedLgaDetail} than the provincial optimums. Standard pediatric audits also register infant mortality at ${selectedFullData.infantMortalityPer1000} per 1,000 births, demonstrating how pre-natal counseling and pediatric access gaps degrade early childhood health outcomes.`
+      burdenMultiplier: `${burdenText}${infantMortalityText}`
     };
   }, [selectedFullData, selectedLgaDetail]);
-
   const dynamicEdRelianceInsight = useMemo(() => {
     const avgEdVisits = PROVINCIAL_BENCHMARKS.totalEdVisitsPer1000;
     const visitsComparison = selectedFullData.totalEdVisitsPer1000 > avgEdVisits
@@ -406,7 +440,6 @@ export default function RegionalInequityDashboard() {
       substitution: `${ERSubstitutionStatus}. Furthermore, ${selectedFullData.afterHoursEdPct}% of ED visits occur between 18:00 and 08:00, signaling a lack of after-hours primary clinics or integrated weekend primary networks.`
     };
   }, [selectedFullData, selectedLgaDetail, PROVINCIAL_BENCHMARKS]);
-
   const dynamicAccessTravelInsight = useMemo(() => {
     return {
       travel: `Remote specialty gaps force local residents to travel an average of ${selectedFullData.avgTravelDistanceKm} km per outpatient cycle. The primary regional facility absorbing this outward medical flow is ${selectedFullData.topDestinationFacility}.`,
@@ -601,10 +634,12 @@ export default function RegionalInequityDashboard() {
               <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60 text-center">
                 <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider">Median Income</span>
                 <span className="text-sm font-black text-white block mt-0.5">
-                  ${selectedLgaNeed.medianHouseholdIncome.toLocaleString()}
+                  {selectedLgaNeed.medianHouseholdIncome > 0 ? `$${selectedLgaNeed.medianHouseholdIncome.toLocaleString()}` : '—'}
                 </span>
                 <span className="text-[8px] text-slate-500 block font-medium mt-0.5">
-                  {selectedLgaNeed.medianHouseholdIncome < 70000 ? 'Below Average' : 'Above Average'}
+                  {selectedLgaNeed.medianHouseholdIncome > 0 
+                    ? (selectedLgaNeed.medianHouseholdIncome < 70000 ? 'Below Average' : 'Above Average')
+                    : 'No Data'}
                 </span>
               </div>
             </div>
@@ -622,7 +657,11 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Rostered Family Physicians</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-rose-400">{selectedLgaNeed.physiciansPer100k}</span>
+                    <span className="text-2xl font-black text-rose-400">
+                      {typeof selectedLgaNeed.physiciansPer100k === 'number' 
+                        ? selectedLgaNeed.physiciansPer100k.toFixed(1) 
+                        : selectedLgaNeed.physiciansPer100k}
+                    </span>
                     <span className="text-[10px] text-slate-500 font-medium">per 100k</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
@@ -633,7 +672,11 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Primary Care Outside LGA</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-orange-400">{selectedLgaNeed.claimsOutsideLgaPct}%</span>
+                    <span className="text-2xl font-black text-orange-400">
+                      {typeof selectedLgaNeed.claimsOutsideLgaPct === 'number'
+                        ? selectedLgaNeed.claimsOutsideLgaPct.toFixed(1)
+                        : selectedLgaNeed.claimsOutsideLgaPct}%
+                    </span>
                     <span className="text-[10px] text-slate-500 font-medium">outward claims</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
@@ -644,7 +687,11 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Preventable ACSC Admissions</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-500">{selectedLgaNeed.acscRatePer100k}</span>
+                    <span className="text-2xl font-black text-amber-500">
+                      {typeof selectedLgaNeed.acscRatePer100k === 'number'
+                        ? selectedLgaNeed.acscRatePer100k.toFixed(1)
+                        : selectedLgaNeed.acscRatePer100k}
+                    </span>
                     <span className="text-[10px] text-slate-500 font-medium">per 100k</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
@@ -664,8 +711,8 @@ export default function RegionalInequityDashboard() {
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={COMMUNITY_NEED_PROFILES}
-                        margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                        data={zoneNeeds}
+                        margin={{ top: 10, right: 10, left: 10, bottom: 35 }}
                       >
                         <defs>
                           <linearGradient id="acscGrad" x1="0" y1="0" x2="0" y2="1">
@@ -678,7 +725,7 @@ export default function RegionalInequityDashboard() {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={9} tickLine={false} />
+                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
                         <YAxis yAxisId="left" stroke="#ef4444" fontSize={9} tickLine={false} label={{ value: 'ACSC Hospitalization Rate', angle: -90, position: 'insideLeft', fill: '#ef4444', fontSize: 10, fontWeight: 'bold' }} />
                         <YAxis yAxisId="right" orientation="right" stroke="#6366f1" fontSize={9} tickLine={false} label={{ value: 'Physicians per 100k', angle: 90, position: 'insideRight', fill: '#6366f1', fontSize: 10, fontWeight: 'bold' }} />
                         <Tooltip 
@@ -686,8 +733,22 @@ export default function RegionalInequityDashboard() {
                           labelStyle={{ color: '#fff', fontWeight: 'bold' }}
                         />
                         <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                        <Bar yAxisId="left" dataKey="acscRatePer100k" name="Preventable Hosp. Rate" fill="url(#acscGrad)" radius={[4, 4, 0, 0]} />
-                        <Bar yAxisId="right" dataKey="physiciansPer100k" name="Physicians per 100k" fill="url(#physGrad)" radius={[4, 4, 0, 0]} />
+                        <Bar yAxisId="left" dataKey="acscRatePer100k" name="Preventable Hosp. Rate" fill="url(#acscGrad)" radius={[4, 4, 0, 0]}>
+                          {zoneNeeds.map((entry, index) => (
+                            <Cell 
+                              key={`cell-acsc-${index}`} 
+                              fill={entry.lgaName === selectedLgaDetail ? '#f43f5e' : 'url(#acscGrad)'} 
+                            />
+                          ))}
+                        </Bar>
+                        <Bar yAxisId="right" dataKey="physiciansPer100k" name="Physicians per 100k" fill="url(#physGrad)" radius={[4, 4, 0, 0]}>
+                          {zoneNeeds.map((entry, index) => (
+                            <Cell 
+                              key={`cell-phys-${index}`} 
+                              fill={entry.lgaName === selectedLgaDetail ? '#3b82f6' : 'url(#physGrad)'} 
+                            />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -703,10 +764,10 @@ export default function RegionalInequityDashboard() {
                     <div>
                       <div className="flex justify-between text-xs font-bold mb-1">
                         <span className="text-slate-400">High School Graduation Rate:</span>
-                        <span className="text-white font-mono">{selectedLgaNeed.highSchoolGradPct}%</span>
+                        <span className="text-white font-mono">{selectedLgaNeed.highSchoolGradPct > 0 ? `${selectedLgaNeed.highSchoolGradPct}%` : '—'}</span>
                       </div>
                       <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                        <div className="bg-rose-500 h-full rounded-full transition-all duration-500" style={{ width: `${selectedLgaNeed.highSchoolGradPct}%` }} />
+                        <div className="bg-rose-500 h-full rounded-full transition-all duration-500" style={{ width: `${selectedLgaNeed.highSchoolGradPct > 0 ? selectedLgaNeed.highSchoolGradPct : 0}%` }} />
                       </div>
                       <p className="text-[10px] text-slate-500 mt-1">Provincial secondary educational baseline target is 90%.</p>
                     </div>
@@ -714,10 +775,10 @@ export default function RegionalInequityDashboard() {
                     <div>
                       <div className="flex justify-between text-xs font-bold mb-1">
                         <span className="text-slate-400">Rostered Outside Local Geographic Area:</span>
-                        <span className="text-orange-400 font-mono">{selectedLgaNeed.claimsOutsideLgaPct}%</span>
+                        <span className="text-orange-400 font-mono">{selectedLgaNeed.claimsOutsideLgaPct > 0 ? `${selectedLgaNeed.claimsOutsideLgaPct}%` : '—'}</span>
                       </div>
                       <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                        <div className="bg-orange-500 h-full rounded-full transition-all duration-500" style={{ width: `${selectedLgaNeed.claimsOutsideLgaPct}%` }} />
+                        <div className="bg-orange-500 h-full rounded-full transition-all duration-500" style={{ width: `${selectedLgaNeed.claimsOutsideLgaPct > 0 ? selectedLgaNeed.claimsOutsideLgaPct : 0}%` }} />
                       </div>
                       <p className="text-[10px] text-slate-500 mt-1">Reflects a localized shortage of accepting practices, forcing outward travel.</p>
                     </div>
@@ -747,7 +808,9 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Life Expectancy</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-rose-400">{selectedLgaDisease.lifeExpectancyYears}</span>
+                    <span className="text-2xl font-black text-rose-400">
+                      {selectedLgaDisease.lifeExpectancyYears > 0 ? selectedLgaDisease.lifeExpectancyYears.toFixed(1) : '—'}
+                    </span>
                     <span className="text-[10px] text-slate-500 font-medium">years</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
@@ -758,7 +821,9 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Infant Mortality Rate</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-orange-400">{selectedLgaDisease.infantMortalityPer1000}</span>
+                    <span className="text-2xl font-black text-orange-400">
+                      {selectedLgaDisease.infantMortalityPer1000 > 0 ? selectedLgaDisease.infantMortalityPer1000.toFixed(1) : '—'}
+                    </span>
                     <span className="text-[10px] text-slate-500 font-medium">per 1,000 births</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
@@ -769,7 +834,9 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Diabetes Prevalence</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-500">{selectedLgaDisease.diabetesPrevalencePct}%</span>
+                    <span className="text-2xl font-black text-amber-500">
+                      {selectedLgaDisease.diabetesPrevalencePct > 0 ? `${selectedLgaDisease.diabetesPrevalencePct.toFixed(1)}%` : '—'}
+                    </span>
                     <span className="text-[10px] text-slate-500 font-medium">of population</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
@@ -786,8 +853,8 @@ export default function RegionalInequityDashboard() {
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={CHRONIC_DISEASE_BURDEN}
-                        margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                        data={zoneChronic}
+                        margin={{ top: 10, right: 10, left: 10, bottom: 35 }}
                       >
                         <defs>
                           <linearGradient id="dbGrad" x1="0" y1="0" x2="0" y2="1">
@@ -804,16 +871,37 @@ export default function RegionalInequityDashboard() {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={9} tickLine={false} />
+                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
                         <YAxis domain={[0, 35]} label={{ value: 'Prevalence %', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} stroke="#64748b" fontSize={9} tickLine={false} />
                         <Tooltip 
                           contentStyle={{ backgroundColor: '#090e21', borderColor: '#1e293b', borderRadius: '12px' }}
                           labelStyle={{ color: '#fff', fontWeight: 'bold' }}
                         />
                         <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                        <Bar dataKey="diabetesPrevalencePct" name="Diabetes (%)" fill="url(#dbGrad)" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="copdPrevalencePct" name="COPD (%)" fill="url(#copdGrad)" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="hypertensionPrevalencePct" name="Hypertension (%)" fill="url(#hypGrad)" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="diabetesPrevalencePct" name="Diabetes (%)" fill="url(#dbGrad)" radius={[4, 4, 0, 0]}>
+                          {zoneChronic.map((entry, index) => (
+                            <Cell 
+                              key={`cell-db-${index}`} 
+                              fill={entry.lgaName === selectedLgaDetail ? '#f43f5e' : 'url(#dbGrad)'} 
+                            />
+                          ))}
+                        </Bar>
+                        <Bar dataKey="copdPrevalencePct" name="COPD (%)" fill="url(#copdGrad)" radius={[4, 4, 0, 0]}>
+                          {zoneChronic.map((entry, index) => (
+                            <Cell 
+                              key={`cell-copd-${index}`} 
+                              fill={entry.lgaName === selectedLgaDetail ? '#ec4899' : 'url(#copdGrad)'} 
+                            />
+                          ))}
+                        </Bar>
+                        <Bar dataKey="hypertensionPrevalencePct" name="Hypertension (%)" fill="url(#hypGrad)" radius={[4, 4, 0, 0]}>
+                          {zoneChronic.map((entry, index) => (
+                            <Cell 
+                              key={`cell-hyp-${index}`} 
+                              fill={entry.lgaName === selectedLgaDetail ? '#f59e0b' : 'url(#hypGrad)'} 
+                            />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -828,7 +916,7 @@ export default function RegionalInequityDashboard() {
                   <div className="space-y-3.5 flex-1 justify-center flex flex-col">
                     <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
                       <span className="text-[9px] text-rose-400 font-mono font-bold uppercase tracking-wider block">Life Expectancy Inequity</span>
-                      <p className="text-xs text-white font-extrabold mt-1">LGA Life Expectancy: {selectedLgaDisease.lifeExpectancyYears} Years</p>
+                      <p className="text-xs text-white font-extrabold mt-1">LGA Life Expectancy: {selectedLgaDisease.lifeExpectancyYears > 0 ? `${selectedLgaDisease.lifeExpectancyYears.toFixed(1)} Years` : '—'}</p>
                       <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
                         {dynamicChronicDiseaseInsight.expectancy}
                       </p>
@@ -836,7 +924,7 @@ export default function RegionalInequityDashboard() {
 
                     <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
                       <span className="text-[9px] text-amber-500 font-mono font-bold uppercase tracking-wider block">Chronic Risk Burden Multipliers</span>
-                      <p className="text-xs text-white font-extrabold mt-1">COPD: {selectedLgaDisease.copdPrevalencePct}% | Diabetes: {selectedLgaDisease.diabetesPrevalencePct}%</p>
+                      <p className="text-xs text-white font-extrabold mt-1">COPD: {selectedLgaDisease.copdPrevalencePct > 0 ? `${selectedLgaDisease.copdPrevalencePct.toFixed(1)}%` : '—'} | Diabetes: {selectedLgaDisease.diabetesPrevalencePct > 0 ? `${selectedLgaDisease.diabetesPrevalencePct.toFixed(1)}%` : '—'}</p>
                       <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
                         {dynamicChronicDiseaseInsight.burdenMultiplier}
                       </p>
@@ -856,7 +944,11 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">ED Visits per 1,000 residents</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-rose-400">{selectedLgaEd.totalEdVisitsPer1000}</span>
+                    <span className="text-2xl font-black text-rose-400">
+                      {typeof selectedLgaEd.totalEdVisitsPer1000 === 'number' 
+                        ? selectedLgaEd.totalEdVisitsPer1000.toFixed(1) 
+                        : selectedLgaEd.totalEdVisitsPer1000}
+                    </span>
                     <span className="text-[10px] text-slate-500 font-medium">visits</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
@@ -867,7 +959,11 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Low Acuity CTAS 4/5 Rate</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-orange-400">{selectedLgaEd.lowAcuityCtas45Pct}%</span>
+                    <span className="text-2xl font-black text-orange-400">
+                      {typeof selectedLgaEd.lowAcuityCtas45Pct === 'number' 
+                        ? selectedLgaEd.lowAcuityCtas45Pct.toFixed(1) 
+                        : selectedLgaEd.lowAcuityCtas45Pct}%
+                    </span>
                     <span className="text-[10px] text-slate-500 font-medium">low acuity</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
@@ -878,7 +974,11 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Mental Health ED Visits</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-500">{selectedLgaEd.moodAnxietyEdRatePer100k}</span>
+                    <span className="text-2xl font-black text-amber-500">
+                      {typeof selectedLgaEd.moodAnxietyEdRatePer100k === 'number' 
+                        ? selectedLgaEd.moodAnxietyEdRatePer100k.toFixed(1) 
+                        : selectedLgaEd.moodAnxietyEdRatePer100k}
+                    </span>
                     <span className="text-[10px] text-slate-500 font-medium">per 100k</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
@@ -895,8 +995,8 @@ export default function RegionalInequityDashboard() {
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
-                        data={ED_RELIANCE_METRICS}
-                        margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                        data={zoneEd}
+                        margin={{ top: 10, right: 10, left: 10, bottom: 35 }}
                       >
                         <defs>
                           <linearGradient id="colorEd" x1="0" y1="0" x2="0" y2="1">
@@ -909,7 +1009,7 @@ export default function RegionalInequityDashboard() {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={9} tickLine={false} />
+                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
                         <YAxis yAxisId="left" stroke="#ec4899" fontSize={9} tickLine={false} label={{ value: 'ED Visits per 1000', angle: -90, position: 'insideLeft', fill: '#ec4899', fontSize: 10, fontWeight: 'bold' }} />
                         <YAxis yAxisId="right" orientation="right" stroke="#6366f1" fontSize={9} tickLine={false} label={{ value: 'CTAS 4/5 %', angle: 90, position: 'insideRight', fill: '#6366f1', fontSize: 10, fontWeight: 'bold' }} />
                         <Tooltip 
@@ -1010,8 +1110,8 @@ export default function RegionalInequityDashboard() {
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={TRAVEL_FOR_CARE}
-                        margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                        data={zoneTravel}
+                        margin={{ top: 10, right: 10, left: 10, bottom: 35 }}
                       >
                         <defs>
                           <linearGradient id="travelGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1024,15 +1124,29 @@ export default function RegionalInequityDashboard() {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={9} tickLine={false} />
+                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
                         <YAxis label={{ value: 'Outside LGA %', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} stroke="#64748b" fontSize={9} tickLine={false} />
                         <Tooltip 
                           contentStyle={{ backgroundColor: '#090e21', borderColor: '#1e293b', borderRadius: '12px' }}
                           labelStyle={{ color: '#fff', fontWeight: 'bold' }}
                         />
                         <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                        <Bar dataKey="careDeliveredOutsideLgaPct" name="Outward Care Travel (%)" fill="url(#travelGrad)" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="localBedLeakagePct" name="Inpatient Care Leakage (%)" fill="url(#leakGrad)" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="careDeliveredOutsideLgaPct" name="Outward Care Travel (%)" fill="url(#travelGrad)" radius={[4, 4, 0, 0]}>
+                          {zoneTravel.map((entry, index) => (
+                            <Cell 
+                              key={`cell-travel-${index}`} 
+                              fill={entry.lgaName === selectedLgaDetail ? '#f43f5e' : 'url(#travelGrad)'} 
+                            />
+                          ))}
+                        </Bar>
+                        <Bar dataKey="localBedLeakagePct" name="Inpatient Care Leakage (%)" fill="url(#leakGrad)" radius={[4, 4, 0, 0]}>
+                          {zoneTravel.map((entry, index) => (
+                            <Cell 
+                              key={`cell-leak-${index}`} 
+                              fill={entry.lgaName === selectedLgaDetail ? '#3b82f6' : 'url(#leakGrad)'} 
+                            />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
