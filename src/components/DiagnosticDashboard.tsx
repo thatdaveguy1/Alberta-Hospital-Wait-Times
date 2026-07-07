@@ -21,6 +21,8 @@ import {
   Bookmark,
   ShieldAlert,
   Sliders,
+  SlidersHorizontal,
+  Compass,
   TrendingUp,
   TrendingDown,
   Map,
@@ -51,6 +53,7 @@ import {
 } from '../diagnosticData';
 import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
+import { calculateDistance, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
 
 export default function DiagnosticDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'labs' | 'imaging-waits' | 'facilities' | 'turnaround'>('labs');
@@ -83,6 +86,12 @@ export default function DiagnosticDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Location + drive-time sorting (mirrors ER tab behaviour)
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [loadingGeo, setLoadingGeo] = useState(false);
+  const [osrmData, setOsrmData] = useState<Record<string, { durationMins: number; distanceKm: number }>>({});
+  const [sortBy, setSortBy] = useState<'net-wait' | 'proximity' | 'raw-wait'>('net-wait');
+
   const loadDiagnosticData = () => {
     fetch('/api/data/diagnostic')
       .then(res => { if (!res.ok) throw new Error('Failed to load diagnostic data'); return res.json(); })
@@ -94,6 +103,82 @@ export default function DiagnosticDashboard() {
     loadDiagnosticData();
   }, []);
 
+  // Load location saved from the ER tab (or auto-request GPS if none exists)
+  useEffect(() => {
+    const saved = loadSavedLocation();
+    if (saved) {
+      setUserLocation(saved);
+      return;
+    }
+
+    if (!navigator.geolocation) return;
+    setLoadingGeo(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          city: 'GPS Location',
+          isGPS: true,
+        };
+        setUserLocation(loc);
+        saveLocation(loc);
+        setLoadingGeo(false);
+      },
+      () => {
+        setLoadingGeo(false);
+      },
+      { enableHighAccuracy: true, timeout: 5000 },
+    );
+  }, []);
+
+  // Fetch OSRM drive times for labs within 100 km of the user
+  useEffect(() => {
+    if (!userLocation || !diagnosticData) {
+      setOsrmData({});
+      return;
+    }
+
+    const fetchOSRMTimes = async () => {
+      const labs = diagnosticData.LAB_LOCATION_WAITS;
+      const nearby = labs.filter((lab) => {
+        const d = calculateDistance(userLocation.lat, userLocation.lng, lab.latitude, lab.longitude);
+        return d <= 100;
+      });
+
+      if (nearby.length === 0) {
+        setOsrmData({});
+        return;
+      }
+
+      const results: Record<string, { durationMins: number; distanceKm: number }> = {};
+      await Promise.all(
+        nearby.map(async (lab) => {
+          try {
+            const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${lab.longitude},${lab.latitude}?overview=false`;
+            const res = await fetch(url);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.code === 'Ok' && data.routes?.length > 0) {
+                const route = data.routes[0];
+                results[lab.id] = {
+                  durationMins: Math.round(route.duration / 60),
+                  distanceKm: parseFloat((route.distance / 1000).toFixed(1)),
+                };
+              }
+            }
+          } catch (e) {
+            // console.warn is fine but noisy; silently fall back to haversine estimate.
+          }
+        }),
+      );
+
+      setOsrmData(results);
+    };
+
+    fetchOSRMTimes();
+  }, [userLocation, diagnosticData]);
+
   const refreshData = () => {
     setRefreshing(true);
     fetch('/api/data/diagnostic')
@@ -101,6 +186,9 @@ export default function DiagnosticDashboard() {
       .then(data => { setDiagnosticData(data); setRefreshing(false); })
       .catch(() => setRefreshing(false));
   };
+  const isLabWaitUnavailable = (lab: LabLocationWait): boolean =>
+    typeof lab.waitTimeMin !== 'number';
+
   // Fetch provincial lab wait trend (averaged across all labs per timestamp)
   const fetchLabTrends = (range: '24h' | '7d' | '30d' = labTrendRange) => {
     setLoadingLabTrends(true);
@@ -178,33 +266,113 @@ export default function DiagnosticDashboard() {
       apptOnlyCount
     };
   }, [diagnosticData]);
-  // Lab location filtering
-  const filteredLabs = useMemo(() => {
+  // Enrich labs with distance + drive time, then filter and sort
+  const processedLabs = useMemo(() => {
     const LAB_LOCATION_WAITS = diagnosticData?.LAB_LOCATION_WAITS ?? [];
-    return LAB_LOCATION_WAITS.filter(lab => {
-      const matchesRegion = selectedRegion === 'All' || lab.region === selectedRegion;
-      const matchesSearch = lab.name.toLowerCase().includes(labSearch.toLowerCase()) ||
-                            lab.city.toLowerCase().includes(labSearch.toLowerCase()) ||
-                            lab.code.toLowerCase().includes(labSearch.toLowerCase());
-      return matchesRegion && matchesSearch;
+    return LAB_LOCATION_WAITS
+      .map((lab) => {
+        let distance: number | undefined = undefined;
+        let driveMins: number | undefined = undefined;
+
+        if (userLocation) {
+          if (osrmData[lab.id]) {
+            distance = osrmData[lab.id].distanceKm;
+            driveMins = osrmData[lab.id].durationMins;
+          } else {
+            distance = calculateDistance(userLocation.lat, userLocation.lng, lab.latitude, lab.longitude);
+            driveMins = Math.round((distance / 85) * 60);
+          }
+        }
+
+        return { ...lab, distance, driveMins };
+      })
+      .filter((lab) => {
+        const matchesRegion = selectedRegion === 'All' || lab.region === selectedRegion;
+        const matchesSearch =
+          lab.name.toLowerCase().includes(labSearch.toLowerCase()) ||
+          lab.city.toLowerCase().includes(labSearch.toLowerCase()) ||
+          lab.code.toLowerCase().includes(labSearch.toLowerCase());
+        return matchesRegion && matchesSearch;
+      })
+      .sort((a, b) => {
+        const aUnav = isLabWaitUnavailable(a);
+        const bUnav = isLabWaitUnavailable(b);
+        if (aUnav && !bUnav) return 1;
+        if (!aUnav && bUnav) return -1;
+        if (aUnav && bUnav) {
+          if (a.distance !== undefined && b.distance !== undefined) return a.distance - b.distance;
+          return a.name.localeCompare(b.name);
+        }
+
+        if (sortBy === 'net-wait') {
+          if (a.distance !== undefined && b.distance !== undefined) {
+            const netA = (a.driveMins || 0) + (a.waitTimeMin as number);
+            const netB = (b.driveMins || 0) + (b.waitTimeMin as number);
+            return netA - netB;
+          }
+          return (a.waitTimeMin as number) - (b.waitTimeMin as number);
+        }
+
+        if (sortBy === 'proximity') {
+          if (a.distance !== undefined && b.distance !== undefined) return a.distance - b.distance;
+          if (a.distance !== undefined) return -1;
+          if (b.distance !== undefined) return 1;
+          return (a.waitTimeMin as number) - (b.waitTimeMin as number);
+        }
+
+        return (a.waitTimeMin as number) - (b.waitTimeMin as number);
+      });
+  }, [diagnosticData, selectedRegion, labSearch, userLocation, osrmData, sortBy]);
+
+  // Group processed labs by zone, sorting zones by proximity (or fastest net wait)
+  const groupedLabs = useMemo(() => {
+    const groups: { name: string; distance: number; labs: typeof processedLabs }[] = [];
+    const allRegions = Array.from(new Set(processedLabs.map((l) => l.region))) as string[];
+
+    allRegions.forEach((regionName) => {
+      const matched = processedLabs.filter((l) => l.region === regionName);
+      if (matched.length === 0) return;
+
+      const minDistance = Math.min(...matched.map((l) => (l.distance !== undefined ? l.distance : Infinity)));
+      groups.push({
+        name: regionName,
+        distance: minDistance === Infinity ? 999999 : minDistance,
+        labs: matched,
+      });
     });
-  }, [selectedRegion, labSearch, diagnosticData]);
+
+    groups.sort((a, b) => {
+      if (sortBy === 'net-wait' && userLocation) {
+        const minNetA = Math.min(
+          ...a.labs.map((l) => (isLabWaitUnavailable(l) ? Infinity : (l.driveMins || 0) + (l.waitTimeMin as number))),
+        );
+        const minNetB = Math.min(
+          ...b.labs.map((l) => (isLabWaitUnavailable(l) ? Infinity : (l.driveMins || 0) + (l.waitTimeMin as number))),
+        );
+        if (minNetA !== minNetB) return minNetA - minNetB;
+      }
+      return a.distance - b.distance;
+    });
+
+    return groups;
+  }, [processedLabs, sortBy, userLocation]);
 
   // Nearby alternative recommendation (high wait vs low wait same region)
   const labRecommendations = useMemo(() => {
-    if (!diagnosticData || filteredLabs.length === 0) return [];
+    if (!diagnosticData || processedLabs.length === 0) return [];
     const LAB_LOCATION_WAITS = diagnosticData.LAB_LOCATION_WAITS;
 
-    // Find labs in same region with high waits (> 40 mins)
-    const highWaitLabs = filteredLabs.filter(l => typeof l.waitTimeMin === 'number' && l.waitTimeMin > 35);
+    // Find labs in same region with high waits (> 35 mins)
+    const highWaitLabs = processedLabs.filter((l) => typeof l.waitTimeMin === 'number' && l.waitTimeMin > 35);
 
-    return highWaitLabs.map(highLab => {
+    return highWaitLabs.map((highLab) => {
       // Find low wait alternatives in same region
-      const alternatives = LAB_LOCATION_WAITS.filter(l =>
-        l.region === highLab.region &&
-        l.id !== highLab.id &&
-        typeof l.waitTimeMin === 'number' &&
-        l.waitTimeMin < 25
+      const alternatives = LAB_LOCATION_WAITS.filter(
+        (l) =>
+          l.region === highLab.region &&
+          l.id !== highLab.id &&
+          typeof l.waitTimeMin === 'number' &&
+          l.waitTimeMin < 25,
       );
 
       if (alternatives.length > 0) {
@@ -220,7 +388,120 @@ export default function DiagnosticDashboard() {
       }
       return null;
     }).filter(item => item !== null) as { highLab: LabLocationWait; betterLab: LabLocationWait; savingMins: number }[];
-  }, [filteredLabs, diagnosticData]);
+  }, [processedLabs, diagnosticData]);
+
+  // Reusable lab card renderer used by both grouped and fallback layouts
+  const renderLabCard = (lab: typeof processedLabs[number]) => {
+    const waitIsNumber = typeof lab.waitTimeMin === 'number';
+    const hasDrive = lab.distance !== undefined && lab.driveMins !== undefined && userLocation;
+    const netWait = hasDrive && waitIsNumber ? (lab.driveMins || 0) + (lab.waitTimeMin as number) : undefined;
+
+    // Color scale for wait times
+    let badgeColor = 'bg-slate-900 text-slate-400 border-slate-800';
+    if (waitIsNumber) {
+      const wait = lab.waitTimeMin as number;
+      if (wait <= 15) badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      else if (wait <= 30) badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      else if (wait <= 45) badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      else badgeColor = 'bg-red-500/10 text-red-400 border-red-500/20';
+    } else if (lab.waitTimeMin === 'Appointments Only') {
+      badgeColor = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+    } else {
+      badgeColor = 'bg-slate-950 text-slate-600 border-slate-900';
+    }
+
+    return (
+      <button
+        key={lab.id}
+        onClick={() => setSelectedLabId(selectedLabId === lab.id ? null : lab.id)}
+        className={`bg-slate-900 border text-left p-4 rounded-2xl shadow-lg flex flex-col justify-between space-y-4 cursor-pointer transition-all hover:border-cyan-500/50 ${
+          selectedLabId === lab.id ? 'border-cyan-500 ring-1 ring-cyan-500/30' : 'border-slate-800'
+        }`}
+      >
+        <div className="space-y-2 w-full">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <h4 className="text-sm font-bold text-white truncate">{lab.name}</h4>
+              <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                <MapPin className="w-3 h-3 text-slate-600 shrink-0" />
+                <span className="truncate">{lab.address}, {lab.city}</span>
+              </p>
+            </div>
+
+            <span className="text-[10px] text-slate-500 font-mono font-semibold uppercase shrink-0">
+              {lab.code}
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center justify-between border-t border-slate-850/60 pt-2 text-[11px]">
+              <span className="text-slate-400 font-medium">Estimated wait:</span>
+              <span className={`px-2 py-0.5 rounded border font-mono font-bold ${badgeColor}`}>
+                {waitIsNumber ? `${lab.waitTimeMin} mins` : lab.waitTimeMin}
+              </span>
+            </div>
+
+            {hasDrive && waitIsNumber && (
+              <div className="flex items-center justify-between text-[11px] py-1 px-1 rounded bg-cyan-950/15 border border-cyan-500/10">
+                <span className="text-cyan-300 font-bold">Net time (drive + wait):</span>
+                <span className="font-black text-cyan-300 font-mono">{formatMinutesToHm(netWait as number)}</span>
+              </div>
+            )}
+
+            {hasDrive && (
+              <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
+                <span>Drive:</span>
+                <span className="font-mono">{lab.distance} km • {formatMinutesToHm(lab.driveMins || 0)}</span>
+              </div>
+            )}
+          </div>
+
+          {(lab.peakHours || lab.dailyVolume) && (
+            <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
+              {lab.peakHours && (
+                <div className="bg-slate-950/40 p-1.5 rounded flex flex-col">
+                  <span className="text-[8px] text-slate-500 uppercase">Peak Hours</span>
+                  <span className="font-semibold text-slate-300">{lab.peakHours}</span>
+                </div>
+              )}
+              {lab.dailyVolume && (
+                <div className="bg-slate-950/40 p-1.5 rounded flex flex-col">
+                  <span className="text-[8px] text-slate-500 uppercase">Daily Volume</span>
+                  <span className="font-semibold text-slate-300">~{lab.dailyVolume} patients</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between pt-2 border-t border-slate-850/60 w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-2">
+            {lab.walkInAvailable && (
+              <span className="text-[9px] bg-slate-950 text-slate-400 px-1.5 py-0.5 rounded border border-slate-850 font-bold uppercase">
+                Walk-In
+              </span>
+            )}
+            {lab.appointmentRequired && (
+              <span className="text-[9px] bg-indigo-950 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-900/40 font-bold uppercase">
+                Appt Req
+              </span>
+            )}
+          </div>
+
+          {lab.saveMyPlaceAvailable && lab.waitTimeMin !== 'Closed' && (
+            <a
+              href="https://mylabbooking.albertaprecisionlabs.ca/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] font-bold px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-md transition-all shadow-sm"
+            >
+              Save My Place
+            </a>
+          )}
+        </div>
+      </button>
+    );
+  };
 
   // Facility filtering
   const filteredFacilities = useMemo(() => {
@@ -566,9 +847,71 @@ export default function DiagnosticDashboard() {
             )}
           </div>
 
-          {/* Lab location filters & search */}
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
-            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          {/* Lab location filters, search, sort & location */}
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3">
+            <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+              <div className="relative w-full md:w-72">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Search labs by name, code or city..."
+                  value={labSearch}
+                  onChange={(e) => setLabSearch(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <div className="relative w-full sm:w-48">
+                  <select
+                    className="w-full appearance-none pl-3 pr-9 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 focus:outline-none focus:border-cyan-500 transition-all cursor-pointer"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'net-wait' | 'proximity' | 'raw-wait')}
+                  >
+                    <option value="net-wait">Sort: Net Wait (Fastest)</option>
+                    <option value="proximity">Sort: Proximity (Nearest)</option>
+                    <option value="raw-wait">Sort: Raw Wait Time</option>
+                  </select>
+                  <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                </div>
+
+                <button
+                  onClick={() => {
+                    setLoadingGeo(true);
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          const loc = {
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude,
+                            city: 'GPS Location',
+                            isGPS: true,
+                          };
+                          setUserLocation(loc);
+                          saveLocation(loc);
+                          setLoadingGeo(false);
+                        },
+                        () => {
+                          setLoadingGeo(false);
+                        },
+                        { enableHighAccuracy: true, timeout: 5000 },
+                      );
+                    } else {
+                      setLoadingGeo(false);
+                    }
+                  }}
+                  disabled={loadingGeo}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-slate-800 bg-slate-950/40 text-xs font-bold text-slate-300 hover:text-cyan-400 hover:border-cyan-500/40 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <Compass className={`w-3.5 h-3.5 ${loadingGeo ? 'animate-spin' : ''}`} />
+                  <span>
+                    {userLocation ? `Location: ${userLocation.city}` : loadingGeo ? 'Locating...' : 'Set Location'}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
               {['All', 'Calgary Zone', 'Edmonton Zone', 'Central Zone', 'South Zone', 'North Zone'].map(region => (
                 <button
                   key={region}
@@ -584,15 +927,20 @@ export default function DiagnosticDashboard() {
               ))}
             </div>
 
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Search labs by name, code or city..."
-                value={labSearch}
-                onChange={(e) => setLabSearch(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
-              />
+            <div className="flex items-center justify-between text-[10px] text-slate-500">
+              <span>
+                Sorting:{' '}
+                <span className="text-cyan-400 font-semibold">
+                  {sortBy === 'net-wait'
+                    ? userLocation ? 'Net Wait (Drive + Wait)' : 'Wait Time (Set location for drive-time sort)'
+                    : sortBy === 'proximity'
+                      ? userLocation ? 'Proximity' : 'Proximity (Set location)'
+                      : 'Raw Wait Time'}
+                </span>
+              </span>
+              <span className="text-slate-600">
+                {processedLabs.length} lab{processedLabs.length !== 1 ? 's' : ''} shown
+              </span>
             </div>
           </div>
 
@@ -643,103 +991,31 @@ export default function DiagnosticDashboard() {
             </div>
           )}
 
-          {/* Lab wait list grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredLabs.map(lab => {
-              const waitIsNumber = typeof lab.waitTimeMin === 'number';
-              
-              // Color scale for wait times
-              let badgeColor = 'bg-slate-900 text-slate-400 border-slate-800';
-              if (waitIsNumber) {
-                const wait = lab.waitTimeMin as number;
-                if (wait <= 15) badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-                else if (wait <= 30) badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-                else if (wait <= 45) badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-                else badgeColor = 'bg-red-500/10 text-red-400 border-red-500/20';
-              } else if (lab.waitTimeMin === 'Appointments Only') {
-                badgeColor = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
-              } else {
-                badgeColor = 'bg-slate-950 text-slate-600 border-slate-900';
-              }
-
-              return (
-                <button
-                  key={lab.id}
-                  onClick={() => setSelectedLabId(selectedLabId === lab.id ? null : lab.id)}
-                  className={`bg-slate-900 border text-left p-4 rounded-2xl shadow-lg flex flex-col justify-between space-y-4 cursor-pointer transition-all hover:border-cyan-500/50 ${
-                    selectedLabId === lab.id ? 'border-cyan-500 ring-1 ring-cyan-500/30' : 'border-slate-800'
-                  }`}
-                >
-                  <div className="space-y-2 w-full">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h4 className="text-sm font-bold text-white truncate">{lab.name}</h4>
-                        <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3 text-slate-600 shrink-0" />
-                          <span className="truncate">{lab.address}, {lab.city}</span>
-                        </p>
-                      </div>
-
-                      <span className="text-[10px] text-slate-500 font-mono font-semibold uppercase shrink-0">
-                        {lab.code}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between border-t border-slate-850/60 pt-2 text-[11px]">
-                      <span className="text-slate-400 font-medium">Estimated wait:</span>
-                      <span className={`px-2 py-0.5 rounded border font-mono font-bold ${badgeColor}`}>
-                        {waitIsNumber ? `${lab.waitTimeMin} mins` : lab.waitTimeMin}
-                      </span>
-                    </div>
-
-                    {(lab.peakHours || lab.dailyVolume) && (
-                      <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
-                        {lab.peakHours && (
-                          <div className="bg-slate-950/40 p-1.5 rounded flex flex-col">
-                            <span className="text-[8px] text-slate-500 uppercase">Peak Hours</span>
-                            <span className="font-semibold text-slate-300">{lab.peakHours}</span>
-                          </div>
-                        )}
-                        {lab.dailyVolume && (
-                          <div className="bg-slate-950/40 p-1.5 rounded flex flex-col">
-                            <span className="text-[8px] text-slate-500 uppercase">Daily Volume</span>
-                            <span className="font-semibold text-slate-300">~{lab.dailyVolume} patients</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-850/60 w-full" onClick={(e) => e.stopPropagation()}>
+          {/* Lab wait list grid — grouped by zone, fastest to slowest within each zone */}
+          <div className="space-y-8">
+            {groupedLabs.length > 0 ? (
+              groupedLabs.map((zone) => (
+                <div key={zone.name} className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                     <div className="flex items-center gap-2">
-                      {lab.walkInAvailable && (
-                        <span className="text-[9px] bg-slate-950 text-slate-400 px-1.5 py-0.5 rounded border border-slate-850 font-bold uppercase">
-                          Walk-In
-                        </span>
-                      )}
-                      {lab.appointmentRequired && (
-                        <span className="text-[9px] bg-indigo-950 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-900/40 font-bold uppercase">
-                          Appt Req
-                        </span>
-                      )}
+                      <MapPin className="w-4 h-4 text-slate-400" />
+                      <h3 className="font-extrabold text-sm text-slate-200 uppercase tracking-wider">
+                        {zone.name}
+                      </h3>
                     </div>
-
-                    {lab.saveMyPlaceAvailable && lab.waitTimeMin !== 'Closed' && (
-                      <a
-                        href="https://mylabbooking.albertaprecisionlabs.ca/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[10px] font-bold px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-md transition-all shadow-sm"
-                      >
-                        Save My Place
-                      </a>
+                    {userLocation && zone.distance !== 999999 && (
+                      <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[9px] font-bold">
+                        ~{zone.distance} km closest
+                      </span>
                     )}
                   </div>
-                </button>
-              );
-            })}
 
-            {filteredLabs.length === 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {zone.labs.map((lab) => renderLabCard(lab))}
+                  </div>
+                </div>
+              ))
+            ) : (
               <div className="col-span-full bg-slate-900 border border-slate-800 p-8 text-center rounded-xl">
                 <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
                 <p className="text-slate-400 text-xs">No community labs matched your search criteria.</p>
@@ -769,7 +1045,7 @@ export default function DiagnosticDashboard() {
                   <div className="space-y-1 pr-8">
                     <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
                       <TrendingUp className="w-4 h-4 text-cyan-400" />
-                      <span>{filteredLabs.find(l => l.id === selectedLabId)?.name ?? selectedLabId} — Wait Time Trend</span>
+                      <span>{processedLabs.find(l => l.id === selectedLabId)?.name ?? selectedLabId} — Wait Time Trend</span>
                     </h3>
                     <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
                       Historical wait time for this lab site, sampled every 30 minutes from live APL QMe API data. Only numeric wait times are charted; 'Appointments Only' and 'Closed' states are excluded.
