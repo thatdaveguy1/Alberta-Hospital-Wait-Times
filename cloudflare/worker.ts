@@ -120,16 +120,20 @@ app.get('/api/trends/labs', async (c) => {
 app.get('/api/trends/labs/:labId', async (c) => {
   const labId = c.req.param('labId');
   const range = c.req.query('range') ?? '24h';
-  const data = await c.env.SNAPSHOTS_KV.get(`trends-labs-${labId}-${range}`);
+  const data = await c.env.SNAPSHOTS_KV.get(`trends-labs-raw-${labId}`);
   if (!data) return c.json([]);
-  return c.json(JSON.parse(data));
+  const snapshots = JSON.parse(data) as Array<{ waitTime: number; timestamp: string }>;
+  const cutoff = Date.now() - (range === '7d' ? 7 : range === '30d' ? 30 : 1) * 24 * 60 * 60 * 1000;
+  return c.json(snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff));
 });
 app.get('/api/trends/:hospitalId', async (c) => {
   const hospitalId = c.req.param('hospitalId');
   const range = c.req.query('range') ?? '24h';
-  const data = await c.env.SNAPSHOTS_KV.get(`trends-${hospitalId}-${range}`);
+  const data = await c.env.SNAPSHOTS_KV.get(`trends-er-raw-${hospitalId}`);
   if (!data) return c.json([]);
-  return c.json(JSON.parse(data));
+  const snapshots = JSON.parse(data) as Array<{ waitTime: number; timestamp: string }>;
+  const cutoff = Date.now() - (range === '7d' ? 7 : range === '30d' ? 30 : 1) * 24 * 60 * 60 * 1000;
+  return c.json(snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff));
 });
 
 // --- Alerts ---

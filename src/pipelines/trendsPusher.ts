@@ -166,10 +166,14 @@ export async function pushErTrends(
 
   kvMap['trends-max-stats'] = computeErMaxStats(snapshots, hospitals);
 
-  // Per-hospital trends are served by the local server from in-memory snapshots.
-  // Pushing 29 hospitals × 3 ranges = 87 KV writes per 10-min cycle is too many
-  // Cloudflare KV puts. The deployed dashboard shows provincial/zone trends;
-  // per-hospital detail is available on the local server.
+  // Per-hospital raw snapshots: one KV key per hospital (trends-er-raw-${hospitalId}).
+  // Worker filters by range on read. ~4,320 entries per key (~200KB), well under 25MB.
+  const hospitalIds = new Set(snapshots.map(s => s.hospitalId));
+  for (const hospitalId of hospitalIds) {
+    kvMap[`trends-er-raw-${hospitalId}`] = snapshots
+      .filter(s => s.hospitalId === hospitalId)
+      .map(s => ({ waitTime: s.waitTime, timestamp: s.timestamp }));
+  }
 
   const result = await pushToCloudflare('er-trends', kvMap);
   if (result.success) {
@@ -189,11 +193,14 @@ export async function pushLabTrends(snapshots: LabWaitSnapshot[]): Promise<void>
   for (const range of RANGES) {
     kvMap[`trends-labs-${range}`] = computeLabTrendProvincial(snapshots, range);
   }
-
-  // Per-lab trends are served by the local server from in-memory snapshots.
-  // Pushing 153 labs × 3 ranges = 459 KV writes per 30-min cycle is too many
-  // Cloudflare KV puts. The deployed dashboard shows the provincial trend;
-  // per-lab detail is available on the local server.
+  // Per-lab raw snapshots: one KV key per lab (trends-labs-raw-${labId}).
+  // Worker filters by range on read. ~4,320 entries per key (~200KB), well under 25MB.
+  const labIds = new Set(snapshots.map(s => s.labId));
+  for (const labId of labIds) {
+    kvMap[`trends-labs-raw-${labId}`] = snapshots
+      .filter(s => s.labId === labId)
+      .map(s => ({ waitTime: s.waitTime, timestamp: s.timestamp }));
+  }
 
   const result = await pushToCloudflare('lab-trends', kvMap);
   if (result.success) {

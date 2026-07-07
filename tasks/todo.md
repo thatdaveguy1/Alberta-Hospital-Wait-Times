@@ -338,5 +338,10 @@
   - Created trendsPusher.ts: computes aggregates from in-memory snapshots, pushes to KV
   - Wired pushErTrends after ER fetch, pushLabTrends after lab fetch in scheduler
   - Provincial + zone + max-stats trends pushed for deployed dashboard
-  - Per-facility trends remain local-server-only (KV write volume too high for 153 labs × 3 ranges)
+- Provincial + zone + max-stats + per-facility trends all pushed for deployed dashboard
   - Also fixes pre-existing gap: ER trends were never pushed to SNAPSHOTS_KV either
+- [x] Per-facility deployed charts: raw snapshot push + worker-side range filter
+  - One KV key per facility (trends-er-raw-${id}, trends-labs-raw-${id})
+  - Each key holds ~4,320 entries (~200KB), well under 25MB KV value limit
+  - 182 total writes per cycle (29 hospitals + 153 labs), not 459
+  - Worker reads raw key and filters by range on read
