@@ -206,6 +206,140 @@ export default function SurgicalDashboard() {
     return matchesSearch && matchesZone;
   });
 
+  // Split into tracked (reporting) and untracked (not reporting) lists
+  const trackedFacilities = useMemo(() => {
+    return filteredFacilities.filter(f => f.or_utilization_rate > 0);
+  }, [filteredFacilities]);
+
+  const untrackedFacilities = useMemo(() => {
+    return filteredFacilities.filter(f => !f.or_utilization_rate || f.or_utilization_rate === 0);
+  }, [filteredFacilities]);
+
+  const renderFacilityRow = (fac: FacilitySurgicalCapacity) => {
+    const isTracked = fac.or_utilization_rate > 0;
+    // color scale for OR utilization
+    let progressColor = 'bg-cyan-500';
+    let textColor = 'text-cyan-400';
+    if (fac.or_utilization_rate >= 93) {
+      progressColor = 'bg-rose-500';
+      textColor = 'text-rose-400';
+    } else if (fac.or_utilization_rate >= 88) {
+      progressColor = 'bg-amber-500';
+      textColor = 'text-amber-400';
+    } else {
+      progressColor = 'bg-emerald-500';
+      textColor = 'text-emerald-400';
+    }
+
+    return (
+      <tr key={fac.id} className="hover:bg-slate-950/20 transition-all text-slate-300">
+        <td className="p-3">
+          <div className="font-bold text-white text-[13px]">{fac.name}</div>
+          <div className="text-[10px] text-slate-500 font-mono">{fac.id}</div>
+        </td>
+        <td className="p-3">
+          <span className="font-semibold text-slate-200">{fac.city}</span>
+          <span className="text-slate-500 text-[10px] block">{fac.zone}</span>
+        </td>
+        <td className="p-3">
+          {isTracked ? (
+            <div className="flex flex-col items-center justify-center space-y-1">
+              <span className={`font-mono text-[11px] font-black ${textColor}`}>{fac.or_utilization_rate}%</span>
+              <div className="w-24 bg-slate-950 h-1 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${progressColor}`} style={{ width: `${fac.or_utilization_rate}%` }} />
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center space-y-1">
+              <span className="font-mono text-[11px] font-bold text-slate-500">—</span>
+              <span className="text-[9px] text-slate-600 font-medium font-sans">No Data</span>
+            </div>
+          )}
+        </td>
+        <td className="p-3">
+          {fac.chartered_partner_status ? (
+            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-black text-[9px] uppercase tracking-wide">
+              Chartered Partner (CSF)
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-black text-[9px] uppercase tracking-wide">
+              Public Facility (AHS)
+            </span>
+          )}
+        </td>
+        <td className="p-3">
+          <div className="flex flex-wrap gap-1 max-w-[280px]">
+            {fac.specialties_offered.map((spec, sIdx) => (
+              <span key={sIdx} className="bg-slate-950 text-slate-400 px-1.5 py-0.5 rounded text-[9px] font-mono border border-slate-850">
+                {spec}
+              </span>
+            ))}
+          </div>
+        </td>
+      </tr>
+    );
+  };
+
+  const renderFacilityMobileCard = (fac: FacilitySurgicalCapacity) => {
+    const isTracked = fac.or_utilization_rate > 0;
+    let progressColor = 'bg-cyan-500';
+    let textColor = 'text-cyan-400';
+    if (fac.or_utilization_rate >= 93) {
+      progressColor = 'bg-rose-500';
+      textColor = 'text-rose-400';
+    } else if (fac.or_utilization_rate >= 88) {
+      progressColor = 'bg-amber-500';
+      textColor = 'text-amber-400';
+    } else {
+      progressColor = 'bg-emerald-500';
+      textColor = 'text-emerald-400';
+    }
+
+    return (
+      <div key={fac.id} className="bg-slate-950/40 border border-slate-850 p-4 rounded-xl space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h4 className="font-bold text-white text-xs">{fac.name}</h4>
+            <span className="text-[9px] text-slate-500 font-mono block">{fac.id} • {fac.city} ({fac.zone})</span>
+          </div>
+          <div className="shrink-0">
+            {fac.chartered_partner_status ? (
+              <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 rounded text-[8px] font-bold uppercase tracking-wider">
+                CSF
+              </span>
+            ) : (
+              <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/15 rounded text-[8px] font-bold uppercase tracking-wider">
+                Public
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-xs border-t border-slate-900 pt-2">
+          <span className="text-slate-400 font-medium">OR Utilization:</span>
+          {isTracked ? (
+            <div className="flex items-center gap-2">
+              <span className={`font-mono font-bold ${textColor}`}>{fac.or_utilization_rate}%</span>
+              <div className="w-16 bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${progressColor}`} style={{ width: `${fac.or_utilization_rate}%` }} />
+              </div>
+            </div>
+          ) : (
+            <span className="font-mono font-bold text-slate-500">— (No Data)</span>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-1 pt-1.5 border-t border-slate-900">
+          {fac.specialties_offered.map((spec, sIdx) => (
+            <span key={sIdx} className="bg-slate-900 text-slate-400 px-1.5 py-0.5 rounded text-[8.5px] font-mono border border-slate-850">
+              {spec}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   // Get active joint replacement records
   const orthopedicData = ORTHOPEDIC_SPECIALTY_RECORDS.filter(
     item => item.procedure === selectedProcedureGroup
@@ -731,122 +865,36 @@ export default function SurgicalDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-850/40">
-                  {filteredFacilities.map(fac => {
-                    // color scale for OR utilization
-                    let progressColor = 'bg-cyan-500';
-                    let textColor = 'text-cyan-400';
-                    if (fac.or_utilization_rate >= 93) {
-                      progressColor = 'bg-rose-500';
-                      textColor = 'text-rose-400';
-                    } else if (fac.or_utilization_rate >= 88) {
-                      progressColor = 'bg-amber-500';
-                      textColor = 'text-amber-400';
-                    } else {
-                      progressColor = 'bg-emerald-500';
-                      textColor = 'text-emerald-400';
-                    }
-
-                    return (
-                      <tr key={fac.id} className="hover:bg-slate-950/20 transition-all text-slate-300">
-                        <td className="p-3">
-                          <div className="font-bold text-white text-[13px]">{fac.name}</div>
-                          <div className="text-[10px] text-slate-500 font-mono">{fac.id}</div>
-                        </td>
-                        <td className="p-3">
-                          <span className="font-semibold text-slate-200">{fac.city}</span>
-                          <span className="text-slate-500 text-[10px] block">{fac.zone}</span>
-                        </td>
-                        <td className="p-3">
-                          <div className="flex flex-col items-center justify-center space-y-1">
-                            <span className={`font-mono text-[11px] font-black ${textColor}`}>{fac.or_utilization_rate}%</span>
-                            <div className="w-24 bg-slate-950 h-1 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${progressColor}`} style={{ width: `${fac.or_utilization_rate}%` }} />
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          {fac.chartered_partner_status ? (
-                            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-black text-[9px] uppercase tracking-wide">
-                              Chartered Partner (CSF)
-                            </span>
-                          ) : (
-                            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-black text-[9px] uppercase tracking-wide">
-                              Public Facility (AHS)
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          <div className="flex flex-wrap gap-1 max-w-[280px]">
-                            {fac.specialties_offered.map((spec, sIdx) => (
-                              <span key={sIdx} className="bg-slate-950 text-slate-400 px-1.5 py-0.5 rounded text-[9px] font-mono border border-slate-850">
-                                {spec}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {trackedFacilities.map(renderFacilityRow)}
+                  {untrackedFacilities.length > 0 && (
+                    <tr className="bg-slate-950/40">
+                      <td colSpan={5} className="p-3 text-[10px] font-black uppercase tracking-widest text-slate-500 border-y border-slate-850/80">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <span>Facilities Not Reporting Live Utilization</span>
+                          <span className="font-sans normal-case text-slate-500 font-medium text-[9.5px]">
+                            *Live telemetry not actively tracked under the current provincial OR registry program (e.g. community and pediatric clinics).
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  {untrackedFacilities.map(renderFacilityRow)}
                 </tbody>
               </table>
             </div>
 
             {/* Grid layout for mobile */}
             <div className="md:hidden grid grid-cols-1 gap-3">
-              {filteredFacilities.map(fac => {
-                let progressColor = 'bg-cyan-500';
-                let textColor = 'text-cyan-400';
-                if (fac.or_utilization_rate >= 93) {
-                  progressColor = 'bg-rose-500';
-                  textColor = 'text-rose-400';
-                } else if (fac.or_utilization_rate >= 88) {
-                  progressColor = 'bg-amber-500';
-                  textColor = 'text-amber-400';
-                } else {
-                  progressColor = 'bg-emerald-500';
-                  textColor = 'text-emerald-400';
-                }
-
-                return (
-                  <div key={fac.id} className="bg-slate-950/40 border border-slate-850 p-4 rounded-xl space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-bold text-white text-xs">{fac.name}</h4>
-                        <span className="text-[9px] text-slate-500 font-mono block">{fac.id} • {fac.city} ({fac.zone})</span>
-                      </div>
-                      <div className="shrink-0">
-                        {fac.chartered_partner_status ? (
-                          <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 rounded text-[8px] font-bold uppercase tracking-wider">
-                            CSF
-                          </span>
-                        ) : (
-                          <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/15 rounded text-[8px] font-bold uppercase tracking-wider">
-                            Public
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs border-t border-slate-900 pt-2">
-                      <span className="text-slate-400 font-medium">OR Utilization:</span>
-                      <div className="flex items-center gap-2">
-                        <span className={`font-mono font-bold ${textColor}`}>{fac.or_utilization_rate}%</span>
-                        <div className="w-16 bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${progressColor}`} style={{ width: `${fac.or_utilization_rate}%` }} />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 pt-1.5 border-t border-slate-900">
-                      {fac.specialties_offered.map((spec, sIdx) => (
-                        <span key={sIdx} className="bg-slate-900 text-slate-400 px-1.5 py-0.5 rounded text-[8.5px] font-mono border border-slate-850">
-                          {spec}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
+              {trackedFacilities.map(renderFacilityMobileCard)}
+              {untrackedFacilities.length > 0 && (
+                <div className="p-4 bg-slate-900/30 border border-slate-850 rounded-xl text-center space-y-1">
+                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Facilities Not Reporting Live Utilization</h4>
+                  <p className="text-[9px] text-slate-500 leading-normal">
+                    *Live telemetry not actively tracked under current provincial OR registry program (e.g. community and pediatric clinics).
+                  </p>
+                </div>
+              )}
+              {untrackedFacilities.map(renderFacilityMobileCard)}
             </div>
 
             {filteredFacilities.length === 0 && (
