@@ -7229,7 +7229,7 @@
     "LAB_LOCATION_WAITS": {
       "source": "APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)",
       "sourceVintage": "Live data",
-      "lastUpdated": "2026-07-07T03:16:16.069Z",
+      "lastUpdated": "2026-07-07T05:41:22.336Z",
       "updateType": "auto",
       "verification": "Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes."
     },

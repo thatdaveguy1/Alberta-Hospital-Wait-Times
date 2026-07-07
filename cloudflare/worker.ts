@@ -38,7 +38,12 @@ const DOMAIN_WHITELIST = new Set([
   'continuing-care', 'mental-health', 'patient-experience', 'primary-care',
   'public-health', 'regional-inequity', 'spending', 'system-flow',
   'virtual-care', 'workforce', 'sync-status',
+  // Snapshot trend domains — written to SNAPSHOTS_KV, not DATA_KV
+  'er-trends', 'lab-trends',
 ]);
+
+// Domains that go to SNAPSHOTS_KV instead of DATA_KV
+const SNAPSHOT_DOMAINS = new Set(['er-trends', 'lab-trends']);
 
 // --- Health ---
 app.get('/api/health', (c) => {
@@ -103,6 +108,20 @@ app.get('/api/trends/zones', async (c) => {
 app.get('/api/trends/max-stats', async (c) => {
   const data = await c.env.SNAPSHOTS_KV.get('trends-max-stats');
   if (!data) return c.json({ max24h: 0, max7d: 0, max30d: 0 });
+  return c.json(JSON.parse(data));
+});
+app.get('/api/trends/labs', async (c) => {
+  const range = c.req.query('range') ?? '24h';
+  const data = await c.env.SNAPSHOTS_KV.get(`trends-labs-${range}`);
+  if (!data) return c.json([]);
+  return c.json(JSON.parse(data));
+});
+
+app.get('/api/trends/labs/:labId', async (c) => {
+  const labId = c.req.param('labId');
+  const range = c.req.query('range') ?? '24h';
+  const data = await c.env.SNAPSHOTS_KV.get(`trends-labs-${labId}-${range}`);
+  if (!data) return c.json([]);
   return c.json(JSON.parse(data));
 });
 app.get('/api/trends/:hospitalId', async (c) => {
@@ -227,6 +246,17 @@ app.post('/api/push/:domain', async (c) => {
   // Parse and store in KV
   try {
     const data = JSON.parse(bodyText);
+    if (SNAPSHOT_DOMAINS.has(domain)) {
+      // Snapshot trend domains: payload is a { kvKey: value } map.
+      // Write each key individually to SNAPSHOTS_KV.
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        for (const [kvKey, kvValue] of Object.entries(data)) {
+          await c.env.SNAPSHOTS_KV.put(kvKey, JSON.stringify(kvValue));
+        }
+        return c.json({ success: true, domain, keysWritten: Object.keys(data).length, timestamp: new Date().toISOString() });
+      }
+      return c.json({ error: 'Snapshot domain payload must be a key-value map' }, 400);
+    }
     await c.env.DATA_KV.put(`data-${domain}`, JSON.stringify(data));
     return c.json({ success: true, domain, timestamp: new Date().toISOString() });
   } catch {

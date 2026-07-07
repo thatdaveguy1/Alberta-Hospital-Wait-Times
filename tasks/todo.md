@@ -330,4 +330,13 @@
 - [x] Empty state messages for when no snapshot data exists yet
 - [x] `npx tsc --noEmit` passes, `npm run build` succeeds
 - [x] Browser verified: trend card renders, empty state shows, zero console errors
-- [ ] Cloudflare worker `trends-labs-*` KV keys (follow-up for deployed parity)
+- [x] Cloudflare worker `trends-labs-*` KV keys (follow-up for deployed parity)
+- [x] Cloudflare worker trends-labs-* KV keys for deployed parity
+  - Added er-trends + lab-trends to worker domain whitelist
+  - Routed snapshot domains to SNAPSHOTS_KV (multi-key map push)
+  - Added /api/trends/labs and /api/trends/labs/:labId worker endpoints
+  - Created trendsPusher.ts: computes aggregates from in-memory snapshots, pushes to KV
+  - Wired pushErTrends after ER fetch, pushLabTrends after lab fetch in scheduler
+  - Provincial + zone + max-stats trends pushed for deployed dashboard
+  - Per-facility trends remain local-server-only (KV write volume too high for 153 labs × 3 ranges)
+  - Also fixes pre-existing gap: ER trends were never pushed to SNAPSHOTS_KV either

@@ -44,6 +44,9 @@ async function runErWaitTimesPipeline(): Promise<void> {
       hospitals: getHospitals(),
       lastUpdated: result.timestamp,
     });
+    // Push pre-computed trend aggregates to SNAPSHOTS_KV
+    const { pushErTrends } = await import('./trendsPusher');
+    await pushErTrends(getSnapshots(), getHospitals());
   }
 }
 
@@ -65,6 +68,9 @@ async function runLabWaitsPipeline(): Promise<void> {
     } catch (err) {
       console.warn('[Scheduler] Failed to push diagnostic data to Cloudflare:', err);
     }
+    // Push pre-computed lab trend aggregates to SNAPSHOTS_KV
+    const { pushLabTrends } = await import('./trendsPusher');
+    await pushLabTrends(getLabSnapshots());
   }
 }
 

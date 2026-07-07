@@ -573,3 +573,15 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** After running the fetcher at 3 AM, `data-lab-snapshots.json` was `[]` and it looked like the logging layer was broken. In fact the APL API genuinely returns `WaitTime: "Closed"` for every site overnight — the sentinel is correctly skipped by the `typeof waitTimeMin === 'number'` guard.
 - **Solution:** Verified the raw API response (all 153 `Closed`), then unit-tested the snapshot append logic with synthetic numeric/sentinel inputs to confirm 4/6 numeric waits were logged and 2 sentinels skipped.
 - **Prevention:** When a data pipeline produces empty output, check the source API's actual response first — it may be a time-of-day artifact, not a code bug. Keep a synthetic test handy to prove the logging path works independently of source data availability.
+
+## Session: 2026-07-07 (Trend KV Push Pipeline — Deployed Parity)
+
+### Lesson: ER trend KV keys were never pushed — the entire deployed trend pipeline was broken
+- **Mistake:** The Cloudflare worker reads pre-computed keys (`trends-all-24h`, `trends-zones-7d`, `trends-max-stats`, `trends-${hospitalId}-30d`) from `SNAPSHOTS_KV`, but no code anywhere computed or pushed those keys. The push endpoint only wrote to `DATA_KV` as `data-${domain}`. So the deployed dashboard's ER trend charts were all empty unless someone manually seeded KV.
+- **Solution:** Created `trendsPusher.ts` that computes all trend aggregates from in-memory snapshots and pushes them as a `{ kvKey: value }` map. Extended the worker push endpoint to route snapshot domains (`er-trends`, `lab-trends`) to `SNAPSHOTS_KV` and iterate the map, writing each key individually.
+- **Prevention:** When adding a worker read endpoint that reads from KV, trace the full write path — who computes and pushes that key? A read endpoint with no writer is dead code.
+
+### Lesson: Per-facility KV pushes don't scale — 153 labs × 3 ranges = 459 writes per cycle
+- **Mistake:** Initially planned to push per-lab and per-hospital trend keys to KV. 153 labs × 3 ranges = 459 KV writes every 30 min, and 29 hospitals × 3 ranges = 87 writes every 10 min. Cloudflare may rate-limit or reject this volume.
+- **Solution:** Only push provincial/zone/max-stats aggregates to KV (7 keys for ER, 3 for labs). Per-facility trends are served by the local server from in-memory snapshots. The deployed dashboard shows provincial trends; per-facility detail is local-only.
+- **Prevention:** When pushing to Cloudflare KV, count the keys × frequency. KV is not designed for high-volume per-entity writes. Aggregate at the push layer and keep per-entity queries on the local server.
