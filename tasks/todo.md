@@ -373,3 +373,4 @@
 - [x] Fix map to center on user location with nearby hospitals via fitBounds
 - [x] Commit to main (8aa7a06)
 - [x] Ensure manual dashboard data sources have real _dataMetadata and scrapers preserve it
+- [x] Investigate stale dashboard timestamps; reload daily-sync launchd job and remove misleading relative-time badge
