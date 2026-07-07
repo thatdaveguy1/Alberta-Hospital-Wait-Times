@@ -913,7 +913,38 @@ export default function SystemFlowDashboard() {
               </div>
 
               {/* Right Column: Hospital Deep-Dive Profile */}
-              <div className="lg:col-span-5">
+              <div className="lg:col-span-5 space-y-4">
+                {/* Flow Metrics Glossary */}
+                <div className="p-4 rounded-2xl bg-[#0b1226] border border-slate-800 shadow-xl space-y-3">
+                  <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-2">
+                    <Info className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Flow Metrics Glossary</span>
+                  </div>
+                  <div className="space-y-2 text-[10px] leading-relaxed">
+                    <div>
+                      <strong className="text-slate-300">Inpatient Occupancy:</strong> <span className="text-slate-400">% of active acute beds occupied. Over 100% signifies capacity overload.</span>
+                    </div>
+                    <div>
+                      <strong className="text-slate-300">ED Bed Wait (P90):</strong> <span className="text-slate-400">90th percentile hours admitted patients wait in ED for a ward bed.</span>
+                    </div>
+                    <div>
+                      <strong className="text-slate-300">Walkout (LWBS) Rate:</strong> <span className="text-slate-400">% of presentations leaving without being seen by a doctor.</span>
+                    </div>
+                    <div>
+                      <strong className="text-slate-300">Hourly Admitted Boarders:</strong> <span className="text-slate-400">Average admitted patients holding ED stretchers at any given hour.</span>
+                    </div>
+                    <div>
+                      <strong className="text-slate-300">Inpatient ALC %:</strong> <span className="text-slate-400">Ward beds used by patients waiting for continuing care placement.</span>
+                    </div>
+                    <div>
+                      <strong className="text-slate-300">ED Daily Intake:</strong> <span className="text-slate-400">Average daily patient registrations at the Emergency Department.</span>
+                    </div>
+                    <div>
+                      <strong className="text-slate-300">72h Return %:</strong> <span className="text-slate-400">% of discharged patients returning to ED within 72 hours.</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="p-6 rounded-2xl bg-gradient-to-b from-[#0a1027] to-[#070b1c] border border-slate-800 shadow-2xl sticky top-4 space-y-6">
                   
                   {/* Deep Dive Header */}
