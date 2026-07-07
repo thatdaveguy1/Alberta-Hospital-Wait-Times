@@ -37,28 +37,6 @@ function formatTimestamp(ts: string): string {
   }
 }
 
-function formatRelative(ts: string): string {
-  if (!ts || ts === 'Unknown') return '';
-  try {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return '';
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHrs = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHrs / 24);
-    if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins}m`;
-    if (diffHrs < 24) return `${diffHrs}h`;
-    if (diffDays === 1) return '1d';
-    if (diffDays < 30) return `${diffDays}d`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo`;
-    return `${Math.floor(diffDays / 365)}y`;
-  } catch {
-    return '';
-  }
-}
-
 export function DashboardHeader({
   icon: Icon,
   title,
@@ -70,7 +48,6 @@ export function DashboardHeader({
   const entry = metadata?.[arrayKey];
   const isAuto = entry?.updateType === 'auto';
   const lastUpdated = entry?.lastUpdated ? formatTimestamp(entry.lastUpdated) : 'Unknown';
-  const relative = entry?.lastUpdated ? formatRelative(entry.lastUpdated) : '';
   const sourceVintage = entry?.sourceVintage || '—';
 
   return (
@@ -93,7 +70,6 @@ export function DashboardHeader({
             }`}
           >
             {isAuto ? 'Auto-updated' : 'Manual update'}
-            {relative && ` (${relative})`}
           </span>
           <span className="text-slate-600">·</span>
           <span>
