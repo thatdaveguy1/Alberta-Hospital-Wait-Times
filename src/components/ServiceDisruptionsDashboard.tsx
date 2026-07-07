@@ -31,7 +31,7 @@ import {
 } from 'recharts';
 import { ServiceDisruption } from '../types';
 import { useSyncStatus, formatRelativeTime, getDomainResult } from '../hooks/useSyncStatus';
-
+import { DataTimestamp } from './DataTimestamp';
 export default function ServiceDisruptionsDashboard() {
   const [disruptions, setDisruptions] = useState<ServiceDisruption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +39,15 @@ export default function ServiceDisruptionsDashboard() {
   const { syncStatus } = useSyncStatus();
   const disruptionsSync = getDomainResult(syncStatus, 'disruptions');
 
+  const lastSyncTime = disruptionsSync?.timestamp || new Date().toISOString();
+  const metadata = {
+    disruptions: {
+      source: 'disruptionsScraper',
+      sourceVintage: 'Live Feed',
+      lastUpdated: lastSyncTime,
+      updateType: 'auto' as const
+    }
+  };
   // Filters state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedZone, setSelectedZone] = useState('All');
@@ -187,6 +196,7 @@ export default function ServiceDisruptionsDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Monitor real-time closures, reduced hours, and bed reductions across Alberta.
           </p>
+          <DataTimestamp metadata={metadata} arrayKey="disruptions" />
         </div>
       </div>
 

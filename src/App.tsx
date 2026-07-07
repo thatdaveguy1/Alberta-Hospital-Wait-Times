@@ -11,7 +11,6 @@ import {
   BarChart3,
   RefreshCw,
   Info,
-  FileText,
   Database,
   Compass,
   Map,
@@ -1635,83 +1634,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* STANDARDIZED LAST UPDATED BANNER */}
-        {(() => {
-          const activeTabMeta = TAB_METADATA_MAP[activeTab] || {
-            updateType: 'manual',
-            interval: 'on demand',
-            sourceVintage: '2025/2026',
-            source: 'AHS datasets'
-          };
-          const isAuto = activeTabMeta.updateType === 'auto';
-          let lastUpdatedDisplay = 'July 5, 2026 at 12:00 PM';
-          let sourceVintageDisplay = activeTabMeta.sourceVintage;
-
-          if (isAuto) {
-            if (activeTab === 'er-waits') {
-              if (syncStatus?.erWaitTimesLastUpdate) {
-                lastUpdatedDisplay = new Date(syncStatus.erWaitTimesLastUpdate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
-                sourceVintageDisplay = lastUpdatedDisplay;
-              } else {
-                lastUpdatedDisplay = 'Live Feed';
-              }
-            } else if (activeTab === 'disruptions') {
-              const result = syncStatus?.results?.find(r => r.domain === 'disruptions' || r.pipeline === 'disruptionsScraper');
-              if (result?.timestamp) {
-                lastUpdatedDisplay = new Date(result.timestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
-                sourceVintageDisplay = lastUpdatedDisplay;
-              } else if (syncStatus?.lastSyncTimestamp) {
-                lastUpdatedDisplay = new Date(syncStatus.lastSyncTimestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
-                sourceVintageDisplay = lastUpdatedDisplay;
-              } else {
-                lastUpdatedDisplay = 'Updated daily';
-              }
-            } else {
-              const result = syncStatus?.results?.find(r => r.domain === activeTabMeta.domain);
-              if (result?.timestamp) {
-                lastUpdatedDisplay = new Date(result.timestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
-              } else if (syncStatus?.lastSyncTimestamp) {
-                lastUpdatedDisplay = new Date(syncStatus.lastSyncTimestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' });
-              } else {
-                lastUpdatedDisplay = 'July 5, 2026 at 12:00 PM';
-              }
-            }
-          } else {
-            lastUpdatedDisplay = 'July 5, 2026 at 12:00 PM';
-          }
-
-          return (
-            <div className="bg-slate-900 border border-slate-800/80 px-4 py-3 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 mb-6 shadow-md relative overflow-hidden">
-              <div className="flex items-center gap-3">
-                <div className={`p-1.5 rounded-lg shrink-0 border ${
-                  isAuto 
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                    : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                }`}>
-                  {isAuto ? <RefreshCw className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
-                </div>
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full border ${
-                      isAuto 
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                    }`}>
-                      {isAuto ? `Auto-updated (${activeTabMeta.interval})` : `Manual (${activeTabMeta.interval})`}
-                    </span>
-                    <span className="text-xs font-bold text-slate-200">
-                      Last Update: <span className="font-mono text-white font-black">{lastUpdatedDisplay}</span>
-                    </span>
-                    <span className="text-slate-600 text-xs hidden sm:inline">·</span>
-                    <span className="text-[11px] text-slate-400">
-                      Data Timestamp: <span className="font-extrabold text-slate-200">{sourceVintageDisplay}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
 
         {/* ACTIVE CONTENT CHANNEL (Full Width Layout) */}
         <div className="w-full min-w-0">
@@ -1728,6 +1650,16 @@ export default function App() {
                 <p className="text-xs text-slate-400 mt-1">
                   Track estimated wait times from registration to physician assessment at regional emergency facilities.
                 </p>
+                <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-400">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-between shrink-0 relative">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse absolute left-0.5 top-0.5"></span>
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">Auto-updated (10m)</span>
+                  <span className="text-slate-600">·</span>
+                  <span>Last Update: <span className="font-mono text-white font-black">{syncStatus?.erWaitTimesLastUpdate ? new Date(syncStatus.erWaitTimesLastUpdate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' }) : 'Live Feed'}</span></span>
+                  <span className="text-slate-600">·</span>
+                  <span>Data Timestamp: <span className="font-extrabold text-slate-200">Real-time Feed</span></span>
+                </div>
               </div>
             </div>
 
