@@ -190,7 +190,7 @@ const DASHBOARDS = [
     badge: 'LIVE LABS',
     badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
     source: 'APL QMe, AHS & CIHI',
-    updateFrequency: 'Every 15 minutes',
+    updateFrequency: 'Lab waits: every 30 min · Imaging/turnaround: annual/manual',
   },
   {
     id: 'primary-care' as const,
@@ -439,9 +439,9 @@ const TAB_METADATA_MAP: Record<string, {
   },
   'diagnostics': {
     updateType: 'auto',
-    interval: 'every 24 hours',
+    interval: 'Lab waits: every 30 min · Imaging: annual',
     sourceVintage: '2025-2026',
-    source: 'APL QMe, AHS Imaging & CIHI Diagnostic Imaging',
+    source: 'APL QMe REST API, AHS Imaging & CIHI Diagnostic Imaging',
     domain: 'diagnostic'
   },
   'cancer': {

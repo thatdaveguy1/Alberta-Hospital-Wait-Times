@@ -1,0 +1,195 @@
+// APL Lab Wait Times Fetcher Pipeline
+// Fetches live lab location wait times from the APL QMe REST API every 30 minutes.
+// The API returns 153 community lab locations with real-time WaitTime and SaveMyPlace fields.
+//
+// Endpoint: GET https://qmeapi.albertaprecisionlabs.ca/api/location
+// No auth, no captcha, open CORS. Returns { Sites: [...] }.
+//
+// This replaces the hand-authored LAB_LOCATION_WAITS array (52 sites) with 153 live API sites.
+// The other 5 diagnostic sub-datasets (CIHI imaging, turnaround, etc.) are untouched —
+// they're annual/static and stay on the daily orchestrator.
+
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import type { SyncResult } from './types';
+
+const APL_API_URL = 'https://qmeapi.albertaprecisionlabs.ca/api/location';
+const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
+
+// API site shape — matches the raw JSON from qmeapi.albertaprecisionlabs.ca
+interface AplSite {
+  Id: number;
+  Name: string;
+  Code: string;
+  Address: string;
+  City: string;
+  Province: string;
+  PostalCode: string;
+  AdditionalInfo: string;
+  Phone: string;
+  Fax: string;
+  Hours: string;
+  Region: string;
+  WaitTime: string;
+  Latitude: string;
+  Longitude: string;
+  SaveMyPlace: boolean;
+}
+
+// Parse the WaitTime string into a number of minutes or a sentinel string.
+// Handles: "Closed", "Appointments Only", "45 min", "1 hr 30 min", "2 hr", bare numbers.
+function parseWaitTime(waitStr: string): number | 'Appointments Only' | 'Closed' {
+  if (!waitStr || typeof waitStr !== 'string') return 'Closed';
+
+  const lower = waitStr.toLowerCase().trim();
+
+  if (lower === 'closed' || lower === '' || lower === 'n/a') return 'Closed';
+  if (lower.includes('appointment')) return 'Appointments Only';
+
+  let totalMins = 0;
+  const hrMatch = lower.match(/(\d+)\s*hr/);
+  const minMatch = lower.match(/(\d+)\s*min/);
+
+  if (hrMatch) totalMins += parseInt(hrMatch[1], 10) * 60;
+  if (minMatch) totalMins += parseInt(minMatch[1], 10);
+
+  if (hrMatch || minMatch) return totalMins;
+
+  // Bare number — try to parse directly
+  const bareNum = parseInt(lower.replace(/[^0-9]/g, ''), 10);
+  if (!isNaN(bareNum) && bareNum > 0) return bareNum;
+
+  // Unknown format — safe default
+  console.warn(`[AplLabWaitTimesFetcher] Unknown WaitTime format: "${waitStr}" — defaulting to Closed`);
+  return 'Closed';
+}
+
+// Derive walkInAvailable and appointmentRequired from the API's free-text fields.
+function deriveWalkIn(site: AplSite): boolean {
+  const text = `${site.AdditionalInfo} ${site.Hours}`.toLowerCase();
+  return /walk.?in/.test(text);
+}
+
+function deriveAppointmentRequired(site: AplSite): boolean {
+  const text = `${site.AdditionalInfo} ${site.Hours}`.toLowerCase();
+  const mentionsAppt = /appointment\s*only|by appointment/i.test(text);
+  const walkIn = deriveWalkIn(site);
+  // If walk-in is available, appointment is not strictly required.
+  // Some sites are walk-in M-F but appointment-only Saturdays — treat as not-required
+  // since walk-in is an option on most days.
+  return mentionsAppt && !walkIn;
+}
+
+export async function run(): Promise<SyncResult> {
+  const startTime = Date.now();
+  const timestamp = new Date().toISOString();
+  console.log('[AplLabWaitTimesFetcher] Fetching live APL lab wait times...');
+
+  try {
+    const response = await axios.get(APL_API_URL, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+      timeout: 15000,
+    });
+
+    if (!response.data || !response.data.Sites || !Array.isArray(response.data.Sites)) {
+      throw new Error('Invalid API response: missing Sites array');
+    }
+
+    const sites = response.data.Sites as AplSite[];
+    console.log(`[AplLabWaitTimesFetcher] Received ${sites.length} sites from APL API`);
+
+    // Map API sites to LabLocationWait shape
+    const labLocations = sites.map(site => ({
+      id: `APL-${site.Code}`,
+      name: site.Name,
+      code: site.Code,
+      address: site.Address,
+      city: site.City,
+      region: site.Region as 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'South Zone' | 'North Zone',
+      waitTimeMin: parseWaitTime(site.WaitTime),
+      saveMyPlaceAvailable: site.SaveMyPlace,
+      appointmentRequired: deriveAppointmentRequired(site),
+      walkInAvailable: deriveWalkIn(site),
+      latitude: parseFloat(site.Latitude) || 0,
+      longitude: parseFloat(site.Longitude) || 0,
+      dailyVolume: 0,
+      peakHours: '',
+    }));
+
+    // Read existing data-diagnostic.json, replace only LAB_LOCATION_WAITS, preserve everything else
+    let existingData: Record<string, unknown>;
+    try {
+      const raw = fs.readFileSync(DIAGNOSTIC_FILE, 'utf8');
+      existingData = JSON.parse(raw);
+    } catch (err) {
+      console.error('[AplLabWaitTimesFetcher] Failed to read existing data-diagnostic.json:', err);
+      return {
+        domain: 'diagnostic',
+        pipeline: 'aplLabWaitTimesFetcher',
+        status: 'failed',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        error: `Failed to read data file: ${err instanceof Error ? err.message : String(err)}`,
+        timestamp,
+      };
+    }
+
+    existingData.LAB_LOCATION_WAITS = labLocations;
+
+    // Update metadata for LAB_LOCATION_WAITS
+    if (existingData._dataMetadata && typeof existingData._dataMetadata === 'object') {
+      const meta = existingData._dataMetadata as Record<string, Record<string, unknown>>;
+      meta.LAB_LOCATION_WAITS = {
+        source: 'APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)',
+        sourceVintage: 'Live data',
+        lastUpdated: timestamp,
+        updateType: 'auto',
+        verification: 'Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes.',
+      };
+    }
+
+    // Write back
+    fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(existingData, null, 2), 'utf8');
+    console.log(`[AplLabWaitTimesFetcher] Wrote ${labLocations.length} lab locations to data-diagnostic.json`);
+
+    return {
+      domain: 'diagnostic',
+      pipeline: 'aplLabWaitTimesFetcher',
+      status: 'success',
+      recordsFetched: labLocations.length,
+      recordsWritten: labLocations.length,
+      durationMs: Date.now() - startTime,
+      timestamp,
+    };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error('[AplLabWaitTimesFetcher] Failed:', errorMsg);
+    return {
+      domain: 'diagnostic',
+      pipeline: 'aplLabWaitTimesFetcher',
+      status: 'failed',
+      recordsFetched: 0,
+      recordsWritten: 0,
+      durationMs: Date.now() - startTime,
+      error: errorMsg,
+      timestamp,
+    };
+  }
+}
+
+// CLI entry point: tsx src/pipelines/aplLabWaitTimesFetcher.ts
+if (import.meta.url === `file://${process.argv[1]}`) {
+  run()
+    .then(result => {
+      console.log(JSON.stringify(result));
+      process.exit(result.status === 'success' ? 0 : 1);
+    })
+    .catch(err => {
+      console.error('[AplLabWaitTimesFetcher] CLI fatal:', err);
+      process.exit(1);
+    });
+}

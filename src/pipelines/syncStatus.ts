@@ -14,6 +14,8 @@ let currentStatus: SyncStatus = {
   results: [],
   erWaitTimesLastUpdate: null,
   erWaitTimesNextUpdate: null,
+  labWaitsLastUpdate: null,
+  labWaitsNextUpdate: null,
 };
 
 export function getSyncStatus(): SyncStatus {
@@ -45,6 +47,21 @@ export function recordErWaitTimesUpdate(result: SyncResult): void {
   } else {
     currentStatus.results.push(result);
   }
+  saveToDisk();
+}
+
+export function recordLabWaitsUpdate(result: SyncResult): void {
+  currentStatus.labWaitsLastUpdate = result.timestamp;
+  currentStatus.labWaitsNextUpdate = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+  const existingIdx = currentStatus.results.findIndex(
+    r => r.pipeline === result.pipeline
+  );
+  if (existingIdx >= 0) {
+    currentStatus.results[existingIdx] = result;
+  } else {
+    currentStatus.results.push(result);
+  }
 
   saveToDisk();
 }
@@ -61,9 +78,11 @@ export function recordDailySyncResults(results: SyncResult[]): void {
   currentStatus.nextSyncTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
   // Replace all daily sync results with the new set.
-  // Keep ER wait times results (different cadence), replace everything else.
-  const erResults = currentStatus.results.filter(r => r.pipeline === 'erWaitTimesFetcher');
-  currentStatus.results = [...erResults, ...results];
+  // Keep ER wait times and lab waits results (different cadence), replace everything else.
+  const fastTierResults = currentStatus.results.filter(
+    r => r.pipeline === 'erWaitTimesFetcher' || r.pipeline === 'aplLabWaitTimesFetcher'
+  );
+  currentStatus.results = [...fastTierResults, ...results];
 
   saveToDisk();
 }

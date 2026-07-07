@@ -3748,6 +3748,42 @@
       ]
     },
     {
+      "id": "8bcc04df-568d-4e3f-9f08-1c8f1834c089",
+      "name": "2010_118",
+      "title": "Alberta Electronic Health Record Regulation",
+      "organization": "King's Printer",
+      "notes": "This Regulation outlines the department’s duties operating and managing the Alberta Electronic Health Record (Alberta EHR); sets eligibility requirements to become an authorized custodian; sets out requirements that the Office of the Chief Medical Examiner and health services providers outside of Alberta must meet to gain access to the Alberta EHR; sets out types and classes of health information; describes the manner in which health information must be made accessible by regulated health professionals; logging capacity; the audit of information logs; and provides rules for investigations and restricting access to the Alberta EHR.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "20cd8990-05f9-4085-a59d-1a164a0221fe",
+          "name": "Alberta Electronic Health Record Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779862863&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "135059ef-ca6f-443b-9c6a-e601e4eb0801",
+      "name": "2001_070",
+      "title": "Health Information Regulation",
+      "organization": "King's Printer",
+      "notes": "This Regulation regulates matters pertaining to the designation of custodians; provisions for affiliates; registration information; exclusions from the definition of a health service, the collection use and disclosure of specified health information; the information manager agreement, and; the security of health information and fees.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "148a3eb5-4a61-414a-bfb0-73c2a2a480c6",
+          "name": "Health Information Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779862870&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
       "id": "f30df77c-3451-448d-9f83-10bb22a75ac0",
       "name": "ministers-office-expenses-mental-health-and-addiction",
       "title": "Minister's office expenses : Mental Health and Addiction",
@@ -4272,6 +4308,42 @@
       ]
     },
     {
+      "id": "cfa7dbb2-8293-4db2-bba3-4e40b45e2cac",
+      "name": "2026_140",
+      "title": "Dual Practice Records Regulation",
+      "organization": "King's Printer",
+      "notes": "The Dual Practice Records Regulation establishes the specific record keeping and reporting obligations for dual practice (flexibly participating) and fully private (non-participating) physicians.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "1aa285bd-e491-4440-8a77-d79ae627c30d",
+          "name": "Dual Practice Records Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863372&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "2e4f4c3b-2bf4-4213-b9a1-62f2d6f8e62f",
+      "name": "2026_134",
+      "title": "Primary Care Corridor Provincial Health Corporations Regulation",
+      "organization": "King's Printer",
+      "notes": "This Regulation establishes seven Primary Care Corridor Provincial Health Corporations, designates the responsible Minister and outlines responsibilities and duties for this provincial health corporation relating to members, governance, bylaws, financial matters, ancillary operations, agreements, a patient concerns resolution process, and other key operational requirements.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "601d376c-76a9-45c8-a5f2-2c6cde1deeb7",
+          "name": "Primary Care Corridor Provincial Health Corporations Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863273&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
       "id": "7a415e73-6941-4c89-bafc-1272f6f9b5dc",
       "name": "sustainable-forest-management-forest-management-plans",
       "title": "Sustainable forest management : forest management plans",
@@ -4422,24 +4494,6 @@
       ]
     },
     {
-      "id": "a98c8682-cae5-438d-9819-0720a6b7eb4c",
-      "name": "2026_129",
-      "title": "Health Insurance Registration Renewal Regulation",
-      "organization": "King's Printer",
-      "notes": "This Regulation establishes processes for Alberta Health Care Insurance Plan coverage renewal, including expiry and cancellation notifications, reinstatement of cancelled registrations, issuance of new or replacement certificates, and requirements to surrender certificates to prevent use of expired or duplicate documents.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "572b6ef9-9a6d-4037-aa91-0de9af221a75",
-          "name": "Health Insurance Registration Renewal Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863181&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
       "id": "df7b7b00-c5c3-4d0e-97ff-5f902537fac0",
       "name": "assured-income-for-the-severely-handicapped-aish-caseload-alberta",
       "title": "Assured Income for the Severely Handicapped (AISH) Caseload",
@@ -4481,6 +4535,24 @@
           "name": "Your Guide to AISH - April 2024",
           "url": "https://open.alberta.ca/dataset/df7b7b00-c5c3-4d0e-97ff-5f902537fac0/resource/a371243a-d29e-42cf-9876-9949a948ed44/download/scss-your-guide-to-aish-2024-04.pdf",
           "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "a98c8682-cae5-438d-9819-0720a6b7eb4c",
+      "name": "2026_129",
+      "title": "Health Insurance Registration Renewal Regulation",
+      "organization": "King's Printer",
+      "notes": "This Regulation establishes processes for Alberta Health Care Insurance Plan coverage renewal, including expiry and cancellation notifications, reinstatement of cancelled registrations, issuance of new or replacement certificates, and requirements to surrender certificates to prevent use of expired or duplicate documents.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "f72eabf1-68fb-4cd7-aa77-a036f8e9c749",
+          "name": "Health Insurance Registration Renewal Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863181&search_by=link",
+          "format": "URI",
           "isStructured": false
         }
       ]
@@ -4560,78 +4632,6 @@
           "url": "https://open.alberta.ca/dataset/76a54113-1381-4824-b39c-2b32d2dfc652/resource/ea1d5197-5a8f-4924-9fbb-fb9fa8f089b9/download/ogp.species.09122025.xlsx",
           "format": "XLSX",
           "isStructured": true
-        }
-      ]
-    },
-    {
-      "id": "b98e4ad1-0eae-46e8-8b68-7eaee0bd3a2e",
-      "name": "2025_105",
-      "title": "Cancer Care Provincial Health Corporation Regulation",
-      "organization": "King's Printer",
-      "notes": "This Regulation establishes the Cancer Care Provincial Health Corporation, designates the responsible Minister, and outlines responsibilities and duties for this provincial health corporation relating to members, governance, bylaws, financial matters, ancillary operations, agreements, a patient concerns resolution process, and other key operational requirements.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "babaa0cb-1b91-48c8-97a6-72459fc61f83",
-          "name": "Cancer Care Provincial Health Corporation Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863105&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "52d061e1-483c-4c1a-ac62-ff5c98a0e36a",
-      "name": "2024_213",
-      "title": "Alberta Health Services Provincial Health Corporation Regulation",
-      "organization": "King's Printer",
-      "notes": "This Regulation establishes the Alberta Health Services Provincial Health Corporation, designates the responsible Minister, and outlines responsibilities and duties for this provincial health corporation relating to members, governance, bylaws, financial matters, ancillary operations, agreements, a patient concerns resolution process, and other key operational requirements.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "22714a2c-6d3a-4c1b-b5dc-62e5e9b32b69",
-          "name": "Alberta Health Services Provincial Health Corporation Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863099&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "4534fe6f-729b-4af8-b5ec-6d371e91608f",
-      "name": "2025_106",
-      "title": "Emergency Health Services Provincial Health Corporation Regulation",
-      "organization": "King's Printer",
-      "notes": "This Regulation establishes the Emergency Health Services Provincial Health Corporation, designates the responsible Minister, and outlines responsibilities and duties for this provincial health corporation relating to members, governance, bylaws, financial matters, ancillary operations, agreements, a patient concerns resolution process, and other key operational requirements.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "324a7c9f-1563-488a-ba57-8916b9583e6d",
-          "name": "Emergency Health Services Provincial Health Corporation Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863112&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "6899efce-a909-4dd8-b64f-067510ac9ff5",
-      "name": "2025_235",
-      "title": "Health Shared Services Provincial Health Corporation Regulation",
-      "organization": "King's Printer",
-      "notes": "This Regulation establishes the Health Shared Services Provincial Health Corporation, designates the responsible Minister, and outlines responsibilities and duties for this provincial health corporation relating to members, governance, bylaws, financial matters, ancillary operations, agreements, and other key operational requirements.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "5a29613c-5c27-49ba-b3a1-2764ee5f44ad",
-          "name": "Health Shared Services Provincial Health Corporation Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863129&search_by=link",
-          "format": "URI",
-          "isStructured": false
         }
       ]
     }

@@ -1,263 +1,325 @@
-# Implementation Plan: 30-Minute APL Community Lab Wait Times Updates
+# Plan: Update Diagnostic & Lab Services Data Every 30 Minutes
 
-We have discovered that instead of scraping the protected Blazor SPA booking site (`qme.albertaprecisionlabs.ca`), Alberta Precision Laboratories (APL) exposes a public, unauthenticated, and CAPTCHA-free REST API that provides community lab site listings and real-time wait times:
+## Situation
 
-```
-GET https://qmeapi.albertaprecisionlabs.ca/api/location
-```
+The user wants "Diagnostic & Lab Services" data to update at least every 30 minutes. Research revealed that "diagnostic data" is six sub-datasets with wildly different source cadences — only one (`LAB_LOCATION_WAITS`) can meaningfully change every 30 min. A live browser probe of the QMe booking site confirmed no wait-in-minutes in the visible booking flow, but a competing plan discovered a **hidden open REST API** that I independently verified: `GET https://qmeapi.albertaprecisionlabs.ca/api/location` returns 153 lab locations with real-time `WaitTime` and `SaveMyPlace` fields — no auth, no captcha, open CORS, 46ms response. This eliminates the need for Puppeteer entirely and makes genuine 30-min updates straightforward.
 
-This endpoint returns `application/json` with CORS headers open. It lists 153 sites under `{ Sites: [...] }`. Each site contains fields including `Code`, `Name`, `Address`, `City`, `Region`, `WaitTime` (e.g. `"Closed"`, `"25 min"`, or `"1 hr 30 min"`), and `SaveMyPlace` (boolean).
-
-This allows us to implement a lightweight, robust, high-frequency pipeline (every 30 minutes) mirroring `erWaitTimesFetcher.ts` without browser automation.
+This plan amalgamates three competing plans, verified against the live API and the codebase.
 
 ---
 
-## Files to Touch and Create
+## Research Findings (verified 2026-07-07)
 
-*   `src/pipelines/aplLabWaitTimesFetcher.ts` (New)
-*   `src/pipelines/types.ts` (Modify)
-*   `src/pipelines/syncStatus.ts` (Modify)
-*   `src/pipelines/scheduler.ts` (Modify)
-*   `src/components/DiagnosticDashboard.tsx` (Modify)
-*   `src/App.tsx` (Modify)
+### The six diagnostic sub-datasets — only one can update every 30 min
+
+| Array | Source | Cadence | 30-min update? |
+|---|---|---|---|
+| `LAB_LOCATION_WAITS` | APL QMe API (new) / was hand-authored | Intraday | **YES — this plan** |
+| `IMAGING_WAIT_TRENDS` | `cihiWaitTimesDownloader` | CIHI annual | No — keep daily |
+| `CIHI_DIAGNOSTIC_WAIT_TIMES` | `cihiWaitTimesPriorityFetcher` | CIHI annual | No — keep daily |
+| `FACILITY_IMAGING_WAITS` | AHS imaging (estimated) | Static/manual | No |
+| `PRIORITY_TARGET_COMPLIANCE` | Alberta Health reports | Static/manual | No |
+| `TEST_TURNAROUND_METRICS` | APL clinical standards | Static/manual | No |
+
+Rerunning CIHI pipelines every 30 min is pure waste — they publish once a year and already run daily.
+
+### The APL REST API is real and verified
+
+**Endpoint:** `GET https://qmeapi.albertaprecisionlabs.ca/api/location`
+- **Verified live:** HTTP 200, 114,847 bytes, 46ms, `Content-Type: application/json; charset=utf-8`.
+- **No auth, no captcha, open CORS:** `Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS`.
+- **Shape:** `{"Sites": [...]}` — 153 sites. Each site has: `Id` (int), `Name`, `Code`, `Address`, `City`, `Province`, `PostalCode`, `AdditionalInfo` (HTML), `Phone`, `Fax`, `Hours` (HTML with `</br>`), `Region`, `WaitTime` (string), `Latitude`, `Longitude` (strings), `SaveMyPlace` (bool).
+- **WaitTime field:** string. At probe time (~evening Alberta), all 153 sites returned `"Closed"` and `SaveMyPlace: false` (sites were closed). During business hours this field will populate with live wait estimates. The exact open-hours format is not yet observed — the fetcher must handle all plausible formats: `"45 min"`, `"1 hr 30 min"`, `"Appointments Only"`, `"Closed"`, and bare numbers.
+- **Regions:** North Zone (37), Edmonton Zone (34), Central Zone (34), Calgary Zone (32), South Zone (16).
+
+### Merge strategy: replace, don't map
+
+- The API has 153 sites; the hand-authored data has 52. **Only 1 of 52 codes matches** the API codes (`SHCC`). Code mapping is infeasible — the hand-authored codes (e.g., `UAH-L`, `RAH-L`, `KECP`) are a different naming scheme from the API codes (e.g., `KW`, `AIR`, `ATHAB`).
+- Name matching is also unreliable: only 22/52 fuzzy-matched, and hospital lab names in the hand-authored data (e.g., "University of Alberta Hospital Lab") don't match the API's community-site names (e.g., "Abbottsfield", "Airdrie"). The hand-authored list is hospital-based; the API is community-collection-site-based — they're largely different locations.
+- **Decision: replace `LAB_LOCATION_WAITS` entirely with the 153 API sites.** The hand-authored `dailyVolume` and `peakHours` fields are unverified estimates (the metadata already admits this). The API gives 3x more locations with real data. Trying to preserve 52 hand-authored records by name-matching adds complexity for no data-quality gain.
+- `dailyVolume` and `peakHours` are **rendered in the dashboard** (DiagnosticDashboard.tsx lines 538-543: "Peak Hours" and "Daily Volume ~X patients" in each lab card). The API does not provide these fields. Make them **optional** in the `LabLocationWait` interface (default `0` / empty string). The dashboard renders them with `~{lab.dailyVolume} patients` and `{lab.peakHours}` — with `0`/empty these show as `~0 patients` and blank, which is honest (no fabricated data). Alternatively, hide the fields when `dailyVolume === 0` — a minor UI tweak in Phase 2.
+- The `LabLocationWait.id` field: use the API `Id` (int) converted to string, or `APL-{Code}`. The `code` field: use the API `Code`.
+
+### Deriving booleans from the API
+
+The API doesn't have explicit `walkInAvailable` / `appointmentRequired` booleans, but they can be derived:
+- `walkInAvailable`: `true` if `AdditionalInfo` contains "walk in" / "walk-in" (case-insensitive). Most sites say "Walk ins accepted until 30 min before closing."
+- `appointmentRequired`: `true` if `Hours` or `AdditionalInfo` contains "appointment only" / "by appointment" and NOT "walk in." Some sites (e.g., Airdrie) are walk-in M-F but appointment-only Saturdays.
+- `saveMyPlaceAvailable`: directly from the API `SaveMyPlace` boolean.
+- `waitTimeMin`: parse the `WaitTime` string — see parser below.
+
+### Critical frontend gap — dashboard reads bundled constants, not the JSON
+
+- `src/components/DiagnosticDashboard.tsx` lines 42-54 import `LAB_LOCATION_WAITS` etc. **directly from `../diagnosticData`** (build-time TS constants). Zero `fetch` calls in the component.
+- The `/api/data/:domain` endpoint **already exists** (`server.ts:490-518`, maps `'diagnostic'` → `data-diagnostic.json`).
+- `App.tsx` demonstrates the correct fetch pattern (line 751: `fetch('/api/hospitals')` → `setHospitals(data)`).
+- **Without converting DiagnosticDashboard to fetch-based, a 30-min fetcher updating `data-diagnostic.json` will never reach the user's browser.** Required phase.
+
+### Scheduler architecture — add a third tier
+
+`src/pipelines/scheduler.ts` has two tiers: ER wait times every 10 min, daily sync every 24 hr. This plan adds a **third tier: lab waits every 30 min** — a simple `setInterval` + axios GET, not a Puppeteer child process.
 
 ---
 
-## Detailed Phases
+## Phases
 
-### Phase 1 — Create `src/pipelines/aplLabWaitTimesFetcher.ts`
+### Phase 1 — Build the APL lab-wait fetcher
 
-Create a new file `src/pipelines/aplLabWaitTimesFetcher.ts`. This module will fetch from the APL REST API, parse the `WaitTime` values, and merge them into `data-diagnostic.json`'s `LAB_LOCATION_WAITS` array.
+**Target files:**
+- NEW: `src/pipelines/aplLabWaitTimesFetcher.ts`
+- EDIT: `src/diagnosticData.ts` — make `dailyVolume` and `peakHours` optional in `LabLocationWait`.
 
-1.  **Wait Time Parser**:
-    Write a parser that converts wait-time strings to minutes:
-    *   If wait-time matches `"Closed"` (case-insensitive), return `"Closed"`.
-    *   If wait-time matches `"Appointments Only"` or `"Appt Only"`, return `"Appointments Only"`.
-    *   If wait-time contains hour/min indicators, parse and sum them (e.g. `"1 hr 30 min"` → `90`, `"45 min"` → `45`).
-    *   If it's just a number, parse it as a number.
-    *   Fallback to `"Closed"` if empty or unparseable.
+**Change:**
 
-2.  **Code Mappings**:
-    Since codes in the local `diagnosticData.ts` and the REST API do not align perfectly, use a hardcoded mapping dictionary to match local clinic codes to the API's site codes:
-    ```typescript
-    const CODE_MAPPING: Record<string, string> = {
-      'LCH-L': 'LEDUC', // Leduc Community Hospital Lab -> Leduc
-      'FSCH': 'FSCC',  // Fort Saskatchewan Community Hospital Lab -> Fort Saskatchewan
-      'STAH': 'STAB',  // St. Albert Sturgeon Community Hospital Lab -> St. Albert
-      'SMCC': 'SMC',   // Sheldon M. Chumir Health Centre Lab -> Sheldon M Chumir
-      'SPBL': 'SUN',   // Sunridge Professional Building Lab -> Sunridge
-      'CCHC': 'COCH',  // Cochrane Community Health Centre Lab -> Cochrane
-      'ACHC': 'AIR',   // Airdrie Community Health Centre Lab -> Airdrie
-      'OHWC': 'OK',    // Okotoks Health and Wellness Centre Lab -> Okotoks
-      'HRGH': 'HRIV',  // High River General Hospital Lab -> High River
-      'COLB': 'CMR',   // Camrose Outpatient Lab -> Camrose
-      'DHCL': 'DRUM',  // Drumheller Health Centre Lab -> Drumheller Health Centre
-      'SHCC': 'SHCC',  // Stettler Hospital and Care Centre Lab -> Stettler Hospital & Care Centre
-      'WHCL': 'WNW',   // Wainwright Health Centre Lab -> Wainwright Health Centre
-      'RMHC': 'RMH',   // Rocky Mountain House Health Centre Lab -> Rocky Mountain House Health Centre
-      'BHCL': 'BROOK', // Brooks Health Centre Lab -> Brooks Lab Patient Collection Site
-      'THCL': 'TAB',   // Taber Health Centre Lab -> Taber
-      'CHCL': 'CARD',  // Cardston Health Centre Lab -> Cardston
-      'PCHC': 'PINCH', // Pincher Creek Health Centre Lab -> Pincher Creek
-      'PRCH': 'PRC',   // Peace River Community Health Centre Lab -> Peace River
-      'AHCC': 'ATHA',  // Athabasca Healthcare Centre Lab -> Athabasca
-      'NWHC': 'HLIV',  // High Level - Northwest Health Centre Lab -> High Level
-      'CLHC': 'CLAK',  // Cold Lake Healthcare Centre Lab -> Cold Lake
-      'BHCB': 'BONN',  // Bonnyville Healthcare Centre Lab -> Bonnyville
-      'SPTH': 'STP',   // St. Paul - Therese Healthcare Centre Lab -> St. Therese - St. Paul Healthcare Centre
-    };
+1. Build an axios-based fetcher modeled on `src/pipelines/erWaitTimesFetcher.ts` (NOT `powerbiScraper.ts` — no Puppeteer, no child process, no `execFileSync`):
+   ```ts
+   const APL_API_URL = 'https://qmeapi.albertaprecisionlabs.ca/api/location';
+   const res = await axios.get(APL_API_URL, { timeout: 15000 });
+   const sites = res.data.Sites as AplSite[];
+   ```
+
+2. Define an `AplSite` interface matching the API shape: `Id`, `Name`, `Code`, `Address`, `City`, `Province`, `PostalCode`, `AdditionalInfo`, `Phone`, `Fax`, `Hours`, `Region`, `WaitTime`, `Latitude`, `Longitude`, `SaveMyPlace`.
+
+3. Write a `parseWaitTime(waitStr: string): number | 'Appointments Only' | 'Closed'` parser that handles all formats:
+   - `"Closed"` → `'Closed'`
+   - `"Appointments Only"` → `'Appointments Only'`
+   - `"45 min"` / `"45min"` → `45`
+   - `"1 hr 30 min"` / `"1hr 30min"` → `90`
+   - `"2 hr"` → `120`
+   - Bare number `"45"` → `45`
+   - Unknown string → `'Closed'` (safe default; log a warning)
+
+4. Write a `deriveBooleans(site: AplSite)` helper:
+   - `walkInAvailable`: `/walk.?in/i.test(site.AdditionalInfo)` (true if the info text mentions walk-ins).
+   - `appointmentRequired`: `/appointment\s*only|by appointment/i.test(site.Hours + ' ' + site.AdditionalInfo)` AND not `walkInAvailable`.
+   - `saveMyPlaceAvailable`: `site.SaveMyPlace` (direct from API).
+
+5. Map each API site to `LabLocationWait`:
+   ```ts
+   {
+     id: `APL-${site.Code}`,
+     name: site.Name,
+     code: site.Code,
+     address: site.Address,
+     city: site.City,
+     region: site.Region,  // API already uses 'Calgary Zone' etc. — matches the union type
+     waitTimeMin: parseWaitTime(site.WaitTime),
+     saveMyPlaceAvailable: site.SaveMyPlace,
+     appointmentRequired: derived,
+     walkInAvailable: derived,
+     latitude: parseFloat(site.Latitude),
+     longitude: parseFloat(site.Longitude),
+     dailyVolume: 0,       // not provided by API — optional field
+     peakHours: '',        // not provided by API — optional field
+   }
+   ```
+
+6. Read the existing `data-diagnostic.json`, replace ONLY the `LAB_LOCATION_WAITS` key with the 153 mapped sites, preserve all other keys (`TEST_TURNAROUND_METRICS`, `IMAGING_WAIT_TRENDS`, `FACILITY_IMAGING_WAITS`, `PRIORITY_TARGET_COMPLIANCE`, `CIHI_DIAGNOSTIC_WAIT_TIMES`, `_handAuthoredMetadata`, `_dataMetadata`).
+
+7. Update `_dataMetadata.LAB_LOCATION_WAITS`:
+   ```json
+   {
+     "source": "APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)",
+     "sourceVintage": "Live data",
+     "lastUpdated": "<ISO timestamp>",
+     "updateType": "auto",
+     "verification": "Live wait times from APL's public location API. 153 sites. WaitTime parsed from string to minutes."
+   }
+   ```
+
+8. Write the updated JSON back to `data-diagnostic.json`.
+
+9. Push to Cloudflare KV: `pushToCloudflare('diagnostic', <full data-diagnostic.json>)` (same pattern as `scheduler.ts` line 38-42).
+
+10. Return a `SyncResult`: `{ domain: 'diagnostic', pipeline: 'aplLabWaitTimesFetcher', status, recordsFetched: 153, timestamp }`.
+
+11. Add a CLI entry point: `if (import.meta.url === ...) { run().then(result => console.log(JSON.stringify(result))).catch(...) }` so it can run standalone: `npx tsx src/pipelines/aplLabWaitTimesFetcher.ts`.
+
+12. In `src/diagnosticData.ts`, change the `LabLocationWait` interface:
+    ```ts
+    dailyVolume?: number;   // was: dailyVolume: number;
+    peakHours?: string;     // was: peakHours: string;
     ```
 
-3.  **Merge Strategy**:
-    *   Read existing `data-diagnostic.json`.
-    *   For each location in the `LAB_LOCATION_WAITS` array:
-        *   Determine the matching API code (`CODE_MAPPING[local.code] || local.code`).
-        *   Find the site in the API response matching this code (case-insensitively).
-        *   If found:
-            *   Update `waitTimeMin` with the parsed wait time.
-            *   Update `saveMyPlaceAvailable` to `apiSite.SaveMyPlace`.
-            *   If wait time is `"Appointments Only"`, set `appointmentRequired: true` and `walkInAvailable: false`.
-        *   If not found (e.g. hospital outpatient clinics that do not use QMe booking), preserve its current values.
-    *   Update `_dataMetadata.LAB_LOCATION_WAITS`:
-        *   `source: 'APL QMe API'`
-        *   `sourceVintage`: `'Live data'`
-        *   `lastUpdated`: Current timestamp
-        *   `updateType`: `'auto'`
-    *   Write the updated JSON atomically back to `data-diagnostic.json`.
-    *   Return a standard `SyncResult`.
+**Guard rails:**
+- Simple axios GET — no Puppeteer, no child process, no Chrome.
+- On API failure (timeout, non-200, parse error): return `status: 'skipped', recordsFetched: 0` and do NOT clobber existing data (same safe-on-failure pattern as all other fetchers).
+- Handle the `WaitTime` string format gracefully — the parser must never throw on an unexpected format; default to `'Closed'` and log a warning.
+- The fetcher must be idempotent: running twice produces the same result.
+- Rate limit: this is a single GET — no rate-limit concern. But add a 15s timeout so a hung request doesn't stall the scheduler.
+
+**Acceptance:**
+- `npx tsx src/pipelines/aplLabWaitTimesFetcher.ts` runs standalone and writes 153 sites to `data-diagnostic.json` with `status: 'success'`.
+- `data-diagnostic.json` is valid JSON after the run (all other keys preserved).
+- `_dataMetadata.LAB_LOCATION_WAITS.lastUpdated` reflects the run timestamp, `updateType` is `'auto'`.
+- During business hours, `waitTimeMin` shows real minute values for open sites. After hours, shows `'Closed'`.
 
 ---
 
-### Phase 2 — Update Sync Status Tracking
+### Phase 2 — Convert DiagnosticDashboard from static imports to fetch-based
 
-1.  **Modify `src/pipelines/types.ts`**:
-    Add the new timestamp trackers to the `SyncStatus` interface:
-    ```typescript
-    export interface SyncStatus {
-      // ... existing fields
-      labWaitsLastUpdate: string | null;
-      labWaitsNextUpdate: string | null;
-    }
-    ```
+**Target files:**
+- EDIT: `src/components/DiagnosticDashboard.tsx`
 
-2.  **Modify `src/pipelines/syncStatus.ts`**:
-    *   Initialize `labWaitsLastUpdate: null` and `labWaitsNextUpdate: null` in the `currentStatus` object.
-    *   Implement `recordLabWaitsUpdate(result: SyncResult)`:
-        ```typescript
-        export function recordLabWaitsUpdate(result: SyncResult): void {
-          currentStatus.labWaitsLastUpdate = result.timestamp;
-          currentStatus.labWaitsNextUpdate = new Date(Date.now() + 30 * 60 * 1000).toISOString();
-          
-          const existingIdx = currentStatus.results.findIndex(r => r.pipeline === result.pipeline);
-          if (existingIdx >= 0) {
-            currentStatus.results[existingIdx] = result;
-          } else {
-            currentStatus.results.push(result);
-          }
-          saveToDisk();
-        }
-        ```
-    *   Update `recordDailySyncResults(results: SyncResult[])` to protect both high-frequency pipelines from deletion:
-        ```typescript
-        // Keep ER wait times and Lab wait times results (different cadences)
-        const keepPipelines = ['erWaitTimesFetcher', 'aplLabWaitTimesFetcher'];
-        const preservedResults = currentStatus.results.filter(r => keepPipelines.includes(r.pipeline));
-        currentStatus.results = [...preservedResults, ...results];
-        ```
+**Change:**
+1. Remove the static data imports (lines 42-54): `LAB_LOCATION_WAITS`, `TEST_TURNAROUND_METRICS`, `IMAGING_WAIT_TRENDS`, `FACILITY_IMAGING_WAITS`, `PRIORITY_TARGET_COMPLIANCE`. Keep the **type** imports (`LabLocationWait`, `TestTurnaround`, `ImagingWaitTrend`, `FacilityImagingWait`, `PriorityTarget`).
+2. Add state:
+   ```ts
+   const [diagnosticData, setDiagnosticData] = useState<{
+     LAB_LOCATION_WAITS: LabLocationWait[];
+     TEST_TURNAROUND_METRICS: TestTurnaround[];
+     IMAGING_WAIT_TRENDS: ImagingWaitTrend[];
+     FACILITY_IMAGING_WAITS: FacilityImagingWait[];
+     PRIORITY_TARGET_COMPLIANCE: PriorityTarget[];
+     _dataMetadata: Record<string, {...}>;
+   } | null>(null);
+   const [isLoading, setIsLoading] = useState(true);
+   const [error, setError] = useState<string | null>(null);
+   ```
+3. Add a `useEffect` that fetches `/api/data/diagnostic` on mount (mirror `App.tsx` line 751):
+   ```ts
+   useEffect(() => {
+     fetch('/api/data/diagnostic')
+       .then(res => { if (!res.ok) throw new Error('Failed to load diagnostic data'); return res.json(); })
+       .then(data => { setDiagnosticData(data); setIsLoading(false); })
+       .catch(err => { setError(err.message); setIsLoading(false); });
+   }, []);
+   ```
+4. Replace all references to `LAB_LOCATION_WAITS` with `diagnosticData?.LAB_LOCATION_WAITS ?? []` (and similarly for the other four arrays). Add null guards at the top of every `useMemo` that touches these arrays (per lessons.md "useMemo crashes before isLoading guard" — return `[]` or default values if `!diagnosticData`).
+5. Add an `isLoading` early return with a loading spinner, and an `error` state with an error message.
+6. For `_dataMetadata`: read from the fetched response (`data._dataMetadata`) so `lastUpdated` reflects the actual data file.
+7. Add a "Refresh data" button that re-fetches `/api/data/diagnostic` (mirrors Phase 9 manual refresh pattern).
+8. Handle the optional `dailyVolume`/`peakHours` fields in the lab card render (lines 536-545): hide the "Peak Hours" and "Daily Volume" boxes when `!lab.dailyVolume` / `!lab.peakHours` (since 153 API sites don't have these fields). This avoids showing `~0 patients` and blank peak hours for the new sites.
 
----
+**Guard rails:**
+- Every `useMemo` that accesses properties of a `.find()` or array-index result MUST have a null guard (lessons.md: hooks run before early returns).
+- Do NOT change the visual layout, sub-tabs, or styling beyond the dailyVolume/peakHours conditional hide. Only change the data source.
+- Preserve `DataTimestamp` usage — read `lastUpdated` from fetched `_dataMetadata`.
+- Handle non-JSON responses (404 fallback to HTML) — check `res.ok` before parsing.
 
-### Phase 3 — Wire Scheduler and Cloudflare Push
-
-1.  **Modify `src/pipelines/scheduler.ts`**:
-    *   Import the new fetcher: `import { run as runAplLabWaitTimes } from './aplLabWaitTimesFetcher';`
-    *   Import `recordLabWaitsUpdate` from `./syncStatus`.
-    *   Implement `runLabWaitTimesPipeline()`:
-        ```typescript
-        async function runLabWaitTimesPipeline(): Promise<void> {
-          const result = await runAplLabWaitTimes();
-          recordLabWaitsUpdate(result);
-          
-          if (result.status === 'success') {
-            const { pushToCloudflare } = await import('./pushClient');
-            const fs = await import('fs');
-            const path = await import('path');
-            const diagnosticFile = path.join(process.cwd(), 'data-diagnostic.json');
-            try {
-              const data = fs.readFileSync(diagnosticFile, 'utf8');
-              const parsed = JSON.parse(data);
-              await pushToCloudflare('diagnostic', parsed);
-            } catch (err) {
-              console.warn('[Scheduler] Failed to push diagnostic to Cloudflare:', err);
-            }
-          }
-        }
-        ```
-    *   In `startScheduler()`:
-        *   Trigger an initial run of `runLabWaitTimesPipeline()` after server boots up (non-blocking).
-        *   Schedule `runLabWaitTimesPipeline()` on a 30-minute interval:
-            ```typescript
-            labIntervalId = setInterval(() => {
-              runLabWaitTimesPipeline().catch(err => {
-                console.error('[Scheduler] Lab wait times pipeline error:', err);
-              });
-            }, 30 * 60 * 1000);
-            ```
-    *   In `stopScheduler()`, clear `labIntervalId`.
-    *   Update the startup logging statement to include APL labs.
+**Acceptance:**
+- `npx tsc --noEmit` passes.
+- Dashboard renders with data from `/api/data/diagnostic` (verify in browser: Network tab shows the fetch, no console errors).
+- After a 30-min fetcher run, refreshing the page shows the new `lastUpdated` timestamp and any changed wait times.
+- Loading and error states render correctly.
+- Lab cards for API sites without `dailyVolume`/`peakHours` don't show `~0 patients` or blank fields — the boxes are hidden.
 
 ---
 
-### Phase 4 — Refactor `DiagnosticDashboard.tsx` for Runtime Data
+### Phase 3 — Wire the 30-min lab tier into the scheduler
 
-We must replace the static import of diagnostic data with a dynamic fetch from `/api/data/diagnostic` at runtime, using a React state and loading spinner:
+**Target files:**
+- EDIT: `src/pipelines/scheduler.ts`
+- EDIT: `src/pipelines/syncStatus.ts` — add `recordLabWaitsUpdate(result)` mirroring `recordErWaitTimesUpdate`.
 
-1.  **Imports**:
-    Remove static array imports (`LAB_LOCATION_WAITS`, `TEST_TURNAROUND_METRICS`, `IMAGING_WAIT_TRENDS`, `FACILITY_IMAGING_WAITS`, `PRIORITY_TARGET_COMPLIANCE`, `_dataMetadata`) from `../diagnosticData`.
-    Keep only the TypeScript interfaces: `LabLocationWait`, `TestTurnaround`, `ImagingWaitTrend`, `FacilityImagingWait`, `PriorityTarget`.
+**Change:**
+1. Add `labIntervalId: ReturnType<typeof setInterval> | null = null`.
+2. Add `runLabWaitsPipeline()`:
+   ```ts
+   async function runLabWaitsPipeline(): Promise<void> {
+     const { run: aplLabRun } = await import('./aplLabWaitTimesFetcher');
+     const result = await aplLabRun();
+     recordLabWaitsUpdate(result);
+     if (result.status === 'success') {
+       const { pushToCloudflare } = await import('./pushClient');
+       const fs = await import('fs');
+       const data = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data-diagnostic.json'), 'utf8'));
+       await pushToCloudflare('diagnostic', data);
+     }
+   }
+   ```
+3. In `startScheduler()`:
+   - After the initial ER run, run initial `runLabWaitsPipeline()` non-blocking (`.catch(...)`, not `await`).
+   - Add `labIntervalId = setInterval(() => { runLabWaitsPipeline().catch(...) }, 30 * 60 * 1000)`.
+4. In `stopScheduler()`: clear `labIntervalId`.
+5. Update startup log: `'[Scheduler] Running. ER: 10 min. Lab waits: 30 min. Daily sync: 24 hr.'`
 
-2.  **Add State**:
-    Add `domainData` state:
-    ```typescript
-    const [domainData, setDomainData] = useState<{
-      LAB_LOCATION_WAITS: LabLocationWait[];
-      TEST_TURNAROUND_METRICS: TestTurnaround[];
-      IMAGING_WAIT_TRENDS: ImagingWaitTrend[];
-      FACILITY_IMAGING_WAITS: FacilityImagingWait[];
-      PRIORITY_TARGET_COMPLIANCE: PriorityTarget[];
-      _dataMetadata?: DataMetadataMap;
-    }>({
-      LAB_LOCATION_WAITS: [],
-      TEST_TURNAROUND_METRICS: [],
-      IMAGING_WAIT_TRENDS: [],
-      FACILITY_IMAGING_WAITS: [],
-      PRIORITY_TARGET_COMPLIANCE: [],
-    });
-    const [isLoading, setIsLoading] = useState(true);
-    ```
+**Guard rails:**
+- Do NOT speed up the daily orchestrator. The 30-min tier is separate and runs only the lab fetcher.
+- Initial lab run must be non-blocking so server startup isn't delayed.
+- Do NOT rerun CIHI pipelines on the 30-min tier.
 
-3.  **Fetch Data in `useEffect`**:
-    ```typescript
-    useEffect(() => {
-      fetch('/api/data/diagnostic')
-        .then(res => res.json())
-        .then(data => {
-          setDomainData(data);
-          setIsLoading(false);
-        })
-        .catch(err => {
-          console.error('Failed to load diagnostic data:', err);
-          setIsLoading(false);
-        });
-    }, []);
-    ```
-
-4.  **Replace Array Access**:
-    Modify all references inside render/logic from:
-    *   `LAB_LOCATION_WAITS` → `domainData.LAB_LOCATION_WAITS`
-    *   `TEST_TURNAROUND_METRICS` → `domainData.TEST_TURNAROUND_METRICS`
-    *   `IMAGING_WAIT_TRENDS` → `domainData.IMAGING_WAIT_TRENDS`
-    *   `FACILITY_IMAGING_WAITS` → `domainData.FACILITY_IMAGING_WAITS`
-    *   `PRIORITY_TARGET_COMPLIANCE` → `domainData.PRIORITY_TARGET_COMPLIANCE`
-    *   `diagnosticDataMetadata` → `domainData._dataMetadata`
-
-5.  **Update `useMemo` Dependencies**:
-    For all `useMemo` hooks (such as `labStats`, `filteredLabs`, `filteredFacilities`, `filteredTrendData`, `trendKpiStats`), add `domainData` as a dependency.
-
-6.  **Add Loading State Rendering**:
-    ```typescript
-    if (isLoading) {
-      return (
-        <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
-          Loading diagnostic and lab data...
-        </div>
-      );
-    }
-    ```
+**Acceptance:**
+- `npx tsc --noEmit` passes.
+- Startup log mentions the 30-min lab schedule.
+- After 30 min (or temporarily shortened to 1 min for testing), scheduler log shows a lab pipeline run.
 
 ---
 
-### Phase 5 — Adjust Cadence Labels in Frontend
+### Phase 4 — Register the fetcher in the orchestrator (daily bonus refresh)
 
-1.  **Modify `src/App.tsx`**:
-    *   In the `DASHBOARDS` array:
-        Change `updateFrequency: 'Every 15 minutes'` → `updateFrequency: 'Every 30 minutes'` (or `'Lab waits every 30 min'`).
-    *   In `DASHBOARD_METADATA['diagnostics']`:
-        Change `interval: 'every 24 hours'` → `interval: 'lab waits every 30 min; imaging annually'`.
-        Change `source` → `'APL QMe API & CIHI CT/MRI wait-times'`.
+**Target files:**
+- EDIT: `src/pipelines/orchestrator.ts`
+
+**Change:**
+1. Import the fetcher: `import { run as aplLabRun } from './aplLabWaitTimesFetcher';`
+2. Add to `PIPELINES` (Tier 1, API fetchers): `{ name: 'apl-lab-waits', domain: 'diagnostic', run: aplLabRun }`.
+3. Do NOT add to `MANUAL_PIPELINES` — it should run automatically.
+
+**Guard rails:**
+- The daily run is a secondary refresh; the 30-min scheduler tier is what satisfies the "every 30 min" requirement.
+
+**Acceptance:**
+- `npm run pipeline` (full orchestrator) includes the lab fetcher in results.
+- `listPipelines()` includes `apl-lab-waits`.
 
 ---
 
-## Verification & Acceptance Criteria
+### Phase 5 — Correct cadence labels in App.tsx and dashboard
 
-1.  **Type Check**: Run `npm run lint` (`tsc --noEmit`) and ensure it compiles without errors.
-2.  **Standalone Fetcher Run**: Execute `npx tsx src/pipelines/aplLabWaitTimesFetcher.ts` to confirm it fetches wait times from `qmeapi.albertaprecisionlabs.ca`, merges them successfully, and writes a correctly structured file to `data-diagnostic.json`.
-3.  **Local Run & API Verification**:
-    *   Start local server with `npm run dev`.
-    *   Confirm in the server logs: `[Scheduler] Running. ER wait times: every 10 min. APL lab waits: every 30 min. Daily sync: every 24 hr.`
-    *   Check `/api/sync/status` contains `labWaitsLastUpdate` and `labWaitsNextUpdate`.
-    *   Confirm `/api/data/diagnostic` loads the merged JSON.
-4.  **UI Verification**:
-    *   Load the dashboard in the browser and navigate to **Diagnostics & Labs**.
-    *   Ensure the Laboratory tab mounts, displays a spinner/loading indicator briefly, and then renders location cards with wait times.
-    *   Confirm the updated cadence ("Every 30 minutes") and source labels are clearly displayed.
+**Target files:**
+- EDIT: `src/App.tsx` — find the DASHBOARDS config entry for the diagnostic tab and set `updateFrequency` to `"Lab waits: every 30 min · Imaging/turnaround: annual/manual"`.
+- EDIT: `src/components/DiagnosticDashboard.tsx` — update the "Lab Location Waits" sub-tab header to reflect the live source: "Lab Location Waits · Live (every 30 min)".
+
+**Acceptance:**
+- The diagnostic tab's update-frequency label accurately says 30 min for lab waits.
+- No false "15 min" or "manual" labels on the live data.
+
+---
+
+## Verification
+
+1. **Typecheck:** `npx tsc --noEmit` → expect 0 new errors (pre-existing `acuteCareScraper.ts` errors are unrelated).
+2. **Standalone fetch test:** `npx tsx src/pipelines/aplLabWaitTimesFetcher.ts` → writes 153 sites to `data-diagnostic.json`, status `success`, JSON valid.
+3. **Daytime wait-time format check:** During business hours (7 AM–5 PM Alberta time), run the fetcher again and verify `waitTimeMin` shows real minute values for open sites (not all `'Closed'`). This confirms the `parseWaitTime` parser handles the live format. If the format is unexpected, update the parser — but the fetcher already handles all plausible formats.
+4. **Scheduler:** Start the server (`npm run dev`), confirm the startup log mentions the 30-min lab tier, wait 30 min (or temporarily shorten to 1 min for testing), confirm the lab pipeline runs.
+5. **Frontend:** Open `http://localhost:3004`, navigate to the Diagnostic tab, confirm:
+   - Network tab shows `GET /api/data/diagnostic` returning JSON with 153 lab sites.
+   - Lab Location Waits sub-tab renders the 153 sites with wait times from the fetched data.
+   - `DataTimestamp` shows the real `lastUpdated` from the fetcher run.
+   - Lab cards for API sites don't show `~0 patients` or blank peak hours (fields hidden).
+   - No console errors.
+6. **KV push:** If `CLOUDFLARE_WORKER_URL` is configured, confirm the diagnostic data lands in KV (check Worker `/api/data/diagnostic` endpoint returns the updated `lastUpdated`).
+
+## Files Touched Summary
+
+| Action | Files |
+|--------|-------|
+| New | `src/pipelines/aplLabWaitTimesFetcher.ts` |
+| Edit | `src/diagnosticData.ts` (`dailyVolume?`, `peakHours?` optional) |
+| Edit | `src/pipelines/scheduler.ts` (add 30-min lab tier) |
+| Edit | `src/pipelines/syncStatus.ts` (`recordLabWaitsUpdate`) |
+| Edit | `src/pipelines/orchestrator.ts` (register fetcher — Phase 4) |
+| Edit | `src/components/DiagnosticDashboard.tsx` (fetch conversion + optional field hide) |
+| Edit | `src/App.tsx` (cadence label — Phase 5) |
+| Edit | `data-diagnostic.json` (metadata + 153-site `LAB_LOCATION_WAITS` from fetcher) |
+| Edit | `tasks/todo.md` (add Phase 23 tracker items) |
+| Edit | `lessons.md` (record APL API discovery + frontend gap lesson) |
+
+## Success Criteria
+
+- [ ] `aplLabWaitTimesFetcher.ts` fetches 153 sites from `qmeapi.albertaprecisionlabs.ca/api/location` and writes them to `data-diagnostic.json`.
+- [ ] Scheduler runs the lab fetcher every 30 min (third tier alongside 10-min ER and 24-hr daily).
+- [ ] DiagnosticDashboard reads from `/api/data/diagnostic` at runtime, not bundled TS constants.
+- [ ] CIHI diagnostic pipelines are NOT rerun every 30 min (kept on daily tier).
+- [ ] `npx tsc --noEmit` passes.
+- [ ] Dashboard verified in browser with no console errors.
+- [ ] Cadence labels accurately say "every 30 min" for lab waits.
+- [ ] `tasks/todo.md` and `lessons.md` updated.
+
+## What was dropped from the competing plans (and why)
+
+- **Puppeteer/Blazor/SignalR/captcha path (my original plan + Plan 3):** Obsolete. The REST API provides the data without browser automation. Dropped entirely.
+- **Path A/B split and daytime re-probe gate (my original plan):** Obsolete. The API is confirmed working; `WaitTime` will populate during business hours naturally. The fetcher handles all formats.
+- **Code-mapping table (Plan 2):** Infeasible — only 1 of 52 codes matches. Replaced with full replacement of `LAB_LOCATION_WAITS` with 153 API sites.
+- **Name-matching to preserve 52 hand-authored records:** Dropped. The hand-authored list is hospital-based; the API is community-site-based — largely different locations. The API has 3x more sites with real data. `dailyVolume`/`peakHours` are unverified estimates not worth preserving.

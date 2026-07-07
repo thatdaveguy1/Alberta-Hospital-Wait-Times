@@ -103,7 +103,7 @@
       "covidSignal": 0.0033118887585851914,
       "fluASignal": 15.6,
       "rsvSignal": 9.4,
-      "activityLevel": "Low",
+      "activityLevel": "Moderate",
       "trend": "Decreasing"
     },
     {
@@ -143,7 +143,7 @@
       "covidSignal": 0.003995376374993326,
       "fluASignal": 0,
       "rsvSignal": 0,
-      "activityLevel": "Low",
+      "activityLevel": "Moderate",
       "trend": "Decreasing"
     },
     {
@@ -153,7 +153,7 @@
       "covidSignal": 0.07487733322830455,
       "fluASignal": 0,
       "rsvSignal": 0,
-      "activityLevel": "Low",
+      "activityLevel": "Very High",
       "trend": "Decreasing"
     },
     {
@@ -163,7 +163,7 @@
       "covidSignal": 0.00854061023586214,
       "fluASignal": 0,
       "rsvSignal": 0,
-      "activityLevel": "Low",
+      "activityLevel": "Moderate",
       "trend": "Decreasing"
     }
   ],
@@ -286,5 +286,2324 @@
       "isolationProtocol": "Designation of isolated cohort dormitories. Masks distributed to all residents and visitors in public areas.",
       "antiviralPolicy": "Triage assessment for high-risk elderly or immunocompromised residents; direct referral to secondary urgent care."
     }
-  }
+  },
+  "RVD_RESPIRATORY_CASE_COUNTS": [
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-08-24",
+      "count": 9
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-08-31",
+      "count": 6
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-09-07",
+      "count": 12
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-09-14",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-09-21",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-09-28",
+      "count": 13
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-10-05",
+      "count": 27
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-10-12",
+      "count": 27
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-10-19",
+      "count": 42
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-10-26",
+      "count": 55
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-11-02",
+      "count": 105
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-11-09",
+      "count": 137
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-11-16",
+      "count": 141
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-11-23",
+      "count": 144
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-11-30",
+      "count": 195
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-12-07",
+      "count": 249
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-12-14",
+      "count": 212
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-12-21",
+      "count": 224
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2025-12-28",
+      "count": 183
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-01-04",
+      "count": 128
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-01-11",
+      "count": 67
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-01-18",
+      "count": 32
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-01-25",
+      "count": 32
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-02-01",
+      "count": 29
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-02-08",
+      "count": 22
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-02-15",
+      "count": 15
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-02-22",
+      "count": 10
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-03-01",
+      "count": 5
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-03-08",
+      "count": 5
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-03-15",
+      "count": 13
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-03-22",
+      "count": 10
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-03-29",
+      "count": 1
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-04-05",
+      "count": 2
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-04-12",
+      "count": 5
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-04-19",
+      "count": 8
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-04-26",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-05-03",
+      "count": 3
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-05-10",
+      "count": 5
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-05-17",
+      "count": 6
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-05-24",
+      "count": 2
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-05-31",
+      "count": 3
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-06-07",
+      "count": 1
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-06-14",
+      "count": 1
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-06-21",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-06-28",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-07-05",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-07-12",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-07-19",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-07-26",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-08-02",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-08-09",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-08-16",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H1N1)",
+      "weekEnding": "2026-08-23",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-08-24",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-08-31",
+      "count": 6
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-09-07",
+      "count": 3
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-09-14",
+      "count": 5
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-09-21",
+      "count": 5
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-09-28",
+      "count": 9
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-10-05",
+      "count": 12
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-10-12",
+      "count": 13
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-10-19",
+      "count": 30
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-10-26",
+      "count": 37
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-11-02",
+      "count": 103
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-11-09",
+      "count": 219
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-11-16",
+      "count": 321
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-11-23",
+      "count": 491
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-11-30",
+      "count": 1210
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-12-07",
+      "count": 1822
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-12-14",
+      "count": 2276
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-12-21",
+      "count": 2055
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2025-12-28",
+      "count": 1592
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-01-04",
+      "count": 661
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-01-11",
+      "count": 267
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-01-18",
+      "count": 133
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-01-25",
+      "count": 85
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-02-01",
+      "count": 40
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-02-08",
+      "count": 35
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-02-15",
+      "count": 22
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-02-22",
+      "count": 20
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-03-01",
+      "count": 13
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-03-08",
+      "count": 13
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-03-15",
+      "count": 5
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-03-22",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-03-29",
+      "count": 3
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-04-05",
+      "count": 8
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-04-12",
+      "count": 6
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-04-19",
+      "count": 1
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-04-26",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-05-03",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-05-10",
+      "count": 2
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-05-17",
+      "count": 1
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-05-24",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-05-31",
+      "count": 2
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-06-07",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-06-14",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-06-21",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-06-28",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-07-05",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-07-12",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-07-19",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-07-26",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-08-02",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-08-09",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-08-16",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (H3N2)",
+      "weekEnding": "2026-08-23",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-08-24",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-08-31",
+      "count": 2
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-09-07",
+      "count": 2
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-09-14",
+      "count": 2
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-09-21",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-09-28",
+      "count": 5
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-10-05",
+      "count": 3
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-10-12",
+      "count": 3
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-10-19",
+      "count": 8
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-10-26",
+      "count": 10
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-11-02",
+      "count": 8
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-11-09",
+      "count": 15
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-11-16",
+      "count": 50
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-11-23",
+      "count": 47
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-11-30",
+      "count": 86
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-12-07",
+      "count": 163
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-12-14",
+      "count": 130
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-12-21",
+      "count": 129
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2025-12-28",
+      "count": 93
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-01-04",
+      "count": 59
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-01-11",
+      "count": 23
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-01-18",
+      "count": 9
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-01-25",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-02-01",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-02-08",
+      "count": 5
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-02-15",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-02-22",
+      "count": 3
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-03-01",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-03-08",
+      "count": 4
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-03-15",
+      "count": 1
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-03-22",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-03-29",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-04-05",
+      "count": 2
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-04-12",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-04-19",
+      "count": 1
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-04-26",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-05-03",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-05-10",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-05-17",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-05-24",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-05-31",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-06-07",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-06-14",
+      "count": 2
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-06-21",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-06-28",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-07-05",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-07-12",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-07-19",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-07-26",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-08-02",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-08-09",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-08-16",
+      "count": 0
+    },
+    {
+      "virus": "Influenza A (Untyped)",
+      "weekEnding": "2026-08-23",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-08-24",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-08-31",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-09-07",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-09-14",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-09-21",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-09-28",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-10-05",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-10-12",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-10-19",
+      "count": 1
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-10-26",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-11-02",
+      "count": 2
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-11-09",
+      "count": 2
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-11-16",
+      "count": 6
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-11-23",
+      "count": 11
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-11-30",
+      "count": 19
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-12-07",
+      "count": 39
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-12-14",
+      "count": 48
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-12-21",
+      "count": 78
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2025-12-28",
+      "count": 91
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-01-04",
+      "count": 96
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-01-11",
+      "count": 94
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-01-18",
+      "count": 103
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-01-25",
+      "count": 164
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-02-01",
+      "count": 211
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-02-08",
+      "count": 256
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-02-15",
+      "count": 261
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-02-22",
+      "count": 268
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-03-01",
+      "count": 328
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-03-08",
+      "count": 391
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-03-15",
+      "count": 493
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-03-22",
+      "count": 436
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-03-29",
+      "count": 421
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-04-05",
+      "count": 399
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-04-12",
+      "count": 305
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-04-19",
+      "count": 225
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-04-26",
+      "count": 208
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-05-03",
+      "count": 170
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-05-10",
+      "count": 154
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-05-17",
+      "count": 108
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-05-24",
+      "count": 68
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-05-31",
+      "count": 36
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-06-07",
+      "count": 19
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-06-14",
+      "count": 11
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-06-21",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-06-28",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-07-05",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-07-12",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-07-19",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-07-26",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-08-02",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-08-09",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-08-16",
+      "count": 0
+    },
+    {
+      "virus": "Influenza B",
+      "weekEnding": "2026-08-23",
+      "count": 0
+    }
+  ],
+  "RVD_IMMUNIZATION_DOSES": [
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-08-31",
+      "doses": 56
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-09-07",
+      "doses": 158
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-09-14",
+      "doses": 304
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-09-21",
+      "doses": 665
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-09-28",
+      "doses": 16484
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-10-05",
+      "doses": 83146
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-10-12",
+      "doses": 189999
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-10-19",
+      "doses": 470669
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-10-26",
+      "doses": 665756
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-11-02",
+      "doses": 797605
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-11-09",
+      "doses": 896165
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-11-16",
+      "doses": 968743
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-11-23",
+      "doses": 1022065
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-11-30",
+      "doses": 1060142
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-12-07",
+      "doses": 1087543
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-12-14",
+      "doses": 1113104
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-12-21",
+      "doses": 1133199
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2025-12-28",
+      "doses": 1146619
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-01-04",
+      "doses": 1162523
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-01-11",
+      "doses": 1174721
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-01-18",
+      "doses": 1183559
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-01-25",
+      "doses": 1189788
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-02-01",
+      "doses": 1194660
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-02-08",
+      "doses": 1198808
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-02-15",
+      "doses": 1202076
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-02-22",
+      "doses": 1204651
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-03-01",
+      "doses": 1207196
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-03-08",
+      "doses": 1209352
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-03-15",
+      "doses": 1211259
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-03-22",
+      "doses": 1212944
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-03-29",
+      "doses": 1214255
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-04-05",
+      "doses": 1214834
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-04-12",
+      "doses": 1215337
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-04-19",
+      "doses": 1215871
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-04-26",
+      "doses": 1216467
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-05-03",
+      "doses": 1216610
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-05-10",
+      "doses": 1216732
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-05-17",
+      "doses": 1216860
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-05-24",
+      "doses": 1216970
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-05-31",
+      "doses": 1217058
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-06-07",
+      "doses": 1217150
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-06-14",
+      "doses": 1217246
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-06-21",
+      "doses": 1217348
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-06-28",
+      "doses": 1217443
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-07-05",
+      "doses": 1217521
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-07-12",
+      "doses": 1217607
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-07-19",
+      "doses": 1217679
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-07-26",
+      "doses": 1217744
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-08-02",
+      "doses": 1217801
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-08-09",
+      "doses": 1217878
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-08-16",
+      "doses": 1217954
+    },
+    {
+      "season": "2021-2022",
+      "weekEnding": "2026-08-23",
+      "doses": 1218028
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-08-31",
+      "doses": 73
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-09-07",
+      "doses": 155
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-09-14",
+      "doses": 249
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-09-21",
+      "doses": 388
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-09-28",
+      "doses": 2367
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-10-05",
+      "doses": 18098
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-10-12",
+      "doses": 49132
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-10-19",
+      "doses": 346470
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-10-26",
+      "doses": 556170
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-11-02",
+      "doses": 690580
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-11-09",
+      "doses": 801113
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-11-16",
+      "doses": 925119
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-11-23",
+      "doses": 1015020
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-11-30",
+      "doses": 1080220
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-12-07",
+      "doses": 1134893
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-12-14",
+      "doses": 1175367
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-12-21",
+      "doses": 1197115
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2025-12-28",
+      "doses": 1210259
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-01-04",
+      "doses": 1226647
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-01-11",
+      "doses": 1239571
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-01-18",
+      "doses": 1248604
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-01-25",
+      "doses": 1255094
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-02-01",
+      "doses": 1260497
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-02-08",
+      "doses": 1264932
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-02-15",
+      "doses": 1268664
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-02-22",
+      "doses": 1271415
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-03-01",
+      "doses": 1274347
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-03-08",
+      "doses": 1276900
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-03-15",
+      "doses": 1279182
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-03-22",
+      "doses": 1281065
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-03-29",
+      "doses": 1282698
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-04-05",
+      "doses": 1283188
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-04-12",
+      "doses": 1283793
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-04-19",
+      "doses": 1284295
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-04-26",
+      "doses": 1284926
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-05-03",
+      "doses": 1285040
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-05-10",
+      "doses": 1285125
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-05-17",
+      "doses": 1285212
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-05-24",
+      "doses": 1285305
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-05-31",
+      "doses": 1285400
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-06-07",
+      "doses": 1285486
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-06-14",
+      "doses": 1285573
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-06-21",
+      "doses": 1285652
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-06-28",
+      "doses": 1285726
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-07-05",
+      "doses": 1285774
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-07-12",
+      "doses": 1285849
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-07-19",
+      "doses": 1285894
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-07-26",
+      "doses": 1285938
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-08-02",
+      "doses": 1285988
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-08-09",
+      "doses": 1286054
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-08-16",
+      "doses": 1286093
+    },
+    {
+      "season": "2022-2023",
+      "weekEnding": "2026-08-23",
+      "doses": 1286141
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-08-31",
+      "doses": 38
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-09-07",
+      "doses": 91
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-09-14",
+      "doses": 158
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-09-21",
+      "doses": 239
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-09-28",
+      "doses": 1927
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-10-05",
+      "doses": 13740
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-10-12",
+      "doses": 47358
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-10-19",
+      "doses": 378697
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-10-26",
+      "doses": 592289
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-11-02",
+      "doses": 732437
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-11-09",
+      "doses": 825017
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-11-16",
+      "doses": 893272
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-11-23",
+      "doses": 942322
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-11-30",
+      "doses": 981809
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-12-07",
+      "doses": 1015670
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-12-14",
+      "doses": 1045987
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-12-21",
+      "doses": 1070062
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2025-12-28",
+      "doses": 1080644
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-01-04",
+      "doses": 1095291
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-01-11",
+      "doses": 1106051
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-01-18",
+      "doses": 1114175
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-01-25",
+      "doses": 1121049
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-02-01",
+      "doses": 1126605
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-02-08",
+      "doses": 1130960
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-02-15",
+      "doses": 1134605
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-02-22",
+      "doses": 1137842
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-03-01",
+      "doses": 1140826
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-03-08",
+      "doses": 1143483
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-03-15",
+      "doses": 1145831
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-03-22",
+      "doses": 1147804
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-03-29",
+      "doses": 1149519
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-04-05",
+      "doses": 1150063
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-04-12",
+      "doses": 1150548
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-04-19",
+      "doses": 1151004
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-04-26",
+      "doses": 1151503
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-05-03",
+      "doses": 1151748
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-05-10",
+      "doses": 1151799
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-05-17",
+      "doses": 1151872
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-05-24",
+      "doses": 1151921
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-05-31",
+      "doses": 1151959
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-06-07",
+      "doses": 1151995
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-06-14",
+      "doses": 1152055
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-06-21",
+      "doses": 1152078
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-06-28",
+      "doses": 1152112
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-07-05",
+      "doses": 1152149
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-07-12",
+      "doses": 1152167
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-07-19",
+      "doses": 1152195
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-07-26",
+      "doses": 1152225
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-08-02",
+      "doses": 1152250
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-08-09",
+      "doses": 1152274
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-08-16",
+      "doses": 1152303
+    },
+    {
+      "season": "2023-2024",
+      "weekEnding": "2026-08-23",
+      "doses": 1152330
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-08-31",
+      "doses": 17
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-09-07",
+      "doses": 37
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-09-14",
+      "doses": 79
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-09-21",
+      "doses": 111
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-09-28",
+      "doses": 172
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-10-05",
+      "doses": 5612
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-10-12",
+      "doses": 38367
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-10-19",
+      "doses": 282002
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-10-26",
+      "doses": 500765
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-11-02",
+      "doses": 640311
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-11-09",
+      "doses": 737686
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-11-16",
+      "doses": 806423
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-11-23",
+      "doses": 852173
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-11-30",
+      "doses": 887234
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-12-07",
+      "doses": 914496
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-12-14",
+      "doses": 934570
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-12-21",
+      "doses": 950827
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2025-12-28",
+      "doses": 957903
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-01-04",
+      "doses": 968901
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-01-11",
+      "doses": 981636
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-01-18",
+      "doses": 991724
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-01-25",
+      "doses": 999188
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-02-01",
+      "doses": 1005117
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-02-08",
+      "doses": 1010782
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-02-15",
+      "doses": 1016542
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-02-22",
+      "doses": 1020747
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-03-01",
+      "doses": 1025085
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-03-08",
+      "doses": 1028646
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-03-15",
+      "doses": 1031556
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-03-22",
+      "doses": 1034368
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-03-29",
+      "doses": 1037051
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-04-05",
+      "doses": 1038047
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-04-12",
+      "doses": 1038627
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-04-19",
+      "doses": 1039126
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-04-26",
+      "doses": 1039718
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-05-03",
+      "doses": 1040233
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-05-10",
+      "doses": 1040274
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-05-17",
+      "doses": 1040283
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-05-24",
+      "doses": 1040303
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-05-31",
+      "doses": 1040309
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-06-07",
+      "doses": 1040324
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-06-14",
+      "doses": 1040336
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-06-21",
+      "doses": 1040352
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-06-28",
+      "doses": 1040363
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-07-05",
+      "doses": 1040383
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-07-12",
+      "doses": 1040396
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-07-19",
+      "doses": 1040407
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-07-26",
+      "doses": 1040420
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-08-02",
+      "doses": 1040434
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-08-09",
+      "doses": 1040443
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-08-16",
+      "doses": 1040457
+    },
+    {
+      "season": "2024-2025",
+      "weekEnding": "2026-08-23",
+      "doses": 1040467
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-08-24",
+      "doses": 9
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-08-31",
+      "doses": 28
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-09-07",
+      "doses": 44
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-09-14",
+      "doses": 56
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-09-21",
+      "doses": 118
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-09-28",
+      "doses": 20504
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-10-05",
+      "doses": 73948
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-10-12",
+      "doses": 123337
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-10-19",
+      "doses": 379408
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-10-26",
+      "doses": 526816
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-11-02",
+      "doses": 630707
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-11-09",
+      "doses": 718315
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-11-16",
+      "doses": 778122
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-11-23",
+      "doses": 823210
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-11-30",
+      "doses": 861548
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-12-07",
+      "doses": 898243
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-12-14",
+      "doses": 935996
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-12-21",
+      "doses": 953234
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2025-12-28",
+      "doses": 969235
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-01-04",
+      "doses": 985471
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-01-11",
+      "doses": 996522
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-01-18",
+      "doses": 1003834
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-01-25",
+      "doses": 1009703
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-02-01",
+      "doses": 1014292
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-02-08",
+      "doses": 1018025
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-02-15",
+      "doses": 1020879
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-02-22",
+      "doses": 1024075
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-03-01",
+      "doses": 1026567
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-03-08",
+      "doses": 1028802
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-03-15",
+      "doses": 1030764
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-03-22",
+      "doses": 1032740
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-03-29",
+      "doses": 1033695
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-04-05",
+      "doses": 1034230
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-04-12",
+      "doses": 1034691
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-04-19",
+      "doses": 1035222
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-04-26",
+      "doses": 1035650
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-05-03",
+      "doses": 1035679
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-05-10",
+      "doses": 1035687
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-05-17",
+      "doses": 1035689
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-05-24",
+      "doses": 1035693
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-05-31",
+      "doses": 1035694
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-06-07",
+      "doses": 1035695
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-06-14",
+      "doses": 1035695
+    }
+  ]
 }

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Building, 
@@ -42,18 +42,12 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { 
-  LAB_LOCATION_WAITS, 
-  TEST_TURNAROUND_METRICS, 
-  IMAGING_WAIT_TRENDS, 
-  FACILITY_IMAGING_WAITS, 
-  PRIORITY_TARGET_COMPLIANCE,
+import {
   LabLocationWait,
   TestTurnaround,
   ImagingWaitTrend,
   FacilityImagingWait,
   PriorityTarget,
-  _dataMetadata as diagnosticDataMetadata,
 } from '../diagnosticData';
 import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
 
@@ -69,6 +63,39 @@ export default function DiagnosticDashboard() {
   // Interactive KPI selected state for historical trend panel
   const [selectedKpi, setSelectedKpi] = useState<'CT Scan' | 'MRI Scan' | null>(null);
 
+  // Diagnostic data loaded at runtime from /api/data/diagnostic so that
+ // 30-min refreshed data-diagnostic.json reaches the browser without a rebuild.
+  const [diagnosticData, setDiagnosticData] = useState<{
+    LAB_LOCATION_WAITS: LabLocationWait[];
+    TEST_TURNAROUND_METRICS: TestTurnaround[];
+    IMAGING_WAIT_TRENDS: ImagingWaitTrend[];
+    FACILITY_IMAGING_WAITS: FacilityImagingWait[];
+    PRIORITY_TARGET_COMPLIANCE: PriorityTarget[];
+    _dataMetadata: DataMetadataMap;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadDiagnosticData = () => {
+    fetch('/api/data/diagnostic')
+      .then(res => { if (!res.ok) throw new Error('Failed to load diagnostic data'); return res.json(); })
+      .then(data => { setDiagnosticData(data); setIsLoading(false); })
+      .catch(err => { setError(err.message); setIsLoading(false); });
+  };
+
+  useEffect(() => {
+    loadDiagnosticData();
+  }, []);
+
+  const refreshData = () => {
+    setRefreshing(true);
+    fetch('/api/data/diagnostic')
+      .then(res => res.json())
+      .then(data => { setDiagnosticData(data); setRefreshing(false); })
+      .catch(() => setRefreshing(false));
+  };
+
   const formatMinutesToHm = (minutes: number): string => {
     if (!minutes || isNaN(minutes)) return '0m';
     const hrs = Math.floor(minutes / 60);
@@ -80,29 +107,37 @@ export default function DiagnosticDashboard() {
   };
 
   const labStats = useMemo(() => {
+    const LAB_LOCATION_WAITS = diagnosticData?.LAB_LOCATION_WAITS ?? [];
+    if (!diagnosticData) {
+      return {
+        avgWait: 0, edmontonAvg: 0, calgaryAvg: 0, restAvg: 0,
+        maxWaitLab: null as LabLocationWait | null,
+        totalActive: 0, walkInCount: 0, apptOnlyCount: 0
+      };
+    }
     const validLabs = LAB_LOCATION_WAITS.filter(l => typeof l.waitTimeMin === 'number');
     const avgWait = validLabs.length > 0 ? Math.round(validLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / validLabs.length) : 0;
-    
+
     const edmontonLabs = validLabs.filter(l => l.region === 'Edmonton Zone');
     const edmontonAvg = edmontonLabs.length > 0 ? Math.round(edmontonLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / edmontonLabs.length) : 0;
-    
+
     const calgaryLabs = validLabs.filter(l => l.region === 'Calgary Zone');
     const calgaryAvg = calgaryLabs.length > 0 ? Math.round(calgaryLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / calgaryLabs.length) : 0;
-    
+
     const restLabs = validLabs.filter(l => l.region !== 'Edmonton Zone' && l.region !== 'Calgary Zone');
     const restAvg = restLabs.length > 0 ? Math.round(restLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / restLabs.length) : 0;
-    
-    let maxWaitLab: typeof LAB_LOCATION_WAITS[0] | null = null;
+
+    let maxWaitLab: LabLocationWait | null = null;
     if (validLabs.length > 0) {
-      maxWaitLab = validLabs.reduce((prev, curr) => 
+      maxWaitLab = validLabs.reduce((prev, curr) =>
         (typeof curr.waitTimeMin === 'number' && typeof prev.waitTimeMin === 'number' && curr.waitTimeMin > prev.waitTimeMin) ? curr : prev
       );
     }
-    
+
     const totalActive = LAB_LOCATION_WAITS.length;
     const walkInCount = LAB_LOCATION_WAITS.filter(l => l.walkInAvailable).length;
     const apptOnlyCount = LAB_LOCATION_WAITS.filter(l => l.appointmentRequired && !l.walkInAvailable).length;
-    
+
     return {
       avgWait,
       edmontonAvg,
@@ -113,37 +148,39 @@ export default function DiagnosticDashboard() {
       walkInCount,
       apptOnlyCount
     };
-  }, []);
+  }, [diagnosticData]);
   // Lab location filtering
   const filteredLabs = useMemo(() => {
+    const LAB_LOCATION_WAITS = diagnosticData?.LAB_LOCATION_WAITS ?? [];
     return LAB_LOCATION_WAITS.filter(lab => {
       const matchesRegion = selectedRegion === 'All' || lab.region === selectedRegion;
-      const matchesSearch = lab.name.toLowerCase().includes(labSearch.toLowerCase()) || 
+      const matchesSearch = lab.name.toLowerCase().includes(labSearch.toLowerCase()) ||
                             lab.city.toLowerCase().includes(labSearch.toLowerCase()) ||
                             lab.code.toLowerCase().includes(labSearch.toLowerCase());
       return matchesRegion && matchesSearch;
     });
-  }, [selectedRegion, labSearch]);
+  }, [selectedRegion, labSearch, diagnosticData]);
 
   // Nearby alternative recommendation (high wait vs low wait same region)
   const labRecommendations = useMemo(() => {
-    if (filteredLabs.length === 0) return [];
-    
+    if (!diagnosticData || filteredLabs.length === 0) return [];
+    const LAB_LOCATION_WAITS = diagnosticData.LAB_LOCATION_WAITS;
+
     // Find labs in same region with high waits (> 40 mins)
     const highWaitLabs = filteredLabs.filter(l => typeof l.waitTimeMin === 'number' && l.waitTimeMin > 35);
-    
+
     return highWaitLabs.map(highLab => {
       // Find low wait alternatives in same region
-      const alternatives = LAB_LOCATION_WAITS.filter(l => 
-        l.region === highLab.region && 
-        l.id !== highLab.id && 
-        typeof l.waitTimeMin === 'number' && 
+      const alternatives = LAB_LOCATION_WAITS.filter(l =>
+        l.region === highLab.region &&
+        l.id !== highLab.id &&
+        typeof l.waitTimeMin === 'number' &&
         l.waitTimeMin < 25
       );
-      
+
       if (alternatives.length > 0) {
         // Pick best alternative
-        const best = alternatives.reduce((prev, curr) => 
+        const best = alternatives.reduce((prev, curr) =>
           (typeof prev.waitTimeMin === 'number' && typeof curr.waitTimeMin === 'number' && curr.waitTimeMin < prev.waitTimeMin) ? curr : prev
         );
         return {
@@ -154,27 +191,29 @@ export default function DiagnosticDashboard() {
       }
       return null;
     }).filter(item => item !== null) as { highLab: LabLocationWait; betterLab: LabLocationWait; savingMins: number }[];
-  }, [filteredLabs]);
+  }, [filteredLabs, diagnosticData]);
 
   // Facility filtering
   const filteredFacilities = useMemo(() => {
+    const FACILITY_IMAGING_WAITS = diagnosticData?.FACILITY_IMAGING_WAITS ?? [];
     return FACILITY_IMAGING_WAITS.filter(fac => {
-      const matchesSearch = fac.facilityName.toLowerCase().includes(facilitySearch.toLowerCase()) || 
+      const matchesSearch = fac.facilityName.toLowerCase().includes(facilitySearch.toLowerCase()) ||
                             fac.city.toLowerCase().includes(facilitySearch.toLowerCase()) ||
                             fac.zone.toLowerCase().includes(facilitySearch.toLowerCase());
       return matchesSearch;
     });
-  }, [facilitySearch]);
+  }, [facilitySearch, diagnosticData]);
 
   // Historical data for selected modality
   const filteredTrendData = useMemo(() => {
+    const IMAGING_WAIT_TRENDS = diagnosticData?.IMAGING_WAIT_TRENDS ?? [];
     return IMAGING_WAIT_TRENDS.filter(trend => trend.modality === selectedModality);
-  }, [selectedModality]);
+  }, [selectedModality, diagnosticData]);
 
   // KPI trend stats for the selected modality trend panel
   const kpiStats = useMemo(() => {
-    if (!selectedKpi) return null;
-    const series = IMAGING_WAIT_TRENDS.filter(t => t.modality === selectedKpi);
+    if (!selectedKpi || !diagnosticData) return null;
+    const series = diagnosticData.IMAGING_WAIT_TRENDS.filter(t => t.modality === selectedKpi);
     const values = series.map(t => t.albertaP90Days).filter(v => typeof v === 'number');
     if (values.length === 0) return null;
 
@@ -194,7 +233,7 @@ export default function DiagnosticDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedKpi]);
+  }, [selectedKpi, diagnosticData]);
 
   const selectedKpiDetails = useMemo(() => {
     if (!selectedKpi) return null;
@@ -226,6 +265,9 @@ export default function DiagnosticDashboard() {
     }
   }, [selectedKpi]);
 
+  if (isLoading) return <div className="p-6 text-slate-400">Loading diagnostic data...</div>;
+  if (error) return <div className="p-6 text-red-400">Error: {error}</div>;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -238,8 +280,15 @@ export default function DiagnosticDashboard() {
           <p className="text-xs text-slate-400 mt-1">
             Monitor laboratory wait times and diagnostic imaging benchmark compliance.
           </p>
-          <DataTimestamp metadata={diagnosticDataMetadata} arrayKey="LAB_LOCATION_WAITS" />
+          <DataTimestamp metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="LAB_LOCATION_WAITS" />
         </div>
+        <button
+          onClick={refreshing ? undefined : refreshData}
+          disabled={refreshing}
+          className="self-start md:self-auto px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-slate-700 bg-slate-950 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
       </div>
 
       {/* Sub-Tab Navigation */}
@@ -293,7 +342,7 @@ export default function DiagnosticDashboard() {
       {/* SUBTAB 1: Live Lab Waits */}
       {activeSubTab === 'labs' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="LAB_LOCATION_WAITS" />
+          <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="LAB_LOCATION_WAITS" />
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -533,16 +582,22 @@ export default function DiagnosticDashboard() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
-                      <div className="bg-slate-950/40 p-1.5 rounded flex flex-col">
-                        <span className="text-[8px] text-slate-500 uppercase">Peak Hours</span>
-                        <span className="font-semibold text-slate-300">{lab.peakHours}</span>
+                    {(lab.peakHours || lab.dailyVolume) && (
+                      <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
+                        {lab.peakHours && (
+                          <div className="bg-slate-950/40 p-1.5 rounded flex flex-col">
+                            <span className="text-[8px] text-slate-500 uppercase">Peak Hours</span>
+                            <span className="font-semibold text-slate-300">{lab.peakHours}</span>
+                          </div>
+                        )}
+                        {lab.dailyVolume && (
+                          <div className="bg-slate-950/40 p-1.5 rounded flex flex-col">
+                            <span className="text-[8px] text-slate-500 uppercase">Daily Volume</span>
+                            <span className="font-semibold text-slate-300">~{lab.dailyVolume} patients</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="bg-slate-950/40 p-1.5 rounded flex flex-col">
-                        <span className="text-[8px] text-slate-500 uppercase">Daily Volume</span>
-                        <span className="font-semibold text-slate-300">~{lab.dailyVolume} patients</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-slate-850/60 w-full" onClick={(e) => e.stopPropagation()}>
@@ -617,7 +672,7 @@ export default function DiagnosticDashboard() {
               </div>
               <div className="flex items-baseline gap-2 mb-1.5">
                 <p className="text-2xl font-black text-white tracking-tight leading-none font-mono">
-                  {IMAGING_WAIT_TRENDS.filter(t => t.modality === 'CT Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
+                  {(diagnosticData?.IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === 'CT Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                   Alberta 90th Percentile Wait (Days)
@@ -657,7 +712,7 @@ export default function DiagnosticDashboard() {
               </div>
               <div className="flex items-baseline gap-2 mb-1.5">
                 <p className="text-2xl font-black text-white tracking-tight leading-none font-mono">
-                  {IMAGING_WAIT_TRENDS.filter(t => t.modality === 'MRI Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
+                  {(diagnosticData?.IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === 'MRI Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                   Alberta 90th Percentile Wait (Days)
@@ -735,7 +790,7 @@ export default function DiagnosticDashboard() {
                   <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
-                        data={IMAGING_WAIT_TRENDS.filter(t => t.modality === selectedKpi)}
+                        data={(diagnosticData?.IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === selectedKpi)}
                         margin={{ top: 10, right: 15, left: -20, bottom: 0 }}
                       >
                         <defs>
@@ -782,7 +837,7 @@ export default function DiagnosticDashboard() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">CIHI CT & MRI Diagnostic Wait Days</h3>
                   <p className="text-[10px] text-slate-500">Comparing Alberta (P50 and P90 percentile days) against Canadian averages (2019 - 2025)</p>
-                  <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="IMAGING_WAIT_TRENDS" />
+                  <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="IMAGING_WAIT_TRENDS" />
                 </div>
 
                 <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
@@ -845,7 +900,7 @@ export default function DiagnosticDashboard() {
               </div>
 
               <div className="space-y-3">
-                {PRIORITY_TARGET_COMPLIANCE.map(item => (
+                {(diagnosticData?.PRIORITY_TARGET_COMPLIANCE ?? []).map(item => (
                   <div key={item.priority} className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-2">
                     <div className="flex items-start justify-between">
                       <div>
@@ -887,7 +942,7 @@ export default function DiagnosticDashboard() {
               <div>
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Facility Diagnostic Volume & Utilization</h3>
                 <p className="text-[10px] text-slate-500">Individual medical-surgical hospital scanner statistics and local P50 / P90 wait ranges</p>
-                <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="FACILITY_IMAGING_WAITS" />
+                <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="FACILITY_IMAGING_WAITS" />
               </div>
 
               <div className="relative w-full sm:w-64">
@@ -959,7 +1014,7 @@ export default function DiagnosticDashboard() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Test Turnaround Duration Benchmarks</h3>
                   <p className="text-[10px] text-slate-500">Required specimen analytical processing timeline from collection to report</p>
-                  <DataTimestamp compact metadata={diagnosticDataMetadata} arrayKey="TEST_TURNAROUND_METRICS" />
+                  <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="TEST_TURNAROUND_METRICS" />
                 </div>
                 <span className="text-[9px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
                   Source: APL Test Directory
@@ -970,7 +1025,7 @@ export default function DiagnosticDashboard() {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={TEST_TURNAROUND_METRICS}
+                    data={diagnosticData?.TEST_TURNAROUND_METRICS ?? []}
                     margin={{ top: 15, right: 10, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -997,7 +1052,7 @@ export default function DiagnosticDashboard() {
               </div>
 
               <div className="space-y-3">
-                {TEST_TURNAROUND_METRICS.slice(0, 4).map(test => (
+                {(diagnosticData?.TEST_TURNAROUND_METRICS ?? []).slice(0, 4).map(test => (
                   <div key={test.testName} className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-1.5">
                     <div className="flex items-start justify-between">
                       <span className="text-xs font-bold text-white">{test.testName}</span>

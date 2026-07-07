@@ -18,6 +18,8 @@ export interface SyncStatus {
   results: SyncResult[];
   erWaitTimesLastUpdate: string | null;
   erWaitTimesNextUpdate: string | null;
+  labWaitsLastUpdate: string | null;
+  labWaitsNextUpdate: string | null;
 }
 
 export interface DataSourceConfig {

@@ -534,3 +534,25 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Solution:** Manually verified the file changes in the workspace, implemented the clickable trend cards and trend panels in `ContinuingCareDashboard.tsx` directly, and confirmed a clean project-wide compile.
 - **Prevention:** Do not rely solely on subagent execution logs. Always verify file diffs and search for key symbols (`AnimatePresence`, `motion`) in the target files before declaring success.
 
+
+## Session: 2026-07-07 (Diagnostic Lab Waits — 30-Minute Updates via APL REST API)
+
+### Lesson: Hidden REST API behind a Blazor/SignalR frontend
+- **Mistake:** The QMe booking site (`qme.albertaprecisionlabs.ca`) is a Blazor Server + SignalR app with reCAPTCHA Enterprise + Altcha anti-bot. Initial investigation assumed Puppeteer browser automation was the only way to get lab wait times — a fragile, slow, resource-intensive approach. A competing plan discovered a hidden REST API (`qmeapi.albertaprecisionlabs.ca/api/location`) that the Blazor frontend calls internally.
+- **Solution:** Verified the REST API directly with `curl`: `GET https://qmeapi.albertaprecisionlabs.ca/api/location` returns 153 lab sites with `WaitTime`, `SaveMyPlace`, coordinates, hours — no auth, no captcha, open CORS, 46ms response. Built a simple axios fetcher (`aplLabWaitTimesFetcher.ts`) modeled on `erWaitTimesFetcher.ts`, not a Puppeteer child process. The entire Puppeteer/Blazor/SignalR/captcha path was dropped.
+- **Prevention:** Before committing to browser automation for a JS-rendered site, audit the site's network traffic for internal REST APIs. Blazor Server apps often have a companion API domain (e.g., `qmeapi.*` alongside `qme.*`). A `curl` probe takes 5 seconds and can eliminate hours of fragile scraper work.
+
+### Lesson: Static TS imports silently defeat runtime data updates
+- **Mistake:** `DiagnosticDashboard.tsx` imported `LAB_LOCATION_WAITS` directly from `../diagnosticData` (a build-time TypeScript constant). Even though the `/api/data/:domain` endpoint existed and the fetcher wrote to `data-diagnostic.json` every 30 min, the dashboard never re-fetched — users saw bundled constants forever. The Phase 3 "fetch conversion" from an earlier sprint never reached this dashboard.
+- **Solution:** Converted the dashboard to `fetch('/api/data/diagnostic')` + `useState`/`useEffect`, mirroring the `App.tsx` `/api/hospitals` pattern. All five data arrays now read from fetched state with null guards in every `useMemo`.
+- **Prevention:** When a dashboard is supposed to show live data, verify it actually calls `fetch` at runtime — not just that the endpoint exists. A static import is a build-time snapshot; only a runtime fetch sees updates. Grep for `fetch('/api/data/` in the component to confirm.
+
+### Lesson: Code mapping between hand-authored and API data is often infeasible — replace, don't merge
+- **Mistake:** The plan initially proposed mapping 52 hand-authored lab records to 153 API sites by code. Only 1 of 52 codes matched (`SHCC`). Name matching was also unreliable (22/52 fuzzy). The hand-authored list was hospital-based; the API is community-site-based — largely different locations.
+- **Solution:** Replaced `LAB_LOCATION_WAITS` entirely with the 153 API sites. Made `dailyVolume` and `peakHours` optional in the `LabLocationWait` interface (the API doesn't provide them; they were unverified estimates anyway). Hid the Peak Hours / Daily Volume UI boxes when the fields are absent.
+- **Prevention:** When replacing hand-authored data with a live API, don't assume codes or names match. Test the overlap first. If the overlap is low, replace entirely rather than building a fragile mapping table. Make hand-authored-only fields optional and hide the UI when they're absent.
+
+### Lesson: Scheduler dynamic imports are intentional — don't refactor to static
+- **Mistake:** The scheduler uses `await import('./pushClient')` and `await import('./syncStatus')` inside pipeline functions. This looks like a violation of the "no dynamic imports" rule, but the dynamic imports are intentional: they lazy-load the push client only when a push actually happens, avoiding circular dependency issues at module load time.
+- **Solution:** Matched the existing dynamic import pattern when adding `runLabWaitsPipeline()`. Did not refactor the existing `runErWaitTimesPipeline` or `runDailySync` to static imports.
+- **Prevention:** When adding new code to an existing module, match the established pattern even if it looks suboptimal. The pattern may exist for a reason (circular deps, lazy loading, conditional initialization). Refactoring existing code is scope creep — do it in a dedicated cleanup sprint, not while adding a feature.

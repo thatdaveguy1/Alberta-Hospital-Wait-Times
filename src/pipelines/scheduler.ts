@@ -1,17 +1,18 @@
 // Scheduler — manages timed execution of all pipelines.
 // Replaces the setInterval calls in server.ts with a clean module.
-// ER wait times: every 10 minutes. Daily orchestrator: every 24 hours.
+// ER wait times: every 10 minutes. Lab waits: every 30 minutes. Daily orchestrator: every 24 hours.
 
 import { fetchErWaitTimes, getHospitals, getSnapshots, setAlertChecker } from './erWaitTimesFetcher';
 import { scrapeDisruptions } from './disruptionsScraper';
-import { recordErWaitTimesUpdate, recordDailySyncResults, loadSyncStatusFromDisk, getSyncStatus } from './syncStatus';
+import { recordErWaitTimesUpdate, recordLabWaitsUpdate, recordDailySyncResults, loadSyncStatusFromDisk, getSyncStatus } from './syncStatus';
 import type { SyncResult } from './types';
 
 type DailyOrchestratorFn = () => Promise<SyncResult[]>;
 
 let dailyOrchestrator: DailyOrchestratorFn | null = null;
-let erIntervalId: ReturnType<typeof setInterval> | null = null;
-let dailyIntervalId: ReturnType<typeof setInterval> | null = null;
+let erIntervalId: NodeJS.Timeout | null = null;
+let dailyIntervalId: NodeJS.Timeout | null = null;
+let labIntervalId: NodeJS.Timeout | null = null;
 
 export function setDailyOrchestrator(fn: DailyOrchestratorFn): void {
   dailyOrchestrator = fn;
@@ -39,6 +40,27 @@ async function runErWaitTimesPipeline(): Promise<void> {
       hospitals: getHospitals(),
       lastUpdated: result.timestamp,
     });
+  }
+}
+
+async function runLabWaitsPipeline(): Promise<void> {
+  const { run: aplLabRun } = await import('./aplLabWaitTimesFetcher');
+  const result = await aplLabRun();
+  recordLabWaitsUpdate(result);
+
+  // Push to Cloudflare if configured
+  if (result.status === 'success') {
+    const { pushToCloudflare } = await import('./pushClient');
+    const fs = await import('fs');
+    const path = await import('path');
+    const diagnosticFile = path.join(process.cwd(), 'data-diagnostic.json');
+    try {
+      const data = fs.readFileSync(diagnosticFile, 'utf8');
+      const parsed = JSON.parse(data);
+      await pushToCloudflare('diagnostic', parsed);
+    } catch (err) {
+      console.warn('[Scheduler] Failed to push diagnostic data to Cloudflare:', err);
+    }
   }
 }
 
@@ -96,12 +118,24 @@ export async function startScheduler(): Promise<void> {
     console.error('[Scheduler] Initial daily sync error:', err);
   });
 
+  // Kick off lab waits in the background — don't block server startup
+  runLabWaitsPipeline().catch(err => {
+    console.error('[Scheduler] Initial lab waits pipeline error:', err);
+  });
+
   // Schedule ER wait times every 10 minutes
   erIntervalId = setInterval(() => {
     runErWaitTimesPipeline().catch(err => {
       console.error('[Scheduler] ER wait times pipeline error:', err);
     });
   }, 10 * 60 * 1000);
+
+  // Schedule lab waits every 30 minutes
+  labIntervalId = setInterval(() => {
+    runLabWaitsPipeline().catch(err => {
+      console.error('[Scheduler] Lab waits pipeline error:', err);
+    });
+  }, 30 * 60 * 1000);
 
   // Schedule daily sync every 24 hours
   dailyIntervalId = setInterval(() => {
@@ -110,13 +144,17 @@ export async function startScheduler(): Promise<void> {
     });
   }, 24 * 60 * 60 * 1000);
 
-  console.log('[Scheduler] Running. ER wait times: every 10 min. Daily sync: every 24 hr.');
+  console.log('[Scheduler] Running. ER wait times: every 10 min. Lab waits: every 30 min. Daily sync: every 24 hr.');
 }
 
 export function stopScheduler(): void {
   if (erIntervalId) {
     clearInterval(erIntervalId);
     erIntervalId = null;
+  }
+  if (labIntervalId) {
+    clearInterval(labIntervalId);
+    labIntervalId = null;
   }
   if (dailyIntervalId) {
     clearInterval(dailyIntervalId);

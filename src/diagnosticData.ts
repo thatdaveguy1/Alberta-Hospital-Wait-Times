@@ -15,8 +15,8 @@ export interface LabLocationWait {
   walkInAvailable: boolean;
   latitude: number;
   longitude: number;
-  dailyVolume: number;
-  peakHours: string;
+  dailyVolume?: number;
+  peakHours?: string;
 }
 
 export interface TestTurnaround {

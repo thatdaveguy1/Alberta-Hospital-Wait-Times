@@ -9,6 +9,7 @@ import type { SyncResult, Pipeline } from './types';
 import { run as statscanRun } from './statscanFetcher';
 import { run as phacRun } from './phacFetcher';
 import { run as openAlbertaRun } from './openAlbertaFetcher';
+import { run as aplLabWaitTimesRun } from './aplLabWaitTimesFetcher';
 
 // Tier 2: HTML scrapers
 import { run as abjhiRun } from './abjhiScraper';
@@ -87,6 +88,7 @@ const PIPELINES: Pipeline[] = [
   { name: 'statscan', domain: 'workforce', run: statscanRun },
   { name: 'phac', domain: 'public-health', run: phacRun },
   { name: 'open-alberta', domain: 'spending', run: openAlbertaRun },
+  { name: 'apl-lab-waits', domain: 'diagnostic', run: aplLabWaitTimesRun },
 
   // Tier 2: HTML scrapers
   // waittimes.alberta.ca was shut down Jan 2026 — replaced by Power BI dashboard.

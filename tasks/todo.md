@@ -302,3 +302,16 @@
 - [x] `npx tsc --noEmit` — 18 pre-existing errors only (cloudflare/worker.ts, src/pipelines/*.ts), 0 in dashboards/data files
 - [x] All 15 tabs verified in browser — 15/15 pass, no errors, 13/15 show DataTimestamp components
 - [x] Updated lessons.md with 5 new Phase 22 lessons
+
+## Phase 23: Diagnostic Lab Waits — 30-Minute Updates via APL REST API (2026-07-07)
+- [x] Discovered hidden APL REST API: `GET https://qmeapi.albertaprecisionlabs.ca/api/location` — 153 lab sites, no auth, no captcha, open CORS
+- [x] Built `src/pipelines/aplLabWaitTimesFetcher.ts` — axios GET, parses WaitTime strings to minutes, derives walkIn/appointmentRequired booleans, replaces 52 hand-authored sites with 153 live API sites
+- [x] Made `dailyVolume` and `peakHours` optional in `LabLocationWait` interface (API doesn't provide them)
+- [x] Converted `DiagnosticDashboard.tsx` from static TS imports to `fetch('/api/data/diagnostic')` + useState/useEffect (was reading bundled constants, not the JSON file)
+- [x] Hidden Peak Hours / Daily Volume boxes when fields absent (153 API sites lack them)
+- [x] Added 30-min lab tier to `scheduler.ts` (third interval alongside 10-min ER and 24-hr daily)
+- [x] Added `recordLabWaitsUpdate` to `syncStatus.ts` + `labWaitsLastUpdate`/`labWaitsNextUpdate` to SyncStatus type
+- [x] Registered `apl-lab-waits` in orchestrator (daily bonus refresh)
+- [x] Corrected cadence labels in App.tsx: "Lab waits: every 30 min · Imaging/turnaround: annual/manual"
+- [x] `npx tsc --noEmit` passes with exit 0
+- [x] Browser verified: 153 sites render, APL QMe REST API source label, auto-updated timestamp, zero console errors
