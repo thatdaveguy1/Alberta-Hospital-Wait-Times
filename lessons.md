@@ -633,3 +633,9 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** The AHS Weekly ED LOS section in System Flow displayed `0` discharged/admitted counts and blank week-ending dates for 19 of 29 facilities. Users interpreted the zeros as real throughput data.
 - **Solution:** Confirmed that AHS only publishes weekly ED LOS PDFs for 5 Edmonton and 5 Calgary major hospitals. Updated `SystemFlowDashboard.tsx` to sort facilities with PDF data first, render `—` for missing metrics, dim the placeholder cards, and add a note explaining the PDF coverage limitation.
 - **Prevention:** When consuming PDF-derived data that does not cover the full facility universe, either filter the display to covered sites or explicitly mark missing entries. Do not let `0` serve as the default for 'not in source.'
+
+
+### Lesson: Static data imports make dashboards stale even when scrapers run
+- **Mistake:** Most dashboards imported hard-coded data constants from `src/*Data.ts` files. The 24-hour scrapers updated local JSON files, but the front end was still rendering the static TypeScript data, so users saw stale timestamps and stale values.
+- **Solution:** Created `src/hooks/useDomainData.ts` and migrated Surgical, MentalHealth, ContinuingCare, PublicHealth, RegionalInequity, Spending, VirtualCare, and PatientExperience dashboards to fetch from `/api/data/:domain`. Updated `dailySync.ts` to call `pushAllToCloudflare()` after the orchestrator so all 15 domains are pushed to KV. Fixed `powerbiScraper.ts` to stamp `_dataMetadata.SURGICAL_RECORDS.lastUpdated` when it writes `data-surgical.json`.
+- **Prevention:** Dashboards should never import live data as static constants. Always fetch from the API (local in dev, Cloudflare KV in prod). The daily-sync orchestrator must push every domain it updates. Every scraper that writes a JSON file must also update that file's `_dataMetadata` timestamp.

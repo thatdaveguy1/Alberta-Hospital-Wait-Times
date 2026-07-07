@@ -369,5 +369,6 @@
 - [x] Verify typecheck, build, and dev server health
 - [x] Fix System Flow dashboard to show N/A for missing HQA FOCUS metrics, sort real data first, and add source note
 - [x] Fix System Flow dashboard to show N/A for missing AHS weekly ED LOS data, sort real data first, and add source note
+- [x] Audit 24-hour scrapers: ensure front-end dashboards fetch live /api/data and dailySync pushes all domains to Cloudflare KV
 - [x] Fix map to center on user location with nearby hospitals via fitBounds
 - [x] Commit to main (8aa7a06)
