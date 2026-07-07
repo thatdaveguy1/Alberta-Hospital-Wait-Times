@@ -10,6 +10,11 @@ import type { AnyNode } from 'domhandler';
 import fs from 'fs';
 import path from 'path';
 import type { JointWaitRecord } from '../surgicalData';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type { SyncResult } from './types';
 
 const ABJHI_URL = 'https://albertaboneandjoint.com/resources/wait-times/';
@@ -231,7 +236,7 @@ function buildJointRecords(
 
 // Load existing data-surgical.json and merge new orthopedic records into
 // ORTHOPEDIC_SPECIALTY_RECORDS, replacing records with matching geography+procedure.
-function mergeAndWrite(newRecords: JointWaitRecord[]): number {
+function mergeAndWrite(newRecords: JointWaitRecord[], timestamp: string): number {
   type SurgicalJson = Record<string, unknown>;
   let existing: SurgicalJson = {};
   try {
@@ -255,6 +260,21 @@ function mergeAndWrite(newRecords: JointWaitRecord[]): number {
 
   const mergedOrtho = Array.from(mergedByKey.values());
   existing.ORTHOPEDIC_SPECIALTY_RECORDS = mergedOrtho;
+
+  // Refresh _dataMetadata for ORTHOPEDIC_SPECIALTY_RECORDS; preserve all other
+  // entries (sibling writers' and hand-authored arrays) via mergeDataMetadata.
+  const ownedMetadata: DataMetadata = {
+    ORTHOPEDIC_SPECIALTY_RECORDS: buildMetadataEntry({
+      updateType: 'auto',
+      source: 'Alberta Bone & Joint Health Institute wait times page',
+      sourceVintage: 'Live weekly orthopedic hip & knee wait times',
+      lastUpdated: timestamp,
+    }),
+  };
+  existing._dataMetadata = mergeDataMetadata(
+    existing._dataMetadata as DataMetadata | undefined,
+    ownedMetadata,
+  );
 
   fs.writeFileSync(SURGICAL_FILE, JSON.stringify(existing, null, 2), 'utf8');
   return mergedOrtho.length;
@@ -293,7 +313,7 @@ export async function run(): Promise<SyncResult> {
     }
 
     const jointRecords = buildJointRecords(surgeryMetrics, consultData);
-    const totalWritten = mergeAndWrite(jointRecords);
+    const totalWritten = mergeAndWrite(jointRecords, timestamp);
 
     const durationMs = Date.now() - startTime;
     console.log(

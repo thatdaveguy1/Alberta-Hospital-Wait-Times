@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 
 const SPENDING_FILE = path.join(process.cwd(), 'data-spending.json');
 const RATE_LIMIT_MS = 2000;
@@ -215,9 +216,27 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // Merge into data-spending.json, preserving all other arrays
+    // Merge into data-spending.json, preserving all other arrays. Stamp
+    // _dataMetadata for PHYSICIAN_SPECIALTY_BILLING; sibling entries (e.g.
+    // NATIONAL_SPENDING_COMPARE, HOSPITAL_EFFICIENCY_TREND) are preserved
+    // via mergeDataMetadata.
     const existingJson = loadJsonFile(SPENDING_FILE);
-    const merged = { ...existingJson, PHYSICIAN_SPECIALTY_BILLING: allRecords };
+    const ownedMetadata: DataMetadata = {
+      PHYSICIAN_SPECIALTY_BILLING: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Open Alberta CKAN physician billing statistical reports',
+        sourceVintage: 'Latest Open Alberta AHCIP billing dataset release',
+        lastUpdated: timestamp,
+      }),
+    };
+    const merged = {
+      ...existingJson,
+      PHYSICIAN_SPECIALTY_BILLING: allRecords,
+      _dataMetadata: mergeDataMetadata(
+        existingJson._dataMetadata as DataMetadata | undefined,
+        ownedMetadata,
+      ),
+    };
     fs.writeFileSync(SPENDING_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
 
     console.log(

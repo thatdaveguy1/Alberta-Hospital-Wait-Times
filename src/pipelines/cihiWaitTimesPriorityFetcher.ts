@@ -227,14 +227,44 @@ export async function run(): Promise<SyncResult> {
 
     if (surgicalRecords.length > 0) {
       const existing = loadJsonFile(SURGICAL_FILE);
-      const merged = { ...existing, CIHI_PRIORITY_PROCEDURE_WAITS: surgicalRecords };
+      const ownedMetadata: DataMetadata = {
+        CIHI_PRIORITY_PROCEDURE_WAITS: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'CIHI Wait Times Priority Procedures in Canada',
+          sourceVintage: '2008–2025',
+          lastUpdated: timestamp,
+        }),
+      };
+      const merged = {
+        ...existing,
+        CIHI_PRIORITY_PROCEDURE_WAITS: surgicalRecords,
+        _dataMetadata: mergeDataMetadata(
+          existing._dataMetadata as DataMetadata | undefined,
+          ownedMetadata,
+        ),
+      };
       fs.writeFileSync(SURGICAL_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
       console.log(`[CihiWaitTimesPriority] Wrote ${surgicalRecords.length} surgical records to data-surgical.json`);
     }
 
     if (diagnosticRecords.length > 0) {
       const existing = loadJsonFile(DIAGNOSTIC_FILE);
-      const merged = { ...existing, CIHI_DIAGNOSTIC_WAIT_TIMES: diagnosticRecords };
+      const ownedMetadata: DataMetadata = {
+        CIHI_DIAGNOSTIC_WAIT_TIMES: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'CIHI Wait Times Priority Procedures in Canada',
+          sourceVintage: '2008–2025',
+          lastUpdated: timestamp,
+        }),
+      };
+      const merged = {
+        ...existing,
+        CIHI_DIAGNOSTIC_WAIT_TIMES: diagnosticRecords,
+        _dataMetadata: mergeDataMetadata(
+          existing._dataMetadata as DataMetadata | undefined,
+          ownedMetadata,
+        ),
+      };
       fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
       console.log(`[CihiWaitTimesPriority] Wrote ${diagnosticRecords.length} diagnostic records to data-diagnostic.json`);
     }

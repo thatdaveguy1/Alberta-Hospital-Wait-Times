@@ -30,6 +30,7 @@ import * as cheerio from 'cheerio';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 import type {
   HealthLinkVolume,
   VirtualMDCohortStudy,
@@ -58,6 +59,7 @@ interface VirtualCareJson {
   VIRTUAL_MD_DISPOSITIONS: VirtualMDDisposition[];
   EMS_811_DIVERSION_DATA: EmsDiversionMetric[];
   ADJACENT_HELPLINES: AdjacentHelplineVolume[];
+  _dataMetadata?: DataMetadata;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -89,6 +91,8 @@ function coerceVirtualCareJson(raw: unknown): VirtualCareJson {
         raw.EMS_811_DIVERSION_DATA as EmsDiversionMetric[];
     if (Array.isArray(raw.ADJACENT_HELPLINES))
       base.ADJACENT_HELPLINES = raw.ADJACENT_HELPLINES as AdjacentHelplineVolume[];
+    if (raw._dataMetadata && typeof raw._dataMetadata === 'object')
+      base._dataMetadata = raw._dataMetadata as DataMetadata;
   }
   return base;
 }

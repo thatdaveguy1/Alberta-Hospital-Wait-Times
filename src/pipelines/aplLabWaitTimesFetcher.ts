@@ -12,8 +12,12 @@
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type { SyncResult } from './types';
-
 const APL_API_URL = 'https://qmeapi.albertaprecisionlabs.ca/api/location';
 const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
 const LAB_SNAPSHOTS_FILE = path.join(process.cwd(), 'data-lab-snapshots.json');
@@ -174,17 +178,22 @@ export async function run(): Promise<SyncResult> {
 
     existingData.LAB_LOCATION_WAITS = labLocations;
 
-    // Update metadata for LAB_LOCATION_WAITS
-    if (existingData._dataMetadata && typeof existingData._dataMetadata === 'object') {
-      const meta = existingData._dataMetadata as Record<string, Record<string, unknown>>;
-      meta.LAB_LOCATION_WAITS = {
+    // Stamp metadata for LAB_LOCATION_WAITS, preserving sibling entries owned
+    // by other diagnostic writers (TEST_TURNAROUND_METRICS, IMAGING_WAIT_TRENDS,
+    // FACILITY_IMAGING_WAITS, PRIORITY_TARGET_COMPLIANCE, CIHI_DIAGNOSTIC_WAIT_TIMES).
+    const ownedMetadata: DataMetadata = {
+      LAB_LOCATION_WAITS: buildMetadataEntry({
+        updateType: 'auto',
         source: 'APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)',
         sourceVintage: 'Live data',
         lastUpdated: timestamp,
-        updateType: 'auto',
         verification: 'Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes.',
-      };
-    }
+      }),
+    };
+    existingData._dataMetadata = mergeDataMetadata(
+      existingData._dataMetadata as DataMetadata | undefined,
+      ownedMetadata,
+    );
 
     // Write back
     fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(existingData, null, 2), 'utf8');

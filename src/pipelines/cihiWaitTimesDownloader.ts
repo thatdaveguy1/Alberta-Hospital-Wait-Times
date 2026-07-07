@@ -598,9 +598,20 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    const recordsWritten = mergeAndWrite(DIAGNOSTIC_FILE, {
-      IMAGING_WAIT_TRENDS: parsed.imaging,
-    });
+    const recordsWritten = mergeAndWrite(
+      DIAGNOSTIC_FILE,
+      {
+        IMAGING_WAIT_TRENDS: parsed.imaging,
+      },
+      {
+        IMAGING_WAIT_TRENDS: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'cihiWaitTimesDownloader',
+          sourceVintage: 'Live data',
+          lastUpdated: timestamp,
+        }),
+      },
+    );
     const status: SyncResult['status'] = recordsWritten > 0 ? 'success' : 'skipped';
     console.log(
       `[CIHIWaitTimes] Diagnostic complete. fetched=${recordsFetched} written=${recordsWritten} in ${Date.now() - startTime}ms`,

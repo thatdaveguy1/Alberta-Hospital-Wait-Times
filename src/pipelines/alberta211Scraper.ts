@@ -185,9 +185,31 @@ export async function run(): Promise<SyncResult> {
     };
     fs.writeFileSync(MENTAL_HEALTH_FILE, JSON.stringify(mhMerged, null, 2) + '\n', 'utf8');
 
-    // Merge into virtual-care data
+    // Merge into virtual-care data. Refresh _dataMetadata for
+    // ADJACENT_HELPLINES (the array this scraper owns in this file); preserve
+    // sibling entries (HEALTH_LINK_VOLUMES, VIRTUAL_MD_COHORT_STUDY,
+    // VIRTUAL_MD_DISPOSITIONS, EMS_811_DIVERSION_DATA) via mergeDataMetadata.
+    // The existing entry is the source of truth for
+    // source/sourceVintage/updateType/verification; only lastUpdated is
+    // refreshed.
     const vcJson = loadJsonFile(VIRTUAL_CARE_FILE);
-    const vcMerged = { ...vcJson, ADJACENT_HELPLINES: adjacentHelplines };
+    const vcExistingMeta = vcJson._dataMetadata as DataMetadata | undefined;
+    const vcOwnedMetadata: DataMetadata = {};
+    const adjExisting = vcExistingMeta?.ADJACENT_HELPLINES;
+    if (adjExisting) {
+      vcOwnedMetadata.ADJACENT_HELPLINES = buildMetadataEntry({
+        updateType: adjExisting.updateType,
+        source: adjExisting.source,
+        sourceVintage: adjExisting.sourceVintage,
+        verification: adjExisting.verification,
+        lastUpdated: timestamp,
+      });
+    }
+    const vcMerged = {
+      ...vcJson,
+      ADJACENT_HELPLINES: adjacentHelplines,
+      _dataMetadata: mergeDataMetadata(vcExistingMeta, vcOwnedMetadata),
+    };
     fs.writeFileSync(VIRTUAL_CARE_FILE, JSON.stringify(vcMerged, null, 2) + '\n', 'utf8');
 
     const recordsWritten = helplines.length + adjacentHelplines.length;

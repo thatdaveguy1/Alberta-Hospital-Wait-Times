@@ -14,6 +14,11 @@ import type {
   FacilityImagingWait,
   ImagingWaitTrend,
 } from '../diagnosticData';
+import {
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 import type { SyncResult } from './types';
 
 const BASE_URL = 'https://waittimes.alberta.ca/';
@@ -397,7 +402,7 @@ function parseDiagnosticTables(
 
 // Merge new surgical records into existing data-surgical.json, replacing
 // records with matching id and preserving all other top-level keys.
-function mergeSurgicalData(newRecords: SurgicalRecord[]): number {
+function mergeSurgicalData(newRecords: SurgicalRecord[], timestamp: string): number {
   type SurgicalJson = Record<string, unknown>;
   let existing: SurgicalJson = {};
   try {
@@ -420,6 +425,21 @@ function mergeSurgicalData(newRecords: SurgicalRecord[]): number {
 
   const merged = Array.from(byId.values());
   existing.SURGICAL_RECORDS = merged;
+
+  // Refresh _dataMetadata for SURGICAL_RECORDS; preserve all other entries
+  // (sibling writers' and hand-authored arrays) via mergeDataMetadata.
+  const ownedMetadata: DataMetadata = {
+    SURGICAL_RECORDS: buildMetadataEntry({
+      updateType: 'auto',
+      source: 'Alberta Wait Times Reporting (waittimes.alberta.ca)',
+      sourceVintage: 'Live provincial wait-times tables',
+      lastUpdated: timestamp,
+    }),
+  };
+  existing._dataMetadata = mergeDataMetadata(
+    existing._dataMetadata as DataMetadata | undefined,
+    ownedMetadata,
+  );
 
   fs.writeFileSync(SURGICAL_FILE, JSON.stringify(existing, null, 2), 'utf8');
   return merged.length;
@@ -482,6 +502,31 @@ function mergeDiagnosticData(
 
   const mergedTrends = Array.from(trendByKey.values());
   existing.IMAGING_WAIT_TRENDS = mergedTrends;
+
+  // Stamp metadata for the arrays this writer refreshes, preserving sibling
+  // entries (LAB_LOCATION_WAITS, TEST_TURNAROUND_METRICS, PRIORITY_TARGET_COMPLIANCE,
+  // CIHI_DIAGNOSTIC_WAIT_TIMES) owned by other diagnostic writers.
+  const timestamp = new Date().toISOString();
+  const ownedMetadata: DataMetadata = {
+    FACILITY_IMAGING_WAITS: buildMetadataEntry({
+      updateType: 'auto',
+      source: 'waittimes.alberta.ca (AccessGoalChart.do)',
+      sourceVintage: 'Live data',
+      lastUpdated: timestamp,
+      verification: 'CT/MRI facility wait times scraped from waittimes.alberta.ca per-zone tables.',
+    }),
+    IMAGING_WAIT_TRENDS: buildMetadataEntry({
+      updateType: 'auto',
+      source: 'waittimes.alberta.ca (AccessGoalChart.do)',
+      sourceVintage: 'Live data',
+      lastUpdated: timestamp,
+      verification: 'CT/MRI wait-time trends scraped from waittimes.alberta.ca per-quarter tables.',
+    }),
+  };
+  existing._dataMetadata = mergeDataMetadata(
+    existing._dataMetadata as DataMetadata | undefined,
+    ownedMetadata,
+  );
 
   fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(existing, null, 2), 'utf8');
   return { facilitiesWritten: mergedFacilities.length, trendsWritten: mergedTrends.length };
@@ -565,7 +610,7 @@ export async function run(): Promise<SyncResult> {
 
     // Step 4: Merge and write data.
     const surgicalWritten = allSurgicalRecords.length > 0
-      ? mergeSurgicalData(allSurgicalRecords)
+      ? mergeSurgicalData(allSurgicalRecords, timestamp)
       : 0;
 
     const diagnosticResult = allDiagnosticFacilities.length > 0 || allDiagnosticTrends.length > 0

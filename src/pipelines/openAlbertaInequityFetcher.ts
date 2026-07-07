@@ -18,6 +18,7 @@ import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 import type {
   CommunityNeedMetric,
   ChronicDiseaseBurden,
@@ -565,6 +566,34 @@ export async function run(): Promise<SyncResult> {
       if (merged[key] === undefined) merged[key] = value;
     }
 
+    // Refresh _dataMetadata for the three arrays this fetcher owns; preserve
+    // any sibling entries (e.g. TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS) via
+    // mergeDataMetadata so a read-modify-write never strips them.
+    const ownedMetadata: DataMetadata = {
+      COMMUNITY_NEED_PROFILES: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Open Alberta CKAN LGA community profiles (Table 10.1)',
+        sourceVintage: 'Latest Open Alberta Table 10.1 release',
+        lastUpdated: timestamp,
+      }),
+      CHRONIC_DISEASE_BURDEN: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Open Alberta CKAN chronic disease indicators (Figure 4.2 + Table 10.1)',
+        sourceVintage: 'Latest Open Alberta Figure 4.2 release',
+        lastUpdated: timestamp,
+      }),
+      ED_RELIANCE_METRICS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Open Alberta CKAN LGA community profiles (Table 10.1 mood/anxiety)',
+        sourceVintage: 'Latest Open Alberta Table 10.1 release',
+        lastUpdated: timestamp,
+      }),
+    };
+    merged._dataMetadata = mergeDataMetadata(
+      existingJson['_dataMetadata'] as DataMetadata | undefined,
+      ownedMetadata,
+    );
+
     fs.writeFileSync(INEQUITY_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
     const recordsWritten =
       mergedCommunityNeed.length + mergedChronicDisease.length + mergedEdReliance.length;
@@ -682,6 +711,22 @@ export async function runPrimaryCare(): Promise<SyncResult> {
 
     // Merge: preserve all other arrays in data-primary-care.json
     const merged: LoadedJson = { ...pcJson, LGA_COMMUNITY_NEEDS: fresh };
+    // Refresh _dataMetadata for LGA_COMMUNITY_NEEDS; preserve all sibling
+    // entries (albertaFindAProviderScraper, hand-authored PCN_CAPACITY, etc.)
+    // via mergeDataMetadata so a read-modify-write never strips them.
+    const ownedMetadata: DataMetadata = {
+      LGA_COMMUNITY_NEEDS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Open Alberta CKAN LGA community profiles (derived from regional-inequity)',
+        sourceVintage: 'Latest Open Alberta release',
+        lastUpdated: timestamp,
+      }),
+    };
+    merged._dataMetadata = mergeDataMetadata(
+      pcJson['_dataMetadata'] as DataMetadata | undefined,
+      ownedMetadata,
+    );
+
     fs.writeFileSync(PRIMARY_CARE_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
 
     console.log(

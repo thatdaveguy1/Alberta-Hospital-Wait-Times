@@ -19,6 +19,7 @@ import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 import type {
   ActivityVolumeTrend,
   NationalSpendingCompare,
@@ -126,19 +127,40 @@ function loadJsonFile(file: string): LoadedJson {
   }
   return {};
 }
-
 // Merge new arrays into an existing JSON object, only overwriting keys that
-// carry non-empty new data. Returns the number of records written.
-function mergeAndWrite(file: string, newPartial: LoadedJson): number {
+// carry non-empty new data. When `ownedMetadata` is supplied, stamp those
+// entries into `_dataMetadata` (preserving sibling writers' entries via
+// mergeDataMetadata) for every array actually refreshed this run. Returns the
+// number of records written.
+function mergeAndWrite(
+  file: string,
+  newPartial: LoadedJson,
+  ownedMetadata?: DataMetadata,
+): number {
   const existing = loadJsonFile(file);
   let written = 0;
+  const refreshedKeys: string[] = [];
   for (const [key, value] of Object.entries(newPartial)) {
     if (Array.isArray(value) && value.length > 0) {
       existing[key] = value;
       written += value.length;
+      refreshedKeys.push(key);
     }
   }
   if (written > 0) {
+    if (ownedMetadata) {
+      // Only stamp metadata for arrays actually refreshed this run.
+      const stamped: DataMetadata = {};
+      for (const key of refreshedKeys) {
+        if (key in ownedMetadata) stamped[key] = ownedMetadata[key];
+      }
+      if (Object.keys(stamped).length > 0) {
+        existing._dataMetadata = mergeDataMetadata(
+          existing._dataMetadata as DataMetadata | undefined,
+          stamped,
+        );
+      }
+    }
     fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
   }
   return written;
@@ -567,12 +589,39 @@ export async function run(): Promise<SyncResult> {
     }
 
     // 7. Merge into data-spending.json, preserving PHYSICIAN_SPECIALTY_BILLING
-    //    and HOSPITAL_EFFICIENCY_TREND (not touched here).
-    const recordsWritten = mergeAndWrite(SPENDING_FILE, {
-      NATIONAL_SPENDING_COMPARE: nationalSpending,
-      ALBERTA_USE_OF_FUNDS: useOfFunds,
-      ALBERTA_ACTIVITY_VOLUME_TREND: activityVolume,
-    });
+    //    and HOSPITAL_EFFICIENCY_TREND (not touched here). Stamp
+    //    _dataMetadata for the arrays refreshed this run; sibling entries
+    //    (e.g. CIHI_RESOURCE_USE_INTENSITY, CIHI_SPENDING_PER_PERSON) are
+    //    preserved via mergeDataMetadata.
+    const ownedMetadata: DataMetadata = {
+      NATIONAL_SPENDING_COMPARE: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI NHEX 2025 full data tables (Table O.1)',
+        sourceVintage: 'NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)',
+        lastUpdated: timestamp,
+      }),
+      ALBERTA_USE_OF_FUNDS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI NHEX 2025 full data tables (Series D1, Alberta sheet)',
+        sourceVintage: 'NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)',
+        lastUpdated: timestamp,
+      }),
+      ALBERTA_ACTIVITY_VOLUME_TREND: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI NHEX 2025 full data tables (Table O.1, derived activity volume)',
+        sourceVintage: 'NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)',
+        lastUpdated: timestamp,
+      }),
+    };
+    const recordsWritten = mergeAndWrite(
+      SPENDING_FILE,
+      {
+        NATIONAL_SPENDING_COMPARE: nationalSpending,
+        ALBERTA_USE_OF_FUNDS: useOfFunds,
+        ALBERTA_ACTIVITY_VOLUME_TREND: activityVolume,
+      },
+      ownedMetadata,
+    );
 
     const status: SyncResult['status'] = recordsWritten > 0 ? 'success' : 'skipped';
     console.log(
