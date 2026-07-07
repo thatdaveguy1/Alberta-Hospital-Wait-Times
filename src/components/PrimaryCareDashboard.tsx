@@ -45,6 +45,7 @@ import type {
   ContinuityAndSatisfaction
 } from '../primaryCareData';
 import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 
 type PrimaryCareData = {
   ATTACHMENT_RATES: AttachmentRate[];
@@ -228,18 +229,13 @@ export default function PrimaryCareDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <Stethoscope className="w-5 h-5 text-indigo-400" />
-            <span>Primary Care & Providers</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Track family medicine attachment rates and locate accepting clinics.
-          </p>
-          <DataTimestamp metadata={primaryCareData._dataMetadata} arrayKey="ATTACHMENT_RATES" />
-        </div>
-      </div>
+      <DashboardHeader
+        icon={Stethoscope}
+        title="Primary Care & Providers"
+        description="Track family medicine attachment rates and locate accepting clinics."
+        metadata={primaryCareData._dataMetadata}
+        arrayKey="ATTACHMENT_RATES"
+      />
 
       {/* Sub-tab Navigation */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">

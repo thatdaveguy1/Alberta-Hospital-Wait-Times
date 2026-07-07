@@ -54,6 +54,7 @@ import type {
   ServiceAccessMetric,
 } from '../regionalInequityData';
 import { DataTimestamp } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
 type RegionalInequityData = {
@@ -383,19 +384,13 @@ export default function RegionalInequityDashboard() {
   }
   return (
     <div className="space-y-6">
-      {/* Executive Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-rose-400" />
-            <span>Health Inequity & Community Need</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Analyze geographic disparities, chronic disease burden, and care travel patterns.
-          </p>
-          <DataTimestamp metadata={metadata ?? undefined} arrayKey="PROVINCIAL_BENCHMARKS" />
-        </div>
-      </div>
+      <DashboardHeader
+        icon={MapPin}
+        title="Health Inequity & Community Need"
+        description="Analyze geographic disparities, chronic disease burden, and care travel patterns."
+        metadata={metadata ?? undefined}
+        arrayKey="PROVINCIAL_BENCHMARKS"
+      />
 
       {/* Primary Sub-Tab Navigation */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">

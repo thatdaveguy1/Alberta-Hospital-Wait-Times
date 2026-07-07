@@ -48,6 +48,7 @@ import type {
   CareFacilityCompliance
 } from '../continuingCareData';
 import { DataTimestamp } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
 type ContinuingCareData = {
@@ -192,18 +193,13 @@ export default function ContinuingCareDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-emerald-400" />
-            <span>Continuing & Long Term Care</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Monitor facility placement timelines, quality outcomes, and standards compliance.
-          </p>
-          <DataTimestamp metadata={metadata} arrayKey="CONTINUING_CARE_PLACEMENT_STATS" />
-        </div>
-      </div>
+      <DashboardHeader
+        icon={Building2}
+        title="Continuing & Long Term Care"
+        description="Monitor facility placement timelines, quality outcomes, and standards compliance."
+        metadata={metadata}
+        arrayKey="CONTINUING_CARE_PLACEMENT_STATS"
+      />
 
       {/* Sub-Tab Navigation */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">

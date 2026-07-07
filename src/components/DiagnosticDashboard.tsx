@@ -49,7 +49,8 @@ import {
   FacilityImagingWait,
   PriorityTarget,
 } from '../diagnosticData';
-import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
+import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 
 export default function DiagnosticDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'labs' | 'imaging-waits' | 'facilities' | 'turnaround'>('labs');
@@ -299,17 +300,13 @@ export default function DiagnosticDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <Activity className="w-5 h-5 text-cyan-400" />
-            <span>Diagnostic & Lab Services</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Monitor laboratory wait times and diagnostic imaging benchmark compliance.
-          </p>
-          <DataTimestamp metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="LAB_LOCATION_WAITS" />
-        </div>
+      <DashboardHeader
+        icon={Activity}
+        title="Diagnostic & Lab Services"
+        description="Monitor laboratory wait times and diagnostic imaging benchmark compliance."
+        metadata={diagnosticData?._dataMetadata}
+        arrayKey="LAB_LOCATION_WAITS"
+      >
         <button
           onClick={refreshing ? undefined : refreshData}
           disabled={refreshing}
@@ -317,7 +314,7 @@ export default function DiagnosticDashboard() {
         >
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </button>
-      </div>
+      </DashboardHeader>
 
       {/* Sub-Tab Navigation */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">

@@ -46,6 +46,7 @@ import type {
   SpecialistComparisonRecord,
 } from '../surgicalData';
 import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
 interface StatsCanSatisfactionSegment {
@@ -258,18 +259,13 @@ export default function SurgicalDashboard() {
     <div className="space-y-6">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <Activity className="w-5 h-5 text-blue-400" />
-            <span>Surgical Wait Times</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Track surgery waitlists, volumes, and priority benchmark compliance across facilities.
-          </p>
-          <DataTimestamp metadata={metadata} arrayKey="SURGICAL_RECORDS" />
-        </div>
-      </div>
+      <DashboardHeader
+        icon={Activity}
+        title="Surgical Wait Times"
+        description="Track surgery waitlists, volumes, and priority benchmark compliance across facilities."
+        metadata={metadata}
+        arrayKey="SURGICAL_RECORDS"
+      />
 
       {/* Primary Sub-Tab Navigation */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">

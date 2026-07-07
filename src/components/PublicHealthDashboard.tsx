@@ -48,6 +48,7 @@ import type {
   OutbreakGuidelines
 } from '../publicHealthData';
 import { DataTimestamp } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
 type PublicHealthData = {
@@ -194,18 +195,13 @@ export default function PublicHealthDashboard() {
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-indigo-400" />
-            <span>Public Health & Surveillance</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Track respiratory viruses, wastewater pathogen loads, and immunization rates.
-          </p>
-          <DataTimestamp metadata={metadata} arrayKey="RVD_RESPIRATORY_CASE_COUNTS" />
-        </div>
-      </div>
+      <DashboardHeader
+        icon={ShieldAlert}
+        title="Public Health & Surveillance"
+        description="Track respiratory viruses, wastewater pathogen loads, and immunization rates."
+        metadata={metadata}
+        arrayKey="RVD_RESPIRATORY_CASE_COUNTS"
+      />
 
       {/* Primary Sub-Tab Navigation */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">

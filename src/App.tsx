@@ -75,7 +75,8 @@ import RegionalInequityDashboard from './components/RegionalInequityDashboard';
 import SpendingDashboard from './components/SpendingDashboard';
 import VirtualCareDashboard from './components/VirtualCareDashboard';
 import { useSyncStatus } from './hooks/useSyncStatus';
-import { LiveDataBadge } from './components/LiveDataBadge';
+import { DashboardHeader } from './components/DashboardHeader';
+import type { DataMetadataMap } from './components/DataTimestamp';
 
 
 const CATEGORIES = [
@@ -505,6 +506,15 @@ const TAB_METADATA_MAP: Record<string, {
 export default function App() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const { syncStatus } = useSyncStatus();
+  // Standardized header metadata for the ER Wait Times tab, derived from sync status.
+  const erWaitTimesMetadata: DataMetadataMap = {
+    ER_WAIT_TIMES: {
+      source: 'Alberta Health Services Portal',
+      sourceVintage: 'Real-time Feed',
+      lastUpdated: syncStatus?.erWaitTimesLastUpdate ?? 'Live Feed',
+      updateType: 'auto',
+    },
+  };
   const [isSourcesModalOpen, setIsSourcesModalOpen] = useState(false);
   const [zoneTrends, setZoneTrends] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1649,28 +1659,13 @@ export default function App() {
             {activeTab === 'er-waits' ? (
           <>
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-              <div>
-                <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-blue-400" />
-                  <span>Real-time Emergency Department Wait Times</span>
-                  <LiveDataBadge domain="er-waittimes" />
-                </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  Track estimated wait times from registration to physician assessment at regional emergency facilities.
-                </p>
-                <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-400">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-between shrink-0 relative">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse absolute left-0.5 top-0.5"></span>
-                  </span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">Auto-updated (10m)</span>
-                  <span className="text-slate-600">·</span>
-                  <span>Last Update: <span className="font-mono text-white font-black">{syncStatus?.erWaitTimesLastUpdate ? new Date(syncStatus.erWaitTimesLastUpdate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' }) : 'Live Feed'}</span></span>
-                  <span className="text-slate-600">·</span>
-                  <span>Data Timestamp: <span className="font-extrabold text-slate-200">Real-time Feed</span></span>
-                </div>
-              </div>
-            </div>
+            <DashboardHeader
+              icon={Clock}
+              title="Real-time Emergency Department Wait Times"
+              description="Track estimated wait times from registration to physician assessment at regional emergency facilities."
+              metadata={erWaitTimesMetadata}
+              arrayKey="ER_WAIT_TIMES"
+            />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">

@@ -44,6 +44,7 @@ import type {
   ComplaintCategory,
 } from '../patientExperienceData';
 import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
 type PatientExperienceData = {
@@ -240,18 +241,13 @@ export default function PatientExperienceDashboard() {
   return (
     <div className="space-y-6">
       {/* Executive Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <Users className="w-5 h-5 text-cyan-400" />
-            <span>Patient Experience & Care Quality</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Monitor patient-reported satisfaction, communication quality, and clinical safety.
-          </p>
-          <DataTimestamp metadata={metadata ?? undefined} arrayKey="PATIENT_SATISFACTION_STATS" />
-        </div>
-      </div>
+      <DashboardHeader
+        icon={Users}
+        title="Patient Experience & Care Quality"
+        description="Monitor patient-reported satisfaction, communication quality, and clinical safety."
+        metadata={metadata ?? undefined}
+        arrayKey="PATIENT_SATISFACTION_STATS"
+      />
 
       {/* Sub-tab Navigation */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">

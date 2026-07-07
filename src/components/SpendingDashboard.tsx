@@ -42,6 +42,7 @@ import type {
   SpendingByUseOfFunds,
 } from '../spendingData';
 import { DataTimestamp } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
 type SpendingData = {
@@ -249,18 +250,13 @@ export default function SpendingDashboard() {
   return (
     <div id="spending-dashboard-container" className="space-y-6">
       {/* Tab bar header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <Coins className="w-5 h-5 text-emerald-400" />
-            <span>Health Expenditures & Efficiency</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Analyze fiscal allocations, national scoreboards, and physician billings.
-          </p>
-          <DataTimestamp metadata={metadata ?? undefined} arrayKey="NATIONAL_SPENDING_COMPARE" />
-        </div>
-      </div>
+      <DashboardHeader
+        icon={Coins}
+        title="Health Expenditures & Efficiency"
+        description="Analyze fiscal allocations, national scoreboards, and physician billings."
+        metadata={metadata ?? undefined}
+        arrayKey="NATIONAL_SPENDING_COMPARE"
+      />
 
       {/* Primary Sub-Tab Navigation */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">

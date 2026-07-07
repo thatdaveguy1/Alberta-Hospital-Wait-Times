@@ -31,7 +31,7 @@ import {
 } from 'recharts';
 import { ServiceDisruption } from '../types';
 import { useSyncStatus, formatRelativeTime, getDomainResult } from '../hooks/useSyncStatus';
-import { DataTimestamp } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 export default function ServiceDisruptionsDashboard() {
   const [disruptions, setDisruptions] = useState<ServiceDisruption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,18 +187,13 @@ export default function ServiceDisruptionsDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-red-400" />
-            <span>Temporary Service Disruptions</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Monitor real-time closures, reduced hours, and bed reductions across Alberta.
-          </p>
-          <DataTimestamp metadata={metadata} arrayKey="disruptions" />
-        </div>
-      </div>
+      <DashboardHeader
+        icon={ShieldAlert}
+        title="Temporary Service Disruptions"
+        description="Monitor real-time closures, reduced hours, and bed reductions across Alberta."
+        metadata={metadata}
+        arrayKey="disruptions"
+      />
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

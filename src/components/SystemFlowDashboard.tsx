@@ -55,7 +55,8 @@ import type {
   LGADemand,
   HistoricalFlowSnapshot,
 } from '../systemFlowData';
-import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
+import { type DataMetadataMap } from './DataTimestamp';
+import { DashboardHeader } from './DashboardHeader';
 type SystemFlowData = {
   FACILITY_FLOW_METRICS: FacilityFlow[];
   AHS_WEEKLY_ED_LOS: WeeklyEDLOS[];
@@ -385,17 +386,13 @@ export default function SystemFlowDashboard() {
     <div id="system-flow-dashboard-root" className="space-y-6 text-slate-100 font-sans">
       
       {/* Standardized Tab bar header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-indigo-400" />
-            <span>Hospital System Flow</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Monitor occupancy, average ED wait times, and alternate level of care bottlenecks.
-          </p>
-          <DataTimestamp metadata={systemFlowData?._dataMetadata} arrayKey="FACILITY_FLOW_METRICS" />
-        </div>
+      <DashboardHeader
+        icon={TrendingUp}
+        title="Hospital System Flow"
+        description="Monitor occupancy, average ED wait times, and alternate level of care bottlenecks."
+        metadata={systemFlowData?._dataMetadata}
+        arrayKey="FACILITY_FLOW_METRICS"
+      >
         <button
           onClick={() => setRefreshNonce(n => n + 1)}
           className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer shrink-0"
@@ -404,7 +401,7 @@ export default function SystemFlowDashboard() {
           <RefreshCw className="w-3.5 h-3.5" />
           Refresh
         </button>
-      </div>
+      </DashboardHeader>
 
       {/* Primary Sub-Tab Navigation */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
