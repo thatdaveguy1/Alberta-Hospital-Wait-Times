@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Activity, 
   Clock, 
@@ -15,7 +16,8 @@ import {
   TrendingDown,
   Search,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  BarChart2
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -49,6 +51,73 @@ import { _dataMetadata as surgicalDataMetadata } from '../surgicalData';
 export default function SurgicalDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'overview' | 'ortho' | 'comparisons' | 'statscan'>('overview');
   
+  // Interactive KPI selected state for historical trend panel
+  const [selectedKpi, setSelectedKpi] = useState<'hip_replacement_median' | 'knee_replacement_median' | 'cataract_surgery_median' | null>(null);
+
+  const kpiStats = useMemo(() => {
+    if (!selectedKpi) return null;
+    const values = HISTORICAL_WAIT_TRENDS.map(t => t[selectedKpi] as number).filter(v => typeof v === 'number');
+    if (values.length === 0) return null;
+
+    const baseline = values[0];
+    const latest = values[values.length - 1];
+    const peak = Math.max(...values);
+    const minVal = Math.min(...values);
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+
+    return {
+      baseline: baseline.toFixed(1),
+      latest: latest.toFixed(1),
+      peak: peak.toFixed(1),
+      minVal: minVal.toFixed(1),
+      delta: rawDelta > 0 ? `+${rawDelta.toFixed(1)}` : rawDelta.toFixed(1),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0
+    };
+  }, [selectedKpi]);
+
+  const selectedKpiDetails = useMemo(() => {
+    if (!selectedKpi) return null;
+    switch (selectedKpi) {
+      case 'hip_replacement_median':
+        return {
+          label: 'Total Hip Replacement Median Wait Time',
+          description: 'Historical trend of hip replacement surgery median wait times (weeks) in Alberta from 2015 to 2026. The COVID pandemic and subsequent system strain caused a major spike, which has only partially resolved.',
+          colorClass: 'text-blue-400',
+          bgClass: 'bg-blue-500/10',
+          strokeColor: '#3b82f6',
+          gradientId: 'colorHipTrend',
+          unit: ' Wks',
+          icon: Clock
+        };
+      case 'knee_replacement_median':
+        return {
+          label: 'Total Knee Replacement Median Wait Time',
+          description: 'Historical trend of knee replacement surgery median wait times (weeks) in Alberta from 2015 to 2026. Consistent under-capacity relative to aging demographics remains a primary strain factor.',
+          colorClass: 'text-purple-400',
+          bgClass: 'bg-purple-500/10',
+          strokeColor: '#a855f7',
+          gradientId: 'colorKneeTrend',
+          unit: ' Wks',
+          icon: Clock
+        };
+      case 'cataract_surgery_median':
+        return {
+          label: 'Cataract Extraction Median Wait Time',
+          description: 'Historical trend of cataract surgery median wait times (weeks) in Alberta from 2015 to 2026. Substantial provincial volume shifts have helped stabilize cataract waits closer to target relative to orthopedics.',
+          colorClass: 'text-emerald-400',
+          bgClass: 'bg-emerald-500/10',
+          strokeColor: '#10b981',
+          gradientId: 'colorCataractTrend',
+          unit: ' Wks',
+          icon: Sparkles
+        };
+      default:
+        return null;
+    }
+  }, [selectedKpi]);
+
   // Comparisons States
   const [compFacilityA, setCompFacilityA] = useState<string>('WDFAB783'); // Royal Alex
   const [compFacilityB, setCompFacilityB] = useState<string>('WDFAB102'); // U of A
@@ -183,7 +252,21 @@ export default function SurgicalDashboard() {
         <div className="space-y-6">
           {/* Top KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-2 relative overflow-hidden group">
+            <div 
+              tabIndex={0}
+              onClick={() => setSelectedKpi(selectedKpi === 'hip_replacement_median' ? null : 'hip_replacement_median')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedKpi(selectedKpi === 'hip_replacement_median' ? null : 'hip_replacement_median');
+                }
+              }}
+              className={`bg-slate-900/40 border rounded-2xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedKpi === 'hip_replacement_median'
+                  ? 'border-blue-500 ring-1 ring-blue-500/30 bg-slate-900/80 shadow-blue-500/5'
+                  : 'border-slate-800 hover:border-blue-500/30'
+              }`}
+            >
               <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors pointer-events-none"></div>
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Hip Replacement</span>
@@ -197,9 +280,27 @@ export default function SurgicalDashboard() {
                 <span>National Target: 26.0 Wks</span>
                 <span className="text-amber-400 font-bold">141% of Target</span>
               </div>
+              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-blue-400/80 group-hover:text-blue-400 transition-colors">
+                <BarChart2 className="w-3 h-3" />
+                <span>{selectedKpi === 'hip_replacement_median' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+              </div>
             </div>
 
-            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-2 relative overflow-hidden group">
+            <div 
+              tabIndex={0}
+              onClick={() => setSelectedKpi(selectedKpi === 'knee_replacement_median' ? null : 'knee_replacement_median')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedKpi(selectedKpi === 'knee_replacement_median' ? null : 'knee_replacement_median');
+                }
+              }}
+              className={`bg-slate-900/40 border rounded-2xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedKpi === 'knee_replacement_median'
+                  ? 'border-purple-500 ring-1 ring-purple-500/30 bg-slate-900/80 shadow-purple-500/5'
+                  : 'border-slate-800 hover:border-purple-500/30'
+              }`}
+            >
               <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-colors pointer-events-none"></div>
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Knee Replacement</span>
@@ -213,9 +314,27 @@ export default function SurgicalDashboard() {
                 <span>National Target: 26.0 Wks</span>
                 <span className="text-amber-500 font-bold">165% of Target</span>
               </div>
+              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-purple-400/80 group-hover:text-purple-400 transition-colors">
+                <BarChart2 className="w-3 h-3" />
+                <span>{selectedKpi === 'knee_replacement_median' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
+              </div>
             </div>
 
-            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-2 relative overflow-hidden group">
+            <div 
+              tabIndex={0}
+              onClick={() => setSelectedKpi(selectedKpi === 'cataract_surgery_median' ? null : 'cataract_surgery_median')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedKpi(selectedKpi === 'cataract_surgery_median' ? null : 'cataract_surgery_median');
+                }
+              }}
+              className={`bg-slate-900/40 border rounded-2xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                selectedKpi === 'cataract_surgery_median'
+                  ? 'border-emerald-500 ring-1 ring-emerald-500/30 bg-slate-900/80 shadow-emerald-500/5'
+                  : 'border-slate-800 hover:border-emerald-500/30'
+              }`}
+            >
               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none"></div>
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cataract Extractions</span>
@@ -228,6 +347,10 @@ export default function SurgicalDashboard() {
               <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400">
                 <span>National Target: 16.0 Wks</span>
                 <span className="text-emerald-400 font-bold">95% (Within Target)</span>
+              </div>
+              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-emerald-400/80 group-hover:text-emerald-400 transition-colors">
+                <BarChart2 className="w-3 h-3" />
+                <span>{selectedKpi === 'cataract_surgery_median' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
               </div>
             </div>
 
@@ -245,8 +368,91 @@ export default function SurgicalDashboard() {
                 <span>Standard Target: 4.0 Wks</span>
                 <span className="text-rose-400 font-bold">High Priority Flow</span>
               </div>
+              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-slate-500">
+                <span>No Trend Data Available</span>
+              </div>
             </div>
           </div>
+
+          {/* Trend Panel */}
+          <AnimatePresence mode="wait">
+            {selectedKpi && selectedKpiDetails && kpiStats && (
+              <motion.div
+                key={`kpi-trend-${selectedKpi}`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-slate-950/80 border border-slate-850 p-4 sm:p-5 rounded-2xl space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800/60">
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                        {React.createElement(selectedKpiDetails.icon, {
+                          className: `w-4 h-4 ${selectedKpiDetails.colorClass}`
+                        })}
+                        <span>{selectedKpiDetails.label} Historical Trend Explorer</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                        {selectedKpiDetails.description}
+                       </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (2015)</span>
+                      <span className="text-xl font-black text-slate-300 font-mono">{kpiStats.baseline}{selectedKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (2026)</span>
+                      <span className="text-xl font-black text-white font-mono">{kpiStats.latest}{selectedKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">5-Year Peak</span>
+                      <span className={`text-xl font-black font-mono ${selectedKpiDetails.colorClass}`}>{kpiStats.peak}{selectedKpiDetails.unit}</span>
+                    </div>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
+                      <span className={`text-xs font-extrabold flex items-center justify-center sm:justify-start gap-1 ${kpiStats.isIncrease ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        {kpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
+                        <span>{kpiStats.delta}{selectedKpiDetails.unit} ({kpiStats.pctChange})</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="h-60 mt-3 pt-3">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={HISTORICAL_WAIT_TRENDS} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id={selectedKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
+                        <YAxis stroke="#64748b" fontSize={10} unit={selectedKpiDetails.unit} />
+                        <RechartsTooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: 11 }} />
+                        <Area
+                          type="monotone"
+                          dataKey={selectedKpi}
+                          name={selectedKpiDetails.label}
+                          stroke={selectedKpiDetails.strokeColor}
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill={`url(#${selectedKpiDetails.gradientId})`}
+                          dot={{ r: 4, strokeWidth: 1 }}
+                          isAnimationActive={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-slate-900/30 border border-slate-800/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between">

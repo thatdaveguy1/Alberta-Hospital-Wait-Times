@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Brain, 
   Search, 
@@ -18,7 +19,10 @@ import {
   Award,
   Users,
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  BarChart2,
+  TrendingDown,
+  X,
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -40,7 +44,6 @@ import {
   COMMUNITY_MH_WAITS, 
   HOSPITAL_MHSU_BURDEN, 
   SUPPORT_HELPLINES,
-  SubstanceHarmTrend,
   AddictionBedStatus,
   CommunityMHWait,
   HospitalMHSUBurden
@@ -49,20 +52,94 @@ import { DataTimestamp } from './DataTimestamp';
 import { _dataMetadata as mentalHealthDataMetadata } from '../mentalHealthData';
 
 export default function MentalHealthDashboard() {
+  // Interactive KPI selected state for substance harms historical trend panel
+  const [selectedHarmKpi, setSelectedHarmKpi] = useState<'apparentDeaths' | 'emsOverdoseResponses' | 'hospitalizations' | null>(null);
   const [activeSubTab, setActiveSubTab] = useState<'substance-harms' | 'addiction-beds' | 'community-access' | 'er-pressure' | 'helplines'>('substance-harms');
   
   // Interactive Filters
-  const [selectedSubstance, setSelectedSubstance] = useState<'Opioids' | 'Stimulants'>('Opioids');
   const [corridorFilter, setCorridorFilter] = useState<string>('All');
   const [bedTypeFilter, setBedTypeFilter] = useState<string>('All');
   const [siteSearch, setSiteSearch] = useState<string>('');
   const [waitAgeGroup, setWaitAgeGroup] = useState<string>('All');
 
-  // Filter Harm Trends
+  // Filter Harm Trends - merged into a single dataset (no selector)
   const filteredHarmData = useMemo(() => {
-    return SUBSTANCE_HARM_TRENDS.filter(t => t.substanceType === selectedSubstance);
-  }, [selectedSubstance]);
+    const years = Array.from(new Set(SUBSTANCE_HARM_TRENDS.map(t => t.year))).sort();
+    return years.map(year => {
+      const records = SUBSTANCE_HARM_TRENDS.filter(t => t.year === year);
+      const apparentDeaths = records.reduce((sum, r) => sum + r.apparentDeaths, 0);
+      const hospitalizations = records.reduce((sum, r) => sum + r.hospitalizations, 0);
+      const emsOverdoseResponses = records.reduce((sum, r) => sum + r.emsOverdoseResponses, 0);
+      return {
+        year,
+        apparentDeaths,
+        hospitalizations,
+        emsOverdoseResponses
+      };
+    });
+  }, []);
 
+  // Historical trend stats for the selected substance harm KPI
+  const harmKpiStats = useMemo(() => {
+    if (!selectedHarmKpi) return null;
+    const values = filteredHarmData.map(t => t[selectedHarmKpi] as number).filter(v => typeof v === 'number');
+    if (values.length === 0) return null;
+
+    const baseline = values[0];
+    const latest = values[values.length - 1];
+    const peak = Math.max(...values);
+    const minVal = Math.min(...values);
+    const rawDelta = latest - baseline;
+    const pctChange = baseline !== 0 ? (rawDelta / baseline) * 100 : 0;
+
+    return {
+      baseline: baseline.toLocaleString(),
+      latest: latest.toLocaleString(),
+      peak: peak.toLocaleString(),
+      minVal: minVal.toLocaleString(),
+      delta: rawDelta > 0 ? `+${rawDelta.toLocaleString()}` : rawDelta.toLocaleString(),
+      pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
+      isIncrease: rawDelta > 0
+    };
+  }, [selectedHarmKpi, filteredHarmData]);
+
+  const selectedHarmKpiDetails = useMemo(() => {
+    if (!selectedHarmKpi) return null;
+    switch (selectedHarmKpi) {
+      case 'apparentDeaths':
+        return {
+          label: 'Alberta Apparent Toxicity Deaths',
+          description: 'Annual apparent toxicity deaths across Alberta tracked via the Alberta Substance Use Surveillance System. Deaths peaked during the 2023 surge and have begun a gradual decline following expansion of Recovery Communities and opioid agonist treatment access.',
+          colorClass: 'text-rose-500',
+          strokeColor: '#e11d48',
+          gradientId: 'colorDeathsTrend',
+          unit: '',
+          icon: AlertTriangle
+        };
+      case 'emsOverdoseResponses':
+        return {
+          label: 'EMS Suspected Overdose Dispatches',
+          description: 'Annual EMS dispatches for suspected opioid and substance overdoses across Alberta. Naloxone kit distribution and opioid agonist treatment networks help suppress overall fatality curves despite persistent call volumes.',
+          colorClass: 'text-violet-400',
+          strokeColor: '#8b5cf6',
+          gradientId: 'colorEmsTrend',
+          unit: '',
+          icon: PhoneCall
+        };
+      case 'hospitalizations':
+        return {
+          label: 'Poisoning Hospital Admissions',
+          description: 'Toxic substance poisonings and accidental overdoses requiring inpatient hospitalization care, tracked annually across Alberta acute facilities.',
+          colorClass: 'text-emerald-400',
+          strokeColor: '#10b981',
+          gradientId: 'colorHospTrend',
+          unit: '',
+          icon: Heart
+        };
+      default:
+        return null;
+    }
+  }, [selectedHarmKpi]);
   // Aggregate bed capacity stats
   const bedStats = useMemo(() => {
     const total = ADDICTION_BED_CAPACITIES.reduce((acc, curr) => acc + curr.totalBeds, 0);
@@ -182,20 +259,20 @@ export default function MentalHealthDashboard() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Alberta Apparent Opioid Deaths (2025)</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Alberta Apparent Toxicity Deaths (2025)</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-rose-500">~1,350</span>
+                <span className="text-3xl font-black text-rose-500">~1,960</span>
                 <span className="text-xs text-slate-400 font-mono">deaths</span>
               </div>
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
-                Gradual reduction from the record 2023 surge (~1,850 deaths) following active expansion of Recovery Communities.
+                Gradual reduction from the record 2023 surge (~2,670 deaths) following active expansion of Recovery Communities.
               </p>
             </div>
 
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Emergency EMS overdose dispatches</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Emergency EMS overdose dispatches (2025)</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-violet-400">~7,850</span>
+                <span className="text-3xl font-black text-violet-400">~11,000</span>
                 <span className="text-xs text-slate-400 font-mono">annual responses</span>
               </div>
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
@@ -204,13 +281,13 @@ export default function MentalHealthDashboard() {
             </div>
 
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Alberta vs Canada Toxicity Burden (2025)</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Poisoning Hospital Admissions (2025)</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-white">29.1</span>
-                <span className="text-xs text-slate-400 font-mono">vs 18.4 per 100k</span>
+                <span className="text-3xl font-black text-emerald-400">~4,300</span>
+                <span className="text-xs text-slate-400 font-mono">admissions</span>
               </div>
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
-                Alberta remains significantly above the national averages due to systemic high-potency non-pharmaceutical drug supplies.
+                Toxic substance poisonings and accidental overdoses requiring inpatient hospitalization care.
               </p>
             </div>
           </div>
@@ -222,25 +299,6 @@ export default function MentalHealthDashboard() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Substance-Induced Toxicity & Overdose Harms</h3>
                   <p className="text-[10px] text-slate-500">Comparing toxicological outcomes and emergency EMS calls by category</p>
-                </div>
-
-                <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-850 self-start sm:self-auto shrink-0">
-                  <button
-                    onClick={() => setSelectedSubstance('Opioids')}
-                    className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
-                      selectedSubstance === 'Opioids' ? 'bg-purple-600 text-white' : 'text-slate-400'
-                    }`}
-                  >
-                    Opioids (Fentanyl / Carfentanil)
-                  </button>
-                  <button
-                    onClick={() => setSelectedSubstance('Stimulants')}
-                    className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
-                      selectedSubstance === 'Stimulants' ? 'bg-purple-600 text-white' : 'text-slate-400'
-                    }`}
-                  >
-                    Stimulants (Meth / Cocaine)
-                  </button>
                 </div>
               </div>
 
@@ -274,35 +332,33 @@ export default function MentalHealthDashboard() {
               </div>
             </div>
 
-            {/* In-depth Mortality Risk Rates */}
+            {/* In-depth Annual Breakdown */}
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Toxicity Rates per 100,000</h3>
-                  <p className="text-[10px] text-slate-500">Alberta vs Canadian national averages</p>
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Annual Event Breakdown</h3>
+                  <p className="text-[10px] text-slate-500">Total recorded events across Alberta by year</p>
                 </div>
 
                 <div className="space-y-3 pt-1">
                   {filteredHarmData.map(item => (
                     <div key={item.year} className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl space-y-2">
-                      <div className="flex justify-between items-center text-xs font-bold text-white">
+                      <div className="flex justify-between items-center text-xs font-bold text-white border-b border-slate-850/50 pb-1.5">
                         <span>Year {item.year}</span>
-                        <span className="text-[9px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded font-mono">
-                          {item.apparentDeaths} deaths
-                        </span>
                       </div>
 
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[10px]">
-                          <span className="text-slate-400">Alberta rate</span>
-                          <span className="font-mono text-slate-200 font-bold">{item.albertaRatePer100k} per 100k</span>
+                      <div className="grid grid-cols-3 gap-2 pt-0.5 text-center">
+                        <div>
+                          <span className="text-[9px] text-slate-400 block">Deaths</span>
+                          <span className="font-mono text-xs font-black text-rose-500">{item.apparentDeaths.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between text-[10px]">
-                          <span className="text-slate-400">Canada rate</span>
-                          <span className="font-mono text-slate-500">{item.canadaRatePer100k} per 100k</span>
+                        <div>
+                          <span className="text-[9px] text-slate-400 block">EMS Calls</span>
+                          <span className="font-mono text-xs font-black text-violet-400">{item.emsOverdoseResponses.toLocaleString()}</span>
                         </div>
-                        <div className="w-full bg-slate-900 h-1 rounded-full overflow-hidden mt-1.5">
-                          <div className="bg-purple-500 h-full rounded-full" style={{ width: `${(item.albertaRatePer100k / 45) * 100}%` }} />
+                        <div>
+                          <span className="text-[9px] text-slate-400 block">Admissions</span>
+                          <span className="font-mono text-xs font-black text-emerald-400">{item.hospitalizations.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
