@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { calculateDistance } from './lib/geo';
+import { cn, formatMinutesToHm } from './lib/utils';
 import { Hospital, WaitTimeSnapshot } from './types';
 import { 
   Activity, 
@@ -57,8 +58,6 @@ import {
   Legend
 } from 'recharts';
 import { format } from 'date-fns';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './components/MapComponent';
 import SurgicalDashboard from './components/SurgicalDashboard';
@@ -331,10 +330,6 @@ const DASHBOARDS = [
   },
 ] as const;
 
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
 interface EmailAlert {
   id: string;
   email: string;
@@ -352,12 +347,6 @@ interface AlertLog {
   currentMins: number;
   timestamp: string;
 }
-
-const formatMinutesToHm = (mins: number) => {
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return `${h}:${m.toString().padStart(2, '0')}`;
-};
 
 const isWaitTimeUnavailable = (hospital: Hospital | null | undefined) => {
   if (!hospital) return true;
