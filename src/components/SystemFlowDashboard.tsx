@@ -256,6 +256,16 @@ export default function SystemFlowDashboard() {
     });
   }, [filteredFacilities, sortMetric, sortDirection]);
 
+  // Weekly ED LOS: real PDF data first, then stubs
+  const sortedWeeklyEdLos = useMemo(() => {
+    return [...(systemFlowData?.AHS_WEEKLY_ED_LOS ?? [])].sort((a, b) => {
+      const aHasData = a.weekEnding ? -1 : 1;
+      const bHasData = b.weekEnding ? -1 : 1;
+      if (aHasData !== bHasData) return aHasData - bHasData;
+      return a.facilityName.localeCompare(b.facilityName);
+    });
+  }, [systemFlowData?.AHS_WEEKLY_ED_LOS]);
+
   // Selected Hospital Details
   const selectedHospital = useMemo(() => {
     const facilities = systemFlowData?.FACILITY_FLOW_METRICS ?? [];
@@ -1719,20 +1729,21 @@ export default function SystemFlowDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {(systemFlowData?.AHS_WEEKLY_ED_LOS ?? []).map((item, idx) => {
+          {sortedWeeklyEdLos.map((item, idx) => {
             const isEdmonton = item.city === 'Edmonton';
-            const warningDischarge = item.pctDischargedWithin4h < 30;
-            const warningAdmit = item.pctAdmittedWithin8h < 20;
+            const hasData = !!item.weekEnding;
+            const warningDischarge = item.pctDischargedWithin4h > 0 && item.pctDischargedWithin4h < 30;
+            const warningAdmit = item.pctAdmittedWithin8h > 0 && item.pctAdmittedWithin8h < 20;
             
             return (
-              <div key={idx} className="p-4 bg-slate-950/40 rounded-xl border border-slate-850 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+              <div key={idx} className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs ${hasData ? 'bg-slate-950/40 border-slate-850' : 'bg-slate-950/20 border-slate-850/50'}`}>
                 <div className="space-y-1">
                   <div className="font-extrabold text-slate-200 flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${isEdmonton ? 'bg-indigo-500' : 'bg-cyan-500'}`}></span>
                     <span>{item.facilityName}</span>
                   </div>
                   <div className="text-[10px] text-slate-500 font-medium">
-                    Week Ending: {item.weekEnding} • {item.city}, AB
+                    {hasData ? `Week Ending: ${item.weekEnding} • ${item.city}, AB` : `${item.city}, AB`}
                   </div>
                 </div>
 
@@ -1740,9 +1751,12 @@ export default function SystemFlowDashboard() {
                   
                   <div>
                     <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Discharged</div>
-                    <div className="font-extrabold text-slate-300">{item.dischargedCount}</div>
-                    <div className={`text-[10px] font-black ${warningDischarge ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {item.pctDischargedWithin4h}% <span className="text-[8px] font-normal text-slate-500 font-sans uppercase">in 4h</span>
+                    <div className="font-extrabold text-slate-300">
+                      {hasData ? item.dischargedCount : <span className="text-slate-600">—</span>}
+                    </div>
+                    <div className={`text-[10px] font-black ${warningDischarge ? 'text-rose-400' : hasData ? 'text-emerald-400' : 'text-slate-600'}`}>
+                      {hasData ? `${item.pctDischargedWithin4h}%` : <span className="text-slate-600">—</span>}
+                      {hasData && <span className="text-[8px] font-normal text-slate-500 font-sans uppercase"> in 4h</span>}
                     </div>
                   </div>
 
@@ -1750,9 +1764,12 @@ export default function SystemFlowDashboard() {
 
                   <div>
                     <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Admitted</div>
-                    <div className="font-extrabold text-slate-300">{item.admittedCount}</div>
-                    <div className={`text-[10px] font-black ${warningAdmit ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {item.pctAdmittedWithin8h}% <span className="text-[8px] font-normal text-slate-500 font-sans uppercase">in 8h</span>
+                    <div className="font-extrabold text-slate-300">
+                      {hasData ? item.admittedCount : <span className="text-slate-600">—</span>}
+                    </div>
+                    <div className={`text-[10px] font-black ${warningAdmit ? 'text-rose-400' : hasData ? 'text-emerald-400' : 'text-slate-600'}`}>
+                      {hasData ? `${item.pctAdmittedWithin8h}%` : <span className="text-slate-600">—</span>}
+                      {hasData && <span className="text-[8px] font-normal text-slate-500 font-sans uppercase"> in 8h</span>}
                     </div>
                   </div>
 
@@ -1760,6 +1777,14 @@ export default function SystemFlowDashboard() {
               </div>
             );
           })}
+        </div>
+
+        <div className="mt-3 flex items-start gap-2 text-[10px] text-slate-500 leading-relaxed">
+          <Info className="w-3.5 h-3.5 text-slate-600 shrink-0 mt-0.5" />
+          <p>
+            AHS weekly ED LOS PDFs only publish throughput data for major Edmonton and Calgary hospitals.
+            Facilities not included in those reports show "—".
+          </p>
         </div>
 
         <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-850 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-slate-400 font-medium leading-relaxed">
