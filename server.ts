@@ -5,7 +5,7 @@ import axios from 'axios';
 import fs from 'fs';
 import { ServiceDisruption } from './src/types';
 import { startScheduler, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
-import { getSyncStatus } from './src/pipelines/syncStatus';
+import { getSyncStatus, loadSyncStatusFromDisk } from './src/pipelines/syncStatus';
 
 // Alert Interfaces
 interface EmailAlert {
@@ -203,8 +203,11 @@ async function startServer() {
   });
 
   // Daily Background Automated Sweep Sync Status Endpoint
-  // Sync Status Endpoint — returns full pipeline health from the scheduler
+  // Sync Status Endpoint — returns full pipeline health from the scheduler.
+  // Reload from disk first so the standalone daily-sync job's updates are visible
+  // without requiring a server restart.
   app.get('/api/sync/status', (req, res) => {
+    loadSyncStatusFromDisk();
     res.json(getSyncStatus());
   });
 

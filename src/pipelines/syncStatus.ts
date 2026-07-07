@@ -35,6 +35,9 @@ export function loadSyncStatusFromDisk(): void {
 }
 
 export function recordErWaitTimesUpdate(result: SyncResult): void {
+  // Reload from disk first so we don't clobber a standalone daily-sync run that wrote
+  // an updated status while the server was running.
+  loadSyncStatusFromDisk();
   currentStatus.erWaitTimesLastUpdate = result.timestamp;
   currentStatus.erWaitTimesNextUpdate = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
@@ -51,6 +54,9 @@ export function recordErWaitTimesUpdate(result: SyncResult): void {
 }
 
 export function recordLabWaitsUpdate(result: SyncResult): void {
+  // Reload from disk first so we don't clobber a standalone daily-sync run that wrote
+  // an updated status while the server was running.
+  loadSyncStatusFromDisk();
   currentStatus.labWaitsLastUpdate = result.timestamp;
   currentStatus.labWaitsNextUpdate = new Date(Date.now() + 30 * 60 * 1000).toISOString();
 
