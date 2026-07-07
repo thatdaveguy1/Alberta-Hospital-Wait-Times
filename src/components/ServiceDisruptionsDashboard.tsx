@@ -15,8 +15,20 @@ import {
   SlidersHorizontal,
   Info,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  BarChart3,
+  TrendingUp
 } from 'lucide-react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Cell
+} from 'recharts';
 import { ServiceDisruption } from '../types';
 import { useSyncStatus, formatRelativeTime, getDomainResult } from '../hooks/useSyncStatus';
 
@@ -36,6 +48,14 @@ export default function ServiceDisruptionsDashboard() {
   // Expanded disruption IDs
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Chart modal state
+  const [chartOpen, setChartOpen] = useState(false);
+  const [chartType, setChartType] = useState<'all' | 'Closure' | 'Reduced Hours' | 'Bed Reduction'>('all');
+
+  const openChart = (type: 'all' | 'Closure' | 'Reduced Hours' | 'Bed Reduction') => {
+    setChartType(type);
+    setChartOpen(true);
+  };
 
 
   const fetchDisruptions = async () => {
@@ -82,6 +102,33 @@ export default function ServiceDisruptionsDashboard() {
   const totalClosures = activeDisruptions.filter(d => d.disruptionType === 'Closure').length;
   const totalReduced = activeDisruptions.filter(d => d.disruptionType === 'Reduced Hours').length;
   const totalBeds = activeDisruptions.filter(d => d.disruptionType === 'Bed Reduction').length;
+
+  // Chart data: breakdown by zone
+  const chartZones = ['North Zone', 'Edmonton Zone', 'Central Zone', 'Calgary Zone', 'South Zone'];
+  const getChartData = (type: 'all' | 'Closure' | 'Reduced Hours' | 'Bed Reduction') => {
+    const records = type === 'all'
+      ? activeDisruptions
+      : activeDisruptions.filter(d => d.disruptionType === type);
+    return chartZones.map(zone => ({
+      zone: zone.replace(' Zone', ''),
+      count: records.filter(d => d.zone === zone).length,
+      fullZone: zone
+    }));
+  };
+
+  const chartTitles: Record<typeof chartType, string> = {
+    all: 'Active Advisories by Zone',
+    Closure: 'Full Site Closures by Zone',
+    'Reduced Hours': 'Reduced Hours by Zone',
+    'Bed Reduction': 'Bed/Specialty Reductions by Zone'
+  };
+
+  const chartColors: Record<typeof chartType, string> = {
+    all: '#ef4444',
+    Closure: '#f43f5e',
+    'Reduced Hours': '#f59e0b',
+    'Bed Reduction': '#3b82f6'
+  };
 
   // Filter lists
   const filteredDisruptions = disruptions.filter(d => {
@@ -146,60 +193,104 @@ export default function ServiceDisruptionsDashboard() {
       {/* Stats Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Active */}
-        <div className="bg-[#090e21] border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
+        <button
+          onClick={() => openChart('all')}
+          className="bg-[#090e21] border border-slate-800 p-4 rounded-2xl flex flex-col justify-between text-left transition-all hover:border-red-500/30 hover:bg-slate-900/50 cursor-pointer group"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Active Advisories</span>
-            <span className="p-1.5 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <AlertTriangle className="w-4 h-4 text-red-400" />
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="p-1.5 bg-red-500/10 border border-red-500/20 rounded-lg group-hover:bg-red-500/20 transition-colors">
+                <AlertTriangle className="w-4 h-4 text-red-400" />
+              </span>
+              <span className="p-1 bg-slate-800/50 border border-slate-700/50 rounded text-slate-400 group-hover:text-white transition-colors">
+                <BarChart3 className="w-3 h-3" />
+              </span>
+            </div>
           </div>
           <div>
             <p className="text-3xl font-black text-white leading-none">{activeDisruptions.length}</p>
-            <p className="text-[10px] text-slate-400 mt-1 font-medium">Currently active in Alberta</p>
+            <p className="text-[10px] text-slate-400 mt-1 font-medium flex items-center gap-1">
+              Click for zone breakdown
+              <BarChart3 className="w-3 h-3 text-slate-500 group-hover:text-red-400 transition-colors" />
+            </p>
           </div>
-        </div>
+        </button>
 
         {/* Card 2: Closures */}
-        <div className="bg-[#090e21] border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
+        <button
+          onClick={() => openChart('Closure')}
+          className="bg-[#090e21] border border-slate-800 p-4 rounded-2xl flex flex-col justify-between text-left transition-all hover:border-rose-500/30 hover:bg-slate-900/50 cursor-pointer group"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Full Site Closures</span>
-            <span className="p-1.5 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-              <ShieldAlert className="w-4 h-4 text-rose-400" />
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="p-1.5 bg-rose-500/10 border border-rose-500/20 rounded-lg group-hover:bg-rose-500/20 transition-colors">
+                <ShieldAlert className="w-4 h-4 text-rose-400" />
+              </span>
+              <span className="p-1 bg-slate-800/50 border border-slate-700/50 rounded text-slate-400 group-hover:text-white transition-colors">
+                <BarChart3 className="w-3 h-3" />
+              </span>
+            </div>
           </div>
           <div>
             <p className="text-3xl font-black text-white leading-none">{totalClosures}</p>
-            <p className="text-[10px] text-slate-400 mt-1 font-medium">Temporary complete shut-downs</p>
+            <p className="text-[10px] text-slate-400 mt-1 font-medium flex items-center gap-1">
+              Click for zone breakdown
+              <BarChart3 className="w-3 h-3 text-slate-500 group-hover:text-rose-400 transition-colors" />
+            </p>
           </div>
-        </div>
+        </button>
 
         {/* Card 3: Reduced Hours */}
-        <div className="bg-[#090e21] border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
+        <button
+          onClick={() => openChart('Reduced Hours')}
+          className="bg-[#090e21] border border-slate-800 p-4 rounded-2xl flex flex-col justify-between text-left transition-all hover:border-amber-500/30 hover:bg-slate-900/50 cursor-pointer group"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Reduced Hours</span>
-            <span className="p-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-              <Clock className="w-4 h-4 text-amber-400" />
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="p-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg group-hover:bg-amber-500/20 transition-colors">
+                <Clock className="w-4 h-4 text-amber-400" />
+              </span>
+              <span className="p-1 bg-slate-800/50 border border-slate-700/50 rounded text-slate-400 group-hover:text-white transition-colors">
+                <BarChart3 className="w-3 h-3" />
+              </span>
+            </div>
           </div>
           <div>
             <p className="text-3xl font-black text-white leading-none">{totalReduced}</p>
-            <p className="text-[10px] text-slate-400 mt-1 font-medium">Overnight / limited shift hours</p>
+            <p className="text-[10px] text-slate-400 mt-1 font-medium flex items-center gap-1">
+              Click for zone breakdown
+              <BarChart3 className="w-3 h-3 text-slate-500 group-hover:text-amber-400 transition-colors" />
+            </p>
           </div>
-        </div>
+        </button>
 
         {/* Card 4: Bed Reductions */}
-        <div className="bg-[#090e21] border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
+        <button
+          onClick={() => openChart('Bed Reduction')}
+          className="bg-[#090e21] border border-slate-800 p-4 rounded-2xl flex flex-col justify-between text-left transition-all hover:border-blue-500/30 hover:bg-slate-900/50 cursor-pointer group"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Bed/Specialty Reductions</span>
-            <span className="p-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-              <Activity className="w-4 h-4 text-blue-400" />
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="p-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg group-hover:bg-blue-500/20 transition-colors">
+                <Activity className="w-4 h-4 text-blue-400" />
+              </span>
+              <span className="p-1 bg-slate-800/50 border border-slate-700/50 rounded text-slate-400 group-hover:text-white transition-colors">
+                <BarChart3 className="w-3 h-3" />
+              </span>
+            </div>
           </div>
           <div>
             <p className="text-3xl font-black text-white leading-none">{totalBeds}</p>
-            <p className="text-[10px] text-slate-400 mt-1 font-medium">Reduced capacity due to staffing</p>
+            <p className="text-[10px] text-slate-400 mt-1 font-medium flex items-center gap-1">
+              Click for zone breakdown
+              <BarChart3 className="w-3 h-3 text-slate-500 group-hover:text-blue-400 transition-colors" />
+            </p>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Filter and Search Bar */}
@@ -449,7 +540,61 @@ export default function ServiceDisruptionsDashboard() {
         </div>
       )}
 
-
+      {/* Chart Modal */}
+      {chartOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+          onClick={() => setChartOpen(false)}
+        >
+          <div 
+            className="bg-[#090e21] border border-slate-800 rounded-2xl p-5 w-full max-w-3xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-blue-400" />
+                {chartTitles[chartType]}
+              </h3>
+              <button 
+                onClick={() => setChartOpen(false)} 
+                className="p-1 text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={getChartData(chartType)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <XAxis 
+                    dataKey="zone" 
+                    tick={{ fill: '#94a3b8', fontSize: 12 }} 
+                    axisLine={{ stroke: '#334155' }} 
+                  />
+                  <YAxis 
+                    allowDecimals={false} 
+                    tick={{ fill: '#94a3b8', fontSize: 12 }} 
+                    axisLine={{ stroke: '#334155' }} 
+                  />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
+                    itemStyle={{ color: '#e2e8f0' }}
+                    cursor={{ fill: '#1e293b' }}
+                  />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {getChartData(chartType).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={chartColors[chartType]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-3 font-medium">
+              Based on {chartType === 'all' ? activeDisruptions.length : activeDisruptions.filter(d => d.disruptionType === chartType).length} active {chartType === 'all' ? 'advisories' : chartType.toLowerCase()} across Alberta.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
