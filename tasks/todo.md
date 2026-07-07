@@ -372,3 +372,4 @@
 - [x] Audit 24-hour scrapers: ensure front-end dashboards fetch live /api/data and dailySync pushes all domains to Cloudflare KV
 - [x] Fix map to center on user location with nearby hospitals via fitBounds
 - [x] Commit to main (8aa7a06)
+- [x] Ensure manual dashboard data sources have real _dataMetadata and scrapers preserve it
