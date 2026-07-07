@@ -40,7 +40,8 @@ import {
   Coins,
   Phone,
   Ribbon,
-  Shield
+  Shield,
+  X
 } from 'lucide-react';
 import { 
   XAxis, 
@@ -649,15 +650,17 @@ export default function App() {
           setLoadingGeo(false);
         },
         (err) => {
-          console.warn("GPS access declined/failed, falling back to IP based:", err);
+          console.warn("GPS access declined/failed:", err);
           setGpsRefused(true);
-          detectIPLocation();
+          setLoadingGeo(false);
+          setShowManualInput(true);
         },
         { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
       setGpsRefused(true);
-      detectIPLocation();
+      setLoadingGeo(false);
+      setShowManualInput(true);
     }
     
     // Poll logs occasionally to show real-time alert dispatching
@@ -829,29 +832,28 @@ export default function App() {
     }
   };
 
-  // IP-Based Geolocation detection (No GPS pop-ups required)
-  const detectIPLocation = async () => {
-    setLoadingGeo(true);
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      if (res.ok) {
-        const data = await res.json();
-        if (data.latitude && data.longitude) {
-          setUserLocation({
-            lat: data.latitude,
-            lng: data.longitude,
-            city: data.city || 'Calgary',
-            region: data.region || 'Alberta',
-            isGPS: false
-          });
-          setSortBy('net-wait');
-        }
-      }
-    } catch (err) {
-      console.warn('IP geolocation fallback triggered:', err);
-    } finally {
-      setLoadingGeo(false);
+  const toTitleCase = (str: string): string => {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  // Extract a clean city name from Nominatim's display_name.
+  // Returns the part just before "Alberta" when available, otherwise the
+  // second-to-last comma-separated component, falling back to the raw input.
+  const extractCityFromDisplayName = (displayName: string | undefined, fallback: string): string => {
+    if (!displayName) return toTitleCase(fallback);
+    const parts = displayName.split(',').map(s => s.trim());
+    const albertaIdx = parts.findIndex(p => p.toLowerCase() === 'alberta');
+    if (albertaIdx > 0) {
+      return toTitleCase(parts[albertaIdx - 1]);
     }
+    if (parts.length >= 2) {
+      return toTitleCase(parts[parts.length - 2]);
+    }
+    return toTitleCase(fallback);
   };
 
   // Precise browser GPS request
@@ -872,12 +874,14 @@ export default function App() {
         setGpsRefused(false);
         setSortBy('net-wait');
         setLoadingGeo(false);
+        setShowManualInput(false);
       },
       (err) => {
         console.warn("Precise GPS access declined/failed:", err);
         setGpsRefused(true);
-        setGeocodingError("Could not detect your location automatically. You can enter an Alberta postal code or city below.");
+        setGeocodingError("Could not detect your location automatically. Enter an Alberta postal code, address, or city below.");
         setLoadingGeo(false);
+        setShowManualInput(true);
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
@@ -906,13 +910,14 @@ export default function App() {
               setUserLocation({
                 lat: parseFloat(place.latitude),
                 lng: parseFloat(place.longitude),
-                city: `${place['place name'].toUpperCase()} (${fsa})`,
+                city: place['place name'],
                 region: "Alberta",
                 isGPS: false
               });
               setSortBy('net-wait');
               setAddressInput('');
               setIsGeocoding(false);
+              setShowManualInput(false);
               return; // Successfully geocoded postal code
             }
           }
@@ -934,15 +939,19 @@ export default function App() {
         const data = await res.json();
         if (data && data.length > 0) {
           const result = data[0];
+          // Extract a clean city name from Nominatim's display_name when possible,
+          // e.g. "T6G, Edmonton, Alberta, Canada" -> "Edmonton"
+          const cityName = extractCityFromDisplayName(result.display_name, inputTrimmed);
           setUserLocation({
             lat: parseFloat(result.lat),
             lng: parseFloat(result.lon),
-            city: inputTrimmed.toUpperCase(),
+            city: cityName,
             region: "Alberta",
             isGPS: false
           });
           setSortBy('net-wait');
           setAddressInput('');
+          setShowManualInput(false);
         } else {
           setGeocodingError('Location not found. Please try a valid Alberta postal code, address, or city (e.g., T2P 2M5, Calgary).');
         }
@@ -1828,10 +1837,7 @@ export default function App() {
                     <span>{loadingGeo ? '...' : 'Use GPS'}</span>
                   </button>
                   <button
-                    onClick={() => {
-                      const inp = document.getElementById('manual-location-input');
-                      if (inp) inp.focus();
-                    }}
+                    onClick={() => setShowManualInput(true)}
                     className="py-1.5 px-2 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <MapPin className="w-3 h-3" />
@@ -1840,30 +1846,13 @@ export default function App() {
                 </div>
               )}
 
-              <form onSubmit={handleAddressSubmit} className="flex gap-1.5">
-                <div className="relative flex-1">
-                  <input
-                    id="manual-location-input"
-                    type="text"
-                    placeholder="Calgary, T2P..."
-                    value={addressInput}
-                    onChange={(e) => setAddressInput(e.target.value)}
-                    className="w-full h-8 px-2.5 pl-7 text-[10px] bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-all font-medium"
-                  />
-                  <MapPin className="absolute left-2 top-2.5 w-3 h-3 text-slate-600" />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isGeocoding}
-                  className="px-3 h-8 text-[10px] font-black rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-50 shrink-0 cursor-pointer shadow-md shadow-blue-600/10"
-                >
-                  {isGeocoding ? '...' : 'Go'}
-                </button>
-              </form>
-
-              {geocodingError && (
-                <p className="text-[9px] text-red-400 font-medium pl-1 leading-none">{geocodingError}</p>
-              )}
+              <button
+                onClick={() => setShowManualInput(true)}
+                className="w-full py-1.5 px-2 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <MapPin className="w-3 h-3" />
+                <span>{userLocation ? 'Change Location' : 'Set Location'}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -2564,6 +2553,93 @@ export default function App() {
               >
                 Close Registry
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LOCATION MODAL */}
+      {showManualInput && (
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0b1226] border border-slate-800 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <MapPin className="w-4 h-4 text-blue-400" />
+                </div>
+                <h2 className="text-sm font-black text-white tracking-tight">Set Your Location</h2>
+              </div>
+              <button
+                onClick={() => {
+                  setShowManualInput(false);
+                  setGeocodingError('');
+                }}
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-5 space-y-4">
+              {/* GPS button */}
+              <button
+                onClick={() => {
+                  setGeocodingError('');
+                  requestGPSLocation();
+                }}
+                disabled={loadingGeo}
+                className="w-full py-3 px-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                <Compass className={`w-4 h-4 ${loadingGeo ? 'animate-spin' : ''}`} />
+                <span className="text-sm font-black">
+                  {loadingGeo ? 'Detecting location...' : 'Use my current location'}
+                </span>
+              </button>
+
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-800" />
+                </div>
+                <span className="relative px-3 bg-[#0b1226] text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  or enter your location
+                </span>
+              </div>
+
+              {/* Address/postal form */}
+              <form onSubmit={handleAddressSubmit} className="space-y-3">
+                <div className="relative">
+                  <input
+                    id="manual-location-input"
+                    type="text"
+                    placeholder="Address or postal code (e.g. Calgary, T2P 2M5)"
+                    value={addressInput}
+                    onChange={(e) => setAddressInput(e.target.value)}
+                    className="w-full h-11 px-4 pl-10 text-xs bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-all font-medium"
+                    autoFocus
+                  />
+                  <MapPin className="absolute left-3 top-3.5 w-4 h-4 text-slate-600" />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isGeocoding || !addressInput.trim()}
+                  className="w-full h-11 text-xs font-black rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md shadow-blue-600/10"
+                >
+                  {isGeocoding ? 'Looking up...' : 'Set Location'}
+                </button>
+              </form>
+
+              {geocodingError && (
+                <p className="text-[11px] text-red-400 font-medium leading-relaxed">
+                  {geocodingError}
+                </p>
+              )}
+
+              <p className="text-[10px] text-slate-500 leading-relaxed">
+                Your location is used to estimate driving times and sort nearby hospitals. We only store it in your browser.
+              </p>
             </div>
           </div>
         </div>
