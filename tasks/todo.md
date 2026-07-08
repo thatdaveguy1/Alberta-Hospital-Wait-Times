@@ -381,3 +381,8 @@
   - P0 findings: Cancer Care zeroed summary cards, Health Inequity `Loading...` LGA names, Health Spending $0/0% placeholders, Long Term Care `NaN%` compliance
   - P1 findings: duplicated/inconsistent CT-MRI wait times across Diagnostics/Surgical/System Flow, provider-directory UX, missing empty/error states
   - P2 findings: >100% occupancy explanation, manual-vs-live badge clarity, module-grid repetition, visual review blocked by `inspect_image` quota
+- [x] Verify Health Spending trend charts no longer show empty pre-data years
+  - `SpendingDashboard.tsx` trims `ALBERTA_ACTIVITY_VOLUME_TREND` to first non-zero value of the selected KPI
+  - Index-growth chart trims to first year where all series have data
+  - Baseline/Current labels are data-driven instead of hardcoded `2021-22` / `2025-26`
+  - Verified: Annual Surgeries and CT Scan Imaging explorers show only `2021-2022` → `2025-2026`; AHS Expense still shows its full history from `1975-1976`
