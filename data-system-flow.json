@@ -1296,49 +1296,49 @@
   "_dataMetadata": {
     "FACILITY_FLOW_METRICS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:07.942Z",
+      "lastUpdated": "2026-07-08T02:30:45.895Z",
       "source": "AHS public wait-times API + HQA FOCUS analytical estimates",
       "sourceVintage": "Facility list live; metrics compiled from HQA FOCUS 2025/2026 reports",
       "verification": "Facility names/cities/zones refreshed from AHS API. Occupancy, ALC, LWBS, bed wait, and ICU metrics are analytical estimates from HQA FOCUS reports."
     },
     "CIHI_COMPARATORS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:07.942Z",
+      "lastUpdated": "2026-07-08T02:30:45.895Z",
       "source": "CIHI NACRS / Hospital Beds / ALC Indicators (derived from diagnostic + cancer data)",
       "sourceVintage": "Latest CIHI official releases",
       "verification": "Derived from data-diagnostic.json and data-cancer.json populated by CIHI downloaders."
     },
     "REGIONAL_LGA_DEMAND": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:07.942Z",
+      "lastUpdated": "2026-07-08T02:30:45.895Z",
       "source": "Open Alberta CKAN LGA community profiles (derived from regional-inequity data)",
       "sourceVintage": "Latest Open Alberta release",
       "verification": "Derived from data-regional-inequity.json populated by openAlbertaInequityFetcher."
     },
     "HISTORICAL_FLOW_TIMELINES": {
       "updateType": "manual",
-      "lastUpdated": "2026-07-07T19:00:07.942Z",
+      "lastUpdated": "2026-07-08T02:30:45.895Z",
       "source": "HQA FOCUS quarterly performance reports",
       "sourceVintage": "2021-Q1 to 2026-Q1 compiled estimates",
       "verification": "Quarterly figures compiled from HQA FOCUS datasets; preserved across runs."
     },
     "AHS_WEEKLY_ED_LOS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:08.946Z",
+      "lastUpdated": "2026-07-08T02:30:46.897Z",
       "source": "AHS Weekly ED Performance Reports (Edmonton + Calgary PDFs)",
       "sourceVintage": "AHS weekly ED LOS PDFs (week ending per report)",
       "verification": "Auto-parsed from AHS weekly ED wait/throughput PDFs via pdftotext; facility names normalized to existing hand-authored IDs."
     },
     "CIHI_OCCUPANCY_RATES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:30.240Z",
+      "lastUpdated": "2026-07-08T02:35:20.117Z",
       "source": "CIHI indicator XLSX (878 average acute occupancy rate)",
       "sourceVintage": "CIHI indicator data table (latest available)",
       "verification": "Auto-fetched and parsed from CIHI indicator XLSX data table."
     },
     "CIHI_ED_WAIT_INITIAL_ASSESSMENT": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:30.240Z",
+      "lastUpdated": "2026-07-08T02:35:20.117Z",
       "source": "CIHI indicator XLSX (811 ED wait time for physician initial assessment)",
       "sourceVintage": "CIHI indicator data table (latest available)",
       "verification": "Auto-fetched and parsed from CIHI indicator XLSX data table."

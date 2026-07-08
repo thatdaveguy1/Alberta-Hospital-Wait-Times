@@ -3518,19 +3518,19 @@
   "_dataMetadata": {
     "COMMUNITY_NEED_PROFILES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:02:07.852Z",
+      "lastUpdated": "2026-07-08T02:32:59.921Z",
       "source": "Open Alberta CKAN LGA community profiles (Table 10.1)",
       "sourceVintage": "Latest Open Alberta Table 10.1 release"
     },
     "CHRONIC_DISEASE_BURDEN": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:02:07.852Z",
+      "lastUpdated": "2026-07-08T02:32:59.921Z",
       "source": "Open Alberta CKAN chronic disease indicators (Figure 4.2 + Table 10.1)",
       "sourceVintage": "Latest Open Alberta Figure 4.2 release"
     },
     "ED_RELIANCE_METRICS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:02:07.852Z",
+      "lastUpdated": "2026-07-08T02:32:59.921Z",
       "source": "Open Alberta CKAN LGA community profiles (Table 10.1 mood/anxiety)",
       "sourceVintage": "Latest Open Alberta Table 10.1 release"
     }

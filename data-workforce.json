@@ -6244,7 +6244,7 @@
   "_dataMetadata": {
     "PHYSICIAN_SPECIALTY_ZONE": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:12.235Z",
+      "lastUpdated": "2026-07-08T02:30:49.983Z",
       "source": "CPSA quarterly statistics",
       "sourceVintage": "Latest CPSA quarterly release"
     },
@@ -6262,7 +6262,7 @@
     },
     "JOB_VACANCY_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T18:59:11.694Z",
+      "lastUpdated": "2026-07-08T02:29:47.892Z",
       "source": "StatCan table 14100371 via WDS CSV",
       "sourceVintage": "2023-Q1 to 2024-Q4"
     },
@@ -6280,43 +6280,43 @@
     },
     "PHYSICIAN_SUPPLY_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "lastUpdated": "2026-07-08T02:35:15.836Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
       "sourceVintage": "2015–2024"
     },
     "NURSE_SUPPLY_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "lastUpdated": "2026-07-08T02:35:15.836Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
       "sourceVintage": "2015–2024"
     },
     "ALLIED_HEALTH_FLOW_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "lastUpdated": "2026-07-08T02:35:15.836Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
       "sourceVintage": "2015–2024"
     },
     "ALLIED_HEALTH_SUPPLY_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "lastUpdated": "2026-07-08T02:35:15.836Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
       "sourceVintage": "Latest CIHI profile-sheet year"
     },
     "NURSING_SUPPLY_TRENDS_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "lastUpdated": "2026-07-08T02:35:15.836Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
       "sourceVintage": "2015–2024"
     },
     "WORKFORCE_AGE_PROFILE_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "lastUpdated": "2026-07-08T02:35:15.836Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
       "sourceVintage": "2023–2024"
     },
     "JOB_VACANCY_TRENDS_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:26.296Z",
+      "lastUpdated": "2026-07-08T02:35:15.836Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
       "sourceVintage": "2015-Q4 to 2024-Q4"
     }

@@ -64523,5 +64523,2905 @@
     "hospitalId": "northern-lights-regional-health-centre",
     "waitTime": 30,
     "timestamp": "2026-07-08T00:28:28.241Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 47,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 298,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 262,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 263,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 30,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 130,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 100,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 118,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 54,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 194,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 259,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 249,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 232,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 369,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 305,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 233,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 236,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 337,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 280,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 308,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 490,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 264,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 126,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 141,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 77,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 33,
+    "timestamp": "2026-07-08T00:38:34.311Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 58,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 291,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 277,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 263,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 30,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 127,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 100,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 129,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 87,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 194,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 259,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 249,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 232,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 374,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 292,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 228,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 241,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 364,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 276,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 311,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 490,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 264,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 138,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 141,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 70,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 41,
+    "timestamp": "2026-07-08T00:48:34.300Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 58,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 305,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 266,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 291,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 61,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 154,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 110,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 144,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 114,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 226,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 144,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 265,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 232,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 369,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 280,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 216,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 236,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 378,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 282,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 314,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 508,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 264,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 142,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 116,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 63,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 33,
+    "timestamp": "2026-07-08T00:58:34.307Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 58,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 284,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 269,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 301,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 30,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 150,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 120,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 118,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 117,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 291,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 144,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 257,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 232,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 408,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 280,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 241,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 243,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 362,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 293,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 314,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 490,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 296,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 162,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 116,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 49,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 41,
+    "timestamp": "2026-07-08T01:08:34.307Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 76,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 279,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 271,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 275,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 30,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 117,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 120,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 118,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 114,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 172,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 265,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 232,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 386,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 256,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 250,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 202,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 328,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 285,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 280,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 490,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 264,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 178,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 129,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 70,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 49,
+    "timestamp": "2026-07-08T01:18:34.305Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 98,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 281,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 273,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 284,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 30,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 103,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 140,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 123,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 128,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 172,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 272,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 310,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 410,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 231,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 274,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 219,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 322,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 278,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 279,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 516,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 275,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 153,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 103,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 42,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 74,
+    "timestamp": "2026-07-08T01:28:34.331Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 88,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 268,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 282,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 301,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 61,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 111,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 150,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 97,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 149,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 356,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 172,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 280,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 349,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 417,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 207,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 255,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 213,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 316,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 282,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 288,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 472,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 287,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 153,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 90,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 63,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 49,
+    "timestamp": "2026-07-08T01:38:34.333Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 104,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 279,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 309,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 289,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 61,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 121,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 156,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 64,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 120,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 388,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 172,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 304,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 388,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 394,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 219,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 236,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 220,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 335,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 289,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 293,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 482,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 310,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 153,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 103,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 42,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 49,
+    "timestamp": "2026-07-08T01:48:34.360Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 119,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 281,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 323,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 299,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 61,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 148,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 161,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 75,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 142,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 356,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 201,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 296,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 368,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 417,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 207,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 238,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 213,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 316,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 293,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 283,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 498,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 314,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 156,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 113,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 35,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 66,
+    "timestamp": "2026-07-08T01:58:34.410Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 108,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 314,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 296,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 295,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 153,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 150,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 123,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 356,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 201,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 272,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 407,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 439,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 195,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 261,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 206,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 308,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 247,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 293,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 475,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 337,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 149,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 110,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 35,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 82,
+    "timestamp": "2026-07-08T02:08:34.411Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 114,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 301,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 326,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 313,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 183,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 140,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 90,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 356,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 230,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 288,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 407,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 445,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 213,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 269,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 217,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 275,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 259,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 286,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 511,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 310,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 156,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 116,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 62,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 66,
+    "timestamp": "2026-07-08T02:18:34.413Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 140,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 318,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 306,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 328,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 153,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 158,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 106,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 356,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 230,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 304,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 388,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 440,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 221,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 254,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 217,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 282,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 234,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 297,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 547,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 298,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 177,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 96,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 35,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 33,
+    "timestamp": "2026-07-08T02:28:34.475Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 153,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 328,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 303,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 344,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 244,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 162,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 98,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 230,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 288,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 388,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 424,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 229,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 240,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 217,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 276,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 221,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 303,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 547,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 319,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 177,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 94,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 42,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 33,
+    "timestamp": "2026-07-08T02:38:34.487Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 165,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 301,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 301,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 374,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 244,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 167,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 65,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 230,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 296,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 407,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 428,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 279,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 247,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 206,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 241,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 209,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 316,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 511,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 383,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 169,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 90,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 77,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 49,
+    "timestamp": "2026-07-08T02:48:34.492Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 191,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 311,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 291,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 391,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 183,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 173,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 57,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 230,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 296,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 407,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 411,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 304,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 254,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 240,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 246,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 221,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 284,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 402,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 440,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 161,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 78,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 68,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 57,
+    "timestamp": "2026-07-08T02:58:34.498Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 191,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 305,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 296,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 412,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 214,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 189,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 65,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 201,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 265,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 388,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 417,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 328,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 261,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 263,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 257,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 210,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 304,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 365,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 421,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 169,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 75,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 44,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 49,
+    "timestamp": "2026-07-08T03:08:34.506Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 185,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 308,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 301,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 428,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 183,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 175,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 77,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 230,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 249,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 388,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 423,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 353,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 276,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 252,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 243,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 240,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 284,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 365,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 495,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 169,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 73,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 34,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 57,
+    "timestamp": "2026-07-08T03:18:34.512Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 191,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 336,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 298,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 430,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "south-health-campus-children",
+    "waitTime": 214,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 175,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 70,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 230,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 241,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 368,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 418,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 377,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 269,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 252,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 257,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 255,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 292,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 365,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 535,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 177,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 79,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 52,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 41,
+    "timestamp": "2026-07-08T03:28:34.542Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 172,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 340,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 279,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 439,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "south-health-campus",
+    "waitTime": 388,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 162,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 97,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 259,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 241,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 349,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 389,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 417,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 263,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 263,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 284,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 226,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 312,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 365,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 579,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 177,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 67,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 58,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 33,
+    "timestamp": "2026-07-08T03:38:34.551Z"
+  },
+  {
+    "hospitalId": "alberta-children-s-hospital",
+    "waitTime": 165,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "foothills-medical-centre",
+    "waitTime": 334,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "peter-lougheed-centre",
+    "waitTime": 275,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "rockyview-general-hospital",
+    "waitTime": 479,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "south-health-campus",
+    "waitTime": 423,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "airdrie-community-health-centre",
+    "waitTime": 189,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "cochrane-community-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "okotoks-health-and-wellness-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "sheldon-m-chumir-centre",
+    "waitTime": 123,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "south-calgary-health-centre",
+    "waitTime": 0,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "devon-general-hospital",
+    "waitTime": 324,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "fort-sask-community-hospital",
+    "waitTime": 259,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "grey-nuns-community-hospital",
+    "waitTime": 218,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "leduc-community-hospital",
+    "waitTime": 329,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "misericordia-community-hospital",
+    "waitTime": 395,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "northeast-community-health-centre",
+    "waitTime": 407,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "royal-alexandra-hospital",
+    "waitTime": 266,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "stollery-children-s-hospital",
+    "waitTime": 252,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "strathcona-community-hospital",
+    "waitTime": 230,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "sturgeon-community-hospital",
+    "waitTime": 205,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "university-of-alberta-hospital",
+    "waitTime": 323,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "westview-health-centre",
+    "waitTime": 329,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "red-deer-regional-hospital",
+    "waitTime": 621,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "innisfail-health-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "lacombe-hospital-and-care-centre",
+    "waitTime": -1,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "chinook-regional-hospital",
+    "waitTime": 185,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "medicine-hat-regional-hospital",
+    "waitTime": 56,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "grande-prairie-regional-hospital",
+    "waitTime": 62,
+    "timestamp": "2026-07-08T03:48:34.542Z"
+  },
+  {
+    "hospitalId": "northern-lights-regional-health-centre",
+    "waitTime": 41,
+    "timestamp": "2026-07-08T03:48:34.542Z"
   }
 ]

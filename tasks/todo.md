@@ -401,3 +401,23 @@
 - [x] P2.3 Distinguish manual vs live datasets: update DashboardHeader badges to show muted static indicators for manual datasets and pulsing green for auto-updated
 - [x] P2.4 Collapse/memoize module selector: declare collapsible nav bar in App.tsx that starts minimized on dashboards and auto-collapses on selection
 - [x] P2.5 Visual review check: verify TypeScript compiles cleanly with no errors, and esbuild/vite production bundle compiles successfully
+
+## Phase 27: Headed Browser Visual Audit — Repeat Content & Source Accuracy (2026-07-08)
+- [x] Visit every remaining tab/subtab in headed browser and save screenshots + text extracts to `visual-audit-findings.md`
+  - Completed: ER Waits, Service Disruptions, Surgical Waitlists, Health Workforce, Cancer Care, Public Health, Mental Health, Regional Inequity, Health Spending
+- [x] Document repeated/poorly presented datasets, incorrect information, and opportunities in `visual-audit-findings.md`
+- [x] Create pipeline-first remediation plan in `visual-audit-plan.md`
+- [ ] Investigate pipeline-sourcing for missing data before deleting any dead subtabs/cards
+  - LTC Compliance Registry (standardsandlicensing.alberta.ca / AHS continuing care)
+  - System Flow LGA demand profiles (extend openAlbertaInequityFetcher from Open Alberta Table 10.1)
+  - Mental Health live addiction bed vacancies (findaddictionbeds.alberta.ca)
+  - Health Spending physician billing (debug openAlbertaBillingFetcher)
+  - Cancer Care projected incidence (Alberta Cancer Registry report)
+- [ ] Fix cross-cutting `HQA` → `HQCA` typo in all dashboard components
+- [ ] Consolidate repeated narrative blocks (Patient Experience narrative chain, Virtual Care audit ledger, System Flow PDF releases, Public Health outbreak protocol, Health Spending efficiency signal, Regional Inequity narrative/LGA selector)
+- [ ] Correct misleading source labels (Primary Care attachment-rate chart, Diagnostics Imaging source, Health Spending pipeline-name sources)
+- [ ] Improve missing/zero data presentation (lab waits at night, LTC historical P50, Mental Health bed availability, Public Health wastewater formatting, ER Waits historical peaks)
+- [ ] Resolve KPI/detail mismatches (Long Term Care placement, Mental Health substance deaths, Health Spending per-capita value)
+- [ ] Fix duplication bugs (Service Disruptions Hinton location, Cancer Therapy city names, Patient Complaints duplicate facility, Mental Health helpline footer)
+- [ ] Verify all fixes with browser re-audit, `npx tsc --noEmit`, and `npm run build`
+- [ ] Update `lessons.md` with visual audit lessons

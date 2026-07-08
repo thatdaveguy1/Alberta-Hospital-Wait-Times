@@ -113,7 +113,7 @@
     {
       "province": "Saskatchewan",
       "spendingPerCapita": 10191,
-      "spendingAsPercentGdp": 12.0,
+      "spendingAsPercentGdp": 12,
       "hospitalSpendingPerCapita": 2595,
       "physicianSpendingPerCapita": 1480,
       "drugSpendingPerCapita": 1198,
@@ -3234,13 +3234,13 @@
   "_dataMetadata": {
     "NATIONAL_SPENDING_COMPARE": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:23.692Z",
+      "lastUpdated": "2026-07-08T02:31:01.285Z",
       "source": "CIHI NHEX 2025 full data tables (Table O.1)",
       "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },
     "ALBERTA_ACTIVITY_VOLUME_TREND": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:23.692Z",
+      "lastUpdated": "2026-07-08T02:31:01.285Z",
       "source": "CIHI NHEX 2025 full data tables (Table O.1, derived activity volume)",
       "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },
@@ -3260,7 +3260,7 @@
     },
     "ALBERTA_USE_OF_FUNDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:23.692Z",
+      "lastUpdated": "2026-07-08T02:31:01.285Z",
       "source": "CIHI NHEX 2025 full data tables (Series D1, Alberta sheet)",
       "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },

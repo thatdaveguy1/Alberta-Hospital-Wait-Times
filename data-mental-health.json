@@ -312,7 +312,7 @@
     },
     "ADDICTION_BED_CAPACITIES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:02.820Z",
+      "lastUpdated": "2026-07-08T02:30:40.388Z",
       "source": "AHS Addiction & Mental Health bed availability",
       "sourceVintage": "Live AHS bed-availability page"
     },
@@ -330,13 +330,13 @@
     },
     "SUPPORT_HELPLINES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:00:02.820Z",
+      "lastUpdated": "2026-07-08T02:30:40.388Z",
       "source": "AHS Mental Health helplines + 211 Alberta directory",
       "sourceVintage": "Live helpline directories"
     },
     "CIHI_MH_READMISSION_RATES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-07T19:03:30.240Z",
+      "lastUpdated": "2026-07-08T02:35:20.117Z",
       "source": "CIHI 30-day mental-health readmission data table",
       "sourceVintage": "CIHI latest release"
     }
