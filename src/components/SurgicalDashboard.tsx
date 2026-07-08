@@ -98,7 +98,13 @@ export default function SurgicalDashboard() {
   const [selectedKpi, setSelectedKpi] = useState<'hip_replacement_median' | 'knee_replacement_median' | 'cataract_surgery_median' | null>(null);
   // Live data fetched from /api/data/surgical
   const { data, metadata, isLoading, error, refresh } = useDomainData<SurgicalData>('surgical');
-  const SURGICAL_RECORDS = data?.SURGICAL_RECORDS ?? [];
+  const SURGICAL_RECORDS = useMemo(() => {
+    return (data?.SURGICAL_RECORDS ?? []).filter(
+      r => r.procedure_group !== 'Diagnostic Imaging' &&
+           !r.procedure_name.includes('MRI') &&
+           !r.procedure_name.includes('CT')
+    );
+  }, [data]);
   const ORTHOPEDIC_SPECIALTY_RECORDS = data?.ORTHOPEDIC_SPECIALTY_RECORDS ?? [];
   const SURGICAL_FACILITIES = data?.SURGICAL_FACILITIES ?? [];
   const SPECIALISTS_LIST = data?.SPECIALISTS_LIST ?? [];
