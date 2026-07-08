@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
+import {
   Activity, 
   Search, 
   MapPin, 
@@ -18,6 +18,7 @@ import {
   Clock,
   BarChart2,
   TrendingDown,
+  RefreshCw,
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -43,6 +44,14 @@ import {
 } from '../cancerData';
 import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
+import { useDomainData } from '../hooks/useDomainData';
+
+type CancerData = {
+  CANCER_BURDEN_STATS: CancerBurdenItem[];
+  CANCER_SURGERY_WAIT_TRENDS: CancerSurgeryWaitTrend[];
+  RADIATION_THERAPY_WAIT_TRENDS: RadiationTherapyCompliance[];
+  ALBERTA_CANCER_CENTRES: CancerCentreLocation[];
+};
 
 export default function CancerDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'burden' | 'surgery' | 'radiation' | 'facilities'>('burden');
@@ -51,27 +60,15 @@ export default function CancerDashboard() {
   const [selectedCancer, setSelectedCancer] = useState<string>('All');
   const [selectedZone, setSelectedZone] = useState<string>('All');
   const [facilitySearch, setFacilitySearch] = useState<string>('');
-  const [domainData, setDomainData] = useState<{
-    CANCER_BURDEN_STATS: CancerBurdenItem[];
-    CANCER_SURGERY_WAIT_TRENDS: CancerSurgeryWaitTrend[];
-    RADIATION_THERAPY_WAIT_TRENDS: RadiationTherapyCompliance[];
-    ALBERTA_CANCER_CENTRES: CancerCentreLocation[];
-    _handAuthoredMetadata?: Record<string, { source: string; vintage?: string; lastVerified: string; verification: string }>;
-    _dataMetadata?: DataMetadataMap;
-  }>({
-    CANCER_BURDEN_STATS: [],
-    CANCER_SURGERY_WAIT_TRENDS: [],
-    RADIATION_THERAPY_WAIT_TRENDS: [],
-    ALBERTA_CANCER_CENTRES: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, metadata, isLoading, error, refresh } = useDomainData<CancerData>('cancer');
 
-  useEffect(() => {
-    fetch('/api/data/cancer')
-      .then(res => res.json())
-      .then(data => { setDomainData(data); setIsLoading(false); })
-      .catch(err => { console.error('Failed to load cancer data:', err); setIsLoading(false); });
-  }, []);
+  const domainData = useMemo(() => ({
+    CANCER_BURDEN_STATS: data?.CANCER_BURDEN_STATS ?? [],
+    CANCER_SURGERY_WAIT_TRENDS: data?.CANCER_SURGERY_WAIT_TRENDS ?? [],
+    RADIATION_THERAPY_WAIT_TRENDS: data?.RADIATION_THERAPY_WAIT_TRENDS ?? [],
+    ALBERTA_CANCER_CENTRES: data?.ALBERTA_CANCER_CENTRES ?? [],
+    _dataMetadata: metadata ?? undefined
+  }), [data, metadata]);
 
   // Filter Cancer Burden stats
   const filteredBurden = useMemo(() => {
@@ -192,7 +189,35 @@ export default function CancerDashboard() {
     return null;
   }, [selectedTrend, domainData]);
 
-  if (isLoading) return <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">Loading...</div>;
+  const hasNoData = !data || 
+                    !data.CANCER_BURDEN_STATS || data.CANCER_BURDEN_STATS.length === 0 || 
+                    !data.CANCER_SURGERY_WAIT_TRENDS || data.CANCER_SURGERY_WAIT_TRENDS.length === 0 || 
+                    !data.RADIATION_THERAPY_WAIT_TRENDS || data.RADIATION_THERAPY_WAIT_TRENDS.length === 0 || 
+                    !data.ALBERTA_CANCER_CENTRES || data.ALBERTA_CANCER_CENTRES.length === 0;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading cancer data...
+      </div>
+    );
+  }
+
+  if (error || hasNoData) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>{error ? `Failed to load cancer data: ${error}` : 'No cancer data available'}</span>
+        <button
+          onClick={refresh}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
