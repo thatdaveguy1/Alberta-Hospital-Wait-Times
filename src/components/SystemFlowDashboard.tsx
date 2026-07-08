@@ -1859,7 +1859,7 @@ export default function SystemFlowDashboard() {
         <span>Analytical Source: Health Quality Alberta (HQA) FOCUS live database; CIHI NACRS/DAD emergency-acute metadata tables; Alberta Health Services Weekly ED Flow metrics releases.</span>
         <span className="uppercase tracking-wider font-extrabold text-slate-400 flex items-center gap-1">
           <Award className="w-3.5 h-3.5 text-blue-400" />
-          AHS Certified Performance Data Feed
+          Unofficial Analytical Data Feed
         </span>
       </div>
 
