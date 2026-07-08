@@ -146,12 +146,12 @@ function mergeAlbertaSpending(file: string, update: Partial<NationalSpendingComp
     merged.push({
       province: 'Alberta',
       spendingPerCapita: update.spendingPerCapita,
-      spendingAsPercentGdp: update.spendingAsPercentGdp ?? 0,
+      spendingAsPercentGdp: update.spendingAsPercentGdp ?? null,
       hospitalSpendingPerCapita: 0,
       physicianSpendingPerCapita: 0,
       drugSpendingPerCapita: 0,
-      bedsPer100k: 0,
-      costPerStandardStay: 0,
+      bedsPer100k: null,
+      costPerStandardStay: null,
     });
   }
 

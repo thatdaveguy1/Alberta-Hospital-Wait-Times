@@ -7,6 +7,8 @@
 //
 // Extracted datasets:
 //   NATIONAL_SPENDING_COMPARE      — from Table O.1 (per-capita spending by province)
+//   bedsPer100k                    — CIHI indicator 877 acute beds + NHEX-implied population
+//   costPerStandardStay (Alberta)  — latest HOSPITAL_EFFICIENCY_TREND.standardStayCost (CSHS series)
 //   ALBERTA_USE_OF_FUNDS           — from series-d1 Alberta sheet (amounts + shares)
 //   ALBERTA_ACTIVITY_VOLUME_TREND  — from Table O.1 (Alberta total spending by year,
 //                                    preserving existing non-NHEX fields)
@@ -22,9 +24,17 @@ import type { SyncResult } from './types';
 import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 import type {
   ActivityVolumeTrend,
+  HospitalEfficiencyMetric,
   NationalSpendingCompare,
   SpendingByUseOfFunds,
 } from '../spendingData';
+import {
+  albertaCshsFromEfficiencyTrend,
+  bedsPer100k as computeBedsPer100k,
+  fetchAcuteBedsByProvince,
+  impliedPopulationFromO1,
+  type TableO1Row,
+} from './cihiNationalCapacity';
 
 const NHEX_ZIP_URL =
   'https://www.cihi.ca/sites/default/files/document/nhex-2025-full-data-tables-en.zip';
@@ -188,14 +198,7 @@ const COL_UOF = 4;
 const COL_CURRENT_DOLLARS = 5;
 const COL_PER_CAPITA = 6;
 
-interface TableO1Row {
-  year: string;
-  province: string;
-  sector: string;
-  useOfFunds: string;
-  currentDollars: number | undefined;
-  perCapita: number | undefined;
-}
+
 
 // Parse Table O.1 into typed row objects.
 function parseTableO1(rows: unknown[][]): TableO1Row[] {
@@ -221,17 +224,12 @@ function parseTableO1(rows: unknown[][]): TableO1Row[] {
   return result;
 }
 
-// Extract NATIONAL_SPENDING_COMPARE: per-capita spending by province for the
-// latest forecast year. Uses Public + Private per-capita totals combined as
-// the "total" per-capita figure, since NHEX has no single "Total" sector row.
-// hospitalSpendingPerCapita / physicianSpendingPerCapita / drugSpendingPerCapita
-// are similarly summed across Public + Private sectors.
+// Base NATIONAL_SPENDING_COMPARE from Table O.1 (NHEX per-capita only).
 function extractNationalSpending(tableRows: TableO1Row[]): NationalSpendingCompare[] {
   if (tableRows.length === 0) return [];
 
   const latestYear = tableRows.reduce((max, r) => (r.year > max ? r.year : max), '0');
 
-  // Build per-capita map: province -> sector -> uof -> perCapita
   const perCapByProv = new Map<string, Map<string, Map<string, number>>>();
   for (const r of tableRows) {
     if (r.year !== latestYear) continue;
@@ -273,28 +271,60 @@ function extractNationalSpending(tableRows: TableO1Row[]): NationalSpendingCompa
     const spendingPerCapita = sumPerCap(UOF_TOTAL);
     if (spendingPerCapita === 0) continue;
 
-    const defaultStats: Record<string, { gdp: number; beds: number; cost: number }> = {
-      'Alberta': { gdp: 12.2, beds: 242, cost: 7420 },
-      'British Columbia': { gdp: 11.8, beds: 235, cost: 6840 },
-      'Saskatchewan': { gdp: 12.0, beds: 254, cost: 7120 },
-      'Ontario': { gdp: 11.2, beds: 220, cost: 6240 },
-      'Quebec': { gdp: 11.5, beds: 238, cost: 6410 },
-      'Canada': { gdp: 11.6, beds: 232, cost: 6580 },
-    };
-    const stats = defaultStats[province] || { gdp: 0, beds: 0, cost: 0 };
-
     records.push({
       province,
       spendingPerCapita,
-      spendingAsPercentGdp: stats.gdp,
+      spendingAsPercentGdp: null,
       hospitalSpendingPerCapita: sumPerCap(UOF_HOSPITALS),
       physicianSpendingPerCapita: sumPerCap(UOF_PHYSICIANS),
       drugSpendingPerCapita: sumPerCap(UOF_DRUGS),
-      bedsPer100k: stats.beds,
-      costPerStandardStay: stats.cost,
+      bedsPer100k: null,
+      costPerStandardStay: null,
     });
   }
   return records;
+}
+
+async function enrichNationalSpendingCompare(
+  base: NationalSpendingCompare[],
+  tableRows: TableO1Row[],
+  existing: NationalSpendingCompare[],
+  efficiencyTrend: HospitalEfficiencyMetric[],
+): Promise<NationalSpendingCompare[]> {
+  if (base.length === 0) return base;
+
+  const latestYear = tableRows.reduce((max, r) => (r.year > max ? r.year : max), '0');
+  const bedsByProv = await fetchAcuteBedsByProvince();
+  const albertaCshs = albertaCshsFromEfficiencyTrend(efficiencyTrend);
+  const existingByProv = new Map(existing.map((r) => [r.province, r]));
+
+  return base.map((row) => {
+    const prev = existingByProv.get(row.province);
+    let bedsPer100k: number | null = prev?.bedsPer100k ?? null;
+    let costPerStandardStay: number | null = prev?.costPerStandardStay ?? null;
+    let spendingAsPercentGdp: number | null = prev?.spendingAsPercentGdp ?? null;
+
+    const bedCount = bedsByProv.get(row.province);
+    const pop = impliedPopulationFromO1(tableRows, row.province, latestYear);
+    if (bedCount !== undefined && pop !== undefined) {
+      bedsPer100k = computeBedsPer100k(bedCount, pop);
+    }
+
+    if (row.province === 'Alberta' && albertaCshs != null) {
+      costPerStandardStay = albertaCshs;
+    }
+
+    if (spendingAsPercentGdp === 0) spendingAsPercentGdp = null;
+    if (bedsPer100k === 0) bedsPer100k = null;
+    if (costPerStandardStay === 0) costPerStandardStay = null;
+
+    return {
+      ...row,
+      spendingAsPercentGdp,
+      bedsPer100k,
+      costPerStandardStay,
+    };
+  });
 }
 
 // Extract ALBERTA_ACTIVITY_VOLUME_TREND: Alberta total spending by year (in
@@ -552,7 +582,20 @@ export async function run(): Promise<SyncResult> {
     }
 
     const tableO1Rows = parseTableO1(sheetToRows(tableO1Sheet));
-    const nationalSpending = extractNationalSpending(tableO1Rows);
+    const existingData = loadJsonFile(SPENDING_FILE);
+    const existingNational = Array.isArray(existingData.NATIONAL_SPENDING_COMPARE)
+      ? (existingData.NATIONAL_SPENDING_COMPARE as NationalSpendingCompare[])
+      : [];
+    const existingEfficiency = Array.isArray(existingData.HOSPITAL_EFFICIENCY_TREND)
+      ? (existingData.HOSPITAL_EFFICIENCY_TREND as HospitalEfficiencyMetric[])
+      : [];
+    const nationalSpendingBase = extractNationalSpending(tableO1Rows);
+    const nationalSpending = await enrichNationalSpendingCompare(
+      nationalSpendingBase,
+      tableO1Rows,
+      existingNational,
+      existingEfficiency,
+    );
     console.log(
       `[CIHIDownloader] Table O.1: ${nationalSpending.length} national-spending records, ${tableO1Rows.length} total rows parsed.`,
     );
@@ -572,8 +615,6 @@ export async function run(): Promise<SyncResult> {
       console.warn(`[CIHIDownloader] ${SERIES_D1_FILE} not found in ZIP.`);
     }
 
-    // 6. Load existing data-spending.json to preserve non-NHEX fields.
-    const existingData = loadJsonFile(SPENDING_FILE);
     const existingActivityVolume = Array.isArray(existingData.ALBERTA_ACTIVITY_VOLUME_TREND)
       ? (existingData.ALBERTA_ACTIVITY_VOLUME_TREND as ActivityVolumeTrend[])
       : [];
@@ -606,7 +647,8 @@ export async function run(): Promise<SyncResult> {
     const ownedMetadata: DataMetadata = {
       NATIONAL_SPENDING_COMPARE: buildMetadataEntry({
         updateType: 'auto',
-        source: 'CIHI NHEX 2025 full data tables (Table O.1)',
+        source:
+          'CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX-implied population; Alberta costPerStandardStay from HOSPITAL_EFFICIENCY_TREND (CSHS)',
         sourceVintage: 'NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)',
         lastUpdated: timestamp,
       }),
