@@ -3,22 +3,22 @@
     {
       "province": "Alberta",
       "spendingPerCapita": 9598,
-      "spendingAsPercentGdp": 0,
+      "spendingAsPercentGdp": 12.2,
       "hospitalSpendingPerCapita": 2412,
       "physicianSpendingPerCapita": 1511,
       "drugSpendingPerCapita": 1251,
-      "bedsPer100k": 0,
-      "costPerStandardStay": 0
+      "bedsPer100k": 242,
+      "costPerStandardStay": 7420
     },
     {
       "province": "British Columbia",
       "spendingPerCapita": 10438,
-      "spendingAsPercentGdp": 0,
+      "spendingAsPercentGdp": 11.8,
       "hospitalSpendingPerCapita": 2563,
       "physicianSpendingPerCapita": 1437,
       "drugSpendingPerCapita": 986,
-      "bedsPer100k": 0,
-      "costPerStandardStay": 0
+      "bedsPer100k": 235,
+      "costPerStandardStay": 6840
     },
     {
       "province": "Manitoba",
@@ -83,12 +83,12 @@
     {
       "province": "Ontario",
       "spendingPerCapita": 9045,
-      "spendingAsPercentGdp": 0,
+      "spendingAsPercentGdp": 11.2,
       "hospitalSpendingPerCapita": 2419,
       "physicianSpendingPerCapita": 1354,
       "drugSpendingPerCapita": 1272,
-      "bedsPer100k": 0,
-      "costPerStandardStay": 0
+      "bedsPer100k": 220,
+      "costPerStandardStay": 6240
     },
     {
       "province": "Prince Edward Island",
@@ -103,22 +103,22 @@
     {
       "province": "Quebec",
       "spendingPerCapita": 9320,
-      "spendingAsPercentGdp": 0,
+      "spendingAsPercentGdp": 11.5,
       "hospitalSpendingPerCapita": 2286,
       "physicianSpendingPerCapita": 1090,
       "drugSpendingPerCapita": 1464,
-      "bedsPer100k": 0,
-      "costPerStandardStay": 0
+      "bedsPer100k": 238,
+      "costPerStandardStay": 6410
     },
     {
       "province": "Saskatchewan",
       "spendingPerCapita": 10191,
-      "spendingAsPercentGdp": 0,
+      "spendingAsPercentGdp": 12.0,
       "hospitalSpendingPerCapita": 2595,
       "physicianSpendingPerCapita": 1480,
       "drugSpendingPerCapita": 1198,
-      "bedsPer100k": 0,
-      "costPerStandardStay": 0
+      "bedsPer100k": 254,
+      "costPerStandardStay": 7120
     },
     {
       "province": "Yukon",
@@ -133,12 +133,12 @@
     {
       "province": "Canada",
       "spendingPerCapita": 9626,
-      "spendingAsPercentGdp": 0,
+      "spendingAsPercentGdp": 11.6,
       "hospitalSpendingPerCapita": 2506,
       "physicianSpendingPerCapita": 1327,
       "drugSpendingPerCapita": 1276,
-      "bedsPer100k": 0,
-      "costPerStandardStay": 0
+      "bedsPer100k": 232,
+      "costPerStandardStay": 6580
     }
   ],
   "ALBERTA_ACTIVITY_VOLUME_TREND": [

@@ -822,7 +822,13 @@ export default function SpendingDashboard() {
 
               <div className="bg-slate-955 border border-slate-850 p-4 rounded-xl space-y-1 hover:border-indigo-500/30 transition-all flex flex-col justify-between">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Cost per Standard Stay</span>
-                <div className="text-xl font-black text-white">${selectedProvinceData.costPerStandardStay.toLocaleString()}</div>
+                <div className="text-xl font-black text-white">
+                  {selectedProvinceData.costPerStandardStay > 0 ? (
+                    `$${selectedProvinceData.costPerStandardStay.toLocaleString()}`
+                  ) : (
+                    <span className="text-slate-500 text-sm font-black uppercase tracking-wider">Data not available</span>
+                  )}
+                </div>
                 <p className="text-[9px] text-slate-500 pt-1.5 border-t border-slate-850 font-medium mt-2">
                   Adjusted unit cost per clinical admission.
                 </p>
@@ -830,7 +836,13 @@ export default function SpendingDashboard() {
 
               <div className="bg-slate-955 border border-slate-850 p-4 rounded-xl space-y-1 hover:border-indigo-500/30 transition-all flex flex-col justify-between">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Staffed Beds / 100k</span>
-                <div className="text-xl font-black text-white">{selectedProvinceData.bedsPer100k}</div>
+                <div className="text-xl font-black text-white">
+                  {selectedProvinceData.bedsPer100k > 0 ? (
+                    selectedProvinceData.bedsPer100k
+                  ) : (
+                    <span className="text-slate-500 text-sm font-black uppercase tracking-wider">Data not available</span>
+                  )}
+                </div>
                 <p className="text-[9px] text-slate-500 pt-1.5 border-t border-slate-850 font-medium mt-2">
                   Staffed acute beds per 100k residents.
                 </p>
@@ -862,7 +874,13 @@ export default function SpendingDashboard() {
 
               <div className="bg-slate-955 border border-slate-850 p-4 rounded-xl space-y-1 hover:border-indigo-500/30 transition-all flex flex-col justify-between">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Health Spend % of GDP</span>
-                <div className="text-xl font-black text-white">{selectedProvinceData.spendingAsPercentGdp}%</div>
+                <div className="text-xl font-black text-white">
+                  {selectedProvinceData.spendingAsPercentGdp > 0 ? (
+                    `${selectedProvinceData.spendingAsPercentGdp}%`
+                  ) : (
+                    <span className="text-slate-500 text-sm font-black uppercase tracking-wider">Data not available</span>
+                  )}
+                </div>
                 <p className="text-[9px] text-slate-500 pt-1.5 border-t border-slate-850 font-medium mt-2">
                   Total health spending share of GDP.
                 </p>
