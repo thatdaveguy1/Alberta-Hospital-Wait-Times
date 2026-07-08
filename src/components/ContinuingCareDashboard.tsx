@@ -163,7 +163,7 @@ export default function ContinuingCareDashboard() {
   const aggregateStats = useMemo(() => {
     const totalFacilities = (data?.CONTINUING_CARE_COMPLIANCE ?? []).length;
     const compliantCount = (data?.CONTINUING_CARE_COMPLIANCE ?? []).filter(f => f.standardsCompliant).length;
-    const complianceRate = (compliantCount / totalFacilities) * 100;
+    const complianceRate = totalFacilities > 0 ? (compliantCount / totalFacilities) * 100 : 0;
     const totalViolations = (data?.CONTINUING_CARE_COMPLIANCE ?? []).reduce((acc, curr) => acc + curr.violationsCount, 0);
     return { totalFacilities, complianceRate, totalViolations };
   }, [data]);
@@ -669,127 +669,136 @@ export default function ContinuingCareDashboard() {
       {/* SUBTAB 4: Compliance Registry (Open Alberta) */}
       {activeSubTab === 'compliance' && (
         <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
-            <div className="flex flex-wrap gap-2 w-full md:w-auto">
-              {['All', 'AHS', 'Covenant Health', 'Private/Contracted', 'Non-Profit'].map(operator => (
-                <button
-                  key={operator}
-                  onClick={() => setOperatorFilter(operator)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                    operatorFilter === operator
-                      ? 'bg-emerald-600 border-emerald-500 text-white shadow-sm'
-                      : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {operator}
-                </button>
-              ))}
+          {!data?.CONTINUING_CARE_COMPLIANCE || data.CONTINUING_CARE_COMPLIANCE.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-sm gap-3">
+              <AlertTriangle className="w-6 h-6 text-amber-500" />
+              <span>No compliance data available</span>
             </div>
-
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Search facility name or city..."
-                value={complianceSearch}
-                onChange={(e) => setComplianceSearch(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-900 border border-slate-800 p-5 rounded-xl">
-            <div className="space-y-1">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Monitored Facilities</span>
-              <span className="text-xl font-bold text-white">{aggregateStats.totalFacilities} sites audited</span>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Accommodation Standards Pass</span>
-              <span className="text-xl font-bold text-emerald-400">{aggregateStats.complianceRate.toFixed(1)}% compliant</span>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Total standards violations</span>
-              <span className="text-xl font-bold text-rose-400">{aggregateStats.totalViolations} violations found</span>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Auditing schedule</span>
-              <span className="text-sm font-bold text-slate-300">Quarterly updates (March 2026 release)</span>
-            </div>
-          </div>
-
-          {/* Compliance List Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredCompliance.map(fac => {
-              return (
-                <div key={fac.id} className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-4">
-                  <div className="space-y-2.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h4 className="text-sm font-bold text-white truncate">{fac.name}</h4>
-                        <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                          <span className="truncate">{fac.city} • {fac.zone}</span>
-                        </p>
-                      </div>
-
-                      <span className={`px-2.5 py-0.5 rounded border text-[10px] font-mono font-bold shrink-0 ${
-                        fac.standardsCompliant
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                          : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                      }`}>
-                        {fac.standardsCompliant ? 'COMPLIANT' : 'VIOLATION'}
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 text-[10px] bg-slate-950/60 p-3 rounded-lg border border-slate-850">
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Facility Type:</span>
-                        <span className="font-semibold text-slate-300 truncate">{fac.type}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Operator:</span>
-                        <span className="font-semibold text-slate-300">{fac.operator}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Inspection:</span>
-                        <span className="font-semibold text-slate-400">{fac.lastInspectionDate}</span>
-                      </div>
-                    </div>
-
-                    {!fac.standardsCompliant && fac.majorViolationsDesc && (
-                      <div className="bg-rose-950/30 border border-rose-500/20 rounded p-2.5 flex items-start gap-1.5">
-                        <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                        <p className="text-[10px] text-rose-300 font-medium leading-normal">{fac.majorViolationsDesc}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-850/60 text-[10px]">
-                    <span className="text-slate-500 flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>{fac.violationsCount} infractions logged</span>
-                    </span>
-
-                    <a
-                      href="https://www.alberta.ca/continuing-care-accommodation-inspections"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-bold px-3 py-1.5 rounded-lg bg-emerald-650 hover:bg-emerald-600 text-white transition-all text-center"
+          ) : (
+            <>
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
+                <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                  {['All', 'AHS', 'Covenant Health', 'Private/Contracted', 'Non-Profit'].map(operator => (
+                    <button
+                      key={operator}
+                      onClick={() => setOperatorFilter(operator)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                        operatorFilter === operator
+                          ? 'bg-emerald-600 border-emerald-500 text-white shadow-sm'
+                          : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:text-slate-200'
+                      }`}
                     >
-                      Verify Status
-                    </a>
-                  </div>
+                      {operator}
+                    </button>
+                  ))}
                 </div>
-              );
-            })}
 
-            {filteredCompliance.length === 0 && (
-              <div className="col-span-full bg-slate-900 border border-slate-800 p-8 text-center rounded-xl">
-                <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                <p className="text-slate-400 text-xs">No audited facilities matched your search parameters.</p>
+                <div className="relative w-full md:w-72">
+                  <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Search facility name or city..."
+                    value={complianceSearch}
+                    onChange={(e) => setComplianceSearch(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
               </div>
-            )}
-          </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                <div className="space-y-1">
+                  <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Monitored Facilities</span>
+                  <span className="text-xl font-bold text-white">{aggregateStats.totalFacilities} sites audited</span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Accommodation Standards Pass</span>
+                  <span className="text-xl font-bold text-emerald-400">{aggregateStats.complianceRate.toFixed(1)}% compliant</span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Total standards violations</span>
+                  <span className="text-xl font-bold text-rose-400">{aggregateStats.totalViolations} violations found</span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Auditing schedule</span>
+                  <span className="text-sm font-bold text-slate-300">Quarterly updates (March 2026 release)</span>
+                </div>
+              </div>
+
+              {/* Compliance List Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {filteredCompliance.map(fac => {
+                  return (
+                    <div key={fac.id} className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-4">
+                      <div className="space-y-2.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-bold text-white truncate">{fac.name}</h4>
+                            <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                              <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                              <span className="truncate">{fac.city} • {fac.zone}</span>
+                            </p>
+                          </div>
+
+                          <span className={`px-2.5 py-0.5 rounded border text-[10px] font-mono font-bold shrink-0 ${
+                            fac.standardsCompliant
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                              : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                          }`}>
+                            {fac.standardsCompliant ? 'COMPLIANT' : 'VIOLATION'}
+                          </span>
+                        </div>
+
+                        <div className="space-y-2 text-[10px] bg-slate-950/60 p-3 rounded-lg border border-slate-850">
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Facility Type:</span>
+                            <span className="font-semibold text-slate-300 truncate">{fac.type}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Operator:</span>
+                            <span className="font-semibold text-slate-300">{fac.operator}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Inspection:</span>
+                            <span className="font-semibold text-slate-400">{fac.lastInspectionDate}</span>
+                          </div>
+                        </div>
+
+                        {!fac.standardsCompliant && fac.majorViolationsDesc && (
+                          <div className="bg-rose-950/30 border border-rose-500/20 rounded p-2.5 flex items-start gap-1.5">
+                            <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                            <p className="text-[10px] text-rose-300 font-medium leading-normal">{fac.majorViolationsDesc}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-850/60 text-[10px]">
+                        <span className="text-slate-500 flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{fac.violationsCount} infractions logged</span>
+                        </span>
+
+                        <a
+                          href="https://www.alberta.ca/continuing-care-accommodation-inspections"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold px-3 py-1.5 rounded-lg bg-emerald-650 hover:bg-emerald-600 text-white transition-all text-center"
+                        >
+                          Verify Status
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {filteredCompliance.length === 0 && (
+                  <div className="col-span-full bg-slate-900 border border-slate-800 p-8 text-center rounded-xl">
+                    <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+                    <p className="text-slate-400 text-xs">No audited facilities matched your search parameters.</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
