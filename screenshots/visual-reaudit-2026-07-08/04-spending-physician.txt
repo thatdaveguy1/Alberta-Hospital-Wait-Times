@@ -1,0 +1,160 @@
+Unofficial Alberta Hospital Wait Times
+AHS DATA FEED
+
+INDEPENDENT ED MONITOR • UNOFFICIAL TRACKING
+
+Location: St. Albert
+CHANGE
+
+Notice: This tracker is completely unofficial and not endorsed by or affiliated with Alberta Health Services. For critical emergency services or life-threatening conditions, please dial 911 immediately.
+
+ACTIVE MODULE:
+HEALTH SPENDING & PRODUCTIVITY
+
+Click "Change Module" to browse other analytical dashboards
+
+Change Module
+Health Expenditures & Efficiency
+
+Analyze fiscal allocations, national scoreboards, and physician billings.
+
+AUTO-UPDATED
+·
+Last Update: Jul 8, 2026, 6:13 a.m. MDT
+·
+Data Timestamp: NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)
+SPENDING & ACCESS
+NATIONAL SCOREBOARD
+HOSPITAL EFFICIENCY
+PHYSICIAN PAYMENTS
+PHYSICIAN PAYMENT MIX
+
+Gross payments and service intensity for General Practice / Family Medicine from the AHCIP statistical supplement — auto-refreshed from Open Alberta.
+
+AUTO-UPDATED
+Updated: Jul 8, 2026, 6:03 a.m. MDT
+·
+Source: Open Alberta AHCIP Statistical Supplement (combined workbook)
+PHYSICIAN INSURED CLINICAL BILLING & INTENSITY
+
+Compare total gross fee-for-service allocations and service intensity by medical specialty
+
+General/Family Physicians (GP/FPs)
+Radiology
+Internal Med
+Psychiatry
+Anaesthesiology
+Ophthalmology
+Obstetrics-Gynaecology
+Paediatrics
+General Surgery
+Orthopaedic Surgery
+Dermatology
+Emergency Medicine
+Otolaryngology
+Urology
+Neurology
+Physical Medicine And Rehabilitation
+Plastic Surgery
+Cardiovascular And Thoracic Surgery
+Pathology
+Neurosurgery
+FTE CLINICAL COUNT
+5425
+practitioners
+
+Rostered physicians practicing in this category.
+
+TOTAL PAYMENTS
+$1755.5M
+annual billings
+
+Sum of clinical fees and program expenditures.
+
+AVG GROSS PAYMENT / MD
+$300,368
+per physician
+
+Clinical billings before clinic overhead costs.
+
+SERVICES PER PATIENT / YEAR
+5.88
+avg annual services
+
+Average consults/procedures per unique patient.
+
+AVERAGE GROSS CLINICAL PAYMENT PER PHYSICIAN (CAD)
+Avg Gross Payment ($)
+Radiology
+Anaesthesiology
+Paediatrics
+Dermatology
+Neurology
+Neurosurgery
+0
+350000
+700000
+1050000
+1400000
+Average Gross Payment ($)
+BILLING & RETENTION ANALYTICS
+
+Insights from the AHCIP Statistical Supplement Tables
+
+SPECIALTY ALLOCATION GAP
+
+General Practice vs. Surgery
+
+While General Practice commands the largest collective pool ($1.42 Billion), the average gross payment is $262,000. Surgical specialties average over $539,000. This creates significant commercial pressures for primary care practices facing rising clinic operational overheads.
+
+INSURED FEE REFORM IMPACT
+
+Insured FFS billing data highlights high-intensity clinical activities. Current primary care reform targets shifting family physicians from pure FFS (fee-for-service) to blended capitation models to encourage comprehensive community medicine.
+
+COMMUNITY
+
+Help keep this dashboard alive
+
+This is an independent, volunteer-maintained project. It is not affiliated with Alberta Health Services. Your star, share, or bug report keeps the data honest and the site reachable for Albertans checking waits and system pressure.
+
+View source
+
+WAYS YOU CAN CONTRIBUTE
+
+Star on GitHub
+
+Stars help others discover the project and signal that open health data tools matter.
+
+Open repository
+Share the dashboard
+
+Send the link to friends, community groups, or local advocates who track ER and system waits.
+
+Copy link
+Report a data issue
+
+Wrong wait time, broken chart, or stale module? Open a GitHub issue with the tab name and what you expected.
+
+File an issue
+
+SPREAD THE WORD
+
+Share on Reddit
+
+Pre-filled post with the public dashboard link
+
+Not medical advice. For emergencies call 911. For health navigation call Health Link 811.
+
+We do not sell personal data. Location you enter stays in your browser for proximity features. See project README on GitHub for how data is fetched and stored.
+
+Privacy & disclaimers · Independent tracker · Not endorsed by AHS
+
+ALBERTA HEALTH DATA MONITOR
+
+Viewing Health Spending & Productivity. Source: CIHI Spending Trends & AHCIP Supplement. Update cadence: Annual Releases.
+
+DATA SOURCES
+OFFICIAL AHS WEB
+SYSTEM DIAGNOSTICS
+CONTRIBUTE
+0

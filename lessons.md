@@ -22,6 +22,12 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Solution:** `scripts/headed-audit-verify.sh` seeds `alberta_hospital_user_location` for **T8N 7W7** (St. Albert, FSA T8N), dismisses the prompt, uses **Change Module** `@ref`, subtabs **WASTEWATER SIGNALS** / **COMPARE MATRIX**, and `agent-browser close --all` before a proof run.
 - **Prevention:** One `AGENT_BROWSER_SESSION` per flow; confirm `ACTIVE MODULE` via `eval` before `--full` screenshots; use uppercase subtab labels from snapshots.
 
+
+### Lesson: Puppeteer module picker needs fresh page per module after LTC
+- **Mistake:** Reusing one Puppeteer tab, `Change Module` after LTC often failed to expand the desktop picker (`hidden lg:flex`); samples showed only header chrome, not module tiles.
+- **Solution:** `visual-reaudit-puppeteer.mjs` opens a **new page per subtab** (`runSubtabAudit`), runs `setLocationT8N` (localStorage St. Albert + optional T8N 7W7 modal), `ensureModulePickerOpen` via exact **Change Module** click, category chip + **Search modules** filter, case-insensitive subtab clicks. Artifacts: `screenshots/visual-reaudit-2026-07-08/` + `report.json` (all four checks pass).
+- **Prevention:** Multi-module browser automation: isolate navigation state per module; match `shortName` + category labels from `App.tsx`, not full `title` strings on tiles.
+
 ## Session: 2026-07-08 (Visual Audit Remediation)
 
 ### Lesson: Visual audits catch UI/UX issues that code review misses

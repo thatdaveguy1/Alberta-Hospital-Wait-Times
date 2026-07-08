@@ -1,0 +1,52 @@
+{
+  "base": "http://127.0.0.1:3004/",
+  "location": {
+    "modal": false,
+    "stored": {
+      "lat": 53.6303,
+      "lng": -113.6253,
+      "city": "St. Albert",
+      "region": "AB",
+      "isGPS": false
+    },
+    "modalVisible": false,
+    "cityLine": "St. Albert"
+  },
+  "steps": [
+    {
+      "file": "01-ltc-compliance.png",
+      "nan": false,
+      "locationModal": false,
+      "checks": {
+        "compliance": true,
+        "openAlberta": true
+      }
+    },
+    {
+      "file": "02-mh-addiction-beds.png",
+      "nan": false,
+      "locationModal": false,
+      "checks": {
+        "abed": true,
+        "beds": true
+      }
+    },
+    {
+      "file": "03-system-flow-lga.png",
+      "nan": false,
+      "locationModal": false,
+      "checks": {
+        "lga": true,
+        "cihi": true
+      }
+    },
+    {
+      "file": "04-spending-physician.png",
+      "nan": false,
+      "locationModal": false,
+      "checks": {
+        "physician": true
+      }
+    }
+  ]
+}

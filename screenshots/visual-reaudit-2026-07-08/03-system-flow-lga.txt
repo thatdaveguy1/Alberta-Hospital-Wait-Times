@@ -1,0 +1,222 @@
+Unofficial Alberta Hospital Wait Times
+AHS DATA FEED
+
+INDEPENDENT ED MONITOR • UNOFFICIAL TRACKING
+
+Location: St. Albert
+CHANGE
+
+Notice: This tracker is completely unofficial and not endorsed by or affiliated with Alberta Health Services. For critical emergency services or life-threatening conditions, please dial 911 immediately.
+
+ACTIVE MODULE:
+HOSPITAL SYSTEM FLOW
+
+Click "Change Module" to browse other analytical dashboards
+
+Change Module
+Hospital System Flow
+
+Monitor occupancy, average ED wait times, and alternate level of care bottlenecks.
+
+AUTO-UPDATED
+·
+Last Update: Jul 8, 2026, 6:01 a.m. MDT
+·
+Data Timestamp: Facility list live; metrics compiled from HQCA FOCUS 2025/2026 reports
+Refresh
+HOSPITAL FLOW GRID
+BOTTLENECK CORRELATION
+HISTORICAL DEGRADATION
+BENCHMARKS & PROFILES
+PROVINCIAL BED OCCUPANCY
+104.3%
+CRITICAL STATE
+Weighted across 7219 active acute beds (can exceed 100% due to surge/overcapacity protocols)
+CLICK TO VIEW TREND
+AVERAGE ED BED WAIT (P90)
+29.4h
++12.4h since 2021
+From decision-to-admit to ward placement
+CLICK TO VIEW TREND
+LEFT WITHOUT BEING SEEN
+7.1%
+HIGH RISK
+Provincial average self-discharge rate
+CLICK TO VIEW TREND
+ALTERNATE LEVEL OF CARE (ALC)
+15.7%
+DISCHARGE BLOCKED
+Inpatient acute bed-days occupied by non-acute cases
+CLICK TO VIEW TREND
+CIHI NATIONAL COMPARATORS (ALBERTA VS CANADA AVG)
+
+Standardized metrics illustrating Alberta's system stress level relative to national averages.
+
+CT Scan Wait (90th percentile)
+
+Days that 90% of patients wait for a CT Scan in Alberta vs the Canadian average (CIHI Wait Times, 2025).
+
+PERFORMANCE GAP
+-0.7% BELOW NATIONAL AVG (FAVORABLE)
+Alberta
+143 days
+Canada Average
+144 days
+MRI Scan Wait (90th percentile)
+
+Days that 90% of patients wait for a MRI Scan in Alberta vs the Canadian average (CIHI Wait Times, 2025).
+
+PERFORMANCE GAP
++6.3% ABOVE NATIONAL AVG (UNFAVORABLE)
+Alberta
+220 days
+Canada Average
+207 days
+Cancer Surgery Wait (90th percentile, blended)
+
+Blended 90th-percentile wait days across cancer surgery types in Alberta vs Canada (CIHI, 2025).
+
+PERFORMANCE GAP
++31.5% ABOVE NATIONAL AVG (UNFAVORABLE)
+Alberta
+85.2 days
+Canada Average
+64.8 days
+Radiation Therapy Within Benchmark (28 days)
+
+Percentage of radiation therapy patients treated within the 28-day benchmark (CIHI, 2025).
+
+PERFORMANCE GAP
++2.1% ABOVE NATIONAL AVG (UNFAVORABLE)
+Alberta
+97%
+Canada Average
+95%
+UPSTREAM LGA DEMAND PROFILES (OPEN ALBERTA PORTAL)
+
+Emergency department visit rates and Canadian Triage and Acuity Scale (CTAS) profiles by Local Geographic Area (LGA), derived from Open Alberta Table 10.1 (community need indicators) and Figure 2.2 (LGA population). Click a card to focus on its zone.
+
+Calgary - West Bow
+CALGARY
+FOCUS ZONE
+ED VISITS
+3,050
+POPULATION
+21,479
+VISIT RATE
+142 / 1k
+CTAS 1-2 (Urgent): 0%
+CTAS 3 (Mod): 75.5%
+CTAS 4-5 (Mild): 24.5%
+PRIMARY PRESENTING ISSUE
+See Regional Inequity dashboard for full profile
+Edmonton - Woodcroft (North Central)
+EDMONTON
+FOCUS ZONE
+ED VISITS
+20,492
+POPULATION
+93,144
+VISIT RATE
+220 / 1k
+CTAS 1-2 (Urgent): 0%
+CTAS 3 (Mod): 61.8%
+CTAS 4-5 (Mild): 38.2%
+PRIMARY PRESENTING ISSUE
+See Regional Inequity dashboard for full profile
+Red Deer - North
+CENTRAL
+FOCUS ZONE
+ED VISITS
+14,602
+POPULATION
+35,615
+VISIT RATE
+410 / 1k
+CTAS 1-2 (Urgent): 0%
+CTAS 3 (Mod): 47.7%
+CTAS 4-5 (Mild): 52.3%
+PRIMARY PRESENTING ISSUE
+See Regional Inequity dashboard for full profile
+South rural (Lethbridge/Cardston area)
+SOUTH
+FOCUS ZONE
+ED VISITS
+N/A
+POPULATION
+N/A
+VISIT RATE
+640 / 1k
+Population unavailable for this composite LGA. ED visit rate is sourced directly from Open Alberta Table 10.1.
+CTAS 1-2 (Urgent): 0%
+CTAS 3 (Mod): 35.2%
+CTAS 4-5 (Mild): 64.8%
+PRIMARY PRESENTING ISSUE
+See Regional Inequity dashboard for full profile
+Wood Buffalo / Fort McKay
+NORTH
+FOCUS ZONE
+ED VISITS
+N/A
+POPULATION
+N/A
+VISIT RATE
+950 / 1k
+Population unavailable for this composite LGA. ED visit rate is sourced directly from Open Alberta Table 10.1.
+CTAS 1-2 (Urgent): 0%
+CTAS 3 (Mod): 21.5%
+CTAS 4-5 (Mild): 78.5%
+PRIMARY PRESENTING ISSUE
+See Regional Inequity dashboard for full profile
+CLINICAL GUIDANCE: CANADIAN TRIAGE AND ACUITY SCALE (CTAS)
+
+Levels 1 & 2 (Resuscitation / Emergent): Critical life threats (e.g. cardiac arrest, severe trauma). Require immediate intervention.
+
+Level 3 (Urgent): Serious conditions requiring moderate resources (e.g., chest pain, asthma flare).
+
+Levels 4 & 5 (Less / Non-Urgent): Minor illnesses (e.g., sprains, cold symptoms, refills) that can be managed in community clinics, yet crowd metropolitan EDs due to localized primary care access shortfalls.
+
+Analytical Source: Health Quality Alberta (HQCA) FOCUS live database; CIHI NACRS/DAD emergency-acute metadata tables; Alberta Health Services Weekly ED Flow metrics releases.
+UNOFFICIAL ANALYTICAL DATA FEED
+
+COMMUNITY
+
+Help keep this dashboard alive
+
+This is an independent, volunteer-maintained project. It is not affiliated with Alberta Health Services. Your star, share, or bug report keeps the data honest and the site reachable for Albertans checking waits and system pressure.
+
+View source
+
+WAYS YOU CAN CONTRIBUTE
+
+Star on GitHub
+
+Stars help others discover the project and signal that open health data tools matter.
+
+Open repository
+Share the dashboard
+
+Send the link to friends, community groups, or local advocates who track ER and system waits.
+
+Copy link
+Report a data issue
+
+Wrong wait time, broken chart, or stale module? Open a GitHub issue with the tab name and what you expected.
+
+File an issue
+
+SPREAD THE WORD
+
+Share on Reddit
+
+Pre-filled post with the public dashboard link
+
+Not medical advice. For emergencies call 911. For health navigation call Health Link 811.
+
+We do not sell personal data. Location you enter stays in your browser for proximity features. See project README on GitHub for how data is fetched and stored.
+
+Privacy & disclaimers · Independent tracker · Not endorsed by AHS
+
+ALBERTA HEALTH DATA MONITOR
+
+Viewing Hospital System Flow. Source: AHS Clinical Operations DB. Upda

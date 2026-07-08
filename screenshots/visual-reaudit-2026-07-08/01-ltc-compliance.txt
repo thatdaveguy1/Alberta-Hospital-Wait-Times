@@ -1,0 +1,227 @@
+Unofficial Alberta Hospital Wait Times
+AHS DATA FEED
+
+INDEPENDENT ED MONITOR • UNOFFICIAL TRACKING
+
+Location: St. Albert
+CHANGE
+
+Notice: This tracker is completely unofficial and not endorsed by or affiliated with Alberta Health Services. For critical emergency services or life-threatening conditions, please dial 911 immediately.
+
+ACTIVE MODULE:
+LONG TERM CARE & SENIORS CARE
+
+Click "Change Module" to browse other analytical dashboards
+
+Change Module
+Continuing & Long Term Care
+
+Monitor facility placement timelines, quality outcomes, and standards compliance.
+
+AUTO-UPDATED
+·
+Last Update: Jul 8, 2026, 6:02 a.m. MDT
+·
+Data Timestamp: 2021–latest HQCA reporting period
+PLACEMENT & FLOW
+CLINICAL QUALITY
+HOME CARE CONTINUITY
+COMPLIANCE REGISTRY
+AUTO-UPDATED
+Updated: Jul 8, 2026, 6:03 a.m. MDT
+·
+Source: Alberta Open Government — Continuing Care Accommodation Standards compliance reporting
+All
+AHS
+Covenant Health
+Private/Contracted
+Non-Profit
+MONITORED FACILITIES
+941 sites audited
+ACCOMMODATION STANDARDS PASS
+74.6% compliant
+TOTAL STANDARDS VIOLATIONS
+1763 violations found
+AUDITING SCHEDULE
+Quarterly (Alberta Open Government data)
+Buffalo Grace Manor - Covenant Care
+
+Lethbridge, Alberta
+
+VIOLATION
+Facility Type:
+Type B (Designated Supportive Living)
+Operator:
+Covenant Health
+Inspection:
+2026-03-24
+
+An appropriate assessment tool for Client's Health Care needs is used.; The care plan reflects the findings of the assessment and is kept up to date.; Client's Care Plan is created and reviewed by an Interdisciplinary Team conference.
+
+86 infractions logged
+Verify Status
+Raymond Health Centre
+
+Raymond, Alberta
+
+VIOLATION
+Facility Type:
+Type A (Long-Term Care)
+Operator:
+AHS
+Inspection:
+2026-03-05
+
+Personal Directives, Power of Attorney, guardian/trusteeship or Advance Care Planning information.; Policies and procedures regarding Restraint use are documented and implemented.; Policies and procedures to provide Clients the opportunity for bathing at a minimum of twice a week.
+
+80 infractions logged
+Verify Status
+Points West Living Cold Lake
+
+Cold Lake, Alberta
+
+VIOLATION
+Facility Type:
+Type B (Designated Supportive Living)
+Operator:
+Private/Contracted
+Inspection:
+2026-01-13
+
+Policy and procedure for responding to concerns about the Health Care provided.; Client's Care Plan is reviewed.; Policies and procedures in Medication Management are documented and implemented.
+
+30 infractions logged
+Verify Status
+Grande Prairie Care Centre
+
+Grande Prairie, Alberta
+
+VIOLATION
+Facility Type:
+Type A (Long-Term Care)
+Operator:
+Private/Contracted
+Inspection:
+2026-02-11
+
+An operator must ensure that a client's health care needs are assessed using the appropriate InterRA; Client's Care Plan is reviewed.; Infection Prevention and Control (IPC) policies and procedures are documented and implemented.
+
+27 infractions logged
+Verify Status
+Killam Health Care Centre
+
+Killam, Alberta
+
+VIOLATION
+Facility Type:
+Type A (Long-Term Care)
+Operator:
+Covenant Health
+Inspection:
+2025-12-04
+
+Policies and procedures regarding Restraint use are documented and implemented.; Policies and procedures in Medication Management are documented and implemented.; Medical Status assessments are documented.
+
+22 infractions logged
+Verify Status
+Medi-home Individualized Support - House #3
+
+Edmonton, Alberta
+
+VIOLATION
+Facility Type:
+Type B (Designated Supportive Living)
+Operator:
+Private/Contracted
+Inspection:
+2026-02-04
+
+Evidence required that the continuation of services plan is practical, identifies relevant supports,; Evidence required that the continuation of services plan includes provisions for loss of utilities,; Evidence required that the written process for the resolution of concerns and complaints is develope
+
+22 infractions logged
+Verify Status
+Medi-home Individualized Support Services #1
+
+Edmonton, Alberta
+
+VIOLATION
+Facility Type:
+Type B (Designated Supportive Living)
+Operator:
+Private/Contracted
+Inspection:
+2026-02-04
+
+Evidence required that each employee, volunteer, and service provider who provides services directly; Evidence required that the continuation of services plan includes provisions for loss of utilities,; Evidence required that the continuation of services plan is practical, identifies relevant supports,
+
+22 infractions logged
+Verify Status
+Youville Auxiliary Hospital (grey Nuns) OF St. Albert
+
+St. Albert, Alberta
+
+VIOLATION
+Facility Type:
+Type A (Long-Term Care)
+Operator:
+Covenant Health
+Inspection:
+2026-01-13
+
+Evidence required that the accommodation, equipment and furnishings are well maintained and in good; Client's Care Plan is created and reviewed by an Interdisciplinary Team conference.; Client's Care Plan is reviewed.
+
+20 infractions logged
+Verify Status
+Gene Zwozdesky Centre AT Norwood
+
+Edmonton, Alberta
+
+VIOLATION
+Facility Type:
+Type A (Long-Term Care)
+Operator:
+Non-Profit
+Inspection:
+2026-03-19
+
+Palliative Care and End-of-Life care documentation in Care Plan.; Medical Status assessments are documented.; Policies and procedures in Medication Management are documented and implemented.
+
+18 infractions logged
+Verify Status
+Good Samaritan Society Good Shepherd Home
+
+Wetaskiwin, Alberta
+
+VIOLATION
+Facility Type:
+Type B (Designated Supportive Living)
+Operator:
+Non-Profit
+Inspection:
+2026-03-18
+
+Policies and procedures to provide Clients the opportunity for bathing at a minimum of twice a week.; The care plan reflects the findings of the assessment and is kept up to date.; Policies and procedures on maintaining equipment owned by Operator and reporting if unsafe.
+
+18 infractions logged
+Verify Status
+St. Joseph's Auxiliary Hospital
+
+Edmonton, Alberta
+
+VIOLATION
+Facility Type:
+Type A (Long-Term Care)
+Operator:
+Covenant Health
+Inspection:
+2025-08-08
+
+Policies and procedures on maintaining equipment owned by Operator and reporting if unsafe.; Policies and procedures for water supply system and temperature checks; Client's Care Plan is reviewed.
+
+18 infractions logged
+Verify Status
+Capital Care Grandview
+
+Edmonton, Alberta
+
+VIOLAT

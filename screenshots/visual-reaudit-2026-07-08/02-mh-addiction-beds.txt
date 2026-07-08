@@ -1,0 +1,386 @@
+Unofficial Alberta Hospital Wait Times
+AHS DATA FEED
+
+INDEPENDENT ED MONITOR • UNOFFICIAL TRACKING
+
+Location: St. Albert
+CHANGE
+
+Notice: This tracker is completely unofficial and not endorsed by or affiliated with Alberta Health Services. For critical emergency services or life-threatening conditions, please dial 911 immediately.
+
+ACTIVE MODULE:
+MENTAL HEALTH & ADDICTIONS
+
+Click "Change Module" to browse other analytical dashboards
+
+Change Module
+Mental Health & Addictions
+
+Track substance use harms, treatment bed capacity, and helpline volumes.
+
+AUTO-UPDATED
+·
+Last Update: Jul 5, 2026, 9:55 a.m. MDT
+·
+Data Timestamp: 2019–latest surveillance year
+SUBSTANCE HARMS
+ADDICTION BEDS
+COMMUNITY ACCESS
+ER PRESSURE
+CRISIS HELPLINES
+AUTO-UPDATED
+Updated: Jul 8, 2026, 6:01 a.m. MDT
+·
+Source: Addiction Bed Exploration Dashboard (ABED) - findaddictionbeds.alberta.ca
+
+Bed availability data is sourced from the Addiction Bed Exploration Dashboard (ABED), updated once daily (Mon–Fri). Beds cannot be reserved through the dashboard — contact sites directly to confirm availability, intake policies, and waitlist information. For immediate help, call 211 or visit Recovery Access Alberta.
+
+All
+Calgary
+Edmonton
+Central
+South
+North
+ABED ACTIVE SITES
+60 registered sites
+TOTAL BED ALLOCATION
+1576 beds
+AVAILABLE BEDS TODAY
+315 of 1576 beds
+AVG SYSTEM BED OCCUPANCY
+78.1%
+George Spady Society (Aurora Centre)
+
+Edmonton Corridor
+
+Operational
+CARE BED TYPE
+Medically Supported Detox
+GENDER / AGE
+Co-Ed • Adult
+Total Beds:
+41 beds
+
+Live availability not currently reported for this site. Check ABED or call 211 for current status.
+
+Triage Intake
+Calgary Alpha House Society
+
+Calgary Corridor
+
+Full
+CARE BED TYPE
+Detoxification
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+0 / 41
+
+No vacancies currently reported
+
+2026-07-05 11:59 PM
+Triage Intake
+Lethbridge Recovery Community
+
+South Corridor
+
+Almost Full
+CARE BED TYPE
+Long-Term Recovery
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+2 / 50
+
+Limited availability
+
+2026-07-05 11:59 PM
+Triage Intake
+Red Deer Recovery Community
+
+Central Corridor
+
+Available
+CARE BED TYPE
+Long-Term Recovery
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+38 / 75
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Grande Prairie Recovery Community
+
+North Corridor
+
+Planned (opening fall 2027)
+CARE BED TYPE
+Long-Term Recovery
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+0 / 50
+
+No vacancies currently reported
+
+Triage Intake
+Lakeview Recovery Community (Gunn)
+
+Edmonton Corridor
+
+Operational
+CARE BED TYPE
+Long-Term Recovery
+GENDER / AGE
+Men • Adult
+Total Beds:
+75 beds
+
+Live availability not currently reported for this site. Check ABED or call 211 for current status.
+
+Triage Intake
+Adeara Recovery Centre (Edmonton)
+
+Edmonton Corridor
+
+Operational
+CARE BED TYPE
+Long-Term Recovery
+GENDER / AGE
+Women • Adult
+Total Beds:
+20 beds
+
+Live availability not currently reported for this site. Check ABED or call 211 for current status.
+
+Triage Intake
+Hull Services Radisson (Recovery Stabilization and Detox)
+
+Calgary Corridor
+
+Available
+CARE BED TYPE
+Detoxification
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+6 / 6
+
+Beds available now
+
+2026-07-04 11:59 PM
+Triage Intake
+Blood Tribe Iitakamotsiipiohsopi Recovery Community
+
+South Corridor
+
+Available
+CARE BED TYPE
+Short-Term Treatment
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+66 / 75
+
+Beds available now
+
+2026-06-14 11:59 PM
+Triage Intake
+Youth Residential Addiction Services - Lethbridge
+
+South Corridor
+
+Available
+CARE BED TYPE
+Short-Term Treatment
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+7 / 8
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Lakeland Centre for FASD
+
+Edmonton Corridor
+
+Available
+CARE BED TYPE
+Long-Term Recovery
+GENDER / AGE
+Female • Adult
+Available Beds:
+6 / 9
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Enviros (Shunda Creek Recovery Centre)
+
+Central Corridor
+
+Available
+CARE BED TYPE
+Short-Term Treatment
+GENDER / AGE
+Male • Adult
+Available Beds:
+9 / 14
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Addiction Counselling & Prevention Services (PChAD)
+
+Central Corridor
+
+Available
+CARE BED TYPE
+Detoxification
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+5 / 8
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Lethbridge Wellness Shelter and Stabilization Unit
+
+South Corridor
+
+Available
+CARE BED TYPE
+Long-Term Recovery
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+7 / 12
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+McDougall House Association
+
+Edmonton Corridor
+
+Available
+CARE BED TYPE
+Short-Term Treatment
+GENDER / AGE
+Female • Adult
+Available Beds:
+7 / 12
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Oxford House
+
+Calgary Corridor
+
+Available
+CARE BED TYPE
+Long-Term Recovery
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+11 / 19
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Hull Services Youth Recovery Program/PChAD
+
+Calgary Corridor
+
+Available
+CARE BED TYPE
+Detoxification
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+4 / 6
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Metis Indian Town Alcohol Association (MITAA Centre)
+
+North Corridor
+
+Available
+CARE BED TYPE
+Detoxification
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+3 / 6
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Youth Detoxification Services (Solstice Integrated Wellness Centre - Mountain Plains CSSN)
+
+North Corridor
+
+Available
+CARE BED TYPE
+Detoxification
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+2 / 4
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Alberta Hospital Edmonton - Youth Stabilization and Residential Services
+
+Edmonton Corridor
+
+Available
+CARE BED TYPE
+Detoxification
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+3 / 8
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Central Alberta's Safe Harbour Society for Health & Housing
+
+Central Corridor
+
+Available
+CARE BED TYPE
+Detoxification
+GENDER / AGE
+Co-Ed • Adult
+Available Beds:
+8 / 19
+
+Beds available now
+
+2026-07-05 11:59 PM
+Triage Intake
+Alberta Hospital Edmonton (PChAD)
+
+Edmonton C
