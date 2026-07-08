@@ -531,6 +531,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
   const [dashboardSearch, setDashboardSearch] = useState('');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isModulesExpanded, setIsModulesExpanded] = useState(false);
 
   // Lock body scroll when map is fullscreen
   useEffect(() => {
@@ -1445,20 +1446,41 @@ export default function App() {
         </AnimatePresence>
 
         {/* Horizontal Nav Bar (Desktop Only, under notice disclaimer) */}
-        <div className="hidden lg:block bg-[#090e21] border border-slate-800 rounded-2xl p-4 mb-8 shadow-xl w-full space-y-4">
-          {/* Header Row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {!isModulesExpanded ? (
+          <div className="hidden lg:flex bg-[#090e21] border border-slate-800 rounded-2xl p-3 mb-6 shadow-xl w-full items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
                 <SlidersHorizontal className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  Analytics Modules
+                  Active Module: <span className="text-white font-extrabold">{DASHBOARDS.find(d => d.id === activeTab)?.title}</span>
                 </h3>
-                <p className="text-[11px] text-slate-500 font-medium">Select a module below to view interactive health indicators and trends</p>
+                <p className="text-[10px] text-slate-500 font-medium">Click "Change Module" to browse other analytical dashboards</p>
               </div>
             </div>
+            <button
+              onClick={() => setIsModulesExpanded(true)}
+              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all cursor-pointer shadow-md"
+            >
+              Change Module
+            </button>
+          </div>
+        ) : (
+          <div className="hidden lg:block bg-[#090e21] border border-slate-800 rounded-2xl p-4 mb-8 shadow-xl w-full space-y-4">
+          {/* Header Row */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
+                  <SlidersHorizontal className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    Analytics Modules
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Select a module below to view interactive health indicators and trends</p>
+                </div>
+              </div>
 
             {/* Search Bar */}
             <div className="relative w-full md:w-64">
@@ -1478,6 +1500,12 @@ export default function App() {
                   Clear
                 </button>
               )}
+              <button
+                onClick={() => setIsModulesExpanded(false)}
+                className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-xs transition-all cursor-pointer shadow-md"
+              >
+                Minimize
+              </button>
             </div>
           </div>
 
@@ -1521,6 +1549,7 @@ export default function App() {
                       key={d.id}
                       onClick={() => {
                         setActiveTab(d.id);
+                        setIsModulesExpanded(false);
                         if (isMapFullscreen) setIsMapFullscreen(false);
                       }}
                       className={`relative group flex items-center gap-2 p-2.5 rounded-lg text-left transition-all border ${
@@ -1578,6 +1607,7 @@ export default function App() {
                             key={d.id}
                             onClick={() => {
                               setActiveTab(d.id);
+                              setIsModulesExpanded(false);
                               if (isMapFullscreen) setIsMapFullscreen(false);
                             }}
                             className={`relative group flex items-center gap-2 p-2.5 rounded-lg text-left transition-all border ${
@@ -1627,8 +1657,9 @@ export default function App() {
                 </button>
               </div>
             )}
+            </div>
           </div>
-        </div>
+        )}
 
 
         {/* ACTIVE CONTENT CHANNEL (Full Width Layout) */}
