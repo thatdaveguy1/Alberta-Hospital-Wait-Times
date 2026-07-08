@@ -482,7 +482,7 @@ export default function SystemFlowDashboard() {
               <span className="text-2xl font-black text-rose-500 font-mono">{provincialOverview.avgOccupancy}%</span>
               <span className="text-[10px] text-rose-400/80 font-bold font-mono">CRITICAL STATE</span>
             </div>
-            <span className="text-[10px] text-slate-500 block leading-tight">Weighted across {provincialOverview.totalBeds} active acute beds</span>
+            <span className="text-[10px] text-slate-500 block leading-tight">Weighted across {provincialOverview.totalBeds} active acute beds (can exceed 100% due to surge/overcapacity protocols)</span>
             <span className="text-[9px] text-slate-500 group-hover:text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
               <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
               {selectedKpi === 'occupancy' ? 'Active: Hide Trend' : 'Click to View Trend'}
@@ -922,7 +922,7 @@ export default function SystemFlowDashboard() {
                   </div>
                   <div className="space-y-2 text-[10px] leading-relaxed">
                     <div>
-                      <strong className="text-slate-300">Inpatient Occupancy:</strong> <span className="text-slate-400">% of active acute beds occupied. Over 100% signifies capacity overload.</span>
+                      <strong className="text-slate-300">Inpatient Occupancy:</strong> <span className="text-slate-400">% of active acute beds occupied. Rates above 100% represent surge capacity/overcapacity protocols in effect.</span>
                     </div>
                     <div>
                       <strong className="text-slate-300">ED Bed Wait (P90):</strong> <span className="text-slate-400">90th percentile hours admitted patients wait in ED for a ward bed.</span>
