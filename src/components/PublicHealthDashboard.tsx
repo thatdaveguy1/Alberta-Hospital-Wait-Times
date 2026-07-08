@@ -210,7 +210,7 @@ export default function PublicHealthDashboard() {
       <DashboardHeader
         icon={ShieldAlert}
         title="Public Health & Surveillance"
-        description="Track respiratory viruses, wastewater pathogen loads, and immunization rates."
+        description="Track respiratory viruses, wastewater pathogen loads, and childhood immunization coverage. Notifiable-disease and environmental-advisory views are temporarily removed pending data verification (see tasks/todo.md Phase 19)."
         metadata={metadata}
         arrayKey="RVD_RESPIRATORY_CASE_COUNTS"
       />

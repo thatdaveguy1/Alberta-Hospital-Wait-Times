@@ -273,7 +273,7 @@ const DASHBOARDS = [
     title: 'Public Health & Outbreaks',
     shortName: 'Public Health',
     category: 'prevention-surveillance' as CategoryId,
-    description: 'Respiratory pathogens, wastewater early-warning monitors, childhood immunization gaps, and active environmental advisories.',
+    description: 'Respiratory pathogens, wastewater early-warning monitors, and childhood immunization coverage (notifiable-disease and environmental-advisory views pending verified data).',
     icon: Shield,
     color: 'text-lime-400',
     bgColor: 'bg-lime-500/10',
@@ -329,6 +329,8 @@ const DASHBOARDS = [
     updateFrequency: 'Annual Releases',
   },
 ] as const;
+
+const LOCATION_SKIP_KEY = 'alberta_hospital_location_prompt_dismissed';
 
 interface EmailAlert {
   id: string;
@@ -641,14 +643,18 @@ export default function App() {
           console.warn("GPS access declined/failed:", err);
           setGpsRefused(true);
           setLoadingGeo(false);
-          setShowManualInput(true);
+          if (!localStorage.getItem(LOCATION_SKIP_KEY)) {
+            setShowManualInput(true);
+          }
         },
         { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
       setGpsRefused(true);
       setLoadingGeo(false);
-      setShowManualInput(true);
+      if (!localStorage.getItem(LOCATION_SKIP_KEY)) {
+        setShowManualInput(true);
+      }
     }
     
     // Poll logs occasionally to show real-time alert dispatching
@@ -1180,6 +1186,22 @@ export default function App() {
     maxWait: hospitals.length > 0 ? Math.max(...hospitals.map(h => h.waitTime)) : 0,
     totalHospitals: hospitals.length,
     nearestHospital: processedHospitals.filter(h => h.distance !== undefined).sort((a, b) => (a.distance || 0) - (b.distance || 0))[0] || null
+  };
+
+  const activeDashboard = DASHBOARDS.find(d => d.id === activeTab) ?? DASHBOARDS[0];
+  const footerTitle =
+    activeTab === 'er-waits'
+      ? 'Alberta Emergency Department Monitor'
+      : 'Alberta Health Data Monitor';
+  const footerBlurb =
+    activeTab === 'er-waits'
+      ? 'Data synchronized directly from the Alberta Health Services live portal. Estimated wait times are updated every 30 minutes.'
+      : `Viewing ${activeDashboard.title}. Source: ${activeDashboard.source}. Update cadence: ${activeDashboard.updateFrequency}.`;
+
+  const dismissLocationPrompt = () => {
+    localStorage.setItem(LOCATION_SKIP_KEY, '1');
+    setShowManualInput(false);
+    setGeocodingError('');
   };
 
   return (
@@ -2473,9 +2495,9 @@ export default function App() {
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800 mt-12 text-slate-500">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div>
-            <p className="text-xs font-bold text-slate-400 tracking-wider uppercase">Alberta Emergency Department Monitor</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wider uppercase">{footerTitle}</p>
             <p className="text-[11px] text-slate-500 mt-1">
-              Data synchronized directly from the Alberta Health Services live portal. Estimated wait times are updated every 30 minutes.
+              {footerBlurb}
             </p>
           </div>
           <div className="flex items-center gap-6 text-xs shrink-0 font-bold uppercase tracking-wider">
@@ -2574,11 +2596,9 @@ export default function App() {
                 <h2 className="text-sm font-black text-white tracking-tight">Set Your Location</h2>
               </div>
               <button
-                onClick={() => {
-                  setShowManualInput(false);
-                  setGeocodingError('');
-                }}
+                onClick={dismissLocationPrompt}
                 className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+                aria-label="Close location prompt"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -2643,6 +2663,14 @@ export default function App() {
               <p className="text-[10px] text-slate-500 leading-relaxed">
                 Your location is used to estimate driving times and sort nearby hospitals. We only store it in your browser.
               </p>
+
+              <button
+                type="button"
+                onClick={dismissLocationPrompt}
+                className="w-full py-2.5 text-[11px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                Skip for now
+              </button>
             </div>
           </div>
         </div>

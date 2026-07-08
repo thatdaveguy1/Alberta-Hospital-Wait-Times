@@ -1,3 +1,11 @@
+## Phase 20 — Headed browser audit remediation (2026-07-08)
+
+- [x] Full 15-tab headed browser audit matrix (`/tmp/audit-final-report.md`)
+- [x] Context-aware site footer (non–ER-waits modules no longer show ED-only copy)
+- [x] Location modal: persistent “Skip for now” + dismiss via localStorage
+- [x] Public Health copy aligned with Phase 19 (3 shipped subtabs; notifiable/advisories pending data)
+- [ ] Optional follow-ups from audit: per-subtab narratives (PH / Health Inequity / Health Spending), respiratory manual timestamp refresh, wastewater dual-axis chart
+
 # Alberta Hospital Wait Times — Auto-Update Pipeline Tracker
 
 ## Phase 0: Project Setup & Conventions

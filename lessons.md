@@ -4,6 +4,19 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 
 ---
 
+
+## Session: 2026-07-08 (Headed Browser Tab Audit)
+
+### Lesson: Global chrome must follow the active module, not the first tab built
+- **Mistake:** The site footer always said “Alberta Emergency Department Monitor” and “wait times updated every 30 minutes” on Cancer Care, Public Health, Health Inequity, and every other non-ER module — misleading on a 15-module console.
+- **Solution:** Made the footer title and blurb depend on `activeTab` / `DASHBOARDS` metadata (ER keeps ED copy; other modules show module title, source, and update cadence).
+- **Prevention:** Any shared footer, badge, or “last updated” line should be module-aware or generic-neutrally worded.
+
+### Lesson: Intentionally hidden subtabs still look like bugs in a browser audit
+- **Mistake:** Phase 19 removed Public Health “Notifiable Diseases” and “Environmental Advisories” subtabs for bad data, but the module tile and dashboard header still promised “environmental advisories,” and the component still contained full subtab panels — auditors flagged “missing subtabs.”
+- **Solution:** Updated `DASHBOARDS` description, `DashboardHeader` description, and documented Phase 19 in the header note; kept code paths for when data is verified again.
+- **Prevention:** When hiding UI for data quality, update module picker copy and in-dashboard disclosure the same sprint.
+
 ## Session: 2026-07-08 (Visual Audit Remediation)
 
 ### Lesson: Visual audits catch UI/UX issues that code review misses
