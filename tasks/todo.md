@@ -386,3 +386,18 @@
   - Index-growth chart trims to first year where all series have data
   - Baseline/Current labels are data-driven instead of hardcoded `2021-22` / `2025-26`
   - Verified: Annual Surgeries and CT Scan Imaging explorers show only `2021-2022` → `2025-2026`; AHS Expense still shows its full history from `1975-1976`
+
+## Phase 26: Prioritized Audit Remediation Sprint (2026-07-08)
+- [x] P0.1 Cancer Care zero-state fix: convert to useDomainData hook, add loading/error/empty state guards, fix badge update status
+- [x] P0.2 Health Inequity community profile fix: prevent community profiles spreading from overriding LGA names with 'Loading...', formatting physiciansPer100k, and displaying '—' for missing values
+- [x] P0.3 Health Spending zero scoreboard: populate major provinces with real values in data-spending.json & cihiDownloader.ts, and add data-vintage checks/guards
+- [x] P0.4 Long Term Care compliance NaN guard: add totalFacilities divide-by-zero check to prevent NaN%, and render centered empty state when array is empty
+- [x] P1.1 Unify/disambiguate CT/MRI wait times: filter diagnostic imaging records out of Surgical Waits dashboard to focus solely on surgeries
+- [x] P1.2 Add data-quality rendering guards: check wait times, rates, and percentages for zero/null/undefined and render '—' or 'Data not available'
+- [x] P1.3 Fix AutoUpdated: label: change compact mode badge in DataTimestamp.tsx from 'Auto' to 'Auto-updated'
+- [x] P1.4 Provider directory search-first pagination: add search-first prompt state, slice filtered providers by page size 15, and render next/previous pagination controls
+- [x] P2.1 Clarify unofficial vs certified language: reword footer feed label in SystemFlowDashboard.tsx to Unofficial Analytical Data Feed
+- [x] P2.2 Explain >100% occupancy: add note to Provincial Bed Occupancy card and glossary explaining capacity overload / surge protocols
+- [x] P2.3 Distinguish manual vs live datasets: update DashboardHeader badges to show muted static indicators for manual datasets and pulsing green for auto-updated
+- [x] P2.4 Collapse/memoize module selector: declare collapsible nav bar in App.tsx that starts minimized on dashboards and auto-collapses on selection
+- [x] P2.5 Visual review check: verify TypeScript compiles cleanly with no errors, and esbuild/vite production bundle compiles successfully

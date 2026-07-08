@@ -654,3 +654,20 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** The Health Spending dashboard's `ALBERTA_ACTIVITY_VOLUME_TREND` array spans 1975–2026, but activity metrics (surgeries, CT exams, lab tests, ED visits, admissions, physicians) only have real values from 2021–2022 onward; earlier years were `0` placeholders. The explorer charts rendered the full range, so the x-axis showed empty decades from 1976–1977 up to 2021–2022 and the stats displayed a baseline of `0` (e.g., "Baseline (2021-22): 0" for CT scans).
 - **Solution:** In `SpendingDashboard.tsx`, added helpers to find the first non-zero data point for a KPI and to find the first year where all index-chart inputs are non-zero. Trimmed the explorer `AreaChart` data and the productivity-disconnect `LineChart` data to those starts. Replaced hardcoded `Baseline (2021-22)` / `Current (2025-26)` labels with data-driven fiscal-year labels. Now Annual Surgeries and CT Scan Imaging show only 2021–2022 through 2025–2026, while AHS Expense (which has data since 1975) still shows its full history.
 - **Prevention:** Whenever a time-series dataset mixes real observations with placeholder zeros for missing years, filter the chart data to the span where the plotted metric actually has data. Make axis labels and baseline/current annotations derive from the filtered data, not hardcoded assumptions. Distinguish true zeros from missing data at the source or in the UI.
+
+## Session: 2026-07-08 (Prioritized Audit Remediation Sprint)
+
+### Lesson: JS spreading order can override key properties with defaults
+- **Mistake:** Spreading default objects (like `defaultTravel`, `defaultAccess`) that had placeholder `'Loading...'` for `lgaName` *after* the active profile (`...p` or `...need`) inside `useMemo` resulted in the profile's real `lgaName` being overwritten by `'Loading...'` for every row in the Health Inequity matrix.
+- **Solution:** Spread defaults first, or explicitly set key identifying properties like `lgaName` at the very end of the spread expression: `{ ...need, ...disease, ...ed, ...travel, ...access, lgaName: need.lgaName }`.
+- **Prevention:** When merging objects from multiple sources or fallback defaults, place the authoritative identifying fields at the very end of the spread object.
+
+### Lesson: Tree-sitter reads can hide syntax errors by eliding invalid tokens
+- **Mistake:** A syntax error like `}))` instead of `))}` inside a JSX expression was parsed by tree-sitter in standard reads as `))` (hiding the trailing `}`), making the code look correct in the terminal view while remaining broken on disk and failing compilation.
+- **Solution:** Read the raw file via `:raw` or verify the code using a raw diff or git diff to see the exact bytes on disk when encountering persistent syntax/JSX parsing issues.
+- **Prevention:** When compiler errors contradict standard file reads, always fall back to raw reads (`:raw` selector) or git diff to inspect exact characters on disk.
+
+### Lesson: Empty datasets in dashboards must be guarded to prevent NaN% and literal 0s
+- **Mistake:** Under-populated arrays like `CONTINUING_CARE_COMPLIANCE` (empty `[]`) resulted in divide-by-zero operations that output `"NaN% compliant"` on screen. Missing values in regional inequity and spending datasets rendered as literal `0` / `$0` / `0 km` for non-count metrics.
+- **Solution:** Guard calculations by checking array length before division (`total > 0 ? (count / total) * 100 : 0`). Check values in JSX and render `"—"` or `"Data not available"` for missing/fallback indicators instead of literal `0`.
+- **Prevention:** Never assume a domain dataset is always populated. Build standard empty-state blocks and value guards for every rate, wait-time, or percentage metric.
