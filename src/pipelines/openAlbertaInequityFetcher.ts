@@ -29,6 +29,8 @@ const TABLE_10_1_URL =
   'https://open.alberta.ca/dataset/28492ab1-7912-4ad1-8988-c666bee26c33/resource/178a681a-ade5-494d-a09a-509ba1b65548/download/table-10.1.xlsx';
 const FIGURE_4_2_URL =
   'https://open.alberta.ca/dataset/fd9674ed-e672-4ffa-bb63-9d9a9ce13fe5/resource/2f1e0166-322f-476b-b0bb-f774dcdec080/download/figure-4.2.xlsx';
+const FIGURE_2_2_URL =
+  'https://open.alberta.ca/dataset/34236eee-06a6-49aa-a328-71dcfafc6fc1/resource/2280f78f-d253-453b-95ac-7952118727f4/download/figure-2.2.xlsx';
 
 const INEQUITY_FILE = path.join(process.cwd(), 'data-regional-inequity.json');
 const RATE_LIMIT_MS = 2000;
@@ -262,6 +264,64 @@ function pickIndicator(indicators: Map<string, number>, fragments: string[]): nu
   return undefined;
 }
 
+// Parse a Figure 2.2 population workbook (tidy layout: LOCAL CODE, LOCAL NAME,
+// Fiscal Year, LGA Population, Alberta Population) into a map of LGA name →
+// population for the latest available fiscal year. Applies the same Woodcroft
+// rename convention as pivotSheet so names align with COMMUNITY_NEED_PROFILES.
+function parsePopulationSheet(rows: unknown[][]): Map<string, number> {
+  // Find the header row carrying LOCAL NAME and Fiscal Year.
+  let headerRow = -1;
+  let nameCol = -1;
+  let yearCol = -1;
+  let popCol = -1;
+  for (let r = 0; r < Math.min(20, rows.length); r++) {
+    const row = rows[r];
+    if (!row) continue;
+    for (let c = 0; c < row.length; c++) {
+      const label = normalizeLabel(String(row[c] ?? ''));
+      if (label.includes('local name')) nameCol = c;
+      if (label.includes('fiscal year')) yearCol = c;
+      if (label.includes('lga population')) popCol = c;
+    }
+    if (nameCol >= 0 && yearCol >= 0 && popCol >= 0) {
+      headerRow = r;
+      break;
+    }
+  }
+  if (headerRow < 0) return new Map();
+
+  // Determine the latest fiscal year present in the data.
+  let latestYear = '';
+  for (let r = headerRow + 1; r < rows.length; r++) {
+    const row = rows[r];
+    if (!row) continue;
+    const year = asString(row[yearCol]);
+    if (year && year > latestYear) latestYear = year;
+  }
+  if (!latestYear) return new Map();
+
+  const byLga = new Map<string, number>();
+  for (let r = headerRow + 1; r < rows.length; r++) {
+    const row = rows[r];
+    if (!row) continue;
+    const year = asString(row[yearCol]);
+    if (year !== latestYear) continue;
+    let name = asString(row[nameCol]);
+    const pop = asNumber(row[popCol]);
+    if (!name || pop === undefined || pop <= 0) continue;
+    // Apply the same rename convention as pivotSheet.
+    if (name === 'Edmonton - Woodcroft') {
+      name = 'Edmonton - Woodcroft (North Central)';
+    } else if (name === 'Edmonton - Woodcroft East') {
+      name = 'Edmonton - Woodcroft East (North Central)';
+    } else if (name === 'Edmonton - Woodcroft West') {
+      name = 'Edmonton - Woodcroft West (North Central)';
+    }
+    byLga.set(name, Math.round(pop));
+  }
+  return byLga;
+}
+
 interface LoadedJson {
   [key: string]: unknown;
 }
@@ -317,6 +377,7 @@ function mergeByLga<T extends { lgaName: string }>(
 function buildCommunityNeed(
   pivoted: Map<string, PivotedLga>,
   existing: CommunityNeedMetric[],
+  populationByLga?: Map<string, number>,
 ): CommunityNeedMetric[] {
   const existingByName = new Map<string, CommunityNeedMetric>();
   for (const rec of existing) existingByName.set(rec.lgaName, rec);
@@ -344,6 +405,7 @@ function buildCommunityNeed(
       deprivationIndex: deprivation ?? prev?.deprivationIndex ?? 0,
       medianHouseholdIncome: prev?.medianHouseholdIncome ?? 0,
       highSchoolGradPct: prev?.highSchoolGradPct ?? 0,
+      population: populationByLga?.get(lgaName) ?? prev?.population,
     });
   }
   return out;
@@ -441,6 +503,18 @@ export async function run(): Promise<SyncResult> {
       console.warn(`[OpenAlbertaInequity] Figure 4.2 download failed: ${msg}`);
     }
 
+    // 4. Rate-limit before the third request.
+    await new Promise<void>((resolve) => setTimeout(resolve, RATE_LIMIT_MS));
+
+    // 5. Download Figure 2.2 (LGA Population).
+    let figure22Buffer: Buffer | null = null;
+    try {
+      console.log(`[OpenAlbertaInequity] Downloading Figure 2.2: ${FIGURE_2_2_URL}`);
+      figure22Buffer = await downloadBuffer(FIGURE_2_2_URL);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[OpenAlbertaInequity] Figure 2.2 download failed: ${msg}`);
+    }
     if (!table101Buffer && !figure42Buffer) {
       console.warn('[OpenAlbertaInequity] Both sources unavailable — skipping.');
       return {
@@ -508,6 +582,28 @@ export async function run(): Promise<SyncResult> {
       }
     }
 
+    // Parse Figure 2.2 population data if downloaded.
+    let populationByLga = new Map<string, number>();
+    if (figure22Buffer) {
+      try {
+        const workbook = parseWorkbook(figure22Buffer);
+        for (const sheetName of workbook.SheetNames) {
+          const sheet = workbook.Sheets[sheetName];
+          if (!sheet) continue;
+          const rows = sheetToRows(sheet);
+          const popMap = parsePopulationSheet(rows);
+          if (popMap.size > 0) {
+            populationByLga = popMap;
+            break;
+          }
+        }
+        console.log(`[OpenAlbertaInequity] Parsed ${populationByLga.size} LGA populations from Figure 2.2.`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.warn(`[OpenAlbertaInequity] Figure 2.2 parse failed: ${msg}`);
+      }
+    }
+
     if (needPivoted.size === 0 && chronicPivoted.size === 0) {
       console.warn('[OpenAlbertaInequity] No LGA rows parsed from either workbook — leaving data file unchanged.');
       return {
@@ -528,7 +624,7 @@ export async function run(): Promise<SyncResult> {
     const existingChronicDisease = asRecordArray<ChronicDiseaseBurden>(existingJson['CHRONIC_DISEASE_BURDEN']);
     const existingEdReliance = asRecordArray<EDRelianceMetric>(existingJson['ED_RELIANCE_METRICS']);
 
-    const freshCommunityNeed = buildCommunityNeed(needPivoted, existingCommunityNeed);
+    const freshCommunityNeed = buildCommunityNeed(needPivoted, existingCommunityNeed, populationByLga);
     const freshChronicDisease = buildChronicDisease(chronicPivoted, needPivoted, existingChronicDisease);
     const freshEdReliance = buildEdReliance(needPivoted, existingEdReliance);
 

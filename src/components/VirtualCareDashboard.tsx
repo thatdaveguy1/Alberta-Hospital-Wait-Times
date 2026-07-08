@@ -680,6 +680,7 @@ export default function VirtualCareDashboard() {
       )}
 
       {/* Persistent Veracity and Audit Reference Section */}
+      {activeSubTab === 'demand' && (
       <div id="vc-audit-references" className="bg-slate-900/60 border border-slate-850 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2 text-slate-400">
           <FileSpreadsheet size={16} />
@@ -718,6 +719,7 @@ export default function VirtualCareDashboard() {
           </a>
         </div>
       </div>
+      )}
     </div>
   );
 }

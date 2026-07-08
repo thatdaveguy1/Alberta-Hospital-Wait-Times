@@ -108,6 +108,15 @@ export default function PatientExperienceDashboard() {
       { name: "Northern Lights Regional Health Centre", city: "Fort McMurray", id: "nlrhc" }
     ];
 
+    // Normalize common abbreviations / duplicate names from upstream APIs so the
+    // dropdown does not list the same facility twice under slightly different names.
+    const normalizeHospitalName = (name: string): string => {
+      return name
+        .replace(/\bFort Sask\b/gi, 'Fort Saskatchewan')
+        .replace(/\s*\(AHS\)\s*/g, '')
+        .trim();
+    };
+
     setHospitalsList(localFacilities);
 
     fetch('/api/hospitals')
@@ -121,11 +130,14 @@ export default function PatientExperienceDashboard() {
         
         data.forEach((h: any) => {
           if (h && h.name) {
-            const cleanName = h.name.replace(/\s*\(AHS\)\s*/g, '').trim();
-            uniqueHospitals.set(cleanName.toLowerCase(), {
-              name: h.name,
+            const cleanName = normalizeHospitalName(h.name);
+            const canonicalKey = cleanName.toLowerCase();
+            // Skip if this canonical name is already covered by the local list.
+            if (uniqueHospitals.has(canonicalKey)) return;
+            uniqueHospitals.set(canonicalKey, {
+              name: cleanName,
               city: h.city || 'Alberta',
-              id: h.id || cleanName.toLowerCase().replace(/[^a-z0-9]/g, '-')
+              id: h.id || canonicalKey.replace(/[^a-z0-9]/g, '-')
             });
           }
         });
@@ -309,6 +321,7 @@ export default function PatientExperienceDashboard() {
       </div>
 
       {/* Narrative quality impact disclaimer */}
+      {activeSubTab === 'voice' && (
       <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5">
@@ -325,6 +338,7 @@ export default function PatientExperienceDashboard() {
           PROVINCIAL FOCUS INDEX
         </span>
       </div>
+      )}
 
       {/* SUBTAB 1: Voice of the Patient */}
       {activeSubTab === 'voice' && (
@@ -495,7 +509,7 @@ export default function PatientExperienceDashboard() {
               <div className="pt-3 border-t border-slate-850 text-[10px] text-slate-400 flex items-start gap-1.5 leading-relaxed">
                 <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong>HQA Statement:</strong> System metrics show that when clinicians introduce themselves and invite decision input, patient compliance with follow-up prescription protocols increases by 24%.
+                  <strong>HQCA Statement:</strong> System metrics show that when clinicians introduce themselves and invite decision input, patient compliance with follow-up prescription protocols increases by 24%.
                 </span>
               </div>
             </div>
@@ -622,7 +636,7 @@ export default function PatientExperienceDashboard() {
                 <div className="p-3 bg-slate-950/40 border border-slate-850 rounded-lg space-y-1">
                   <span className="text-[10px] font-bold text-slate-300">Prescription Side-Effects Gap</span>
                   <p className="text-[10px] text-slate-400 leading-normal">
-                    Explaining potential prescription drug side effects remains the lowest-performing HQA FOCUS metric (averaging only 39.5% in 2025), presenting a clear medication-mishap risk.
+                    Explaining potential prescription drug side effects remains the lowest-performing HQCA FOCUS metric (averaging only 39.5% in 2025), presenting a clear medication-mishap risk.
                   </p>
                 </div>
               </div>

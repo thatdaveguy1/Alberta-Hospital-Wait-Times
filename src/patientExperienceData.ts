@@ -1,5 +1,5 @@
 // Alberta Patient Experience & Health Service Quality Datasets (2019 - 2026)
-// Compiled from HQA FOCUS (Primary Care, ED, Hospital, Home Care, LTC) and CIHI Hospital Harm metrics.
+// Compiled from HQCA FOCUS (Primary Care, ED, Hospital, Home Care, LTC) and CIHI Hospital Harm metrics.
 
 export interface SettingExperience {
   setting: string; // e.g., 'Primary Care', 'Emergency Dept', 'Hospital Inpatient', 'Home Care', 'Long-Term Care'
@@ -45,7 +45,7 @@ export interface ComplaintCategory {
 // DATASETS
 // ----------------------------------------------------------------------------
 
-// 1. Voice of the Patient: High-Level Satisfaction & Communication across Settings (HQA FOCUS)
+// 1. Voice of the Patient: High-Level Satisfaction & Communication across Settings (HQCA FOCUS)
 export const PATIENT_VOICE_BY_SETTING: SettingExperience[] = [
   // Primary Care (Family Doctors Clinic)
   {
@@ -138,7 +138,7 @@ export const PATIENT_VOICE_BY_SETTING: SettingExperience[] = [
   }
 ];
 
-// 2. Inpatient Experience Drilldown Trends (HQA Hospital Care Survey)
+// 2. Inpatient Experience Drilldown Trends (HQCA Hospital Care Survey)
 export const INPATIENT_EXPERIENCE_TRENDS: InpatientDetail[] = [
   {
     year: '2021',
@@ -166,7 +166,7 @@ export const INPATIENT_EXPERIENCE_TRENDS: InpatientDetail[] = [
   }
 ];
 
-// 3. Emergency Department Specific Experience Trends (HQA EDPEC Survey)
+// 3. Emergency Department Specific Experience Trends (HQCA EDPEC Survey)
 export const ED_EXPERIENCE_TRENDS: EDExperienceTrend[] = [
   {
     year: '2021',

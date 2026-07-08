@@ -237,14 +237,14 @@ export default function SystemFlowDashboard() {
     });
   }, [selectedZone, selectedType, searchQuery, systemFlowData]);
 
-// Facilities with HQA FOCUS flow metrics available
+// Facilities with HQCA FOCUS flow metrics available
   const hasFlowData = (f: FacilityFlow) =>
     f.hospitalOccupancy > 0 || f.p90BedWait > 0 || f.alcRate > 0;
 
   // Sorted Facilities
   const sortedFacilities = useMemo(() => {
     return [...filteredFacilities].sort((a, b) => {
-      // Show facilities with real HQA FOCUS data first
+      // Show facilities with real HQCA FOCUS data first
       const aHasData = hasFlowData(a) ? 1 : 0;
       const bHasData = hasFlowData(b) ? 1 : 0;
       if (aHasData !== bHasData) return bHasData - aHasData;
@@ -863,7 +863,7 @@ export default function SystemFlowDashboard() {
                             );
                           };
 
-                          // Find the boundary between rows that have HQA FOCUS flow metrics
+                          // Find the boundary between rows that have HQCA FOCUS flow metrics
                           // and rows that don't, so we can insert an explanatory divider.
                           let splitIndex = -1;
                           for (let i = 0; i < sortedFacilities.length - 1; i++) {
@@ -884,7 +884,7 @@ export default function SystemFlowDashboard() {
                                 <div className="px-4 py-2.5 bg-slate-950/60 border-y border-slate-800/80">
                                   <p className="text-[10px] text-slate-400 font-sans leading-relaxed">
                                     <span className="font-bold text-slate-300">Why the blanks?</span>{' '}
-                                    Occupancy, P90 bed wait, and ALC come from HQA FOCUS analytics and are only reported by acute-care hospitals that submit those metrics. The sites below report ED visits and LWBS only.
+                                    Occupancy, P90 bed wait, and ALC come from HQCA FOCUS analytics and are only reported by acute-care hospitals that submit those metrics. The sites below report ED visits and LWBS only.
                                   </p>
                                 </div>
                               )}
@@ -900,7 +900,7 @@ export default function SystemFlowDashboard() {
                   <div className="flex items-start gap-2 text-[10px] text-slate-500 leading-relaxed">
                     <Info className="w-3.5 h-3.5 text-slate-600 shrink-0 mt-0.5" />
                     <p>
-                      Flow metrics (occupancy, P90 bed wait, ALC) come from HQA FOCUS analytical estimates and are not available for all facility types.
+                      Flow metrics (occupancy, P90 bed wait, ALC) come from HQCA FOCUS analytical estimates and are not available for all facility types.
                       Facilities without these metrics show "—".
                     </p>
                   </div>
@@ -1351,7 +1351,7 @@ export default function SystemFlowDashboard() {
                   <span>Historical System Degradation Analysis (2021 - 2026)</span>
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Long-run quarters compiled from HQA FOCUS datasets illustrate how climbing occupancies trigger non-linear bed wait spikes.
+                  Long-run quarters compiled from HQCA FOCUS datasets illustrate how climbing occupancies trigger non-linear bed wait spikes.
                 </p>
               </div>
 
@@ -1632,13 +1632,18 @@ export default function SystemFlowDashboard() {
                   <span>Upstream LGA Demand Profiles (Open Alberta Portal)</span>
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Analysis of emergency department visit rates and Canadian Triage and Acuity Scale (CTAS) profiles by local health geographic area. Click a card to focus on its zone.
+                  Emergency department visit rates and Canadian Triage and Acuity Scale (CTAS) profiles by Local Geographic Area (LGA), derived from <a href="https://open.alberta.ca/dataset/28492ab1-7912-4ad1-8988-c666bee26c33" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">Open Alberta Table 10.1</a> (community need indicators) and <a href="https://open.alberta.ca/dataset/34236eee-06a6-49aa-a328-71dcfafc6fc1" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">Figure 2.2</a> (LGA population). Click a card to focus on its zone.
                 </p>
               </div>
 
               <div className="space-y-4">
                 {(systemFlowData?.REGIONAL_LGA_DEMAND ?? []).map((lga, idx) => {
-                  const visitRate = Math.round((lga.annualEdVisits / lga.population) * 1000);
+                  const hasPopulation = lga.population > 0;
+                  // Use the source edVisitsPer1000 rate directly when available;
+                  // only derive from annualEdVisits/population when both are real.
+                  const visitRate = hasPopulation
+                    ? Math.round((lga.annualEdVisits / lga.population) * 1000)
+                    : lga.edVisitsPer1000 ?? 0;
                   const isZoneFocused = selectedZone === lga.zone;
                   
                   return (
@@ -1679,17 +1684,35 @@ export default function SystemFlowDashboard() {
                       <div className="grid grid-cols-3 gap-2 p-2.5 rounded-lg bg-slate-950/80 border border-slate-900 text-center font-mono">
                         <div className="space-y-0.5">
                           <span className="text-[8px] text-slate-500 uppercase font-black tracking-wider block">ED Visits</span>
-                          <span className="text-xs font-black text-slate-200">{lga.annualEdVisits.toLocaleString()}</span>
+                          <span className="text-xs font-black text-slate-200">
+                            {hasPopulation ? lga.annualEdVisits.toLocaleString() : <span className="text-slate-600">N/A</span>}
+                          </span>
                         </div>
                         <div className="space-y-0.5 border-l border-r border-slate-900">
                           <span className="text-[8px] text-slate-500 uppercase font-black tracking-wider block">Population</span>
-                          <span className="text-xs font-black text-slate-200">{lga.population.toLocaleString()}</span>
+                          <span className="text-xs font-black text-slate-200">
+                            {hasPopulation ? lga.population.toLocaleString() : <span className="text-slate-600">N/A</span>}
+                          </span>
                         </div>
                         <div className="space-y-0.5">
                           <span className="text-[8px] text-slate-500 uppercase font-black tracking-wider block">Visit Rate</span>
-                          <span className="text-xs font-black text-amber-400">{visitRate} / 1k</span>
+                          <span className="text-xs font-black text-amber-400">
+                            {visitRate > 0 ? `${visitRate} / 1k` : <span className="text-slate-600">N/A</span>}
+                          </span>
                         </div>
                       </div>
+
+                      {/* Disclosure notice for LGAs without population data */}
+                      {!hasPopulation && (
+                        <div className="flex items-start gap-1.5 text-[9px] text-amber-400/80 leading-relaxed bg-amber-500/5 border border-amber-500/15 rounded-lg p-2">
+                          <Info className="w-3 h-3 shrink-0 mt-px text-amber-500" />
+                          <span>
+                            Population unavailable for this composite LGA. ED visit rate is sourced directly from{' '}
+                            <a href="https://open.alberta.ca/dataset/28492ab1-7912-4ad1-8988-c666bee26c33" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-300">Open Alberta Table 10.1</a>.
+                          </span>
+                        </div>
+                      )}
+
 
                       {/* Segmented triage progress bar */}
                       <div className="space-y-2">
@@ -1765,6 +1788,7 @@ export default function SystemFlowDashboard() {
       </AnimatePresence>
 
       {/* AHS Weekly Los PDF Releases Segment */}
+      {subTab === 'trends-weekly' && (
       <div className="p-6 rounded-2xl bg-[#090e21] border border-slate-800 space-y-4 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div className="space-y-1">
@@ -1853,10 +1877,11 @@ export default function SystemFlowDashboard() {
           </a>
         </div>
       </div>
+      )}
 
       {/* Footer methodology notes */}
       <div className="p-4 rounded-xl bg-[#090e21] border border-slate-800 text-[9px] text-slate-500 font-mono leading-relaxed flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
-        <span>Analytical Source: Health Quality Alberta (HQA) FOCUS live database; CIHI NACRS/DAD emergency-acute metadata tables; Alberta Health Services Weekly ED Flow metrics releases.</span>
+        <span>Analytical Source: Health Quality Alberta (HQCA) FOCUS live database; CIHI NACRS/DAD emergency-acute metadata tables; Alberta Health Services Weekly ED Flow metrics releases.</span>
         <span className="uppercase tracking-wider font-extrabold text-slate-400 flex items-center gap-1">
           <Award className="w-3.5 h-3.5 text-blue-400" />
           Unofficial Analytical Data Feed

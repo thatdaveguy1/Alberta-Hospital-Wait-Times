@@ -565,7 +565,7 @@ export default function PrimaryCareDashboard() {
               <div className="p-3 bg-slate-900/60 border border-slate-900 rounded-lg flex items-start gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <div className="text-xs text-slate-300">
-                  <strong>Critical Vulnerability identified:</strong> Access to a regular healthcare provider varies substantially across demographics. Low-income earners (<span className="text-rose-400 font-bold">{lowIncomeRate}%</span>), young adults (<span className="text-amber-400 font-bold">{youngAdultsRate}%</span>), and rural residents (<span className="text-rose-400 font-bold">{ruralRate}%</span>) experience severe gaps compared to seniors (<span className="text-emerald-400 font-bold">{seniorsRate}%</span>).
+                  <strong>Access Gap:</strong> Attachment to a regular healthcare provider is uneven across demographics. Rural / remote residents (<span className="text-rose-400 font-bold">{ruralRate}%</span>) and the lowest income quintile (<span className="text-rose-400 font-bold">{lowIncomeRate}%</span>) are attached at lower rates than seniors (<span className="text-emerald-400 font-bold">{seniorsRate}%</span>), while working-age adults (18–64) are closer to the provincial average.
                 </div>
               </div>
             </div>

@@ -94,6 +94,12 @@ export default function MentalHealthDashboard() {
     });
   }, [SUBSTANCE_HARM_TRENDS]);
 
+  const substanceHarmStats = useMemo(() => {
+    const latest = filteredHarmData[filteredHarmData.length - 1];
+    const peak = filteredHarmData.reduce((max, r) => r.apparentDeaths > max.apparentDeaths ? r : max, filteredHarmData[0]);
+    return { latest, peak };
+  }, [filteredHarmData]);
+
   // Historical trend stats for the selected substance harm KPI
   const harmKpiStats = useMemo(() => {
     if (!selectedHarmKpi) return null;
@@ -158,9 +164,12 @@ export default function MentalHealthDashboard() {
   // Aggregate bed capacity stats
   const bedStats = useMemo(() => {
     const total = ADDICTION_BED_CAPACITIES.reduce((acc, curr) => acc + curr.totalBeds, 0);
-    const available = ADDICTION_BED_CAPACITIES.reduce((acc, curr) => acc + curr.availableBeds, 0);
-    const pctOccupied = ((total - available) / total) * 100;
-    return { total, available, pctOccupied };
+    // Only sites with non-null availableBeds contribute to live availability stats.
+    const liveSites = ADDICTION_BED_CAPACITIES.filter(b => b.availableBeds !== null && b.availableBeds !== undefined);
+    const liveTotal = liveSites.reduce((acc, curr) => acc + curr.totalBeds, 0);
+    const available = liveSites.reduce((acc, curr) => acc + (curr.availableBeds ?? 0), 0);
+    const pctOccupied = liveTotal > 0 ? ((liveTotal - available) / liveTotal) * 100 : 0;
+    return { total, available, pctOccupied, liveCount: liveSites.length, hasLiveData: liveSites.length > 0 };
   }, [ADDICTION_BED_CAPACITIES]);
 
   // Filter ABED Beds
@@ -180,18 +189,15 @@ export default function MentalHealthDashboard() {
     return COMMUNITY_MH_WAITS.filter(w => w.ageGroup === waitAgeGroup);
   }, [waitAgeGroup, COMMUNITY_MH_WAITS]);
 
-  // Helper to color-code bed status
-  const getBedStatusStyle = (status: 'Available' | 'Almost Full' | 'Full') => {
-    switch (status) {
-      case 'Available':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      case 'Almost Full':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-      case 'Full':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-      default:
-        return 'bg-slate-900 text-slate-400 border-slate-800';
-    }
+  // Helper to color-code bed status (handles ABED tags and hand-authored statuses)
+  const getBedStatusStyle = (status: string) => {
+    const lower = status.toLowerCase();
+    if (lower === 'available') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+    if (lower === 'almost full') return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    if (lower === 'full') return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+    if (lower.includes('planned')) return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+    if (lower.includes('operational')) return 'bg-slate-700/30 text-slate-300 border-slate-600/30';
+    return 'bg-slate-900 text-slate-400 border-slate-800';
   };
 
   if (isLoading) {
@@ -307,13 +313,17 @@ export default function MentalHealthDashboard() {
                   : 'border-slate-800 hover:border-rose-500/30'
               }`}
             >
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Alberta Apparent Toxicity Deaths (2025)</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Alberta Apparent Toxicity Deaths ({substanceHarmStats.latest?.year ?? '2025'})</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-rose-500">~1,960</span>
+                <span className="text-3xl font-black text-rose-500">
+                  {substanceHarmStats.latest?.apparentDeaths.toLocaleString() ?? '—'}
+                </span>
                 <span className="text-xs text-slate-400 font-mono">deaths</span>
               </div>
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
-                Gradual reduction from the record 2023 surge (~2,670 deaths) following active expansion of Recovery Communities.
+                {substanceHarmStats.peak && substanceHarmStats.latest && substanceHarmStats.peak.year !== substanceHarmStats.latest.year
+                  ? `Gradual reduction from the record ${substanceHarmStats.peak.year} surge (${substanceHarmStats.peak.apparentDeaths.toLocaleString()} deaths) following active expansion of Recovery Communities.`
+                  : `Latest recorded annual apparent toxicity deaths across Alberta.`}
               </p>
               <span className="text-[9px] text-slate-500 group-hover:text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
                 <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
@@ -561,6 +571,20 @@ export default function MentalHealthDashboard() {
       {activeSubTab === 'addiction-beds' && (
         <div className="space-y-6">
           <DataTimestamp compact metadata={metadata} arrayKey="ADDICTION_BED_CAPACITIES" />
+          {/* ABED source disclosure */}
+          <div className="bg-slate-900/60 border border-slate-800/60 p-3 rounded-lg flex items-start gap-2">
+            <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              Bed availability data is sourced from the{' '}
+              <a href="https://findaddictionbeds.alberta.ca/" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 underline">
+                Addiction Bed Exploration Dashboard (ABED)
+              </a>
+              , updated once daily (Mon–Fri). Beds cannot be reserved through the dashboard — contact sites directly to confirm availability, intake policies, and waitlist information. For immediate help, call 211 or visit{' '}
+              <a href="https://recoveryaccessalberta.ca/" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 underline">
+                Recovery Access Alberta
+              </a>.
+            </p>
+          </div>
           {/* Bed search & corridor filters */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
@@ -603,16 +627,24 @@ export default function MentalHealthDashboard() {
             </div>
             <div className="space-y-1">
               <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Available Beds Today</span>
-              <span className="text-xl font-bold text-emerald-400">{bedStats.available} vacancies</span>
+              {bedStats.hasLiveData ? (
+                <span className="text-xl font-bold text-emerald-400">{bedStats.available} of {bedStats.total} beds</span>
+              ) : (
+                <span className="text-sm font-bold text-amber-400">Live availability not currently reported</span>
+              )}
             </div>
             <div className="space-y-1">
               <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Avg System Bed Occupancy</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-white">{bedStats.pctOccupied.toFixed(1)}%</span>
-                <div className="w-16 bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-850">
-                  <div className="bg-purple-500 h-full" style={{ width: `${bedStats.pctOccupied}%` }} />
+              {bedStats.hasLiveData ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-bold text-white">{bedStats.pctOccupied.toFixed(1)}%</span>
+                  <div className="w-16 bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-850">
+                    <div className="bg-purple-500 h-full" style={{ width: `${bedStats.pctOccupied}%` }} />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <span className="text-sm font-bold text-amber-400">Awaiting ABED data</span>
+              )}
             </div>
           </div>
 
@@ -647,9 +679,42 @@ export default function MentalHealthDashboard() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] bg-slate-950/60 p-2 rounded-lg border border-slate-850/60">
-                      <span className="text-slate-400">Available Beds:</span>
-                      <strong className="text-slate-200 font-mono font-black">{bed.availableBeds} / {bed.totalBeds}</strong>
+                    <div className="space-y-1.5 bg-slate-950/60 p-2 rounded-lg border border-slate-850/60">
+                      {bed.availableBeds !== null && bed.availableBeds !== undefined ? (
+                        <>
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-slate-400">Available Beds:</span>
+                            <strong className="text-slate-200 font-mono font-black">{bed.availableBeds} / {bed.totalBeds}</strong>
+                          </div>
+                          <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-850">
+                            <div
+                              className="bg-emerald-500 h-full"
+                              style={{ width: `${Math.min(100, (bed.availableBeds / bed.totalBeds) * 100)}%` }}
+                            />
+                          </div>
+                          <p className="text-[9px] text-slate-500">
+                            {bed.availableBeds === 0
+                              ? 'No vacancies currently reported'
+                              : bed.availableBeds / bed.totalBeds < 0.25
+                                ? 'Limited availability'
+                                : 'Beds available now'}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-slate-400">Total Beds:</span>
+                            <strong className="text-slate-200 font-mono font-black">{bed.totalBeds} beds</strong>
+                          </div>
+                          <p className="text-[9px] text-amber-400/80">
+                            Live availability not currently reported for this site. Check{' '}
+                            <a href="https://findaddictionbeds.alberta.ca/" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-300">
+                              ABED
+                            </a>{' '}
+                            or call 211 for current status.
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
 

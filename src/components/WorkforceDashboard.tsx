@@ -345,7 +345,7 @@ export default function WorkforceDashboard() {
               +2.4% Annual Increase (illustrative)
             </p>
             <span className="text-[9px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5">
-              No Trend Data Available
+              Snapshot only — no time series
             </span>
           </div>
           <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 hidden sm:block">
@@ -428,7 +428,7 @@ export default function WorkforceDashboard() {
               Physicians Over Age 55
             </p>
             <span className="text-[9px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5">
-              No Trend Data Available
+              Snapshot only — no time series
             </span>
           </div>
           <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 hidden sm:block">

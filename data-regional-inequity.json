@@ -9,7 +9,8 @@
       "acscRatePer100k": 361.86,
       "deprivationIndex": 8.95,
       "medianHouseholdIncome": 112500,
-      "highSchoolGradPct": 94.5
+      "highSchoolGradPct": 94.5,
+      "population": 21479
     },
     {
       "lgaName": "Edmonton - Woodcroft (North Central)",
@@ -31,7 +32,8 @@
       "acscRatePer100k": 325.34,
       "deprivationIndex": 12.61,
       "medianHouseholdIncome": 74200,
-      "highSchoolGradPct": 81.4
+      "highSchoolGradPct": 81.4,
+      "population": 35615
     },
     {
       "lgaName": "South rural (Lethbridge/Cardston area)",
@@ -64,7 +66,8 @@
       "acscRatePer100k": 573.89,
       "deprivationIndex": 10.55,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6309
     },
     {
       "lgaName": "Pincher Creek",
@@ -75,7 +78,8 @@
       "acscRatePer100k": 475.62,
       "deprivationIndex": 6.4,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 8437
     },
     {
       "lgaName": "Fort Macleod",
@@ -86,7 +90,8 @@
       "acscRatePer100k": 434.95,
       "deprivationIndex": 6.68,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6838
     },
     {
       "lgaName": "Cardston-Kainai",
@@ -97,7 +102,8 @@
       "acscRatePer100k": 396.43,
       "deprivationIndex": 8.12,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 16444
     },
     {
       "lgaName": "County of Lethbridge excluding the City of Lethbridge",
@@ -108,7 +114,8 @@
       "acscRatePer100k": 174.07,
       "deprivationIndex": 5.9,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 25940
     },
     {
       "lgaName": "Taber MD",
@@ -119,7 +126,8 @@
       "acscRatePer100k": 211.95,
       "deprivationIndex": 8.21,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 19068
     },
     {
       "lgaName": "County of Warner",
@@ -130,7 +138,8 @@
       "acscRatePer100k": 201.27,
       "deprivationIndex": 10.71,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 11174
     },
     {
       "lgaName": "County of Forty Mile",
@@ -141,7 +150,8 @@
       "acscRatePer100k": 274.89,
       "deprivationIndex": 6.68,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6437
     },
     {
       "lgaName": "Newell",
@@ -152,7 +162,8 @@
       "acscRatePer100k": 300.62,
       "deprivationIndex": 9.83,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 27580
     },
     {
       "lgaName": "Oyen",
@@ -163,7 +174,8 @@
       "acscRatePer100k": 434.05,
       "deprivationIndex": 7.29,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 3465
     },
     {
       "lgaName": "Cypress County excluding Medicine Hat",
@@ -174,7 +186,8 @@
       "acscRatePer100k": 271.48,
       "deprivationIndex": 10.8,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 11223
     },
     {
       "lgaName": "Medicine Hat",
@@ -185,7 +198,8 @@
       "acscRatePer100k": 311.29,
       "deprivationIndex": 9.69,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 68309
     },
     {
       "lgaName": "Lethbridge - West",
@@ -196,7 +210,8 @@
       "acscRatePer100k": 117.38,
       "deprivationIndex": 5.39,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 38901
     },
     {
       "lgaName": "Lethbridge - North",
@@ -207,7 +222,8 @@
       "acscRatePer100k": 296.43,
       "deprivationIndex": 11.35,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 28141
     },
     {
       "lgaName": "Lethbridge - South",
@@ -218,7 +234,8 @@
       "acscRatePer100k": 246.43,
       "deprivationIndex": 8.61,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 34232
     },
     {
       "lgaName": "Calgary - Upper NW",
@@ -229,7 +246,8 @@
       "acscRatePer100k": 122.93,
       "deprivationIndex": 2.92,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 124656
     },
     {
       "lgaName": "Calgary - North",
@@ -240,7 +258,8 @@
       "acscRatePer100k": 156.02,
       "deprivationIndex": 3.57,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 118115
     },
     {
       "lgaName": "Calgary - Nose Hill",
@@ -251,7 +270,8 @@
       "acscRatePer100k": 171.13,
       "deprivationIndex": 6.54,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 78920
     },
     {
       "lgaName": "Calgary - Lower NW",
@@ -262,7 +282,8 @@
       "acscRatePer100k": 92.74,
       "deprivationIndex": 2.65,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 62712
     },
     {
       "lgaName": "Calgary - Centre North",
@@ -273,7 +294,8 @@
       "acscRatePer100k": 244.56,
       "deprivationIndex": 10.79,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 44914
     },
     {
       "lgaName": "Calgary - Upper NE",
@@ -284,7 +306,8 @@
       "acscRatePer100k": 212.77,
       "deprivationIndex": 5.75,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 122930
     },
     {
       "lgaName": "Calgary - Lower NE",
@@ -295,7 +318,8 @@
       "acscRatePer100k": 266.66,
       "deprivationIndex": 7.96,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 95795
     },
     {
       "lgaName": "Calgary - East",
@@ -306,7 +330,8 @@
       "acscRatePer100k": 452.66,
       "deprivationIndex": 11.71,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 72069
     },
     {
       "lgaName": "Calgary - SE",
@@ -317,7 +342,8 @@
       "acscRatePer100k": 165.75,
       "deprivationIndex": 2.54,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 136850
     },
     {
       "lgaName": "Calgary - West",
@@ -328,7 +354,8 @@
       "acscRatePer100k": 129.72,
       "deprivationIndex": 3.88,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 93098
     },
     {
       "lgaName": "Calgary - Centre",
@@ -339,7 +366,8 @@
       "acscRatePer100k": 337.36,
       "deprivationIndex": 13.48,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 67123
     },
     {
       "lgaName": "Calgary - Centre West",
@@ -350,7 +378,8 @@
       "acscRatePer100k": 238.67,
       "deprivationIndex": 6.88,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 66554
     },
     {
       "lgaName": "Calgary - Elbow",
@@ -361,7 +390,8 @@
       "acscRatePer100k": 211.95,
       "deprivationIndex": 4.47,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 41160
     },
     {
       "lgaName": "Calgary - Fish Creek",
@@ -372,7 +402,8 @@
       "acscRatePer100k": 192.69,
       "deprivationIndex": 5.89,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 111207
     },
     {
       "lgaName": "Calgary - SW",
@@ -383,7 +414,8 @@
       "acscRatePer100k": 154.47,
       "deprivationIndex": 5.43,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 118053
     },
     {
       "lgaName": "Okotoks-Priddis",
@@ -394,7 +426,8 @@
       "acscRatePer100k": 149.91,
       "deprivationIndex": 4.38,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 46729
     },
     {
       "lgaName": "Black Diamond",
@@ -405,7 +438,8 @@
       "acscRatePer100k": 427.78,
       "deprivationIndex": 5.65,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 8764
     },
     {
       "lgaName": "High River",
@@ -416,7 +450,8 @@
       "acscRatePer100k": 164.52,
       "deprivationIndex": 7.46,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 23994
     },
     {
       "lgaName": "Claresholm",
@@ -427,7 +462,8 @@
       "acscRatePer100k": 211.15,
       "deprivationIndex": 7.25,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6297
     },
     {
       "lgaName": "Vulcan",
@@ -438,7 +474,8 @@
       "acscRatePer100k": 160.31,
       "deprivationIndex": 6.37,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6758
     },
     {
       "lgaName": "Airdrie",
@@ -449,7 +486,8 @@
       "acscRatePer100k": 189.45,
       "deprivationIndex": 5.67,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 75326
     },
     {
       "lgaName": "Chestermere",
@@ -460,7 +498,8 @@
       "acscRatePer100k": 117.21,
       "deprivationIndex": 3.84,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 25744
     },
     {
       "lgaName": "Strathmore",
@@ -471,7 +510,8 @@
       "acscRatePer100k": 327.48,
       "deprivationIndex": 7.31,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 35896
     },
     {
       "lgaName": "Crossfield",
@@ -482,7 +522,8 @@
       "acscRatePer100k": 176.09,
       "deprivationIndex": 5.22,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 9331
     },
     {
       "lgaName": "Didsbury",
@@ -493,7 +534,8 @@
       "acscRatePer100k": 168.19,
       "deprivationIndex": 5.8,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 16601
     },
     {
       "lgaName": "Cochrane-Springbank",
@@ -504,7 +546,8 @@
       "acscRatePer100k": 100.05,
       "deprivationIndex": 3.55,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 51694
     },
     {
       "lgaName": "Canmore",
@@ -515,7 +558,8 @@
       "acscRatePer100k": 250.66,
       "deprivationIndex": 5.22,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 28667
     },
     {
       "lgaName": "Banff",
@@ -526,7 +570,8 @@
       "acscRatePer100k": 188.22,
       "deprivationIndex": 6.66,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 12097
     },
     {
       "lgaName": "Rocky Mountain House",
@@ -537,7 +582,8 @@
       "acscRatePer100k": 439.7,
       "deprivationIndex": 8.36,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 20501
     },
     {
       "lgaName": "Drayton Valley",
@@ -548,7 +594,8 @@
       "acscRatePer100k": 228.95,
       "deprivationIndex": 8.02,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 18151
     },
     {
       "lgaName": "Sundre",
@@ -559,7 +606,8 @@
       "acscRatePer100k": 355.17,
       "deprivationIndex": 8.22,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6781
     },
     {
       "lgaName": "Olds",
@@ -570,7 +618,8 @@
       "acscRatePer100k": 198.61,
       "deprivationIndex": 6.12,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 12707
     },
     {
       "lgaName": "Innisfail",
@@ -581,7 +630,8 @@
       "acscRatePer100k": 334.61,
       "deprivationIndex": 6.48,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 15955
     },
     {
       "lgaName": "Red Deer County excluding the City of Red Deer",
@@ -592,7 +642,8 @@
       "acscRatePer100k": 256.73,
       "deprivationIndex": 8.31,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 29830
     },
     {
       "lgaName": "Sylvan Lake",
@@ -603,7 +654,8 @@
       "acscRatePer100k": 164.67,
       "deprivationIndex": 7.63,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 18220
     },
     {
       "lgaName": "Three Hills/Highway 21",
@@ -614,7 +666,8 @@
       "acscRatePer100k": 267.7,
       "deprivationIndex": 6.12,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 10873
     },
     {
       "lgaName": "Starland County/Drumheller",
@@ -625,7 +678,8 @@
       "acscRatePer100k": 461.45,
       "deprivationIndex": 8.02,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 11753
     },
     {
       "lgaName": "Planning & Special Area 2",
@@ -636,7 +690,8 @@
       "acscRatePer100k": 301.62,
       "deprivationIndex": 7.37,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 3581
     },
     {
       "lgaName": "Stettler & County",
@@ -647,7 +702,8 @@
       "acscRatePer100k": 239.42,
       "deprivationIndex": 10.18,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 12408
     },
     {
       "lgaName": "Castor/Coronation/Consort",
@@ -658,7 +714,8 @@
       "acscRatePer100k": 333.01,
       "deprivationIndex": 6.26,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6039
     },
     {
       "lgaName": "Wetaskiwin County",
@@ -669,7 +726,8 @@
       "acscRatePer100k": 680.9,
       "deprivationIndex": 6.88,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 33622
     },
     {
       "lgaName": "Ponoka",
@@ -680,7 +738,8 @@
       "acscRatePer100k": 328.29,
       "deprivationIndex": 6.54,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 12465
     },
     {
       "lgaName": "Rimbey",
@@ -691,7 +750,8 @@
       "acscRatePer100k": 367.66,
       "deprivationIndex": 7.86,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 10160
     },
     {
       "lgaName": "Lacombe",
@@ -702,7 +762,8 @@
       "acscRatePer100k": 288.73,
       "deprivationIndex": 7.66,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 23657
     },
     {
       "lgaName": "Camrose & County",
@@ -713,7 +774,8 @@
       "acscRatePer100k": 164.44,
       "deprivationIndex": 11.33,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 30228
     },
     {
       "lgaName": "Tofield",
@@ -724,7 +786,8 @@
       "acscRatePer100k": 466.68,
       "deprivationIndex": 6.42,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 7755
     },
     {
       "lgaName": "Viking",
@@ -735,7 +798,8 @@
       "acscRatePer100k": 259.12,
       "deprivationIndex": 6.63,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 2355
     },
     {
       "lgaName": "Flagstaff County",
@@ -746,7 +810,8 @@
       "acscRatePer100k": 304.93,
       "deprivationIndex": 6.65,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 8463
     },
     {
       "lgaName": "MD of Provost",
@@ -757,7 +822,8 @@
       "acscRatePer100k": 199.21,
       "deprivationIndex": 7.05,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 4832
     },
     {
       "lgaName": "MD of Wainwright",
@@ -768,7 +834,8 @@
       "acscRatePer100k": 367.02,
       "deprivationIndex": 9.41,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 11916
     },
     {
       "lgaName": "Lamont County",
@@ -779,7 +846,8 @@
       "acscRatePer100k": 401.38,
       "deprivationIndex": 7.09,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6446
     },
     {
       "lgaName": "Two Hills County",
@@ -790,7 +858,8 @@
       "acscRatePer100k": 387.79,
       "deprivationIndex": 7.45,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 5550
     },
     {
       "lgaName": "Vegreville/Minburn County",
@@ -801,7 +870,8 @@
       "acscRatePer100k": 333.2,
       "deprivationIndex": 9.87,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 10353
     },
     {
       "lgaName": "Vermilion River County",
@@ -812,7 +882,8 @@
       "acscRatePer100k": 161.35,
       "deprivationIndex": 5.99,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 36896
     },
     {
       "lgaName": "Red Deer - SW",
@@ -823,7 +894,8 @@
       "acscRatePer100k": 478.16,
       "deprivationIndex": 13.16,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 15676
     },
     {
       "lgaName": "Red Deer - East",
@@ -834,7 +906,8 @@
       "acscRatePer100k": 201.82,
       "deprivationIndex": 7.15,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 55472
     },
     {
       "lgaName": "Edmonton - Woodcroft East (North Central)",
@@ -845,7 +918,8 @@
       "acscRatePer100k": 371.69,
       "deprivationIndex": 16.06,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 59890
     },
     {
       "lgaName": "Edmonton - Woodcroft West (North Central)",
@@ -856,7 +930,8 @@
       "acscRatePer100k": 295.2,
       "deprivationIndex": 10.32,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 33254
     },
     {
       "lgaName": "Edmonton - Jasper Place",
@@ -867,7 +942,8 @@
       "acscRatePer100k": 300.62,
       "deprivationIndex": 13.13,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 45960
     },
     {
       "lgaName": "Edmonton - West Jasper Place",
@@ -878,7 +954,8 @@
       "acscRatePer100k": 168.1,
       "deprivationIndex": 5.26,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 105390
     },
     {
       "lgaName": "Edmonton - Castle Downs",
@@ -889,7 +966,8 @@
       "acscRatePer100k": 190.61,
       "deprivationIndex": 5.47,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 71639
     },
     {
       "lgaName": "Edmonton - Northgate",
@@ -900,7 +978,8 @@
       "acscRatePer100k": 245.32,
       "deprivationIndex": 11.71,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 82443
     },
     {
       "lgaName": "Edmonton - Eastwood",
@@ -911,7 +990,8 @@
       "acscRatePer100k": 643.24,
       "deprivationIndex": 16.02,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 70566
     },
     {
       "lgaName": "Edmonton - Abbottsfield",
@@ -922,7 +1002,8 @@
       "acscRatePer100k": 382.71,
       "deprivationIndex": 8.85,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 14446
     },
     {
       "lgaName": "Edmonton - NE",
@@ -933,7 +1014,8 @@
       "acscRatePer100k": 292.75,
       "deprivationIndex": 10.29,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 91141
     },
     {
       "lgaName": "Edmonton - Bonnie Doon",
@@ -944,7 +1026,8 @@
       "acscRatePer100k": 251.79,
       "deprivationIndex": 8.56,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 95751
     },
     {
       "lgaName": "Edmonton - Mill Woods West",
@@ -955,7 +1038,8 @@
       "acscRatePer100k": 227.1,
       "deprivationIndex": 7.88,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 50658
     },
     {
       "lgaName": "Edmonton - Mill Woods South & East",
@@ -966,7 +1050,8 @@
       "acscRatePer100k": 153.12,
       "deprivationIndex": 3.61,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 85399
     },
     {
       "lgaName": "Edmonton - Duggan",
@@ -977,7 +1062,8 @@
       "acscRatePer100k": 170.02,
       "deprivationIndex": 11.01,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 39356
     },
     {
       "lgaName": "Edmonton - Twin Brooks",
@@ -988,7 +1074,8 @@
       "acscRatePer100k": 98.82,
       "deprivationIndex": 2.67,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 75463
     },
     {
       "lgaName": "Edmonton - Rutherford",
@@ -999,7 +1086,8 @@
       "acscRatePer100k": 118.02,
       "deprivationIndex": 3.79,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 116729
     },
     {
       "lgaName": "Sturgeon County West",
@@ -1010,7 +1098,8 @@
       "acscRatePer100k": 188.46,
       "deprivationIndex": 8.81,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 30329
     },
     {
       "lgaName": "Sturgeon County East",
@@ -1021,7 +1110,8 @@
       "acscRatePer100k": 69.2,
       "deprivationIndex": 7.48,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6102
     },
     {
       "lgaName": "Fort Saskatchewan",
@@ -1032,7 +1122,8 @@
       "acscRatePer100k": 148.42,
       "deprivationIndex": 5.02,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 27017
     },
     {
       "lgaName": "Sherwood Park",
@@ -1043,7 +1134,8 @@
       "acscRatePer100k": 129.55,
       "deprivationIndex": 3.25,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 82512
     },
     {
       "lgaName": "Strathcona County excluding Sherwood Park",
@@ -1054,7 +1146,8 @@
       "acscRatePer100k": 90.15,
       "deprivationIndex": 3.82,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 17571
     },
     {
       "lgaName": "Beaumont",
@@ -1065,7 +1158,8 @@
       "acscRatePer100k": 163.08,
       "deprivationIndex": 4.67,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 26298
     },
     {
       "lgaName": "Leduc & Devon",
@@ -1076,7 +1170,8 @@
       "acscRatePer100k": 229.98,
       "deprivationIndex": 5.96,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 43578
     },
     {
       "lgaName": "Thorsby",
@@ -1087,7 +1182,8 @@
       "acscRatePer100k": 228.4,
       "deprivationIndex": 5.8,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 9100
     },
     {
       "lgaName": "Stony Plain & Spruce Grove",
@@ -1098,7 +1194,8 @@
       "acscRatePer100k": 231.78,
       "deprivationIndex": 6.51,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 58758
     },
     {
       "lgaName": "Westview excluding Stony Plain and Spruce Grove",
@@ -1109,7 +1206,8 @@
       "acscRatePer100k": 237.58,
       "deprivationIndex": 6.39,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 36964
     },
     {
       "lgaName": "St. Albert",
@@ -1120,7 +1218,8 @@
       "acscRatePer100k": 127.02,
       "deprivationIndex": 3.4,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 69970
     },
     {
       "lgaName": "Jasper",
@@ -1131,7 +1230,8 @@
       "acscRatePer100k": 297.16,
       "deprivationIndex": 6.98,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 5163
     },
     {
       "lgaName": "Hinton",
@@ -1142,7 +1242,8 @@
       "acscRatePer100k": 363.02,
       "deprivationIndex": 7.81,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 12213
     },
     {
       "lgaName": "Edson",
@@ -1153,7 +1254,8 @@
       "acscRatePer100k": 398.91,
       "deprivationIndex": 6.56,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 15929
     },
     {
       "lgaName": "Whitecourt",
@@ -1164,7 +1266,8 @@
       "acscRatePer100k": 343.32,
       "deprivationIndex": 7.83,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 14715
     },
     {
       "lgaName": "Mayerthorpe",
@@ -1175,7 +1278,8 @@
       "acscRatePer100k": 351.09,
       "deprivationIndex": 8.29,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 16198
     },
     {
       "lgaName": "Barrhead",
@@ -1186,7 +1290,8 @@
       "acscRatePer100k": 325.48,
       "deprivationIndex": 7.06,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 10978
     },
     {
       "lgaName": "Westlock",
@@ -1197,7 +1302,8 @@
       "acscRatePer100k": 294.51,
       "deprivationIndex": 7.74,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 19147
     },
     {
       "lgaName": "Frog Lake",
@@ -1208,7 +1314,8 @@
       "acscRatePer100k": 930.72,
       "deprivationIndex": 6.67,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 4794
     },
     {
       "lgaName": "St. Paul",
@@ -1219,7 +1326,8 @@
       "acscRatePer100k": 616.94,
       "deprivationIndex": 6.58,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 15346
     },
     {
       "lgaName": "Smoky Lake",
@@ -1230,7 +1338,8 @@
       "acscRatePer100k": 455.43,
       "deprivationIndex": 8.23,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 4725
     },
     {
       "lgaName": "Cold Lake",
@@ -1241,7 +1350,8 @@
       "acscRatePer100k": 415.97,
       "deprivationIndex": 5.84,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 20650
     },
     {
       "lgaName": "Bonnyville",
@@ -1252,7 +1362,8 @@
       "acscRatePer100k": 529.43,
       "deprivationIndex": 7.46,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 16536
     },
     {
       "lgaName": "Boyle",
@@ -1263,7 +1374,8 @@
       "acscRatePer100k": 263.66,
       "deprivationIndex": 6.79,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 3551
     },
     {
       "lgaName": "Athabasca",
@@ -1274,7 +1386,8 @@
       "acscRatePer100k": 341.27,
       "deprivationIndex": 7.47,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 10682
     },
     {
       "lgaName": "Lac La Biche",
@@ -1285,7 +1398,8 @@
       "acscRatePer100k": 741.34,
       "deprivationIndex": 9.22,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 10364
     },
     {
       "lgaName": "Grande Cache",
@@ -1296,7 +1410,8 @@
       "acscRatePer100k": 484.11,
       "deprivationIndex": 6.54,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 4146
     },
     {
       "lgaName": "Fox Creek",
@@ -1307,7 +1422,8 @@
       "acscRatePer100k": 421.56,
       "deprivationIndex": 6.94,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 2187
     },
     {
       "lgaName": "Valleyview",
@@ -1318,7 +1434,8 @@
       "acscRatePer100k": 867.41,
       "deprivationIndex": 8.65,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 7195
     },
     {
       "lgaName": "Beaverlodge",
@@ -1329,7 +1446,8 @@
       "acscRatePer100k": 290.65,
       "deprivationIndex": 8.09,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 12183
     },
     {
       "lgaName": "Grande Prairie County excluding the City of Grande Prairie",
@@ -1340,7 +1458,8 @@
       "acscRatePer100k": 160.6,
       "deprivationIndex": 6.18,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 21014
     },
     {
       "lgaName": "Swan Hills",
@@ -1351,7 +1470,8 @@
       "acscRatePer100k": 745.41,
       "deprivationIndex": 8.94,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 1299
     },
     {
       "lgaName": "Slave Lake",
@@ -1362,7 +1482,8 @@
       "acscRatePer100k": 470.5,
       "deprivationIndex": 7.97,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 11718
     },
     {
       "lgaName": "Wabasca",
@@ -1373,7 +1494,8 @@
       "acscRatePer100k": 589.24,
       "deprivationIndex": 7.69,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 4221
     },
     {
       "lgaName": "High Prairie",
@@ -1384,7 +1506,8 @@
       "acscRatePer100k": 1130.75,
       "deprivationIndex": 6.87,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 11593
     },
     {
       "lgaName": "High Level",
@@ -1395,7 +1518,8 @@
       "acscRatePer100k": 660.99,
       "deprivationIndex": 7.64,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 25211
     },
     {
       "lgaName": "Manning",
@@ -1406,7 +1530,8 @@
       "acscRatePer100k": 643.74,
       "deprivationIndex": 6.79,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 3301
     },
     {
       "lgaName": "Peace River",
@@ -1417,7 +1542,8 @@
       "acscRatePer100k": 402.45,
       "deprivationIndex": 7.98,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 18525
     },
     {
       "lgaName": "Falher",
@@ -1428,7 +1554,8 @@
       "acscRatePer100k": 913.13,
       "deprivationIndex": 6.74,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 4340
     },
     {
       "lgaName": "Spirit River",
@@ -1439,7 +1566,8 @@
       "acscRatePer100k": 343.05,
       "deprivationIndex": 6.24,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 6092
     },
     {
       "lgaName": "Fairview",
@@ -1450,7 +1578,8 @@
       "acscRatePer100k": 374.15,
       "deprivationIndex": 8.23,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 8102
     },
     {
       "lgaName": "Wood Buffalo excluding Fort McMurray",
@@ -1461,7 +1590,8 @@
       "acscRatePer100k": 351.15,
       "deprivationIndex": 6.95,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 4020
     },
     {
       "lgaName": "Fort McMurray",
@@ -1472,7 +1602,8 @@
       "acscRatePer100k": 291.07,
       "deprivationIndex": 5.56,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 78277
     },
     {
       "lgaName": "City of Grande Prairie",
@@ -1483,7 +1614,8 @@
       "acscRatePer100k": 305.84,
       "deprivationIndex": 9.71,
       "medianHouseholdIncome": 0,
-      "highSchoolGradPct": 0
+      "highSchoolGradPct": 0,
+      "population": 73580
     }
   ],
   "CHRONIC_DISEASE_BURDEN": [
@@ -3518,19 +3650,19 @@
   "_dataMetadata": {
     "COMMUNITY_NEED_PROFILES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:32:59.921Z",
+      "lastUpdated": "2026-07-08T04:26:20.627Z",
       "source": "Open Alberta CKAN LGA community profiles (Table 10.1)",
       "sourceVintage": "Latest Open Alberta Table 10.1 release"
     },
     "CHRONIC_DISEASE_BURDEN": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:32:59.921Z",
+      "lastUpdated": "2026-07-08T04:26:20.627Z",
       "source": "Open Alberta CKAN chronic disease indicators (Figure 4.2 + Table 10.1)",
       "sourceVintage": "Latest Open Alberta Figure 4.2 release"
     },
     "ED_RELIANCE_METRICS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:32:59.921Z",
+      "lastUpdated": "2026-07-08T04:26:20.627Z",
       "source": "Open Alberta CKAN LGA community profiles (Table 10.1 mood/anxiety)",
       "sourceVintage": "Latest Open Alberta Table 10.1 release"
     }

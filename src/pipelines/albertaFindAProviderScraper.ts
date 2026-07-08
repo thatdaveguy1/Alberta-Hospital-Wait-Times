@@ -15,6 +15,7 @@ import fs from 'fs';
 import path from 'path';
 import type { AcceptingProvider } from '../primaryCareData';
 import type { SyncResult } from './types';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 
 const API_ENDPOINT = 'https://albertafindaprovider.ca/search/directory/clinics';
 const DATA_FILE = path.join(process.cwd(), 'data-primary-care.json');
@@ -182,6 +183,18 @@ function mergeAndWrite(file: string, newProviders: AcceptingProvider[]): number 
 
   const merged = Array.from(byId.values());
   existing.ACCEPTING_PROVIDERS = merged;
+
+  const ownedMetadata: DataMetadata = {
+    ACCEPTING_PROVIDERS: buildMetadataEntry({
+      updateType: 'auto',
+      source: SOURCE_NAME,
+      sourceVintage: 'Live directory',
+    }),
+  };
+  existing._dataMetadata = mergeDataMetadata(
+    existing._dataMetadata as DataMetadata | undefined,
+    ownedMetadata,
+  );
 
   fs.writeFileSync(file, JSON.stringify(existing, null, 2));
   return merged.length;

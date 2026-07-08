@@ -48,7 +48,7 @@ const USER_AGENT =
 
 // GoodCaring-sourced rows are tagged with this setting so we can identify
 // and replace them on re-scrape without touching hand-curated rows from
-// other sources (HQA FOCUS, CIHI, AHS Patient Relations).
+// other sources (HQCA FOCUS, CIHI, AHS Patient Relations).
 const GOODCARING_SETTING = 'Specialist Access';
 
 interface PatientExperienceJson {

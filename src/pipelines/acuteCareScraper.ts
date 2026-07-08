@@ -8,7 +8,7 @@
 //
 // Facility-level flow metrics (occupancy, ALC, LWBS, bed wait, ICU) and
 // historical quarterly timelines are NOT published by AHS in scrapeable form —
-// they come from HQA FOCUS PDF/CSV reports. Those remain hand-authored
+// they come from HQCA FOCUS PDF/CSV reports. Those remain hand-authored
 // analytical estimates and are preserved (never clobbered) across runs.
 // The weekly ED LOS PDF parse is handled by ahsWeeklyEdLosScraper.ts.
 
@@ -373,17 +373,42 @@ function buildRegionalLgaDemand(): LGADemand[] {
   const needProfiles = (ri.COMMUNITY_NEED_PROFILES as CommunityNeedProfile[] | undefined) ?? [];
   const needByLga = new Map(needProfiles.map(p => [p.lgaName, p]));
 
-  // Approximate population from COMMUNITY_NEED_PROFILES where available;
-  // fall back to a per-1000-visit derived estimate otherwise.
+  // Build a normalized name → population lookup for fuzzy matching of composite
+  // LGA names (e.g. "South rural (Lethbridge/Cardston area)") that don't appear
+  // verbatim in the population source. Strips parenthetical descriptors and
+  // attempts prefix matching against the population map.
+  const popByLga = new Map<string, number>();
+  for (const p of needProfiles) {
+    if (p.population && p.population > 0) popByLga.set(p.lgaName, p.population);
+  }
+  const popByNormName = new Map<string, number>();
+  for (const [name, pop] of popByLga) {
+    popByNormName.set(name.toLowerCase().replace(/\s*\([^)]*\)\s*/g, '').trim(), pop);
+  }
+  function lookupPopulation(lgaName: string): number {
+    if (popByLga.has(lgaName)) return popByLga.get(lgaName)!;
+    const base = lgaName.toLowerCase().replace(/\s*\([^)]*\)\s*/g, '').trim();
+    if (popByNormName.has(base)) return popByNormName.get(base)!;
+    // Prefix match for composite names. When the normalized query is a prefix
+    // of multiple entries (e.g. "edmonton - woodcroft" matches both
+    // "edmonton - woodcroft west" and "edmonton - woodcroft east"), sum the
+    // populations of all matching sub-areas to get the combined total.
+    const prefixMatches: number[] = [];
+    for (const [normName, pop] of popByNormName) {
+      if (normName.startsWith(base)) prefixMatches.push(pop);
+      else if (base.startsWith(normName)) return pop;
+    }
+    if (prefixMatches.length > 0) return prefixMatches.reduce((a, b) => a + b, 0);
+    return 0;
+  }
+
   const candidates = edReliance.map(ed => {
     const profile = needByLga.get(ed.lgaName);
     const zone = profile?.zone ?? 'North Zone';
-    // Estimate annual ED visits from per-1000 rate and population (if present)
-    const population = profile?.population ?? 0;
+    const population = lookupPopulation(ed.lgaName);
     const annualEdVisits = population > 0
       ? Math.round((ed.totalEdVisitsPer1000 * population) / 1000)
       : 0;
-    // CTAS split is not in the source — mark as unknown (0) and keep low-acuity
     const lowAcuity = ed.lowAcuityCtas45Pct;
     return {
       lgaName: ed.lgaName,
@@ -412,6 +437,7 @@ function buildRegionalLgaDemand(): LGADemand[] {
         zone: best.zone,
         population: best.population,
         annualEdVisits: best.annualEdVisits,
+        edVisitsPer1000: best.edVisitsPer1000,
         ctas1_2_Pct: best.ctas1_2_Pct,
         ctas3_Pct: best.ctas3_Pct,
         ctas4_5_Pct: best.ctas4_5_Pct,
@@ -493,9 +519,9 @@ export async function run(): Promise<SyncResult> {
     const ownedMetadata: DataMetadata = {
       FACILITY_FLOW_METRICS: buildMetadataEntry({
         updateType: 'auto',
-        source: 'AHS public wait-times API + HQA FOCUS analytical estimates',
-        sourceVintage: 'Facility list live; metrics compiled from HQA FOCUS 2025/2026 reports',
-        verification: 'Facility names/cities/zones refreshed from AHS API. Occupancy, ALC, LWBS, bed wait, and ICU metrics are analytical estimates from HQA FOCUS reports.',
+        source: 'AHS public wait-times API + HQCA FOCUS analytical estimates',
+        sourceVintage: 'Facility list live; metrics compiled from HQCA FOCUS 2025/2026 reports',
+        verification: 'Facility names/cities/zones refreshed from AHS API. Occupancy, ALC, LWBS, bed wait, and ICU metrics are analytical estimates from HQCA FOCUS reports.',
       }),
       CIHI_COMPARATORS: buildMetadataEntry({
         updateType: 'auto',
@@ -505,15 +531,15 @@ export async function run(): Promise<SyncResult> {
       }),
       REGIONAL_LGA_DEMAND: buildMetadataEntry({
         updateType: 'auto',
-        source: 'Open Alberta CKAN LGA community profiles (derived from regional-inequity data)',
-        sourceVintage: 'Latest Open Alberta release',
-        verification: 'Derived from data-regional-inequity.json populated by openAlbertaInequityFetcher.',
+        source: 'Open Alberta CKAN LGA community profiles: Table 10.1 (ED visit rates) + Figure 2.2 (population)',
+        sourceVintage: 'Latest Open Alberta release (Table 10.1 + Figure 2.2)',
+        verification: 'Derived from data-regional-inequity.json populated by openAlbertaInequityFetcher (Table 10.1 + Figure 2.2).',
       }),
       HISTORICAL_FLOW_TIMELINES: buildMetadataEntry({
         updateType: 'manual',
-        source: 'HQA FOCUS quarterly performance reports',
+        source: 'HQCA FOCUS quarterly performance reports',
         sourceVintage: '2021-Q1 to 2026-Q1 compiled estimates',
-        verification: 'Quarterly figures compiled from HQA FOCUS datasets; preserved across runs.',
+        verification: 'Quarterly figures compiled from HQCA FOCUS datasets; preserved across runs.',
       }),
     };
     data._dataMetadata = mergeDataMetadata(data._dataMetadata, ownedMetadata);

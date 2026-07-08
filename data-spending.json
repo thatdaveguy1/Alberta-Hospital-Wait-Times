@@ -697,46 +697,144 @@
   ],
   "PHYSICIAN_SPECIALTY_BILLING": [
     {
-      "specialtyGroup": "General Practice / Family Medicine",
-      "physicianCount": 5420,
-      "totalPaymentsMillions": 1420.5,
-      "averagePaymentGross": 262000,
-      "servicesPerPatient": 4.8
+      "specialtyGroup": "General/Family Physicians (GP/FPs)",
+      "physicianCount": 5425,
+      "totalPaymentsMillions": 1755.5,
+      "averagePaymentGross": 300368,
+      "servicesPerPatient": 5.88
+    },
+    {
+      "specialtyGroup": "Radiology",
+      "physicianCount": 442,
+      "totalPaymentsMillions": 533.8,
+      "averagePaymentGross": 1182055,
+      "servicesPerPatient": 0
     },
     {
       "specialtyGroup": "Internal Medicine",
-      "physicianCount": 1480,
-      "totalPaymentsMillions": 621.4,
-      "averagePaymentGross": 419000,
-      "servicesPerPatient": 3.5
-    },
-    {
-      "specialtyGroup": "General & Thoracic Surgery",
-      "physicianCount": 580,
-      "totalPaymentsMillions": 312.8,
-      "averagePaymentGross": 539000,
-      "servicesPerPatient": 2.1
-    },
-    {
-      "specialtyGroup": "Anesthesiology",
-      "physicianCount": 820,
-      "totalPaymentsMillions": 385.4,
-      "averagePaymentGross": 470000,
-      "servicesPerPatient": 1.8
+      "physicianCount": 943,
+      "totalPaymentsMillions": 493.3,
+      "averagePaymentGross": 507917,
+      "servicesPerPatient": 1.49
     },
     {
       "specialtyGroup": "Psychiatry",
-      "physicianCount": 710,
-      "totalPaymentsMillions": 224.2,
-      "averagePaymentGross": 315000,
-      "servicesPerPatient": 5.2
+      "physicianCount": 586,
+      "totalPaymentsMillions": 239.2,
+      "averagePaymentGross": 398438,
+      "servicesPerPatient": 0.82
     },
     {
-      "specialtyGroup": "Pediatrics",
-      "physicianCount": 650,
-      "totalPaymentsMillions": 234.8,
-      "averagePaymentGross": 361000,
-      "servicesPerPatient": 3.9
+      "specialtyGroup": "Anaesthesiology",
+      "physicianCount": 462,
+      "totalPaymentsMillions": 186.7,
+      "averagePaymentGross": 392520,
+      "servicesPerPatient": 0.96
+    },
+    {
+      "specialtyGroup": "Ophthalmology",
+      "physicianCount": 142,
+      "totalPaymentsMillions": 185.2,
+      "averagePaymentGross": 1271421,
+      "servicesPerPatient": 0.7
+    },
+    {
+      "specialtyGroup": "Obstetrics-Gynaecology",
+      "physicianCount": 253,
+      "totalPaymentsMillions": 127.6,
+      "averagePaymentGross": 485750,
+      "servicesPerPatient": 0.26
+    },
+    {
+      "specialtyGroup": "Paediatrics",
+      "physicianCount": 396,
+      "totalPaymentsMillions": 126.1,
+      "averagePaymentGross": 304381,
+      "servicesPerPatient": 0.3
+    },
+    {
+      "specialtyGroup": "General Surgery",
+      "physicianCount": 217,
+      "totalPaymentsMillions": 106.9,
+      "averagePaymentGross": 470587,
+      "servicesPerPatient": 0.14
+    },
+    {
+      "specialtyGroup": "Orthopaedic Surgery",
+      "physicianCount": 188,
+      "totalPaymentsMillions": 95.7,
+      "averagePaymentGross": 491108,
+      "servicesPerPatient": 0.1
+    },
+    {
+      "specialtyGroup": "Dermatology",
+      "physicianCount": 67,
+      "totalPaymentsMillions": 75.1,
+      "averagePaymentGross": 1086779,
+      "servicesPerPatient": 0.28
+    },
+    {
+      "specialtyGroup": "Emergency Medicine",
+      "physicianCount": 206,
+      "totalPaymentsMillions": 72,
+      "averagePaymentGross": 341349,
+      "servicesPerPatient": 0.14
+    },
+    {
+      "specialtyGroup": "Otolaryngology",
+      "physicianCount": 76,
+      "totalPaymentsMillions": 56.8,
+      "averagePaymentGross": 714945,
+      "servicesPerPatient": 0.13
+    },
+    {
+      "specialtyGroup": "Urology",
+      "physicianCount": 63,
+      "totalPaymentsMillions": 38.7,
+      "averagePaymentGross": 599967,
+      "servicesPerPatient": 0.06
+    },
+    {
+      "specialtyGroup": "Neurology",
+      "physicianCount": 97,
+      "totalPaymentsMillions": 38.3,
+      "averagePaymentGross": 383511,
+      "servicesPerPatient": 0.08
+    },
+    {
+      "specialtyGroup": "Physical Medicine And Rehabilitation",
+      "physicianCount": 72,
+      "totalPaymentsMillions": 37.6,
+      "averagePaymentGross": 504764,
+      "servicesPerPatient": 0.08
+    },
+    {
+      "specialtyGroup": "Plastic Surgery",
+      "physicianCount": 74,
+      "totalPaymentsMillions": 35.4,
+      "averagePaymentGross": 464291,
+      "servicesPerPatient": 0.04
+    },
+    {
+      "specialtyGroup": "Cardiovascular And Thoracic Surgery",
+      "physicianCount": 27,
+      "totalPaymentsMillions": 18.8,
+      "averagePaymentGross": 599784,
+      "servicesPerPatient": 0.02
+    },
+    {
+      "specialtyGroup": "Pathology",
+      "physicianCount": 22,
+      "totalPaymentsMillions": 17.9,
+      "averagePaymentGross": 437371,
+      "servicesPerPatient": 0
+    },
+    {
+      "specialtyGroup": "Neurosurgery",
+      "physicianCount": 5,
+      "totalPaymentsMillions": 1.9,
+      "averagePaymentGross": 355442,
+      "servicesPerPatient": 0.01
     }
   ],
   "ALBERTA_USE_OF_FUNDS": [
@@ -3235,14 +3333,14 @@
     "NATIONAL_SPENDING_COMPARE": {
       "updateType": "auto",
       "lastUpdated": "2026-07-08T02:31:01.285Z",
-      "source": "CIHI NHEX 2025 full data tables (Table O.1)",
-      "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
+      "source": "CIHI National Health Expenditure Trends (NHEX)",
+      "sourceVintage": "NHEX 2025 release"
     },
     "ALBERTA_ACTIVITY_VOLUME_TREND": {
       "updateType": "auto",
       "lastUpdated": "2026-07-08T02:31:01.285Z",
-      "source": "CIHI NHEX 2025 full data tables (Table O.1, derived activity volume)",
-      "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
+      "source": "CIHI National Health Expenditure Trends (NHEX)",
+      "sourceVintage": "NHEX 2025 release"
     },
     "HOSPITAL_EFFICIENCY_TREND": {
       "source": "CIHI Hospital Cost Performance report",
@@ -3252,27 +3350,27 @@
       "verification": "CIHI publishes hospital cost performance indicators including spending per staffed bed and hospitalizations per bed. Fiscal year figures are plausible but could not be confirmed against a specific CIHI publication."
     },
     "PHYSICIAN_SPECIALTY_BILLING": {
-      "source": "openAlbertaBillingFetcher",
-      "sourceVintage": "Open Alberta (mismatched schema)",
-      "lastUpdated": "2026-07-05",
-      "updateType": "manual",
-      "verification": "Physician billing data has schema alignment issues on Open Alberta, requiring manual data cleansing and verification."
+      "updateType": "auto",
+      "lastUpdated": "2026-07-08T04:31:47.021Z",
+      "source": "Open Alberta AHCIP Statistical Supplement (combined workbook)",
+      "sourceVintage": "AHCIP Statistical Supplement — latest release (Tables 2.3, 2.12 A/B/D, 2.14)",
+      "verification": "Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons, with registered persons derived from Table 2.14 FTE counts. Pathology and Radiology have no Table 2.14 entry, so their servicesPerPatient is 0."
     },
     "ALBERTA_USE_OF_FUNDS": {
       "updateType": "auto",
       "lastUpdated": "2026-07-08T02:31:01.285Z",
-      "source": "CIHI NHEX 2025 full data tables (Series D1, Alberta sheet)",
-      "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
+      "source": "CIHI National Health Expenditure Trends (NHEX)",
+      "sourceVintage": "NHEX 2025 release"
     },
     "CIHI_RESOURCE_USE_INTENSITY": {
-      "source": "cihiDownloader",
-      "sourceVintage": "Live data",
+      "source": "CIHI National Health Expenditure Trends (NHEX)",
+      "sourceVintage": "NHEX 2025 release",
       "lastUpdated": "2026-07-05T15:56:27.339Z",
       "updateType": "auto"
     },
     "CIHI_SPENDING_PER_PERSON": {
-      "source": "cihiDownloader",
-      "sourceVintage": "Live data",
+      "source": "CIHI National Health Expenditure Trends (NHEX)",
+      "sourceVintage": "NHEX 2025 release",
       "lastUpdated": "2026-07-05T15:56:27.339Z",
       "updateType": "auto"
     }

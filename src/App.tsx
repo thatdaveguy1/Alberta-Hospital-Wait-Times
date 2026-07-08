@@ -220,7 +220,7 @@ const DASHBOARDS = [
     borderColor: 'border-teal-500/20',
     badge: 'CONTINUING CARE',
     badgeColor: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
-    source: 'HQA FOCUS & CIHI CCRS Registry',
+    source: 'HQCA FOCUS & CIHI CCRS Registry',
     updateFrequency: 'Quarterly Audits',
   },
   {
@@ -235,7 +235,7 @@ const DASHBOARDS = [
     borderColor: 'border-violet-500/20',
     badge: 'FOCUS SURVEY',
     badgeColor: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-    source: 'HQA FOCUS & CIHI Inpatient CPES-IC',
+    source: 'HQCA FOCUS & CIHI Inpatient CPES-IC',
     updateFrequency: 'Quarterly Release',
   },
   {
@@ -392,7 +392,7 @@ const TAB_METADATA_MAP: Record<string, {
     updateType: 'auto',
     interval: 'daily at 06:00 MT',
     sourceVintage: 'Auto-refreshed daily',
-    source: 'HQA FOCUS & AHS Weekly reports'
+    source: 'HQCA FOCUS & AHS Weekly reports'
   },
   'surgical-waits': {
     updateType: 'auto',
@@ -440,14 +440,14 @@ const TAB_METADATA_MAP: Record<string, {
     updateType: 'auto',
     interval: 'every 24 hours',
     sourceVintage: '2020-2026 placement stats',
-    source: 'HQA FOCUS, CIHI CCRS & AHS Continuing Care Registry',
+    source: 'HQCA FOCUS, CIHI CCRS & AHS Continuing Care Registry',
     domain: 'continuing-care'
   },
   'patient-experience': {
     updateType: 'auto',
     interval: 'every 24 hours',
     sourceVintage: '2026 survey data',
-    source: 'HQA FOCUS & CIHI CPES-IC',
+    source: 'HQCA FOCUS & CIHI CPES-IC',
     domain: 'patient-experience'
   },
   'public-health': {
@@ -1757,10 +1757,10 @@ export default function App() {
               <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl flex flex-col justify-between text-center min-w-0">
                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">7d Max</span>
                 <span className="text-xs font-black text-red-400 font-mono block mt-0.5">
-                  {maxStats?.max7d ? formatMinutesToHm(maxStats.max7d.waitTime) : formatMinutesToHm(stats.maxWait)}
+                  {maxStats?.max7d ? formatMinutesToHm(maxStats.max7d.waitTime) : '—'}
                 </span>
                 <span className="text-[7px] text-slate-500 font-medium italic truncate block mt-1" title={maxStats?.max7d ? maxStats.max7d.hospitalName : ''}>
-                  {maxStats?.max7d ? maxStats.max7d.hospitalName.replace('Community Hospital', '').replace('General Hospital', '').trim() : 'Syncing...'}
+                  {maxStats?.max7d ? maxStats.max7d.hospitalName.replace('Community Hospital', '').replace('General Hospital', '').trim() : 'No historical data'}
                 </span>
               </div>
 
@@ -1768,10 +1768,10 @@ export default function App() {
               <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl flex flex-col justify-between text-center min-w-0">
                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">30d Max</span>
                 <span className="text-xs font-black text-red-400 font-mono block mt-0.5">
-                  {maxStats?.max30d ? formatMinutesToHm(maxStats.max30d.waitTime) : formatMinutesToHm(stats.maxWait)}
+                  {maxStats?.max30d ? formatMinutesToHm(maxStats.max30d.waitTime) : '—'}
                 </span>
                 <span className="text-[7px] text-slate-500 font-medium italic truncate block mt-1" title={maxStats?.max30d ? maxStats.max30d.hospitalName : ''}>
-                  {maxStats?.max30d ? maxStats.max30d.hospitalName.replace('Community Hospital', '').replace('General Hospital', '').trim() : 'Syncing...'}
+                  {maxStats?.max30d ? maxStats.max30d.hospitalName.replace('Community Hospital', '').replace('General Hospital', '').trim() : 'No historical data'}
                 </span>
               </div>
             </div>

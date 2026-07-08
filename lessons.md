@@ -4,6 +4,70 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 
 ---
 
+## Session: 2026-07-08 (Visual Audit Remediation)
+
+### Lesson: Visual audits catch UI/UX issues that code review misses
+- **Mistake:** A full visual audit of all 15 dashboard modules revealed repeated narrative blocks, pipeline-filename source labels, missing data shown as zeros/blanks, hardcoded KPIs that contradicted detail tables, dead subtabs, and duplicate location/facility entries. These issues were not caught by `tsc` or `npm run build`.
+- **Solution:** Audited every tab in a headed browser, documented findings in `visual-audit-findings.md`, then fixed them systematically: HQA→HQCA typo, human-readable source labels, data-driven KPIs, closed-state explanations for labs, N/A handling for missing LTC wait times, scientific notation for wastewater signals, and normalization maps for facilities/cities.
+- **Prevention:** Schedule visual audits after any broad dashboard change. Automated tests catch crashes; human/browser audits catch misleading presentation.
+
+### Lesson: Source labels should never leak pipeline filenames to users
+- **Mistake:** Data timestamps and metadata showed pipeline IDs like `cihiWaitTimesDownloader`, `openAlbertaBillingFetcher`, and `cihiDownloader` as the source. Users cannot interpret internal filenames.
+- **Solution:** Added a comprehensive mapping in `DataTimestamp.tsx` (e.g., `cihiDownloader` → "CIHI National Health Expenditure Trends (NHEX)"), updated `_dataMetadata` in the data files, and fixed the source strings written by `cihiWaitTimesDownloader.ts`, `primaryCareFetcher.ts`, `albertaFindAProviderScraper.ts`, `hqcaFocusScraper.ts`, and `cihiMhSafetyFetcher.ts`.
+- **Prevention:** Treat pipeline IDs as internal. Every metadata writer must emit a user-facing source name and vintage. DataTimestamp should be a safety net, not the only layer.
+
+### Lesson: KPIs must be derived from the same data as the detail tables
+- **Mistake:** LTC placement KPIs showed 57.3% / 25 days / 67.5% while the detail panel showed 58.5% / 56.2% / 68.2% / 66.8%. Mental Health apparent toxicity deaths showed ~1,960 while the table showed 610. These were hardcoded or stale values.
+- **Solution:** Replaced the KPI cards with inline computations from the same arrays used in the detail charts/tables (2025 Calgary/Edmonton averages for LTC, latest year from `SUBSTANCE_HARM_TRENDS` for mental health).
+- **Prevention:** Never hardcode a KPI that can be computed from existing data. If the data source is ambiguous (e.g., annualized estimate vs. calendar-year actual), add a tooltip or footnote explaining the discrepancy.
+
+### Lesson: Missing historical data should be null, not zero
+- **Mistake:** Continuing care placement records for 2019, 2020, and 2022 stored `daysWaitingP50: 0` and `daysWaitingP90: 0` as placeholders. The chart drew a flat line at 0, making it look like there were zero wait days in those years.
+- **Solution:** Transformed 0 placeholders to `null` in the component, updated the `PlacementMetric` interface to allow `number | null`, and rendered "N/A" in the summary cards. The chart now leaves a gap for missing years.
+- **Prevention:** Distinguish "not measured" from "measured as zero" in data models. Use `null` for missing values and validate scrapers so they don't write 0 as a placeholder.
+
+### Lesson: Closed state and unavailable data need explicit UI treatment
+- **Mistake:** Lab wait times at night showed `0:00` or `Unavailable` without explanation. ER 7-day and 30-day historical peak boxes showed the same current peak as the 24-hour box because the fallback returned the live snapshot for all ranges.
+- **Solution:** Added a `getLabStatus()` helper that renders "Closed" with a tooltip when a lab is not walk-in or reports `0`/`Closed`. Removed the fallback for 7-day and 30-day ER peaks in `trendsPusher.ts` so those ranges show "No historical data" when there are no snapshots.
+- **Prevention:** Any metric that can be unavailable or closed must have a dedicated UI state. Do not fall back to current data for historical ranges unless the range truly contains data.
+
+### Lesson: Scrapers can pick up footer text as data rows
+- **Mistake:** The AHS mental health helplines scraper matched 3-digit numbers in footer text (`© 2026 Alberta Health Services`, `call 911`, `741` from `741741`) and created garbage helpline entries.
+- **Solution:** Added `isValidHelplineRow()` validation in `ahsAsiScraper.ts` to reject copyright notices, terms/privacy text, and generic 911 reminders. Cleaned the garbage entries from `data-mental-health.json`.
+- **Prevention:** When scraping unstructured HTML, validate extracted rows against the expected domain. Footer text, legal notices, and call-to-action paragraphs often contain phone-like tokens.
+
+### Lesson: Location data can be wrong upstream; normalize it
+- **Mistake:** The AHS disruptions page grouped `Hinton Healthcare Centre` under the `Smoky Lake` city header, so the scraper wrote `city: "Smoky Lake"`. The cancer facility cards displayed city names twice (`Barrhead, Barrhead (Edmonton Zone)`).
+- **Solution:** Added a `CITY_OVERRIDES` map in `disruptionsScraper.ts` to force `Hinton` for the Hinton facility. Removed the duplicate city badge in `CancerDashboard.tsx` and kept the address line as the single city+zone reference.
+- **Prevention:** Upstream page grouping can be wrong. Add editorial override seams for facility city/location. Avoid rendering the same geographic label twice in one card.
+
+### Lesson: Projected totals must be clearly labeled as subsets when they are not province-wide totals
+- **Mistake:** The Cancer dashboard displayed "2026 Projected Annual Cancer Diagnoses ~13,880" even though the underlying data only covers six major cancer types (breast, colorectal, lung, prostate, bladder, melanoma). The true Alberta annual cancer incidence is much higher.
+- **Solution:** Changed the label to "2026 Projected Major Cancer Diagnoses" and added a subtitle explaining the tracked cancers are a subset, not the total provincial burden. Updated the metadata verification note accordingly.
+- **Prevention:** When a dashboard aggregates a subset of a domain, the headline must say so. Never let a subset number be mistaken for a total.
+
+### Lesson: Wrong CKAN dataset can make a fetcher look broken
+- **Mistake:** `openAlbertaBillingFetcher` searched for "physician billing" and bound to AHCIP Table 4.9 (prescription/drug coverage), not physician payments by specialty. The parser correctly found zero specialty rows and wrote 0 records.
+- **Solution:** Retargeted the fetcher to the AHCIP Statistical Supplement combined workbook and joined Tables 2.12 A/B/D, 2.3, and 2.14 by specialty for 2021–22. Wrote 20 real records with user-facing metadata.
+- **Prevention:** Validate the first downloaded workbook against expected column names (specialty, gross payment, services) before building parsers. Log the CKAN package title and resource name on every run.
+
+### Lesson: Live ABED is the real source for addiction bed availability
+- **Mistake:** The mental health scraper targeted the wrong AHS page (tables that do not exist). `availableBeds: null` was coerced to `0`, showing "0 vacancies" and 100% occupancy.
+- **Solution:** Built an ABED card parser for `findaddictionbeds.alberta.ca`, merged 69 live sites into `ADDICTION_BED_CAPACITIES`, and updated the UI to treat `null` as "not reported" instead of zero.
+- **Prevention:** When vacancy data is optional, use `number | null` end-to-end and never default null to 0 in occupancy math.
+
+### Lesson: LGA demand cards need population from a second Open Alberta table
+- **Mistake:** `buildRegionalLgaDemand()` derived `annualEdVisits` from `population * rate / 1000` but `COMMUNITY_NEED_PROFILES` had no population, producing `0/0` → `NaN` on the cards.
+- **Solution:** Extended `openAlbertaInequityFetcher` with Figure 2.2 LGA population, fuzzy-matched composite LGA names, and showed `edVisitsPer1000` with disclosure when population is unavailable.
+- **Prevention:** When displaying derived counts (annual visits), either fetch every input field or show the rate directly with an explicit "population unavailable" state.
+
+### Lesson: Continuing care compliance was removed as fabricated, then restored from Open Alberta
+- **Mistake:** Phase 19 removed `CONTINUING_CARE_COMPLIANCE` as hand-authored fiction. The visual audit found an empty compliance subtab with no pipeline attempt.
+- **Solution:** Added `continuingCareComplianceFetcher.ts` against the Open Alberta Accommodation Standards XLSX (941 facilities), restored the compliance subtab with honest city-only geography (no fabricated AHS zones).
+- **Prevention:** When removing fabricated data, either wire a real fetcher in the same sprint or replace the subtab with a clear "no public source" disclosure — not an empty shell.
+
+---
+
 ## Session: 2026-07-06 (Python Environment & Launchd PATH Conflicts)
 
 ### Lesson: Launchd PATH overrides can redirect python3 execution to Homebrew versions

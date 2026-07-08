@@ -98,6 +98,15 @@ const DOMAIN_METADATA_BUILDERS: Record<
   string,
   Record<string, (ts: string) => DataMetadata[string]>
 > = {
+  'primary-care': {
+    CIHI_SAME_DAY_ACCESS: (ts) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Shared Health Priorities',
+        sourceVintage: 'CIHI same-day/next-day access data table',
+        lastUpdated: ts,
+      }),
+  },
   'system-flow': {
     CIHI_OCCUPANCY_RATES: (ts) =>
       buildMetadataEntry({

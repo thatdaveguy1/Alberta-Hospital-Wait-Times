@@ -37,6 +37,7 @@ import { run as cihiWorkforceRun } from './cihiWorkforceFetcher';
 import { run as albertaSubstanceUseRun } from './albertaSubstanceUseScraper';
 import { run as cihiMhSafetyRun } from './cihiMhSafetyFetcher';
 import { run as cihiWaitTimesPriorityRun } from './cihiWaitTimesPriorityFetcher';
+import { run as continuingCareComplianceRun } from './continuingCareComplianceFetcher';
 
 // Power BI scraper runs as a child process because Puppeteer is ESM-only
 // and the server bundles as CJS. The scraper launches headless Chrome,
@@ -110,6 +111,7 @@ const PIPELINES: Pipeline[] = [
   { name: 'primary-care', domain: 'primary-care', run: primaryCareRun },
   { name: 'alberta-find-a-provider', domain: 'primary-care', run: albertaFindAProviderRun },
   { name: 'hqca-continuing-care', domain: 'continuing-care', run: hqcaContinuingCareRun },
+  { name: 'continuing-care-compliance', domain: 'continuing-care', run: continuingCareComplianceRun },
   { name: 'open-alberta-inequity', domain: 'regional-inequity', run: openAlbertaInequityRun },
   { name: 'open-alberta-inequity-primary-care', domain: 'primary-care', run: openAlbertaInequityPrimaryCareRun },
   { name: 'virtual-care', domain: 'virtual-care', run: virtualCareRun },

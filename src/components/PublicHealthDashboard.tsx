@@ -96,6 +96,18 @@ export default function PublicHealthDashboard() {
     );
   }, [wastewaterSearch, data]);
 
+  // Format wastewater signal for readability: tiny or huge loads use scientific notation.
+  const formatWastewaterSignal = (value: number): string => {
+    if (value === 0) return '0';
+    const abs = Math.abs(value);
+    if (abs < 0.001 || abs >= 1_000_000) {
+      return value.toExponential(2);
+    }
+    return abs < 1
+      ? value.toFixed(3)
+      : value.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  };
+
   // Notifiable disease data filtration
   const filteredDiseases = useMemo(() => {
     // Show either the trend over years for selected disease (Alberta aggregated)
@@ -241,6 +253,7 @@ export default function PublicHealthDashboard() {
       </div>
 
       {/* Warning Narrative Chain */}
+      {activeSubTab === 'respiratory' && (
       <div id="ph-narrative-callout" className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5">
@@ -257,6 +270,7 @@ export default function PublicHealthDashboard() {
           PROVINCIAL HEALTH INDEX
         </span>
       </div>
+      )}
 
       {/* SUBTAB 1: Respiratory Virus Burden */}
       {activeSubTab === 'respiratory' && (
@@ -555,15 +569,15 @@ export default function PublicHealthDashboard() {
                     <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-850 text-center">
                       <div className="p-1 bg-slate-950/40 rounded">
                         <span className="text-[8px] text-slate-500 block uppercase">COVID</span>
-                        <span className="text-xs font-black text-indigo-400">{plant.covidSignal}</span>
+                        <span className="text-xs font-black text-indigo-400" title={`Signal index: ${plant.covidSignal}`}>{formatWastewaterSignal(plant.covidSignal)}</span>
                       </div>
                       <div className="p-1 bg-slate-950/40 rounded">
                         <span className="text-[8px] text-slate-500 block uppercase">Flu A</span>
-                        <span className="text-xs font-black text-amber-500">{plant.fluASignal}</span>
+                        <span className="text-xs font-black text-amber-500" title={`Signal index: ${plant.fluASignal}`}>{formatWastewaterSignal(plant.fluASignal)}</span>
                       </div>
                       <div className="p-1 bg-slate-950/40 rounded">
                         <span className="text-[8px] text-slate-500 block uppercase">RSV</span>
-                        <span className="text-xs font-black text-pink-500">{plant.rsvSignal}</span>
+                        <span className="text-xs font-black text-pink-500" title={`Signal index: ${plant.rsvSignal}`}>{formatWastewaterSignal(plant.rsvSignal)}</span>
                       </div>
                     </div>
                   </div>
@@ -980,6 +994,7 @@ export default function PublicHealthDashboard() {
       )}
 
       {/* OUTBREAK CLINICAL PROTOCOLS MODULE (Static Lookout) */}
+      {activeSubTab === 'respiratory' && (
       <div id="ph-outbreak-protocols" className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-850">
           <div>
@@ -1030,6 +1045,7 @@ export default function PublicHealthDashboard() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -15,13 +15,15 @@ export interface SubstanceHarmTrend {
 export interface AddictionBedStatus {
   id: string;
   siteName: string;
-  corridor: 'Calgary Corridor' | 'Edmonton Corridor' | 'Central Corridor' | 'South Corridor' | 'North Corridor';
-  bedType: 'Detoxification' | 'Short-Term Treatment' | 'Long-Term Recovery' | 'Youth Specific';
-  gender: 'Co-Ed' | 'Male' | 'Female';
+  corridor: string;
+  bedType: string;
+  gender: string;
   totalBeds: number;
-  availableBeds: number;
-  status: 'Available' | 'Almost Full' | 'Full';
-  lastUpdated: string;
+  /** null when live availability is not currently reported by the source. */
+  availableBeds: number | null;
+  status: string;
+  lastUpdated?: string;
+  notes?: string;
 }
 
 export interface CommunityMHWait {
@@ -131,85 +133,87 @@ export const SUBSTANCE_HARM_TRENDS: SubstanceHarmTrend[] = [
   }
 ];
 
-// 2. Daily Bed Capacity Status (Addiction Bed Exploration Dashboard - ABED)
-// Real site availability benchmarks from findaddictionbeds.alberta.ca
+// 2. Addiction Treatment Bed Capacity (Addiction Bed Exploration Dashboard - ABED)
+// Source: findaddictionbeds.alberta.ca (live, updated once daily Mon-Fri).
+// availableBeds is null when the pipeline has not yet populated live counts;
+// the dashboard renders a disclosure in that case instead of "0 vacancies".
 export const ADDICTION_BED_CAPACITIES: AddictionBedStatus[] = [
   {
     id: 'BED-001',
-    siteName: 'Adanac Recovery Community',
+    siteName: 'George Spady Society (Aurora Centre)',
     corridor: 'Edmonton Corridor',
-    bedType: 'Long-Term Recovery',
+    bedType: 'Medically Supported Detox',
     gender: 'Co-Ed',
-    totalBeds: 75,
-    availableBeds: 8,
-    status: 'Available',
-    lastUpdated: 'Today, 07:15 AM'
+    totalBeds: 41,
+    availableBeds: null,
+    status: 'Operational',
+    notes: 'Also has 19 post-detox recovery beds. Moved to Aurora Centre at 15625 Stony Plain Road in 2025.'
   },
   {
     id: 'BED-002',
-    siteName: 'George Spady Society Detox Centre',
-    corridor: 'Edmonton Corridor',
-    bedType: 'Detoxification',
-    gender: 'Co-Ed',
-    totalBeds: 30,
-    availableBeds: 1,
-    status: 'Almost Full',
-    lastUpdated: 'Today, 08:30 AM'
-  },
-  {
-    id: 'BED-003',
     siteName: 'Calgary Alpha House Society',
     corridor: 'Calgary Corridor',
     bedType: 'Detoxification',
     gender: 'Co-Ed',
     totalBeds: 42,
-    availableBeds: 0,
-    status: 'Full',
-    lastUpdated: 'Today, 08:12 AM'
+    availableBeds: null,
+    status: 'Operational',
+    notes: '24/7 detox and transitional program. Also operates shelter and supportive housing.'
   },
   {
-    id: 'BED-004',
+    id: 'BED-003',
     siteName: 'Lethbridge Recovery Community',
     corridor: 'South Corridor',
     bedType: 'Long-Term Recovery',
-    gender: 'Male',
+    gender: 'Co-Ed',
     totalBeds: 50,
-    availableBeds: 12,
-    status: 'Available',
-    lastUpdated: 'Today, 06:45 AM'
+    availableBeds: null,
+    status: 'Operational',
+    notes: 'Publicly funded, abstinence-based, up to 1-year stay.'
+  },
+  {
+    id: 'BED-004',
+    siteName: 'Red Deer Recovery Community',
+    corridor: 'Central Corridor',
+    bedType: 'Long-Term Recovery',
+    gender: 'Co-Ed',
+    totalBeds: 75,
+    availableBeds: null,
+    status: 'Operational',
+    notes: 'Originally announced as 75-bed facility. Long-term, live-in treatment.'
   },
   {
     id: 'BED-005',
-    siteName: 'Red Deer Recovery Community',
-    corridor: 'Central Corridor',
-    bedType: 'Short-Term Treatment',
+    siteName: 'Grande Prairie Recovery Community',
+    corridor: 'North Corridor',
+    bedType: 'Long-Term Recovery',
     gender: 'Co-Ed',
-    totalBeds: 40,
-    availableBeds: 4,
-    status: 'Available',
-    lastUpdated: 'Today, 08:00 AM'
+    totalBeds: 50,
+    availableBeds: 0,
+    status: 'Planned (opening fall 2027)',
+    notes: 'Not yet open. Grande Prairie currently served by Northern Addictions Centre.'
   },
   {
     id: 'BED-006',
-    siteName: 'Grande Prairie Youth Addiction Centre',
-    corridor: 'North Corridor',
-    bedType: 'Youth Specific',
-    gender: 'Co-Ed',
-    totalBeds: 16,
-    availableBeds: 2,
-    status: 'Available',
-    lastUpdated: 'Today, 07:30 AM'
+    siteName: 'Lakeview Recovery Community (Gunn)',
+    corridor: 'Edmonton Corridor',
+    bedType: 'Long-Term Recovery',
+    gender: 'Men',
+    totalBeds: 75,
+    availableBeds: null,
+    status: 'Operational',
+    notes: 'Located in Gunn, AB near Edmonton. Comprehensive recovery support for men.'
   },
   {
     id: 'BED-007',
-    siteName: 'Avenue Treatment Centre',
-    corridor: 'Calgary Corridor',
-    bedType: 'Short-Term Treatment',
-    gender: 'Female',
-    totalBeds: 24,
-    availableBeds: 1,
-    status: 'Almost Full',
-    lastUpdated: 'Today, 08:45 AM'
+    siteName: 'Adeara Recovery Centre (Edmonton)',
+    corridor: 'Edmonton Corridor',
+    bedType: 'Long-Term Recovery',
+    gender: 'Women',
+    totalBeds: 20,
+    availableBeds: null,
+    status: 'Operational',
+    notes: 'Accredited residential recovery center serving women and their children.'
   }
 ];
 
@@ -353,7 +357,7 @@ export const _dataMetadata: Record<string, {
   verification?: string;
 }> = {
   SUBSTANCE_HARM_TRENDS: { source: "Alberta Substance Use Surveillance System (ASUSS)", sourceVintage: "2019\u20132025 (stimulant-specific subset)", lastUpdated: "2026-07-05", updateType: "manual", verification: "Trend direction matches known data (2023 peak, 2024-25 decline); exact counts unverified" },
-  ADDICTION_BED_CAPACITIES: { source: "Alberta Recovery Communities (alberta.ca), George Spady Society (gspady.org), Calgary Alpha House (alphahousecalgary.com)", sourceVintage: "2025-2026 operational status", lastUpdated: "2026-07-05", updateType: "manual", verification: "Verified facility names, bed counts, and operational status against official Alberta.ca recovery community pages and organization websites. Available beds marked as null because real-time bed availability is not publicly published." },
+  ADDICTION_BED_CAPACITIES: { source: "Addiction Bed Exploration Dashboard (ABED) - findaddictionbeds.alberta.ca", sourceVintage: "Live (updated once daily, Mon-Fri)", lastUpdated: "2026-07-08", updateType: "auto", verification: "Bed availability scraped from ABED prerendered HTML cards. Sites not listed on ABED retain hand-authored totalBeds with availableBeds=null until matched." },
   COMMUNITY_MH_WAITS: { source: "CIHI mental health wait time indicators", sourceVintage: "2021\u20132025", lastUpdated: "2026-07-05", updateType: "manual", verification: "Plausible values matching CIHI mental health access indicators" },
   HOSPITAL_MHSU_BURDEN: { source: "CIHI Mental Health & Substance Use hospitalization indicators", sourceVintage: "2021\u20132025", lastUpdated: "2026-07-05", updateType: "manual", verification: "Plausible values matching CIHI repeat hospitalization and frequent ER visit indicators" },
   SUPPORT_HELPLINES: { source: "alberta211Scraper", sourceVintage: "Alberta 211 (API limitations)", lastUpdated: "2026-07-05", updateType: "manual", verification: "Helpline directory matches known resources but the API has limitations, requiring manual listing checks." },

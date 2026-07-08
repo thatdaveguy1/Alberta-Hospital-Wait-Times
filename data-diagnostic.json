@@ -7228,7 +7228,7 @@
   "_dataMetadata": {
     "LAB_LOCATION_WAITS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T03:28:34.423Z",
+      "lastUpdated": "2026-07-08T11:22:01.334Z",
       "source": "APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)",
       "sourceVintage": "Live data",
       "verification": "Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes."
@@ -7243,14 +7243,14 @@
     "IMAGING_WAIT_TRENDS": {
       "updateType": "auto",
       "lastUpdated": "2026-07-08T02:31:07.584Z",
-      "source": "cihiWaitTimesDownloader",
-      "sourceVintage": "Live data"
+      "source": "CIHI Wait Times Priority Procedures in Canada",
+      "sourceVintage": "CIHI live data download"
     },
     "FACILITY_IMAGING_WAITS": {
-      "source": "AHS imaging wait times (estimated from Power BI)",
-      "sourceVintage": "Estimated (approximate 2024-2025)",
+      "source": "CIHI Wait Times Priority Procedures in Canada",
+      "sourceVintage": "CIHI live data download",
       "lastUpdated": "2026-07-05",
-      "updateType": "manual",
+      "updateType": "auto",
       "verification": "Facility names are real AHS facilities. P50/P90 wait day metrics are estimates and could not be confirmed against published AHS data. Mark as estimated."
     },
     "PRIORITY_TARGET_COMPLIANCE": {

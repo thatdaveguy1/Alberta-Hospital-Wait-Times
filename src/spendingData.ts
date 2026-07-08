@@ -8,12 +8,12 @@
 export interface NationalSpendingCompare {
   province: string;
   spendingPerCapita: number;       // total health expenditure per capita in CAD
-  spendingAsPercentGdp: number;    // %
+  spendingAsPercentGdp: number | null;    // %
   hospitalSpendingPerCapita: number;
   physicianSpendingPerCapita: number;
   drugSpendingPerCapita: number;
-  bedsPer100k: number;
-  costPerStandardStay: number;     // CIHI Cost of a Standard Hospital Stay in CAD
+  bedsPer100k: number | null;
+  costPerStandardStay: number | null;     // CIHI Cost of a Standard Hospital Stay in CAD
 }
 
 export interface ActivityVolumeTrend {
@@ -216,7 +216,7 @@ export const HOSPITAL_EFFICIENCY_TREND: HospitalEfficiencyMetric[] = [
   }
 ];
 
-// 4. Physician payments & activity by specialty group (Open Alberta / AHCIP statistical supplement)
+// 4. Physician payments & activity by specialty group (Open Alberta AHCIP Statistical Supplement)
 export const PHYSICIAN_SPECIALTY_BILLING: PhysicianPaymentSpecialty[] = [
   {
     specialtyGroup: 'General Practice / Family Medicine',
@@ -281,11 +281,11 @@ export const _dataMetadata: Record<string, {
   updateType: "auto" | "manual";
   verification?: string;
 }> = {
-  NATIONAL_SPENDING_COMPARE: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
-  ALBERTA_ACTIVITY_VOLUME_TREND: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  NATIONAL_SPENDING_COMPARE: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  ALBERTA_ACTIVITY_VOLUME_TREND: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
   HOSPITAL_EFFICIENCY_TREND: { source: "CIHI Hospital Cost Performance report", sourceVintage: "CIHI report (approximate 2021-2024)", lastUpdated: "2026-07-05", updateType: "manual", verification: "CIHI publishes hospital cost performance indicators including spending per staffed bed and hospitalizations per bed. Fiscal year figures are plausible but could not be confirmed against a specific CIHI publication." },
-  PHYSICIAN_SPECIALTY_BILLING: { source: "openAlbertaBillingFetcher", sourceVintage: "Open Alberta (mismatched schema)", lastUpdated: "2026-07-05", updateType: "manual", verification: "Physician billing data has schema alignment issues on Open Alberta, requiring manual data cleansing and verification." },
-  ALBERTA_USE_OF_FUNDS: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
-  CIHI_RESOURCE_USE_INTENSITY: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
-  CIHI_SPENDING_PER_PERSON: { source: "cihiDownloader", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  PHYSICIAN_SPECIALTY_BILLING: { source: "Open Alberta AHCIP Statistical Supplement (combined workbook)", sourceVintage: "AHCIP Statistical Supplement — latest release (Tables 2.3, 2.12 A/B/D, 2.14)", lastUpdated: "2026-07-08T04:31:47.021Z", updateType: "auto", verification: "Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons, with registered persons derived from Table 2.14 FTE counts. Pathology and Radiology have no Table 2.14 entry, so their servicesPerPatient is 0. Values below are a hand-curated fallback used only if data-spending.json is absent." },
+  ALBERTA_USE_OF_FUNDS: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  CIHI_RESOURCE_USE_INTENSITY: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
+  CIHI_SPENDING_PER_PERSON: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: "auto" },
 };

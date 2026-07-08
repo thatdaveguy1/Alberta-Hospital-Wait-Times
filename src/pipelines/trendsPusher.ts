@@ -88,7 +88,7 @@ function computeErTrendZones(snapshots: WaitTimeSnapshot[], hospitals: Hospital[
 function computeErMaxStats(snapshots: WaitTimeSnapshot[], hospitals: Hospital[]) {
   const now = Date.now();
 
-  const getPeakForRange = (cutoffMs: number) => {
+  const getPeakForRange = (cutoffMs: number, fallbackToCurrent = false) => {
     const cutoff = now - cutoffMs;
     const rangeSnaps = snapshots.filter(s => {
       const t = new Date(s.timestamp).getTime();
@@ -96,6 +96,9 @@ function computeErMaxStats(snapshots: WaitTimeSnapshot[], hospitals: Hospital[])
     });
 
     if (rangeSnaps.length === 0) {
+      // Only the 24h window may fall back to the current live snapshot; longer ranges
+      // should not inherit a single point-in-time value as their historical peak.
+      if (!fallbackToCurrent) return null;
       const validHospitals = hospitals.filter(h => h.waitTime >= 0);
       if (validHospitals.length === 0) return null;
       const peakHosp = validHospitals.reduce((max, h) => h.waitTime > max.waitTime ? h : max, validHospitals[0]);
@@ -120,7 +123,7 @@ function computeErMaxStats(snapshots: WaitTimeSnapshot[], hospitals: Hospital[])
   };
 
   return {
-    max24h: getPeakForRange(24 * 60 * 60 * 1000),
+    max24h: getPeakForRange(24 * 60 * 60 * 1000, true),
     max7d: getPeakForRange(7 * 24 * 60 * 60 * 1000),
     max30d: getPeakForRange(30 * 24 * 60 * 60 * 1000),
   };

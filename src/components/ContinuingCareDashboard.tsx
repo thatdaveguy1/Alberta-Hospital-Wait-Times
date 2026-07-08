@@ -65,13 +65,25 @@ export default function ContinuingCareDashboard() {
   // Interactive KPI selected state for historical trend panel
   const [selectedKpi, setSelectedKpi] = useState<'daysWaitingP50' | 'pctPlacedWithin30Days' | null>(null);
 
+  // Normalize placement stats: treat daysWaitingP50/P90 == 0 as missing (null) so the chart
+  // does not draw a misleading flat line across years without real wait-time data.
+  const placementStats = useMemo(() => {
+    return (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).map((r) => ({
+      ...r,
+      daysWaitingP50: r.daysWaitingP50 === 0 || r.daysWaitingP50 === undefined ? null : r.daysWaitingP50,
+      daysWaitingP90: r.daysWaitingP90 === 0 || r.daysWaitingP90 === undefined ? null : r.daysWaitingP90,
+    }));
+  }, [data]);
+
   const kpiStats = useMemo(() => {
     if (!selectedKpi) return null;
     // Get combined Calgary & Edmonton (or provincial representation) trend across years
     const yearlyData = ['2021', '2023', '2025'].map(y => {
-      const records = (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
-      const sum = records.reduce((acc, r) => acc + (r[selectedKpi] as number), 0);
-      return sum / (records.length || 1);
+      const records = placementStats.filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
+      const values = records
+        .map(r => r[selectedKpi])
+        .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+      return values.length > 0 ? values.reduce((acc, v) => acc + v, 0) / values.length : 0;
     });
 
     const baseline = yearlyData[0];
@@ -88,7 +100,7 @@ export default function ContinuingCareDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedKpi, data]);
+  }, [selectedKpi, placementStats]);
 
   const selectedKpiDetails = useMemo(() => {
     if (!selectedKpi) return null;
@@ -123,11 +135,14 @@ export default function ContinuingCareDashboard() {
   const trendData = useMemo(() => {
     if (!selectedKpi) return [];
     return ['2021', '2023', '2025'].map(y => {
-      const records = (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
-      const val = records.reduce((acc, r) => acc + (r[selectedKpi] as number), 0) / (records.length || 1);
+      const records = placementStats.filter(r => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
+      const values = records
+        .map(r => r[selectedKpi])
+        .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+      const val = values.length > 0 ? values.reduce((acc, v) => acc + v, 0) / values.length : 0;
       return { year: y, value: val };
     });
-  }, [selectedKpi, data]);
+  }, [selectedKpi, placementStats]);
   // Interactive Filters
   const [selectedZone, setSelectedZone] = useState<string>('All');
   const [operatorFilter, setOperatorFilter] = useState<string>('All');
@@ -138,10 +153,10 @@ export default function ContinuingCareDashboard() {
   const filteredPlacementData = useMemo(() => {
     if (selectedZone === 'All') {
       // average out by year or show all
-      return (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).filter(p => p.zone === 'Calgary Zone' || p.zone === 'Edmonton Zone');
+      return placementStats.filter(p => p.zone === 'Calgary Zone' || p.zone === 'Edmonton Zone');
     }
-    return (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).filter(p => p.zone === selectedZone);
-  }, [selectedZone, data]);
+    return placementStats.filter(p => p.zone === selectedZone);
+  }, [selectedZone, placementStats]);
 
   // Filter Quality Metrics
   const filteredQualityData = useMemo(() => {
@@ -249,7 +264,7 @@ export default function ContinuingCareDashboard() {
         </button>
       </div>
 
-      {/* SUBTAB 1: Placement & Flow (HQA FOCUS) */}
+      {/* SUBTAB 1: Placement & Flow (HQCA FOCUS) */}
       {activeSubTab === 'placement' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -268,7 +283,13 @@ export default function ContinuingCareDashboard() {
             >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Avg Placement Within 30 Days</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-emerald-400">57.3%</span>
+                <span className="text-3xl font-black text-emerald-400">
+                  {(() => {
+                    const records = placementStats.filter(r => r.year === '2025' && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
+                    const vals = records.map(r => r.pctPlacedWithin30Days).filter((v): v is number => typeof v === 'number' && !isNaN(v));
+                    return vals.length > 0 ? `${(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1)}%` : '—';
+                  })()}
+                </span>
                 <span className="text-xs text-slate-400 font-mono">Target: 60%+</span>
               </div>
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
@@ -295,7 +316,14 @@ export default function ContinuingCareDashboard() {
             >
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Median Wait Days (Calgary & Edmonton)</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-white">25 days</span>
+                <span className="text-3xl font-black text-white">
+                  {(() => {
+                    const records = placementStats.filter(r => r.year === '2025' && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone'));
+                    const vals = records.map(r => r.daysWaitingP50).filter((v): v is number => typeof v === 'number' && !isNaN(v));
+                    const avg = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+                    return avg === null ? '—' : `${avg.toFixed(0)} days`;
+                  })()}
+                </span>
                 <span className="text-xs text-slate-400 font-mono">P50 benchmark</span>
               </div>
               <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
@@ -447,8 +475,8 @@ export default function ContinuingCareDashboard() {
                     <YAxis label={{ value: 'Days', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} stroke="#64748b" fontSize={9} />
                     <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <Area type="monotone" dataKey="daysWaitingP90" name="90th Percentile Wait (Days)" stroke="#ef4444" fillOpacity={1} fill="url(#colorP90)" strokeWidth={2} />
-                    <Area type="monotone" dataKey="daysWaitingP50" name="Median Wait (Days)" stroke="#10b981" fillOpacity={1} fill="url(#colorP50)" strokeWidth={2.5} />
+                    <Area type="monotone" dataKey="daysWaitingP90" name="90th Percentile Wait (Days)" stroke="#ef4444" fillOpacity={1} fill="url(#colorP90)" strokeWidth={2} connectNulls={false} />
+                    <Area type="monotone" dataKey="daysWaitingP50" name="Median Wait (Days)" stroke="#10b981" fillOpacity={1} fill="url(#colorP50)" strokeWidth={2.5} connectNulls={false} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -467,7 +495,7 @@ export default function ContinuingCareDashboard() {
                     <div className="flex justify-between items-center text-xs font-bold text-white">
                       <span>{item.zone} ({item.year})</span>
                       <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono">
-                        P50: {item.daysWaitingP50}d
+                        P50: {item.daysWaitingP50 === null || item.daysWaitingP50 === undefined ? 'N/A' : `${item.daysWaitingP50}d`}
                       </span>
                     </div>
 
@@ -590,7 +618,7 @@ export default function ContinuingCareDashboard() {
         </div>
       )}
 
-      {/* SUBTAB 3: Home care client experience (HQA FOCUS Survey) */}
+      {/* SUBTAB 3: Home care client experience (HQCA FOCUS Survey) */}
       {activeSubTab === 'home-care' && (
         <div className="space-y-6">
           <DataTimestamp compact metadata={metadata} arrayKey="HOME_CARE_EXPERIENCE" />
@@ -654,7 +682,7 @@ export default function ContinuingCareDashboard() {
                 <span>The Turnover & Professional Continuity Gap</span>
               </h4>
               <p className="text-xs text-slate-400 max-w-4xl">
-                HQA FOCUS surveys show that clients seeing an average of 11+ different support workers in a 6-month period 
+                HQCA FOCUS surveys show that clients seeing an average of 11+ different support workers in a 6-month period 
                 record up to 40% lower satisfaction rates and face higher medication-mishap occurrence risks.
               </p>
             </div>
@@ -669,6 +697,7 @@ export default function ContinuingCareDashboard() {
       {/* SUBTAB 4: Compliance Registry (Open Alberta) */}
       {activeSubTab === 'compliance' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={metadata} arrayKey="CONTINUING_CARE_COMPLIANCE" />
           {!data?.CONTINUING_CARE_COMPLIANCE || data.CONTINUING_CARE_COMPLIANCE.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-sm gap-3">
               <AlertTriangle className="w-6 h-6 text-amber-500" />
@@ -720,7 +749,7 @@ export default function ContinuingCareDashboard() {
                 </div>
                 <div className="space-y-1">
                   <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">Auditing schedule</span>
-                  <span className="text-sm font-bold text-slate-300">Quarterly updates (March 2026 release)</span>
+                  <span className="text-sm font-bold text-slate-300">Quarterly (Alberta Open Government data)</span>
                 </div>
               </div>
 
@@ -735,7 +764,7 @@ export default function ContinuingCareDashboard() {
                             <h4 className="text-sm font-bold text-white truncate">{fac.name}</h4>
                             <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
                               <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                              <span className="truncate">{fac.city} • {fac.zone}</span>
+                              <span className="truncate">{fac.city}, Alberta</span>
                             </p>
                           </div>
 
@@ -778,7 +807,7 @@ export default function ContinuingCareDashboard() {
                         </span>
 
                         <a
-                          href="https://www.alberta.ca/continuing-care-accommodation-inspections"
+                          href="https://standardsandlicensing.alberta.ca"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="font-bold px-3 py-1.5 rounded-lg bg-emerald-650 hover:bg-emerald-600 text-white transition-all text-center"
@@ -796,6 +825,13 @@ export default function ContinuingCareDashboard() {
                     <p className="text-slate-400 text-xs">No audited facilities matched your search parameters.</p>
                   </div>
                 )}
+              </div>
+
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-start gap-2.5 text-[10px] text-slate-400 leading-relaxed">
+                <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                <p>
+                  Data source: <a href="https://open.alberta.ca/dataset/2003f13d-33ad-4d3f-865d-0d9488ace84d" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Alberta Open Government — Continuing Care Accommodation Standards compliance reporting</a> (OGL-A licensed, updated quarterly). Each facility is aggregated from per-visit monitoring records dating back to April 2013; <strong className="text-slate-300">violationsCount</strong> reflects only open/unresolved non-compliances. For real-time inspection results, search the <a href="https://standardsandlicensing.alberta.ca" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">standardsandlicensing.alberta.ca</a> portal.
+                </p>
               </div>
             </>
           )}

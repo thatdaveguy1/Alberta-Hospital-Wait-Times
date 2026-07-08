@@ -16,6 +16,7 @@ export interface CommunityNeedMetric {
   deprivationIndex: number;            // CIMD score (1-5, where 5 is highly deprived)
   medianHouseholdIncome: number;       // In CAD
   highSchoolGradPct: number;
+  population?: number;               // LGA population (Open Alberta Figure 2.2, AHCIP registrants)
 }
 
 export interface ChronicDiseaseBurden {

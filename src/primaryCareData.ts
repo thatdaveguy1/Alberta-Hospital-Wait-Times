@@ -1,5 +1,5 @@
 // Normalized Alberta Primary Care, Attachment, and Family Doctor Directory Datasets (2024 - 2026 reporting periods)
-// Compiled from HQA FOCUS Primary Healthcare, CIHI Shared Health Priorities, Statistics Canada SHCAE-PSC, and Alberta Find a Provider.
+// Compiled from HQCA FOCUS Primary Healthcare, CIHI Shared Health Priorities, Statistics Canada SHCAE-PSC, and Alberta Find a Provider.
 
 export interface AttachmentRate {
   id: string;
@@ -63,14 +63,14 @@ export interface LGACommunityNeed {
 
 export interface EDRelianceMetric {
   group: 'High Continuity (70%+)' | 'Moderate Continuity (30-69%)' | 'Low Continuity (<30%)' | 'No Attached Doctor' | 'Alberta Average';
-  minorConditionEdVisitsPer1000: number; // HQA FOCUS data linking continuity to ED visits
+  minorConditionEdVisitsPer1000: number; // HQCA FOCUS data linking continuity to ED visits
   description: string;
 }
 
 export interface ContinuityAndSatisfaction {
   zone: 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'South Zone' | 'North Zone' | 'Alberta';
-  highDoctorContinuityPct: number; // HQA FOCUS: % patients with high continuity of care
-  highClinicContinuityPct: number; // HQA FOCUS: % patients with high clinic continuity
+  highDoctorContinuityPct: number; // HQCA FOCUS: % patients with high continuity of care
+  highClinicContinuityPct: number; // HQCA FOCUS: % patients with high clinic continuity
   sameNextDayAccessPct: number; // CIHI: % patients who could get same/next day appointment
   satisfiedWithWaitTimePct: number; // CIHI: % satisfied with wait times for non-urgent care
   overallCareRatingExcellentPct: number; // FOCUS: % rating care as Excellent/Very Good
@@ -561,7 +561,7 @@ export const LGA_COMMUNITY_NEEDS: LGACommunityNeed[] = [
   }
 ];
 
-// 5. Causal Link: Family Doctor Continuity vs Emergency Department Overreliance (HQA FOCUS Chart Data)
+// 5. Causal Link: Family Doctor Continuity vs Emergency Department Overreliance (HQCA FOCUS Chart Data)
 export const ED_RELIANCE_BY_CONTINUITY: EDRelianceMetric[] = [
   {
     group: 'High Continuity (70%+)',
@@ -590,7 +590,7 @@ export const ED_RELIANCE_BY_CONTINUITY: EDRelianceMetric[] = [
   }
 ];
 
-// 6. Focus Primary Healthcare Experience & Access Metrics (CIHI Priority Indicators & HQA FOCUS Survey)
+// 6. Focus Primary Healthcare Experience & Access Metrics (CIHI Priority Indicators & HQCA FOCUS Survey)
 export const CONTINUITY_SATISFACTION: ContinuityAndSatisfaction[] = [
   {
     zone: 'Calgary Zone',

@@ -553,6 +553,7 @@ export default function RegionalInequityDashboard() {
       </div>
 
       {/* Warning Narrative Chain */}
+      {activeSubTab === 'lga-needs' && (
       <div id="ri-narrative-callout" className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
         <div className="space-y-1 flex-1">
           <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
@@ -567,6 +568,7 @@ export default function RegionalInequityDashboard() {
           PROVINCIAL HEALTH AUDIT
         </span>
       </div>
+      )}
 
       {/* Main Two-Column Interactive Layout */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">

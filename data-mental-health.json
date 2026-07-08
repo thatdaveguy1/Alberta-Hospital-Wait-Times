@@ -55,10 +55,11 @@
       "corridor": "Calgary Corridor",
       "bedType": "Detoxification",
       "gender": "Co-Ed",
-      "totalBeds": 42,
-      "availableBeds": null,
-      "status": "Operational",
-      "notes": "24/7 detox and transitional program. Also operates shelter and supportive housing."
+      "totalBeds": 41,
+      "availableBeds": 0,
+      "status": "Full",
+      "notes": "24/7 detox and transitional program. Also operates shelter and supportive housing.",
+      "lastUpdated": "2026-07-05 11:59 PM"
     },
     {
       "id": "BED-003",
@@ -67,9 +68,10 @@
       "bedType": "Long-Term Recovery",
       "gender": "Co-Ed",
       "totalBeds": 50,
-      "availableBeds": null,
-      "status": "Operational",
-      "notes": "Publicly funded, abstinence-based, up to 1-year stay."
+      "availableBeds": 2,
+      "status": "Almost Full",
+      "notes": "Publicly funded, abstinence-based, up to 1-year stay.",
+      "lastUpdated": "2026-07-05 11:59 PM"
     },
     {
       "id": "BED-004",
@@ -78,9 +80,10 @@
       "bedType": "Long-Term Recovery",
       "gender": "Co-Ed",
       "totalBeds": 75,
-      "availableBeds": null,
-      "status": "Operational",
-      "notes": "Originally announced as 75-bed facility. Long-term, live-in treatment."
+      "availableBeds": 38,
+      "status": "Available",
+      "notes": "Originally announced as 75-bed facility. Long-term, live-in treatment.",
+      "lastUpdated": "2026-07-05 11:59 PM"
     },
     {
       "id": "BED-005",
@@ -114,6 +117,589 @@
       "availableBeds": null,
       "status": "Operational",
       "notes": "Accredited residential recovery center serving women and their children."
+    },
+    {
+      "id": "BED-ABED-hull-services-radisson-recovery-stabilization-and-detox-Detoxification",
+      "siteName": "Hull Services Radisson (Recovery Stabilization and Detox)",
+      "corridor": "Calgary Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 6,
+      "availableBeds": 6,
+      "status": "Available",
+      "lastUpdated": "2026-07-04 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-blood-tribe-iitakamotsiipiohsopi-recovery-community-Short-Term Treatment",
+      "siteName": "Blood Tribe Iitakamotsiipiohsopi Recovery Community",
+      "corridor": "South Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 75,
+      "availableBeds": 66,
+      "status": "Available",
+      "lastUpdated": "2026-06-14 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-youth-residential-addiction-services-lethbridge-Short-Term Treatment",
+      "siteName": "Youth Residential Addiction Services - Lethbridge",
+      "corridor": "South Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 8,
+      "availableBeds": 7,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-lakeland-centre-for-fasd-Long-Term Recovery",
+      "siteName": "Lakeland Centre for FASD",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Female",
+      "totalBeds": 9,
+      "availableBeds": 6,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-enviros-shunda-creek-recovery-centre-Short-Term Treatment",
+      "siteName": "Enviros (Shunda Creek Recovery Centre)",
+      "corridor": "Central Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Male",
+      "totalBeds": 14,
+      "availableBeds": 9,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-addiction-counselling-prevention-services-pchad-Detoxification",
+      "siteName": "Addiction Counselling & Prevention Services  (PChAD)",
+      "corridor": "Central Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 8,
+      "availableBeds": 5,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-lethbridge-wellness-shelter-and-stabilization-unit-Long-Term Recovery",
+      "siteName": "Lethbridge Wellness Shelter and Stabilization Unit",
+      "corridor": "South Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Co-Ed",
+      "totalBeds": 12,
+      "availableBeds": 7,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-mcdougall-house-association-Short-Term Treatment",
+      "siteName": "McDougall House Association",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Female",
+      "totalBeds": 12,
+      "availableBeds": 7,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-oxford-house-Long-Term Recovery",
+      "siteName": "Oxford House",
+      "corridor": "Calgary Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Co-Ed",
+      "totalBeds": 19,
+      "availableBeds": 11,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-hull-services-youth-recovery-program-pchad-Detoxification",
+      "siteName": "Hull Services Youth Recovery Program/PChAD",
+      "corridor": "Calgary Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 6,
+      "availableBeds": 4,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-metis-indian-town-alcohol-association-mitaa-centre-Detoxification",
+      "siteName": "Metis Indian Town Alcohol Association (MITAA Centre)",
+      "corridor": "North Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 6,
+      "availableBeds": 3,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-youth-detoxification-services-solstice-integrated-wellness-centre-mountain-plains-cssn-Detoxification",
+      "siteName": "Youth Detoxification Services (Solstice Integrated Wellness Centre - Mountain Plains CSSN)",
+      "corridor": "North Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 4,
+      "availableBeds": 2,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-alberta-hospital-edmonton-youth-stabilization-and-residential-services-Detoxification",
+      "siteName": "Alberta Hospital Edmonton - Youth Stabilization and Residential Services",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 8,
+      "availableBeds": 3,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-central-alberta-s-safe-harbour-society-for-health-housing-Detoxification",
+      "siteName": "Central Alberta's Safe Harbour Society for Health & Housing",
+      "corridor": "Central Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 19,
+      "availableBeds": 8,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-alberta-hospital-edmonton-pchad-Detoxification",
+      "siteName": "Alberta Hospital Edmonton (PChAD)",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 9,
+      "availableBeds": 3,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-calgary-drop-in-centre-Detoxification",
+      "siteName": "Calgary Drop In Centre",
+      "corridor": "Calgary Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 15,
+      "availableBeds": 5,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-medicine-hat-recovery-centre-Detoxification",
+      "siteName": "Medicine Hat Recovery Centre",
+      "corridor": "South Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 12,
+      "availableBeds": 0,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-new-beginnings-stabilization-program-Short-Term Treatment",
+      "siteName": "New Beginnings Stabilization Program",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 12,
+      "availableBeds": 4,
+      "status": "Available",
+      "lastUpdated": "2026-07-02 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-drumheller-society-for-recovery-s-grace-house-Long-Term Recovery",
+      "siteName": "Drumheller Society for Recovery’s (Grace House)",
+      "corridor": "Central Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Male",
+      "totalBeds": 12,
+      "availableBeds": 3,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-lethbridge-recovery-centre-adult-detoxification-services-Detoxification",
+      "siteName": "Lethbridge Recovery Centre - Adult Detoxification Services",
+      "corridor": "South Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 8,
+      "availableBeds": 2,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-mcman-youth-family-and-community-association-Long-Term Recovery",
+      "siteName": "McMan Youth, Family and Community Association",
+      "corridor": "South Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Co-Ed",
+      "totalBeds": 16,
+      "availableBeds": 4,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-northern-addictions-centre-Detoxification",
+      "siteName": "Northern Addictions Centre",
+      "corridor": "North Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 40,
+      "availableBeds": 12,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-poundmaker-s-lodge-treatment-centres-Short-Term Treatment",
+      "siteName": "Poundmaker’s Lodge Treatment Centres",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 7,
+      "availableBeds": 1,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-the-george-spady-centre-society-Detoxification",
+      "siteName": "The George Spady Centre Society",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 19,
+      "availableBeds": 3,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-calgary-recovery-community-Short-Term Treatment",
+      "siteName": "Calgary Recovery Community",
+      "corridor": "Calgary Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Male",
+      "totalBeds": 74,
+      "availableBeds": 15,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-southern-alcare-manor-Long-Term Recovery",
+      "siteName": "Southern Alcare Manor",
+      "corridor": "South Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Co-Ed",
+      "totalBeds": 25,
+      "availableBeds": 5,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-pastew-place-detox-centre-society-Detoxification",
+      "siteName": "Pastew Place Detox Centre Society",
+      "corridor": "North Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 11,
+      "availableBeds": 2,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-alcove-addiction-recovery-for-women-Short-Term Treatment",
+      "siteName": "Alcove Addiction Recovery for Women",
+      "corridor": "Calgary Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Female",
+      "totalBeds": 5,
+      "availableBeds": 3,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-lakeview-recovery-community-Short-Term Treatment",
+      "siteName": "Lakeview Recovery Community",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Male",
+      "totalBeds": 100,
+      "availableBeds": 17,
+      "status": "Available",
+      "lastUpdated": "2026-07-04 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-nayoskan-treatment-centre-rts-Short-Term Treatment",
+      "siteName": "Nayoskan Treatment Centre - RTS",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 12,
+      "availableBeds": 2,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-streets-alive-Long-Term Recovery",
+      "siteName": "Streets Alive",
+      "corridor": "South Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Co-Ed",
+      "totalBeds": 35,
+      "availableBeds": 6,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-lander-treatment-centre-Short-Term Treatment",
+      "siteName": "Lander Treatment Centre",
+      "corridor": "Calgary Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 48,
+      "availableBeds": 7,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-northeast-addiction-and-mental-health-centre-for-holistic-recovery-Long-Term Recovery",
+      "siteName": "Northeast Addiction and Mental Health Centre for Holistic Recovery",
+      "corridor": "Calgary Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Co-Ed",
+      "totalBeds": 20,
+      "availableBeds": 3,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-simon-house-recovery-centre-Short-Term Treatment",
+      "siteName": "Simon House Recovery Centre",
+      "corridor": "Calgary Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Male",
+      "totalBeds": 44,
+      "availableBeds": 9,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-foothills-alcohol-action-society-foothills-centre-Detoxification",
+      "siteName": "Foothills Alcohol Action Society (Foothills Centre)",
+      "corridor": "South Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 6,
+      "availableBeds": 3,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-fort-mcmurray-recovery-centre-adult-residential-treatment-Short-Term Treatment",
+      "siteName": "Fort McMurray Recovery Centre - Adult Residential Treatment",
+      "corridor": "North Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 16,
+      "availableBeds": 2,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-recovery-acres-society-edmonton-Short-Term Treatment",
+      "siteName": "Recovery Acres Society - Edmonton",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Male",
+      "totalBeds": 19,
+      "availableBeds": 2,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-red-deer-dream-centre-Long-Term Recovery",
+      "siteName": "Red Deer Dream Centre",
+      "corridor": "Central Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Male",
+      "totalBeds": 20,
+      "availableBeds": 2,
+      "status": "Available",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-recovery-acres-society-calgary-Short-Term Treatment",
+      "siteName": "Recovery Acres Society - Calgary",
+      "corridor": "Calgary Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 25,
+      "availableBeds": 3,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-sunrise-healing-lodge-society-Short-Term Treatment",
+      "siteName": "Sunrise Healing Lodge Society",
+      "corridor": "Calgary Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 34,
+      "availableBeds": 3,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-bonnyville-indian-metis-rehab-centre-Short-Term Treatment",
+      "siteName": "Bonnyville Indian-Metis Rehab Centre",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 28,
+      "availableBeds": 2,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-jellinek-society-Long-Term Recovery",
+      "siteName": "Jellinek Society",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Male",
+      "totalBeds": 17,
+      "availableBeds": 1,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-fresh-start-recovery-calgary-facility-Short-Term Treatment",
+      "siteName": "Fresh Start Recovery - Calgary Facility",
+      "corridor": "Calgary Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Male",
+      "totalBeds": 10,
+      "availableBeds": 0,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-addiction-recovery-centre-adult-detoxification-services-Detoxification",
+      "siteName": "Addiction Recovery Centre - Adult Detoxification Services",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 50,
+      "availableBeds": 2,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-the-salvation-army-keystone-residential-recovery-Long-Term Recovery",
+      "siteName": "The Salvation Army Keystone Residential Recovery",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Male",
+      "totalBeds": 24,
+      "availableBeds": 1,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-thorpe-recovery-centre-Detoxification",
+      "siteName": "Thorpe Recovery Centre",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 41,
+      "availableBeds": 2,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-calgary-dream-centre-Long-Term Recovery",
+      "siteName": "Calgary Dream Centre",
+      "corridor": "Calgary Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Co-Ed",
+      "totalBeds": 30,
+      "availableBeds": 1,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-renfrew-recovery-centre-adult-detoxification-services-Detoxification",
+      "siteName": "Renfrew Recovery Centre - Adult Detoxification Services",
+      "corridor": "Calgary Corridor",
+      "bedType": "Detoxification",
+      "gender": "Co-Ed",
+      "totalBeds": 30,
+      "availableBeds": 1,
+      "status": "Almost Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-aventa-addiction-treatment-yat-Short-Term Treatment",
+      "siteName": "Aventa Addiction Treatment- YAT",
+      "corridor": "Calgary Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Female",
+      "totalBeds": 10,
+      "availableBeds": 0,
+      "status": "Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-aventa-centre-of-excellence-for-women-with-addictions-Short-Term Treatment",
+      "siteName": "Aventa Centre of Excellence for Women with Addictions",
+      "corridor": "Calgary Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Female",
+      "totalBeds": 50,
+      "availableBeds": 0,
+      "status": "Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-fresh-start-recovery-lethbridge-facility-co-ed-Short-Term Treatment",
+      "siteName": "Fresh Start Recovery - Lethbridge Facility Co-Ed",
+      "corridor": "South Corridor",
+      "bedType": "Short-Term Treatment",
+      "gender": "Co-Ed",
+      "totalBeds": 23,
+      "availableBeds": 0,
+      "status": "Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-opportunity-home-Long-Term Recovery",
+      "siteName": "Opportunity Home",
+      "corridor": "Central Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Male",
+      "totalBeds": 10,
+      "availableBeds": 0,
+      "status": "Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
+    },
+    {
+      "id": "BED-ABED-our-house-addiction-recovery-centre-Long-Term Recovery",
+      "siteName": "Our House Addiction Recovery Centre",
+      "corridor": "Edmonton Corridor",
+      "bedType": "Long-Term Recovery",
+      "gender": "Male",
+      "totalBeds": 51,
+      "availableBeds": 0,
+      "status": "Full",
+      "lastUpdated": "2026-07-05 11:59 PM"
     }
   ],
   "COMMUNITY_MH_WAITS": [
@@ -280,67 +866,8 @@
       "availability": "24 Hours / 7 Days",
       "scope": "National, Call or Text",
       "description": "Confidential counselling and information for youth. Call 1-800-668-6868 or text CONNECT to 686868."
-    },
-    {
-      "name": "call 911",
-      "number": "911",
-      "availability": "Anyone needing emergency care is reminded to call 911, or to",
-      "scope": "Province-wide",
-      "description": "Anyone needing emergency care is reminded to call , or to go to the nearest emergency department or urgent care centre."
-    },
-    {
-      "name": "Crisis Text Line - Text CONNECT to 741741",
-      "number": "741",
-      "availability": "Crisis Text Line - Text CONNECT to 741741",
-      "scope": "Province-wide",
-      "description": "Crisis Text Line - Text CONNECT to 741"
-    },
-    {
-      "name": "© 2026 Alberta Health Services |Terms & Conditions|Privacy",
-      "number": "202",
-      "availability": "© 2026 Alberta Health Services |Terms & Conditions|Privacy",
-      "scope": "Province-wide",
-      "description": "© 6 Alberta Health Services |Terms & Conditions|Privacy"
     }
   ],
-  "_dataMetadata": {
-    "SUBSTANCE_HARM_TRENDS": {
-      "source": "Alberta Substance Use Surveillance",
-      "sourceVintage": "2019–latest surveillance year",
-      "updateType": "auto",
-      "lastUpdated": "2026-07-05T15:55:14Z"
-    },
-    "ADDICTION_BED_CAPACITIES": {
-      "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:30:40.388Z",
-      "source": "AHS Addiction & Mental Health bed availability",
-      "sourceVintage": "Live AHS bed-availability page"
-    },
-    "COMMUNITY_MH_WAITS": {
-      "source": "Alberta community mental-health median waits",
-      "sourceVintage": "2021 hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "HOSPITAL_MHSU_BURDEN": {
-      "source": "Alberta hospital mental-health/substance-use burden",
-      "sourceVintage": "2021 hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
-    },
-    "SUPPORT_HELPLINES": {
-      "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:30:40.388Z",
-      "source": "AHS Mental Health helplines + 211 Alberta directory",
-      "sourceVintage": "Live helpline directories"
-    },
-    "CIHI_MH_READMISSION_RATES": {
-      "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:20.117Z",
-      "source": "CIHI 30-day mental-health readmission data table",
-      "sourceVintage": "CIHI latest release"
-    }
-  },
   "CIHI_MH_READMISSION_RATES": [
     {
       "Indicator": "30-Day Readmission for Mental Health and Substance Use",
@@ -4942,5 +5469,43 @@
       "Risk-adjusted rate: Top results": "Not a top result",
       "Risk-adjusted rate: Relative standing scatter plot confidence intervals": "Outside 99.8% CI"
     }
-  ]
+  ],
+  "_dataMetadata": {
+    "SUBSTANCE_HARM_TRENDS": {
+      "source": "Alberta Substance Use Surveillance",
+      "sourceVintage": "2019–latest surveillance year",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-05T15:55:14Z"
+    },
+    "ADDICTION_BED_CAPACITIES": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-08T04:34:09.546Z",
+      "source": "Addiction Bed Exploration Dashboard (ABED) - findaddictionbeds.alberta.ca",
+      "sourceVintage": "Live (updated once daily, Mon-Fri)"
+    },
+    "COMMUNITY_MH_WAITS": {
+      "source": "Alberta community mental-health median waits",
+      "sourceVintage": "2021 hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "HOSPITAL_MHSU_BURDEN": {
+      "source": "Alberta hospital mental-health/substance-use burden",
+      "sourceVintage": "2021 hand-authored baseline",
+      "updateType": "manual",
+      "lastUpdated": "2026-07-05T00:00:00Z"
+    },
+    "SUPPORT_HELPLINES": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-08T04:34:09.546Z",
+      "source": "AHS Mental Health helplines + 211 Alberta directory",
+      "sourceVintage": "Live helpline directories"
+    },
+    "CIHI_MH_READMISSION_RATES": {
+      "updateType": "auto",
+      "lastUpdated": "2026-07-08T02:35:20.117Z",
+      "source": "CIHI 30-day mental-health readmission data table",
+      "sourceVintage": "CIHI latest release"
+    }
+  }
 }

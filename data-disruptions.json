@@ -96,7 +96,7 @@
     "startDate": "2022-08-17T06:00:00.000Z",
     "endDate": "TBD",
     "reason": "Due to clinical personnel shortage",
-    "details": "Emergency department closed, nursing staff remain on site. Regular operating hours are Monday - Thursday 0900 - 1700 and Friday 0900 – 1200.",
+    "details": "Emergency department closed, nursing staff remain on site. Regular operating hours are Monday - Thursday 0900 - 1700 and Friday 0900 \u2013 1200.",
     "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
     "updatedAt": "2026-07-08T02:29:47.345Z"
@@ -190,7 +190,7 @@
     "id": "disr-hinton-healthcare-centre-mrbgmk4z",
     "facilityId": "hinton-healthcare-centre",
     "facilityName": "Hinton Healthcare Centre",
-    "city": "Smoky Lake",
+    "city": "Hinton",
     "zone": "North Zone",
     "serviceAffected": "Emergency Department",
     "disruptionType": "Closure",

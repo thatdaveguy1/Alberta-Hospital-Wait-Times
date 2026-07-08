@@ -284,10 +284,10 @@ export default function CancerDashboard() {
           {/* Burden Cards Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">2026 Projected Annual Cancer Diagnoses</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">2026 Projected Major Cancer Diagnoses</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-white">~{(burdenSummary.totalCases).toLocaleString()}</span>
-                <span className="text-xs text-slate-400 font-mono">new cases</span>
+                <span className="text-xs text-slate-400 font-mono">new cases (major cancers)</span>
               </div>
               <p className="text-[10px] text-slate-400 leading-relaxed pt-1 border-t border-slate-850">
                 Expected primary cancer cases diagnosed among residents of Alberta, monitored via the Alberta Cancer Registry.
@@ -323,7 +323,7 @@ export default function CancerDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Alberta Primary Cancer Burden Profiler</h3>
-                  <p className="text-[10px] text-slate-500">Projected incident cases vs actual mortality indicators (March 2026 Registry Update)</p>
+                  <p className="text-[10px] text-slate-500">Projected incident cases for the tracked major cancers vs. actual mortality indicators (March 2026 Registry Update). This is not the total annual cancer burden for Alberta.</p>
                 <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="CANCER_BURDEN_STATS" />
                 </div>
                 <div className="relative">
@@ -865,9 +865,6 @@ export default function CancerDashboard() {
                           {fac.type}
                         </span>
                       </div>
-                      <span className="text-[10px] text-slate-500 font-mono font-semibold shrink-0">
-                        {fac.city}
-                      </span>
                     </div>
 
                     <div className="text-[10px] text-slate-400 space-y-1">

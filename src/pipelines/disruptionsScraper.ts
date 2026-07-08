@@ -27,6 +27,16 @@ function makeFacilityId(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 }
 
+// Editorial overrides for facility city/location when the upstream page groups
+// facilities under the wrong city header.
+const CITY_OVERRIDES: Record<string, string> = {
+  'hinton-healthcare-centre': 'Hinton',
+};
+
+function normalizeCity(facilityId: string, facilityName: string, scrapedCity: string): string {
+  return CITY_OVERRIDES[facilityId] ?? CITY_OVERRIDES[makeFacilityId(facilityName)] ?? scrapedCity;
+}
+
 function deduceDisruptionType(bedReductionText: string): ServiceDisruption['disruptionType'] {
   const lower = bedReductionText.toLowerCase();
   if (lower.includes('closure') || lower.includes('closed') || lower.includes('no physician available on site') && !lower.includes('overnight')) {
@@ -203,9 +213,10 @@ export async function scrapeDisruptions(): Promise<SyncResult> {
         const key = `${facilityId}|${parsed.serviceAffected}`;
         seenKeys.add(key);
 
+        const normalizedCity = normalizeCity(facilityId, facilityName, city);
         const override = overrides[facilityId];
         const disruptionType = deduceDisruptionType(parsed.bedReductionText);
-        const zone = deduceZone(city);
+        const zone = deduceZone(normalizedCity);
 
         // Check if we already have this disruption
         const existingDisr = existingByKey.get(key);
@@ -216,7 +227,7 @@ export async function scrapeDisruptions(): Promise<SyncResult> {
           newDisruptions.push({
             ...existingDisr,
             facilityName,
-            city,
+            city: normalizedCity,
             zone,
             serviceAffected: parsed.serviceAffected,
             disruptionType,
@@ -235,7 +246,7 @@ export async function scrapeDisruptions(): Promise<SyncResult> {
             id: `disr-${facilityId}-${Date.now().toString(36)}`,
             facilityId,
             facilityName,
-            city,
+            city: normalizedCity,
             zone,
             serviceAffected: parsed.serviceAffected,
             disruptionType,

@@ -192,6 +192,19 @@ export default function DiagnosticDashboard() {
   const isLabWaitUnavailable = (lab: LabLocationWait): boolean =>
     typeof lab.waitTimeMin !== 'number';
 
+  const getLabStatus = (lab: LabLocationWait): { label: string; detail: string } => {
+    if (typeof lab.waitTimeMin === 'number') {
+      if (lab.waitTimeMin === 0 && !lab.walkInAvailable) {
+        return { label: 'Closed', detail: 'Lab is closed or has no open walk-in hours right now' };
+      }
+      return { label: formatMinutesToHm(lab.waitTimeMin), detail: 'Estimated live wait time' };
+    }
+    if (lab.waitTimeMin === 'Closed') {
+      return { label: 'Closed', detail: 'Lab is closed or has no open walk-in hours right now' };
+    }
+    return { label: lab.waitTimeMin ?? 'Unavailable', detail: 'No live wait-time estimate available' };
+  };
+
   // Fetch provincial lab wait trend (averaged across all labs per timestamp)
   const fetchLabTrends = (range: '24h' | '7d' | '30d' = labTrendRange) => {
     setLoadingLabTrends(true);
@@ -599,8 +612,8 @@ export default function DiagnosticDashboard() {
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2 mb-1.5">
-                  <p className="text-2xl font-black text-white tracking-tight leading-none">
-                    {labStats.maxWaitLab ? formatMinutesToHm(labStats.maxWaitLab.waitTimeMin as number) : '0:00'}
+                  <p className="text-2xl font-black text-white tracking-tight leading-none" title={labStats.maxWaitLab ? getLabStatus(labStats.maxWaitLab).detail : ''}>
+                    {labStats.maxWaitLab ? getLabStatus(labStats.maxWaitLab).label : '—'}
                   </p>
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                     Longest Estimated Wait Time
@@ -811,7 +824,7 @@ export default function DiagnosticDashboard() {
                         <p className="text-sm font-black text-white mt-0.5 leading-none">{formatMinutesToHm(lab.totalTime)}</p>
                       </div>
                       <div className="text-right text-[9px] text-slate-400 font-semibold space-y-0.5 leading-none">
-                        <p>Wait: {typeof lab.waitTimeMin === 'number' ? formatMinutesToHm(lab.waitTimeMin) : lab.waitTimeMin}</p>
+                        <p title={getLabStatus(lab).detail}>Wait: {getLabStatus(lab).label}</p>
                         <p>Drive: {formatMinutesToHm(lab.driveMins || 0)}</p>
                       </div>
                     </div>
@@ -1296,8 +1309,7 @@ export default function DiagnosticDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">CIHI CT & MRI Diagnostic Wait Days</h3>
-                  <p className="text-[10px] text-slate-500">Comparing Alberta (P50 and P90 percentile days) against Canadian averages (2019 - 2025)</p>
-                  <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="IMAGING_WAIT_TRENDS" />
+                  <p className="text-[10px] text-slate-500">Comparing Alberta (P50 and P90 percentile days) against Canadian averages (2018 - 2025)</p>
                 </div>
 
                 <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
@@ -1402,7 +1414,6 @@ export default function DiagnosticDashboard() {
               <div>
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Facility Diagnostic Volume & Utilization</h3>
                 <p className="text-[10px] text-slate-500">Individual medical-surgical hospital scanner statistics and local P50 / P90 wait ranges</p>
-                <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="FACILITY_IMAGING_WAITS" />
               </div>
 
               <div className="relative w-full sm:w-64">
@@ -1474,7 +1485,6 @@ export default function DiagnosticDashboard() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Test Turnaround Duration Benchmarks</h3>
                   <p className="text-[10px] text-slate-500">Required specimen analytical processing timeline from collection to report</p>
-                  <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="TEST_TURNAROUND_METRICS" />
                 </div>
                 <span className="text-[9px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
                   Source: APL Test Directory

@@ -44,6 +44,22 @@ function sanitizeSource(source: string): string {
     acuteCareScraper: 'AHS Acute Care Capacity',
     hqcaContinuingCareScraper: 'HQCA Continuing Care',
     hqcaFocusScraper: 'HQCA FOCUS',
+    // Downloader / fetcher pipeline IDs that may appear in metadata source fields
+    cihiDownloader: 'CIHI National Health Expenditure Trends (NHEX)',
+    cihiNhexDownloader: 'CIHI National Health Expenditure Trends (NHEX)',
+    cihiWaitTimesDownloader: 'CIHI Wait Times Priority Procedures in Canada',
+    cihiWaitTimesPriorityFetcher: 'CIHI Wait Times Priority Procedures in Canada',
+    cihiMhSafetyFetcher: 'CIHI Shared Health Priorities',
+    cihiWorkforceFetcher: 'CIHI Workforce Data',
+    primaryCareFetcher: 'CIHI Shared Health Priorities',
+    openAlbertaInequityFetcher: 'Open Alberta LGA Community Profiles',
+    openAlbertaBillingFetcher: 'AHCIP Statistical Supplement (hand-curated)',
+    openAlbertaFetcher: 'Open Alberta',
+    statscanFetcher: 'Statistics Canada',
+    phacFetcher: 'Public Health Agency of Canada',
+    virtualCareFetcher: 'AHS Virtual Care Reports',
+    erWaitTimesFetcher: 'Alberta Health Services Portal',
+    aplLabWaitTimesFetcher: 'Alberta Precision Laboratories',
   };
 
   const normalized = source.trim();

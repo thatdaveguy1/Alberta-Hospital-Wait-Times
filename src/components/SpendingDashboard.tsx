@@ -101,6 +101,43 @@ export default function SpendingDashboard() {
     return NATIONAL_SPENDING_COMPARE.find(p => p.province === selectedProvince) || NATIONAL_SPENDING_COMPARE[0];
   }, [selectedProvince, NATIONAL_SPENDING_COMPARE]);
 
+  const { albertaSpendingPerCapita, albertaSpendingRank, higherSpendingProvinces } = useMemo(() => {
+    const sorted = [...NATIONAL_SPENDING_COMPARE].sort((a, b) => b.spendingPerCapita - a.spendingPerCapita);
+    const rank = sorted.findIndex(p => p.province === 'Alberta') + 1;
+    const alberta = sorted.find(p => p.province === 'Alberta');
+    const higher = sorted
+      .filter(p => p.province !== 'Alberta' && p.spendingPerCapita > (alberta?.spendingPerCapita ?? 0))
+      .slice(0, 3)
+      .map(p => p.province);
+    return {
+      albertaSpendingPerCapita: alberta?.spendingPerCapita ?? 0,
+      albertaSpendingRank: rank,
+      higherSpendingProvinces: higher,
+    };
+  }, [NATIONAL_SPENDING_COMPARE]);
+
+  const selectedProvinceRank = useMemo(() => {
+    const sorted = [...NATIONAL_SPENDING_COMPARE].sort((a, b) => b.spendingPerCapita - a.spendingPerCapita);
+    const idx = sorted.findIndex(p => p.province === selectedProvince);
+    return idx >= 0 ? idx + 1 : null;
+  }, [NATIONAL_SPENDING_COMPARE, selectedProvince]);
+
+  const albertaProvinceData = useMemo(
+    () => NATIONAL_SPENDING_COMPARE.find(p => p.province === 'Alberta'),
+    [NATIONAL_SPENDING_COMPARE]
+  );
+
+  const nationalChartCompare = useMemo(
+    () =>
+      NATIONAL_SPENDING_COMPARE.map(p => ({
+        ...p,
+        spendingAsPercentGdp: p.spendingAsPercentGdp ?? undefined,
+        costPerStandardStay: p.costPerStandardStay ?? undefined,
+      })),
+    [NATIONAL_SPENDING_COMPARE]
+  );
+
+
   const selectedSpecialtyData = useMemo(() => {
     return PHYSICIAN_SPECIALTY_BILLING.find(s => s.specialtyGroup === selectedSpecialty) || PHYSICIAN_SPECIALTY_BILLING[0];
   }, [selectedSpecialty, PHYSICIAN_SPECIALTY_BILLING]);
@@ -345,6 +382,7 @@ export default function SpendingDashboard() {
       </div>
 
       {/* Warning Narrative Chain / Ingestion Insights */}
+      {activeSpendingTab === 'spending-access' && (
       <div id="sd-narrative-callout" className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5 font-mono">
@@ -352,13 +390,14 @@ export default function SpendingDashboard() {
             <span>Value for Money & Macro Efficiency Signal</span>
           </h4>
           <p className="text-[11px] text-slate-400 max-w-4xl leading-normal">
-            <strong>System Productivity Gap:</strong> While Alberta’s per capita expenditure of <strong>$8,540</strong> is the highest among major provinces, patient wait-times and staffed bed shortages persist. This indicates that rising spending is increasingly absorbed by legacy operational structures, personnel premium pay, and service-delivery inflation rather than proportionate physical-capacity expansions.
+            <strong>System Productivity Gap:</strong> Alberta’s per capita health expenditure is now <strong>${albertaSpendingPerCapita.toLocaleString()}</strong>, ranking <strong>{albertaSpendingRank}</strong> of {NATIONAL_SPENDING_COMPARE.length} reporting provinces — below {higherSpendingProvinces.join(', ')}. Despite this spending level, patient wait-times and staffed bed shortages persist, suggesting that rising expenditure is increasingly absorbed by legacy operational structures, personnel premium pay, and service-delivery inflation rather than proportionate physical-capacity expansions.
           </p>
         </div>
         <span className="text-[9px] bg-emerald-950/40 border border-emerald-500/25 text-emerald-400 px-2 py-1 rounded font-mono font-extrabold shrink-0">
           CIHI VALUE BENCHMARK
         </span>
       </div>
+      )}
 
       {/* Primary Panels based on Tabs */}
       {activeSpendingTab === 'spending-access' && (
@@ -812,10 +851,27 @@ export default function SpendingDashboard() {
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Total Spend / Capita</span>
                 <div className="text-xl font-black text-white">${selectedProvinceData.spendingPerCapita.toLocaleString()}</div>
                 <div className="text-[9px] text-slate-500 pt-1.5 border-t border-slate-850 font-mono mt-2">
-                  {selectedProvince === 'Alberta' ? (
-                    <span className="text-emerald-400 font-semibold">Highest in Major Provinces</span>
+                  {selectedProvinceRank != null ? (
+                    selectedProvince === 'Alberta' ? (
+                      <span className="text-emerald-400 font-semibold">
+                        Rank {selectedProvinceRank} of {NATIONAL_SPENDING_COMPARE.length} — below {higherSpendingProvinces.join(', ')}
+                      </span>
+                    ) : albertaProvinceData ? (
+                      <span>
+                        Rank {selectedProvinceRank} of {NATIONAL_SPENDING_COMPARE.length}
+                        {selectedProvinceData.spendingPerCapita < albertaProvinceData.spendingPerCapita ? (
+                          <> — AB spends <strong className="text-emerald-400">+${(albertaProvinceData.spendingPerCapita - selectedProvinceData.spendingPerCapita).toLocaleString()}</strong> more</>
+                        ) : selectedProvinceData.spendingPerCapita > albertaProvinceData.spendingPerCapita ? (
+                          <> — <strong className="text-amber-400">${(selectedProvinceData.spendingPerCapita - albertaProvinceData.spendingPerCapita).toLocaleString()}</strong> above AB</>
+                        ) : (
+                          <> — matches Alberta per capita</>
+                        )}
+                      </span>
+                    ) : (
+                      <span>Rank {selectedProvinceRank} of {NATIONAL_SPENDING_COMPARE.length}</span>
+                    )
                   ) : (
-                    <span>AB spends <strong className="text-emerald-400">+${(NATIONAL_SPENDING_COMPARE[0].spendingPerCapita - selectedProvinceData.spendingPerCapita).toLocaleString()}</strong> more</span>
+                    <span className="text-slate-500">Rank unavailable</span>
                   )}
                 </div>
               </div>
@@ -823,7 +879,7 @@ export default function SpendingDashboard() {
               <div className="bg-slate-955 border border-slate-850 p-4 rounded-xl space-y-1 hover:border-indigo-500/30 transition-all flex flex-col justify-between">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Cost per Standard Stay</span>
                 <div className="text-xl font-black text-white">
-                  {selectedProvinceData.costPerStandardStay > 0 ? (
+                  {selectedProvinceData.costPerStandardStay != null && selectedProvinceData.costPerStandardStay > 0 ? (
                     `$${selectedProvinceData.costPerStandardStay.toLocaleString()}`
                   ) : (
                     <span className="text-slate-500 text-sm font-black uppercase tracking-wider">Data not available</span>
@@ -837,7 +893,7 @@ export default function SpendingDashboard() {
               <div className="bg-slate-955 border border-slate-850 p-4 rounded-xl space-y-1 hover:border-indigo-500/30 transition-all flex flex-col justify-between">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Staffed Beds / 100k</span>
                 <div className="text-xl font-black text-white">
-                  {selectedProvinceData.bedsPer100k > 0 ? (
+                  {selectedProvinceData.bedsPer100k != null && selectedProvinceData.bedsPer100k > 0 ? (
                     selectedProvinceData.bedsPer100k
                   ) : (
                     <span className="text-slate-500 text-sm font-black uppercase tracking-wider">Data not available</span>
@@ -875,7 +931,7 @@ export default function SpendingDashboard() {
               <div className="bg-slate-955 border border-slate-850 p-4 rounded-xl space-y-1 hover:border-indigo-500/30 transition-all flex flex-col justify-between">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block leading-snug">Health Spend % of GDP</span>
                 <div className="text-xl font-black text-white">
-                  {selectedProvinceData.spendingAsPercentGdp > 0 ? (
+                  {selectedProvinceData.spendingAsPercentGdp != null && selectedProvinceData.spendingAsPercentGdp > 0 ? (
                     `${selectedProvinceData.spendingAsPercentGdp}%`
                   ) : (
                     <span className="text-slate-500 text-sm font-black uppercase tracking-wider">Data not available</span>
@@ -898,7 +954,7 @@ export default function SpendingDashboard() {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={NATIONAL_SPENDING_COMPARE}
+                    data={nationalChartCompare}
                     margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -922,7 +978,7 @@ export default function SpendingDashboard() {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={NATIONAL_SPENDING_COMPARE}
+                    data={nationalChartCompare.filter(p => p.costPerStandardStay != null && p.costPerStandardStay > 0)}
                     margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />

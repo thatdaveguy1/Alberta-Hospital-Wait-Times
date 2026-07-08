@@ -1,4 +1,4 @@
-// Real healthcare flow datasets compiled from Health Quality Alberta (HQA) FOCUS,
+// Real healthcare flow datasets compiled from Health Quality Alberta (HQCA) FOCUS,
 // Canadian Institute for Health Information (CIHI) NACRS / Hospital Beds / ALC Indicators,
 // and Alberta Health Services (AHS) Weekly Performance Reports.
 
@@ -8,22 +8,22 @@ export interface FacilityFlow {
   city: string;
   zone: string;
   type: 'Metro' | 'Regional' | 'Community' | 'Childrens';
-  edDailyVolume: number;           // HQA FOCUS: average patients/day
-  lwbsRate: number;                // HQA FOCUS: % left without being seen
-  medianLosDischarged: number;     // HQA FOCUS: median LOS in hours (discharged)
-  p90LosDischarged: number;        // HQA FOCUS: 90th-percentile LOS in hours (discharged)
-  medianLosAdmitted: number;       // HQA FOCUS: median LOS in hours (admitted)
-  p90LosAdmitted: number;          // HQA FOCUS: 90th-percentile LOS in hours (admitted)
-  medianBedWait: number;           // HQA FOCUS: median hours from decision-to-admit to leaving ED
-  p90BedWait: number;              // HQA FOCUS: 90th-percentile hours from decision-to-admit to leaving ED
-  avgHourlyAdmittedWaiting: number; // HQA FOCUS: average hourly admitted patients stuck waiting in ED
-  hospitalOccupancy: number;       // HQA FOCUS: % of staffed beds occupied by inpatients
-  alcRate: number;                 // HQA FOCUS: % Alternate Level of Care inpatient days
-  continuingCare30DayPlacements: number; // HQA FOCUS: % placed in continuing care within 30 days
+  edDailyVolume: number;           // HQCA FOCUS: average patients/day
+  lwbsRate: number;                // HQCA FOCUS: % left without being seen
+  medianLosDischarged: number;     // HQCA FOCUS: median LOS in hours (discharged)
+  p90LosDischarged: number;        // HQCA FOCUS: 90th-percentile LOS in hours (discharged)
+  medianLosAdmitted: number;       // HQCA FOCUS: median LOS in hours (admitted)
+  p90LosAdmitted: number;          // HQCA FOCUS: 90th-percentile LOS in hours (admitted)
+  medianBedWait: number;           // HQCA FOCUS: median hours from decision-to-admit to leaving ED
+  p90BedWait: number;              // HQCA FOCUS: 90th-percentile hours from decision-to-admit to leaving ED
+  avgHourlyAdmittedWaiting: number; // HQCA FOCUS: average hourly admitted patients stuck waiting in ED
+  hospitalOccupancy: number;       // HQCA FOCUS: % of staffed beds occupied by inpatients
+  alcRate: number;                 // HQCA FOCUS: % Alternate Level of Care inpatient days
+  continuingCare30DayPlacements: number; // HQCA FOCUS: % placed in continuing care within 30 days
   staffedAcuteBeds: number;        // CIHI: staffed and operating beds
   icuBedsOpen: number;             // AHS: open ICU beds
   icuOccupancy: number;            // AHS: ICU occupancy %
-  returnedWithin72h: number;       // HQA FOCUS: % returned to ED within 72 hours
+  returnedWithin72h: number;       // HQCA FOCUS: % returned to ED within 72 hours
 }
 
 export interface WeeklyEDLOS {
@@ -50,6 +50,7 @@ export interface LGADemand {
   zone: string;
   population: number;
   annualEdVisits: number;
+  edVisitsPer1000?: number;  // Open Alberta ED visit rate per 1,000 population (source rate, not derived)
   ctas1_2_Pct: number; // Urgent/Emergent (CTAS 1 & 2) %
   ctas3_Pct: number;   // Less Urgent (CTAS 3) %
   ctas4_5_Pct: number; // Non-Urgent (CTAS 4 & 5) %
@@ -828,7 +829,7 @@ export const REGIONAL_LGA_DEMAND: LGADemand[] = [
   }
 ];
 
-// 5. Historical Quarterly Trends (HQA FOCUS 2021 to Q1 2026)
+// 5. Historical Quarterly Trends (HQCA FOCUS 2021 to Q1 2026)
 export const HISTORICAL_FLOW_TIMELINES: HistoricalFlowSnapshot[] = [
   {
     quarter: '2021-Q1',
@@ -929,7 +930,7 @@ export const _dataMetadata: Record<string, {
   verification?: string;
 }> = {
   FACILITY_FLOW_METRICS: {
-    source: 'HQA FOCUS acute care facility metrics',
+    source: 'HQCA FOCUS acute care facility metrics',
     sourceVintage: '2025/2026 compiled data',
     lastUpdated: '2026-07-05',
     updateType: 'manual',
@@ -954,6 +955,6 @@ export const _dataMetadata: Record<string, {
     sourceVintage: 'Approximate 2021-Q1 2026',
     lastUpdated: '2026-07-05',
     updateType: 'manual',
-    verification: 'Quarterly figures compiled from HQA FOCUS datasets; plausible but could not be confirmed against specific published quarterly reports.',
+    verification: 'Quarterly figures compiled from HQCA FOCUS datasets; plausible but could not be confirmed against specific published quarterly reports.',
   },
 };

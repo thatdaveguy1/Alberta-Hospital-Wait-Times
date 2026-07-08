@@ -13,6 +13,7 @@ import os from 'os';
 import path from 'path';
 import type { SyncResult } from './types';
 import type { AttachmentRate } from '../primaryCareData';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 
 const INDICATOR_XLSX_URL =
   'https://www.cihi.ca/sites/default/files/document/indicator-library-all-indicator-data-en.xlsx';
@@ -68,6 +69,19 @@ function mergeAndWrite(file: string, newRates: AttachmentRate[]): number {
 
   const merged = Array.from(byId.values());
   existing['ATTACHMENT_RATES'] = merged;
+
+  const ownedMetadata: DataMetadata = {
+    ATTACHMENT_RATES: buildMetadataEntry({
+      updateType: 'auto',
+      source: SOURCE_NAME,
+      sourceVintage: 'CIHI Shared Health Priorities Primary Health Care dashboard',
+    }),
+  };
+  existing._dataMetadata = mergeDataMetadata(
+    existing._dataMetadata as DataMetadata | undefined,
+    ownedMetadata,
+  );
+
   fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
   return merged.length;
 }

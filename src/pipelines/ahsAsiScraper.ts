@@ -50,6 +50,9 @@ const AHS_MENTAL_HEALTH_URL =
   'https://www.albertahealthservices.ca/amh/Page18670.aspx';
 const AHS_HELPLINES_URL =
   'https://www.albertahealthservices.ca/amh/Page16759.aspx';
+// ABED (Addiction Bed Exploration Dashboard) publishes live bed availability
+// as prerendered Blazor HTML cards. Updated once daily, Mon-Fri.
+const ABED_DASHBOARD_URL = 'https://findaddictionbeds.alberta.ca/';
 
 const CONTINUING_CARE_FILE = path.join(process.cwd(), 'data-continuing-care.json');
 const MENTAL_HEALTH_FILE = path.join(process.cwd(), 'data-mental-health.json');
@@ -133,6 +136,8 @@ interface MentalHealthJson {
   COMMUNITY_MH_WAITS: CommunityMHWait[];
   HOSPITAL_MHSU_BURDEN: HospitalMHSUBurden[];
   SUPPORT_HELPLINES: SupportHelpline[];
+  // Preserved verbatim — owned by cihiMhSafetyFetcher, not this scraper.
+  CIHI_MH_READMISSION_RATES?: Record<string, unknown>[];
   _dataMetadata?: DataMetadata;
 }
 
@@ -175,6 +180,7 @@ function loadMentalHealth(): MentalHealthJson {
       COMMUNITY_MH_WAITS: existing.COMMUNITY_MH_WAITS ?? [],
       HOSPITAL_MHSU_BURDEN: existing.HOSPITAL_MHSU_BURDEN ?? [],
       SUPPORT_HELPLINES: existing.SUPPORT_HELPLINES ?? [],
+      CIHI_MH_READMISSION_RATES: existing.CIHI_MH_READMISSION_RATES,
       _dataMetadata: existing._dataMetadata,
     };
   }
@@ -441,6 +447,18 @@ function mergeCompliance(
 // support lines and potentially bed availability. We extract helpline
 // directories and any structured bed-availability tables.
 
+function isValidHelplineRow(name: string, number: string, text: string): boolean {
+  // Reject footer text, copyright notices, and generic 911 reminders that the AHS page
+  // embeds at the end of its helpline list.
+  const lowerName = name.toLowerCase();
+  const lowerText = text.toLowerCase();
+  if (name.includes('©') || name.includes('Terms & Conditions') || name.includes('Privacy')) return false;
+  if (lowerName.includes('call 911') || lowerText.includes('anyone needing emergency care is reminded')) return false;
+  if (number === '202' || number === '741') return false;
+  if (lowerName.startsWith('call 911') && number === '911') return false;
+  return true;
+}
+
 function parseHelplines($: cheerio.CheerioAPI): SupportHelpline[] {
   const found: SupportHelpline[] = [];
   const seen = new Set<string>();
@@ -465,6 +483,7 @@ function parseHelplines($: cheerio.CheerioAPI): SupportHelpline[] {
       const name = heading || text.split(':')[0].trim().slice(0, 80);
 
       if (!name || name.length < 3) return;
+      if (!isValidHelplineRow(name, number, text)) return;
 
       // Extract availability (24/7, hours, etc.)
       const availMatch = text.match(/24\s*(?:hours|hr|\/)?\s*7/i);
@@ -486,53 +505,119 @@ function parseHelplines($: cheerio.CheerioAPI): SupportHelpline[] {
   return found;
 }
 
-function parseBedAvailability(
-  $: cheerio.CheerioAPI,
-): AddictionBedStatus[] {
+// ---- ABED bed availability parser ------------------------------------------
+// The Addiction Bed Exploration Dashboard (findaddictionbeds.alberta.ca)
+// renders prerendered Blazor cards. Each card has a site name, an
+// availability tag (Available / Almost Full / Full), a health corridor,
+// gender, age, per-type bed counts ("N available (of M)" or "---"), and an
+// "Updated: YYYY-MM-DD HH:MM PM" footer timestamp.
+
+// Map ABED health corridors to the five-corridor model used by the dashboard.
+const ABED_CORRIDOR_MAP: Record<string, string> = {
+  Calgary: 'Calgary Corridor',
+  Edmonton: 'Edmonton Corridor',
+  Central: 'Central Corridor',
+  Southwest: 'South Corridor',
+  Southeast: 'South Corridor',
+  Northwest: 'North Corridor',
+  Northeast: 'North Corridor',
+};
+
+// Map ABED bed-type labels to our bedType categories.
+function abedBedType(label: string): string | undefined {
+  const lower = label.toLowerCase();
+  if (lower.includes('detox')) return 'Detoxification';
+  if (lower.includes('treatment')) return 'Short-Term Treatment';
+  if (lower.includes('recovery')) return 'Long-Term Recovery';
+  return undefined;
+}
+
+// Parse "6 available (of 6)" → { available: 6, total: 6 }. Returns null for "---".
+function parseAbedBedCount(text: string): { available: number; total: number } | null {
+  const match = text.match(/(\d+)\s*available\s*\(of\s*(\d+)\)/i);
+  if (!match) return null;
+  return { available: parseInt(match[1], 10), total: parseInt(match[2], 10) };
+}
+
+// Normalize a site name for fuzzy matching: lowercase, strip punctuation and
+// common suffixes so "The George Spady Centre Society" matches "George Spady
+// Society (Aurora Centre)".
+function normalizeSiteName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\b(the|society|centre|center|inc|association|corp|corporation)\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function parseAbedBedAvailability($: cheerio.CheerioAPI): AddictionBedStatus[] {
   const found: AddictionBedStatus[] = [];
 
-  $('table tr').each((_i, rowEl) => {
-    const $row = $(rowEl);
-    const cells = $row.find('td');
-    if (cells.length < 4) return;
+  $('.card.interactive').each((_i, cardEl) => {
+    const $card = $(cardEl);
 
-    const siteName = textOf($, $(cells[0]));
+    // Site name from the header <strong> or title attribute.
+    const headerDiv = $card.find('.card-header > div[title]').first();
+    const siteName =
+      headerDiv.attr('title') || textOf($, $card.find('.card-header strong').first());
     if (!siteName || siteName.length < 3) return;
-    if (/site|facility|name/i.test(siteName)) return;
 
-    const bedTypeText = textOf($, $(cells[1]));
-    const totalBeds = asNumber(textOf($, $(cells[2]))) ?? 0;
-    const availableBeds = asNumber(textOf($, $(cells[3]))) ?? 0;
+    // Availability tag: success=Available, warning=Almost Full, danger=Full.
+    const tagText = textOf($, $card.find('.card-header .tag').first());
+    const status = tagText || 'Available';
 
-    if (totalBeds === 0 && availableBeds === 0) return;
-
-    const city = cleanText($row.find('.city, .location').first().text()) || 'Edmonton';
-    const zone = deduceZone(city);
-    const corridor = CORRIDOR_BY_ZONE[zone];
-
-    found.push({
-      id: `BED-SCRAPE-${makeFacilityId(siteName)}`,
-      siteName,
-      corridor,
-      bedType: parseBedType(bedTypeText) ?? 'Detoxification',
-      gender: 'Co-Ed',
-      totalBeds,
-      availableBeds,
-      status: availableBeds === 0 ? 'Full' : availableBeds <= 2 ? 'Almost Full' : 'Available',
-      lastUpdated: new Date().toISOString(),
+    // Parse list-group items into a label→value map.
+    const fields = new Map<string, string>();
+    $card.find('.list-group-item').each((_j, liEl) => {
+      const $li = $(liEl);
+      const label = textOf($, $li.find('strong').first()).replace(/:$/, '').trim();
+      const value = textOf($, $li.find('.text-end').first());
+      if (label && value) fields.set(label, value);
     });
+
+    const corridorRaw = fields.get('Health corridor') ?? 'Edmonton';
+    const corridor = ABED_CORRIDOR_MAP[corridorRaw] ?? `${corridorRaw} Corridor`;
+    const genderRaw = fields.get('Genders') ?? 'Female, Male';
+    const gender =
+      /female.*male|male.*female|co-ed/i.test(genderRaw)
+        ? 'Co-Ed'
+        : /female/i.test(genderRaw)
+          ? 'Female'
+          : /male/i.test(genderRaw)
+            ? 'Male'
+            : 'Co-Ed';
+
+    // Footer "Updated: YYYY-MM-DD HH:MM PM"
+    const updatedText = textOf($, $card.find('.card-footer .tag.light').first());
+    const updatedMatch = updatedText.match(/Updated:\s*(.+)/i);
+    const lastUpdated = updatedMatch
+      ? updatedMatch[1].trim()
+      : new Date().toISOString();
+
+    // Each bed-type row becomes a separate entry so per-type availability is
+    // preserved. Rows with "---" are skipped.
+    for (const [label, value] of fields) {
+      const bedType = abedBedType(label);
+      if (!bedType) continue;
+      const counts = parseAbedBedCount(value);
+      if (!counts) continue;
+
+      found.push({
+        id: `BED-ABED-${makeFacilityId(siteName)}-${bedType}`,
+        siteName,
+        corridor,
+        bedType,
+        gender,
+        totalBeds: counts.total,
+        availableBeds: counts.available,
+        status,
+        lastUpdated,
+      });
+    }
   });
 
   return found;
-}
-
-function parseBedType(text: string): AddictionBedStatus['bedType'] | undefined {
-  const lower = text.toLowerCase();
-  if (lower.includes('detox')) return 'Detoxification';
-  if (lower.includes('short') || lower.includes('treatment')) return 'Short-Term Treatment';
-  if (lower.includes('long') || lower.includes('recovery')) return 'Long-Term Recovery';
-  if (lower.includes('youth')) return 'Youth Specific';
-  return undefined;
 }
 
 // Merge scraped helplines into existing, keyed by phone number.
@@ -552,32 +637,50 @@ function mergeHelplines(
   return Array.from(byNumber.values());
 }
 
-// Merge scraped bed capacities into existing, keyed by siteName.
+// Merge scraped bed capacities into existing. Existing hand-authored entries
+// are preserved; ABED entries update availability where the site name fuzzy-
+// matches, and new ABED-only sites are appended.
 function mergeBedCapacities(
   existing: AddictionBedStatus[],
   scraped: AddictionBedStatus[],
 ): AddictionBedStatus[] {
-  const bySite = new Map<string, AddictionBedStatus>();
-  for (const b of existing) {
-    bySite.set(b.siteName.toLowerCase(), b);
-  }
-  for (const b of scraped) {
-    const key = b.siteName.toLowerCase();
-    const prev = bySite.get(key);
-    if (prev) {
-      // Update availability from fresh scrape, preserve hand-authored metadata
-      bySite.set(key, {
-        ...prev,
-        availableBeds: b.availableBeds,
-        totalBeds: b.totalBeds || prev.totalBeds,
-        status: b.status,
-        lastUpdated: b.lastUpdated,
-      });
+  const result = [...existing];
+
+  // Build a normalized-name index of existing entries for quick lookup.
+  const existingIndex = new Map<string, number[]>();
+  result.forEach((b, idx) => {
+    const key = normalizeSiteName(b.siteName);
+    const arr = existingIndex.get(key) ?? [];
+    arr.push(idx);
+    existingIndex.set(key, arr);
+  });
+
+  for (const bed of scraped) {
+    const normKey = normalizeSiteName(bed.siteName);
+    const candidateIdxs = existingIndex.get(normKey);
+
+    if (candidateIdxs && candidateIdxs.length > 0) {
+      // Prefer matching on bedType too; fall back to the first same-site entry.
+      const byType = candidateIdxs.find(
+        i => result[i].bedType === bed.bedType,
+      );
+      const targetIdx = byType ?? candidateIdxs[0];
+
+      result[targetIdx] = {
+        ...result[targetIdx],
+        availableBeds: bed.availableBeds,
+        totalBeds: bed.totalBeds || result[targetIdx].totalBeds,
+        status: bed.status,
+        lastUpdated: bed.lastUpdated,
+      };
     } else {
-      bySite.set(key, b);
+      // New site from ABED — append.
+      result.push(bed);
+      existingIndex.set(normKey, [result.length - 1]);
     }
   }
-  return Array.from(bySite.values());
+
+  return result;
 }
 
 // ---- HTTP fetch helper ----------------------------------------------------
@@ -655,13 +758,13 @@ export async function run(): Promise<SyncResult> {
     console.error('[AhsAsiScraper] Helplines fetch failed:', msg);
   }
 
-  // --- Mental health: addiction beds ---
+  // --- Mental health: addiction beds (ABED dashboard) ---
   try {
-    console.log('[AhsAsiScraper] Fetching addiction & mental health page...');
-    const html = await fetchPage(AHS_MENTAL_HEALTH_URL);
+    console.log('[AhsAsiScraper] Fetching ABED dashboard (findaddictionbeds.alberta.ca)...');
+    const html = await fetchPage(ABED_DASHBOARD_URL);
     const $ = cheerio.load(html);
 
-    const scrapedBeds = parseBedAvailability($);
+    const scrapedBeds = parseAbedBedAvailability($);
     if (scrapedBeds.length > 0) {
       mhData.ADDICTION_BED_CAPACITIES = mergeBedCapacities(
         mhData.ADDICTION_BED_CAPACITIES,
@@ -669,14 +772,14 @@ export async function run(): Promise<SyncResult> {
       );
       mentalHealthUpdated = true;
       recordsFetched += scrapedBeds.length;
-      console.log(`[AhsAsiScraper] Found ${scrapedBeds.length} bed availability records.`);
+      console.log(`[AhsAsiScraper] Found ${scrapedBeds.length} bed availability records from ABED.`);
     } else {
-      console.log('[AhsAsiScraper] No structured bed availability found on page.');
+      console.log('[AhsAsiScraper] No bed availability cards found on ABED page.');
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     errors.push(`beds: ${msg}`);
-    console.error('[AhsAsiScraper] Bed availability fetch failed:', msg);
+    console.error('[AhsAsiScraper] ABED bed availability fetch failed:', msg);
   }
 
   // --- Write files ---
@@ -720,8 +823,8 @@ export async function run(): Promise<SyncResult> {
       const mhMetadata = mergeDataMetadata(mhData._dataMetadata, {
         ADDICTION_BED_CAPACITIES: buildMetadataEntry({
           updateType: 'auto',
-          source: 'AHS Addiction & Mental Health bed availability',
-          sourceVintage: 'Live AHS bed-availability page',
+          source: 'Addiction Bed Exploration Dashboard (ABED) - findaddictionbeds.alberta.ca',
+          sourceVintage: 'Live (updated once daily, Mon-Fri)',
           lastUpdated: timestamp,
         }),
         SUPPORT_HELPLINES: buildMetadataEntry({

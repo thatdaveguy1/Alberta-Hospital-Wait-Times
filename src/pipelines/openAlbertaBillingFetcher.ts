@@ -1,9 +1,22 @@
 // Open Alberta Physician Billing Fetcher
-// Downloads AHCIP physician billing statistical reports from Open Alberta
+// Downloads the AHCIP Statistical Supplement combined workbook from Open Alberta
 // and writes PHYSICIAN_SPECIALTY_BILLING to data-spending.json.
 //
-// Source: https://open.alberta.ca/opendata?tags=Physician+Billing
-// The datasets are published as CSV/Excel on Open Alberta (CKAN).
+// Source: https://open.alberta.ca/dataset/ahcip-statistical-supplement
+// The AHCIP Statistical Supplement is published as a single combined XLSX
+// workbook on Open Alberta (CKAN) containing all supplement tables.
+//
+// PHYSICIAN_SPECIALTY_BILLING is assembled by joining four tables, all keyed
+// by physician specialty and the latest service-year column:
+//   Table 2.12 A — Number of fee-for-service physicians by specialty
+//   Table 2.12 B — Average gross payment by specialty
+//   Table 2.12 D — Number of services by specialty
+//   Table 2.3    — Total payments by program and specialty (FFS+BCP+RRNP+MEDR)
+// `servicesPerPatient` is derived from Table 2.14 (FTE physicians and
+// registered persons per FTE) where available:
+//   services / (FTE physicians × registered persons per FTE).
+// Pathology and Radiology are excluded from Table 2.14 by the source, so
+// their `servicesPerPatient` is set to 0 with a verification note.
 
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -17,9 +30,11 @@ const RATE_LIMIT_MS = 2000;
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-// Open Alberta CKAN dataset search for physician billing
+// Open Alberta CKAN package id for the AHCIP Statistical Supplement combined
+// workbook (all tables in one XLSX). Resolved via package_search by title.
 const CKAN_SEARCH_URL = 'https://open.alberta.ca/api/3/action/package_search';
-const BILLING_TAG_QUERY = 'physician billing';
+const SUPPLEMENT_TITLE_QUERY =
+  'title:"Alberta Health Care Insurance Plan (AHCIP) Statistical Supplement"';
 
 interface PhysicianPaymentSpecialty {
   specialtyGroup: string;
@@ -61,110 +76,261 @@ async function downloadBuffer(url: string): Promise<Buffer> {
   return Buffer.from(response.data);
 }
 
-// Search Open Alberta CKAN for physician billing datasets
-async function findBillingResourceUrls(): Promise<string[]> {
+// Locate the combined AHCIP Statistical Supplement workbook resource URL.
+// Prefer the resource whose name contains the latest year suffix; fall back to
+// the first XLSX resource named "combined-tables".
+async function findSupplementWorkbookUrl(): Promise<string | undefined> {
   try {
     const response = await axios.get(CKAN_SEARCH_URL, {
-      params: { q: BILLING_TAG_QUERY, rows: 20 },
+      params: { q: SUPPLEMENT_TITLE_QUERY, rows: 10 },
       timeout: 30000,
       headers: { 'User-Agent': USER_AGENT },
     });
     const results = response.data?.result?.results ?? [];
-    const urls: string[] = [];
+    // The AHCIP Statistical Supplement package publishes one combined XLSX
+    // workbook per fiscal year. Pick the XLSX resource with the highest year
+    // token in its name (the latest release).
+    const xlsxResources: { url: string; name: string }[] = [];
     for (const pkg of results) {
-      const resources = pkg.resources ?? [];
-      for (const res of resources) {
+      for (const res of pkg.resources ?? []) {
         const format = (res.format ?? '').toLowerCase();
         const url = res.url as string;
-        if (url && (format.includes('xlsx') || format.includes('csv') || format.includes('excel'))) {
-          urls.push(url);
+        const name = res.name ?? '';
+        if (url && format.includes('xlsx') && extractYear(name)) {
+          xlsxResources.push({ url, name });
         }
       }
     }
-    return urls;
+    if (xlsxResources.length === 0) return undefined;
+    xlsxResources.sort((a, b) => {
+      const ya = extractYear(a.name) ?? 0;
+      const yb = extractYear(b.name) ?? 0;
+      return yb - ya;
+    });
+    return xlsxResources[0].url;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`[OpenAlbertaBilling] CKAN search failed: ${msg}`);
-    return [];
+    return undefined;
   }
 }
 
-// Parse a billing workbook/CSV into PhysicianPaymentSpecialty records
-function parseBillingData(buffer: Buffer, url: string): PhysicianPaymentSpecialty[] {
-  const isCsv = url.toLowerCase().endsWith('.csv');
-  let workbook: XLSX.WorkBook;
-  try {
-    if (isCsv) {
-      workbook = XLSX.read(buffer, { type: 'buffer', raw: false });
-    } else {
-      workbook = XLSX.read(buffer, { type: 'buffer' });
+function extractYear(name: string): number | undefined {
+  const match = name.match(/(20\d{2})/g);
+  if (!match) return undefined;
+  return Math.max(...match.map(Number));
+}
+
+// Normalize a specialty label for cross-table joins: lowercase, collapse
+// whitespace, unify ampersand/and, strip trailing punctuation.
+function normalizeSpecialty(raw: string): string {
+  let s = raw.trim().replace(/\s+/g, ' ');
+  s = s.replace(/&/g, 'and');
+  s = s.replace(/\.$/, '');
+  return s.toLowerCase();
+}
+
+// A small alias map reconciling labels that differ between Table 2.3 and the
+// 2.12 series. Keys are the Table 2.3 spelling; values the canonical 2.12
+// spelling. Applied after normalization.
+const SPECIALTY_ALIASES: Record<string, string> = {
+  'psychiatry designated specialty': 'psychiatry',
+};
+
+function canonicalSpecialty(raw: string): string {
+  const n = normalizeSpecialty(raw);
+  return SPECIALTY_ALIASES[n] ?? n;
+}
+
+// Read a 2.12-style sheet (header on row 5, year columns 2..6, data from row 7)
+// and return a map of canonical specialty -> value for the latest year column.
+function parseYearSeriesSheet(
+  workbook: XLSX.WorkBook,
+  sheetName: string,
+): Map<string, number> {
+  const sheet = workbook.Sheets[sheetName];
+  const out = new Map<string, number>();
+  if (!sheet) return out;
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
+  if (rows.length < 7) return out;
+
+  // Header row 5 (index 4) holds the metric name; row 6 (index 5) holds year
+  // labels. The latest year is the last non-empty cell in row 6.
+  const yearRow = rows[5] ?? [];
+  let latestCol = -1;
+  for (let j = yearRow.length - 1; j >= 1; j--) {
+    if (asString(yearRow[j])) {
+      latestCol = j;
+      break;
     }
-  } catch {
-    return [];
   }
+  if (latestCol < 0) return out;
 
-  const out: PhysicianPaymentSpecialty[] = [];
-  for (const sheetName of workbook.SheetNames) {
-    const sheet = workbook.Sheets[sheetName];
-    if (!sheet) continue;
-    const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
-    if (rows.length < 2) continue;
-
-    // Find header row with specialty/count/payments columns
-    let headerIdx = -1;
-    let specialtyCol = -1;
-    let countCol = -1;
-    let paymentsCol = -1;
-    let avgPaymentCol = -1;
-
-    for (let i = 0; i < Math.min(rows.length, 10); i++) {
-      const header = rows[i];
-      if (!header) continue;
-      for (let j = 0; j < header.length; j++) {
-        const cell = asString(header[j])?.toLowerCase() ?? '';
-        if (cell.includes('specialty') || cell.includes('specialization') || cell.includes('practice type')) {
-          specialtyCol = j;
-        }
-        if (cell.includes('count') || cell.includes('number of physicians') || cell.includes('physician count')) {
-          countCol = j;
-        }
-        if (cell.includes('total payment') || cell.includes('total billing') || cell.includes('payments')) {
-          paymentsCol = j;
-        }
-        if (cell.includes('average') || cell.includes('avg') || cell.includes('mean payment')) {
-          avgPaymentCol = j;
-        }
-      }
-      if (specialtyCol >= 0 && (countCol >= 0 || paymentsCol >= 0)) {
-        headerIdx = i;
-        break;
-      }
+  let started = false;
+  for (let i = 6; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
+    const label = asString(row[0]);
+    if (!label) continue;
+    const low = label.toLowerCase();
+    if (low.includes('physicians by specialty')) {
+      started = true;
+      continue;
     }
+    if (low.startsWith('total: all physicians')) {
+      started = true;
+      continue;
+    }
+    if (!started) continue;
+    if (
+      low.startsWith('note:') ||
+      low.startsWith('(') ||
+      low.startsWith('subtotal') ||
+      low.startsWith('total') ||
+      low.startsWith('all physicians') ||
+      low.startsWith('all specialists')
+    ) {
+      continue;
+    }
+    // Stop at the trailing percentage-change sub-table.
+    if (low.startsWith('table 2.12')) break;
+    // Skip indented sub-rows (leading whitespace or dash).
+    if (label.startsWith(' ') || label.startsWith('-')) continue;
+    const value = asNumber(row[latestCol]);
+    if (value === undefined) continue;
+    out.set(canonicalSpecialty(label), value);
+  }
+  return out;
+}
 
-    if (headerIdx < 0 || specialtyCol < 0) continue;
+// Read Table 2.3 (single-year, four program columns) and return a map of
+// canonical specialty -> total payments (sum of FFS+BCP+RRNP+MEDR).
+function parsePaymentsBySpecialty(workbook: XLSX.WorkBook): Map<string, number> {
+  const sheet = workbook.Sheets['Table_2.3'];
+  const out = new Map<string, number>();
+  if (!sheet) return out;
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
+  // Header row 5 (index 4): col 0 = specialty, cols 1-4 = program payments.
+  // Data starts row 11 (index 10) after the subtotal block.
+  for (let i = 10; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
+    const label = asString(row[0]);
+    if (!label) continue;
+    const low = label.toLowerCase();
+    if (
+      low.startsWith('note:') ||
+      low.startsWith('(') ||
+      low.startsWith('subtotal') ||
+      low.startsWith('total') ||
+      low.startsWith('all physicians') ||
+      low.startsWith('all specialists')
+    ) {
+      continue;
+    }
+    if (label.startsWith(' ') || label.startsWith('-')) continue;
+    const vals = [1, 2, 3, 4].map((c) => asNumber(row[c])).filter((n): n is number => n !== undefined);
+    if (vals.length === 0) continue;
+    out.set(canonicalSpecialty(label), vals.reduce((a, b) => a + b, 0));
+  }
+  return out;
+}
 
-    for (let i = headerIdx + 1; i < rows.length; i++) {
-      const row = rows[i];
-      if (!row) continue;
-      const specialty = asString(row[specialtyCol]);
-      if (!specialty || specialty.toLowerCase().includes('total') || specialty.toLowerCase().includes('all')) continue;
-      const count = asNumber(row[countCol]) ?? 0;
-      const payments = asNumber(row[paymentsCol]);
-      const avgPayment = asNumber(row[avgPaymentCol]);
-
-      // Skip rows with no useful data
-      if (count === 0 && payments === undefined && avgPayment === undefined) continue;
-
-      out.push({
-        specialtyGroup: specialty,
-        physicianCount: count,
-        totalPaymentsMillions: payments !== undefined ? Math.round(payments * 10) / 10 : 0,
-        averagePaymentGross: avgPayment ?? 0,
-        servicesPerPatient: 0,
-      });
+// Read Table 2.14 (single-year, FTE physicians + registered persons per FTE)
+// and return a map of canonical specialty -> registered persons (FTE × per-FTE).
+function parseRegisteredPersons(workbook: XLSX.WorkBook): Map<string, number> {
+  const sheet = workbook.Sheets['Table_2.14'];
+  const out = new Map<string, number>();
+  if (!sheet) return out;
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
+  // Header row 5 (index 4). Data from row 7 (index 6).
+  // Col layout: 0=specialty, 3=#physicians, 4=#FTE, 9=registered persons per FTE.
+  for (let i = 6; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
+    const label = asString(row[0]);
+    if (!label) continue;
+    const low = label.toLowerCase();
+    if (
+      low.startsWith('note:') ||
+      low.startsWith('(') ||
+      low.startsWith('subtotal') ||
+      low.startsWith('total') ||
+      low.startsWith('all physicians') ||
+      low.startsWith('all specialists') ||
+      low.startsWith('definition') ||
+      low.startsWith('step')
+    ) {
+      continue;
+    }
+    if (label.startsWith(' ') || label.startsWith('-')) continue;
+    const fte = asNumber(row[4]);
+    const perFte = asNumber(row[9]);
+    if (fte && perFte) {
+      out.set(canonicalSpecialty(label), Math.round(fte * perFte));
     }
   }
   return out;
+}
+
+// Build a display label from the canonical normalized key: title-case the
+// common specialty names so the UI shows readable groups.
+function displayLabel(canonical: string): string {
+  const GP = 'general/family physicians (gp/fps)';
+  if (canonical === GP) return 'General/Family Physicians (GP/FPs)';
+  // Title-case words, preserving hyphens and slashes.
+  return canonical
+    .split(' ')
+    .map((w) => {
+      if (w.includes('-')) {
+        return w
+          .split('-')
+          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+          .join('-');
+      }
+      if (w.includes('/')) {
+        return w
+          .split('/')
+          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+          .join('/');
+      }
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    })
+    .join(' ');
+}
+
+function buildRecords(
+  counts: Map<string, number>,
+  avgPayments: Map<string, number>,
+  services: Map<string, number>,
+  payments: Map<string, number>,
+  registeredPersons: Map<string, number>,
+): PhysicianPaymentSpecialty[] {
+  const keys = [...counts.keys()].filter(
+    (k) => avgPayments.has(k) && services.has(k) && payments.has(k),
+  );
+  const records: PhysicianPaymentSpecialty[] = [];
+  for (const key of keys) {
+    const physicianCount = counts.get(key)!;
+    const averagePaymentGross = Math.round(avgPayments.get(key)!);
+    const totalPayments = payments.get(key)!;
+    const serviceCount = services.get(key)!;
+    const registered = registeredPersons.get(key);
+    const servicesPerPatient =
+      registered && registered > 0
+        ? Math.round((serviceCount / registered) * 100) / 100
+        : 0;
+    records.push({
+      specialtyGroup: displayLabel(key),
+      physicianCount,
+      totalPaymentsMillions: Math.round((totalPayments / 1_000_000) * 10) / 10,
+      averagePaymentGross,
+      servicesPerPatient,
+    });
+  }
+  // Sort by total payments descending so the most material specialties lead.
+  records.sort((a, b) => b.totalPaymentsMillions - a.totalPaymentsMillions);
+  return records;
 }
 
 export async function run(): Promise<SyncResult> {
@@ -173,9 +339,11 @@ export async function run(): Promise<SyncResult> {
   console.log('[OpenAlbertaBilling] Starting physician billing fetch');
 
   try {
-    const urls = await findBillingResourceUrls();
-    if (urls.length === 0) {
-      console.warn('[OpenAlbertaBilling] No billing datasets found on Open Alberta — leaving data-spending.json unchanged.');
+    const url = await findSupplementWorkbookUrl();
+    if (!url) {
+      console.warn(
+        '[OpenAlbertaBilling] AHCIP Statistical Supplement workbook not found — leaving data-spending.json unchanged.',
+      );
       return {
         domain: 'spending',
         pipeline: 'openAlbertaBillingFetcher',
@@ -184,26 +352,44 @@ export async function run(): Promise<SyncResult> {
         recordsWritten: 0,
         durationMs: Date.now() - startTime,
         timestamp,
-        error: 'No physician billing datasets found on Open Alberta CKAN',
+        error: 'AHCIP Statistical Supplement combined workbook not found on Open Alberta CKAN',
       };
     }
 
-    let allRecords: PhysicianPaymentSpecialty[] = [];
-    for (const url of urls) {
-      try {
-        console.log(`[OpenAlbertaBilling] Downloading: ${url}`);
-        const buffer = await downloadBuffer(url);
-        const records = parseBillingData(buffer, url);
-        allRecords = allRecords.concat(records);
-        await new Promise<void>((resolve) => setTimeout(resolve, RATE_LIMIT_MS));
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.warn(`[OpenAlbertaBilling] Failed to download/parse ${url}: ${msg}`);
-      }
+    console.log(`[OpenAlbertaBilling] Downloading: ${url}`);
+    const buffer = await downloadBuffer(url);
+    await new Promise<void>((resolve) => setTimeout(resolve, RATE_LIMIT_MS));
+
+    let workbook: XLSX.WorkBook;
+    try {
+      workbook = XLSX.read(buffer, { type: 'buffer' });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[OpenAlbertaBilling] Failed to parse workbook: ${msg}`);
+      return {
+        domain: 'spending',
+        pipeline: 'openAlbertaBillingFetcher',
+        status: 'failed',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        timestamp,
+        error: `Failed to parse AHCIP Statistical Supplement workbook: ${msg}`,
+      };
     }
 
-    if (allRecords.length === 0) {
-      console.warn('[OpenAlbertaBilling] No billing records extracted — leaving data-spending.json unchanged.');
+    const counts = parseYearSeriesSheet(workbook, 'Table_2.12 A');
+    const avgPayments = parseYearSeriesSheet(workbook, 'Table_2.12 B');
+    const services = parseYearSeriesSheet(workbook, 'Table_2.12 D');
+    const payments = parsePaymentsBySpecialty(workbook);
+    const registeredPersons = parseRegisteredPersons(workbook);
+
+    const records = buildRecords(counts, avgPayments, services, payments, registeredPersons);
+
+    if (records.length === 0) {
+      console.warn(
+        '[OpenAlbertaBilling] No billing records extracted from workbook — leaving data-spending.json unchanged.',
+      );
       return {
         domain: 'spending',
         pipeline: 'openAlbertaBillingFetcher',
@@ -212,7 +398,7 @@ export async function run(): Promise<SyncResult> {
         recordsWritten: 0,
         durationMs: Date.now() - startTime,
         timestamp,
-        error: 'No physician billing records matched the expected shape',
+        error: 'No physician billing records matched the expected table shape',
       };
     }
 
@@ -224,14 +410,16 @@ export async function run(): Promise<SyncResult> {
     const ownedMetadata: DataMetadata = {
       PHYSICIAN_SPECIALTY_BILLING: buildMetadataEntry({
         updateType: 'auto',
-        source: 'Open Alberta CKAN physician billing statistical reports',
-        sourceVintage: 'Latest Open Alberta AHCIP billing dataset release',
+        source: 'Open Alberta AHCIP Statistical Supplement (combined workbook)',
+        sourceVintage: 'AHCIP Statistical Supplement — latest release (Tables 2.3, 2.12 A/B/D, 2.14)',
         lastUpdated: timestamp,
+        verification:
+          'Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons, with registered persons derived from Table 2.14 FTE counts. Pathology and Radiology have no Table 2.14 entry, so their servicesPerPatient is 0.',
       }),
     };
     const merged = {
       ...existingJson,
-      PHYSICIAN_SPECIALTY_BILLING: allRecords,
+      PHYSICIAN_SPECIALTY_BILLING: records,
       _dataMetadata: mergeDataMetadata(
         existingJson._dataMetadata as DataMetadata | undefined,
         ownedMetadata,
@@ -240,14 +428,14 @@ export async function run(): Promise<SyncResult> {
     fs.writeFileSync(SPENDING_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
 
     console.log(
-      `[OpenAlbertaBilling] Complete. fetched=${allRecords.length} written=${allRecords.length} in ${Date.now() - startTime}ms`,
+      `[OpenAlbertaBilling] Complete. fetched=${records.length} written=${records.length} in ${Date.now() - startTime}ms`,
     );
     return {
       domain: 'spending',
       pipeline: 'openAlbertaBillingFetcher',
       status: 'success',
-      recordsFetched: allRecords.length,
-      recordsWritten: allRecords.length,
+      recordsFetched: records.length,
+      recordsWritten: records.length,
       durationMs: Date.now() - startTime,
       timestamp,
     };

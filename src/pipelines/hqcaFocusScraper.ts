@@ -250,7 +250,21 @@ export async function run(): Promise<SyncResult> {
           fiscalYear: r.fiscalYear,
           continuityPct: r.continuityPct,
         }));
-      const merged = { ...existing, CONTINUITY_SATISFACTION_HQCA: satisfactionData };
+      const ownedMetadata: DataMetadata = {
+        CONTINUITY_SATISFACTION_HQCA: buildMetadataEntry({
+          updateType: 'auto',
+          source: 'HQCA FOCUS Primary Healthcare Experience',
+          sourceVintage: 'HQCA FOCUS primary care continuity survey',
+        }),
+      };
+      const merged = {
+        ...existing,
+        CONTINUITY_SATISFACTION_HQCA: satisfactionData,
+        _dataMetadata: mergeDataMetadata(
+          existing._dataMetadata as DataMetadata | undefined,
+          ownedMetadata,
+        ),
+      };
       fs.writeFileSync(PRIMARY_CARE_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
     }
 

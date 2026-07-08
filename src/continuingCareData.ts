@@ -1,13 +1,13 @@
 // Alberta Continuing Care & Home Care Datasets (2019 - 2026 reporting periods)
-// Compiled from HQA FOCUS Continuing Care, CIHI Long-Term Care, and Open Alberta standards.
+// Compiled from HQCA FOCUS Continuing Care, CIHI Long-Term Care, and Open Alberta standards.
 
 export interface PlacementMetric {
   year: string;
   zone: 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'South Zone' | 'North Zone' | 'Alberta';
   pctPlacedWithin30Days: number; // Target: 60%+
   pctPlacedPreferredOption: number; // Target: 70%+
-  daysWaitingP50: number; // Median wait days
-  daysWaitingP90: number; // 90th percentile wait days
+  daysWaitingP50: number | null; // Median wait days (null when historical value not available)
+  daysWaitingP90: number | null; // 90th percentile wait days (null when historical value not available)
 }
 
 export interface ResidentOutcomeQuality {
@@ -31,7 +31,7 @@ export interface CareFacilityCompliance {
   type: 'Type A (Long-Term Care)' | 'Type B (Designated Supportive Living)';
   operator: 'AHS' | 'Covenant Health' | 'Private/Contracted' | 'Non-Profit';
   city: string;
-  zone: 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'South Zone' | 'North Zone';
+  zone: 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'South Zone' | 'North Zone' | 'Alberta';
   lastInspectionDate: string;
   standardsCompliant: boolean;
   violationsCount: number;
@@ -42,7 +42,7 @@ export interface CareFacilityCompliance {
 // DATASETS
 // ----------------------------------------------------------------------------
 
-// 1. Placement Times & Flow into Preferred Living Options (HQA FOCUS)
+// 1. Placement Times & Flow into Preferred Living Options (HQCA FOCUS)
 export const CONTINUING_CARE_PLACEMENT_STATS: PlacementMetric[] = [
   {
     year: '2021',
@@ -139,7 +139,7 @@ export const RESIDENT_QUALITY_OUTCOMES: ResidentOutcomeQuality[] = [
   {
     year: '2025',
     metric: 'Inappropriate Antipsychotic Use',
-    albertaRatePct: 18.2, // Improved due to HQA guidelines on antipsychotic audits
+    albertaRatePct: 18.2, // Improved due to HQCA guidelines on antipsychotic audits
     canadaRatePct: 19.2,
     directionIsLowerBetter: true
   },
@@ -187,7 +187,7 @@ export const RESIDENT_QUALITY_OUTCOMES: ResidentOutcomeQuality[] = [
   }
 ];
 
-// 3. Home Care Experience & Staff Continuity (HQA FOCUS Survey)
+// 3. Home Care Experience & Staff Continuity (HQCA FOCUS Survey)
 export const HOME_CARE_EXPERIENCE: HomeCareContinuity[] = [
   {
     zone: 'Calgary Zone',
