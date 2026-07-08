@@ -17,6 +17,11 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Solution:** Updated `DASHBOARDS` description, `DashboardHeader` description, and documented Phase 19 in the header note; kept code paths for when data is verified again.
 - **Prevention:** When hiding UI for data quality, update module picker copy and in-dashboard disclosure the same sprint.
 
+### Lesson: Headed agent-browser needs one session, ref clicks, and T8N via localStorage
+- **Mistake:** Clicking header **Set Location** while the location modal was open targeted the wrong control; mixing `agent-browser` sessions left screenshots on the ER default tab while `read` showed Public Health text.
+- **Solution:** `scripts/headed-audit-verify.sh` seeds `alberta_hospital_user_location` for **T8N 7W7** (St. Albert, FSA T8N), dismisses the prompt, uses **Change Module** `@ref`, subtabs **WASTEWATER SIGNALS** / **COMPARE MATRIX**, and `agent-browser close --all` before a proof run.
+- **Prevention:** One `AGENT_BROWSER_SESSION` per flow; confirm `ACTIVE MODULE` via `eval` before `--full` screenshots; use uppercase subtab labels from snapshots.
+
 ## Session: 2026-07-08 (Visual Audit Remediation)
 
 ### Lesson: Visual audits catch UI/UX issues that code review misses

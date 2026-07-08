@@ -16,23 +16,36 @@ BASE_URL="${AUDIT_BASE_URL:-http://127.0.0.1:3004/}"
 ab() { agent-browser "$@"; }
 
 pick_ref() {
-  local pattern="$1"
-  ab snapshot -i 2>&1 | grep -F "$pattern" | sed -n 's/.*\[ref=\(e[0-9]*\)\].*/\1/p' | head -1
+  local label="$1"
+  local ref
+  ref=$(ab snapshot -i 2>&1 | grep -F "$label" | sed -n 's/.*\[ref=\(e[0-9]*\)\].*/\1/p' | head -1)
+  if [[ -z "$ref" ]]; then
+    ref=$(ab snapshot -i 2>&1 | grep -iF "$label" | sed -n 's/.*\[ref=\(e[0-9]*\)\].*/\1/p' | head -1)
+  fi
+  echo "$ref"
 }
 
 wait_for() {
-  local pattern="$1"
-  for _ in 1 2 3 4 5 6 7 8; do
-    if ab snapshot -i 2>&1 | grep -qF "$pattern"; then return 0; fi
-    sleep 1
+  local label="$1"
+  local i
+  for i in $(seq 1 20); do
+    if ab snapshot -i 2>&1 | grep -qiF "$label"; then
+      return 0
+    fi
+    sleep 0.5
   done
-  echo "Timeout waiting for: $pattern" >&2
+  echo "WARN: timed out waiting for: $label" >&2
   return 1
 }
 
 open_modules() {
   wait_for "Change Module"
-  ab click "text=Change Module"
+  CM=$(pick_ref 'button "Change Module"')
+  if [[ -n "$CM" ]]; then
+    ab click "@$CM"
+  else
+    ab click "text=Change Module"
+  fi
   sleep 1.5
 }
 
@@ -77,8 +90,8 @@ PH=$(pick_ref "Public Health Respiratory")
 [[ -z "$PH" ]] && PH=$(pick_ref "Public Health")
 [[ -n "$PH" ]] || { echo "Public Health tile ref missing"; ab snapshot -i >&2; exit 1; }
 ab click "@$PH"
-sleep 3
-ab click "text=Wastewater Signals"
+wait_for "Wastewater Signals"
+ab click "@$(pick_ref 'WASTEWATER SIGNALS')"
 sleep 2.5
 ab screenshot "$OUT/01-public-health-wastewater.png" --full
 ab read 2>&1 | grep -iE 'Wastewater early warning|Left axis|COVID|Public Health|Health Data Monitor|Emergency Department Monitor|×10' | head -20 > "$OUT/01-public-health-wastewater.txt" || true
@@ -86,12 +99,12 @@ ab read 2>&1 | grep -iE 'Wastewater early warning|Left axis|COVID|Public Health|
 # --- Health Inequity > Compare Matrix ---
 echo "Health Inequity / Compare Matrix..."
 open_modules
-HI=$(pick_ref "Health Inequity Regional")
-[[ -z "$HI" ]] && HI=$(pick_ref "Health Inequity")
-[[ -n "$HI" ]] || { echo "Health Inequity tile ref missing"; exit 1; }
+HI=$(pick_ref "Health Inequity")
+[[ -n "$HI" ]] || { echo "Health Inequity tile ref missing"; ab snapshot -i >&2; exit 1; }
 ab click "@$HI"
 sleep 3
-ab click "text=Compare Matrix"
+wait_for "Compare Matrix"
+ab click "@$(pick_ref 'COMPARE MATRIX')"
 sleep 2.5
 ab screenshot "$OUT/02-health-inequity-compare.png" --full
 ab read 2>&1 | grep -iE 'Compare Matrix|Interactive Health Equity|LGA Selection Navigator|Cycle of Disparity|Health Data Monitor|Emergency Department Monitor' | head -20 > "$OUT/02-health-inequity-compare.txt" || true

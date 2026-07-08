@@ -1,0 +1,9 @@
+Location: St. AlbertChange
+Location Origin
+St. Albert, AB
+Change Location
+#### Sturgeon Community Hospital
+St. Albert
+### Sturgeon Community Hospital
+St. AlbertEdmonton Zone
+We do not sell personal data. Location you enter stays in your browser for proximity features. See project README on GitHub for how data is fetched and stored.
