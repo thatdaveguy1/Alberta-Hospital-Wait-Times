@@ -212,7 +212,8 @@ export default function RegionalInequityDashboard() {
       ...selectedLgaDisease,
       ...selectedLgaEd,
       ...selectedLgaTravel,
-      ...selectedLgaAccess
+      ...selectedLgaAccess,
+      lgaName: selectedLgaNeed.lgaName // Ensure lgaName isn't overridden by 'Loading...'
     };
   }, [selectedLgaNeed, selectedLgaDisease, selectedLgaEd, selectedLgaTravel, selectedLgaAccess]);
 
@@ -254,7 +255,8 @@ export default function RegionalInequityDashboard() {
         ...disease,
         ...ed,
         ...travel,
-        ...access
+        ...access,
+        lgaName: need.lgaName // Ensure lgaName isn't overridden by 'Loading...'
       };
     }
   }, [comparisonTarget, PROVINCIAL_BENCHMARKS, COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, ED_RELIANCE_METRICS, TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS]);
@@ -340,7 +342,8 @@ export default function RegionalInequityDashboard() {
         ...disease,
         ...ed,
         ...travel,
-        ...access
+        ...access,
+        lgaName: p.lgaName // Ensure we keep the original LGA name!
       };
     });
   }, [COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, ED_RELIANCE_METRICS, TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS]);
@@ -1060,7 +1063,7 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Clinics per 10k population</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-rose-400">{selectedLgaAccess.facilitiesPer10k}</span>
+                    <span className="text-2xl font-black text-rose-400">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedLgaAccess.facilitiesPer10k}</span>
                     <span className="text-[10px] text-slate-500 font-medium">clinics</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
@@ -1071,7 +1074,7 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Distance to Nearest ED</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-orange-400">{selectedLgaAccess.distanceToNearestEdKm}</span>
+                    <span className="text-2xl font-black text-orange-400">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedLgaAccess.distanceToNearestEdKm}</span>
                     <span className="text-[10px] text-slate-500 font-medium">km</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
@@ -1082,7 +1085,7 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Distance to Nearest Imaging</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-indigo-400">{selectedLgaAccess.distanceToNearestImagingKm}</span>
+                    <span className="text-2xl font-black text-indigo-400">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedLgaAccess.distanceToNearestImagingKm}</span>
                     <span className="text-[10px] text-slate-500 font-medium">km</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
@@ -1093,7 +1096,7 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Accepting Roster practices</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-500">{selectedLgaAccess.providersAcceptingPatients}</span>
+                    <span className="text-2xl font-black text-amber-500">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedLgaAccess.providersAcceptingPatients}</span>
                     <span className="text-[10px] text-slate-500 font-medium">clinics</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
@@ -1168,11 +1171,11 @@ export default function RegionalInequityDashboard() {
                         <div className="flex-1 flex items-center justify-center relative min-w-[100px]">
                           <div className="w-full border-t border-dashed border-rose-500/40"></div>
                           <span className="absolute bg-[#0b1226] border border-rose-500/30 text-[9px] px-2 py-0.5 rounded-full font-mono text-rose-300 font-bold">
-                            {selectedLgaTravel.avgTravelDistanceKm} km
+                            {TRAVEL_FOR_CARE.length === 0 ? '—' : `${selectedLgaTravel.avgTravelDistanceKm} km`}
                           </span>
                         </div>
                         <span className="text-[10px] font-black text-rose-400 truncate max-w-[120px]" title={selectedLgaTravel.topDestinationFacility}>
-                          {selectedLgaTravel.topDestinationFacility.split(' ')[0]}...
+                          {TRAVEL_FOR_CARE.length === 0 ? '—' : (selectedLgaTravel.topDestinationFacility ? (selectedLgaTravel.topDestinationFacility.split(' ')[0] + '...') : '—')}
                         </span>
                       </div>
                       
@@ -1183,7 +1186,7 @@ export default function RegionalInequityDashboard() {
 
                     <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
                       <span className="text-[9px] text-amber-500 font-mono font-bold uppercase tracking-wider block">Local Retention & Infrastructure Capacity</span>
-                      <p className="text-xs text-white font-extrabold mt-1">Bed Leakage: {selectedLgaTravel.localBedLeakagePct}%</p>
+                      <p className="text-xs text-white font-extrabold mt-1">Bed Leakage: {TRAVEL_FOR_CARE.length === 0 ? '—' : `${selectedLgaTravel.localBedLeakagePct}%`}</p>
                       <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
                         {dynamicAccessTravelInsight.leakage}
                       </p>
@@ -1268,8 +1271,8 @@ export default function RegionalInequityDashboard() {
                           {/* Row 1 */}
                           <tr>
                             <td className="p-3 text-slate-300">Physicians per 100k</td>
-                            <td className="p-3 text-white font-mono">{selectedFullData.physiciansPer100k}</td>
-                            <td className="p-3 text-slate-400 font-mono">{comparisonFullData.physiciansPer100k}</td>
+                            <td className="p-3 text-white font-mono">{selectedFullData.physiciansPer100k ? Number(selectedFullData.physiciansPer100k).toFixed(1) : '—'}</td>
+                            <td className="p-3 text-slate-400 font-mono">{comparisonFullData.physiciansPer100k ? Number(comparisonFullData.physiciansPer100k).toFixed(1) : '—'}</td>
                             <td className="p-3 text-center font-mono">
                               {(() => {
                                 const diff = selectedFullData.physiciansPer100k - comparisonFullData.physiciansPer100k;
@@ -1351,10 +1354,14 @@ export default function RegionalInequityDashboard() {
                           {/* Row 6 */}
                           <tr>
                             <td className="p-3 text-slate-300">Providers accepting rosters</td>
-                            <td className="p-3 text-white font-mono">{selectedFullData.providersAcceptingPatients}</td>
-                            <td className="p-3 text-slate-400 font-mono">{comparisonFullData.providersAcceptingPatients}</td>
+                            <td className="p-3 text-white font-mono">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedFullData.providersAcceptingPatients}</td>
+                            <td className="p-3 text-slate-400 font-mono">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : comparisonFullData.providersAcceptingPatients}</td>
                             <td className="p-3 text-center font-mono">
-                              {(() => {
+                              {SERVICE_ACCESS_METRICS.length === 0 ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 text-slate-500 border border-slate-800">
+                                  —
+                                </span>
+                              ) : (() => {
                                 const diff = selectedFullData.providersAcceptingPatients - comparisonFullData.providersAcceptingPatients;
                                 return (
                                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${diff >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
@@ -1483,43 +1490,81 @@ export default function RegionalInequityDashboard() {
                               <td className="p-3 font-sans text-slate-400">{lga.zone}</td>
                               <td className="p-3 font-sans text-slate-400">{lga.type}</td>
                               <td className="p-3 text-center">
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lga.deprivationIndex >= 4 ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
-                                  {lga.deprivationIndex} / 5
-                                </span>
+                                {lga.deprivationIndex ? (
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lga.deprivationIndex >= 4 ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                                    {lga.deprivationIndex} / 5
+                                  </span>
+                                ) : '—'}
                               </td>
-                              <td className="p-3 text-right text-slate-100">${lga.medianHouseholdIncome.toLocaleString()}</td>
-                              <td className="p-3 text-right">{lga.highSchoolGradPct}%</td>
+                              <td className="p-3 text-right text-slate-100">
+                                {lga.medianHouseholdIncome ? `$${lga.medianHouseholdIncome.toLocaleString()}` : '—'}
+                              </td>
+                              <td className="p-3 text-right">
+                                {lga.highSchoolGradPct ? `${lga.highSchoolGradPct}%` : '—'}
+                              </td>
                             </>
                           )}
 
                           {(explorerCategory === 'all' || explorerCategory === 'chronic') && (
                             <>
-                              <td className="p-3 text-right text-slate-100">{lga.lifeExpectancyYears} yrs</td>
-                              <td className="p-3 text-right text-orange-400">{lga.infantMortalityPer1000}</td>
-                              <td className="p-3 text-right">{lga.diabetesPrevalencePct}%</td>
-                              <td className="p-3 text-right">{lga.copdPrevalencePct}%</td>
-                              <td className="p-3 text-right">{lga.hypertensionPrevalencePct}%</td>
+                              <td className="p-3 text-right text-slate-100">
+                                {lga.lifeExpectancyYears ? `${lga.lifeExpectancyYears} yrs` : '—'}
+                              </td>
+                              <td className="p-3 text-right text-orange-400">
+                                {lga.infantMortalityPer1000 ? lga.infantMortalityPer1000 : '—'}
+                              </td>
+                              <td className="p-3 text-right">
+                                {lga.diabetesPrevalencePct ? `${lga.diabetesPrevalencePct}%` : '—'}
+                              </td>
+                              <td className="p-3 text-right">
+                                {lga.copdPrevalencePct ? `${lga.copdPrevalencePct}%` : '—'}
+                              </td>
+                              <td className="p-3 text-right">
+                                {lga.hypertensionPrevalencePct ? `${lga.hypertensionPrevalencePct}%` : '—'}
+                              </td>
                             </>
                           )}
 
                           {(explorerCategory === 'all' || explorerCategory === 'ed') && (
                             <>
-                              <td className="p-3 text-right text-slate-100">{lga.totalEdVisitsPer1000}</td>
-                              <td className="p-3 text-right text-orange-400">{lga.lowAcuityCtas45Pct}%</td>
-                              <td className="p-3 text-right">{lga.afterHoursEdPct}%</td>
-                              <td className="p-3 text-right text-slate-100">{lga.moodAnxietyEdRatePer100k}</td>
+                              <td className="p-3 text-right text-slate-100">
+                                {lga.totalEdVisitsPer1000 ? lga.totalEdVisitsPer1000 : '—'}
+                              </td>
+                              <td className="p-3 text-right text-orange-400">
+                                {lga.lowAcuityCtas45Pct ? `${lga.lowAcuityCtas45Pct}%` : '—'}
+                              </td>
+                              <td className="p-3 text-right">
+                                {lga.afterHoursEdPct ? `${lga.afterHoursEdPct}%` : '—'}
+                              </td>
+                              <td className="p-3 text-right text-slate-100">
+                                {lga.moodAnxietyEdRatePer100k ? lga.moodAnxietyEdRatePer100k : '—'}
+                              </td>
                             </>
                           )}
 
                           {(explorerCategory === 'all' || explorerCategory === 'access') && (
                             <>
-                              <td className="p-3 text-right text-slate-100">{lga.physiciansPer100k}</td>
-                              <td className="p-3 text-right">{lga.claimsOutsideLgaPct}%</td>
-                              <td className="p-3 text-right text-slate-100">{lga.acscRatePer100k}</td>
-                              <td className="p-3 text-right text-slate-400">{lga.facilitiesPer10k}</td>
-                              <td className="p-3 text-right text-orange-400">{lga.distanceToNearestEdKm} km</td>
-                              <td className="p-3 text-right text-orange-400">{lga.distanceToNearestImagingKm} km</td>
-                              <td className="p-3 text-right text-slate-100">{lga.providersAcceptingPatients}</td>
+                              <td className="p-3 text-right text-slate-100">
+                                {lga.physiciansPer100k ? Number(lga.physiciansPer100k).toFixed(1) : '—'}
+                              </td>
+                              <td className="p-3 text-right">
+                                {lga.claimsOutsideLgaPct ? `${lga.claimsOutsideLgaPct}%` : '—'}
+                              </td>
+                              <td className="p-3 text-right text-slate-100">
+                                {lga.acscRatePer100k ? lga.acscRatePer100k : '—'}
+                              </td>
+                              <td className="p-3 text-right text-slate-400">
+                                {SERVICE_ACCESS_METRICS.length === 0 ? '—' : lga.facilitiesPer10k}
+                              </td>
+                              <td className="p-3 text-right text-orange-400">
+                                {SERVICE_ACCESS_METRICS.length === 0 ? '—' : `${lga.distanceToNearestEdKm} km`}
+                              </td>
+                              <td className="p-3 text-right text-orange-400">
+                                {SERVICE_ACCESS_METRICS.length === 0 ? '—' : `${lga.distanceToNearestImagingKm} km`}
+                              </td>
+                              <td className="p-3 text-right text-slate-100">
+                                {SERVICE_ACCESS_METRICS.length === 0 ? '—' : lga.providersAcceptingPatients}
+                              </td>
                             </>
                           )}
                         </tr>
