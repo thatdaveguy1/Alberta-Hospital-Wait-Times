@@ -234,8 +234,8 @@ export default function MentalHealthDashboard() {
         arrayKey="SUBSTANCE_HARM_TRENDS"
       />
 
-      {/* Sub-tab Navigation */}
-      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+      {/* Sub-tab Navigation — sticky so clicks stay on-screen at tall viewports */}
+      <div className="sticky top-16 z-20 bg-[#070b19]/95 backdrop-blur-sm border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar -mx-1 px-1">
         <button
           onClick={() => setActiveSubTab('substance-harms')}
           className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${

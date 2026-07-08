@@ -12,6 +12,7 @@ import {
   HeartPulse,
   Coins,
   Scale,
+  Globe,
   BarChart2,
   X,
   AlertTriangle,
@@ -381,21 +382,61 @@ export default function SpendingDashboard() {
         </button>
       </div>
 
-      {/* Warning Narrative Chain / Ingestion Insights */}
+      {/* Subtab-specific macro context */}
       {activeSpendingTab === 'spending-access' && (
       <div id="sd-narrative-callout" className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5 font-mono">
             <Scale className="w-4.5 h-4.5 text-emerald-400" />
-            <span>Value for Money & Macro Efficiency Signal</span>
+            <span>Spending vs. service volume</span>
           </h4>
           <p className="text-[11px] text-slate-400 max-w-4xl leading-normal">
-            <strong>System Productivity Gap:</strong> Alberta’s per capita health expenditure is now <strong>${albertaSpendingPerCapita.toLocaleString()}</strong>, ranking <strong>{albertaSpendingRank}</strong> of {NATIONAL_SPENDING_COMPARE.length} reporting provinces — below {higherSpendingProvinces.join(', ')}. Despite this spending level, patient wait-times and staffed bed shortages persist, suggesting that rising expenditure is increasingly absorbed by legacy operational structures, personnel premium pay, and service-delivery inflation rather than proportionate physical-capacity expansions.
+            <strong>Productivity signal:</strong> Alberta spends <strong>${albertaSpendingPerCapita.toLocaleString()}</strong> per capita (rank <strong>{albertaSpendingRank}</strong> nationally). Track whether surgeries, imaging, and ED visits are keeping pace with expense growth.
           </p>
         </div>
         <span className="text-[9px] bg-emerald-950/40 border border-emerald-500/25 text-emerald-400 px-2 py-1 rounded font-mono font-extrabold shrink-0">
-          CIHI VALUE BENCHMARK
+          CIHI NHEX
         </span>
+      </div>
+      )}
+      {activeSpendingTab === 'national-scoreboard' && (
+      <div id="sd-narrative-callout" className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5 font-mono">
+            <Globe className="w-4.5 h-4.5 text-blue-400" />
+            <span>Inter-provincial comparison</span>
+          </h4>
+          <p className="text-[11px] text-slate-400 max-w-4xl leading-normal">
+            Per-capita spend, beds per 100k, and cost per standard stay for <strong>{selectedProvince}</strong>
+            {selectedProvinceRank != null ? ` (rank ${selectedProvinceRank} by per-capita spend)` : ''}. Use to benchmark Alberta against peer provinces.
+          </p>
+        </div>
+      </div>
+      )}
+      {activeSpendingTab === 'hospital-efficiency' && (
+      <div id="sd-narrative-callout" className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5 font-mono">
+            <Building2 className="w-4.5 h-4.5 text-orange-400" />
+            <span>Hospital efficiency trend</span>
+          </h4>
+          <p className="text-[11px] text-slate-400 max-w-4xl leading-normal">
+            Staffed-bed costs, hours per bed, and throughput per bed from CIHI hospital performance tables. Timestamp reflects manual curation until a live CIHI pull is wired.
+          </p>
+        </div>
+      </div>
+      )}
+      {activeSpendingTab === 'physician-payments' && (
+      <div id="sd-narrative-callout" className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5 font-mono">
+            <Users className="w-4.5 h-4.5 text-violet-400" />
+            <span>Physician payment mix</span>
+          </h4>
+          <p className="text-[11px] text-slate-400 max-w-4xl leading-normal">
+            Gross payments and service intensity for <strong>{selectedSpecialty}</strong> from the AHCIP statistical supplement — auto-refreshed from Open Alberta.
+          </p>
+        </div>
       </div>
       )}
 

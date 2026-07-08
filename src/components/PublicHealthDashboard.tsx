@@ -96,6 +96,15 @@ export default function PublicHealthDashboard() {
     );
   }, [wastewaterSearch, data]);
 
+  const wastewaterChartData = useMemo(() => {
+    return filteredWastewater.map((w) => ({
+      ...w,
+      covidSignalScaled: w.covidSignal * 10_000,
+      fluASignalChart: w.fluASignal,
+      rsvSignalChart: w.rsvSignal,
+    }));
+  }, [filteredWastewater]);
+
   // Format wastewater signal for readability: tiny or huge loads use scientific notation.
   const formatWastewaterSignal = (value: number): string => {
     if (value === 0) return '0';
@@ -212,7 +221,7 @@ export default function PublicHealthDashboard() {
         title="Public Health & Surveillance"
         description="Track respiratory viruses, wastewater pathogen loads, and childhood immunization coverage. Notifiable-disease and environmental-advisory views are temporarily removed pending data verification (see tasks/todo.md Phase 19)."
         metadata={metadata}
-        arrayKey="RVD_RESPIRATORY_CASE_COUNTS"
+        arrayKey="RESPIRATORY_VIRUS_SURVEILLANCE"
       />
 
       {/* Primary Sub-Tab Navigation */}
@@ -252,22 +261,52 @@ export default function PublicHealthDashboard() {
         </button>
       </div>
 
-      {/* Warning Narrative Chain */}
+      {/* Subtab-specific context */}
       {activeSubTab === 'respiratory' && (
       <div id="ph-narrative-callout" className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5">
             <ShieldAlert className="w-4.5 h-4.5 text-indigo-400" />
-            <span>Community Prevention & Pathogen Transmission Dynamics</span>
+            <span>Respiratory season burden</span>
           </h4>
           <p className="text-[11px] text-slate-400 max-w-4xl leading-normal">
-            Declining childhood immunization coverage sets a vulnerable demographic baseline, leading directly to 
-            preventable communicable outbreaks (such as Pertussis). These outbreaks, paired with high seasonal respiratory 
-            positivity rates, trigger acute-care unit closures and add critical bottleneck pressures onto regional emergency departments.
+            Seasonal lab positivity and hospitalization counts from the Alberta Respiratory Virus Dashboard. Pair with immunization coverage to interpret pediatric ICU pressure.
           </p>
         </div>
         <span className="text-[9px] bg-indigo-950/40 border border-indigo-500/25 text-indigo-400 px-2 py-1 rounded font-mono font-extrabold shrink-0">
-          PROVINCIAL HEALTH INDEX
+          AHS / RVD
+        </span>
+      </div>
+      )}
+      {activeSubTab === 'wastewater' && (
+      <div id="ph-narrative-callout" className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5">
+            <Droplet className="w-4.5 h-4.5 text-cyan-400" />
+            <span>Wastewater early warning</span>
+          </h4>
+          <p className="text-[11px] text-slate-400 max-w-4xl leading-normal">
+            Sewer-network viral load indices can rise before clinical testing spikes. COVID uses a separate axis scale in the chart below because raw signal values are much smaller than influenza and RSV.
+          </p>
+        </div>
+        <span className="text-[9px] bg-cyan-950/40 border border-cyan-500/25 text-cyan-400 px-2 py-1 rounded font-mono font-extrabold shrink-0">
+          PHAC + AHS
+        </span>
+      </div>
+      )}
+      {activeSubTab === 'immunization' && (
+      <div id="ph-narrative-callout" className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h4 className="text-xs font-extrabold text-white uppercase tracking-widest flex items-center gap-1.5">
+            <ShieldCheck className="w-4.5 h-4.5 text-lime-400" />
+            <span>Childhood immunization gaps</span>
+          </h4>
+          <p className="text-[11px] text-slate-400 max-w-4xl leading-normal">
+            Zone-level coverage for school-entry vaccines. Sub-90% DTaP-IPV-Hib or MMR dose-1 rates increase risk of vaccine-preventable outbreaks tracked in respiratory surveillance.
+          </p>
+        </div>
+        <span className="text-[9px] bg-lime-950/40 border border-lime-500/25 text-lime-400 px-2 py-1 rounded font-mono font-extrabold shrink-0">
+          RVD IMMUNIZATIONS
         </span>
       </div>
       )}
@@ -515,22 +554,32 @@ export default function PublicHealthDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Wastewater Chart */}
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
-              <h4 className="text-xs font-bold text-slate-400 uppercase">Normalized Pathogen Loads by Treatment Plant (Index)</h4>
+              <h4 className="text-xs font-bold text-slate-400 uppercase">Pathogen loads by treatment plant</h4>
+              <p className="text-[10px] text-slate-500">Left axis: COVID (×10,000 for visibility). Right axis: Influenza A and RSV (raw index). Tooltip shows unscaled COVID values.</p>
               
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={filteredWastewater}
+                    data={wastewaterChartData}
                     margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                     <XAxis dataKey="site" stroke="#64748b" fontSize={9} tickFormatter={(val) => val.split(' ')[0]} />
-                    <YAxis label={{ value: 'Viral Load Signal Index', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} stroke="#64748b" fontSize={9} />
-                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                    <YAxis yAxisId="covid" orientation="left" stroke="#6366f1" fontSize={9} label={{ value: 'COVID (scaled)', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 9 }} />
+                    <YAxis yAxisId="resp" orientation="right" stroke="#f59e0b" fontSize={9} label={{ value: 'Flu A / RSV index', angle: 90, position: 'insideRight', fill: '#64748b', fontSize: 9 }} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}
+                      formatter={(value: number, name: string, props: { payload?: { covidSignal?: number } }) => {
+                        if (name === 'COVID-19 Signal' && props.payload?.covidSignal != null) {
+                          return [formatWastewaterSignal(props.payload.covidSignal), name];
+                        }
+                        return [typeof value === 'number' ? formatWastewaterSignal(value) : String(value), name];
+                      }}
+                    />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <Bar dataKey="covidSignal" name="COVID-19 Signal" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="fluASignal" name="Influenza A Signal" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="rsvSignal" name="RSV Signal" fill="#ec4899" radius={[4, 4, 0, 0]} />
+                    <Bar yAxisId="covid" dataKey="covidSignalScaled" name="COVID-19 Signal" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                    <Bar yAxisId="resp" dataKey="fluASignalChart" name="Influenza A Signal" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <Bar yAxisId="resp" dataKey="rsvSignalChart" name="RSV Signal" fill="#ec4899" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

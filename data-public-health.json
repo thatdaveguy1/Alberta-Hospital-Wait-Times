@@ -289,10 +289,11 @@
   },
   "_dataMetadata": {
     "RESPIRATORY_VIRUS_SURVEILLANCE": {
-      "source": "Alberta respiratory virus surveillance summary",
-      "sourceVintage": "Hand-authored baseline",
+      "source": "Alberta Respiratory Virus Dashboard (seasonal surveillance)",
+      "sourceVintage": "2024–2025 and 2025–2026 seasons (lab positivity & hospitalizations)",
       "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
+      "lastUpdated": "2026-07-08",
+      "verification": "Seasonal metrics curated from AHS RVD; auto RVD summary arrays refresh separately under RVD_RESPIRATORY_CASE_COUNTS."
     },
     "WASTEWATER_SIGNALS": {
       "updateType": "auto",

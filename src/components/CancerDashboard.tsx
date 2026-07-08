@@ -290,7 +290,7 @@ export default function CancerDashboard() {
                 <span className="text-xs text-slate-400 font-mono">new cases (major cancers)</span>
               </div>
               <p className="text-[10px] text-slate-400 leading-relaxed pt-1 border-t border-slate-850">
-                Expected primary cancer cases diagnosed among residents of Alberta, monitored via the Alberta Cancer Registry.
+                Sum of projected 2026 cases for tracked major cancer types (not total provincial incidence). Registry vintage shown in data timestamp below.
               </p>
             </div>
 

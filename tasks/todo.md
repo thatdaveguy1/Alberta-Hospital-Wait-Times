@@ -4,7 +4,7 @@
 - [x] Context-aware site footer (non–ER-waits modules no longer show ED-only copy)
 - [x] Location modal: persistent “Skip for now” + dismiss via localStorage
 - [x] Public Health copy aligned with Phase 19 (3 shipped subtabs; notifiable/advisories pending data)
-- [ ] Optional follow-ups from audit: per-subtab narratives (PH / Health Inequity / Health Spending), respiratory manual timestamp refresh, wastewater dual-axis chart
+- [x] Optional follow-ups from audit: per-subtab narratives (PH / Health Inequity / Health Spending), respiratory header timestamp key, wastewater dual-axis chart, mental health sticky subtabs, cancer projection footnote
 
 # Alberta Hospital Wait Times — Auto-Update Pipeline Tracker
 

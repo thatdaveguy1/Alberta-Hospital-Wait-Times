@@ -177,6 +177,9 @@ export default function RegionalInequityDashboard() {
   const [sortKey, setSortKey] = useState<string>('lgaName');
   const [sortAsc, setSortAsc] = useState<boolean>(true);
 
+  const showLgaSidebar =
+    activeSubTab !== 'compare-matrix' && activeSubTab !== 'data-explorer';
+
   // Filter lists based on search
   const filteredNeeds = useMemo(() => {
     return COMMUNITY_NEED_PROFILES.filter(p => 
@@ -604,28 +607,66 @@ export default function RegionalInequityDashboard() {
         </button>
       </div>
 
-      {/* Warning Narrative Chain */}
+      {/* Subtab-specific context (Cycle of Disparity only on Community Profile) */}
       {activeSubTab === 'lga-needs' && (
       <div id="ri-narrative-callout" className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
         <div className="space-y-1 flex-1">
           <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
             <ShieldAlert className="w-4.5 h-4.5 text-rose-400" />
-            <span>Socioeconomic Status & Health Inequity Dynamics</span>
+            <span>Community socioeconomic profile</span>
           </h4>
           <p className="text-[11px] text-slate-400 leading-relaxed">
-            <strong>The Cycle of Disparity:</strong> Severe socioeconomic deprivation correlates directly to primary care attachment gaps. With local primary clinics accepting zero rosters, residents rely heavily on regional Emergency Departments as primary care substitutes. This drives acute-care congestion, diagnostic delays, and extreme travel-for-care burdens.
+            <strong>Cycle of disparity:</strong> Deprivation and primary-care attachment gaps in this LGA shape downstream ED reliance and travel-for-care burdens shown in other subtabs.
           </p>
         </div>
         <span className="text-[10px] bg-rose-500/10 border border-rose-500/25 text-rose-400 px-3 py-1.5 rounded-lg font-mono font-bold tracking-widest shrink-0 self-start md:self-center">
-          PROVINCIAL HEALTH AUDIT
+          LGA PROFILE
         </span>
       </div>
       )}
+      {activeSubTab === 'disease-burden' && (
+      <div id="ri-narrative-callout" className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
+        <div className="space-y-1 flex-1">
+          <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+            <HeartPulse className="w-4.5 h-4.5 text-orange-400" />
+            <span>Chronic disease burden</span>
+          </h4>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Prevalence and outcome metrics for the selected LGA — diabetes, COPD, hypertension, infant mortality, and life expectancy vs provincial benchmarks.
+          </p>
+        </div>
+      </div>
+      )}
+      {activeSubTab === 'ed-reliance' && (
+      <div id="ri-narrative-callout" className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
+        <div className="space-y-1 flex-1">
+          <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+            <Activity className="w-4.5 h-4.5 text-amber-400" />
+            <span>Emergency department reliance</span>
+          </h4>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Low-acuity CTAS 4–5 visits and after-hours ED use often signal primary-care access gaps rather than true emergencies.
+          </p>
+        </div>
+      </div>
+      )}
+      {activeSubTab === 'access-travel' && (
+      <div id="ri-narrative-callout" className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
+        <div className="space-y-1 flex-1">
+          <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+            <Compass className="w-4.5 h-4.5 text-cyan-400" />
+            <span>Travel and local access</span>
+          </h4>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Share of care delivered outside the home LGA, typical travel distance, and leakage of staffed beds to regional hubs.
+          </p>
+        </div>
+      </div>
+      )}
 
-      {/* Main Two-Column Interactive Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+      <div className={`grid gap-6 ${showLgaSidebar ? 'grid-cols-1 xl:grid-cols-4' : 'grid-cols-1'}`}>
         
-        {/* Left Column: LGA Navigator & Profile selector */}
+        {showLgaSidebar && (
         <div className="bg-[#0b1226] border border-slate-800 rounded-2xl p-5 space-y-4 xl:col-span-1 shadow-md">
           <div>
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">LGA Selection Navigator</h3>
@@ -702,9 +743,10 @@ export default function RegionalInequityDashboard() {
             </div>
           </div>
         </div>
+        )}
 
-        {/* Right Column: Dashboard Content Panels */}
-        <div className="xl:col-span-3 space-y-6 min-w-0">
+        {/* Dashboard content */}
+        <div className={`space-y-6 min-w-0 ${showLgaSidebar ? 'xl:col-span-3' : ''}`}>
 
           {/* SUBTAB 1: Needs & Deprivation */}
           {activeSubTab === 'lga-needs' && (
