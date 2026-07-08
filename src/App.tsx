@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { calculateDistance } from './lib/geo';
 import { cn, formatMinutesToHm } from './lib/utils';
+import { averageFacilityWaitMinutes, busiestHourOfDay, facilityTrendYDomain } from './lib/facilityWaitStats';
 import { Hospital, WaitTimeSnapshot } from './types';
 import { 
   Activity, 
@@ -55,7 +56,8 @@ import {
   Area,
   BarChart,
   Bar,
-  Legend
+  Legend,
+  ReferenceLine
 } from 'recharts';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
@@ -76,6 +78,7 @@ import SpendingDashboard from './components/SpendingDashboard';
 import VirtualCareDashboard from './components/VirtualCareDashboard';
 import { useSyncStatus } from './hooks/useSyncStatus';
 import { DashboardHeader } from './components/DashboardHeader';
+import { ContributionsSection } from './components/ContributionsSection';
 import type { DataMetadataMap } from './components/DataTimestamp';
 
 
@@ -356,12 +359,15 @@ const isWaitTimeUnavailable = (hospital: Hospital | null | undefined) => {
   return label.includes('unavailable') || label.includes('not available') || label.includes('n/a') || hospital.waitTime < 0;
 };
 
+const normalizeTrendRange = (range: string) => (range === '30D' ? '30d' : range);
+
 const formatChartXAxis = (tick: string, range: string) => {
   try {
     const d = new Date(tick);
-    if (range === '24h') {
+    const r = normalizeTrendRange(range);
+    if (r === '24h') {
       return format(d, 'HH:mm');
-    } else if (range === '7d' || range === '30D' || range === '30d') {
+    } else if (r === '7d' || r === '30d') {
       return format(d, 'MMM d');
     } else {
       return format(d, 'MMM yy');
@@ -370,6 +376,15 @@ const formatChartXAxis = (tick: string, range: string) => {
     return tick;
   }
 };
+
+const trendRangeLabel = (range: string) => {
+  const r = normalizeTrendRange(range);
+  if (r === '24h') return '24 hours';
+  if (r === '7d') return '7 days';
+  if (r === '30d') return '30 days';
+  return r;
+};
+
 
 const TAB_METADATA_MAP: Record<string, {
   updateType: 'auto' | 'manual';
@@ -791,8 +806,9 @@ export default function App() {
 
   const fetchTrends = async (id: string, range: string = '24h') => {
     setLoadingTrends(true);
+    const apiRange = normalizeTrendRange(range);
     try {
-      const res = await fetch(`/api/trends/${id}?range=${range}`);
+      const res = await fetch(`/api/trends/${encodeURIComponent(id)}?range=${encodeURIComponent(apiRange)}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setTrends(data);
@@ -802,6 +818,7 @@ export default function App() {
       }
     } catch (error) {
       console.error('Failed to fetch trends', error);
+      setTrends([]);
     } finally {
       setLoadingTrends(false);
     }
@@ -1187,6 +1204,14 @@ export default function App() {
     totalHospitals: hospitals.length,
     nearestHospital: processedHospitals.filter(h => h.distance !== undefined).sort((a, b) => (a.distance || 0) - (b.distance || 0))[0] || null
   };
+
+  const facilityTrendStats = useMemo(() => {
+    const avg = averageFacilityWaitMinutes(trends);
+    const busiest = busiestHourOfDay(trends);
+    const yDomain = facilityTrendYDomain(trends);
+    const rangeKey = normalizeTrendRange(hospitalRange);
+    return { avg, busiest, yDomain, rangeKey };
+  }, [trends, hospitalRange]);
 
   const activeDashboard = DASHBOARDS.find(d => d.id === activeTab) ?? DASHBOARDS[0];
   const footerTitle =
@@ -2120,7 +2145,20 @@ export default function App() {
                   
                   <div className="p-2 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-xs font-extrabold text-slate-100 truncate">{selectedHospital.name}</h3>
+                      <div className="flex items-center gap-1 min-w-0">
+                        <h3 className="text-xs font-extrabold text-slate-100 truncate">{selectedHospital.name}</h3>
+                        {selectedHospital.address && (
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(selectedHospital.name + ' ' + selectedHospital.address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 p-0.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded border border-blue-500/20 transition-all"
+                            title="Open in Google Maps"
+                          >
+                            <Map className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
                       <p className="text-[10px] text-slate-400 mt-0.5">{selectedHospital.city}, {selectedHospital.region}</p>
                       {selectedHospital.distance !== undefined && (
                         <p className="text-[10px] text-blue-400 font-bold mt-1 flex items-center gap-1">
@@ -2199,18 +2237,39 @@ export default function App() {
                         })}
                       </div>
                     </div>
-                    <div className="h-14 bg-slate-950 border border-slate-800/80 rounded-xl p-1.5">
+                    {(facilityTrendStats.avg !== null || facilityTrendStats.busiest !== null || trends.length === 0) && (
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mb-1 text-[9px] text-slate-500">
+                        {facilityTrendStats.avg !== null ? (
+                          <span>
+                            <span className="text-slate-500 font-semibold uppercase tracking-wider">Avg wait ({trendRangeLabel(facilityTrendStats.rangeKey)}):</span>{' '}
+                            <span className="text-slate-300 font-mono font-bold">{formatMinutesToHm(facilityTrendStats.avg)}</span>
+                          </span>
+                        ) : null}
+                        {facilityTrendStats.busiest !== null ? (
+                          <span>
+                            <span className="text-slate-500 font-semibold uppercase tracking-wider">Busiest hour:</span>{' '}
+                            <span className="text-slate-300 font-mono font-bold">
+                              {facilityTrendStats.busiest.hourLabel} (~{formatMinutesToHm(facilityTrendStats.busiest.avgWaitMinutes)} avg)
+                            </span>
+                          </span>
+                        ) : null}
+                        {trends.length === 0 && !loadingTrends && facilityTrendStats.avg === null && facilityTrendStats.busiest === null ? (
+                          <span className="text-slate-600">—</span>
+                        ) : null}
+                      </div>
+                    )}
+                    <div className="h-28 bg-slate-950 border border-slate-800/80 rounded-xl p-1.5">
                       {loadingTrends ? (
                         <div className="w-full h-full animate-pulse flex items-center justify-center">
                           <RefreshCw className="w-4 h-4 text-blue-500/40 animate-spin" />
                         </div>
                       ) : trends.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={trends} margin={{ top: 1, right: 1, left: 1, bottom: 1 }}>
+                          <AreaChart data={trends} margin={{ top: 4, right: 4, left: 0, bottom: 1 }}>
                             <defs>
                               <linearGradient id="colorWaitSingle" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2}/>
-                                <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.45}/>
+                                <stop offset="95%" stopColor="#2563eb" stopOpacity={0.08}/>
                               </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
@@ -2220,7 +2279,13 @@ export default function App() {
                               stroke="#334155"
                               tick={{ fill: '#64748b', fontSize: 7 }}
                             />
-                            <YAxis hide domain={['auto', 'auto']} />
+                            <YAxis
+                              width={28}
+                              domain={facilityTrendStats.yDomain}
+                              stroke="#334155"
+                              tick={{ fill: '#64748b', fontSize: 7 }}
+                              tickFormatter={(v) => formatMinutesToHm(Number(v))}
+                            />
                             <Tooltip 
                               content={({ active, payload }) => {
                                 if (active && payload && payload.length) {
@@ -2234,11 +2299,19 @@ export default function App() {
                                 return null;
                               }}
                             />
+                            {facilityTrendStats.avg !== null && (
+                              <ReferenceLine
+                                y={facilityTrendStats.avg}
+                                stroke="#64748b"
+                                strokeDasharray="4 4"
+                                label={{ value: 'Avg', position: 'insideTopRight', fill: '#94a3b8', fontSize: 8 }}
+                              />
+                            )}
                             <Area 
                               type="monotone" 
                               dataKey="waitTime" 
                               stroke="#3b82f6" 
-                              strokeWidth={1.5}
+                              strokeWidth={2}
                               fillOpacity={1} 
                               fill="url(#colorWaitSingle)" 
                             />
@@ -2255,27 +2328,6 @@ export default function App() {
                 </div>
 
                 <div className="space-y-1.5 mt-2">
-                  <div className={cn(
-                    "flex justify-between items-center text-xs border-b border-slate-800/80 pb-1 px-1 rounded transition-colors",
-                    sortBy === 'raw-wait' && "bg-blue-500/5 border-blue-500/20"
-                  )}>
-                    <span className={cn("text-slate-400 font-medium", sortBy === 'raw-wait' && "text-slate-200 font-bold")}>
-                      Current Wait Queue {sortBy === 'raw-wait' && "🎯"}
-                    </span>
-                    <span className={cn(
-                      "font-black text-xs font-mono",
-                      isWaitTimeUnavailable(selectedHospital)
-                        ? "text-slate-500"
-                        : selectedHospital.status === 'Red' 
-                          ? "text-red-400" 
-                          : selectedHospital.status === 'Yellow' 
-                            ? "text-amber-400" 
-                            : "text-emerald-400",
-                      sortBy === 'raw-wait' && "text-sm"
-                    )}>
-                      {isWaitTimeUnavailable(selectedHospital) ? "Unavailable" : formatMinutesToHm(selectedHospital.waitTime)}
-                    </span>
-                  </div>
 
                   {selectedHospital.distance !== undefined && !isWaitTimeUnavailable(selectedHospital) && (
                     <>
@@ -2306,24 +2358,6 @@ export default function App() {
                     <span className="text-slate-400 font-medium">Queue Severity</span>
                     <StatusBadge status={selectedHospital.status} />
                   </div>
-
-                  {selectedHospital.address && (
-                    <div className="text-[11px]">
-                      <span className="text-slate-400 block mb-0.5 text-[9px]">Facility Address</span>
-                      <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg flex items-start gap-1.5 justify-between">
-                        <p className="text-[10px] text-slate-300 leading-normal max-w-[190px] truncate" title={selectedHospital.address}>{selectedHospital.address}</p>
-                        <a 
-                          href={`https://maps.google.com/?q=${encodeURIComponent(selectedHospital.name + ' ' + selectedHospital.address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded border border-blue-500/20 transition-all shrink-0"
-                          title="Navigate in Google Maps"
-                        >
-                          <Map className="w-3 h-3" />
-                        </a>
-                      </div>
-                    </div>
-                  )}
 
                   {selectedHospital.note && (
                     <div className="text-[11px]">
@@ -2492,7 +2526,9 @@ export default function App() {
           </div>
       </main>
 
-      <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800 mt-12 text-slate-500">
+      <ContributionsSection />
+
+      <footer id="site-footer" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800 mt-12 text-slate-500">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div>
             <p className="text-xs font-bold text-slate-400 tracking-wider uppercase">{footerTitle}</p>
@@ -2509,6 +2545,9 @@ export default function App() {
             </button>
             <a href="https://www.albertahealthservices.ca/" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-300 transition-colors">Official AHS Web</a>
             <a href="#" className="text-slate-500 hover:text-slate-300 transition-colors">System Diagnostics</a>
+            <a href="#contributions" className="text-slate-500 hover:text-slate-300 transition-colors">
+              Contribute
+            </a>
           </div>
         </div>
       </footer>
