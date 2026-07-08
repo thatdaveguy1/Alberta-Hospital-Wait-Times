@@ -374,3 +374,10 @@
 - [x] Commit to main (8aa7a06)
 - [x] Ensure manual dashboard data sources have real _dataMetadata and scrapers preserve it
 - [x] Investigate stale dashboard timestamps; reload daily-sync launchd job and remove misleading relative-time badge
+
+## Phase 25: Full 15-Tab Visual & Data Audit (2026-07-08)
+- [x] Audit every tab/subtab of the Alberta Hospital Wait Times dashboard (`http://localhost:3004/`)
+- [x] Synthesize repeated/poor datasets, incorrect information, and improvement opportunities into a prioritized remediation plan with file paths and acceptance criteria
+  - P0 findings: Cancer Care zeroed summary cards, Health Inequity `Loading...` LGA names, Health Spending $0/0% placeholders, Long Term Care `NaN%` compliance
+  - P1 findings: duplicated/inconsistent CT-MRI wait times across Diagnostics/Surgical/System Flow, provider-directory UX, missing empty/error states
+  - P2 findings: >100% occupancy explanation, manual-vs-live badge clarity, module-grid repetition, visual review blocked by `inspect_image` quota
