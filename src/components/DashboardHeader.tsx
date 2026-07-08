@@ -59,17 +59,21 @@ export function DashboardHeader({
         </h2>
         <p className="text-xs text-slate-400 mt-1">{description}</p>
         <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-400 flex-wrap">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 relative">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse absolute left-0.5 top-0.5" />
-          </span>
+          {isAuto ? (
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 relative">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse absolute left-0.5 top-0.5" />
+            </span>
+          ) : (
+            <span className="w-2 h-2 rounded-full bg-slate-600 border border-slate-700 flex items-center justify-center shrink-0" />
+          )}
           <span
             className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${
               isAuto
                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                : 'bg-slate-800/60 text-slate-400 border-slate-750'
             }`}
           >
-            {isAuto ? 'Auto-updated' : 'Manual update'}
+            {isAuto ? 'Auto-updated' : 'Static / estimated'}
           </span>
           <span className="text-slate-600">·</span>
           <span>
