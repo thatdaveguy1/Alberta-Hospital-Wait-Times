@@ -6,6 +6,12 @@
 - [x] Public Health copy aligned with Phase 19 (3 shipped subtabs; notifiable/advisories pending data)
 - [x] Optional follow-ups from audit: per-subtab narratives (PH / Health Inequity / Health Spending), respiratory header timestamp key, wastewater dual-axis chart, mental health sticky subtabs, cancer projection footnote
 
+## Phase 21 — ER facility details panel (2026-07-08)
+- [x] Per-facility avg wait + busiest hour (from trend snapshots via `facilityWaitStats.ts`)
+- [x] Trend chart: taller area, stronger fill, Y domain padding, dashed avg `ReferenceLine`
+- [x] Remove duplicate Current Wait Queue row and Facility Address block; Maps link on facility name
+- [x] `scripts/verify-facility-wait-stats.mjs` + `npm run lint`
+
 # Alberta Hospital Wait Times — Auto-Update Pipeline Tracker
 
 ## Phase 0: Project Setup & Conventions
