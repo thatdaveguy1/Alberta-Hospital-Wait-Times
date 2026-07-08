@@ -907,9 +907,14 @@ export default function App() {
     try {
       const inputTrimmed = addressInput.trim();
       
-      // Match Canadian postal code FSA pattern (first 3 characters like T8N, T6G, etc.)
-      const fsaMatch = inputTrimmed.match(/\b([a-zA-Z]\d[a-zA-Z])\b/) || inputTrimmed.match(/([a-zA-Z]\d[a-zA-Z])/);
-      const fsa = fsaMatch ? fsaMatch[1].toUpperCase() : null;
+      const compactPostal = inputTrimmed.replace(/\s+/g, '').toUpperCase();
+      const fsaFromFullPostal =
+        /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(compactPostal) ? compactPostal.slice(0, 3) : null;
+      const fsaMatch =
+        fsaFromFullPostal ??
+        (inputTrimmed.match(/\b([a-zA-Z]\d[a-zA-Z])\b/) || inputTrimmed.match(/([a-zA-Z]\d[a-zA-Z])/))?.[1]?.toUpperCase() ??
+        null;
+      const fsa = fsaMatch;
 
       if (fsa) {
         try {
