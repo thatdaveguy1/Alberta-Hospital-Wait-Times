@@ -95,7 +95,7 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
           }`}
         >
           {isAuto ? <RefreshCw className="w-2.5 h-2.5" /> : <FileText className="w-2.5 h-2.5" />}
-          {isAuto ? 'Auto' : 'Manual'}
+          {isAuto ? 'Auto-updated' : 'Manual'}
         </span>
         <span className="font-medium">
           Updated: <span className="font-mono text-slate-200 font-semibold">{lastUpdated}</span>
