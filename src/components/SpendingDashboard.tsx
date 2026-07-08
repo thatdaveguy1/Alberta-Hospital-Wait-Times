@@ -62,6 +62,25 @@ const getSpecialtyLabel = (name: string): string => {
   return name;
 };
 
+const formatFiscalYearShort = (fy: string): string => {
+  const match = fy.match(/^(\d{4})-\d{2}(\d{2})$/);
+  return match ? `${match[1]}-${match[2]}` : fy;
+};
+
+const firstNonZeroIndex = (data: ActivityVolumeTrend[], key: keyof ActivityVolumeTrend): number => {
+  return data.findIndex(d => {
+    const v = d[key];
+    return v !== null && v !== undefined && v !== 0;
+  });
+};
+
+const firstAllNonZeroIndex = (data: ActivityVolumeTrend[], keys: (keyof ActivityVolumeTrend)[]): number => {
+  return data.findIndex(d => keys.every(k => {
+    const v = d[k];
+    return v !== null && v !== undefined && v !== 0;
+  }));
+};
+
 export default function SpendingDashboard() {
   // Live data fetched from /api/data/spending
   const { data, metadata, isLoading, error, refresh } = useDomainData<SpendingData>('spending');
@@ -86,10 +105,29 @@ export default function SpendingDashboard() {
     return PHYSICIAN_SPECIALTY_BILLING.find(s => s.specialtyGroup === selectedSpecialty) || PHYSICIAN_SPECIALTY_BILLING[0];
   }, [selectedSpecialty, PHYSICIAN_SPECIALTY_BILLING]);
 
-  // Derived growth index calculations relative to 2021-2022 baseline (index = 100)
+  // Trim the activity trend to the period where the selected KPI actually has data,
+  // so charts don't render a long empty tail of zero years before data collection began.
+  const filteredActivityTrend = useMemo(() => {
+    if (!selectedActivityKpi) return ALBERTA_ACTIVITY_VOLUME_TREND;
+    const idx = firstNonZeroIndex(ALBERTA_ACTIVITY_VOLUME_TREND, selectedActivityKpi);
+    return idx === -1 ? [] : ALBERTA_ACTIVITY_VOLUME_TREND.slice(idx);
+  }, [selectedActivityKpi, ALBERTA_ACTIVITY_VOLUME_TREND]);
+
+  // Trim the data used for the index chart to the period where every index input has data.
+  const filteredActivityTrendForIndex = useMemo(() => {
+    const indexKeys: (keyof ActivityVolumeTrend)[] = [
+      'totalExpenseBillions', 'surgeriesCount', 'ctExamsCount', 'labTestsMillions',
+      'edVisitsMillions', 'hospitalAdmissions', 'physiciansCount'
+    ];
+    const idx = firstAllNonZeroIndex(ALBERTA_ACTIVITY_VOLUME_TREND, indexKeys);
+    return idx === -1 ? [] : ALBERTA_ACTIVITY_VOLUME_TREND.slice(idx);
+  }, [ALBERTA_ACTIVITY_VOLUME_TREND]);
+
+  // Derived growth index calculations relative to the first year where all series have data (index = 100)
   const derivedGrowthIndexes = useMemo(() => {
-    const baseline = ALBERTA_ACTIVITY_VOLUME_TREND[0];
-    return ALBERTA_ACTIVITY_VOLUME_TREND.map(year => {
+    const baseline = filteredActivityTrendForIndex[0];
+    if (!baseline) return [];
+    return filteredActivityTrendForIndex.map(year => {
       return {
         fiscalYear: year.fiscalYear,
         'Spending Index': (year.totalExpenseBillions / baseline.totalExpenseBillions) * 100,
@@ -101,7 +139,7 @@ export default function SpendingDashboard() {
         'Physicians Index': (year.physiciansCount / baseline.physiciansCount) * 100
       };
     });
-  }, [ALBERTA_ACTIVITY_VOLUME_TREND]);
+  }, [filteredActivityTrendForIndex]);
 
   const latestAlbertaActivity = ALBERTA_ACTIVITY_VOLUME_TREND[ALBERTA_ACTIVITY_VOLUME_TREND.length - 1];
 
@@ -150,7 +188,7 @@ export default function SpendingDashboard() {
 
   const activityKpiStats = useMemo(() => {
     if (!selectedActivityKpi) return null;
-    const values = ALBERTA_ACTIVITY_VOLUME_TREND.map(t => t[selectedActivityKpi] as number);
+    const values = filteredActivityTrend.map(t => t[selectedActivityKpi] as number);
     if (values.length === 0) return null;
     const baseline = values[0];
     const latest = values[values.length - 1];
@@ -168,7 +206,7 @@ export default function SpendingDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedActivityKpi, ALBERTA_ACTIVITY_VOLUME_TREND]);
+  }, [selectedActivityKpi, filteredActivityTrend]);
 
   // KPI detail metadata for hospital-efficiency cards (backed by HOSPITAL_EFFICIENCY_TREND)
   const efficiencyKpiDetails = useMemo(() => {
@@ -596,11 +634,11 @@ export default function SpendingDashboard() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (2021-22)</span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline ({filteredActivityTrend[0]?.fiscalYear ? formatFiscalYearShort(filteredActivityTrend[0].fiscalYear) : '2021-22'})</span>
                       <span className="text-xl font-black text-slate-300 font-mono">{activityKpiStats.baseline}{activityKpiDetails.unit}</span>
                     </div>
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (2025-26)</span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current ({filteredActivityTrend[filteredActivityTrend.length - 1]?.fiscalYear ? formatFiscalYearShort(filteredActivityTrend[filteredActivityTrend.length - 1].fiscalYear) : '2025-26'})</span>
                       <span className="text-xl font-black text-white font-mono">{activityKpiStats.latest}{activityKpiDetails.unit}</span>
                     </div>
                     <div className="space-y-1 text-center sm:text-left">
@@ -619,7 +657,7 @@ export default function SpendingDashboard() {
                   </div>
                   <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={ALBERTA_ACTIVITY_VOLUME_TREND} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                      <AreaChart data={filteredActivityTrend} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id={activityKpiDetails.gradientId} x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor={activityKpiDetails.strokeColor} stopOpacity={0.2}/>
@@ -661,7 +699,7 @@ export default function SpendingDashboard() {
                   Alberta Health spending vs Service activity growth (Cumulative % Change)
                 </h3>
                 <p className="text-[10px] text-slate-500 mt-1">
-                  Base Year 2021-22 indexed at 100. Disconnects indicate spending outpacing service delivery yields.
+                  Base Year {filteredActivityTrendForIndex[0]?.fiscalYear ? formatFiscalYearShort(filteredActivityTrendForIndex[0].fiscalYear) : '2021-22'} indexed at 100. Disconnects indicate spending outpacing service delivery yields.
                 </p>
               </div>
 
