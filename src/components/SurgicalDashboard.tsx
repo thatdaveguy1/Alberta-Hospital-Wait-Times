@@ -791,10 +791,10 @@ export default function SurgicalDashboard() {
                               </span>
                             </td>
                             <td className="py-2.5 px-3 text-center font-mono font-black text-slate-200 whitespace-nowrap">
-                              {formatWaitTime(rec.metric_value)} weeks
+                              {rec.metric_value > 0 ? `${formatWaitTime(rec.metric_value)} weeks` : <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">—</span>}
                             </td>
                             <td className="py-2.5 px-3 text-center font-mono font-black text-slate-200 whitespace-nowrap">
-                              {matching90th ? `${formatWaitTime(matching90th.metric_value)} weeks` : <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">—</span>}
+                              {matching90th && matching90th.metric_value > 0 ? `${formatWaitTime(matching90th.metric_value)} weeks` : <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">—</span>}
                             </td>
                             <td className="py-2.5 px-3 text-slate-400 font-semibold text-[11px] whitespace-nowrap">
                               {rec.benchmark_value ? formatBenchmark(rec.benchmark_value) : <span className="text-slate-600 font-normal">—</span>}
