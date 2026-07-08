@@ -198,11 +198,13 @@ export default function RegionalInequityDashboard() {
   }, [ED_RELIANCE_METRICS, selectedLgaDetail]);
 
   const selectedLgaTravel = useMemo(() => {
-    return TRAVEL_FOR_CARE.find(t => t.lgaName === selectedLgaDetail) || TRAVEL_FOR_CARE[0] || defaultTravel;
+    if (TRAVEL_FOR_CARE.length === 0) return null;
+    return TRAVEL_FOR_CARE.find(t => t.lgaName === selectedLgaDetail) ?? null;
   }, [TRAVEL_FOR_CARE, selectedLgaDetail]);
 
   const selectedLgaAccess = useMemo(() => {
-    return SERVICE_ACCESS_METRICS.find(s => s.lgaName === selectedLgaDetail) || SERVICE_ACCESS_METRICS[0] || defaultAccess;
+    if (SERVICE_ACCESS_METRICS.length === 0) return null;
+    return SERVICE_ACCESS_METRICS.find(s => s.lgaName === selectedLgaDetail) ?? null;
   }, [SERVICE_ACCESS_METRICS, selectedLgaDetail]);
 
   // Combined full dataset of selected LGA
@@ -211,9 +213,19 @@ export default function RegionalInequityDashboard() {
       ...selectedLgaNeed,
       ...selectedLgaDisease,
       ...selectedLgaEd,
-      ...selectedLgaTravel,
-      ...selectedLgaAccess,
-      lgaName: selectedLgaNeed.lgaName // Ensure lgaName isn't overridden by 'Loading...'
+      ...(selectedLgaTravel ?? {
+        careDeliveredOutsideLgaPct: null as number | null,
+        topDestinationFacility: null as string | null,
+        avgTravelDistanceKm: null as number | null,
+        localBedLeakagePct: null as number | null,
+      }),
+      ...(selectedLgaAccess ?? {
+        facilitiesPer10k: null as number | null,
+        distanceToNearestEdKm: null as number | null,
+        distanceToNearestImagingKm: null as number | null,
+        providersAcceptingPatients: null as number | null,
+      }),
+      lgaName: selectedLgaNeed.lgaName
     };
   }, [selectedLgaNeed, selectedLgaDisease, selectedLgaEd, selectedLgaTravel, selectedLgaAccess]);
 
@@ -248,15 +260,29 @@ export default function RegionalInequityDashboard() {
       const need = COMMUNITY_NEED_PROFILES.find(p => p.lgaName === comparisonTarget) || COMMUNITY_NEED_PROFILES[0] || defaultNeed;
       const disease = CHRONIC_DISEASE_BURDEN.find(d => d.lgaName === comparisonTarget) || CHRONIC_DISEASE_BURDEN[0] || defaultDisease;
       const ed = ED_RELIANCE_METRICS.find(e => e.lgaName === comparisonTarget) || ED_RELIANCE_METRICS[0] || defaultEd;
-      const travel = TRAVEL_FOR_CARE.find(t => t.lgaName === comparisonTarget) || TRAVEL_FOR_CARE[0] || defaultTravel;
-      const access = SERVICE_ACCESS_METRICS.find(s => s.lgaName === comparisonTarget) || SERVICE_ACCESS_METRICS[0] || defaultAccess;
+      const travel = TRAVEL_FOR_CARE.length > 0
+        ? (TRAVEL_FOR_CARE.find(t => t.lgaName === comparisonTarget) ?? null)
+        : null;
+      const access = SERVICE_ACCESS_METRICS.length > 0
+        ? (SERVICE_ACCESS_METRICS.find(s => s.lgaName === comparisonTarget) ?? null)
+        : null;
       return {
         ...need,
         ...disease,
         ...ed,
-        ...travel,
-        ...access,
-        lgaName: need.lgaName // Ensure lgaName isn't overridden by 'Loading...'
+        ...(travel ?? {
+          careDeliveredOutsideLgaPct: null as number | null,
+          topDestinationFacility: null as string | null,
+          avgTravelDistanceKm: null as number | null,
+          localBedLeakagePct: null as number | null,
+        }),
+        ...(access ?? {
+          facilitiesPer10k: null as number | null,
+          distanceToNearestEdKm: null as number | null,
+          distanceToNearestImagingKm: null as number | null,
+          providersAcceptingPatients: null as number | null,
+        }),
+        lgaName: need.lgaName
       };
     }
   }, [comparisonTarget, PROVINCIAL_BENCHMARKS, COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, ED_RELIANCE_METRICS, TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS]);
@@ -284,9 +310,8 @@ export default function RegionalInequityDashboard() {
       return Math.round(95 - (progress * 80));
     };
 
-    // 4. Care proximity: Inverse of distance to ED (max 145.8, min 2.1)
-    const normalizeProximity = (val: number) => {
-      if (val === undefined || isNaN(val)) return 0;
+    const normalizeProximity = (val: number | null | undefined) => {
+      if (val == null || isNaN(val)) return null;
       const progress = (val - 2.1) / (145.8 - 2.1);
       return Math.round(98 - (progress * 90));
     };
@@ -317,8 +342,8 @@ export default function RegionalInequityDashboard() {
       },
       {
         subject: 'Emergency Proximity',
-        [selectedLgaDetail]: normalizeProximity(selectedFullData.distanceToNearestEdKm),
-        [comparisonTarget]: normalizeProximity(comparisonFullData.distanceToNearestEdKm),
+        [selectedLgaDetail]: normalizeProximity((selectedFullData as { distanceToNearestEdKm?: number | null }).distanceToNearestEdKm) ?? 0,
+        [comparisonTarget]: normalizeProximity((comparisonFullData as { distanceToNearestEdKm?: number | null }).distanceToNearestEdKm) ?? 0,
         fullMark: 100,
       },
       {
@@ -335,15 +360,25 @@ export default function RegionalInequityDashboard() {
     return COMMUNITY_NEED_PROFILES.map(p => {
       const disease = CHRONIC_DISEASE_BURDEN.find(d => d.lgaName === p.lgaName) || defaultDisease;
       const ed = ED_RELIANCE_METRICS.find(e => e.lgaName === p.lgaName) || defaultEd;
-      const travel = TRAVEL_FOR_CARE.find(t => t.lgaName === p.lgaName) || defaultTravel;
-      const access = SERVICE_ACCESS_METRICS.find(s => s.lgaName === p.lgaName) || defaultAccess;
+      const travel = TRAVEL_FOR_CARE.length > 0 ? TRAVEL_FOR_CARE.find(t => t.lgaName === p.lgaName) : null;
+      const access = SERVICE_ACCESS_METRICS.length > 0 ? SERVICE_ACCESS_METRICS.find(s => s.lgaName === p.lgaName) : null;
       return {
         ...p,
         ...disease,
         ...ed,
-        ...travel,
-        ...access,
-        lgaName: p.lgaName // Ensure we keep the original LGA name!
+        ...(travel ?? {
+          careDeliveredOutsideLgaPct: null,
+          topDestinationFacility: null,
+          avgTravelDistanceKm: null,
+          localBedLeakagePct: null,
+        }),
+        ...(access ?? {
+          facilitiesPer10k: null,
+          distanceToNearestEdKm: null,
+          distanceToNearestImagingKm: null,
+          providersAcceptingPatients: null,
+        }),
+        lgaName: p.lgaName
       };
     });
   }, [COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, ED_RELIANCE_METRICS, TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS]);
@@ -444,11 +479,28 @@ export default function RegionalInequityDashboard() {
     };
   }, [selectedFullData, selectedLgaDetail, PROVINCIAL_BENCHMARKS]);
   const dynamicAccessTravelInsight = useMemo(() => {
-    return {
-      travel: `Remote specialty gaps force local residents to travel an average of ${selectedFullData.avgTravelDistanceKm} km per outpatient cycle. The primary regional facility absorbing this outward medical flow is ${selectedFullData.topDestinationFacility}.`,
-      leakage: `This resource gap is confirmed by a local inpatient bed leakage rate of ${selectedFullData.localBedLeakagePct}%. Local diagnostics are unable to retain native clinical caseloads, requiring residents to leave their home districts for standard inpatient care.`
+    const hasTravel = TRAVEL_FOR_CARE.length > 0 && selectedLgaTravel != null;
+    const hasAccess = SERVICE_ACCESS_METRICS.length > 0 && selectedLgaAccess != null;
+    if (!hasTravel && !hasAccess) {
+      return {
+        travel: 'Travel-for-care and facility-distance metrics are not published in the current Open Alberta LGA workbooks. Pipeline preserves curated arrays when present; otherwise values show as unavailable.',
+        leakage: 'Inpatient bed leakage and outward travel distance require a dedicated TRAVEL_FOR_CARE dataset — not yet backfilled from automated sources.'
+      };
+    }
+    const travel = selectedFullData as typeof selectedFullData & {
+      avgTravelDistanceKm?: number | null;
+      topDestinationFacility?: string | null;
+      localBedLeakagePct?: number | null;
     };
-  }, [selectedFullData, selectedLgaDetail]);
+    return {
+      travel: travel.avgTravelDistanceKm != null
+        ? `Remote specialty gaps force local residents to travel an average of ${travel.avgTravelDistanceKm} km per outpatient cycle. The primary regional facility absorbing this outward medical flow is ${travel.topDestinationFacility ?? 'not listed'}.`
+        : 'Average travel distance is not available for this LGA in the current dataset.',
+      leakage: travel.localBedLeakagePct != null
+        ? `This resource gap is confirmed by a local inpatient bed leakage rate of ${travel.localBedLeakagePct}%. Local diagnostics are unable to retain native clinical caseloads, requiring residents to leave their home districts for standard inpatient care.`
+        : 'Bed leakage rate is not available for this LGA.'
+    };
+  }, [TRAVEL_FOR_CARE.length, SERVICE_ACCESS_METRICS.length, selectedLgaTravel, selectedLgaAccess, selectedFullData]);
 
   if (isLoading) {
     return (
@@ -1065,7 +1117,7 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Clinics per 10k population</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-rose-400">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedLgaAccess.facilitiesPer10k}</span>
+                    <span className="text-2xl font-black text-rose-400">{selectedLgaAccess == null ? '—' : selectedLgaAccess.facilitiesPer10k}</span>
                     <span className="text-[10px] text-slate-500 font-medium">clinics</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
@@ -1076,7 +1128,7 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Distance to Nearest ED</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-orange-400">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedLgaAccess.distanceToNearestEdKm}</span>
+                    <span className="text-2xl font-black text-orange-400">{selectedLgaAccess == null ? '—' : selectedLgaAccess.distanceToNearestEdKm}</span>
                     <span className="text-[10px] text-slate-500 font-medium">km</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
@@ -1087,7 +1139,7 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Distance to Nearest Imaging</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-indigo-400">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedLgaAccess.distanceToNearestImagingKm}</span>
+                    <span className="text-2xl font-black text-indigo-400">{selectedLgaAccess == null ? '—' : selectedLgaAccess.distanceToNearestImagingKm}</span>
                     <span className="text-[10px] text-slate-500 font-medium">km</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
@@ -1098,7 +1150,7 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Accepting Roster practices</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-500">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedLgaAccess.providersAcceptingPatients}</span>
+                    <span className="text-2xl font-black text-amber-500">{selectedLgaAccess == null ? '—' : selectedLgaAccess.providersAcceptingPatients}</span>
                     <span className="text-[10px] text-slate-500 font-medium">clinics</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
@@ -1173,11 +1225,11 @@ export default function RegionalInequityDashboard() {
                         <div className="flex-1 flex items-center justify-center relative min-w-[100px]">
                           <div className="w-full border-t border-dashed border-rose-500/40"></div>
                           <span className="absolute bg-[#0b1226] border border-rose-500/30 text-[9px] px-2 py-0.5 rounded-full font-mono text-rose-300 font-bold">
-                            {TRAVEL_FOR_CARE.length === 0 ? '—' : `${selectedLgaTravel.avgTravelDistanceKm} km`}
+                            {selectedLgaTravel == null ? '—' : `${selectedLgaTravel.avgTravelDistanceKm} km`}
                           </span>
                         </div>
-                        <span className="text-[10px] font-black text-rose-400 truncate max-w-[120px]" title={selectedLgaTravel.topDestinationFacility}>
-                          {TRAVEL_FOR_CARE.length === 0 ? '—' : (selectedLgaTravel.topDestinationFacility ? (selectedLgaTravel.topDestinationFacility.split(' ')[0] + '...') : '—')}
+                        <span className="text-[10px] font-black text-rose-400 truncate max-w-[120px]" title={selectedLgaTravel?.topDestinationFacility ?? undefined}>
+                          {selectedLgaTravel == null ? '—' : (selectedLgaTravel.topDestinationFacility ? (selectedLgaTravel.topDestinationFacility.split(' ')[0] + '...') : '—')}
                         </span>
                       </div>
                       
@@ -1356,8 +1408,8 @@ export default function RegionalInequityDashboard() {
                           {/* Row 6 */}
                           <tr>
                             <td className="p-3 text-slate-300">Providers accepting rosters</td>
-                            <td className="p-3 text-white font-mono">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : selectedFullData.providersAcceptingPatients}</td>
-                            <td className="p-3 text-slate-400 font-mono">{SERVICE_ACCESS_METRICS.length === 0 ? '—' : comparisonFullData.providersAcceptingPatients}</td>
+                            <td className="p-3 text-white font-mono">{(selectedFullData as { providersAcceptingPatients?: number | null }).providersAcceptingPatients == null ? '—' : (selectedFullData as { providersAcceptingPatients: number }).providersAcceptingPatients}</td>
+                            <td className="p-3 text-slate-400 font-mono">{(comparisonFullData as { providersAcceptingPatients?: number | null }).providersAcceptingPatients == null ? '—' : (comparisonFullData as { providersAcceptingPatients: number }).providersAcceptingPatients}</td>
                             <td className="p-3 text-center font-mono">
                               {SERVICE_ACCESS_METRICS.length === 0 ? (
                                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 text-slate-500 border border-slate-800">
@@ -1556,16 +1608,16 @@ export default function RegionalInequityDashboard() {
                                 {lga.acscRatePer100k ? lga.acscRatePer100k : '—'}
                               </td>
                               <td className="p-3 text-right text-slate-400">
-                                {SERVICE_ACCESS_METRICS.length === 0 ? '—' : lga.facilitiesPer10k}
+                                {(lga as { facilitiesPer10k?: number | null }).facilitiesPer10k == null ? '—' : (lga as { facilitiesPer10k: number }).facilitiesPer10k}
                               </td>
                               <td className="p-3 text-right text-orange-400">
-                                {SERVICE_ACCESS_METRICS.length === 0 ? '—' : `${lga.distanceToNearestEdKm} km`}
+                                {(lga as { distanceToNearestEdKm?: number | null }).distanceToNearestEdKm == null ? '—' : `${(lga as { distanceToNearestEdKm: number }).distanceToNearestEdKm} km`}
                               </td>
                               <td className="p-3 text-right text-orange-400">
-                                {SERVICE_ACCESS_METRICS.length === 0 ? '—' : `${lga.distanceToNearestImagingKm} km`}
+                                {(lga as { distanceToNearestImagingKm?: number | null }).distanceToNearestImagingKm == null ? '—' : `${(lga as { distanceToNearestImagingKm: number }).distanceToNearestImagingKm} km`}
                               </td>
                               <td className="p-3 text-right text-slate-100">
-                                {SERVICE_ACCESS_METRICS.length === 0 ? '—' : lga.providersAcceptingPatients}
+                                {(lga as { providersAcceptingPatients?: number | null }).providersAcceptingPatients == null ? '—' : (lga as { providersAcceptingPatients: number }).providersAcceptingPatients}
                               </td>
                             </>
                           )}
