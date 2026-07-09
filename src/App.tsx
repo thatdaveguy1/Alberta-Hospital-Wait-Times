@@ -556,13 +556,20 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
   const [dashboardSearch, setDashboardSearch] = useState('');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [isModulesExpanded, setIsModulesExpanded] = useState(false);
+  const [isModulesExpanded, setIsModulesExpanded] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('alberta_hospital_modules_expanded') !== '0';
+  });
 
   // Deep-link: ?module=diagnostics (headed verify + bookmarks)
   useEffect(() => {
     const fromUrl = readDashboardModuleFromUrl(DASHBOARDS.map((d) => d.id));
     if (fromUrl) setActiveTab(fromUrl as typeof activeTab);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('alberta_hospital_modules_expanded', isModulesExpanded ? '1' : '0');
+  }, [isModulesExpanded]);
 
   // Lock body scroll when map is fullscreen
   useEffect(() => {
@@ -1522,14 +1529,14 @@ export default function App() {
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   Active Module: <span className="text-white font-extrabold">{DASHBOARDS.find(d => d.id === activeTab)?.title}</span>
                 </h3>
-                <p className="text-[10px] text-slate-500 font-medium">Click "Change Module" to browse other analytical dashboards</p>
+                <p className="text-[10px] text-slate-500 font-medium">Module picker is hidden — use Show modules to browse all dashboards</p>
               </div>
             </div>
             <button
               onClick={() => setIsModulesExpanded(true)}
               className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all cursor-pointer shadow-md"
             >
-              Change Module
+              Show modules
             </button>
           </div>
         ) : (
@@ -1548,7 +1555,7 @@ export default function App() {
                 </div>
               </div>
 
-            {/* Search Bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto shrink-0">
             <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-2 w-3.5 h-3.5 text-slate-500" />
               <input
@@ -1560,17 +1567,21 @@ export default function App() {
               />
               {dashboardSearch && (
                 <button
+                  type="button"
                   onClick={() => setDashboardSearch('')}
                   className="absolute right-3 top-2 text-slate-500 hover:text-slate-300 text-xs font-bold"
                 >
                   Clear
                 </button>
               )}
+            </div>
               <button
+                type="button"
                 onClick={() => setIsModulesExpanded(false)}
-                className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-xs transition-all cursor-pointer shadow-md"
+                className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-xs transition-all cursor-pointer shadow-md shrink-0"
+                title="Hide module picker"
               >
-                Minimize
+                Hide modules
               </button>
             </div>
           </div>
@@ -1616,7 +1627,6 @@ export default function App() {
                       data-dashboard-id={d.id}
                       onClick={() => {
                         setActiveTab(d.id);
-                        setIsModulesExpanded(false);
                         if (isMapFullscreen) setIsMapFullscreen(false);
                       }}
                       className={`relative group flex items-center gap-2 p-2.5 rounded-lg text-left transition-all border ${
@@ -1675,7 +1685,6 @@ export default function App() {
                             data-dashboard-id={d.id}
                             onClick={() => {
                               setActiveTab(d.id);
-                              setIsModulesExpanded(false);
                               if (isMapFullscreen) setIsMapFullscreen(false);
                             }}
                             className={`relative group flex items-center gap-2 p-2.5 rounded-lg text-left transition-all border ${
