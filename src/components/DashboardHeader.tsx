@@ -5,7 +5,7 @@
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { RefreshCw, FileText } from 'lucide-react';
-import type { DataMetadataMap } from './DataTimestamp';
+import { sanitizeSource, type DataMetadataMap } from './DataTimestamp';
 
 interface DashboardHeaderProps {
   icon: LucideIcon;
@@ -49,6 +49,7 @@ export function DashboardHeader({
   const isAuto = entry?.updateType === 'auto';
   const lastUpdated = entry?.lastUpdated ? formatTimestamp(entry.lastUpdated) : 'Unknown';
   const sourceVintage = entry?.sourceVintage || '—';
+  const source = entry?.source ? sanitizeSource(entry.source) : '—';
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
@@ -82,6 +83,10 @@ export function DashboardHeader({
           <span className="text-slate-600">·</span>
           <span>
             Data Timestamp: <span className="font-extrabold text-slate-200">{sourceVintage}</span>
+          </span>
+          <span className="text-slate-600">·</span>
+          <span>
+            Source: <span className="font-extrabold text-slate-200">{source}</span>
           </span>
         </div>
       </div>

@@ -47,6 +47,7 @@ import type {
   HomeCareContinuity,
   CareFacilityCompliance
 } from '../continuingCareData';
+import * as continuingCareData from '../continuingCareData';
 import { DataTimestamp } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
@@ -59,7 +60,7 @@ type ContinuingCareData = {
 };
 
 export default function ContinuingCareDashboard() {
-  const { data, metadata, isLoading, error, refresh } = useDomainData<ContinuingCareData>('continuing-care');
+  const { data, metadata, isLoading, error, refresh } = useDomainData<ContinuingCareData>('continuing-care', continuingCareData);
   const [activeSubTab, setActiveSubTab] = useState<'placement' | 'resident-quality' | 'home-care' | 'compliance'>('placement');
   
   // Interactive KPI selected state for historical trend panel
@@ -152,8 +153,7 @@ export default function ContinuingCareDashboard() {
   // Filter Placement Metrics by Zone
   const filteredPlacementData = useMemo(() => {
     if (selectedZone === 'All') {
-      // average out by year or show all
-      return placementStats.filter(p => p.zone === 'Calgary Zone' || p.zone === 'Edmonton Zone');
+      return placementStats;
     }
     return placementStats.filter(p => p.zone === selectedZone);
   }, [selectedZone, placementStats]);
@@ -590,7 +590,7 @@ export default function ContinuingCareDashboard() {
               <h4 className="text-xs font-bold text-slate-400 uppercase">Quality Benchmarks Breakdown</h4>
               
               <div className="space-y-3.5">
-                {(data?.RESIDENT_QUALITY_OUTCOMES ?? []).filter((_, i) => i % 3 === 2).map((item, idx) => (
+                {filteredQualityData.map((item, idx) => (
                   <div key={idx} className="p-4 bg-slate-950/40 border border-slate-850 rounded-xl space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-black text-white">{item.metric}</span>

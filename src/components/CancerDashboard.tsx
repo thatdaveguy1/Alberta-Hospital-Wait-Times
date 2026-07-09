@@ -36,11 +36,13 @@ import {
   Cell,
   ReferenceLine
 } from 'recharts';
+import * as cancerData from '../cancerData';
 import {
   type CancerBurdenItem,
   type CancerSurgeryWaitTrend,
   type CancerCentreLocation,
-  type RadiationTherapyCompliance
+  type RadiationTherapyCompliance,
+  type CancerScreeningZoneRate
 } from '../cancerData';
 import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
@@ -48,22 +50,24 @@ import { useDomainData } from '../hooks/useDomainData';
 
 type CancerData = {
   CANCER_BURDEN_STATS: CancerBurdenItem[];
+  CANCER_SCREENING_RATES: CancerScreeningZoneRate[];
   CANCER_SURGERY_WAIT_TRENDS: CancerSurgeryWaitTrend[];
   RADIATION_THERAPY_WAIT_TRENDS: RadiationTherapyCompliance[];
   ALBERTA_CANCER_CENTRES: CancerCentreLocation[];
 };
 
 export default function CancerDashboard() {
-  const [activeSubTab, setActiveSubTab] = useState<'burden' | 'surgery' | 'radiation' | 'facilities'>('burden');
+  const [activeSubTab, setActiveSubTab] = useState<'burden' | 'screening' | 'surgery' | 'radiation' | 'facilities'>('burden');
   
   // Interactive Filter States
   const [selectedCancer, setSelectedCancer] = useState<string>('All');
   const [selectedZone, setSelectedZone] = useState<string>('All');
   const [facilitySearch, setFacilitySearch] = useState<string>('');
-  const { data, metadata, isLoading, error, refresh } = useDomainData<CancerData>('cancer');
+  const { data, metadata, isLoading, error, refresh } = useDomainData<CancerData>('cancer', cancerData);
 
   const domainData = useMemo(() => ({
     CANCER_BURDEN_STATS: data?.CANCER_BURDEN_STATS ?? [],
+    CANCER_SCREENING_RATES: data?.CANCER_SCREENING_RATES ?? [],
     CANCER_SURGERY_WAIT_TRENDS: data?.CANCER_SURGERY_WAIT_TRENDS ?? [],
     RADIATION_THERAPY_WAIT_TRENDS: data?.RADIATION_THERAPY_WAIT_TRENDS ?? [],
     ALBERTA_CANCER_CENTRES: data?.ALBERTA_CANCER_CENTRES ?? [],
@@ -244,6 +248,17 @@ export default function CancerDashboard() {
           <span>Tumor Burden</span>
         </button>
         <button
+          onClick={() => setActiveSubTab('screening')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'screening'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <UserCheck className="w-4 h-4" />
+          <span>Screening Rates</span>
+        </button>
+        <button
           onClick={() => setActiveSubTab('surgery')}
           className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'surgery'
@@ -400,6 +415,65 @@ export default function CancerDashboard() {
           </div>
         </div>
       )}
+
+      {/* SUBTAB 2: Organized Cancer Screening by Zone */}
+      {activeSubTab === 'screening' && (
+        <div className="space-y-6">
+          <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="CANCER_SCREENING_RATES" />
+          <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+            <div>
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Screening for Life Participation by Zone</h3>
+              <p className="text-[10px] text-slate-500">Breast, cervical, and colorectal screening rates (% eligible population screened)</p>
+            </div>
+            {domainData.CANCER_SCREENING_RATES.length === 0 ? (
+              <p className="text-sm text-slate-500">No screening rate data available.</p>
+            ) : (
+              <>
+                <div className="h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={domainData.CANCER_SCREENING_RATES}
+                      margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="zone" stroke="#64748b" fontSize={10} />
+                      <YAxis stroke="#64748b" fontSize={9} domain={[0, 100]} />
+                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                      <Legend wrapperStyle={{ fontSize: 10 }} />
+                      <Bar dataKey="breastScreeningPct" name="Breast (%)" fill="#ec4899" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                      <Bar dataKey="cervicalScreeningPct" name="Cervical (%)" fill="#8b5cf6" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                      <Bar dataKey="colorectalScreeningPct" name="Colorectal (%)" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="text-slate-500 uppercase tracking-wider border-b border-slate-800">
+                        <th className="py-2 pr-4 font-extrabold">Zone</th>
+                        <th className="py-2 pr-4 font-extrabold">Breast %</th>
+                        <th className="py-2 pr-4 font-extrabold">Cervical %</th>
+                        <th className="py-2 font-extrabold">Colorectal %</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {domainData.CANCER_SCREENING_RATES.map((row) => (
+                        <tr key={row.zone} className="border-b border-slate-850 text-slate-300">
+                          <td className="py-2 pr-4 font-semibold text-white">{row.zone}</td>
+                          <td className="py-2 pr-4 font-mono">{row.breastScreeningPct}%</td>
+                          <td className="py-2 pr-4 font-mono">{row.cervicalScreeningPct}%</td>
+                          <td className="py-2 font-mono">{row.colorectalScreeningPct}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
 
       {/* SUBTAB 3: Cancer Surgery Wait Times (CIHI Benchmarks) */}
       {activeSubTab === 'surgery' && (

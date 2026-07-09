@@ -354,10 +354,14 @@ interface AlertLog {
   timestamp: string;
 }
 
+const formatAvgWaitDisplay = (minutes: number, validCount: number): string => {
+  if (validCount === 0) return '—';
+  return formatMinutesToHm(minutes);
+};
 const isWaitTimeUnavailable = (hospital: Hospital | null | undefined) => {
   if (!hospital) return true;
   const label = hospital.waitTimeLabel?.toLowerCase() || '';
-  return label.includes('unavailable') || label.includes('not available') || label.includes('n/a') || hospital.waitTime < 0;
+  return label.includes('unavailable') || label.includes('not available') || label.includes('n/a') || label.includes('closed') || hospital.waitTime < 0;
 };
 
 const normalizeTrendRange = (range: string) => (range === '30D' ? '30d' : range);
@@ -1205,7 +1209,7 @@ export default function App() {
     .slice(0, 3); // Top 3 optimal recommendations
 
   // Calculate high-fidelity metrics
-  const validHospitals = hospitals.filter(h => h.waitTime >= 0);
+  const validHospitals = hospitals.filter(h => !isWaitTimeUnavailable(h));
   const edmontonHospitals = validHospitals.filter(h => h.city.toLowerCase() === 'edmonton');
   const calgaryHospitals = validHospitals.filter(h => h.city.toLowerCase() === 'calgary');
   const restHospitals = validHospitals.filter(h => h.city.toLowerCase() !== 'edmonton' && h.city.toLowerCase() !== 'calgary');
@@ -1215,7 +1219,7 @@ export default function App() {
     edmontonAvgWait: edmontonHospitals.length > 0 ? Math.round(edmontonHospitals.reduce((acc, h) => acc + h.waitTime, 0) / edmontonHospitals.length) : 0,
     calgaryAvgWait: calgaryHospitals.length > 0 ? Math.round(calgaryHospitals.reduce((acc, h) => acc + h.waitTime, 0) / calgaryHospitals.length) : 0,
     restAvgWait: restHospitals.length > 0 ? Math.round(restHospitals.reduce((acc, h) => acc + h.waitTime, 0) / restHospitals.length) : 0,
-    maxWait: hospitals.length > 0 ? Math.max(...hospitals.map(h => h.waitTime)) : 0,
+    maxWait: validHospitals.length > 0 ? Math.max(...validHospitals.map(h => h.waitTime)) : 0,
     totalHospitals: hospitals.length,
     nearestHospital: processedHospitals.filter(h => h.distance !== undefined).sort((a, b) => (a.distance || 0) - (b.distance || 0))[0] || null
   };
@@ -1753,7 +1757,7 @@ export default function App() {
               </div>
               <div className="flex items-baseline gap-2 mb-1.5">
                 <p className="text-2xl font-black text-white tracking-tight leading-none">
-                  {formatMinutesToHm(stats.avgWait)}
+                  {formatAvgWaitDisplay(stats.avgWait, validHospitals.length)}
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                   Provincial Average Wait
@@ -1765,19 +1769,19 @@ export default function App() {
               <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Edmonton</span>
                 <span className="text-xs font-black text-emerald-400 font-mono block mt-0.5">
-                  {formatMinutesToHm(stats.edmontonAvgWait)}
+                  {formatAvgWaitDisplay(stats.edmontonAvgWait, edmontonHospitals.length)}
                 </span>
               </div>
               <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Calgary</span>
                 <span className="text-xs font-black text-blue-400 font-mono block mt-0.5">
-                  {formatMinutesToHm(stats.calgaryAvgWait)}
+                  {formatAvgWaitDisplay(stats.calgaryAvgWait, calgaryHospitals.length)}
                 </span>
               </div>
               <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Rest AB</span>
                 <span className="text-xs font-black text-indigo-400 font-mono block mt-0.5">
-                  {formatMinutesToHm(stats.restAvgWait)}
+                  {formatAvgWaitDisplay(stats.restAvgWait, restHospitals.length)}
                 </span>
               </div>
             </div>
@@ -1796,7 +1800,7 @@ export default function App() {
               </div>
               <div className="flex items-baseline gap-2 mb-1.5">
                 <p className="text-2xl font-black text-white tracking-tight leading-none">
-                  {maxStats?.max24h ? formatMinutesToHm(maxStats.max24h.waitTime) : formatMinutesToHm(stats.maxWait)}
+                  {maxStats?.max24h ? formatMinutesToHm(maxStats.max24h.waitTime) : formatAvgWaitDisplay(stats.maxWait, validHospitals.length)}
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                   Max Recorded Wait (24h Peak)
@@ -1809,7 +1813,7 @@ export default function App() {
               <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl flex flex-col justify-between text-center min-w-0">
                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">24h Max</span>
                 <span className="text-xs font-black text-red-400 font-mono block mt-0.5">
-                  {maxStats?.max24h ? formatMinutesToHm(maxStats.max24h.waitTime) : formatMinutesToHm(stats.maxWait)}
+                  {maxStats?.max24h ? formatMinutesToHm(maxStats.max24h.waitTime) : formatAvgWaitDisplay(stats.maxWait, validHospitals.length)}
                 </span>
                 <span className="text-[7px] text-slate-500 font-medium italic truncate block mt-1" title={maxStats?.max24h ? maxStats.max24h.hospitalName : ''}>
                   {maxStats?.max24h ? maxStats.max24h.hospitalName.replace('Community Hospital', '').replace('General Hospital', '').trim() : 'Syncing...'}

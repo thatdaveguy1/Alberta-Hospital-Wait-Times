@@ -1,3 +1,45 @@
+## Session: 2026-07-09 (Phase F — Audit Fixes)
+
+### Lesson: Static seed arrays can fill API gaps without touching fetchers
+- **Mistake:** `data-regional-inequity.json`, `data-public-health.json`, and `data-cancer.json` had missing or empty arrays (`TRAVEL_FOR_CARE`, `SERVICE_ACCESS_METRICS`, `NOTIFIABLE_DISEASE_INCIDENCE`, `ENVIRONMENTAL_ADVISORIES`, `CANCER_SCREENING_RATES`) because the corresponding fetchers did not seed them. Editing every fetcher would have been slow and risky.
+- **Solution:** Added an optional `fallback` parameter to `useDomainData` that merges static arrays from `src/*Data.ts` when the fetched payload has empty/missing arrays. Dashboards now import `* as dataModule` and pass it to `useDomainData('domain', dataModule)`. This keeps the UI honest while leaving the pipeline owners unchanged.
+- **Prevention:** When a fetcher produces partial output, prefer a component-level fallback over hand-editing runtime data files or copying live records into source. Document which arrays are fallback-seeded so future pipeline work knows.
+
+### Lesson: Dashboards must not hardcode KPIs that can be derived from the same arrays
+- **Mistake:** `SurgicalDashboard` overview cards hardcoded 36.8/43.1/15.2/5.9 weeks; `SpendingDashboard` showed `+8.1% vs prev`; `WorkforceDashboard` hardcoded `45171` total RNs and `9.0` avg nursing vacancy. These contradicted the detail tables or the source arrays.
+- **Solution:** Replaced every hardcoded headline with a computation from the same array used in the detail panel: `SurgicalDashboard` finds the 90th percentile record by `procedure_name`; `SpendingDashboard` computes the latest-vs-previous percentage; `WorkforceDashboard` pulls `activePermits` and averages `vacancyRatePct` for 2025.
+- **Prevention:** Any headline number that can be calculated from existing data must be calculated. If a KPI is intentionally different from the detail table (e.g., annualized estimate), add a footnote or tooltip explaining the discrepancy.
+
+### Lesson: `isLoading` guards do not protect `useMemo` against empty arrays
+- **Mistake:** `SystemFlowDashboard` `provincialOverview` divided by `totalBeds` without guarding `0`, producing `NaN` when `FACILITY_FLOW_METRICS` had only zero-bed facilities. `MentalHealthDashboard` used `filteredHarmData[0]` as a reduce seed, crashing on empty data. `WorkforceDashboard` and `SpendingDashboard` indexed arrays without length checks.
+- **Solution:** Added zero/empty guards before every division and before every array index. `SystemFlowDashboard` now sets `avgOccupancy` to `0` when `totalBeds === 0`; `MentalHealthDashboard` returns `{ latest: null, peak: null }` for empty `filteredHarmData`.
+- **Prevention:** `useMemo` runs before the `if (isLoading)` early return. Treat any `.find()`, `.reduce()`, or `[0]`/`[length-1]` as a potential crash site and guard it.
+
+### Lesson: `All` zone filters must literally mean all zones
+- **Mistake:** `ContinuingCareDashboard` and `PatientExperienceDashboard` `All` zone filters returned only `Calgary Zone` + `Edmonton Zone`, silently dropping Central, South, and North. `ContinuingCareDashboard` also used `filter((_, i) => i % 3 === 2)` on the quality list, hiding two-thirds of rows.
+- **Solution:** `All` branches now return the full unfiltered array. Removed the modulo hack and used the pre-computed `filteredQualityData`.
+- **Prevention:** A label of `All` is a user promise. Never hardcode a subset under an `All` label, and never use array index modulo as a display filter.
+
+### Lesson: Closed / appointment-only / unavailable lab states need explicit UI treatment
+- **Mistake:** `DiagnosticDashboard` and `LabCard` treated `0` numeric wait times as valid walk-in waits and rendered `0:00` or `Unavailable` for closed/appointments-only labs. `App.tsx` did not treat `Closed` as an unavailable wait-time label.
+- **Solution:** Unified `isLabWaitUnavailable` to return `true` for `waitTimeMin === 'Closed'`, `'Appointments Only'`, or `0 && !walkInAvailable`. `LabCard` now renders `Closed` or `Appointments Only` directly. `App.tsx` `isWaitTimeUnavailable` also checks `closed`.
+- **Prevention:** Any metric that can be unavailable, closed, or appointments-only needs a dedicated display state. Do not fall back to `0` or `Unavailable` when the upstream data has a meaningful label.
+
+### Lesson: Don't mix wait-week rows into a percentage bar chart
+- **Mistake:** `PatientExperienceDashboard` rendered `Specialist Access` rows (e.g., `Cardiovascular Median Wait (weeks)`) on the same `Positive %` bar chart as actual patient-reported percentages, making the chart axis meaningless.
+- **Solution:** Excluded `Specialist Access` rows from the `Comparative Experience Ratings` bar chart data while keeping the setting filter intact.
+- **Prevention:** When a single array contains different units (percentages vs. weeks), do not force them onto a single axis. Either split the series or exclude mismatched rows.
+
+### Lesson: Source labels should not leak internal pipeline filenames
+- **Mistake:** `DashboardHeader` displayed the raw `source` field from metadata, which could still show pipeline IDs like `powerbiScraper` or `cihiDownloader` if `DataTimestamp` was not used.
+- **Solution:** Exported `DataTimestamp.sanitizeSource` and made `DashboardHeader` use it to render a human-readable `Source:` in the metadata row.
+- **Prevention:** Source metadata should be sanitized as close to the UI chrome as possible; never trust a raw pipeline string to be user-friendly.
+
+### Lesson: Manual `fetch` calls duplicate `useDomainData` logic and lose fallback
+- **Mistake:** `SystemFlowDashboard`, `DiagnosticDashboard`, `PrimaryCareDashboard`, and `WorkforceDashboard` each had their own `fetch('/api/data/<domain>')` useEffect, separate `isLoading`/`error`/`refresh` state, and no fallback seeding.
+- **Solution:** Replaced all manual fetches with `useDomainData(domain, dataModule)`, giving each dashboard consistent loading, error, refresh, and fallback behavior.
+- **Prevention:** Standardize on one data hook per domain. If a dashboard needs custom refresh logic, extend the hook rather than duplicating fetch/loading/error handling.
+
 ## Session: 2026-07-09 (Audit Plan — Missing App.tsx imports)
 
 ### Lesson: A missing `tsc` import can hide behind a stale "tsc pass" todo

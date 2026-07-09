@@ -192,3 +192,81 @@ Map each pipeline to tab(s) using `orchestrator.ts` `domain` field (§2 implicit
 ---
 
 *Audit plan — the blocker fixes above are already committed; remaining work follows this plan.*
+
+## 9. Phase F — Fix execution (continued from audit findings)
+
+This phase implements the fixes identified by the code/data audits. The shared `useDomainData` hook now accepts an optional `fallback` module (e.g. `import * as cancerData from '../cancerData'`) so empty arrays from `data-*.json` are backfilled by static seed arrays without touching the API pipeline. `DashboardHeader` now uses `DataTimestamp.sanitizeSource` and shows a human-readable `Source`. `App.tsx` treats `Closed` as an unavailable wait-time label.
+
+### 9.1 Shared shell / hook
+
+- `src/hooks/useDomainData.ts` — add optional `fallback` parameter; merge missing/empty arrays and metadata from fallback module.
+- `src/components/DataTimestamp.tsx` — export `sanitizeSource`.
+- `src/components/DashboardHeader.tsx` — import `sanitizeSource`; add `Source:` to metadata row.
+- `src/App.tsx` — `isWaitTimeUnavailable` checks `label.includes('closed')`.
+
+### 9.2 Acute / capacity group
+
+**`SystemFlowDashboard.tsx`**
+- Replace manual `fetch('/api/data/system-flow')` with `useDomainData<SystemFlowData>('system-flow', systemFlowData)`.
+- `provincialOverview` guard `totalBeds` before dividing by zero; `avgOccupancy` is 0 when `totalBeds === 0`.
+- Replace hardcoded `+12.4h since 2021` with computed delta from `HISTORICAL_FLOW_TIMELINES` first/last `p90BedWaitHours`.
+- `selectedHospital` should be `FacilityFlow | undefined`; guard deep-dive panel (return null / placeholder when undefined).
+
+**`SurgicalDashboard.tsx`**
+- Add `import * as surgicalData from '../surgicalData'` and use `useDomainData<SurgicalData>('surgical', surgicalData)` fallback.
+- Replace hardcoded provincial overview cards (36.8 / 43.1 / 15.2 / 5.9 weeks) with records from `SURGICAL_RECORDS` (`procedure_name` `Total Hip Arthroplasty`, `Total Knee Arthroplasty`, `Cataract Extraction & Lens Implant`, `Breast Cancer Surgery`; `metric_name` `90th percentile`; `geography_name` `Alberta`; `wait_segment` `Decision-to-surgery`). Derive target from `benchmark_value` (parse leading number) and `% of target` as `wait / target * 100`.
+- Fix `hipBenchPct` lookup to use `procedure_name` `Total Hip Arthroplasty` and `metric_name` `% within benchmark` (or `wait_segment` `Decision-to-surgery`).
+- Fix `compProcedureA`/`compProcedureB` defaults to `Hip Replacement` and `Knee Replacement` (matching `HISTORICAL_WAIT_TRENDS` pivot). Use `procedure_group` to find the 90th percentile record in `SURGICAL_RECORDS` for the comparison cards.
+
+**`DiagnosticDashboard.tsx`**
+- Replace manual `fetch('/api/data/diagnostic')` with `useDomainData<DiagnosticData>('diagnostic', diagnosticData)`.
+- `getLabStatus()` and `labStats` should exclude `0`-closed / `Closed` labs from `validLabs` when computing live availability.
+- `processedLabs` sort and `LabCard` should use `isLabWaitUnavailable` that treats `0`/`Closed` as unavailable and show `Closed`/`Appointments Only` labels.
+
+**`LabCard.tsx`**
+- `isLabWaitUnavailable` must return true for `0` or `Closed` values and render `Closed`/`Appointments Only` instead of `Unavailable`.
+
+**`WorkforceDashboard.tsx`**
+- Replace manual `fetch('/api/data/workforce')` with `useDomainData<WorkforceData>('workforce', workforceData)`.
+- Remove hardcoded `45171` for `totalRNs` and `9.0` for `avgNursingVacancy`; derive from `NURSING Workforce_DATA` arrays.
+
+### 9.3 Community group
+
+**`ContinuingCareDashboard.tsx`**
+- Zone filter `All` returns the full unfiltered array.
+- Resident quality sidebar list uses `filteredQualityData` (remove `filter((_, i) => i % 3 === 2)`).
+
+**`PatientExperienceDashboard.tsx`**
+- `safetyZoneFilter` `All` returns all records.
+- Exclude `Specialist Access` rows from `PATIENT_VOICE_BY_SETTING` `Positive %` bar chart (or use a separate wait-weeks display), since those rows contain wait-week values not percentages.
+
+**`PrimaryCareDashboard.tsx`**
+- Replace manual `fetch('/api/data/primary-care')` with `useDomainData<PrimaryCareData>('primary-care', primaryCareData)`.
+- Add `CONTINUITY_SATISFACTION_HQCA` to the `PrimaryCareData` type and `domainData`.
+
+### 9.4 Prevention / equity group
+
+**`CancerDashboard.tsx`**
+- Add `import * as cancerData from '../cancerData'` and use `useDomainData<CancerData>('cancer', cancerData)` fallback.
+- Add `CANCER_SCREENING_RATES` to `CancerData` type and `domainData`. Add a `screening` subtab (or render screening rates in the `burden` tab) using the `CancerScreeningZoneRate` array.
+
+**`PublicHealthDashboard.tsx`**
+- Add `import * as publicHealthData from '../publicHealthData'` and use `useDomainData<PublicHealthData>('public-health', publicHealthData)` fallback.
+- `NOTIFIABLE_DISEASE_INCIDENCE` and `ENVIRONMENTAL_ADVISORIES` should be available in `domainData` and the hidden subtabs should render empty-state disclosures instead of stale data.
+
+**`MentalHealthDashboard.tsx`**
+- Guard `substanceHarmStats` against empty `filteredHarmData`; do not use `filteredHarmData[0]` as a reduce seed.
+
+**`RegionalInequityDashboard.tsx`**
+- Add `import * as regionalInequityData from '../regionalInequityData'` and use `useDomainData<RegionalInequityData>('regional-inequity', regionalInequityData)` fallback.
+- Add `TRAVEL_FOR_CARE` and `SERVICE_ACCESS_METRICS` to `RegionalInequityData` type and `domainData`; use them in the `access-travel`/`data-explorer` subtabs or show empty disclosure.
+
+**`SpendingDashboard.tsx`**
+- Guard `latestAlbertaActivity` before deriving; compute `vs prev` from `ALBERTA_ACTIVITY_VOLUME_TREND` (latest 47.5, previous 45.7 → +3.9%) and remove hardcoded `+8.1%`.
+
+### 9.5 Verification
+
+- `npx tsc --noEmit` for every touched dashboard.
+- `npm run build`.
+- Headless DOM/text sweep of the affected modules (screenshots + `visual-audit.json` update) to confirm no `NaN`, `0:00`, `Closed` mislabeled as `Unavailable`, and `All` filters show all zones.
+- Update `tasks/todo.md`, `implementation.md`, and `lessons.md`; commit source/plan/docs changes only (do not commit runtime `data-*.json` modifications).

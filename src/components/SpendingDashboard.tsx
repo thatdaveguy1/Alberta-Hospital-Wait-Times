@@ -42,6 +42,7 @@ import type {
   PhysicianPaymentSpecialty,
   SpendingByUseOfFunds,
 } from '../spendingData';
+import * as spendingData from '../spendingData';
 import { DataTimestamp } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
@@ -84,7 +85,7 @@ const firstAllNonZeroIndex = (data: ActivityVolumeTrend[], keys: (keyof Activity
 
 export default function SpendingDashboard() {
   // Live data fetched from /api/data/spending
-  const { data, metadata, isLoading, error, refresh } = useDomainData<SpendingData>('spending');
+  const { data, metadata, isLoading, error, refresh } = useDomainData<SpendingData>('spending', spendingData);
   const NATIONAL_SPENDING_COMPARE = data?.NATIONAL_SPENDING_COMPARE ?? [];
   const ALBERTA_ACTIVITY_VOLUME_TREND = data?.ALBERTA_ACTIVITY_VOLUME_TREND ?? [];
   const HOSPITAL_EFFICIENCY_TREND = data?.HOSPITAL_EFFICIENCY_TREND ?? [];
@@ -179,7 +180,22 @@ export default function SpendingDashboard() {
     });
   }, [filteredActivityTrendForIndex]);
 
-  const latestAlbertaActivity = ALBERTA_ACTIVITY_VOLUME_TREND[ALBERTA_ACTIVITY_VOLUME_TREND.length - 1];
+  const latestAlbertaActivity = ALBERTA_ACTIVITY_VOLUME_TREND.length > 0
+    ? ALBERTA_ACTIVITY_VOLUME_TREND[ALBERTA_ACTIVITY_VOLUME_TREND.length - 1]
+    : null;
+  const expenseVsPrevPct = useMemo(() => {
+    if (ALBERTA_ACTIVITY_VOLUME_TREND.length < 2) return null;
+    const latest = ALBERTA_ACTIVITY_VOLUME_TREND[ALBERTA_ACTIVITY_VOLUME_TREND.length - 1];
+    const prev = ALBERTA_ACTIVITY_VOLUME_TREND[ALBERTA_ACTIVITY_VOLUME_TREND.length - 2];
+    const latestVal = latest.totalExpenseBillions;
+    const prevVal = prev.totalExpenseBillions;
+    if (prevVal == null || prevVal === 0 || latestVal == null || Number.isNaN(latestVal) || Number.isNaN(prevVal)) {
+      return null;
+    }
+    const pct = ((latestVal - prevVal) / prevVal) * 100;
+    const sign = pct > 0 ? '+' : '';
+    return `${sign}${pct.toFixed(1)}% vs prev`;
+  }, [ALBERTA_ACTIVITY_VOLUME_TREND]);
 
   // KPI detail metadata for spending-access cards (backed by ALBERTA_ACTIVITY_VOLUME_TREND)
   const activityKpiDetails = useMemo(() => {
@@ -468,9 +484,13 @@ export default function SpendingDashboard() {
               </div>
               <div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-xl font-black text-emerald-400">${latestAlbertaActivity.totalExpenseBillions}B</span>
+                  <span className="text-xl font-black text-emerald-400">
+                    {latestAlbertaActivity ? `$${latestAlbertaActivity.totalExpenseBillions}B` : '—'}
+                  </span>
                 </div>
-                <span className="text-[10px] text-emerald-500 font-mono font-semibold">+8.1% vs prev</span>
+                <span className="text-[10px] text-emerald-500 font-mono font-semibold">
+                  {expenseVsPrevPct ?? '—'}
+                </span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
                 Annual budget consumed by health infrastructure.
@@ -502,7 +522,7 @@ export default function SpendingDashboard() {
                 <Activity className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
               </div>
               <div>
-                <div className="text-xl font-black text-indigo-400">{latestAlbertaActivity.surgeriesCount.toLocaleString()}</div>
+                <div className="text-xl font-black text-indigo-400">{latestAlbertaActivity?.surgeriesCount?.toLocaleString() ?? '—'}</div>
                 <span className="text-[10px] text-slate-500 font-mono">cases</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
@@ -535,7 +555,7 @@ export default function SpendingDashboard() {
                 <Layers className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               </div>
               <div>
-                <div className="text-xl font-black text-amber-500">{latestAlbertaActivity.ctExamsCount.toLocaleString()}</div>
+                <div className="text-xl font-black text-amber-500">{latestAlbertaActivity?.ctExamsCount?.toLocaleString() ?? '—'}</div>
                 <span className="text-[10px] text-slate-500 font-mono">exams</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
@@ -568,7 +588,7 @@ export default function SpendingDashboard() {
                 <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
               </div>
               <div>
-                <div className="text-xl font-black text-cyan-400">{latestAlbertaActivity.labTestsMillions}M</div>
+                <div className="text-xl font-black text-cyan-400">{latestAlbertaActivity ? `${latestAlbertaActivity.labTestsMillions}M` : '—'}</div>
                 <span className="text-[10px] text-slate-500 font-mono">tests</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
@@ -601,7 +621,7 @@ export default function SpendingDashboard() {
                 <HeartPulse className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               </div>
               <div>
-                <div className="text-xl font-black text-emerald-400">{latestAlbertaActivity.edVisitsMillions}M</div>
+                <div className="text-xl font-black text-emerald-400">{latestAlbertaActivity ? `${latestAlbertaActivity.edVisitsMillions}M` : '—'}</div>
                 <span className="text-[10px] text-slate-500 font-mono">visits</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
@@ -634,7 +654,7 @@ export default function SpendingDashboard() {
                 <Building2 className="w-3.5 h-3.5 text-rose-400 shrink-0" />
               </div>
               <div>
-                <div className="text-xl font-black text-rose-400">{latestAlbertaActivity.hospitalAdmissions.toLocaleString()}</div>
+                <div className="text-xl font-black text-rose-400">{latestAlbertaActivity?.hospitalAdmissions?.toLocaleString() ?? '—'}</div>
                 <span className="text-[10px] text-slate-500 font-mono">stays</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">
@@ -667,7 +687,7 @@ export default function SpendingDashboard() {
                 <Users className="w-3.5 h-3.5 text-pink-400 shrink-0" />
               </div>
               <div>
-                <div className="text-xl font-black text-pink-400">{latestAlbertaActivity.physiciansCount.toLocaleString()}</div>
+                <div className="text-xl font-black text-pink-400">{latestAlbertaActivity?.physiciansCount?.toLocaleString() ?? '—'}</div>
                 <span className="text-[10px] text-slate-500 font-mono">FTEs</span>
               </div>
               <p className="text-[9px] text-slate-400 pt-1.5 border-t border-slate-800/80 font-medium">

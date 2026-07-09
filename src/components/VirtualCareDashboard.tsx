@@ -46,6 +46,7 @@ import type {
   EmsDiversionMetric,
   AdjacentHelplineVolume,
 } from '../virtualCareData';
+import * as virtualCareData from '../virtualCareData';
 import { DataTimestamp } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
@@ -68,7 +69,7 @@ const DEFAULT_VOLUME: HealthLinkVolume = {
 };
 
 export default function VirtualCareDashboard() {
-  const { data, metadata, isLoading, error, refresh } = useDomainData<VirtualCareData>('virtual-care');
+  const { data, metadata, isLoading, error, refresh } = useDomainData<VirtualCareData>('virtual-care', virtualCareData);
 
   const HEALTH_LINK_VOLUMES = data?.HEALTH_LINK_VOLUMES ?? [];
   const VIRTUAL_MD_COHORT_STUDY = data?.VIRTUAL_MD_COHORT_STUDY ?? [];

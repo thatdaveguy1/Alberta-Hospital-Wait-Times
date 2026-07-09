@@ -43,6 +43,7 @@ import type {
   HospitalHarmMetric,
   ComplaintCategory,
 } from '../patientExperienceData';
+import * as patientExperienceData from '../patientExperienceData';
 import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
@@ -56,7 +57,7 @@ type PatientExperienceData = {
 };
 
 export default function PatientExperienceDashboard() {
-  const { data, metadata, isLoading, error, refresh } = useDomainData<PatientExperienceData>('patient-experience');
+  const { data, metadata, isLoading, error, refresh } = useDomainData<PatientExperienceData>('patient-experience', patientExperienceData);
 
   const PATIENT_VOICE_BY_SETTING = data?.PATIENT_VOICE_BY_SETTING ?? [];
   const INPATIENT_EXPERIENCE_TRENDS = data?.INPATIENT_EXPERIENCE_TRENDS ?? [];
@@ -163,10 +164,14 @@ export default function PatientExperienceDashboard() {
     return PATIENT_VOICE_BY_SETTING.filter(v => v.setting === settingFilter);
   }, [settingFilter, PATIENT_VOICE_BY_SETTING]);
 
+  const voiceChartData = useMemo(() => {
+    return filteredVoiceData.filter(v => v.setting !== 'Specialist Access');
+  }, [filteredVoiceData]);
+
   // Filtered safety metrics
   const filteredSafetyData = useMemo(() => {
     if (safetyZoneFilter === 'All') {
-      return CLINICAL_SAFETY_TRENDS.filter(s => s.zone === 'Calgary Zone' || s.zone === 'Edmonton Zone');
+      return CLINICAL_SAFETY_TRENDS;
     }
     return CLINICAL_SAFETY_TRENDS.filter(s => s.zone === safetyZoneFilter);
   }, [safetyZoneFilter, CLINICAL_SAFETY_TRENDS]);
@@ -470,7 +475,7 @@ export default function PatientExperienceDashboard() {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={filteredVoiceData}
+                    data={voiceChartData}
                     margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />

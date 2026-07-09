@@ -47,6 +47,7 @@ import type {
   EnvironmentalAdvisory,
   OutbreakGuidelines
 } from '../publicHealthData';
+import * as publicHealthData from '../publicHealthData';
 import { DataTimestamp } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
@@ -61,7 +62,7 @@ type PublicHealthData = {
 };
 
 export default function PublicHealthDashboard() {
-  const { data, metadata, isLoading, error, refresh } = useDomainData<PublicHealthData>('public-health');
+  const { data, metadata, isLoading, error, refresh } = useDomainData<PublicHealthData>('public-health', publicHealthData);
   const [activeSubTab, setActiveSubTab] = useState<'respiratory' | 'wastewater' | 'notifiable' | 'immunization' | 'advisories'>('respiratory');
   
   // Filter States
@@ -249,6 +250,17 @@ export default function PublicHealthDashboard() {
           <span>Wastewater Signals</span>
         </button>
         <button
+          onClick={() => setActiveSubTab('notifiable')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'notifiable'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Dna className="w-4 h-4" />
+          <span>Notifiable Diseases</span>
+        </button>
+        <button
           onClick={() => setActiveSubTab('immunization')}
           className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'immunization'
@@ -258,6 +270,17 @@ export default function PublicHealthDashboard() {
         >
           <ShieldAlert className="w-4 h-4" />
           <span>Childhood Immunization</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('advisories')}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+            activeSubTab === 'advisories'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <Flame className="w-4 h-4" />
+          <span>Environmental Advisories</span>
         </button>
       </div>
 

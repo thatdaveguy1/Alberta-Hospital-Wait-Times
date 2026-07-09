@@ -42,10 +42,13 @@ import type {
   AcceptingProvider,
   PCNCapacity,
   EDRelianceMetric,
-  ContinuityAndSatisfaction
+  ContinuityAndSatisfaction,
+  ContinuitySatisfactionHqca,
 } from '../primaryCareData';
-import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
+import * as primaryCareDataModule from '../primaryCareData';
+import { DataTimestamp } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
+import { useDomainData } from '../hooks/useDomainData';
 
 type PrimaryCareData = {
   ATTACHMENT_RATES: AttachmentRate[];
@@ -53,34 +56,35 @@ type PrimaryCareData = {
   PCN_CAPACITY: PCNCapacity[];
   ED_RELIANCE_BY_CONTINUITY: EDRelianceMetric[];
   CONTINUITY_SATISFACTION: ContinuityAndSatisfaction[];
-  _dataMetadata?: DataMetadataMap;
+  CONTINUITY_SATISFACTION_HQCA?: ContinuitySatisfactionHqca[];
 };
 
 export default function PrimaryCareDashboard() {
-  const [primaryCareData, setPrimaryCareData] = useState<PrimaryCareData>({
-    ATTACHMENT_RATES: [],
-    ACCEPTING_PROVIDERS: [],
-    PCN_CAPACITY: [],
-    ED_RELIANCE_BY_CONTINUITY: [],
-    CONTINUITY_SATISFACTION: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, metadata, isLoading, error, refresh } = useDomainData<PrimaryCareData>(
+    'primary-care',
+    primaryCareDataModule
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/data/primary-care')
-      .then(res => res.json())
-      .then((data: PrimaryCareData) => {
-        if (!cancelled) {
-          setPrimaryCareData(data);
-          setIsLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, []);
+  const domainData = useMemo(
+    () => ({
+      ATTACHMENT_RATES: data?.ATTACHMENT_RATES ?? [],
+      ACCEPTING_PROVIDERS: data?.ACCEPTING_PROVIDERS ?? [],
+      PCN_CAPACITY: data?.PCN_CAPACITY ?? [],
+      ED_RELIANCE_BY_CONTINUITY: data?.ED_RELIANCE_BY_CONTINUITY ?? [],
+      CONTINUITY_SATISFACTION: data?.CONTINUITY_SATISFACTION ?? [],
+      CONTINUITY_SATISFACTION_HQCA: data?.CONTINUITY_SATISFACTION_HQCA ?? [],
+    }),
+    [data]
+  );
+
+  const latestHqcaContinuityByZone = useMemo(() => {
+    const rows = domainData.CONTINUITY_SATISFACTION_HQCA;
+    if (!rows.length) return [];
+    const latestYear = rows.map(r => r.fiscalYear).sort((a, b) => b.localeCompare(a))[0];
+    return rows
+      .filter(r => r.fiscalYear === latestYear)
+      .sort((a, b) => b.continuityPct - a.continuityPct);
+  }, [domainData.CONTINUITY_SATISFACTION_HQCA]);
 
   const [activeSubTab, setActiveSubTab] = useState<'attachment' | 'directory' | 'pcn' | 'er-link'>('attachment');
 
@@ -113,7 +117,7 @@ export default function PrimaryCareDashboard() {
 
   // Filtered Provider Directory logic
   const filteredProviders = useMemo(() => {
-    return primaryCareData.ACCEPTING_PROVIDERS.filter(prov => {
+    return domainData.ACCEPTING_PROVIDERS.filter(prov => {
       const matchesSearch = 
         prov.name.toLowerCase().includes(directorySearch.toLowerCase()) ||
         prov.clinicName.toLowerCase().includes(directorySearch.toLowerCase()) ||
@@ -129,7 +133,7 @@ export default function PrimaryCareDashboard() {
       
       return matchesSearch && matchesZone && matchesType && matchesWalkIn && matchesAfterHours && matchesVirtual;
     });
-  }, [directorySearch, selectedZoneFilter, selectedTypeFilter, filterWalkIn, filterAfterHours, filterVirtual, primaryCareData]);
+  }, [directorySearch, selectedZoneFilter, selectedTypeFilter, filterWalkIn, filterAfterHours, filterVirtual, domainData]);
 
   const PAGE_SIZE = 15;
   const totalPages = useMemo(() => {
@@ -142,19 +146,19 @@ export default function PrimaryCareDashboard() {
 
   // Unique list of cities from providers for directory filter
   const uniqueCities = useMemo(() => {
-    const cities = primaryCareData.ACCEPTING_PROVIDERS.map(p => p.city);
+    const cities = domainData.ACCEPTING_PROVIDERS.map(p => p.city);
     return Array.from(new Set(cities));
-  }, [primaryCareData]);
+  }, [domainData]);
 
 
   // Executive summary counts
-  const totalAcceptingCount = primaryCareData.ACCEPTING_PROVIDERS.filter(p => p.acceptingNewPatients).length;
+  const totalAcceptingCount = domainData.ACCEPTING_PROVIDERS.filter(p => p.acceptingNewPatients).length;
 
   // Data-driven computed values (avoid hardcoded KPIs)
-  const albertaAttachment = primaryCareData.ATTACHMENT_RATES
+  const albertaAttachment = domainData.ATTACHMENT_RATES
     .filter(r => r.geography === 'Alberta' && r.demographic_group === 'All Residents')
     .sort((a, b) => b.reporting_year.localeCompare(a.reporting_year))[0];
-  const canadaAttachment = primaryCareData.ATTACHMENT_RATES
+  const canadaAttachment = domainData.ATTACHMENT_RATES
     .filter(r => r.geography === 'Canada' && r.demographic_group === 'All Residents')
     .sort((a, b) => b.reporting_year.localeCompare(a.reporting_year))[0];
   const attachmentRate = albertaAttachment?.metric_value ?? 0;
@@ -163,15 +167,15 @@ export default function PrimaryCareDashboard() {
 
   // Latest-year Alberta attachment rates by demographic group (for chart + insights)
   const latestAlbertaRates = useMemo(() => {
-    const latestYear = primaryCareData.ATTACHMENT_RATES
+    const latestYear = domainData.ATTACHMENT_RATES
       .filter(r => r.geography === 'Alberta')
       .map(r => r.reporting_year)
       .sort((a, b) => b.localeCompare(a))[0] ?? reportingYear;
     const year = latestYear || reportingYear;
-    return primaryCareData.ATTACHMENT_RATES
+    return domainData.ATTACHMENT_RATES
       .filter(r => r.geography === 'Alberta' && r.reporting_year === year)
       .sort((a, b) => b.metric_value - a.metric_value);
-  }, [primaryCareData, reportingYear]);
+  }, [domainData, reportingYear]);
   const getRate = (group: string) => latestAlbertaRates.find(r => r.demographic_group === group)?.metric_value ?? 0;
   const lowIncomeRate = getRate('Lowest Income Quintile');
   const youngAdultsRate = getRate('Adults (18-64)');
@@ -200,27 +204,27 @@ export default function PrimaryCareDashboard() {
     latestAlbertaRates.length,
   ]);
 
-  const albertaContinuity = primaryCareData.CONTINUITY_SATISFACTION.find(c => c.zone === 'Alberta');
+  const albertaContinuity = domainData.CONTINUITY_SATISFACTION.find(c => c.zone === 'Alberta');
   const sameDayAccess = albertaContinuity?.sameNextDayAccessPct ?? 0;
   const waitSatisfaction = albertaContinuity?.satisfiedWithWaitTimePct ?? 0;
   const clinicContinuity = albertaContinuity?.highClinicContinuityPct ?? 0;
   const careRatingExcellent = albertaContinuity?.overallCareRatingExcellentPct ?? 0;
 
-  const albertaEdReliance = primaryCareData.ED_RELIANCE_BY_CONTINUITY.find(e => e.group === 'Alberta Average');
+  const albertaEdReliance = domainData.ED_RELIANCE_BY_CONTINUITY.find(e => e.group === 'Alberta Average');
   const minorConditionEdRate = albertaEdReliance?.minorConditionEdVisitsPer1000 ?? 0;
 
-  const albertaPcn = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'Alberta');
+  const albertaPcn = domainData.PCN_CAPACITY.find(p => p.zone === 'Alberta');
   const provincialFundingPerPatient = albertaPcn?.fundingPerPatient ?? 0;
   const provincialProvidersPer100k = albertaPcn?.providersPer100k ?? 0;
-  const northZone = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'North Zone');
-  const edmontonZone = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'Edmonton Zone');
-  const calgaryZone = primaryCareData.PCN_CAPACITY.find(p => p.zone === 'Calgary Zone');
+  const northZone = domainData.PCN_CAPACITY.find(p => p.zone === 'North Zone');
+  const edmontonZone = domainData.PCN_CAPACITY.find(p => p.zone === 'Edmonton Zone');
+  const calgaryZone = domainData.PCN_CAPACITY.find(p => p.zone === 'Calgary Zone');
 
   // Trend panel stats for the attachment rate KPI
   const kpiStats = useMemo(() => {
     if (!selectedKpi) return null;
     // Build a historical series of Alberta "All Residents" attachment rates by year
-    const series = primaryCareData.ATTACHMENT_RATES
+    const series = domainData.ATTACHMENT_RATES
       .filter(r => r.geography === 'Alberta' && r.demographic_group === 'All Residents')
       .sort((a, b) => a.reporting_year.localeCompare(b.reporting_year))
       .map(r => r.metric_value);
@@ -242,7 +246,7 @@ export default function PrimaryCareDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedKpi, primaryCareData.ATTACHMENT_RATES]);
+  }, [selectedKpi, domainData.ATTACHMENT_RATES]);
 
   const selectedKpiDetails = useMemo(() => {
     if (!selectedKpi) return null;
@@ -265,13 +269,33 @@ export default function PrimaryCareDashboard() {
 
   // Historical trend series for the attachment rate AreaChart
   const attachmentTrendSeries = useMemo(() => {
-    return primaryCareData.ATTACHMENT_RATES
+    return domainData.ATTACHMENT_RATES
       .filter(r => r.geography === 'Alberta' && r.demographic_group === 'All Residents')
       .sort((a, b) => a.reporting_year.localeCompare(b.reporting_year))
       .map(r => ({ year: r.reporting_year, attachment_rate: r.metric_value }));
-  }, [primaryCareData.ATTACHMENT_RATES]);
+  }, [domainData.ATTACHMENT_RATES]);
   
-  if (isLoading) return <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">Loading...</div>;
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load primary care data: {error}</span>
+        <button
+          onClick={() => refresh()}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
+        Loading primary care data...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -279,7 +303,7 @@ export default function PrimaryCareDashboard() {
         icon={Stethoscope}
         title="Primary Care & Providers"
         description="Track family medicine attachment rates and locate accepting clinics."
-        metadata={primaryCareData._dataMetadata}
+        metadata={metadata}
         arrayKey="ATTACHMENT_RATES"
       />
 
@@ -391,7 +415,7 @@ export default function PrimaryCareDashboard() {
               <span className="text-2xl font-black text-white">{totalAcceptingCount.toLocaleString()} Providers</span>
               <span className="text-[10px] text-emerald-400 font-bold">Live Directory</span>
             </div>
-            <span className="text-[10px] text-slate-400 mt-1 block">Source: Alberta Find a Provider directory · {primaryCareData.ACCEPTING_PROVIDERS.length} providers province-wide (not attachment statistics)</span>
+            <span className="text-[10px] text-slate-400 mt-1 block">Source: Alberta Find a Provider directory · {domainData.ACCEPTING_PROVIDERS.length} providers province-wide (not attachment statistics)</span>
           </div>
         </div>
 
@@ -547,7 +571,7 @@ export default function PrimaryCareDashboard() {
                 <div>
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">Primary Care Attachment Rates by Demographic Group</h3>
                   <p className="text-xs text-slate-400">CIHI Shared Health Priorities — percent of Albertans reporting access to a regular provider ({reportingYear})</p>
-                  <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="ATTACHMENT_RATES" />
+                  <DataTimestamp compact metadata={metadata} arrayKey="ATTACHMENT_RATES" />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-sm bg-indigo-500"></span>
@@ -657,6 +681,26 @@ export default function PrimaryCareDashboard() {
                 </div>
               </div>
 
+              {latestHqcaContinuityByZone.length > 0 && (
+                <div className="p-3 bg-slate-900/40 border border-slate-900 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-slate-300 font-bold">Family Doctor Continuity by Zone</span>
+                    <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="CONTINUITY_SATISFACTION_HQCA" />
+                  </div>
+                  <p className="text-[10px] text-slate-500">
+                    HQCA FOCUS — percent of visits with the patient&apos;s usual family doctor ({latestHqcaContinuityByZone[0]?.fiscalYear}).
+                  </p>
+                  <div className="divide-y divide-slate-800/80 max-h-40 overflow-y-auto">
+                    {latestHqcaContinuityByZone.map((row) => (
+                      <div key={`${row.zone}-${row.fiscalYear}`} className="flex justify-between py-1.5 text-[11px]">
+                        <span className="text-slate-400">{row.zone}</span>
+                        <span className="font-mono font-bold text-indigo-300">{row.continuityPct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="pt-2 border-t border-slate-900">
                 <span className="text-[10px] text-indigo-400 uppercase font-black block tracking-wider">CPAR Integration Status</span>
                 <p className="text-[10px] text-slate-400 mt-1">
@@ -675,7 +719,7 @@ export default function PrimaryCareDashboard() {
             <div className="flex items-center gap-2 border-b border-slate-900 pb-3">
               <Sliders className="w-4 h-4 text-indigo-400" />
               <h3 className="text-xs font-black text-white uppercase tracking-wider">Search & Filter Clinics Accepting New Patients</h3>
-              <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="ACCEPTING_PROVIDERS" />
+              <DataTimestamp compact metadata={metadata} arrayKey="ACCEPTING_PROVIDERS" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -930,13 +974,13 @@ export default function PrimaryCareDashboard() {
               <div>
                 <h3 className="text-sm font-black text-white uppercase tracking-wider">Primary Care Network (PCN) Resource Distribution</h3>
                 <p className="text-xs text-slate-400">Comparison of active primary care providers and payments per patient across health zones.</p>
-              <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="PCN_CAPACITY" />
+              <DataTimestamp compact metadata={metadata} arrayKey="PCN_CAPACITY" />
               </div>
 
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={primaryCareData.PCN_CAPACITY.filter(c => c.zone !== 'Alberta')}
+                    data={domainData.PCN_CAPACITY.filter(c => c.zone !== 'Alberta')}
                     margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -968,7 +1012,7 @@ export default function PrimaryCareDashboard() {
               </div>
 
               <div className="divide-y divide-slate-900 overflow-hidden">
-                {primaryCareData.PCN_CAPACITY.map((zone, idx) => (
+                {domainData.PCN_CAPACITY.map((zone, idx) => (
                   <div key={idx} className={`py-2.5 flex justify-between items-center text-xs ${zone.zone === 'Alberta' ? 'bg-indigo-950/20 px-2 rounded-lg border border-indigo-900/30' : ''}`}>
                     <div>
                       <strong className={`font-bold block ${zone.zone === 'Alberta' ? 'text-indigo-300' : 'text-white'}`}>
@@ -992,7 +1036,7 @@ export default function PrimaryCareDashboard() {
               </div>
 
               <div className="pt-2 border-t border-slate-900">
-                <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="PCN_CAPACITY" />
+                <DataTimestamp compact metadata={metadata} arrayKey="PCN_CAPACITY" />
               </div>
             </div>
           </div>
@@ -1009,13 +1053,13 @@ export default function PrimaryCareDashboard() {
                 <p className="text-xs text-slate-400">
                   Annual minor-condition (CTAS 4 & 5) emergency room visits per 1,000 patients, grouped by care continuity with their primary care provider.
                 </p>
-              <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="ED_RELIANCE_BY_CONTINUITY" />
+              <DataTimestamp compact metadata={metadata} arrayKey="ED_RELIANCE_BY_CONTINUITY" />
               </div>
 
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={primaryCareData.ED_RELIANCE_BY_CONTINUITY}
+                    data={domainData.ED_RELIANCE_BY_CONTINUITY}
                     margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -1028,7 +1072,7 @@ export default function PrimaryCareDashboard() {
                       formatter={(v: number) => [`${v} visits`, 'Visits per 1,000']}
                     />
                     <Bar dataKey="minorConditionEdVisitsPer1000" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={45} isAnimationActive={false}>
-                      {primaryCareData.ED_RELIANCE_BY_CONTINUITY.map((entry, index) => {
+                      {domainData.ED_RELIANCE_BY_CONTINUITY.map((entry, index) => {
                         let barColor = '#3b82f6';
                         if (entry.group.includes('High')) barColor = '#10b981';
                         if (entry.group.includes('Low')) barColor = '#f59e0b';

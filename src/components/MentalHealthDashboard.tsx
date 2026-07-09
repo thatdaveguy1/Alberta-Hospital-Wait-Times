@@ -46,6 +46,7 @@ import type {
   HospitalMHSUBurden,
   SupportHelpline,
 } from '../mentalHealthData';
+import * as mentalHealthData from '../mentalHealthData';
 import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
@@ -70,7 +71,7 @@ export default function MentalHealthDashboard() {
   const [siteSearch, setSiteSearch] = useState<string>('');
   const [waitAgeGroup, setWaitAgeGroup] = useState<string>('All');
   // Live data fetched from /api/data/mental-health
-  const { data, metadata, isLoading, error, refresh } = useDomainData<MentalHealthData>('mental-health');
+  const { data, metadata, isLoading, error, refresh } = useDomainData<MentalHealthData>('mental-health', mentalHealthData);
   const SUBSTANCE_HARM_TRENDS = data?.SUBSTANCE_HARM_TRENDS ?? [];
   const ADDICTION_BED_CAPACITIES = data?.ADDICTION_BED_CAPACITIES ?? [];
   const COMMUNITY_MH_WAITS = data?.COMMUNITY_MH_WAITS ?? [];
@@ -95,8 +96,14 @@ export default function MentalHealthDashboard() {
   }, [SUBSTANCE_HARM_TRENDS]);
 
   const substanceHarmStats = useMemo(() => {
+    if (filteredHarmData.length === 0) {
+      return { latest: null, peak: null };
+    }
     const latest = filteredHarmData[filteredHarmData.length - 1];
-    const peak = filteredHarmData.reduce((max, r) => r.apparentDeaths > max.apparentDeaths ? r : max, filteredHarmData[0]);
+    const peak = filteredHarmData.reduce(
+      (max, r) => (r.apparentDeaths > max.apparentDeaths ? r : max),
+      filteredHarmData[0]
+    );
     return { latest, peak };
   }, [filteredHarmData]);
 

@@ -34,7 +34,21 @@ interface LabCardProps {
 }
 
 function isLabWaitUnavailable(lab: LabCardData): boolean {
-  return typeof lab.waitTimeMin !== 'number';
+  if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') return true;
+  if (typeof lab.waitTimeMin === 'number') {
+    return lab.waitTimeMin === 0 && !lab.walkInAvailable;
+  }
+  return true;
+}
+
+function unavailableWaitLabel(lab: LabCardData): string {
+  if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') {
+    return lab.waitTimeMin;
+  }
+  if (typeof lab.waitTimeMin === 'number' && lab.waitTimeMin === 0 && !lab.walkInAvailable) {
+    return 'Closed';
+  }
+  return 'Unavailable';
 }
 
 function waitColorClass(lab: LabCardData): string {
@@ -181,7 +195,7 @@ export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCard
           ) : (
             <>
               <p className={cn('text-lg sm:text-xl font-black tracking-tight leading-none', isUnavailable ? 'text-slate-500' : waitColorClass(lab))}>
-                {isUnavailable ? 'Unavailable' : formatMinutesToHm(waitTime)}
+                {isUnavailable ? unavailableWaitLabel(lab) : formatMinutesToHm(waitTime)}
               </p>
               {!isUnavailable && <p className="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mt-1">Wait Time</p>}
             </>

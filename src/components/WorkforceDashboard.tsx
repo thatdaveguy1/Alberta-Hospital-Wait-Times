@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Users, 
@@ -22,7 +22,8 @@ import {
   BarChart2,
   Building,
   GraduationCap,
-  X
+  X,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -49,8 +50,20 @@ import {
   type SpecialistRecruitmentNeed,
   type AlliedHealthSupply
 } from '../workforceData';
+import * as workforceDataModule from '../workforceData';
 import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
+import { useDomainData } from '../hooks/useDomainData';
+
+type WorkforceData = {
+  PHYSICIAN_SPECIALTY_ZONE: PhysicianSpecialtyZone[];
+  NURSING_SUPPLY_TRENDS: NursingSupplyGroup[];
+  WORKFORCE_AGE_PROFILE: WorkforceAgeProfile[];
+  JOB_VACANCY_TRENDS: JobVacancyTrend[];
+  SPECIALIST_RECRUITMENT_NEEDS: SpecialistRecruitmentNeed[];
+  ALLIED_HEALTH_SUPPLY: AlliedHealthSupply[];
+  _dataMetadata?: DataMetadataMap;
+};
 
 export default function WorkforceDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'physicians' | 'nursing' | 'allied' | 'retirement' | 'vacancies'>('physicians');
@@ -61,36 +74,18 @@ export default function WorkforceDashboard() {
   const [selectedZone, setSelectedZone] = useState<string>('Alberta');
   const [searchProfession, setSearchProfession] = useState<string>('');
   const [selectedRiskLevel, setSelectedRiskLevel] = useState<string>('All');
-  const [domainData, setDomainData] = useState<{
-    PHYSICIAN_SPECIALTY_ZONE: PhysicianSpecialtyZone[];
-    NURSING_SUPPLY_TRENDS: NursingSupplyGroup[];
-    WORKFORCE_AGE_PROFILE: WorkforceAgeProfile[];
-    JOB_VACANCY_TRENDS: JobVacancyTrend[];
-    SPECIALIST_RECRUITMENT_NEEDS: SpecialistRecruitmentNeed[];
-    ALLIED_HEALTH_SUPPLY: AlliedHealthSupply[];
-    _handAuthoredMetadata?: Record<string, { source: string; vintage?: string; lastVerified: string; verification: string }>;
-    _dataMetadata?: DataMetadataMap;
-  }>({
-    PHYSICIAN_SPECIALTY_ZONE: [],
-    NURSING_SUPPLY_TRENDS: [],
-    WORKFORCE_AGE_PROFILE: [],
-    JOB_VACANCY_TRENDS: [],
-    SPECIALIST_RECRUITMENT_NEEDS: [],
-    ALLIED_HEALTH_SUPPLY: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/data/workforce')
-      .then(res => res.json())
-      .then(data => { setDomainData(data); setIsLoading(false); })
-      .catch(err => { console.error('Failed to load workforce data:', err); setIsLoading(false); });
-  }, []);
+  const { data, metadata, isLoading, error, refresh } = useDomainData<WorkforceData>('workforce', workforceDataModule);
+  const PHYSICIAN_SPECIALTY_ZONE = data?.PHYSICIAN_SPECIALTY_ZONE ?? [];
+  const NURSING_SUPPLY_TRENDS = data?.NURSING_SUPPLY_TRENDS ?? [];
+  const WORKFORCE_AGE_PROFILE = data?.WORKFORCE_AGE_PROFILE ?? [];
+  const JOB_VACANCY_TRENDS = data?.JOB_VACANCY_TRENDS ?? [];
+  const SPECIALIST_RECRUITMENT_NEEDS = data?.SPECIALIST_RECRUITMENT_NEEDS ?? [];
+  const ALLIED_HEALTH_SUPPLY = data?.ALLIED_HEALTH_SUPPLY ?? [];
 
   // Physician calculations
   const physicianZoneData = useMemo(() => {
-    return domainData.PHYSICIAN_SPECIALTY_ZONE.find(z => z.zone === selectedZone) || domainData.PHYSICIAN_SPECIALTY_ZONE[5];
-  }, [selectedZone, domainData]);
+    return PHYSICIAN_SPECIALTY_ZONE.find(z => z.zone === selectedZone) || PHYSICIAN_SPECIALTY_ZONE[5];
+  }, [selectedZone, PHYSICIAN_SPECIALTY_ZONE]);
 
   const zonePieData = useMemo(() => {
     if (!physicianZoneData) return [];
@@ -106,24 +101,28 @@ export default function WorkforceDashboard() {
 
   // Nursing filtered trends
   const selectedNursingProfession = useMemo(() => {
-    return domainData.NURSING_SUPPLY_TRENDS.filter(n => n.year === '2025');
-  }, [domainData]);
+    return NURSING_SUPPLY_TRENDS.filter(n => n.year === '2025');
+  }, [NURSING_SUPPLY_TRENDS]);
 
   // Retirement risk profiles
   const filteredRetirementProfiles = useMemo(() => {
-    return domainData.WORKFORCE_AGE_PROFILE.filter(profile => {
+    return WORKFORCE_AGE_PROFILE.filter(profile => {
       const matchesSearch = profile.professionGroup.toLowerCase().includes(searchProfession.toLowerCase());
       const matchesRisk = selectedRiskLevel === 'All' || profile.retirementRiskLevel === selectedRiskLevel;
       return matchesSearch && matchesRisk;
     });
-  }, [searchProfession, selectedRiskLevel, domainData]);
+  }, [searchProfession, selectedRiskLevel, WORKFORCE_AGE_PROFILE]);
 
   // Aggregate stats
   const aggregateStats = useMemo(() => {
-    const totalPhysicians = domainData.PHYSICIAN_SPECIALTY_ZONE.find(z => z.zone === 'Alberta')?.totalActive ?? 0;
-    const totalRNs = domainData.NURSING_SUPPLY_TRENDS.find(n => n.profession === 'Registered Nurse (RN)' && n.year === '2025')?.activePermits || 45171;
-    const activeVacancies = domainData.JOB_VACANCY_TRENDS[domainData.JOB_VACANCY_TRENDS.length - 1]?.vacanciesCount ?? 0;
-    const avgNursingVacancy = 9.0; // blended vacancy indicator
+    const totalPhysicians = PHYSICIAN_SPECIALTY_ZONE.find(z => z.zone === 'Alberta')?.totalActive ?? 0;
+    const totalRNs = NURSING_SUPPLY_TRENDS.find(n => n.profession === 'Registered Nurse (RN)' && n.year === '2025')?.activePermits ?? 0;
+    const activeVacancies = JOB_VACANCY_TRENDS[JOB_VACANCY_TRENDS.length - 1]?.vacanciesCount ?? 0;
+    const nursing2025 = NURSING_SUPPLY_TRENDS.filter(n => n.year === '2025');
+    const avgNursingVacancy =
+      nursing2025.length > 0
+        ? Math.round((nursing2025.reduce((s, n) => s + n.vacancyRatePct, 0) / nursing2025.length) * 10) / 10
+        : 0;
 
     return {
       totalPhysicians,
@@ -131,57 +130,57 @@ export default function WorkforceDashboard() {
       activeVacancies,
       avgNursingVacancy
     };
-  }, [domainData]);
+  }, [PHYSICIAN_SPECIALTY_ZONE, NURSING_SUPPLY_TRENDS, JOB_VACANCY_TRENDS]);
   // Max allied health rate for bar normalization (replaces hardcoded 140)
   const alliedMaxRate = useMemo(() => {
-    const allRates = domainData.ALLIED_HEALTH_SUPPLY.flatMap(a => [a.nationalComparisonRatePer100k.alberta, a.nationalComparisonRatePer100k.canadaAvg]);
+    const allRates = ALLIED_HEALTH_SUPPLY.flatMap(a => [a.nationalComparisonRatePer100k.alberta, a.nationalComparisonRatePer100k.canadaAvg]);
     const max = Math.max(...allRates, 0);
     return max > 0 ? max : 140;
-  }, [domainData]);
+  }, [ALLIED_HEALTH_SUPPLY]);
   // Alberta provincial physician density benchmark (data-derived)
   const albertaRatePer100k = useMemo(
-    () => domainData.PHYSICIAN_SPECIALTY_ZONE.find(z => z.zone === 'Alberta')?.ratePer100k ?? 0,
-    [domainData]
+    () => PHYSICIAN_SPECIALTY_ZONE.find(z => z.zone === 'Alberta')?.ratePer100k ?? 0,
+    [PHYSICIAN_SPECIALTY_ZONE]
   );
 
   // Physician retirement-cliff ratio: share of physicians aged 55+ averaged across physician groups
   const physicianRetirementRatio = useMemo(() => {
-    const physicianProfiles = domainData.WORKFORCE_AGE_PROFILE.filter(
+    const physicianProfiles = WORKFORCE_AGE_PROFILE.filter(
       p => /physician|specialist/i.test(p.professionGroup)
     );
     if (physicianProfiles.length === 0) return 0;
     return physicianProfiles.reduce((sum, p) => sum + p.age55to64Pct + p.over65Pct, 0) / physicianProfiles.length;
-  }, [domainData]);
+  }, [WORKFORCE_AGE_PROFILE]);
 
   // Nursing supply chart pivoted from NURSING_SUPPLY_TRENDS by year into RN/LPN/HCA series
   const nursingChartData = useMemo(() => {
-    const allYears = domainData.NURSING_SUPPLY_TRENDS.map(n => n.year);
+    const allYears = NURSING_SUPPLY_TRENDS.map(n => n.year);
     const years = allYears.filter((y, i) => allYears.indexOf(y) === i).sort();
     const findPermits = (year: string, profession: string) =>
-      domainData.NURSING_SUPPLY_TRENDS.find(n => n.year === year && n.profession === profession)?.activePermits ?? 0;
+      NURSING_SUPPLY_TRENDS.find(n => n.year === year && n.profession === profession)?.activePermits ?? 0;
     return years.map(year => ({
       year,
       RN: findPermits(year, 'Registered Nurse (RN)'),
       LPN: findPermits(year, 'Licensed Practical Nurse (LPN)'),
       HCA: findPermits(year, 'Health Care Aide (HCA)'),
     }));
-  }, [domainData]);
+  }, [NURSING_SUPPLY_TRENDS]);
 
   // RN registered growth rate (2025) for overview card
   const rnGrowthPct = useMemo(
-    () => domainData.NURSING_SUPPLY_TRENDS.find(n => n.profession === 'Registered Nurse (RN)' && n.year === '2025')?.growthRatePct ?? 0,
-    [domainData]
+    () => NURSING_SUPPLY_TRENDS.find(n => n.profession === 'Registered Nurse (RN)' && n.year === '2025')?.growthRatePct ?? 0,
+    [NURSING_SUPPLY_TRENDS]
   );
 
   // Vacancy count change vs 2024 peak for overview card
   const vacancyChangePct = useMemo(() => {
-    const trends = domainData.JOB_VACANCY_TRENDS;
+    const trends = JOB_VACANCY_TRENDS;
     if (trends.length === 0) return 0;
     const latest = trends[trends.length - 1].vacanciesCount;
     const peak2024 = Math.max(0, ...trends.filter(t => t.quarter.startsWith('2024')).map(t => t.vacanciesCount));
     if (peak2024 === 0) return 0;
     return ((latest - peak2024) / peak2024) * 100;
-  }, [domainData]);
+  }, [JOB_VACANCY_TRENDS]);
 
   // Trend panel metadata for the selected overview card
   const selectedTrendDetails = useMemo(() => {
@@ -212,7 +211,7 @@ export default function WorkforceDashboard() {
 
   // Job vacancy chart series pivoted from JOB_VACANCY_TRENDS by quarter
   const vacancyChartData = useMemo(() => {
-    return domainData.JOB_VACANCY_TRENDS
+    return JOB_VACANCY_TRENDS
       .filter(t => t.sector === 'Health Care & Social Assistance')
       .map(t => ({
         quarter: t.quarter,
@@ -220,13 +219,13 @@ export default function WorkforceDashboard() {
         vacancyRatePct: t.vacancyRatePct,
         avgOfferedHourlyWage: t.avgOfferedHourlyWage,
       }));
-  }, [domainData]);
+  }, [JOB_VACANCY_TRENDS]);
 
   // Trend panel summary statistics for the selected series
   const selectedTrendStats = useMemo(() => {
     if (!selectedTrend) return null;
     if (selectedTrend === 'nursingSupply') {
-      const rnSeries = domainData.NURSING_SUPPLY_TRENDS.filter(n => n.profession === 'Registered Nurse (RN)').sort((a, b) => a.year.localeCompare(b.year));
+      const rnSeries = NURSING_SUPPLY_TRENDS.filter(n => n.profession === 'Registered Nurse (RN)').sort((a, b) => a.year.localeCompare(b.year));
       if (rnSeries.length === 0) return null;
       const baseline = rnSeries[0].activePermits;
       const latest = rnSeries[rnSeries.length - 1].activePermits;
@@ -260,9 +259,24 @@ export default function WorkforceDashboard() {
       isIncrease: rawDelta > 0,
       unit: ''
     };
-  }, [selectedTrend, domainData, vacancyChartData]);
+  }, [selectedTrend, vacancyChartData]);
 
   if (isLoading) return <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">Loading...</div>;
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-amber-400" />
+        <span>Failed to load workforce data: {error}</span>
+        <button
+          onClick={refresh}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -271,7 +285,7 @@ export default function WorkforceDashboard() {
         icon={Users}
         title="Health Workforce & Staffing"
         description="Monitor physician register counts, nurse supply trends, and job vacancies."
-        metadata={domainData._dataMetadata}
+        metadata={metadata}
         arrayKey="PHYSICIAN_SPECIALTY_ZONE"
       />
 
@@ -570,13 +584,13 @@ export default function WorkforceDashboard() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Geographic Profile Selector</h3>
                   <p className="text-[10px] text-slate-500">Analyze specialties inside local health authorities</p>
-                <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="PHYSICIAN_SPECIALTY_ZONE" />
+                <DataTimestamp compact metadata={metadata} arrayKey="PHYSICIAN_SPECIALTY_ZONE" />
                 </div>
                 <Building className="w-4 h-4 text-blue-500" />
               </div>
 
               <div className="grid grid-cols-1 gap-1">
-                {domainData.PHYSICIAN_SPECIALTY_ZONE.map(zone => (
+                {PHYSICIAN_SPECIALTY_ZONE.map(zone => (
                   <button
                     key={zone.zone}
                     onClick={() => setSelectedZone(zone.zone)}
@@ -694,12 +708,12 @@ export default function WorkforceDashboard() {
                 <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
                   Hand-authored
                 </span>
-            <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="SPECIALIST_RECRUITMENT_NEEDS" />
+            <DataTimestamp compact metadata={metadata} arrayKey="SPECIALIST_RECRUITMENT_NEEDS" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {domainData.SPECIALIST_RECRUITMENT_NEEDS.map(item => {
+              {SPECIALIST_RECRUITMENT_NEEDS.map(item => {
                 const deficit = item.forecasted10YrNeed - item.currentActive;
                 const ratio = Math.round((item.currentActive / item.forecasted10YrNeed) * 100);
                 
@@ -782,7 +796,7 @@ export default function WorkforceDashboard() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Permit Growth & Demand Tracker</h3>
                   <p className="text-[10px] text-slate-500">Active licensed practice permit expansion (2023–2025)</p>
-                <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="NURSING_SUPPLY_TRENDS" />
+                <DataTimestamp compact metadata={metadata} arrayKey="NURSING_SUPPLY_TRENDS" />
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[9px] bg-blue-600/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
@@ -859,7 +873,7 @@ export default function WorkforceDashboard() {
               <div>
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Allied Health Professional Benchmarking</h3>
                 <p className="text-[10px] text-slate-500">Active staffing densities per 100,000 population: Alberta vs National Canadian Average</p>
-                <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="ALLIED_HEALTH_SUPPLY" />
+                <DataTimestamp compact metadata={metadata} arrayKey="ALLIED_HEALTH_SUPPLY" />
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
@@ -873,7 +887,7 @@ export default function WorkforceDashboard() {
 
             {/* Visual Grid comparing Alberta and Canada rates */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {domainData.ALLIED_HEALTH_SUPPLY.map(allied => {
+              {ALLIED_HEALTH_SUPPLY.map(allied => {
                 const diff = allied.nationalComparisonRatePer100k.alberta - allied.nationalComparisonRatePer100k.canadaAvg;
                 const matchesAvg = diff >= 0;
                 
@@ -937,7 +951,7 @@ export default function WorkforceDashboard() {
               <div>
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Retirement Cliff & Demographics Analyzer</h3>
                 <p className="text-[10px] text-slate-500">Evaluating potential staffing supply flight via aging practitioner profiles</p>
-                <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="WORKFORCE_AGE_PROFILE" />
+                <DataTimestamp compact metadata={metadata} arrayKey="WORKFORCE_AGE_PROFILE" />
                 <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-bold uppercase w-fit mt-1">
                   Hand-authored
                 </span>
@@ -1064,7 +1078,7 @@ export default function WorkforceDashboard() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">StatsCan Vacancy and Offered Hourly Wage Trends</h3>
                   <p className="text-[10px] text-slate-500">Unadjusted quarterly monitoring for Health Care & Social Assistance (Alberta)</p>
-                <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="JOB_VACANCY_TRENDS" />
+                <DataTimestamp compact metadata={metadata} arrayKey="JOB_VACANCY_TRENDS" />
                 </div>
                 <span className="text-[9px] bg-blue-600/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
                   Source: StatCan Table 14-10-0371-01
@@ -1075,7 +1089,7 @@ export default function WorkforceDashboard() {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={domainData.JOB_VACANCY_TRENDS}
+                    data={JOB_VACANCY_TRENDS}
                     margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />

@@ -9,7 +9,10 @@ export interface DomainData<T> {
   refresh: () => void;
 }
 
-export function useDomainData<T = unknown>(domain: string): DomainData<T> {
+export function useDomainData<T = unknown>(
+  domain: string,
+  fallback?: Record<string, unknown>
+): DomainData<T> {
   const [data, setData] = useState<T | null>(null);
   const [metadata, setMetadata] = useState<DataMetadataMap | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,9 +33,35 @@ export function useDomainData<T = unknown>(domain: string): DomainData<T> {
       })
       .then((payload: { _dataMetadata?: DataMetadataMap } & T) => {
         if (cancelled) return;
-        const { _dataMetadata, ...rest } = payload;
-        setData(rest as T);
-        setMetadata(_dataMetadata ?? null);
+        const { _dataMetadata: fetchedMetadata, ...rest } = payload;
+        const merged = { ...rest } as Record<string, unknown>;
+
+        if (fallback) {
+          for (const key of Object.keys(fallback)) {
+            if (key === '_dataMetadata') continue;
+            const existing = merged[key];
+            if (existing === undefined || (Array.isArray(existing) && existing.length === 0)) {
+              merged[key] = fallback[key];
+            }
+          }
+
+          const fallbackMeta = fallback._dataMetadata as DataMetadataMap | undefined;
+          if (fallbackMeta) {
+            const mergedMeta: DataMetadataMap = { ...(fetchedMetadata ?? {}) };
+            for (const key of Object.keys(fallbackMeta)) {
+              if (!mergedMeta[key]) {
+                mergedMeta[key] = fallbackMeta[key];
+              }
+            }
+            setMetadata(mergedMeta);
+          } else {
+            setMetadata(fetchedMetadata ?? null);
+          }
+        } else {
+          setMetadata(fetchedMetadata ?? null);
+        }
+
+        setData(merged as T);
         setIsLoading(false);
       })
       .catch((err: unknown) => {
@@ -42,7 +71,7 @@ export function useDomainData<T = unknown>(domain: string): DomainData<T> {
       });
 
     return () => { cancelled = true; };
-  }, [domain, refreshNonce]);
+  }, [domain, fallback, refreshNonce]);
 
   return { data, metadata, isLoading, error, refresh };
 }

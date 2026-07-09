@@ -52,8 +52,19 @@ import {
   FacilityImagingWait,
   PriorityTarget,
 } from '../diagnosticData';
+import * as diagnosticDataModule from '../diagnosticData';
 import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
+import { useDomainData } from '../hooks/useDomainData';
+
+type DiagnosticData = {
+  LAB_LOCATION_WAITS: LabLocationWait[];
+  TEST_TURNAROUND_METRICS: TestTurnaround[];
+  IMAGING_WAIT_TRENDS: ImagingWaitTrend[];
+  FACILITY_IMAGING_WAITS: FacilityImagingWait[];
+  PRIORITY_TARGET_COMPLIANCE: PriorityTarget[];
+  _dataMetadata?: DataMetadataMap;
+};
 import { calculateDistance, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
 import { cn, formatMinutesToHm } from '../lib/utils';
 import { LabCard, type LabCardData } from './LabCard';
@@ -75,18 +86,12 @@ export default function DiagnosticDashboard() {
   const [loadingLabTrends, setLoadingLabTrends] = useState(false);
   const [labTrendRange, setLabTrendRange] = useState<'24h' | '7d' | '30d'>('24h');
 
-  // Diagnostic data loaded at runtime from /api/data/diagnostic so that
- // 30-min refreshed data-diagnostic.json reaches the browser without a rebuild.
-  const [diagnosticData, setDiagnosticData] = useState<{
-    LAB_LOCATION_WAITS: LabLocationWait[];
-    TEST_TURNAROUND_METRICS: TestTurnaround[];
-    IMAGING_WAIT_TRENDS: ImagingWaitTrend[];
-    FACILITY_IMAGING_WAITS: FacilityImagingWait[];
-    PRIORITY_TARGET_COMPLIANCE: PriorityTarget[];
-    _dataMetadata: DataMetadataMap;
-  } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, metadata, isLoading, error, refresh } = useDomainData<DiagnosticData>('diagnostic', diagnosticDataModule);
+  const LAB_LOCATION_WAITS = data?.LAB_LOCATION_WAITS ?? [];
+  const TEST_TURNAROUND_METRICS = data?.TEST_TURNAROUND_METRICS ?? [];
+  const IMAGING_WAIT_TRENDS = data?.IMAGING_WAIT_TRENDS ?? [];
+  const FACILITY_IMAGING_WAITS = data?.FACILITY_IMAGING_WAITS ?? [];
+  const PRIORITY_TARGET_COMPLIANCE = data?.PRIORITY_TARGET_COMPLIANCE ?? [];
   const [refreshing, setRefreshing] = useState(false);
 
   // Location + drive-time sorting (mirrors ER tab behaviour)
@@ -94,17 +99,6 @@ export default function DiagnosticDashboard() {
   const [loadingGeo, setLoadingGeo] = useState(false);
   const [osrmData, setOsrmData] = useState<Record<string, { durationMins: number; distanceKm: number }>>({});
   const [sortBy, setSortBy] = useState<'net-wait' | 'proximity' | 'raw-wait'>('net-wait');
-
-  const loadDiagnosticData = () => {
-    fetch('/api/data/diagnostic')
-      .then(res => { if (!res.ok) throw new Error('Failed to load diagnostic data'); return res.json(); })
-      .then(data => { setDiagnosticData(data); setIsLoading(false); })
-      .catch(err => { setError(err.message); setIsLoading(false); });
-  };
-
-  useEffect(() => {
-    loadDiagnosticData();
-  }, []);
 
   // Load location saved from the ER tab (or auto-request GPS if none exists)
   useEffect(() => {
@@ -137,13 +131,13 @@ export default function DiagnosticDashboard() {
 
   // Fetch OSRM drive times for labs within 100 km of the user
   useEffect(() => {
-    if (!userLocation || !diagnosticData) {
+    if (!userLocation || LAB_LOCATION_WAITS.length === 0) {
       setOsrmData({});
       return;
     }
 
     const fetchOSRMTimes = async () => {
-      const labs = diagnosticData.LAB_LOCATION_WAITS;
+      const labs = LAB_LOCATION_WAITS;
       const nearby = labs.filter((lab) => {
         const d = calculateDistance(userLocation.lat, userLocation.lng, lab.latitude, lab.longitude);
         return d <= 100;
@@ -180,29 +174,45 @@ export default function DiagnosticDashboard() {
     };
 
     fetchOSRMTimes();
-  }, [userLocation, diagnosticData]);
+  }, [userLocation, LAB_LOCATION_WAITS]);
 
   const refreshData = () => {
     setRefreshing(true);
-    fetch('/api/data/diagnostic')
-      .then(res => res.json())
-      .then(data => { setDiagnosticData(data); setRefreshing(false); })
-      .catch(() => setRefreshing(false));
+    refresh();
+    setRefreshing(false);
   };
-  const isLabWaitUnavailable = (lab: LabLocationWait): boolean =>
-    typeof lab.waitTimeMin !== 'number';
+  const isLabWaitUnavailable = (lab: LabLocationWait): boolean => {
+    if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') return true;
+    if (typeof lab.waitTimeMin === 'number') {
+      return lab.waitTimeMin === 0 && !lab.walkInAvailable;
+    }
+    return true;
+  };
+
+  const unavailableWaitLabel = (lab: LabLocationWait): string => {
+    if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') {
+      return lab.waitTimeMin;
+    }
+    if (typeof lab.waitTimeMin === 'number' && lab.waitTimeMin === 0 && !lab.walkInAvailable) {
+      return 'Closed';
+    }
+    return 'Unavailable';
+  };
 
   const getLabStatus = (lab: LabLocationWait): { label: string; detail: string } => {
-    if (typeof lab.waitTimeMin === 'number') {
-      if (lab.waitTimeMin === 0 && !lab.walkInAvailable) {
-        return { label: 'Closed', detail: 'Lab is closed or has no open walk-in hours right now' };
-      }
-      return { label: formatMinutesToHm(lab.waitTimeMin), detail: 'Estimated live wait time' };
+    if (isLabWaitUnavailable(lab)) {
+      return {
+        label: unavailableWaitLabel(lab),
+        detail: lab.waitTimeMin === 'Appointments Only'
+          ? 'Appointment-only site; no walk-in wait estimate'
+          : 'Lab is closed or has no open walk-in hours right now',
+      };
     }
-    if (lab.waitTimeMin === 'Closed') {
-      return { label: 'Closed', detail: 'Lab is closed or has no open walk-in hours right now' };
-    }
-    return { label: lab.waitTimeMin ?? 'Unavailable', detail: 'No live wait-time estimate available' };
+    return { label: formatMinutesToHm(lab.waitTimeMin as number), detail: 'Estimated live wait time' };
+  };
+  const formatLabAvgWait = (minutes: number, validCount: number): string => {
+    if (validCount === 0) return '—';
+    return formatMinutesToHm(minutes);
   };
 
   // Fetch provincial lab wait trend (averaged across all labs per timestamp)
@@ -230,15 +240,13 @@ export default function DiagnosticDashboard() {
   }, [activeSubTab, labTrendRange]);
 
   const labStats = useMemo(() => {
-    const LAB_LOCATION_WAITS = diagnosticData?.LAB_LOCATION_WAITS ?? [];
-    if (!diagnosticData) {
       return {
         avgWait: 0, edmontonAvg: 0, calgaryAvg: 0, restAvg: 0,
+        validLabCount: 0, edmontonLabCount: 0, calgaryLabCount: 0, restLabCount: 0,
         maxWaitLab: null as LabLocationWait | null,
         totalActive: 0, walkInCount: 0, apptOnlyCount: 0
       };
-    }
-    const validLabs = LAB_LOCATION_WAITS.filter(l => typeof l.waitTimeMin === 'number');
+    const validLabs = LAB_LOCATION_WAITS.filter(l => !isLabWaitUnavailable(l));
     const avgWait = validLabs.length > 0 ? Math.round(validLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / validLabs.length) : 0;
 
     const edmontonLabs = validLabs.filter(l => l.region === 'Edmonton Zone');
@@ -260,21 +268,23 @@ export default function DiagnosticDashboard() {
     const totalActive = LAB_LOCATION_WAITS.length;
     const walkInCount = LAB_LOCATION_WAITS.filter(l => l.walkInAvailable).length;
     const apptOnlyCount = LAB_LOCATION_WAITS.filter(l => l.appointmentRequired && !l.walkInAvailable).length;
-
     return {
       avgWait,
       edmontonAvg,
       calgaryAvg,
       restAvg,
+      validLabCount: validLabs.length,
+      edmontonLabCount: edmontonLabs.length,
+      calgaryLabCount: calgaryLabs.length,
+      restLabCount: restLabs.length,
       maxWaitLab,
       totalActive,
       walkInCount,
       apptOnlyCount
     };
-  }, [diagnosticData]);
+  }, [LAB_LOCATION_WAITS, data]);
   // Enrich labs with distance + drive time, then filter and sort
   const processedLabs = useMemo(() => {
-    const LAB_LOCATION_WAITS = diagnosticData?.LAB_LOCATION_WAITS ?? [];
     return LAB_LOCATION_WAITS
       .map((lab) => {
         let distance: number | undefined = undefined;
@@ -328,7 +338,7 @@ export default function DiagnosticDashboard() {
 
         return (a.waitTimeMin as number) - (b.waitTimeMin as number);
       });
-  }, [diagnosticData, selectedRegion, labSearch, userLocation, osrmData, sortBy]);
+  }, [LAB_LOCATION_WAITS, selectedRegion, labSearch, userLocation, osrmData, sortBy]);
 
   // Group processed labs by zone, sorting zones by proximity (or fastest net wait)
   const groupedLabs = useMemo(() => {
@@ -377,11 +387,10 @@ export default function DiagnosticDashboard() {
 
   // Nearby alternative recommendation (high wait vs low wait same region)
   const labRecommendations = useMemo(() => {
-    if (!diagnosticData || processedLabs.length === 0) return [];
-    const LAB_LOCATION_WAITS = diagnosticData.LAB_LOCATION_WAITS;
+    if (processedLabs.length === 0) return [];
 
     // Find labs in same region with high waits (> 35 mins)
-    const highWaitLabs = processedLabs.filter((l) => typeof l.waitTimeMin === 'number' && l.waitTimeMin > 35);
+    const highWaitLabs = processedLabs.filter((l) => !isLabWaitUnavailable(l) && typeof l.waitTimeMin === 'number' && l.waitTimeMin > 35);
 
     return highWaitLabs.map((highLab) => {
       // Find low wait alternatives in same region
@@ -406,29 +415,27 @@ export default function DiagnosticDashboard() {
       }
       return null;
     }).filter(item => item !== null) as { highLab: LabLocationWait; betterLab: LabLocationWait; savingMins: number }[];
-  }, [processedLabs, diagnosticData]);
+  }, [processedLabs, LAB_LOCATION_WAITS]);
 
   // Facility filtering
   const filteredFacilities = useMemo(() => {
-    const FACILITY_IMAGING_WAITS = diagnosticData?.FACILITY_IMAGING_WAITS ?? [];
     return FACILITY_IMAGING_WAITS.filter(fac => {
       const matchesSearch = fac.facilityName.toLowerCase().includes(facilitySearch.toLowerCase()) ||
                             fac.city.toLowerCase().includes(facilitySearch.toLowerCase()) ||
                             fac.zone.toLowerCase().includes(facilitySearch.toLowerCase());
       return matchesSearch;
     });
-  }, [facilitySearch, diagnosticData]);
+  }, [facilitySearch, FACILITY_IMAGING_WAITS]);
 
   // Historical data for selected modality
   const filteredTrendData = useMemo(() => {
-    const IMAGING_WAIT_TRENDS = diagnosticData?.IMAGING_WAIT_TRENDS ?? [];
     return IMAGING_WAIT_TRENDS.filter(trend => trend.modality === selectedModality);
-  }, [selectedModality, diagnosticData]);
+  }, [selectedModality, IMAGING_WAIT_TRENDS]);
 
   // KPI trend stats for the selected modality trend panel
   const kpiStats = useMemo(() => {
-    if (!selectedKpi || !diagnosticData) return null;
-    const series = diagnosticData.IMAGING_WAIT_TRENDS.filter(t => t.modality === selectedKpi);
+    if (!selectedKpi) return null;
+    const series = IMAGING_WAIT_TRENDS.filter(t => t.modality === selectedKpi);
     const values = series.map(t => t.albertaP90Days).filter(v => typeof v === 'number');
     if (values.length === 0) return null;
 
@@ -448,7 +455,7 @@ export default function DiagnosticDashboard() {
       pctChange: pctChange > 0 ? `+${pctChange.toFixed(1)}%` : `${pctChange.toFixed(1)}%`,
       isIncrease: rawDelta > 0
     };
-  }, [selectedKpi, diagnosticData]);
+  }, [selectedKpi, IMAGING_WAIT_TRENDS]);
 
   const selectedKpiDetails = useMemo(() => {
     if (!selectedKpi) return null;
@@ -490,7 +497,7 @@ export default function DiagnosticDashboard() {
         icon={Activity}
         title="Diagnostic & Lab Services"
         description="Monitor laboratory wait times and diagnostic imaging benchmark compliance."
-        metadata={diagnosticData?._dataMetadata}
+        metadata={metadata}
         arrayKey="LAB_LOCATION_WAITS"
       >
         <button
@@ -553,7 +560,7 @@ export default function DiagnosticDashboard() {
       {/* SUBTAB 1: Live Lab Waits */}
       {activeSubTab === 'labs' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="LAB_LOCATION_WAITS" />
+          <DataTimestamp compact metadata={metadata ?? {}} arrayKey="LAB_LOCATION_WAITS" />
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -570,7 +577,7 @@ export default function DiagnosticDashboard() {
                 </div>
                 <div className="flex items-baseline gap-2 mb-1.5">
                   <p className="text-2xl font-black text-white tracking-tight leading-none">
-                    {formatMinutesToHm(labStats.avgWait)}
+                    {formatLabAvgWait(labStats.avgWait, labStats.validLabCount)}
                   </p>
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                     Provincial Average Lab Wait
@@ -582,19 +589,19 @@ export default function DiagnosticDashboard() {
                 <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
                   <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Edmonton</span>
                   <span className="text-xs font-black text-emerald-400 font-mono block mt-0.5">
-                    {formatMinutesToHm(labStats.edmontonAvg)}
+                    {formatLabAvgWait(labStats.edmontonAvg, labStats.edmontonLabCount)}
                   </span>
                 </div>
                 <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
                   <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Calgary</span>
                   <span className="text-xs font-black text-blue-400 font-mono block mt-0.5">
-                    {formatMinutesToHm(labStats.calgaryAvg)}
+                    {formatLabAvgWait(labStats.calgaryAvg, labStats.calgaryLabCount)}
                   </span>
                 </div>
                 <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
                   <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Rest AB</span>
                   <span className="text-xs font-black text-indigo-400 font-mono block mt-0.5">
-                    {formatMinutesToHm(labStats.restAvg)}
+                    {formatLabAvgWait(labStats.restAvg, labStats.restLabCount)}
                   </span>
                 </div>
               </div>
@@ -1116,7 +1123,7 @@ export default function DiagnosticDashboard() {
       {/* SUBTAB 2: CT & MRI Public Wait Times */}
       {activeSubTab === 'imaging-waits' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="CIHI_DIAGNOSTIC_WAIT_TIMES" />
+          <DataTimestamp compact metadata={metadata ?? {}} arrayKey="CIHI_DIAGNOSTIC_WAIT_TIMES" />
           {/* Clickable KPI overview cards — toggle historical trend panel */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* CT Scan KPI Card */}
@@ -1147,7 +1154,7 @@ export default function DiagnosticDashboard() {
               </div>
               <div className="flex items-baseline gap-2 mb-1.5">
                 <p className="text-2xl font-black text-white tracking-tight leading-none font-mono">
-                  {(diagnosticData?.IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === 'CT Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
+                  {(IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === 'CT Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                   Alberta 90th Percentile Wait (Days)
@@ -1187,7 +1194,7 @@ export default function DiagnosticDashboard() {
               </div>
               <div className="flex items-baseline gap-2 mb-1.5">
                 <p className="text-2xl font-black text-white tracking-tight leading-none font-mono">
-                  {(diagnosticData?.IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === 'MRI Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
+                  {(IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === 'MRI Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                   Alberta 90th Percentile Wait (Days)
@@ -1265,7 +1272,7 @@ export default function DiagnosticDashboard() {
                   <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
-                        data={(diagnosticData?.IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === selectedKpi)}
+                        data={(IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === selectedKpi)}
                         margin={{ top: 10, right: 15, left: -20, bottom: 0 }}
                       >
                         <defs>
@@ -1374,7 +1381,7 @@ export default function DiagnosticDashboard() {
               </div>
 
               <div className="space-y-3">
-                {(diagnosticData?.PRIORITY_TARGET_COMPLIANCE ?? []).map(item => (
+                {(PRIORITY_TARGET_COMPLIANCE ?? []).map(item => (
                   <div key={item.priority} className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-2">
                     <div className="flex items-start justify-between">
                       <div>
@@ -1497,7 +1504,7 @@ export default function DiagnosticDashboard() {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={diagnosticData?.TEST_TURNAROUND_METRICS ?? []}
+                    data={TEST_TURNAROUND_METRICS ?? []}
                     margin={{ top: 15, right: 10, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -1524,7 +1531,7 @@ export default function DiagnosticDashboard() {
               </div>
 
               <div className="space-y-3">
-                {(diagnosticData?.TEST_TURNAROUND_METRICS ?? []).slice(0, 4).map(test => (
+                {(TEST_TURNAROUND_METRICS ?? []).slice(0, 4).map(test => (
                   <div key={test.testName} className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-1.5">
                     <div className="flex items-start justify-between">
                       <span className="text-xs font-bold text-white">{test.testName}</span>

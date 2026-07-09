@@ -76,6 +76,13 @@ export interface ContinuityAndSatisfaction {
   overallCareRatingExcellentPct: number; // FOCUS: % rating care as Excellent/Very Good
 }
 
+/** HQCA FOCUS: continuity to one family doctor by zone and fiscal year (API-only array). */
+export interface ContinuitySatisfactionHqca {
+  zone: string;
+  fiscalYear: string;
+  continuityPct: number;
+}
+
 // ----------------------------------------------------------------------------
 // DATASETS
 // ----------------------------------------------------------------------------

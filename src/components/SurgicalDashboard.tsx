@@ -45,6 +45,7 @@ import type {
   FacilityComparisonRecord,
   SpecialistComparisonRecord,
 } from '../surgicalData';
+import * as surgicalData from '../surgicalData';
 import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
@@ -96,8 +97,7 @@ export default function SurgicalDashboard() {
   
   // Interactive KPI selected state for historical trend panel
   const [selectedKpi, setSelectedKpi] = useState<'hip_replacement_median' | 'knee_replacement_median' | 'cataract_surgery_median' | null>(null);
-  // Live data fetched from /api/data/surgical
-  const { data, metadata, isLoading, error, refresh } = useDomainData<SurgicalData>('surgical');
+  const { data, metadata, isLoading, error, refresh } = useDomainData<SurgicalData>('surgical', surgicalData);
   const SURGICAL_RECORDS = useMemo(() => {
     return (data?.SURGICAL_RECORDS ?? []).filter(
       r => r.procedure_group !== 'Diagnostic Imaging' &&
@@ -223,9 +223,9 @@ export default function SurgicalDashboard() {
   const [compFacilityA, setCompFacilityA] = useState<string>('WDFAB783'); // Royal Alex
   const [compFacilityB, setCompFacilityB] = useState<string>('WDFAB102'); // U of A
   const [compSpecialistA, setCompSpecialistA] = useState<string>('6743'); // Dr. Arbour
-  const [compSpecialistB, setCompSpecialistB] = useState<string>('6748'); // Dr. Tremblay
-  const [compProcedureA, setCompProcedureA] = useState<string>('Total Hip Replacement');
-  const [compProcedureB, setCompProcedureB] = useState<string>('Total Knee Replacement');
+  const [compSpecialistB, setCompSpecialistB] = useState<string>('6743');
+  const [compProcedureA, setCompProcedureA] = useState<string>('Hip Replacement');
+  const [compProcedureB, setCompProcedureB] = useState<string>('Knee Replacement');
 
   // StatsCan State
   const [statscanCategoryFilter, setStatscanCategoryFilter] = useState<string>('All');
@@ -273,14 +273,54 @@ export default function SurgicalDashboard() {
         : 0;
     const hipBench = SURGICAL_RECORDS.find(
       r =>
-        r.procedure_name === 'Hip Replacement' &&
-        r.geography_type === 'Province' &&
+        r.procedure_name === 'Total Hip Arthroplasty' &&
+        (r.geography_name === 'Alberta' || r.geography_type === 'Province') &&
         r.metric_name === '% within benchmark' &&
         r.wait_segment === 'Decision-to-surgery',
     )?.metric_value;
     return { total, csfSharePct, orUtilPct, hipBenchPct: hipBench ?? null };
   }, [SURGICAL_FACILITIES, SURGICAL_RECORDS]);
 
+
+  const parseBenchmarkWeeks = (benchmark?: string): number | null => {
+    if (!benchmark) return null;
+    const match = benchmark.match(/(\d+(?:\.\d+)?)\s*weeks?/i);
+    return match ? parseFloat(match[1]) : null;
+  };
+
+  const findProvincial90th = (procedureName: string) =>
+    SURGICAL_RECORDS.find(
+      r =>
+        r.procedure_name === procedureName &&
+        r.geography_name === 'Alberta' &&
+        r.metric_name === '90th percentile' &&
+        r.wait_segment === 'Decision-to-surgery',
+    );
+
+  const findComparison90th = (procedureGroup: string) =>
+    SURGICAL_RECORDS.find(
+      r =>
+        r.procedure_group === procedureGroup &&
+        r.geography_name === 'Alberta' &&
+        r.metric_name === '90th percentile' &&
+        r.wait_segment === 'Decision-to-surgery',
+    );
+
+  const overviewProcedureCards = useMemo(() => {
+    const specs = [
+      { procedureName: 'Total Hip Arthroplasty', title: 'Total Hip Replacement', iconColor: 'text-blue-400', pctClass: 'text-amber-400' },
+      { procedureName: 'Total Knee Arthroplasty', title: 'Total Knee Replacement', iconColor: 'text-purple-400', pctClass: 'text-amber-500' },
+      { procedureName: 'Cataract Extraction & Lens Implant', title: 'Cataract Extraction', iconColor: 'text-emerald-400', pctClass: 'text-emerald-400' },
+      { procedureName: 'Breast Cancer Surgery', title: 'Breast Cancer Surgery', iconColor: 'text-rose-400', pctClass: 'text-rose-400', subtitle: 'Breast Cancer 90th percentile' },
+    ] as const;
+    return specs.map(spec => {
+      const record = findProvincial90th(spec.procedureName);
+      const wait = record?.metric_value ?? null;
+      const target = parseBenchmarkWeeks(record?.benchmark_value);
+      const pctOfTarget = wait != null && target != null && target > 0 ? Math.round((wait / target) * 1000) / 10 : null;
+      return { ...spec, wait, target, pctOfTarget, benchmarkLabel: record?.benchmark_value };
+    });
+  }, [SURGICAL_RECORDS]);
   const renderFacilityRow = (fac: FacilitySurgicalCapacity) => {
     const isTracked = fac.or_utilization_rate > 0;
     // color scale for OR utilization
@@ -423,9 +463,8 @@ export default function SurgicalDashboard() {
   const specAData = SPECIALIST_COMPARISONS.find(s => s.id === compSpecialistA);
   const specBData = SPECIALIST_COMPARISONS.find(s => s.id === compSpecialistB);
 
-  const procAData = SURGICAL_RECORDS.find(p => p.procedure_name === compProcedureA && p.metric_name === '90th percentile') || SURGICAL_RECORDS[0];
-  const procBData = SURGICAL_RECORDS.find(p => p.procedure_name === compProcedureB && p.metric_name === '90th percentile') || SURGICAL_RECORDS[1];
-
+  const procAData = findComparison90th(compProcedureA);
+  const procBData = findComparison90th(compProcedureB);
   // Pie chart stats for StatsCan Satisfaction
   const satisfactionPieData = [
     { name: 'Satisfied with wait time', value: STATSCAN_SATISFACTION_STATS.metrics_alberta.satisfied_with_wait, color: '#10b981' },
@@ -524,128 +563,93 @@ export default function SurgicalDashboard() {
         <div className="space-y-6">
           {/* Top KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div 
-              tabIndex={0}
-              onClick={() => setSelectedKpi(selectedKpi === 'hip_replacement_median' ? null : 'hip_replacement_median')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setSelectedKpi(selectedKpi === 'hip_replacement_median' ? null : 'hip_replacement_median');
-                }
-              }}
-              className={`bg-slate-900/40 border rounded-2xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
-                selectedKpi === 'hip_replacement_median'
-                  ? 'border-blue-500 ring-1 ring-blue-500/30 bg-slate-900/80 shadow-blue-500/5'
-                  : 'border-slate-800 hover:border-blue-500/30'
-              }`}
-            >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors pointer-events-none"></div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Hip Replacement</span>
-                <Clock className="w-3.5 h-3.5 text-blue-400" />
-              </div>
-              <div className="space-y-0.5">
-                <div className="text-2xl font-black text-white">36.8 Weeks</div>
-                <div className="text-[10px] text-slate-400">90th Percentile Wait Time</div>
-              </div>
-              <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400">
-                <span>National Target: 26.0 Wks</span>
-                <span className="text-amber-400 font-bold">141% of Target</span>
-              </div>
-              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-blue-400/80 group-hover:text-blue-400 transition-colors">
-                <BarChart2 className="w-3 h-3" />
-                <span>{selectedKpi === 'hip_replacement_median' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
-              </div>
-            </div>
+            {overviewProcedureCards.map((card) => {
+              const trendKey =
+                card.procedureName === 'Total Hip Arthroplasty'
+                  ? 'hip_replacement_median'
+                  : card.procedureName === 'Total Knee Arthroplasty'
+                    ? 'knee_replacement_median'
+                    : card.procedureName === 'Cataract Extraction & Lens Implant'
+                      ? 'cataract_surgery_median'
+                      : null;
+              const waitLabel = card.wait != null ? `${card.wait} Weeks` : '—';
+              const targetFooter =
+                card.target != null
+                  ? `National Target: ${card.target} Wks`
+                  : card.benchmarkLabel
+                    ? `Target: ${card.benchmarkLabel}`
+                    : 'Target: —';
+              const pctFooter =
+                card.pctOfTarget != null
+                  ? card.procedureName === 'Cataract Extraction & Lens Implant' && card.pctOfTarget <= 100
+                    ? `${card.pctOfTarget}% (Within Target)`
+                    : `${card.pctOfTarget}% of Target`
+                  : card.procedureName === 'Breast Cancer Surgery'
+                    ? 'High Priority Flow'
+                    : '—';
 
-            <div 
-              tabIndex={0}
-              onClick={() => setSelectedKpi(selectedKpi === 'knee_replacement_median' ? null : 'knee_replacement_median')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setSelectedKpi(selectedKpi === 'knee_replacement_median' ? null : 'knee_replacement_median');
-                }
-              }}
-              className={`bg-slate-900/40 border rounded-2xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
-                selectedKpi === 'knee_replacement_median'
-                  ? 'border-purple-500 ring-1 ring-purple-500/30 bg-slate-900/80 shadow-purple-500/5'
-                  : 'border-slate-800 hover:border-purple-500/30'
-              }`}
-            >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-colors pointer-events-none"></div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Knee Replacement</span>
-                <Clock className="w-3.5 h-3.5 text-purple-400" />
-              </div>
-              <div className="space-y-0.5">
-                <div className="text-2xl font-black text-white">43.1 Weeks</div>
-                <div className="text-[10px] text-slate-400">90th Percentile Wait Time</div>
-              </div>
-              <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400">
-                <span>National Target: 26.0 Wks</span>
-                <span className="text-amber-500 font-bold">165% of Target</span>
-              </div>
-              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-purple-400/80 group-hover:text-purple-400 transition-colors">
-                <BarChart2 className="w-3 h-3" />
-                <span>{selectedKpi === 'knee_replacement_median' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
-              </div>
-            </div>
+              if (card.procedureName === 'Breast Cancer Surgery') {
+                return (
+                  <div key={card.procedureName} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-2 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/10 transition-colors pointer-events-none"></div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Oncology Fast-Track</span>
+                      <Activity className="w-3.5 h-3.5 text-rose-400" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="text-2xl font-black text-white">{waitLabel}</div>
+                      <div className="text-[10px] text-slate-400">{card.subtitle ?? 'Breast Cancer 90th percentile'}</div>
+                    </div>
+                    <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400">
+                      <span>{targetFooter}</span>
+                      <span className="text-rose-400 font-bold">{pctFooter}</span>
+                    </div>
+                    <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-slate-500">
+                      <span>No Trend Data Available</span>
+                    </div>
+                  </div>
+                );
+              }
 
-            <div 
-              tabIndex={0}
-              onClick={() => setSelectedKpi(selectedKpi === 'cataract_surgery_median' ? null : 'cataract_surgery_median')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setSelectedKpi(selectedKpi === 'cataract_surgery_median' ? null : 'cataract_surgery_median');
-                }
-              }}
-              className={`bg-slate-900/40 border rounded-2xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
-                selectedKpi === 'cataract_surgery_median'
-                  ? 'border-emerald-500 ring-1 ring-emerald-500/30 bg-slate-900/80 shadow-emerald-500/5'
-                  : 'border-slate-800 hover:border-emerald-500/30'
-              }`}
-            >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none"></div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cataract Extractions</span>
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              </div>
-              <div className="space-y-0.5">
-                <div className="text-2xl font-black text-white">15.2 Weeks</div>
-                <div className="text-[10px] text-slate-400">90th Percentile Wait Time</div>
-              </div>
-              <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400">
-                <span>National Target: 16.0 Wks</span>
-                <span className="text-emerald-400 font-bold">95% (Within Target)</span>
-              </div>
-              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-emerald-400/80 group-hover:text-emerald-400 transition-colors">
-                <BarChart2 className="w-3 h-3" />
-                <span>{selectedKpi === 'cataract_surgery_median' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
-              </div>
-            </div>
+              const isActive = trendKey != null && selectedKpi === trendKey;
+              const toggle = () => trendKey && setSelectedKpi(isActive ? null : trendKey);
 
-            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-2 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/10 transition-colors pointer-events-none"></div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Oncology Fast-Track</span>
-                <Activity className="w-3.5 h-3.5 text-rose-400" />
-              </div>
-              <div className="space-y-0.5">
-                <div className="text-2xl font-black text-white">5.9 Weeks</div>
-                <div className="text-[10px] text-slate-400">Breast Cancer 90th percentile</div>
-              </div>
-              <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400">
-                <span>Standard Target: 4.0 Wks</span>
-                <span className="text-rose-400 font-bold">High Priority Flow</span>
-              </div>
-              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-slate-500">
-                <span>No Trend Data Available</span>
-              </div>
-            </div>
+              if (card.procedureName === 'Total Hip Arthroplasty') {
+                return (
+                  <div key={card.procedureName} tabIndex={0} onClick={toggle} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    className={`bg-slate-900/40 border rounded-2xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${isActive ? 'border-blue-500 ring-1 ring-blue-500/30 bg-slate-900/80 shadow-blue-500/5' : 'border-slate-800 hover:border-blue-500/30'}`}>
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors pointer-events-none"></div>
+                    <div className="flex items-center justify-between"><span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{card.title}</span><Clock className="w-3.5 h-3.5 text-blue-400" /></div>
+                    <div className="space-y-0.5"><div className="text-2xl font-black text-white">{waitLabel}</div><div className="text-[10px] text-slate-400">90th Percentile Wait Time</div></div>
+                    <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400"><span>{targetFooter}</span><span className={`${card.pctClass} font-bold`}>{pctFooter}</span></div>
+                    <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-blue-400/80 group-hover:text-blue-400 transition-colors"><BarChart2 className="w-3 h-3" /><span>{isActive ? 'Active: Hide Trend' : 'Click to View Trend'}</span></div>
+                  </div>
+                );
+              }
+              if (card.procedureName === 'Total Knee Arthroplasty') {
+                return (
+                  <div key={card.procedureName} tabIndex={0} onClick={toggle} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    className={`bg-slate-900/40 border rounded-2xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${isActive ? 'border-purple-500 ring-1 ring-purple-500/30 bg-slate-900/80 shadow-purple-500/5' : 'border-slate-800 hover:border-purple-500/30'}`}>
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-colors pointer-events-none"></div>
+                    <div className="flex items-center justify-between"><span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{card.title}</span><Clock className="w-3.5 h-3.5 text-purple-400" /></div>
+                    <div className="space-y-0.5"><div className="text-2xl font-black text-white">{waitLabel}</div><div className="text-[10px] text-slate-400">90th Percentile Wait Time</div></div>
+                    <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400"><span>{targetFooter}</span><span className={`${card.pctClass} font-bold`}>{pctFooter}</span></div>
+                    <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-purple-400/80 group-hover:text-purple-400 transition-colors"><BarChart2 className="w-3 h-3" /><span>{isActive ? 'Active: Hide Trend' : 'Click to View Trend'}</span></div>
+                  </div>
+                );
+              }
+              return (
+                <div key={card.procedureName} tabIndex={0} onClick={toggle} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  className={`bg-slate-900/40 border rounded-2xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${isActive ? 'border-emerald-500 ring-1 ring-emerald-500/30 bg-slate-900/80 shadow-emerald-500/5' : 'border-slate-800 hover:border-emerald-500/30'}`}>
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none"></div>
+                  <div className="flex items-center justify-between"><span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cataract Extractions</span><Sparkles className="w-3.5 h-3.5 text-emerald-400" /></div>
+                  <div className="space-y-0.5"><div className="text-2xl font-black text-white">{waitLabel}</div><div className="text-[10px] text-slate-400">90th Percentile Wait Time</div></div>
+                  <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400"><span>{targetFooter}</span><span className={`${card.pctClass} font-bold`}>{pctFooter}</span></div>
+                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-emerald-400/80 group-hover:text-emerald-400 transition-colors"><BarChart2 className="w-3 h-3" /><span>{isActive ? 'Active: Hide Trend' : 'Click to View Trend'}</span></div>
+                </div>
+              );
+            })}
           </div>
-
           {/* Trend Panel */}
           <AnimatePresence mode="wait">
             {selectedKpi && selectedKpiDetails && kpiStats && (

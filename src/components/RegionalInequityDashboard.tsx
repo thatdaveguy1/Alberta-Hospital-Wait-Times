@@ -54,6 +54,7 @@ import type {
   TravelForCare,
   ServiceAccessMetric,
 } from '../regionalInequityData';
+import * as regionalInequityData from '../regionalInequityData';
 import { DataTimestamp } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
@@ -112,7 +113,7 @@ const defaultAccess: ServiceAccessMetric = {
 };
 export default function RegionalInequityDashboard() {
   // Live data fetched from /api/data/regional-inequity
-  const { data, metadata, isLoading, error, refresh } = useDomainData<RegionalInequityData>('regional-inequity');
+  const { data, metadata, isLoading, error, refresh } = useDomainData<RegionalInequityData>('regional-inequity', regionalInequityData);
   const COMMUNITY_NEED_PROFILES = data?.COMMUNITY_NEED_PROFILES ?? [];
   const CHRONIC_DISEASE_BURDEN = data?.CHRONIC_DISEASE_BURDEN ?? [];
   const ED_RELIANCE_METRICS = data?.ED_RELIANCE_METRICS ?? [];
