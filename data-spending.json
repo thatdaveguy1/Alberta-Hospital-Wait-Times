@@ -8,7 +8,7 @@
       "physicianSpendingPerCapita": 1511,
       "drugSpendingPerCapita": 1251,
       "bedsPer100k": 143.6,
-      "costPerStandardStay": 7420
+      "costPerStandardStay": 11016
     },
     {
       "province": "British Columbia",
@@ -18,7 +18,7 @@
       "physicianSpendingPerCapita": 1437,
       "drugSpendingPerCapita": 986,
       "bedsPer100k": 137.1,
-      "costPerStandardStay": 6840
+      "costPerStandardStay": 11751
     },
     {
       "province": "Manitoba",
@@ -28,7 +28,7 @@
       "physicianSpendingPerCapita": 1506,
       "drugSpendingPerCapita": 1216,
       "bedsPer100k": 144.4,
-      "costPerStandardStay": null
+      "costPerStandardStay": 10271
     },
     {
       "province": "New Brunswick",
@@ -38,7 +38,7 @@
       "physicianSpendingPerCapita": 1081,
       "drugSpendingPerCapita": 1412,
       "bedsPer100k": 208.8,
-      "costPerStandardStay": null
+      "costPerStandardStay": 9728
     },
     {
       "province": "Newfoundland and Labrador",
@@ -48,7 +48,7 @@
       "physicianSpendingPerCapita": 1060,
       "drugSpendingPerCapita": 1403,
       "bedsPer100k": 223.8,
-      "costPerStandardStay": null
+      "costPerStandardStay": 9560
     },
     {
       "province": "Northwest Territories",
@@ -58,7 +58,7 @@
       "physicianSpendingPerCapita": 1835,
       "drugSpendingPerCapita": 1453,
       "bedsPer100k": 177,
-      "costPerStandardStay": null
+      "costPerStandardStay": 17677
     },
     {
       "province": "Nova Scotia",
@@ -68,7 +68,7 @@
       "physicianSpendingPerCapita": 1270,
       "drugSpendingPerCapita": 1394,
       "bedsPer100k": 123.6,
-      "costPerStandardStay": null
+      "costPerStandardStay": 10651
     },
     {
       "province": "Nunavut",
@@ -87,8 +87,8 @@
       "hospitalSpendingPerCapita": 2419,
       "physicianSpendingPerCapita": 1354,
       "drugSpendingPerCapita": 1272,
-      "bedsPer100k": 37.8,
-      "costPerStandardStay": 6240
+      "bedsPer100k": 106.2,
+      "costPerStandardStay": 8296
     },
     {
       "province": "Prince Edward Island",
@@ -98,7 +98,7 @@
       "physicianSpendingPerCapita": 1574,
       "drugSpendingPerCapita": 1296,
       "bedsPer100k": 200.5,
-      "costPerStandardStay": null
+      "costPerStandardStay": 9197
     },
     {
       "province": "Quebec",
@@ -107,8 +107,8 @@
       "hospitalSpendingPerCapita": 2286,
       "physicianSpendingPerCapita": 1090,
       "drugSpendingPerCapita": 1464,
-      "bedsPer100k": 8,
-      "costPerStandardStay": 6410
+      "bedsPer100k": 166.2,
+      "costPerStandardStay": 10721
     },
     {
       "province": "Saskatchewan",
@@ -118,7 +118,7 @@
       "physicianSpendingPerCapita": 1480,
       "drugSpendingPerCapita": 1198,
       "bedsPer100k": 211.5,
-      "costPerStandardStay": 7120
+      "costPerStandardStay": 11156
     },
     {
       "province": "Yukon",
@@ -128,7 +128,7 @@
       "physicianSpendingPerCapita": 2008,
       "drugSpendingPerCapita": 1291,
       "bedsPer100k": 160.6,
-      "costPerStandardStay": null
+      "costPerStandardStay": 13916
     },
     {
       "province": "Canada",
@@ -3332,13 +3332,13 @@
   "_dataMetadata": {
     "NATIONAL_SPENDING_COMPARE": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:13:24.215Z",
-      "source": "CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX-implied population; Alberta costPerStandardStay from HOSPITAL_EFFICIENCY_TREND (CSHS)",
+      "lastUpdated": "2026-07-09T02:28:36.063Z",
+      "source": "CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)",
       "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },
     "ALBERTA_ACTIVITY_VOLUME_TREND": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:13:24.215Z",
+      "lastUpdated": "2026-07-09T02:28:36.063Z",
       "source": "CIHI NHEX 2025 full data tables (Table O.1, derived activity volume)",
       "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },
@@ -3358,7 +3358,7 @@
     },
     "ALBERTA_USE_OF_FUNDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:13:24.215Z",
+      "lastUpdated": "2026-07-09T02:28:36.063Z",
       "source": "CIHI NHEX 2025 full data tables (Series D1, Alberta sheet)",
       "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },

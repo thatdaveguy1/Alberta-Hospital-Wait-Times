@@ -7,8 +7,8 @@
 //
 // Extracted datasets:
 //   NATIONAL_SPENDING_COMPARE      — from Table O.1 (per-capita spending by province)
-//   bedsPer100k                    — CIHI indicator 877 acute beds + NHEX-implied population
-//   costPerStandardStay (Alberta)  — latest HOSPITAL_EFFICIENCY_TREND.standardStayCost (CSHS series)
+//   bedsPer100k                    — CIHI indicator 877 + NHEX-implied population
+//   costPerStandardStay            — CIHI indicator 823 (CSHS), Province/territory level
 //   ALBERTA_USE_OF_FUNDS           — from series-d1 Alberta sheet (amounts + shares)
 //   ALBERTA_ACTIVITY_VOLUME_TREND  — from Table O.1 (Alberta total spending by year,
 //                                    preserving existing non-NHEX fields)
@@ -24,14 +24,13 @@ import type { SyncResult } from './types';
 import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 import type {
   ActivityVolumeTrend,
-  HospitalEfficiencyMetric,
   NationalSpendingCompare,
   SpendingByUseOfFunds,
 } from '../spendingData';
 import {
-  albertaCshsFromEfficiencyTrend,
   bedsPer100k as computeBedsPer100k,
   fetchAcuteBedsByProvince,
+  fetchCshsByProvince,
   impliedPopulationFromO1,
   type TableO1Row,
 } from './cihiNationalCapacity';
@@ -289,29 +288,34 @@ async function enrichNationalSpendingCompare(
   base: NationalSpendingCompare[],
   tableRows: TableO1Row[],
   existing: NationalSpendingCompare[],
-  efficiencyTrend: HospitalEfficiencyMetric[],
 ): Promise<NationalSpendingCompare[]> {
   if (base.length === 0) return base;
 
   const latestYear = tableRows.reduce((max, r) => (r.year > max ? r.year : max), '0');
   const bedsByProv = await fetchAcuteBedsByProvince();
-  const albertaCshs = albertaCshsFromEfficiencyTrend(efficiencyTrend);
+  const cshsByProv = await fetchCshsByProvince();
   const existingByProv = new Map(existing.map((r) => [r.province, r]));
 
   return base.map((row) => {
     const prev = existingByProv.get(row.province);
-    let bedsPer100k: number | null = prev?.bedsPer100k ?? null;
-    let costPerStandardStay: number | null = prev?.costPerStandardStay ?? null;
     let spendingAsPercentGdp: number | null = prev?.spendingAsPercentGdp ?? null;
 
+    let bedsPer100k: number | null = null;
     const bedCount = bedsByProv.get(row.province);
     const pop = impliedPopulationFromO1(tableRows, row.province, latestYear);
     if (bedCount !== undefined && pop !== undefined) {
       bedsPer100k = computeBedsPer100k(bedCount, pop);
+    } else if (prev?.bedsPer100k != null && prev.bedsPer100k > 0) {
+      bedsPer100k = prev.bedsPer100k;
     }
 
-    if (row.province === 'Alberta' && albertaCshs != null) {
-      costPerStandardStay = albertaCshs;
+    let costPerStandardStay: number | null = cshsByProv.get(row.province) ?? null;
+    if (
+      costPerStandardStay == null &&
+      prev?.costPerStandardStay != null &&
+      prev.costPerStandardStay > 0
+    ) {
+      costPerStandardStay = prev.costPerStandardStay;
     }
 
     if (spendingAsPercentGdp === 0) spendingAsPercentGdp = null;
@@ -586,15 +590,11 @@ export async function run(): Promise<SyncResult> {
     const existingNational = Array.isArray(existingData.NATIONAL_SPENDING_COMPARE)
       ? (existingData.NATIONAL_SPENDING_COMPARE as NationalSpendingCompare[])
       : [];
-    const existingEfficiency = Array.isArray(existingData.HOSPITAL_EFFICIENCY_TREND)
-      ? (existingData.HOSPITAL_EFFICIENCY_TREND as HospitalEfficiencyMetric[])
-      : [];
     const nationalSpendingBase = extractNationalSpending(tableO1Rows);
     const nationalSpending = await enrichNationalSpendingCompare(
       nationalSpendingBase,
       tableO1Rows,
       existingNational,
-      existingEfficiency,
     );
     console.log(
       `[CIHIDownloader] Table O.1: ${nationalSpending.length} national-spending records, ${tableO1Rows.length} total rows parsed.`,
@@ -648,7 +648,7 @@ export async function run(): Promise<SyncResult> {
       NATIONAL_SPENDING_COMPARE: buildMetadataEntry({
         updateType: 'auto',
         source:
-          'CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX-implied population; Alberta costPerStandardStay from HOSPITAL_EFFICIENCY_TREND (CSHS)',
+          'CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)',
         sourceVintage: 'NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)',
         lastUpdated: timestamp,
       }),
