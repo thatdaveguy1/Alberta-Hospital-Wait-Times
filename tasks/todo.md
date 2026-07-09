@@ -1,4 +1,16 @@
 
+## Phase 30: Diagnostics & Lab Fix (2026-07-09)
+- [x] Fix `DiagnosticDashboard` `labStats` dead zero-return so lab stats cards show real averages
+- [x] Fix `LabCard` contradictory `Walk-In`/`Closed`/`Appt Req` badges
+- [x] Fix `DiagnosticDashboard` `Manual`/`Set Location` buttons to dispatch `open-location-modal` and open the manual location modal
+- [x] Add `APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)` → `APL QMe REST API` mapping in `DataTimestamp`
+- [x] Switch `Imaging Gaps` `DataTimestamp` to `IMAGING_WAIT_TRENDS`, add `DataTimestamp` to `Diagnostic Sites` (`FACILITY_IMAGING_WAITS`) and `Lab Turnaround` (`TEST_TURNAROUND_METRICS`), and remove hardcoded `Source: APL Test Directory` badge
+- [x] Fix `DataTimestamp` compact spacing between `Auto-updated`/`Manual` and `Updated:`
+- [x] Run `npx tsc --noEmit` and `npm run build`
+- [x] Re-run headed diagnostics browser audit (`agent-browser`) and verify stats, badges, manual location modal, and `DataTimestamp` sources across all four subtabs
+- [x] Update `lessons.md` with diagnostics fixes
+- [x] Commit source + docs to `main` (revert runtime `data-*.json`)
+
 ## Phase 28: CIHI National Scoreboard + Audit Finish (2026-07-09)
 - [x] Wire CIHI indicator 823 (province CSHS) and 877 (acute beds, ON/QC corporation rollup) in `cihiNationalCapacity.ts` / `cihiDownloader.ts` (`d16f9cc`)
 - [x] Re-run `continuingCareComplianceFetcher` — 941 facilities in `CONTINUING_CARE_COMPLIANCE`

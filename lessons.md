@@ -1,3 +1,30 @@
+## Session: 2026-07-09 (Diagnostics & Lab Fix)
+
+### Lesson: Unreachable `return` can silently zero out live statistics
++ **Mistake:** `DiagnosticDashboard.tsx` `labStats` `useMemo` had an unconditional `return` of all zeros before any real calculation, so the lab stats cards always showed `—` even though `LAB_LOCATION_WAITS` was populated.
++ **Solution:** Guarded the early return on `LAB_LOCATION_WAITS.length === 0` and removed the dead zero-return. Stats cards now show the live provincial/zone averages and peak-delay lab.
++ **Prevention:** When a dashboard shows `—` or `0`, verify the computation path actually runs. Use empty-array guards, not unconditional early returns.
+
+### Lesson: Lab badges must match the actual service state
++ **Mistake:** `LabCard` rendered `Walk-In` whenever `lab.walkInAvailable` was true, so closed and appointment-only sites showed both `Walk-In` and `Closed` / `Appointments Only`.
++ **Solution:** Made `Walk-In` conditional on `walkInAvailable && !isUnavailable && !isAppointmentsOnly`, added `Appt Req` for `appointmentRequired || isAppointmentsOnly`, and added a `Closed` badge for `waitTimeMin === 'Closed'`.
++ **Prevention:** Badge logic should gate on the same unavailable conditions that the value display uses. If a label can be `Closed` or `Appointments Only`, the badge must reflect it.
+
+### Lesson: Cross-component UI triggers should use explicit events, not duplicated GPS logic
++ **Mistake:** `DiagnosticDashboard` `Manual` and `Set Location` buttons duplicated the GPS `Use GPS` logic instead of opening the manual location entry that `App.tsx` already managed.
++ **Solution:** `DiagnosticDashboard` now dispatches `window.dispatchEvent(new CustomEvent('open-location-modal'))`; `App.tsx` listens for the event and calls `setShowManualInput(true)`.
++ **Prevention:** When a shared modal lives in a parent component, let child dashboards request it via an explicit event rather than duplicating state or GPS code.
+
+### Lesson: Data-timestamp sources must be sanitized and point at the right array metadata
++ **Mistake:** `DataTimestamp.sanitizeSource` did not map the raw `APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)` string; `Imaging Gaps` used the wrong `arrayKey` (`CIHI_DIAGNOSTIC_WAIT_TIMES` instead of `IMAGING_WAIT_TRENDS`); `Diagnostic Sites` and `Lab Turnaround` had no `DataTimestamp` and `Lab Turnaround` had a hardcoded `Source: APL Test Directory` badge.
++ **Solution:** Added the APL URL mapping to `DataTimestamp.tsx`; switched `Imaging Gaps` to `IMAGING_WAIT_TRENDS`; added `DataTimestamp` to `Diagnostic Sites` (`FACILITY_IMAGING_WAITS`) and `Lab Turnaround` (`TEST_TURNAROUND_METRICS`); removed the hardcoded source badge.
++ **Prevention:** Add every raw source URL/pipeline ID to `sanitizeSource`; prefer `DataTimestamp` over hardcoded source badges; pair the `arrayKey` with the data array the panel actually renders.
+
+### Lesson: Compact `DataTimestamp` layout needs a real text separator
++ **Mistake:** The compact `DataTimestamp` rendered `Auto-updatedUpdated:` because `Updated:` immediately followed the `Auto-updated` badge with no space.
++ **Solution:** Added a trailing non-breaking space (`\u00A0`) to the `Auto-updated` / `Manual` badge text so screen readers and text extraction read the label as a separate word.
++ **Prevention:** Inline-flex gaps do not create a text node. Test accessible text with `read` or `snapshot` output, not just visual spacing.
+
 ## Session: 2026-07-09 (Phase F — Audit Fixes)
 
 ### Lesson: Static seed arrays can fill API gaps without touching fetchers

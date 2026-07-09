@@ -570,6 +570,16 @@ export default function App() {
     localStorage.setItem('alberta_hospital_modules_expanded', isModulesExpanded ? '1' : '0');
   }, [isModulesExpanded]);
 
+  // Allow child dashboards (e.g. Diagnostics) to open the manual location modal
+  useEffect(() => {
+    const handler = () => {
+      setGeocodingError('');
+      setShowManualInput(true);
+    };
+    window.addEventListener('open-location-modal', handler);
+    return () => window.removeEventListener('open-location-modal', handler);
+  }, []);
+
   // Lock body scroll when map is fullscreen
   useEffect(() => {
     if (isMapFullscreen) {

@@ -62,6 +62,8 @@ function waitColorClass(lab: LabCardData): string {
 
 export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCardProps): React.ReactElement {
   const isUnavailable = isLabWaitUnavailable(lab);
+  const isAppointmentsOnly = lab.waitTimeMin === 'Appointments Only';
+  const isClosed = lab.waitTimeMin === 'Closed';
   const waitTime = typeof lab.waitTimeMin === 'number' ? lab.waitTimeMin : 0;
   const hasDrive = lab.distance !== undefined && lab.driveMins !== undefined;
 
@@ -131,14 +133,19 @@ export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCard
             </>
           )}
 
-          {lab.walkInAvailable && (
+          {lab.walkInAvailable && !isUnavailable && !isAppointmentsOnly && (
             <span className="text-[9px] font-extrabold bg-slate-500/10 text-slate-300 border border-slate-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
               Walk-In
             </span>
           )}
-          {lab.appointmentRequired && (
+          {(lab.appointmentRequired || isAppointmentsOnly) && (
             <span className="text-[9px] font-extrabold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
               Appt Req
+            </span>
+          )}
+          {isClosed && (
+            <span className="text-[9px] font-extrabold bg-red-500/10 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
+              Closed
             </span>
           )}
         </div>

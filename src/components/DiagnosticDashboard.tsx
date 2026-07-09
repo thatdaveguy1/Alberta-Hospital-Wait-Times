@@ -240,12 +240,14 @@ export default function DiagnosticDashboard() {
   }, [activeSubTab, labTrendRange]);
 
   const labStats = useMemo(() => {
+    if (LAB_LOCATION_WAITS.length === 0) {
       return {
         avgWait: 0, edmontonAvg: 0, calgaryAvg: 0, restAvg: 0,
         validLabCount: 0, edmontonLabCount: 0, calgaryLabCount: 0, restLabCount: 0,
         maxWaitLab: null as LabLocationWait | null,
         totalActive: 0, walkInCount: 0, apptOnlyCount: 0
       };
+    }
     const validLabs = LAB_LOCATION_WAITS.filter(l => !isLabWaitUnavailable(l));
     const avgWait = validLabs.length > 0 ? Math.round(validLabs.reduce((acc, l) => acc + (l.waitTimeMin as number), 0) / validLabs.length) : 0;
 
@@ -282,7 +284,7 @@ export default function DiagnosticDashboard() {
       walkInCount,
       apptOnlyCount
     };
-  }, [LAB_LOCATION_WAITS, data]);
+  }, [LAB_LOCATION_WAITS]);
   // Enrich labs with distance + drive time, then filter and sort
   const processedLabs = useMemo(() => {
     return LAB_LOCATION_WAITS
@@ -721,26 +723,7 @@ export default function DiagnosticDashboard() {
                     </button>
                     <button
                       onClick={() => {
-                        setLoadingGeo(true);
-                        if (navigator.geolocation) {
-                          navigator.geolocation.getCurrentPosition(
-                            (pos) => {
-                              const loc = {
-                                lat: pos.coords.latitude,
-                                lng: pos.coords.longitude,
-                                city: 'GPS Location',
-                                isGPS: true,
-                              };
-                              setUserLocation(loc);
-                              saveLocation(loc);
-                              setLoadingGeo(false);
-                            },
-                            () => setLoadingGeo(false),
-                            { enableHighAccuracy: true, timeout: 5000 },
-                          );
-                        } else {
-                          setLoadingGeo(false);
-                        }
+                        window.dispatchEvent(new CustomEvent('open-location-modal'));
                       }}
                       className="py-1.5 px-2 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
                     >
@@ -752,26 +735,7 @@ export default function DiagnosticDashboard() {
 
                 <button
                   onClick={() => {
-                    setLoadingGeo(true);
-                    if (navigator.geolocation) {
-                      navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                          const loc = {
-                            lat: pos.coords.latitude,
-                            lng: pos.coords.longitude,
-                            city: 'GPS Location',
-                            isGPS: true,
-                          };
-                          setUserLocation(loc);
-                          saveLocation(loc);
-                          setLoadingGeo(false);
-                        },
-                        () => setLoadingGeo(false),
-                        { enableHighAccuracy: true, timeout: 5000 },
-                      );
-                    } else {
-                      setLoadingGeo(false);
-                    }
+                    window.dispatchEvent(new CustomEvent('open-location-modal'));
                   }}
                   className="w-full py-1.5 px-2 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
                 >
@@ -1123,7 +1087,7 @@ export default function DiagnosticDashboard() {
       {/* SUBTAB 2: CT & MRI Public Wait Times */}
       {activeSubTab === 'imaging-waits' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata ?? {}} arrayKey="CIHI_DIAGNOSTIC_WAIT_TIMES" />
+          <DataTimestamp compact metadata={metadata ?? {}} arrayKey="IMAGING_WAIT_TRENDS" />
           {/* Clickable KPI overview cards — toggle historical trend panel */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* CT Scan KPI Card */}
@@ -1418,6 +1382,7 @@ export default function DiagnosticDashboard() {
       {/* SUBTAB 3: Imaging Facility Access */}
       {activeSubTab === 'facilities' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={metadata ?? {}} arrayKey="FACILITY_IMAGING_WAITS" />
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
@@ -1486,18 +1451,16 @@ export default function DiagnosticDashboard() {
       {/* SUBTAB 4: Lab Test Turnaround-Time Benchmarks */}
       {activeSubTab === 'turnaround' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={metadata ?? {}} arrayKey="TEST_TURNAROUND_METRICS" />
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
             {/* Turnaround times bar chart */}
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Test Turnaround Duration Benchmarks</h3>
                   <p className="text-[10px] text-slate-500">Required specimen analytical processing timeline from collection to report</p>
                 </div>
-                <span className="text-[9px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
-                  Source: APL Test Directory
-                </span>
               </div>
 
               {/* Recharts Bar Chart */}

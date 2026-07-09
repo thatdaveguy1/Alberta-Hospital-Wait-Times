@@ -63,6 +63,7 @@ export function sanitizeSource(source: string): string {
     'CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)':
       'CIHI NHEX & indicators (877 beds, 823 CSHS)',
     'Open Alberta AHCIP Statistical Supplement (combined workbook)': 'Open Alberta AHCIP Statistical Supplement',
+    'APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)': 'APL QMe REST API',
   };
 
   const normalized = source.trim();
@@ -113,8 +114,7 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
               : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
           }`}
         >
-          {isAuto ? <RefreshCw className="w-2.5 h-2.5" /> : <FileText className="w-2.5 h-2.5" />}
-          {isAuto ? 'Auto-updated' : 'Manual'}
+          {isAuto ? 'Auto-updated\u00A0' : 'Manual\u00A0'}
         </span>
         <span className="font-medium">
           Updated: <span className="font-mono text-slate-200 font-semibold">{lastUpdated}</span>
