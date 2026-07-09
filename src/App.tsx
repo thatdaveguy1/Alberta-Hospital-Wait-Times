@@ -20,7 +20,7 @@ import {
   Map,
   SlidersHorizontal,
   ChevronRight,
-  ChevronDown,
+
   ChevronUp,
   Mail,
   Bell,
@@ -29,7 +29,7 @@ import {
   CheckCircle,
   Navigation,
   Sparkles,
-  Minus,
+
   Check,
   Maximize2,
   Minimize2,
@@ -61,7 +61,7 @@ import {
   ReferenceLine
 } from 'recharts';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { MapComponent } from './components/MapComponent';
 import SurgicalDashboard from './components/SurgicalDashboard';
 import ServiceDisruptionsDashboard from './components/ServiceDisruptionsDashboard';
@@ -555,7 +555,6 @@ export default function App() {
   });
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
   const [dashboardSearch, setDashboardSearch] = useState('');
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isModulesExpanded, setIsModulesExpanded] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('alberta_hospital_modules_expanded') !== '0';
@@ -1336,191 +1335,10 @@ export default function App() {
           </p>
         </div>
 
-        {/* Mobile Header Dashboard Switcher */}
-        {(() => {
-          const activeDashboard = DASHBOARDS.find(d => d.id === activeTab) || DASHBOARDS[0];
-          const ActiveIcon = activeDashboard.icon;
-          return (
-            <div className="lg:hidden mb-6">
-              <button
-                onClick={() => setIsMobileNavOpen(true)}
-                className="w-full flex items-center justify-between p-4 bg-[#090e21] border border-slate-800 rounded-2xl hover:border-slate-700 transition-all text-left shadow-xl"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl ${activeDashboard.bgColor} ${activeDashboard.color}`}>
-                    <ActiveIcon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-[9px] text-slate-500 font-black uppercase tracking-wider">
-                      {getCategoryTitle(activeDashboard.category)}
-                    </div>
-                    <div className="text-sm font-extrabold text-white">
-                      {activeDashboard.title}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 text-[9px] font-black bg-blue-600/10 border border-blue-500/20 text-blue-400 rounded-full uppercase tracking-wider">
-                    Change Module
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
-                </div>
-              </button>
-            </div>
-          );
-        })()}
 
-        {/* Mobile Slide-Up Navigation Drawer */}
-        <AnimatePresence>
-          {isMobileNavOpen && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                key="mobile-nav-backdrop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsMobileNavOpen(false)}
-                className="fixed inset-0 bg-black/80 z-50 lg:hidden"
-              />
-              {/* Slide-up Container */}
-              <motion.div
-                key="mobile-nav-drawer"
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-                className="fixed bottom-0 left-0 right-0 max-h-[85vh] bg-[#090e21] border-t border-slate-800 rounded-t-3xl z-50 p-6 flex flex-col overflow-hidden lg:hidden shadow-2xl"
-              >
-                {/* Drawer Drag Bar */}
-                <div className="w-12 h-1.5 bg-slate-800 rounded-full mx-auto mb-4 shrink-0" />
-
-                {/* Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800 shrink-0">
-                  <div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                      <SlidersHorizontal className="w-4 h-4 text-blue-500" />
-                      Select Analytics Console
-                    </h3>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Explore active health service metrics across Alberta</p>
-                  </div>
-                  <button
-                    onClick={() => setIsMobileNavOpen(false)}
-                    className="p-1 text-slate-400 hover:text-white"
-                  >
-                    <Minus className="w-6 h-6" />
-                  </button>
-                </div>
-
-                {/* Drawer Search */}
-                <div className="relative my-4 shrink-0">
-                  <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Search dashboards..."
-                    value={dashboardSearch}
-                    onChange={(e) => setDashboardSearch(e.target.value)}
-                    className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-2 pl-9 pr-8 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                  />
-                  {dashboardSearch && (
-                    <button
-                      onClick={() => setDashboardSearch('')}
-                      className="absolute right-3 top-2.5 text-slate-500 hover:text-white text-xs font-bold"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-
-                {/* Drawer Body - Scrollable */}
-                <div className="flex-1 overflow-y-auto pr-1 pb-8 space-y-6">
-                  {CATEGORIES.filter(c => c.id !== 'all').map(category => {
-                    const items = DASHBOARDS.filter(d =>
-                      d.category === category.id &&
-                      dashboardMatchesSearch(d, dashboardSearch)
-                    );
-
-                    if (items.length === 0) return null;
-
-                    return (
-                      <div key={category.id} className="space-y-2">
-                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">
-                          {CATEGORY_TITLE_BY_ID[category.id]}
-                        </h4>
-                        <div className="grid grid-cols-1 gap-2">
-                          {items.map(d => {
-                            const Icon = d.icon;
-                            const isActive = activeTab === d.id;
-                            return (
-                              <button
-                                key={d.id}
-                                type="button"
-                                data-dashboard-id={d.id}
-                                onClick={() => {
-                                  setActiveTab(d.id);
-                                  setIsMobileNavOpen(false);
-                                  if (isMapFullscreen) {
-                                    setIsMapFullscreen(false);
-                                  }
-                                }}
-                                className={`w-full flex items-start gap-3.5 p-3.5 rounded-xl text-xs transition-all text-left ${
-                                  isActive
-                                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold border border-blue-400/30'
-                                    : 'bg-slate-950/40 text-slate-400 hover:text-slate-200 border border-slate-800/40'
-                                }`}
-                              >
-                                <div className={`p-2 rounded-xl shrink-0 ${
-                                  isActive ? 'bg-white/10 text-white' : `${d.bgColor} ${d.color}`
-                                }`}>
-                                  <Icon className="w-4 h-4" />
-                                </div>
-                                <div className="space-y-1">
-                                  <div className="font-extrabold flex items-center gap-2">
-                                    <span>{d.title}</span>
-                                    {d.badge && (
-                                      <span className={`text-[8px] px-1.5 py-0.5 rounded font-extrabold uppercase tracking-widest border ${
-                                        isActive ? 'bg-white/10 text-white border-white/20' : d.badgeColor
-                                      }`}>
-                                        {d.badge}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className={`text-[10px] leading-relaxed ${isActive ? 'text-blue-100/80' : 'text-slate-400'}`}>
-                                    {d.description}
-                                  </p>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  {/* No Results Drawer */}
-                  {DASHBOARDS.filter(d =>
-                    dashboardMatchesSearch(d, dashboardSearch)
-                  ).length === 0 && (
-                    <div className="text-center py-8 bg-slate-950/20 border border-dashed border-slate-800 rounded-2xl space-y-2">
-                      <Search className="w-8 h-8 text-slate-600 mx-auto" />
-                      <p className="text-xs text-slate-400 font-medium">No matches found</p>
-                      <button
-                        onClick={() => setDashboardSearch('')}
-                        className="text-[10px] text-blue-400 font-black uppercase tracking-wider"
-                      >
-                        Reset Filters
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-
-        {/* Horizontal Nav Bar (Desktop Only, under notice disclaimer) */}
+        {/* Module picker (all screen sizes; optional hide via localStorage) */}
         {!isModulesExpanded ? (
-          <div className="hidden lg:flex bg-[#090e21] border border-slate-800 rounded-2xl p-3 mb-6 shadow-xl w-full items-center justify-between gap-4">
+          <div className="flex bg-[#090e21] border border-slate-800 rounded-2xl p-3 mb-6 shadow-xl w-full items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
                 <SlidersHorizontal className="w-4 h-4" />
@@ -1540,7 +1358,7 @@ export default function App() {
             </button>
           </div>
         ) : (
-          <div className="hidden lg:block bg-[#090e21] border border-slate-800 rounded-2xl p-4 mb-8 shadow-xl w-full space-y-4">
+          <div className="block bg-[#090e21] border border-slate-800 rounded-2xl p-4 mb-8 shadow-xl w-full space-y-4">
           {/* Header Row */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
               <div className="flex items-center gap-3">
@@ -1584,7 +1402,7 @@ export default function App() {
                 Hide modules
               </button>
             </div>
-          </div>
+            </div>
 
           {/* Category Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
@@ -1614,7 +1432,7 @@ export default function App() {
           {/* Module Tiles */}
           <div className="space-y-4">
             {selectedCategory === 'all' ? (
-              <div className="grid grid-cols-4 xl:grid-cols-5 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                 {DASHBOARDS.filter(d =>
                   dashboardMatchesSearch(d, dashboardSearch)
                 ).map(d => {
@@ -1674,7 +1492,7 @@ export default function App() {
                         {items.length} module{items.length !== 1 ? 's' : ''}
                       </span>
                     </div>
-                    <div className="grid grid-cols-4 xl:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                       {items.map(d => {
                         const Icon = d.icon;
                         const isActive = activeTab === d.id;
