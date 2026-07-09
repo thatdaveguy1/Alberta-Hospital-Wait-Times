@@ -1,3 +1,11 @@
+## Session: 2026-07-09 (Diagnostics headed verify — module search)
+
+### Lesson: Module picker search must not match description text
+- **Mistake:** `dashboardSearch` filtered `title` OR `description`, so queries like "diagnostic" matched **Surgical Waitlists** (description mentions diagnostic timelines) and **Patient Experience** (advocacy diagnostics), not only **Diagnostic Imaging + Labs**. Headed scripts then clicked the wrong tile or stayed on ER.
+- **Solution:** `src/lib/dashboardModuleSearch.ts` — `dashboardMatchesSearch` uses `title`, `shortName`, and `id` only. Module tiles expose `data-dashboard-id`; deep link `?module=diagnostics` sets `activeTab` on load. Lab automation uses `[data-lab-id]` + `MouseEvent` click. `scripts/headed-diag-lab-trends.sh` opens `?module=diagnostics` first.
+- **Prevention:** Picker search should use stable identifiers, not long marketing descriptions. Prefer `data-dashboard-id` or URL deep links over `text=Diagnostics` in agent-browser.
+
+
 # Lessons Learned
 
 Record mistakes and their solutions here. Read before each sprint to avoid repeating.

@@ -53,6 +53,8 @@ export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCard
 
   return (
     <div
+      data-testid="lab-card"
+      data-lab-id={lab.id}
       role="button"
       tabIndex={0}
       onClick={onClick}

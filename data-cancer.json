@@ -5593,27 +5593,27 @@
     },
     "CANCER_SURGERY_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:31:11.346Z",
+      "lastUpdated": "2026-07-08T12:01:30.854Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2013\u20132025"
+      "sourceVintage": "2013–2025"
     },
     "RADIATION_THERAPY_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:31:11.346Z",
+      "lastUpdated": "2026-07-08T12:01:30.854Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2010\u20132025"
+      "sourceVintage": "2010–2025"
     },
     "ALBERTA_CANCER_CENTRES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:30:58.149Z",
+      "lastUpdated": "2026-07-08T12:01:17.076Z",
       "source": "AHS Cancer Centre directory",
       "sourceVintage": "Live AHS directory"
     },
     "CIHI_CANCER_WAIT_TIMES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:45.975Z",
+      "lastUpdated": "2026-07-08T12:04:29.810Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2008\u20132025"
+      "sourceVintage": "2008–2025"
     }
   }
 }

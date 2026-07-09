@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { calculateDistance } from './lib/geo';
-import { cn, formatMinutesToHm } from './lib/utils';
+import { dashboardMatchesSearch, readDashboardModuleFromUrl } from './lib/dashboardModuleSearch';
 import { averageFacilityWaitMinutes, busiestHourOfDay, facilityTrendYDomain } from './lib/facilityWaitStats';
 import { Hospital, WaitTimeSnapshot } from './types';
 import { 
@@ -544,11 +544,20 @@ export default function App() {
   const [alertErrorMessage, setAlertErrorMessage] = useState('');
   const [expandedRegions, setExpandedRegions] = useState<{ [region: string]: boolean }>({});
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'er-waits' | 'surgical-waits' | 'disruptions' | 'system-flow' | 'primary-care' | 'workforce' | 'diagnostics' | 'cancer' | 'mental-health' | 'long-term-care' | 'patient-experience' | 'public-health' | 'regional-inequity' | 'health-spending' | 'virtual-care'>('er-waits');
+  const [activeTab, setActiveTab] = useState<'er-waits' | 'surgical-waits' | 'disruptions' | 'system-flow' | 'primary-care' | 'workforce' | 'diagnostics' | 'cancer' | 'mental-health' | 'long-term-care' | 'patient-experience' | 'public-health' | 'regional-inequity' | 'health-spending' | 'virtual-care'>(() => {
+    const ids = DASHBOARDS.map((d) => d.id);
+    return (readDashboardModuleFromUrl(ids) as typeof activeTab) ?? 'er-waits';
+  });
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
   const [dashboardSearch, setDashboardSearch] = useState('');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isModulesExpanded, setIsModulesExpanded] = useState(false);
+
+  // Deep-link: ?module=diagnostics (headed verify + bookmarks)
+  useEffect(() => {
+    const fromUrl = readDashboardModuleFromUrl(DASHBOARDS.map((d) => d.id));
+    if (fromUrl) setActiveTab(fromUrl as typeof activeTab);
+  }, []);
 
   // Lock body scroll when map is fullscreen
   useEffect(() => {
@@ -1416,8 +1425,7 @@ export default function App() {
                   {CATEGORIES.filter(c => c.id !== 'all').map(category => {
                     const items = DASHBOARDS.filter(d =>
                       d.category === category.id &&
-                      (d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
-                       d.description.toLowerCase().includes(dashboardSearch.toLowerCase()))
+                      dashboardMatchesSearch(d, dashboardSearch)
                     );
 
                     if (items.length === 0) return null;
@@ -1434,6 +1442,8 @@ export default function App() {
                             return (
                               <button
                                 key={d.id}
+                                type="button"
+                                data-dashboard-id={d.id}
                                 onClick={() => {
                                   setActiveTab(d.id);
                                   setIsMobileNavOpen(false);
@@ -1477,8 +1487,7 @@ export default function App() {
 
                   {/* No Results Drawer */}
                   {DASHBOARDS.filter(d =>
-                    d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
-                    d.description.toLowerCase().includes(dashboardSearch.toLowerCase())
+                    dashboardMatchesSearch(d, dashboardSearch)
                   ).length === 0 && (
                     <div className="text-center py-8 bg-slate-950/20 border border-dashed border-slate-800 rounded-2xl space-y-2">
                       <Search className="w-8 h-8 text-slate-600 mx-auto" />
@@ -1591,14 +1600,15 @@ export default function App() {
             {selectedCategory === 'all' ? (
               <div className="grid grid-cols-4 xl:grid-cols-5 gap-2">
                 {DASHBOARDS.filter(d =>
-                  d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
-                  d.description.toLowerCase().includes(dashboardSearch.toLowerCase())
+                  dashboardMatchesSearch(d, dashboardSearch)
                 ).map(d => {
                   const Icon = d.icon;
                   const isActive = activeTab === d.id;
                   return (
                     <button
                       key={d.id}
+                      type="button"
+                      data-dashboard-id={d.id}
                       onClick={() => {
                         setActiveTab(d.id);
                         setIsModulesExpanded(false);
@@ -1634,8 +1644,7 @@ export default function App() {
               CATEGORIES.filter(c => c.id === selectedCategory).map(category => {
                 const items = DASHBOARDS.filter(d =>
                   d.category === category.id &&
-                  (d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
-                   d.description.toLowerCase().includes(dashboardSearch.toLowerCase()))
+                  dashboardMatchesSearch(d, dashboardSearch)
                 );
 
                 if (items.length === 0) return null;
@@ -1657,6 +1666,8 @@ export default function App() {
                         return (
                           <button
                             key={d.id}
+                            type="button"
+                            data-dashboard-id={d.id}
                             onClick={() => {
                               setActiveTab(d.id);
                               setIsModulesExpanded(false);
@@ -1694,8 +1705,7 @@ export default function App() {
             {/* Empty search results */}
             {DASHBOARDS.filter(d => {
               const matchesCategory = selectedCategory === 'all' || d.category === selectedCategory;
-              const matchesSearch = d.title.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
-                                    d.description.toLowerCase().includes(dashboardSearch.toLowerCase());
+              const matchesSearch = dashboardMatchesSearch(d, dashboardSearch);
               return matchesCategory && matchesSearch;
             }).length === 0 && (
               <div className="text-center py-6 bg-slate-950/20 border border-dashed border-slate-800 rounded-2xl space-y-2">

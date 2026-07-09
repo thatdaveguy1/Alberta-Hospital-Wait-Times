@@ -54,6 +54,12 @@ open_modules() {
 
 select_module() {
   local needle="$1"
+  local dashboard_id="${2:-}"
+  if [[ -n "$dashboard_id" ]]; then
+    if ab eval "(()=>{const b=document.querySelector('[data-dashboard-id="${dashboard_id}"]');if(b){b.click();return true;}return false;})()" 2>/dev/null | grep -q true; then
+      return 0
+    fi
+  fi
   ab fill 'input[placeholder="Search modules..."]' "$needle" 2>/dev/null || true
   sleep 1
   local ref
@@ -63,7 +69,7 @@ select_module() {
     return 0
   fi
   ab click "text=$needle" 2>/dev/null && return 0
-  ab eval "(()=>{const el=[...document.querySelectorAll('button,h3,div')].find(n=>(n.textContent||'').includes('$needle'));if(el){el.click();return true;}return false;})()" || return 1
+  ab eval "(()=>{const el=[...document.querySelectorAll('button[data-dashboard-id],button,h3')].find(n=>(n.textContent||'').includes('$needle'));if(el){el.click();return true;}return false;})()" || return 1
 }
 
 set_location_via_modal() {

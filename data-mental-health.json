@@ -5479,7 +5479,7 @@
     },
     "ADDICTION_BED_CAPACITIES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T04:34:09.546Z",
+      "lastUpdated": "2026-07-08T12:01:00.541Z",
       "source": "Addiction Bed Exploration Dashboard (ABED) - findaddictionbeds.alberta.ca",
       "sourceVintage": "Live (updated once daily, Mon-Fri)"
     },
@@ -5497,13 +5497,13 @@
     },
     "SUPPORT_HELPLINES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T04:34:09.546Z",
+      "lastUpdated": "2026-07-08T12:01:00.541Z",
       "source": "AHS Mental Health helplines + 211 Alberta directory",
       "sourceVintage": "Live helpline directories"
     },
     "CIHI_MH_READMISSION_RATES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:20.117Z",
+      "lastUpdated": "2026-07-08T12:04:04.193Z",
       "source": "CIHI 30-day mental-health readmission data table",
       "sourceVintage": "CIHI latest release"
     }

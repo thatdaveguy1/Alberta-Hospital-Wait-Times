@@ -342,7 +342,7 @@
   "_dataMetadata": {
     "PATIENT_VOICE_BY_SETTING": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:30:54.440Z",
+      "lastUpdated": "2026-07-08T12:01:13.354Z",
       "source": "GoodCaring.ca Alberta specialist wait times",
       "sourceVintage": "Live GoodCaring scrape"
     },
@@ -372,25 +372,25 @@
     },
     "INPATIENT_EXPERIENCE_TRENDS_HQCA": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:34:57.867Z",
+      "lastUpdated": "2026-07-08T12:03:43.304Z",
       "source": "HQCA FOCUS patient experience CSV",
       "sourceVintage": "Apr 2021 onward"
     },
     "CIHI_ALL_READMISSION_RATES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:20.117Z",
+      "lastUpdated": "2026-07-08T12:04:04.193Z",
       "source": "CIHI all-patients readmitted data table",
       "sourceVintage": "CIHI latest release"
     },
     "CIHI_ACSC_HOSPITALIZATIONS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:20.117Z",
+      "lastUpdated": "2026-07-08T12:04:04.193Z",
       "source": "CIHI ambulatory-care-sensitive-conditions hospitalizations",
       "sourceVintage": "CIHI latest release"
     },
     "CIHI_WAIT_TIME_SATISFACTION": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:20.117Z",
+      "lastUpdated": "2026-07-08T12:04:04.193Z",
       "source": "CIHI wait-time satisfaction data table",
       "sourceVintage": "CIHI latest release"
     }

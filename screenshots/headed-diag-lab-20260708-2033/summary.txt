@@ -1,0 +1,1 @@
+recharts_after_provincial=0 recharts_after_lab_click=2

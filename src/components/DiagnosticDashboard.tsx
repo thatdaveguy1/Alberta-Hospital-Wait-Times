@@ -841,7 +841,7 @@ export default function DiagnosticDashboard() {
             </div>
           )}
           {/* Provincial Lab Wait Trend Chart */}
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+          <div data-testid="provincial-lab-wait-trend" className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -1026,6 +1026,7 @@ export default function DiagnosticDashboard() {
           <AnimatePresence mode="wait">
             {selectedLabId && (
               <motion.div
+                data-testid="per-lab-wait-trend"
                 key={`lab-trend-${selectedLabId}`}
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}

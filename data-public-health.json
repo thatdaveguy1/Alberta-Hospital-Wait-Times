@@ -297,7 +297,7 @@
     },
     "WASTEWATER_SIGNALS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:07.364Z",
+      "lastUpdated": "2026-07-08T12:03:52.778Z",
       "source": "PHAC Health Infobase wastewater API + Alberta RVD",
       "sourceVintage": "Live weekly wastewater signals"
     },
@@ -327,13 +327,13 @@
     },
     "RVD_RESPIRATORY_CASE_COUNTS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:07.364Z",
+      "lastUpdated": "2026-07-08T12:03:52.778Z",
       "source": "Alberta Respiratory Virus Dashboard summary",
       "sourceVintage": "2025-08-24 to 2026-08-23"
     },
     "RVD_IMMUNIZATION_DOSES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:07.364Z",
+      "lastUpdated": "2026-07-08T12:03:52.778Z",
       "source": "Alberta Respiratory Virus Dashboard immunizations",
       "sourceVintage": "2025-08-24 to 2026-08-23"
     }

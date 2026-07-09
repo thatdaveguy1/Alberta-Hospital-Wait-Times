@@ -183,7 +183,7 @@
       "address": "209 - 8120 Beddington Blvd NW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
@@ -855,7 +855,7 @@
       "address": "154 - 3715 51 St SW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
@@ -1255,7 +1255,7 @@
       "address": "200 - 4935 40 Ave NW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
@@ -1895,7 +1895,7 @@
       "address": "211 - 31 Sunpark Plaza SE",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
@@ -2055,7 +2055,7 @@
       "address": "3 - 2681 36 St NE",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
@@ -7228,7 +7228,7 @@
   "_dataMetadata": {
     "LAB_LOCATION_WAITS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T11:22:01.334Z",
+      "lastUpdated": "2026-07-09T02:37:05.809Z",
       "source": "APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)",
       "sourceVintage": "Live data",
       "verification": "Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes."
@@ -7242,9 +7242,9 @@
     },
     "IMAGING_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:31:07.584Z",
+      "lastUpdated": "2026-07-08T12:01:27.064Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "CIHI live data download"
+      "sourceVintage": "Live data"
     },
     "FACILITY_IMAGING_WAITS": {
       "source": "CIHI Wait Times Priority Procedures in Canada",
@@ -7262,7 +7262,7 @@
     },
     "CIHI_DIAGNOSTIC_WAIT_TIMES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:35:45.975Z",
+      "lastUpdated": "2026-07-08T12:04:29.810Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
       "sourceVintage": "2008–2025"
     }

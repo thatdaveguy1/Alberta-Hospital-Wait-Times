@@ -1464,7 +1464,7 @@ export default function SystemFlowDashboard() {
                     {activeQuarterSnapshot.quarter === '2021-Q1' && "Pre-crisis period: Hospital bed occupancy hovered below target levels (94.2%). Downstream placement bottlenecks were minor, holding decisions-to-admit waits to a manageable 24.5-hour median."}
                     {activeQuarterSnapshot.quarter === '2022-Q1' && "Early capacity overload: Bed occupancies breached 101.4%. The decision-to-admit wait time expanded to 31.2 hours as ED boarding became a persistent systemic issue."}
                     {activeQuarterSnapshot.quarter === '2024-Q1' && "Critical degradation: Inpatient occupancies hit 104.8%, sending ED bed wait times past 40.5 hours. LWBS walkout rates rose to 9.2% as front-end assessment lines backed up."}
-                    {activeQuarterSnapshot.quarter === '2026-Q1' && "Peak systemic crisis: Occumpancy stands at an all-time high of 107.5%. Decisions-to-admit now require a massive 48.0 hours of waiting, driving critical safety risks."}
+                    {activeQuarterSnapshot.quarter === '2026-Q1' && "Peak systemic crisis: Occupancy stands at an all-time high of 107.5%. Decisions-to-admit now require a massive 48.0 hours of waiting, driving critical safety risks."}
                     {!['2021-Q1', '2022-Q1', '2024-Q1', '2026-Q1'].includes(activeQuarterSnapshot.quarter) && "Mid-period transition: Continuous growth in Alternate Level of Care (ALC) delayed discharge rates steadily locked acute care wards, slowly degrading ED transit metrics."}
                   </div>
                 </div>
