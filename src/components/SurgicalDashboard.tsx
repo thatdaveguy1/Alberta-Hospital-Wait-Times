@@ -262,6 +262,25 @@ export default function SurgicalDashboard() {
     return filteredFacilities.filter(f => !f.or_utilization_rate || f.or_utilization_rate === 0);
   }, [filteredFacilities]);
 
+  const surgicalCapacityStats = useMemo(() => {
+    const total = SURGICAL_FACILITIES.length;
+    const csfCount = SURGICAL_FACILITIES.filter(f => f.chartered_partner_status).length;
+    const csfSharePct = total > 0 ? Math.round((csfCount / total) * 1000) / 10 : 0;
+    const tracked = SURGICAL_FACILITIES.filter(f => f.or_utilization_rate > 0);
+    const orUtilPct =
+      tracked.length > 0
+        ? Math.round((tracked.reduce((s, f) => s + f.or_utilization_rate, 0) / tracked.length) * 10) / 10
+        : 0;
+    const hipBench = SURGICAL_RECORDS.find(
+      r =>
+        r.procedure_name === 'Hip Replacement' &&
+        r.geography_type === 'Province' &&
+        r.metric_name === '% within benchmark' &&
+        r.wait_segment === 'Decision-to-surgery',
+    )?.metric_value;
+    return { total, csfSharePct, orUtilPct, hipBenchPct: hipBench ?? null };
+  }, [SURGICAL_FACILITIES, SURGICAL_RECORDS]);
+
   const renderFacilityRow = (fac: FacilitySurgicalCapacity) => {
     const isTracked = fac.or_utilization_rate > 0;
     // color scale for OR utilization
@@ -825,34 +844,41 @@ export default function SurgicalDashboard() {
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-slate-300 font-medium">Chartered Surgical Facilities Share</span>
-                      <span className="text-emerald-400 font-bold">34.0%</span>
+                      <span className="text-emerald-400 font-bold">{surgicalCapacityStats.csfSharePct}%</span>
                     </div>
                     <div className="w-full h-1.5 bg-slate-850 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500" style={{ width: '34%' }}></div>
+                      <div className="h-full bg-emerald-500" style={{ width: `${Math.min(100, surgicalCapacityStats.csfSharePct)}%` }}></div>
                     </div>
-                    <p className="text-[9px] text-slate-500">Day surgery optimization partner contracts (Acute Care Alberta Initiative)</p>
+                    <p className="text-[9px] text-slate-500">
+                      {SURGICAL_FACILITIES.filter(f => f.chartered_partner_status).length} of {surgicalCapacityStats.total} tracked facilities are CSF partners
+                    </p>
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-slate-300 font-medium">Provincial Operating Room (OR) Utilization</span>
-                      <span className="text-blue-400 font-bold">88.5%</span>
+                      <span className="text-blue-400 font-bold">{surgicalCapacityStats.orUtilPct}%</span>
                     </div>
                     <div className="w-full h-1.5 bg-slate-850 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500" style={{ width: '88.5%' }}></div>
+                      <div className="h-full bg-blue-500" style={{ width: `${Math.min(100, surgicalCapacityStats.orUtilPct)}%` }}></div>
                     </div>
-                    <p className="text-[9px] text-slate-500">Averages based on acute-care facilities performing complex surgery</p>
+                    <p className="text-[9px] text-slate-500">Mean OR utilization across facilities reporting non-zero rates</p>
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-slate-300 font-medium">ASI Hip/Knee Fast-Track Compliance</span>
-                      <span className="text-amber-400 font-bold">62.0%</span>
+                      <span className="text-amber-400 font-bold">
+                        {surgicalCapacityStats.hipBenchPct != null ? `${surgicalCapacityStats.hipBenchPct}%` : '—'}
+                      </span>
                     </div>
                     <div className="w-full h-1.5 bg-slate-850 rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-500" style={{ width: '62%' }}></div>
+                      <div
+                        className="h-full bg-amber-500"
+                        style={{ width: `${Math.min(100, surgicalCapacityStats.hipBenchPct ?? 0)}%` }}
+                      ></div>
                     </div>
-                    <p className="text-[9px] text-slate-500">Benchmark target compliance for joint reconstruction procedures</p>
+                    <p className="text-[9px] text-slate-500">Hip replacement % within CIHI 182-day benchmark (provincial)</p>
                   </div>
                 </div>
               </div>
@@ -910,8 +936,8 @@ export default function SurgicalDashboard() {
                   <Building2 className="w-4 h-4 text-cyan-400" />
                   Surgical Facilities Directory & Capacity Monitor
                 </h3>
-                <p className="text-[11px] text-slate-400 leading-normal">
-                  Comprehensive tracking of all 11 licensed acute care and contracted Chartered Surgical Facilities (CSF) performing specialized surgeries in Alberta.
+                <p className="text-[11px] text-slate-400 leading-normal mt-1">
+                  Comprehensive tracking of all {surgicalCapacityStats.total} licensed acute care and contracted Chartered Surgical Facilities (CSF) performing specialized surgeries in Alberta.
                 </p>
               </div>
 

@@ -58,7 +58,7 @@ export interface SpendingByUseOfFunds {
 export const NATIONAL_SPENDING_COMPARE: NationalSpendingCompare[] = [
   {
     province: 'Alberta',
-    spendingPerCapita: 8540,
+    spendingPerCapita: 9598,
     spendingAsPercentGdp: 12.2,
     hospitalSpendingPerCapita: 3120,
     physicianSpendingPerCapita: 1480,

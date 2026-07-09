@@ -3351,7 +3351,7 @@
     },
     "PHYSICIAN_SPECIALTY_BILLING": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:03:21.239Z",
+      "lastUpdated": "2026-07-09T02:33:53.212Z",
       "source": "Open Alberta AHCIP Statistical Supplement (combined workbook)",
       "sourceVintage": "AHCIP Statistical Supplement — latest release (Tables 2.3, 2.12 A/B/D, 2.14)",
       "verification": "Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons, with registered persons derived from Table 2.14 FTE counts. Pathology and Radiology have no Table 2.14 entry, so their servicesPerPatient is 0."

@@ -11679,13 +11679,13 @@
   "_dataMetadata": {
     "CONTINUING_CARE_PLACEMENT_STATS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:32:53.440Z",
+      "lastUpdated": "2026-07-08T12:02:56.015Z",
       "source": "HQCA FOCUS continuing-care CSVs",
       "sourceVintage": "2021–latest HQCA reporting period"
     },
     "RESIDENT_QUALITY_OUTCOMES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T02:32:53.440Z",
+      "lastUpdated": "2026-07-08T12:02:56.015Z",
       "source": "HQCA FOCUS continuing-care CSVs + CIHI LTCC indicators",
       "sourceVintage": "2021–latest HQCA/CIHI reporting period"
     },
@@ -11697,7 +11697,7 @@
     },
     "CONTINUING_CARE_COMPLIANCE": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T04:34:22.797Z",
+      "lastUpdated": "2026-07-09T02:30:38.386Z",
       "source": "Alberta Open Government — Continuing Care Accommodation Standards compliance reporting",
       "sourceVintage": "Dataset vintage: 2026-03-31",
       "verification": "Aggregated from open.alberta.ca XLSX (OGL-A). Per-facility record collapsed from per-visit/per-standard rows; violationsCount counts only open/unresolved non-compliances."

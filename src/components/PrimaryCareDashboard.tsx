@@ -369,7 +369,7 @@ export default function PrimaryCareDashboard() {
               <span className="text-2xl font-black text-white">{totalAcceptingCount.toLocaleString()} Providers</span>
               <span className="text-[10px] text-emerald-400 font-bold">Live Directory</span>
             </div>
-            <span className="text-[10px] text-slate-400 mt-1 block">Source: Alberta Find a Provider · {primaryCareData.ACCEPTING_PROVIDERS.length} providers province-wide</span>
+            <span className="text-[10px] text-slate-400 mt-1 block">Source: Alberta Find a Provider directory · {primaryCareData.ACCEPTING_PROVIDERS.length} providers province-wide (not attachment statistics)</span>
           </div>
         </div>
 
@@ -524,7 +524,7 @@ export default function PrimaryCareDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-900 pb-4">
                 <div>
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">Primary Care Attachment Rates by Demographic Group</h3>
-                  <p className="text-xs text-slate-400">Percent of Albertans who report having access to a regular health provider ({reportingYear})</p>
+                  <p className="text-xs text-slate-400">CIHI Shared Health Priorities — percent of Albertans reporting access to a regular provider ({reportingYear})</p>
                   <DataTimestamp compact metadata={primaryCareData._dataMetadata} arrayKey="ATTACHMENT_RATES" />
                 </div>
                 <div className="flex items-center gap-2">

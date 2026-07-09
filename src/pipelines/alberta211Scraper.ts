@@ -142,7 +142,9 @@ export async function run(): Promise<SyncResult> {
     }
 
     if (allRecords.length === 0) {
-      console.warn('[Alberta211] No helpline records found — leaving data files unchanged.');
+      console.warn(
+        '[Alberta211] No helpline records — API may be behind Cloudflare (check.search211.ca). Preserving hand-authored helplines.',
+      );
       return {
         domain: 'mental-health',
         pipeline: 'alberta211Scraper',
@@ -151,7 +153,7 @@ export async function run(): Promise<SyncResult> {
         recordsWritten: 0,
         durationMs: Date.now() - startTime,
         timestamp,
-        error: 'No helpline records found via 211 Alberta API',
+        error: '211 API returned no records (Cloudflare verification or empty search)',
       };
     }
 

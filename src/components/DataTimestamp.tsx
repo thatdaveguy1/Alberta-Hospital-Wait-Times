@@ -53,7 +53,7 @@ function sanitizeSource(source: string): string {
     cihiWorkforceFetcher: 'CIHI Workforce Data',
     primaryCareFetcher: 'CIHI Shared Health Priorities',
     openAlbertaInequityFetcher: 'Open Alberta LGA Community Profiles',
-    openAlbertaBillingFetcher: 'AHCIP Statistical Supplement (hand-curated)',
+    openAlbertaBillingFetcher: 'Open Alberta AHCIP Statistical Supplement',
     openAlbertaFetcher: 'Open Alberta',
     statscanFetcher: 'Statistics Canada',
     phacFetcher: 'Public Health Agency of Canada',
