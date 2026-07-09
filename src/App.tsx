@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { calculateDistance } from './lib/geo';
 import { dashboardMatchesSearch, readDashboardModuleFromUrl } from './lib/dashboardModuleSearch';
 import { averageFacilityWaitMinutes, busiestHourOfDay, facilityTrendYDomain } from './lib/facilityWaitStats';
+import { cn, formatMinutesToHm } from './lib/utils';
 import { Hospital, WaitTimeSnapshot } from './types';
 import { 
   Activity, 

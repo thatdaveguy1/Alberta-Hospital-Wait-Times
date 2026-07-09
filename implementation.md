@@ -1,277 +1,194 @@
-# Plan: Make Hospital System Flow Data Auto-Update Daily
+# 15-Tab Dashboard Audit & Fix Plan
 
-## Executive Summary
+This is the living plan for a complete, file-by-file, tab-by-tab audit of the Alberta Hospital Wait Times dashboard. The audit evaluates **visual quality**, **data quality**, and **pipeline (updater) quality** for every module.
 
-The daily pipeline is already running, but the **System Flow dashboard still shows "Manual Update"** because the frontend reads bundled static data from `src/systemFlowData.ts` instead of the live `data-system-flow.json` that the scraper updates every night. Two other reliability gaps make the dashboard look broken: `data-system-flow.json` has no `_dataMetadata` block, and `data-sync-status.json` reports `"failed"` even though 23/31 pipelines succeed because the rollup counts `status: "manual"` as failures.
+**Initial blocker already cleared during planning:**
+- `src/App.tsx` was missing `cn` and `formatMinutesToHm` imports, causing a blank page in headless browsers and `npx tsc --noEmit` failures. Fixed.
+- `tsconfig.json` included `tests` without `vitest` installed, causing `tsc` failures. Excluded `tests` and `**/*.test.ts`.
+- `npx tsc --noEmit` and `npm run build` now pass and the dev server renders.
 
-This plan fixes the root causes and decouples the heavy daily orchestrator from the long-lived Express server so a Puppeteer/CIHI crash cannot take the site down.
+# Alberta Hospitals — 15-Tab Dashboard Audit Plan
 
-## Current State (verified 2026-07-07)
-
-| Check | Result |
-|---|---|
-| launchd server job loaded | ✅ `com.alberta-hospital-wait-times` running, pid 72435 |
-| Express server on port 3004 | ✅ up |
-| Daily orchestrator ran today | ✅ `Jul 7 00:05:16` — 22 success, 0 skipped, 0 failed |
-| `data-system-flow.json` touched today | ✅ `Jul 7 00:05:13` |
-| Dashboard reads live JSON | ❌ imports static `systemFlowData.ts` |
-| `data-system-flow.json` has `_dataMetadata` | ❌ absent |
-| Sync status rollup handles `"manual"` | ❌ falls through to `"failed"` |
-| launchd has calendar trigger | ❌ only `RunAtLoad` + `KeepAlive` |
-
-## Root Cause
-
-1. **Frontend is bundled with hand-authored data.** `SystemFlowDashboard.tsx` imports `FACILITY_FLOW_METRICS`, `AHS_WEEKLY_ED_LOS`, `CIHI_COMPARATORS`, `REGIONAL_LGA_DEMAND`, `HISTORICAL_FLOW_TIMELINES` from `../systemFlowData`. That file's `_dataMetadata` hard-codes `updateType: 'manual'`, so the badge is correct for the bundled data but misleading for the live JSON.
-2. **Live JSON lacks metadata.** `acuteCareScraper.ts`, `ahsWeeklyEdLosScraper.ts`, and `cihiMhSafetyFetcher.ts` all read-modify-write `data-system-flow.json`, but none writes `_dataMetadata`.
-3. **Sync status rollup bug.** `recordDailySyncResults()` treats `status: 'manual'` as a failure because the status is neither `success`, `failed`, `partial`, nor `skipped`.
-4. **Daily sync is tied to the server process.** `scheduler.ts` runs the daily orchestrator via `setInterval(24h)`, which drifts and resets on every restart; the existing launchd plist only keeps the server alive, it does not calendar-schedule the heavy daily work.
-
-## Phases
-
-### Phase 1 — Convert SystemFlowDashboard to fetch from the API
-
-**Target:** `src/components/SystemFlowDashboard.tsx`
-
-1. Remove static imports of the five data arrays from `../systemFlowData`; keep only the **type** imports.
-2. Add state and `useEffect` mirroring `PrimaryCareDashboard.tsx`:
-   ```ts
-   const [systemFlowData, setSystemFlowData] = useState<{
-     FACILITY_FLOW_METRICS: FacilityFlow[];
-     AHS_WEEKLY_ED_LOS: WeeklyEDLOS[];
-     CIHI_COMPARATORS: CIHIComparator[];
-     REGIONAL_LGA_DEMAND: LGADemand[];
-     HISTORICAL_FLOW_TIMELINES: HistoricalFlowSnapshot[];
-     CIHI_OCCUPANCY_RATES?: any[];
-     CIHI_ED_WAIT_INITIAL_ASSESSMENT?: any[];
-     _dataMetadata?: DataMetadataMap;
-   } | null>(null);
-   const [isLoading, setIsLoading] = useState(true);
-   const [error, setError] = useState<string | null>(null);
-   ```
-3. Fetch `/api/data/system-flow` on mount and on manual refresh.
-4. Replace every static array reference with `systemFlowData?.ARRAY ?? []`.
-5. Add null guards at the start of every `useMemo` that accesses properties of a `.find()` or array-index result (per `lessons.md` useMemo crash lesson).
-6. Add loading and error states.
-7. Pass `systemFlowData?._dataMetadata` to `DataTimestamp` instead of the static `systemFlowDataMetadata`.
-
-**Guard rails:** do not change visual layout, sub-tabs, or chart styling. Only change the data source and add null guards.
-
-**Acceptance:**
-- `npx tsc --noEmit` passes.
-- Network tab shows `GET /api/data/system-flow` returning JSON.
-- Dashboard renders without console errors.
-- Refreshing after a pipeline run shows a new `lastUpdated` timestamp.
+**Scope:** All `DASHBOARDS` tabs in `src/App.tsx` plus shared shell (`DashboardHeader`, `DataTimestamp`, `LiveDataBadge`, `MapComponent`, footer, module picker, `ContributionsSection`, Data Sources modal).  
+**Out of scope for this plan:** Editing source/data; full `npm test` / full `runAllPipelines()`.
 
 ---
 
-### Phase 2 — Write `_dataMetadata` into `data-system-flow.json`
+## 0. Prerequisites (every auditor)
 
-**Targets:** `src/pipelines/acuteCareScraper.ts`, `src/pipelines/ahsWeeklyEdLosScraper.ts`, `src/pipelines/cihiMhSafetyFetcher.ts`
+1. Confirm dev server: `http://127.0.0.1:3004` (or `REAUDIT_URL`).
+2. Seed location once per session: `localStorage` key `alberta_hospital_user_location` → St. Albert / **T8N 7W7** (see `lessons.md` headed-audit pattern); dismiss location modal if shown.
+3. Navigate modules via **`?module=<id>`** deep link (`readDashboardModuleFromUrl`) — not description-based search (`dashboardModuleSearch` title/shortName/id only).
+4. Cross-check `data-sync-status.json` and `/api/sync/status` (or `useSyncStatus`) against `TAB_METADATA_MAP` auto/manual claims.
+5. Log findings to a single artifact (e.g. `local://dashboard-audit-findings.md`) with: tab, severity, evidence (screenshot path / JSON key / line ref).
 
-Each writer already does read-modify-write on `data-system-flow.json`. They must preserve the existing `_dataMetadata` object and only update the keys they own.
-
-1. **Shared helper** (new file `src/pipelines/metadataHelpers.ts` or inline in each file):
-   ```ts
-   function buildMetadata(existing: DataMetadataMap | undefined, key: string, patch: Partial<ArrayMetadata>): DataMetadataMap {
-     const now = new Date().toISOString();
-     return { ...existing, [key]: { source, sourceVintage, lastUpdated: now, updateType: 'auto', verification, ...patch } };
-   }
-   ```
-2. **`acuteCareScraper.ts`** owns:
-   - `FACILITY_FLOW_METRICS` (live facility list + hand-authored analytical metrics)
-   - `CIHI_COMPARATORS` (derived from diagnostic/cancer files)
-   - `REGIONAL_LGA_DEMAND` (derived from regional-inequity file)
-   - `HISTORICAL_FLOW_TIMELINES` (preserved from `systemFlowData.ts` fallback)
-   Use honest metadata: hand-authored/derived parts should say so, but `updateType: 'auto'` because the file is refreshed daily by the scraper.
-3. **`ahsWeeklyEdLosScraper.ts`** owns:
-   - `AHS_WEEKLY_ED_LOS` (parsed from AHS PDFs)
-4. **`cihiMhSafetyFetcher.ts`** owns:
-   - `CIHI_OCCUPANCY_RATES`
-   - `CIHI_ED_WAIT_INITIAL_ASSESSMENT`
-5. Each writer must load the existing `_dataMetadata`, merge only its own keys, and write the merged object back. No writer may replace the whole `_dataMetadata` block.
-
-**Acceptance:**
-- After `npm run pipeline`, `data-system-flow.json` contains a top-level `_dataMetadata` object with entries for all arrays.
-- Each entry has `updateType: 'auto'` and a fresh `lastUpdated` ISO timestamp.
-- Re-running individual pipelines does not erase metadata written by the other pipelines.
+**Pipeline inventory:** 28 jobs in `src/pipelines/orchestrator.ts` `PIPELINES` + **ER** (`erWaitTimesFetcher` / `scheduler.ts` ~10 min) + **disruptions** (`disruptionsScraper` / `dailySync.ts`) + **lab waits** (`aplLabWaitTimesFetcher` / scheduler ~30 min). Daily bulk: `dailySync.ts` → `recordDailySyncResults` → `pushAllToCloudflare`.
 
 ---
 
-### Phase 3 — Fix sync status rollup for `"manual"` pipelines
+## 1. Shared shell audit (Owner: **explore** + **designer**)
 
-**Target:** `src/pipelines/syncStatus.ts`
-
-1. In `recordDailySyncResults()`, update the status logic:
-   ```ts
-   const allSuccess = results.every(r => r.status === 'success');
-   const anyFailed = results.some(r => r.status === 'failed');
-   const anyPartial = results.some(r => r.status === 'partial');
-   const anySkipped = results.some(r => r.status === 'skipped');
-   const anyManual = results.some(r => r.status === 'manual');
-   const anySuccess = results.some(r => r.status === 'success');
-
-   if (allSuccess) {
-     currentStatus.status = 'success';
-   } else if (anyFailed) {
-     currentStatus.status = anySuccess ? 'partial_success' : 'failed';
-   } else if (anyPartial || anySkipped || anyManual) {
-     currentStatus.status = anySuccess ? 'partial_success' : 'manual';
-   } else {
-     currentStatus.status = 'failed';
-   }
-   ```
-   Optional: add `'manual'` to the `SyncStatus['status']` union in `src/pipelines/types.ts` if it does not already exist.
-
-**Acceptance:**
-- After running a daily sync that returns 9 `manual` and 22 `success`, `data-sync-status.json` shows `status: 'partial_success'`, not `failed`.
+| Area | Visual checks | Data/code checks |
+|------|---------------|------------------|
+| Module picker | Category chips, `data-dashboard-id` tiles, mobile “Change Module”, search uses title/shortName/id only | `DASHBOARDS` copy matches each `*Dashboard` header; no ER-only wording on other modules |
+| Footer | `#site-footer` title/blurb switches with `activeTab` (ER vs generic monitor) | `footerBlurb` source/cadence matches `DASHBOARDS[].source` / `updateFrequency` |
+| Data Sources modal | All 15 rows from `TAB_METADATA_MAP`; auto vs static badges | Intervals match scheduler/daily-sync reality (ER 30m vs comment “10 min” in scheduler — document mismatch) |
+| `DashboardHeader` | Auto pulse vs static pill; Last Update / Data Timestamp readable | `arrayKey` exists in `_dataMetadata`; badge aligns with `updateType` |
+| `DataTimestamp` | No pipeline IDs visible; compact vs full | `sanitizeSource()` map covers all `source` strings in JSON metadata |
+| `LiveDataBadge` | N/A (returns `null`) | Dead component / should not be relied on in UI |
+| `MapComponent` | Markers, user pin, selected hospital pan, resize/fullscreen | Hospitals with null lat/lng excluded; wait/proximity sort labels |
+| `ContributionsSection` | Renders below all tabs without layout break | — |
 
 ---
 
-### Phase 4 — Create a standalone daily-sync script
+## 2. Tab-by-tab audit matrix
 
-**Target:** new file `src/pipelines/dailySync.ts` + `package.json`
+| Tab (`module=` ) | Files | Subtabs / views to screenshot | Visual checks | Data checks | Pipeline / updater checks | Owner |
+|------------------|-------|------------------------------|---------------|-------------|---------------------------|-------|
+| **er-waits** | `App.tsx` (inline), `MapComponent.tsx`, `data-er-waittimes.json`, `types.ts` | Default: stats grid, facility list, map, trends (24h/7d/30d) | Map fullscreen; facility cards; peak boxes not cloning 24h value; mobile list/map stack | `/api/hospitals` array shape; snapshots trends; empty hospitals | `scheduler.ts` → `fetchErWaitTimes`; KV push; `erWaitTimesMetadata` vs sync timestamp | **designer** (visual), **task** (pipeline) |
+| **disruptions** | `ServiceDisruptionsDashboard.tsx`, `data-disruptions.json`, `data-disruption-overrides.json` | Single view + stats row | Header metadata; resolve actions; “Invalid Date” on dates | Active vs resolved; city/zone; overrides applied | `disruptionsScraper.ts` + `dailySync`; header `source: disruptionsScraper` → human label | **designer**, **task** |
+| **system-flow** | `SystemFlowDashboard.tsx`, `systemFlowData.ts`, `data-system-flow.json` | `ranked`, `scatterplot`, `trends-weekly`, `cihi-lga` | Weekly ED LOS empty states; scatter quadrants; deep-dive panel | KPIs vs table; null guards in `useMemo`; 29 ER sites coverage | `acute-care`, `ahs-weekly-edlos` | **explore** (data), **designer** |
+| **surgical-waits** | `SurgicalDashboard.tsx`, `surgicalData.ts`, `data-surgical.json` | `overview`, `ortho`, `comparisons`, `statscan` | Facility name match (no `(AHS)`); comparison selectors | `SURGICAL_RECORDS` vs KPI cards; StatsCan segment optional | `powerbi-scraper`, `abjhi`, `cihi-wait-times-surgical`, `cihi-wait-times-priority` | **designer**, **task** |
+| **workforce** | `WorkforceDashboard.tsx`, `workforceData.ts`, `data-workforce.json` | `physicians`, `nursing`, `allied`, `retirement`, `vacancies` | Chart axes; retirement cohort labels | `useMemo` null guards; vacancy quarters | `statscan`, `cpsa`, `cihi-workforce` | **explore**, **designer** |
+| **diagnostics** | `DiagnosticDashboard.tsx`, `diagnosticData.ts`, `data-diagnostic.json`, `LabCard.tsx` | `labs`, `imaging-waits`, `facilities`, `turnaround` | Lab **Closed** vs `0:00`; proximity sort with T8N; refresh button | `LAB_LOCATION_WAITS` live via `/api/data/diagnostic`; trends APIs | `apl-lab-waits` (scheduler 30m) + `cihi-wait-times` (daily) | **designer**, **task** |
+| **primary-care** | `PrimaryCareDashboard.tsx`, `primaryCareData.ts`, `data-primary-care.json` | `attachment`, `directory`, `pcn`, `er-link` | Directory filters; map/cards if any | Attachment year; accepting providers count | `primary-care`, `alberta-find-a-provider`, `open-alberta-inequity-primary-care` | **designer**, **task** |
+| **long-term-care** | `ContinuingCareDashboard.tsx`, `continuingCareData.ts`, `data-continuing-care.json` | `placement`, `resident-quality`, `home-care`, `compliance` | Zone filter **All** = all zones; all 11 quality rows (no modulo) | `null` wait days → N/A not 0; KPIs from same arrays as tables | `ahs-asi`, `hqca-continuing-care`, `continuing-care-compliance` | **explore**, **designer** |
+| **patient-experience** | `PatientExperienceDashboard.tsx`, `patientExperienceData.ts`, `data-patient-experience.json` | `voice`, `inpatient`, `emergency`, `safety`, `complaints` | Zone filter All; disclaimer on voice tab | Hospital cross-ref `/api/hospitals` | `hqca-focus`, `goodcaring` | **designer**, **task** |
+| **virtual-care** | `VirtualCareDashboard.tsx`, `virtualCareData.ts`, `data-virtual-care.json` | `demand`, `virtual-md`, `ems-diversion`, `adjacent-lines` | Fiscal year toggle; audit reference block | Cohort study fields populated | `virtual-care` | **designer** |
+| **cancer** | `CancerDashboard.tsx`, `cancerData.ts`, `data-cancer.json` | `burden`, `surgery`, `radiation`, `facilities` | “Major cancer” subset label; no duplicate city on cards | Projected totals not implied province-wide | `ahs-cancer-centres`, `cihi-wait-times-cancer` | **designer**, **task** |
+| **public-health** | `PublicHealthDashboard.tsx`, `publicHealthData.ts`, `data-public-health.json` | **Visible nav:** `respiratory`, `wastewater`, `immunization` only | Header note on hidden subtabs; wastewater scientific notation | Hidden `notifiable` / `advisories` — if reachable, must show empty/disclosure not stale junk | `phac`, `alberta-rvd` | **explore**, **designer** |
+| **mental-health** | `MentalHealthDashboard.tsx`, `mentalHealthData.ts`, `data-mental-health.json` | `substance-harms`, `addiction-beds`, `community-access`, `er-pressure`, `helplines` | Vacancy `null` → “not reported” not 0%; helpline rows sane | KPI from `SUBSTANCE_HARM_TRENDS` latest year | `ahs-asi` (ABED beds), `alberta-211`, `cihi-mh-safety`, `phac` (domain) | **designer**, **task** |
+| **regional-inequity** | `RegionalInequityDashboard.tsx`, `regionalInequityData.ts`, `data-regional-inequity.json` | `lga-needs`, `disease-burden`, `ed-reliance`, `access-travel`, `compare-matrix`, `data-explorer` | LGA sidebar; compare matrix; narrative callouts per subtab | No `/5` averages; population for ED visits; `TRAVEL_FOR_CARE` empty handling | `open-alberta-inequity` | **explore**, **designer** |
+| **health-spending** | `SpendingDashboard.tsx`, `spendingData.ts`, `data-spending.json` | `spending-access`, `national-scoreboard`, `hospital-efficiency`, `physician-payments` | CIHI national scoreboard; specialty billing table | National compare row count; billing records | `open-alberta`, `cihi-nhex`, `open-alberta-billing` (manual), `fraser` (manual) | **designer**, **task** |
 
-The server-side `runDailySync()` currently does more than the orchestrator: it runs the disruptions scraper, the full orchestrator, pushes every domain to KV, and writes/pushes `data-sync-status.json`. A launchd one-shot must replicate this entire flow.
-
-1. Extract or replicate the `runDailySync()` logic into a standalone CLI module `src/pipelines/dailySync.ts`:
-   - `await scrapeDisruptions()`
-   - Push `disruptions` to KV
-   - `await runAllPipelines()`
-   - `recordDailySyncResults(results)`
-   - Push `sync-status` to KV
-2. Add `npm run daily-sync` to `package.json`:
-   ```json
-   "daily-sync": "tsx src/pipelines/dailySync.ts"
-   ```
-3. Ensure the script loads `dotenv/config` so `PUSH_SECRET` and `CLOUDFLARE_WORKER_URL` are available.
-
-**Guard rails:** on any error, log and exit non-zero so launchd can retry; but one pipeline failure must not stop the others.
-
-**Acceptance:**
-- `npm run daily-sync` runs end-to-end from a clean terminal, writes fresh `data-sync-status.json`, and pushes updates to KV.
-- It does not require the Express server to be running.
+**TAB_METADATA_MAP keys (modal):** all 15 ids above — verify each matches runtime metadata for the header `arrayKey` used on that tab.
 
 ---
 
-### Phase 5 — Calendar-schedule the daily sync with a second launchd plist
+## 3. Cross-cutting anti-patterns (re-check every tab)
 
-**Target:** new file `~/Library/LaunchAgents/com.alberta-hospital-pipeline-daily.plist`
+From `lessons.md` and prior audits — explicit pass/fail per tab where applicable:
 
-1. Create a new LaunchAgent that runs once a day at 06:00 America/Edmonton, independent of the server:
-   ```xml
-   <?xml version="1.0" encoding="UTF-8"?>
-   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" ...>
-   <plist version="1.0">
-   <dict>
-     <key>Label</key><string>com.alberta-hospital-pipeline-daily</string>
-     <key>WorkingDirectory</key><string>${HOME}/Antigravity/AlbertaHospitals</string>
-     <key>EnvironmentVariables</key>
-     <dict>
-       <key>PATH</key><string>${HOME}/.local/bin:${HOME}/.local/lib/nodejs/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
-       <key>HOME</key><string>${HOME}</string>
-       <key>NODE_ENV</key><string>production</string>
-       <key>PUSH_SECRET</key><string>alberta-hospital-push-ee4cc87ed9b09893850ee696aeae752cca9a735ce93bfe43</string>
-       <key>CLOUDFLARE_WORKER_URL</key><string>https://alberta-hospital-wait-times.longmad.workers.dev</string>
-     </dict>
-     <key>ProgramArguments</key>
-     <array>
-       <string>${HOME}/.local/bin/node</string>
-       <string>${HOME}/.local/lib/nodejs/bin/npm</string>
-       <string>run</string>
-       <string>daily-sync</string>
-     </array>
-     <key>StartCalendarInterval</key>
-     <dict>
-       <key>Hour</key><integer>6</integer>
-       <key>Minute</key><integer>0</integer>
-     </dict>
-     <key>StandardOutPath</key><string>/tmp/alberta-hospital-daily-sync.log</string>
-     <key>StandardErrorPath</key><string>/tmp/alberta-hospital-daily-sync.err</string>
-   </dict>
-   </plist>
-   ```
-2. Load it:
-   ```bash
-   launchctl load ~/Library/LaunchAgents/com.alberta-hospital-pipeline-daily.plist
-   ```
-3. Optionally start it once manually to verify:
-   ```bash
-   launchctl start com.alberta-hospital-pipeline-daily
-   ```
-
-**Acceptance:**
-- `launchctl list | grep alberta-hospital-pipeline-daily` shows the job.
-- After 06:00 MT, `/tmp/alberta-hospital-daily-sync.log` shows a completed run.
+1. **Footer/header chrome** not module-aware (ER copy on non-ER tabs).
+2. **Source labels** leaking pipeline filenames (`cihiDownloader`, `disruptionsScraper`, etc.) — UI and `_dataMetadata.source`.
+3. **KPI hardcoded** or stale vs detail tables/charts (compute from same arrays).
+4. **Missing data as `0`** or blank instead of `null` / **N/A** / “Closed” / “No historical data”.
+5. **Zone/filter “All”** that is a subset (Calgary+Edmonton only).
+6. **Modulo / index hacks** hiding rows (`i % 3`).
+7. **Hardcoded divisors** (`/ 5`) instead of `.length`.
+8. **Subset totals** presented as province-wide (cancer burden, etc.).
+9. **Historical range fallback** to current snapshot (ER 7d/30d peaks).
+10. **Scraper garbage rows** (footer phone numbers, copyright in helplines).
+11. **Facility/city normalization** (wrong upstream city, duplicate labels).
+12. **`useMemo` before `isLoading`** — `.find()` on empty arrays without guards.
+13. **Hidden subtabs** still in code/marketing copy without disclosure (Public Health notifiable/advisories).
+14. **`LiveDataBadge`** stub — do not expect live badge outside `DashboardHeader`/`DataTimestamp`.
+15. **Module search** matching description text (wrong module navigation).
+16. **API shape** mismatches (bare array vs `{ hospitals: [] }`) for `/api/hospitals`.
+17. **Manual pipelines** (`MANUAL_PIPELINES`: `fraser`, `open-alberta-billing`, `alberta-211`) marked success but partial/manual in UI.
+18. **Scheduler vs UI cadence** text (10 min ER fetch vs “30 minutes” in copy).
 
 ---
 
-### Phase 6 — Remove the daily orchestrator from the server's `setInterval`
+## 4. Visual audit protocol (precise)
 
-**Target:** `src/pipelines/scheduler.ts`
+### 4.1 Tooling
 
-1. Remove the daily `setInterval` (24h) that calls `runDailySync()`.
-2. Keep the ER wait times 10-min interval and the lab waits 30-min interval.
-3. Keep the initial non-blocking `runDailySync()` on server startup only if desired as a warm-up; otherwise remove it entirely.
-4. Keep `triggerDailySync()` (POST `/api/sync/trigger`) for manual on-demand runs, but have it call the same standalone logic or import from `dailySync.ts`.
-5. Update the startup log to: `"ER wait times: every 10 min. Lab waits: every 30 min."`.
+- **Primary:** `browser` tool → `open` `http://127.0.0.1:3004/?module=<id>` (viewport **1440×900** desktop).
+- **Mobile pass:** second viewport **390×844** for tabs marked high-risk: `er-waits`, `diagnostics`, `regional-inequity`, `long-term-care`, module picker.
+- **Evidence:** `tab.screenshot({ fullPage: true, save: 'screenshots/audit-2026-07-09/<module>-<subtab>.png' })` then **`inspect_image`** on each PNG with a fixed rubric (below).
+- **Optional batch:** extend `scripts/visual-reaudit-puppeteer.mjs` (`setLocationT8N`, `openModule`, new page per module) for regression parity with 2026-07-08 run.
 
-**Acceptance:**
-- Server startup log no longer mentions a 24-hour scheduled daily sync.
-- `setInterval` calls remain only for ER and lab.
+### 4.2 Location
+
+- **Required:** T8N 7W7 (St. Albert) for any tab using proximity, drive time, or LGA context: `er-waits`, `diagnostics` (labs), `regional-inequity`, `primary-care` (directory distance if shown).
+- **Other tabs:** same location for consistency across screenshots.
+
+### 4.3 Per-module screenshot checklist
+
+For each of the 15 `module` ids:
+
+1. Land on default subtab (first in component state).
+2. Capture **full page** including `#site-footer` and subtab bar.
+3. Click **each subtab** listed in §2; wait for `animate-fadeIn` / chart render (~1–2s); screenshot.
+4. Open **Data Sources** modal once per session — verify row for this module.
+5. `inspect_image` questions (copy into each call):
+   - “Quote visible **Auto-updated** vs **Static** badge and Last Update / Data Timestamp verbatim.”
+   - “Any **0**, **0:00**, **NaN**, **undefined**, or empty chart where labels imply data?”
+   - “Any internal pipeline/scraper name visible to users?”
+   - “Do KPI headline numbers visually match the largest table/chart below (yes/no + values)?”
+   - “Footer: does title/blurb describe this module (not ER-only)?”
+
+### 4.4 High-priority `inspect_image` targets
+
+| Module | Must-inspect regions |
+|--------|----------------------|
+| er-waits | KPI cards, 7d/30d peak tiles, map legend |
+| diagnostics | Lab cards at night/off-hours, provincial lab trend |
+| long-term-care | Placement KPI trio vs detail panel |
+| mental-health | Substance KPI vs table; bed occupancy % |
+| public-health | Wastewater Y-axis labels; immunization cards |
+| regional-inequity | LGA demand cards (0/0); compare matrix header |
+| health-spending | National scoreboard Alberta column |
+| disruptions | Date fields on active cards |
 
 ---
 
-### Phase 7 — Update cadence labels in `App.tsx`
+## 5. Data-quality audit method (Owner: **explore**)
 
-**Target:** `src/App.tsx` DASHBOARDS config for `'system-flow'`
+Per tab:
 
-1. Change:
-   ```ts
-   'system-flow': {
-     updateType: 'auto',
-     interval: 'Daily at 06:00 MT',
-     sourceVintage: 'Auto-refreshed daily',
-     source: 'HQA FOCUS & AHS Weekly reports'
-   }
-   ```
-
-**Acceptance:**
-- The System Flow tab's badge/label says it updates daily.
+1. Load `data-<domain>.json` (or `data-disruptions.json` / ER files).
+2. Validate `_dataMetadata` keys ⊇ all `DataTimestamp` / `DashboardHeader` `arrayKey`s used in that component.
+3. Spot-check: empty arrays, null vs 0, string dates ISO-parseable.
+4. Compare record counts to last `data-sync-status.json` entry for domain pipelines.
+5. For live tabs, `fetch` `/api/data/<domain>` and diff `_dataMetadata.lastUpdated` vs file mtime.
 
 ---
 
-### Phase 8 — Verify end-to-end
+## 6. Pipeline / updater audit method (Owner: **task**)
 
-1. `npx tsc --noEmit` — zero errors.
-2. `npm run build` — produces a fresh `dist/` with the fetch-based dashboard.
-3. `npm run daily-sync` — completes, writes `data-sync-status.json` with `status: 'partial_success'` or `success`, and updates `data-system-flow.json` `_dataMetadata`.
-4. Start the server (`npm run dev` or `npm start`), open the System Flow tab, confirm:
-   - Network tab shows `GET /api/data/system-flow`.
-   - `DataTimestamp` shows an **Auto** badge with today's timestamp.
-   - No console errors.
-5. Load the new launchd plist and confirm the next 06:00 run produces a log file.
-6. (Optional) Deploy the new frontend build to Cloudflare Pages so the published site also reads live data.
+**Do not** run full orchestrator in plan phase. Targeted:
 
-## Files Touched
+| Trigger | Command / action | Verify |
+|---------|------------------|--------|
+| Single domain | `npx tsx src/pipelines/orchestrator.ts` subset or `runPipelineByName('<name>')` via small script | `data-*.json` mtime, `recordsWritten`, no throw |
+| ER | observe `scheduler` / manual `fetchErWaitTimes` | `data-er-waittimes.json`, `data-snapshots.json` |
+| Labs | `apl-lab-waits` | `data-diagnostic.json` `LAB_LOCATION_WAITS` |
+| Disruptions | `scrapeDisruptions()` or daily sync step 1 | `data-disruptions.json` active count |
+| Status file | read `data-sync-status.json` | every domain has recent timestamp or documented `manual`/`failed` |
+| KV | inspect `pushClient.ts` / worker logs if configured | domain list matches 15 data files |
 
-| Action | Files |
-|---|---|
-| Edit | `src/components/SystemFlowDashboard.tsx` |
-| Edit | `src/pipelines/acuteCareScraper.ts` |
-| Edit | `src/pipelines/ahsWeeklyEdLosScraper.ts` |
-| Edit | `src/pipelines/cihiMhSafetyFetcher.ts` |
-| Edit | `src/pipelines/syncStatus.ts` |
-| Edit | `src/pipelines/scheduler.ts` |
-| Edit | `src/App.tsx` |
-| New | `src/pipelines/dailySync.ts` |
-| Edit | `package.json` (add `daily-sync` script) |
-| New | `~/Library/LaunchAgents/com.alberta-hospital-pipeline-daily.plist` |
-| Edit | `lessons.md` (record the static-import + metadata + manual-status pitfalls) |
-| Edit | `tasks/todo.md` (track Phase 23) |
+Map each pipeline to tab(s) using `orchestrator.ts` `domain` field (§2 implicit).
 
-## Risks & Decisions
+---
 
-- **Data shape mismatch:** If `SystemFlowDashboard` uses arrays not present in `data-system-flow.json`, the fetch handler will return empty arrays. Audit every used array before converting.
-- **Hand-authored vs. auto metadata:** The facility-level flow metrics are still partly analytical estimates. The metadata should say "Auto-merged daily; facility list from AHS API, metrics from HQA FOCUS estimates" so the badge is honest.
-- **KV domain `er-trends`/`lab-trends` 404:** These are already failing today (see `/tmp/alberta-hospital-wait-times.err`). Not in scope for this plan, but the one-shot script should either fix or skip them to avoid log spam.
-- **Server in-memory sync status:** After the standalone `daily-sync` writes `data-sync-status.json`, the running server's `/api/sync/status` endpoint will serve stale in-memory status until restart. If the sync-status panel is user-facing, add a `loadSyncStatusFromDisk()` call inside the `/api/sync/status` handler or have the server watch the file. Note this in the plan if needed.
+## 7. Fix-plan phase — subagent divisions (after audit)
+
+| Finding type | Owner agent | Examples |
+|--------------|-------------|----------|
+| Visual/layout/copy, empty states, chart formatting | **designer** | Closed labs, footer, cancer subset label, PH disclosure |
+| Pipeline/fetcher/scraper/metadata writers | **task** | Wrong CKAN set, ABED parser, disruptions dates, `_dataMetadata` sources |
+| Data JSON integrity, KPI derivation, filters | **task** (or main) | null vs 0, All-zone filter, remove modulo |
+| Tests for regressions | **Tester** | Filter logic, metadata sanitize, API shape guards |
+| Final pass / severity triage | **reviewer** | Sign-off against §3 checklist |
+| Read-only discovery only | **explore** | No edits — maps gaps to §2 matrix |
+
+**Order:** P0 user-misleading data → P1 crashes (`useMemo`) → P2 polish. Re-run §4 visual subset for touched tabs only.
+
+---
+
+## 8. Phased schedule (audit only)
+
+| Phase | Days | Work |
+|-------|------|------|
+| A | 0.5 | Shell + `TAB_METADATA_MAP` + location seed script check |
+| B | 1 | Acute + capacity tabs (5): visual + data |
+| C | 1 | Community tabs (4) |
+| D | 1 | Prevention + equity (6) |
+| E | 0.5 | Targeted pipeline reruns for failed domains |
+| F | 0.5 | Consolidated findings → fix backlog for phase 7 |
+
+---
+
+*Audit plan — the blocker fixes above are already committed; remaining work follows this plan.*

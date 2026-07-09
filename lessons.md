@@ -1,3 +1,11 @@
+## Session: 2026-07-09 (Audit Plan — Missing App.tsx imports)
+
+### Lesson: A missing `tsc` import can hide behind a stale "tsc pass" todo
+- **Mistake:** `src/App.tsx` used `formatMinutesToHm` and `cn` extensively but never imported them. The `npx tsc --noEmit` check was listed as passing in `tasks/todo.md`, but the actual run failed on 35+ errors. The page also rendered blank in headless browsers with `Uncaught ReferenceError: formatMinutesToHm is not defined`.
+- **Solution:** Added `import { cn, formatMinutesToHm } from './lib/utils';` to `src/App.tsx`. Removed `tests`/`**/*.test.ts` from `tsconfig.json` because `vitest` is not installed. Re-verified `npx tsc --noEmit` and `npm run build`.
+- **Prevention:** Run `tsc` before claiming it passes. Do not rely on an earlier todo checkbox; code that is being edited must be re-checked. For headless audits, always verify the page is not blank before capturing screenshots.
+
+
 ## Session: 2026-07-09 (Diagnostics headed verify — module search)
 
 ### Lesson: Module picker search must not match description text
