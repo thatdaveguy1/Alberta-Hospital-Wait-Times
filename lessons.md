@@ -1,3 +1,10 @@
+## Session: 2026-07-09 (Surgical Waitlists — procedure comparison fix)
+
+### Lesson: Procedure comparison dropdown keys must match lookup fields
+- **Mistake:** `SurgicalDashboard` stored `compProcedureA`/`compProcedureB` as `procedure_name` values from the `<select>`, but `findComparison90th` only matched `procedure_group`. Defaults used `Hip Replacement` / `Knee Replacement` (groups), so the Head-to-Head **Procedure Target Benchmarking** panel never rendered after the first interaction.
+- **Solution:** Match on `procedure_name === key || procedure_group === key`, default selects to `Total Hip Arthroplasty` / `Total Knee Arthroplasty`, dedupe provincial 90th options by `procedure_name`, and sync specialist comparison IDs from `SPECIALIST_COMPARISONS` (with empty-state copy when the array is missing even after `useDomainData` fallback).
+- **Prevention:** When a dropdown `value` is one field (`procedure_name`), the finder must accept that field—not only a sibling (`procedure_group`). Add a small unit test for the lookup helper.
+
 ## Session: 2026-07-09 (Diagnostics & Lab Fix)
 
 ### Lesson: Unreachable `return` can silently zero out live statistics

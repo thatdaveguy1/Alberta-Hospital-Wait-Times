@@ -1,3 +1,9 @@
+## Phase 31: Surgical Waitlists fix (2026-07-09)
+- [x] Verify surgical pipelines (`powerbiScraper`, `abjhiScraper`, `cihiWaitTimesDownloader` surgical) against `data-surgical.json`
+- [x] Fix `SurgicalDashboard` procedure comparison lookup (`procedure_name` vs `procedure_group`) and specialist comparison defaults/empty state
+- [x] Add `tests/unit/surgicalDashboardComparisons.test.ts`; browser smoke on `?module=surgical-waits` (36.8 / 43.1 KPIs, no load error)
+- [x] Update `lessons.md`; commit source (revert runtime `data-*.json`)
+
 
 ## Phase 30: Diagnostics & Lab Fix (2026-07-09)
 - [x] Fix `DiagnosticDashboard` `labStats` dead zero-return so lab stats cards show real averages

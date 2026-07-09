@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Activity, 
@@ -155,6 +155,18 @@ export default function SurgicalDashboard() {
   const FACILITY_COMPARISONS = data?.FACILITY_COMPARISONS ?? [];
   const SPECIALIST_COMPARISONS = data?.SPECIALIST_COMPARISONS ?? [];
 
+  useEffect(() => {
+    if (SPECIALIST_COMPARISONS.length === 0) return;
+    setCompSpecialistA(prev =>
+      prev && SPECIALIST_COMPARISONS.some(s => s.id === prev) ? prev : SPECIALIST_COMPARISONS[0].id,
+    );
+    setCompSpecialistB(prev => {
+      if (prev && SPECIALIST_COMPARISONS.some(s => s.id === prev)) return prev;
+      const second = SPECIALIST_COMPARISONS.find(s => s.id !== SPECIALIST_COMPARISONS[0]?.id);
+      return second?.id ?? SPECIALIST_COMPARISONS[0].id;
+    });
+  }, [SPECIALIST_COMPARISONS]);
+
   const kpiStats = useMemo(() => {
     if (!selectedKpi) return null;
     const values = HISTORICAL_WAIT_TRENDS.map(t => t[selectedKpi] as number).filter(v => typeof v === 'number');
@@ -222,10 +234,10 @@ export default function SurgicalDashboard() {
   // Comparisons States
   const [compFacilityA, setCompFacilityA] = useState<string>('WDFAB783'); // Royal Alex
   const [compFacilityB, setCompFacilityB] = useState<string>('WDFAB102'); // U of A
-  const [compSpecialistA, setCompSpecialistA] = useState<string>('6743'); // Dr. Arbour
-  const [compSpecialistB, setCompSpecialistB] = useState<string>('6743');
-  const [compProcedureA, setCompProcedureA] = useState<string>('Hip Replacement');
-  const [compProcedureB, setCompProcedureB] = useState<string>('Knee Replacement');
+  const [compSpecialistA, setCompSpecialistA] = useState<string>('');
+  const [compSpecialistB, setCompSpecialistB] = useState<string>('');
+  const [compProcedureA, setCompProcedureA] = useState<string>('Total Hip Arthroplasty');
+  const [compProcedureB, setCompProcedureB] = useState<string>('Total Knee Arthroplasty');
 
   // StatsCan State
   const [statscanCategoryFilter, setStatscanCategoryFilter] = useState<string>('All');
@@ -297,14 +309,24 @@ export default function SurgicalDashboard() {
         r.wait_segment === 'Decision-to-surgery',
     );
 
-  const findComparison90th = (procedureGroup: string) =>
+  const findComparison90th = (procedureKey: string) =>
     SURGICAL_RECORDS.find(
       r =>
-        r.procedure_group === procedureGroup &&
         r.geography_name === 'Alberta' &&
         r.metric_name === '90th percentile' &&
-        r.wait_segment === 'Decision-to-surgery',
+        r.wait_segment === 'Decision-to-surgery' &&
+        (r.procedure_name === procedureKey || r.procedure_group === procedureKey),
     );
+
+  const provincial90thOptions = useMemo(() => {
+    const seen = new Set<string>();
+    return SURGICAL_RECORDS.filter(r => {
+      if (r.geography_type !== 'Province' || r.metric_name !== '90th percentile') return false;
+      if (seen.has(r.procedure_name)) return false;
+      seen.add(r.procedure_name);
+      return true;
+    });
+  }, [SURGICAL_RECORDS]);
 
   const overviewProcedureCards = useMemo(() => {
     const specs = [
@@ -1361,6 +1383,13 @@ export default function SurgicalDashboard() {
               </div>
             </div>
 
+            {SPECIALIST_COMPARISONS.length === 0 && (
+              <div className="bg-slate-950/40 border border-slate-850/60 p-6 text-center rounded-xl">
+                <AlertTriangle className="w-6 h-6 text-amber-400 mx-auto mb-2" />
+                <p className="text-xs text-slate-400">Specialist comparison profiles are not available in the live surgical dataset yet.</p>
+              </div>
+            )}
+
             {specAData && specBData && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Card Specialist A */}
@@ -1462,7 +1491,7 @@ export default function SurgicalDashboard() {
                   onChange={(e) => setCompProcedureA(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500/50 cursor-pointer"
                 >
-                  {SURGICAL_RECORDS.filter(p => p.geography_type === 'Province' && p.metric_name === '90th percentile').map(p => (
+                  {provincial90thOptions.map(p => (
                     <option key={p.procedure_name} value={p.procedure_name}>{p.procedure_name}</option>
                   ))}
                 </select>
@@ -1475,7 +1504,7 @@ export default function SurgicalDashboard() {
                   onChange={(e) => setCompProcedureB(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500/50 cursor-pointer"
                 >
-                  {SURGICAL_RECORDS.filter(p => p.geography_type === 'Province' && p.metric_name === '90th percentile').map(p => (
+                  {provincial90thOptions.map(p => (
                     <option key={p.procedure_name} value={p.procedure_name}>{p.procedure_name}</option>
                   ))}
                 </select>
