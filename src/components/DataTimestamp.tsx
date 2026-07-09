@@ -60,6 +60,9 @@ function sanitizeSource(source: string): string {
     virtualCareFetcher: 'AHS Virtual Care Reports',
     erWaitTimesFetcher: 'Alberta Health Services Portal',
     aplLabWaitTimesFetcher: 'Alberta Precision Laboratories',
+    'CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)':
+      'CIHI NHEX & indicators (877 beds, 823 CSHS)',
+    'Open Alberta AHCIP Statistical Supplement (combined workbook)': 'Open Alberta AHCIP Statistical Supplement',
   };
 
   const normalized = source.trim();

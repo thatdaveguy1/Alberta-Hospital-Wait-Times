@@ -856,7 +856,7 @@ export default function SpendingDashboard() {
 
       {activeSpendingTab === 'national-scoreboard' && (
         <div id="sd-national-scoreboard-panel" className="space-y-6">
-          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="CIHI_SPENDING_PER_PERSON" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="NATIONAL_SPENDING_COMPARE" />
           {/* Province focus row */}
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">

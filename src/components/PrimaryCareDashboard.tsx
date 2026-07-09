@@ -177,6 +177,28 @@ export default function PrimaryCareDashboard() {
   const youngAdultsRate = getRate('Adults (18-64)');
   const ruralRate = getRate('Rural / Remote Areas');
   const seniorsRate = getRate('Seniors (65+)');
+  const workingAgeRate = youngAdultsRate;
+  const attachmentGapInsight = useMemo(() => {
+    if (!attachmentRate || !latestAlbertaRates.length) return null;
+    const gaps: { label: string; rate: number; gap: number }[] = [
+      { label: 'lowest income quintile', rate: lowIncomeRate, gap: attachmentRate - lowIncomeRate },
+      { label: 'rural / remote residents', rate: ruralRate, gap: attachmentRate - ruralRate },
+      { label: 'working-age adults (18–64)', rate: workingAgeRate, gap: attachmentRate - workingAgeRate },
+    ].filter(g => g.rate > 0 && g.gap >= 3);
+    const worst = gaps.sort((a, b) => b.gap - a.gap)[0];
+    if (!worst) {
+      return `Provincial attachment is ${attachmentRate}% (CIHI ${reportingYear}). Lowest-income and rural groups remain below the provincial average; seniors (${seniorsRate}%) are typically highest.`;
+    }
+    return `Provincial attachment is ${attachmentRate}% (CIHI ${reportingYear}). The largest gap is ${worst.gap.toFixed(1)} points below average for the ${worst.label} (${worst.rate}% attached) versus seniors at ${seniorsRate}%.`;
+  }, [
+    attachmentRate,
+    reportingYear,
+    lowIncomeRate,
+    ruralRate,
+    workingAgeRate,
+    seniorsRate,
+    latestAlbertaRates.length,
+  ]);
 
   const albertaContinuity = primaryCareData.CONTINUITY_SATISFACTION.find(c => c.zone === 'Alberta');
   const sameDayAccess = albertaContinuity?.sameNextDayAccessPct ?? 0;
@@ -565,7 +587,7 @@ export default function PrimaryCareDashboard() {
               <div className="p-3 bg-slate-900/60 border border-slate-900 rounded-lg flex items-start gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <div className="text-xs text-slate-300">
-                  <strong>Access Gap:</strong> Attachment to a regular healthcare provider is uneven across demographics. Rural / remote residents (<span className="text-rose-400 font-bold">{ruralRate}%</span>) and the lowest income quintile (<span className="text-rose-400 font-bold">{lowIncomeRate}%</span>) are attached at lower rates than seniors (<span className="text-emerald-400 font-bold">{seniorsRate}%</span>), while working-age adults (18–64) are closer to the provincial average.
+                  <strong>Access gap (CIHI):</strong> {attachmentGapInsight}
                 </div>
               </div>
             </div>

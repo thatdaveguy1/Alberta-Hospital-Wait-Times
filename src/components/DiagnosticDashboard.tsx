@@ -1115,6 +1115,7 @@ export default function DiagnosticDashboard() {
       {/* SUBTAB 2: CT & MRI Public Wait Times */}
       {activeSubTab === 'imaging-waits' && (
         <div className="space-y-6">
+          <DataTimestamp compact metadata={diagnosticData?._dataMetadata ?? {}} arrayKey="CIHI_DIAGNOSTIC_WAIT_TIMES" />
           {/* Clickable KPI overview cards — toggle historical trend panel */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* CT Scan KPI Card */}
