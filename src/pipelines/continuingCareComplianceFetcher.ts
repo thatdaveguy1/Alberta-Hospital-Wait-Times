@@ -136,13 +136,23 @@ interface CkanResource {
 async function discoverXlsxUrl(): Promise<{ url: string; vintage: string } | undefined> {
   try {
     const resp = await axios.get(CKAN_PACKAGE_SHOW_URL, {
-      headers: { 'User-Agent': USER_AGENT },
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'AlbertaHospitals-Pipeline/1.0 (data sync)',
+      },
       timeout: 30000,
     });
     const pkg = resp.data?.result;
     if (!pkg || !Array.isArray(pkg.resources)) return undefined;
+    const isColumnDescriptions = (r: CkanResource) => {
+      const hay = `${r.name ?? ''} ${r.url ?? ''}`.toLowerCase();
+      return hay.includes('column description') || hay.includes('column-description');
+    };
     const xlsx = (pkg.resources as CkanResource[]).find(
-      (r) => r.format?.toUpperCase() === 'XLSX' && r.url.endsWith('.xlsx'),
+      (r) =>
+        r.format?.toUpperCase() === 'XLSX' &&
+        r.url.toLowerCase().endsWith('.xlsx') &&
+        !isColumnDescriptions(r),
     );
     if (!xlsx) return undefined;
     // Vintage label from the resource name, e.g. "...as of March 2026".
@@ -374,9 +384,14 @@ export async function run(): Promise<SyncResult> {
     try {
       const resp = await axios.get(discovered.url, {
         responseType: 'arraybuffer',
-        headers: { 'User-Agent': USER_AGENT },
+        headers: {
+          'User-Agent': 'AlbertaHospitals-Pipeline/1.0 (data sync)',
+          Accept:
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream,*/*',
+        },
         timeout: 60000,
         maxContentLength: 20 * 1024 * 1024,
+        maxRedirects: 5,
       });
       const buf = Buffer.from(resp.data as ArrayBuffer);
       console.log(`[CcCompliance] Downloaded ${buf.length} bytes; parsing...`);

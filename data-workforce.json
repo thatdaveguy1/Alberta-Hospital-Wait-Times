@@ -5295,8 +5295,8 @@
       "albertaDataYear": "2024",
       "canadaSupply": 48450,
       "nationalComparisonRatePer100k": {
-        "alberta": null,
-        "canadaAvg": null
+        "alberta": 122.8,
+        "canadaAvg": 118.2
       },
       "vacancyActivePostings": 0,
       "source": "CIHI Health Workforce Quick Stats 2024 (PHProfileData + VacancyData)"
@@ -5307,8 +5307,8 @@
       "albertaDataYear": "2024",
       "canadaSupply": 30776,
       "nationalComparisonRatePer100k": {
-        "alberta": null,
-        "canadaAvg": null
+        "alberta": 75.9,
+        "canadaAvg": 75.1
       },
       "vacancyActivePostings": 0,
       "source": "CIHI Health Workforce Quick Stats 2024 (PTProfileData + VacancyData)"
@@ -5319,8 +5319,8 @@
       "albertaDataYear": "2024",
       "canadaSupply": 21963,
       "nationalComparisonRatePer100k": {
-        "alberta": null,
-        "canadaAvg": null
+        "alberta": 51.7,
+        "canadaAvg": 53.6
       },
       "vacancyActivePostings": 70,
       "source": "CIHI Health Workforce Quick Stats 2024 (OTProfileData + VacancyData)"

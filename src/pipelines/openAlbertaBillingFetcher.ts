@@ -30,11 +30,10 @@ const RATE_LIMIT_MS = 2000;
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-// Open Alberta CKAN package id for the AHCIP Statistical Supplement combined
-// workbook (all tables in one XLSX). Resolved via package_search by title.
-const CKAN_SEARCH_URL = 'https://open.alberta.ca/api/3/action/package_search';
-const SUPPLEMENT_TITLE_QUERY =
-  'title:"Alberta Health Care Insurance Plan (AHCIP) Statistical Supplement"';
+// AHCIP Statistical Supplement combined workbook (all tables in one XLSX).
+// Resolved at runtime via CKAN package_show on the supplement package.
+const AHCIP_SUPPLEMENT_PACKAGE_ID = '670bf4ce-386d-4bc4-b7f5-7a74edcec722';
+const CKAN_PACKAGE_SHOW_URL = `https://open.alberta.ca/api/3/action/package_show?id=${AHCIP_SUPPLEMENT_PACKAGE_ID}`;
 
 interface PhysicianPaymentSpecialty {
   specialtyGroup: string;
@@ -70,47 +69,58 @@ function asNumber(value: unknown): number | undefined {
 async function downloadBuffer(url: string): Promise<Buffer> {
   const response = await axios.get(url, {
     responseType: 'arraybuffer',
-    timeout: 60000,
-    headers: { 'User-Agent': USER_AGENT },
+    headers: {
+      'User-Agent': 'AlbertaHospitals-Pipeline/1.0 (data sync)',
+      Accept:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream,*/*',
+    },
   });
   return Buffer.from(response.data);
 }
 
+interface CkanResource {
+  url: string;
+  format: string;
+  name: string;
+}
+
 // Locate the combined AHCIP Statistical Supplement workbook resource URL.
-// Prefer the resource whose name contains the latest year suffix; fall back to
-// the first XLSX resource named "combined-tables".
+// Prefer the XLSX whose download filename contains "combined-tables"; otherwise
+// the XLSX resource with the highest fiscal-year token in its name.
 async function findSupplementWorkbookUrl(): Promise<string | undefined> {
   try {
-    const response = await axios.get(CKAN_SEARCH_URL, {
-      params: { q: SUPPLEMENT_TITLE_QUERY, rows: 10 },
+    const response = await axios.get(CKAN_PACKAGE_SHOW_URL, {
       timeout: 30000,
-      headers: { 'User-Agent': USER_AGENT },
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'AlbertaHospitals-Pipeline/1.0 (data sync)',
+      },
     });
-    const results = response.data?.result?.results ?? [];
-    // The AHCIP Statistical Supplement package publishes one combined XLSX
-    // workbook per fiscal year. Pick the XLSX resource with the highest year
-    // token in its name (the latest release).
-    const xlsxResources: { url: string; name: string }[] = [];
-    for (const pkg of results) {
-      for (const res of pkg.resources ?? []) {
-        const format = (res.format ?? '').toLowerCase();
-        const url = res.url as string;
-        const name = res.name ?? '';
-        if (url && format.includes('xlsx') && extractYear(name)) {
-          xlsxResources.push({ url, name });
-        }
-      }
+    const resources = response.data?.result?.resources;
+    if (!Array.isArray(resources)) return undefined;
+
+    const xlsxResources: { url: string; name: string; urlLower: string }[] = [];
+    for (const res of resources as CkanResource[]) {
+      const format = (res.format ?? '').toLowerCase();
+      const url = res.url ?? '';
+      const name = res.name ?? '';
+      if (!url || !format.includes('xlsx')) continue;
+      if (!extractYear(name) && !url.toLowerCase().includes('combined-tables')) continue;
+      xlsxResources.push({ url, name, urlLower: url.toLowerCase() });
     }
     if (xlsxResources.length === 0) return undefined;
-    xlsxResources.sort((a, b) => {
+
+    const combined = xlsxResources.filter((r) => r.urlLower.includes('combined-tables'));
+    const pool = combined.length > 0 ? combined : xlsxResources;
+    pool.sort((a, b) => {
       const ya = extractYear(a.name) ?? 0;
       const yb = extractYear(b.name) ?? 0;
       return yb - ya;
     });
-    return xlsxResources[0].url;
+    return pool[0].url;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.warn(`[OpenAlbertaBilling] CKAN search failed: ${msg}`);
+    console.warn(`[OpenAlbertaBilling] CKAN package_show failed: ${msg}`);
     return undefined;
   }
 }

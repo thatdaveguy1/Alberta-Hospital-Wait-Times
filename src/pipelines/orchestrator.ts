@@ -125,18 +125,6 @@ const PIPELINES: Pipeline[] = [
   { name: 'cihi-wait-times-priority', domain: 'surgical', run: cihiWaitTimesPriorityRun },
 ];
 
-// Pipelines that should be treated as manual-only because their upstream sources
-// are blocked, don't match expected shapes, or only provide partial data.
-const MANUAL_PIPELINES: Record<string, true> = {
-  fraser: true,
-  'open-alberta-billing': true,
-  'alberta-211': true,
-  'open-alberta': true,
-  'open-alberta-inequity': true,
-  'open-alberta-inequity-primary-care': true,
-  phac: true,
-  'virtual-care': true,
-};
 
 // Run a single pipeline with error isolation
 async function runPipelineSafely(pipeline: Pipeline): Promise<SyncResult> {
@@ -147,11 +135,6 @@ async function runPipelineSafely(pipeline: Pipeline): Promise<SyncResult> {
     // Ensure durationMs is filled
     if (!result.durationMs) {
       result.durationMs = durationMs;
-    }
-    // Mark manual-only pipelines as manual unconditionally
-    if (MANUAL_PIPELINES[pipeline.name]) {
-      result.status = 'manual';
-      result.error = 'Manual update required — automated source unavailable or partial';
     }
     console.log(`[Orchestrator] ${pipeline.name}: ${result.status} (${result.recordsFetched} fetched, ${result.recordsWritten} written, ${result.durationMs}ms)`);
     return result;

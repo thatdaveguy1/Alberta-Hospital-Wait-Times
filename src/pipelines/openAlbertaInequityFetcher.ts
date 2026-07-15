@@ -25,11 +25,18 @@ import type {
   EDRelianceMetric,
 } from '../regionalInequityData';
 
-const TABLE_10_1_URL =
+const CKAN_PACKAGE_SHOW_BASE = 'https://open.alberta.ca/api/3/action/package_show?id=';
+
+const TABLE_10_1_PACKAGE_ID = '28492ab1-7912-4ad1-8988-c666bee26c33';
+const FIGURE_4_2_PACKAGE_ID = 'fd9674ed-e672-4ffa-bb63-9d9a9ce13fe5';
+const FIGURE_2_2_PACKAGE_ID = '34236eee-06a6-49aa-a328-71dcfafc6fc1';
+
+// Fallback download URLs when CKAN package_show is unavailable.
+const TABLE_10_1_FALLBACK_URL =
   'https://open.alberta.ca/dataset/28492ab1-7912-4ad1-8988-c666bee26c33/resource/178a681a-ade5-494d-a09a-509ba1b65548/download/table-10.1.xlsx';
-const FIGURE_4_2_URL =
+const FIGURE_4_2_FALLBACK_URL =
   'https://open.alberta.ca/dataset/fd9674ed-e672-4ffa-bb63-9d9a9ce13fe5/resource/2f1e0166-322f-476b-b0bb-f774dcdec080/download/figure-4.2.xlsx';
-const FIGURE_2_2_URL =
+const FIGURE_2_2_FALLBACK_URL =
   'https://open.alberta.ca/dataset/34236eee-06a6-49aa-a328-71dcfafc6fc1/resource/2280f78f-d253-453b-95ac-7952118727f4/download/figure-2.2.xlsx';
 
 const INEQUITY_FILE = path.join(process.cwd(), 'data-regional-inequity.json');
@@ -142,13 +149,52 @@ function deriveType(lgaName: string): LgaType {
   return 'Urban Hub';
 }
 
+interface CkanResource {
+  url: string;
+  format: string;
+  name: string;
+}
+
+// Resolve the live XLSX download URL for a community-profile dataset via CKAN
+// package_show. Matches resources whose download path ends with the expected
+// workbook filename (e.g. table-10.1.xlsx).
+async function discoverXlsxByFilename(
+  packageId: string,
+  filenameSuffix: string,
+  fallbackUrl: string,
+): Promise<string> {
+  try {
+    const resp = await axios.get(`${CKAN_PACKAGE_SHOW_BASE}${packageId}`, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'AlbertaHospitals-Pipeline/1.0 (data sync)',
+      },
+      timeout: 30000,
+    });
+    const pkg = resp.data?.result;
+    if (!pkg || !Array.isArray(pkg.resources)) return fallbackUrl;
+    const suffix = filenameSuffix.toLowerCase();
+    const match = (pkg.resources as CkanResource[]).find((r) => {
+      if (r.format?.toUpperCase() !== 'XLSX') return false;
+      const url = (r.url ?? '').toLowerCase();
+      return url.endsWith(suffix) || url.includes(`/download/${suffix}`);
+    });
+    if (match?.url) return match.url;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[OpenAlbertaInequity] CKAN package_show (${packageId}): ${msg}`);
+  }
+  return fallbackUrl;
+}
+
 async function downloadBuffer(url: string): Promise<Buffer> {
   const res = await axios.get(url, {
     responseType: 'arraybuffer',
     timeout: 60000,
     headers: {
-      'User-Agent': USER_AGENT,
-      Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream,*/*',
+      'User-Agent': 'AlbertaHospitals-Pipeline/1.0 (data sync)',
+      Accept:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream,*/*',
     },
     maxRedirects: 5,
   });
@@ -483,8 +529,13 @@ export async function run(): Promise<SyncResult> {
     // 1. Download Table 10.1 (Community Need).
     let table101Buffer: Buffer | null = null;
     try {
-      console.log(`[OpenAlbertaInequity] Downloading Table 10.1: ${TABLE_10_1_URL}`);
-      table101Buffer = await downloadBuffer(TABLE_10_1_URL);
+      const table101Url = await discoverXlsxByFilename(
+        TABLE_10_1_PACKAGE_ID,
+        'table-10.1.xlsx',
+        TABLE_10_1_FALLBACK_URL,
+      );
+      console.log(`[OpenAlbertaInequity] Downloading Table 10.1: ${table101Url}`);
+      table101Buffer = await downloadBuffer(table101Url);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(`[OpenAlbertaInequity] Table 10.1 download failed: ${msg}`);
@@ -496,8 +547,13 @@ export async function run(): Promise<SyncResult> {
     // 3. Download Figure 4.2 (Chronic Disease).
     let figure42Buffer: Buffer | null = null;
     try {
-      console.log(`[OpenAlbertaInequity] Downloading Figure 4.2: ${FIGURE_4_2_URL}`);
-      figure42Buffer = await downloadBuffer(FIGURE_4_2_URL);
+      const figure42Url = await discoverXlsxByFilename(
+        FIGURE_4_2_PACKAGE_ID,
+        'figure-4.2.xlsx',
+        FIGURE_4_2_FALLBACK_URL,
+      );
+      console.log(`[OpenAlbertaInequity] Downloading Figure 4.2: ${figure42Url}`);
+      figure42Buffer = await downloadBuffer(figure42Url);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(`[OpenAlbertaInequity] Figure 4.2 download failed: ${msg}`);
@@ -509,8 +565,13 @@ export async function run(): Promise<SyncResult> {
     // 5. Download Figure 2.2 (LGA Population).
     let figure22Buffer: Buffer | null = null;
     try {
-      console.log(`[OpenAlbertaInequity] Downloading Figure 2.2: ${FIGURE_2_2_URL}`);
-      figure22Buffer = await downloadBuffer(FIGURE_2_2_URL);
+      const figure22Url = await discoverXlsxByFilename(
+        FIGURE_2_2_PACKAGE_ID,
+        'figure-2.2.xlsx',
+        FIGURE_2_2_FALLBACK_URL,
+      );
+      console.log(`[OpenAlbertaInequity] Downloading Figure 2.2: ${figure22Url}`);
+      figure22Buffer = await downloadBuffer(figure22Url);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(`[OpenAlbertaInequity] Figure 2.2 download failed: ${msg}`);

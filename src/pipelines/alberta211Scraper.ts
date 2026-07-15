@@ -230,15 +230,19 @@ export async function run(): Promise<SyncResult> {
     };
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    console.error('[Alberta211] FAILED:', errorMsg);
+    const isAccessBlocked =
+      /403|429|status code 403|status code 429|rate limit|cloudflare|forbidden/i.test(errorMsg);
+    console.error(`[Alberta211] ${isAccessBlocked ? 'BLOCKED' : 'FAILED'}:`, errorMsg);
     return {
       domain: 'mental-health',
       pipeline: 'alberta211Scraper',
-      status: 'failed',
+      status: isAccessBlocked ? 'skipped' : 'failed',
       recordsFetched: 0,
       recordsWritten: 0,
       durationMs: Date.now() - startTime,
-      error: errorMsg,
+      error: isAccessBlocked
+        ? `211 Alberta API blocked or rate-limited — ${errorMsg}`
+        : errorMsg,
       timestamp: new Date().toISOString(),
     };
   }

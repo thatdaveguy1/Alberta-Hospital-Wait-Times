@@ -25,6 +25,14 @@ const CIHI_WORKFORCE_XLSX_URL =
 const RATE_LIMIT_MS = 2000;
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+// July 2024 population estimates (Statistics Canada) for per-100k allied supply rates.
+const ALBERTA_POPULATION_2024 = 4_800_000;
+const CANADA_POPULATION_2024 = 41_000_000;
+
+function alliedRatePer100k(count: number | null, population: number): number | null {
+  if (count == null || count <= 0 || population <= 0) return null;
+  return round1((count / population) * 100_000);
+}
 
 interface LoadedJson {
   [key: string]: unknown;
@@ -319,8 +327,7 @@ function buildVacancyLookup(workbook: XLSX.WorkBook): Map<string, Map<string, { 
 // Output shape mirrors ALLIED_HEALTH_SUPPLY:
 //   { profession, albertaCount, nationalComparisonRatePer100k:{alberta,canadaAvg},
 //     vacancyActivePostings }
-// Per-100k rates require population figures not in the XLSX, so we report
-// raw Alberta/Canada supply counts instead and leave the rate fields null.
+// Per-100k rates use fixed 2024 Alberta/Canada population denominators (not in the XLSX).
 function parseAlliedHealthSupply(workbook: XLSX.WorkBook): Record<string, unknown>[] {
   const vacRows = sheetRows(workbook, 'VacancyData');
   // Latest-year Alberta + Canada vacancies by provider type.
@@ -365,12 +372,18 @@ function parseAlliedHealthSupply(workbook: XLSX.WorkBook): Record<string, unknow
     const canadaCount = ca?.supply ?? null;
 
     const abVac = vacAB.get(profession);
+    const abCount = albertaCount ?? 0;
+    const albertaRate = alliedRatePer100k(abCount > 0 ? abCount : null, ALBERTA_POPULATION_2024);
+    const canadaRate = alliedRatePer100k(canadaCount, CANADA_POPULATION_2024);
     out.push({
       profession,
-      albertaCount: albertaCount ?? 0,
+      albertaCount: abCount,
       albertaDataYear: albertaYear,
       canadaSupply: canadaCount,
-      nationalComparisonRatePer100k: { alberta: null, canadaAvg: null },
+      nationalComparisonRatePer100k: {
+        alberta: albertaRate ?? 0,
+        canadaAvg: canadaRate ?? 0,
+      },
       vacancyActivePostings: abVac?.count ?? 0,
       source: `CIHI Health Workforce Quick Stats 2024 (${name} + VacancyData)`,
     });

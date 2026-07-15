@@ -307,10 +307,23 @@ export async function run(): Promise<SyncResult> {
       ],
     };
 
+    const ownedMetadata: DataMetadata = {};
+    if (pubmedVerified) {
+      const cohortExisting = existing._dataMetadata?.VIRTUAL_MD_COHORT_STUDY;
+      ownedMetadata.VIRTUAL_MD_COHORT_STUDY = buildMetadataEntry({
+        updateType: cohortExisting?.updateType ?? 'manual',
+        source: cohortExisting?.source ?? 'Canadian Journal of Emergency Medicine (PubMed PMID 40465166)',
+        sourceVintage: cohortExisting?.sourceVintage ?? 'Cohort study indexed in PubMed',
+        verification: pubmedNote,
+        lastUpdated: timestamp,
+      });
+      merged._dataMetadata = mergeDataMetadata(existing._dataMetadata, ownedMetadata);
+    }
+
     const recordsWritten = newVolumeRows.length;
     const recordsFetched = (pubmedVerified ? 1 : 0) + newVolumeRows.length;
 
-    if (recordsWritten > 0) {
+    if (recordsWritten > 0 || pubmedVerified) {
       fs.writeFileSync(
         VIRTUAL_CARE_FILE,
         JSON.stringify(merged, null, 2),
@@ -338,7 +351,7 @@ export async function run(): Promise<SyncResult> {
       recordsWritten,
       durationMs,
       error:
-        status === 'success'
+        status === 'success' || status === 'partial'
           ? undefined
           : `${pubmedNote} | ${ahsNote}`,
       timestamp,

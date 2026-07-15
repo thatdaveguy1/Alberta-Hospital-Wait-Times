@@ -9361,7 +9361,7 @@
     },
     {
       "id": "FAC-CC-650",
-      "name": "Riverside / Son\u00ees\u00eep\u00eehk, Des K\u2019e Gah Care Centre",
+      "name": "Riverside / Sonîsîpîhk, Des K’e Gah Care Centre",
       "type": "Type B (Designated Supportive Living)",
       "operator": "Private/Contracted",
       "city": "Fort Mcmurray",
@@ -9829,7 +9829,7 @@
     },
     {
       "id": "FAC-CC-546",
-      "name": "Saint Thomas Health Centre / Centre DE Sant\u00e9 Saint-thomas - Covenant Care",
+      "name": "Saint Thomas Health Centre / Centre DE Santé Saint-thomas - Covenant Care",
       "type": "Type B (Designated Supportive Living)",
       "operator": "Covenant Health",
       "city": "Edmonton",
@@ -11885,13 +11885,13 @@
       "updateType": "auto",
       "lastUpdated": "2026-07-15T12:03:20.433Z",
       "source": "HQCA FOCUS continuing-care CSVs",
-      "sourceVintage": "2021\u2013latest HQCA reporting period"
+      "sourceVintage": "2021–latest HQCA reporting period"
     },
     "RESIDENT_QUALITY_OUTCOMES": {
       "updateType": "auto",
       "lastUpdated": "2026-07-15T12:03:20.433Z",
       "source": "HQCA FOCUS continuing-care CSVs + CIHI LTCC indicators",
-      "sourceVintage": "2021\u2013latest HQCA/CIHI reporting period"
+      "sourceVintage": "2021–latest HQCA/CIHI reporting period"
     },
     "HOME_CARE_EXPERIENCE": {
       "source": "HQCA home-care experience zone ratings",
@@ -11901,8 +11901,8 @@
     },
     "CONTINUING_CARE_COMPLIANCE": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-14T12:03:25.198Z",
-      "source": "Alberta Open Government \u2014 Continuing Care Accommodation Standards compliance reporting",
+      "lastUpdated": "2026-07-15T22:43:32.286Z",
+      "source": "Alberta Open Government — Continuing Care Accommodation Standards compliance reporting",
       "sourceVintage": "Dataset vintage: 2026-06-30",
       "verification": "Aggregated from open.alberta.ca XLSX (OGL-A). Per-facility record collapsed from per-visit/per-standard rows; violationsCount counts only open/unresolved non-compliances."
     }

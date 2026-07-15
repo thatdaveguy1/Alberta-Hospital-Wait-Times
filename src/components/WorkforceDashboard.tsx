@@ -56,6 +56,16 @@ import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
 type NursingSupplyDisplay = Omit<NursingSupplyGroup, 'profession'> & { profession: string };
+
+function cihiAlliedHasRates(rows: AlliedHealthSupply[] | undefined): boolean {
+  return (
+    (rows?.length ?? 0) > 0 &&
+    rows!.some(
+      (a) => a.nationalComparisonRatePer100k.alberta > 0 || a.nationalComparisonRatePer100k.canadaAvg > 0,
+    )
+  );
+}
+
 type JobVacancyDisplay = Omit<JobVacancyTrend, 'sector'> & { sector: string };
 
 type WorkforceData = {
@@ -68,6 +78,7 @@ type WorkforceData = {
   JOB_VACANCY_TRENDS_CIHI?: JobVacancyDisplay[];
   SPECIALIST_RECRUITMENT_NEEDS: SpecialistRecruitmentNeed[];
   ALLIED_HEALTH_SUPPLY: AlliedHealthSupply[];
+  ALLIED_HEALTH_SUPPLY_CIHI?: AlliedHealthSupply[];
   _dataMetadata?: DataMetadataMap;
 };
 
@@ -84,6 +95,7 @@ export default function WorkforceDashboard() {
   const useCihiNursing = (data?.NURSING_SUPPLY_TRENDS_CIHI?.length ?? 0) > 0;
   const useCihiAgeProfile = (data?.WORKFORCE_AGE_PROFILE_CIHI?.length ?? 0) > 0;
   const useCihiJobVacancy = (data?.JOB_VACANCY_TRENDS_CIHI?.length ?? 0) > 0;
+  const useCihiAllied = cihiAlliedHasRates(data?.ALLIED_HEALTH_SUPPLY_CIHI);
 
   const NURSING_SUPPLY_TRENDS: NursingSupplyDisplay[] = useCihiNursing
     ? (data!.NURSING_SUPPLY_TRENDS_CIHI as NursingSupplyDisplay[])
@@ -98,6 +110,7 @@ export default function WorkforceDashboard() {
   const nursingSupplyMetadataKey = useCihiNursing ? 'NURSING_SUPPLY_TRENDS_CIHI' : 'NURSING_SUPPLY_TRENDS';
   const ageProfileMetadataKey = useCihiAgeProfile ? 'WORKFORCE_AGE_PROFILE_CIHI' : 'WORKFORCE_AGE_PROFILE';
   const jobVacancyMetadataKey = useCihiJobVacancy ? 'JOB_VACANCY_TRENDS_CIHI' : 'JOB_VACANCY_TRENDS';
+  const alliedSupplyMetadataKey = useCihiAllied ? 'ALLIED_HEALTH_SUPPLY_CIHI' : 'ALLIED_HEALTH_SUPPLY';
 
   const latestNursingYear = useMemo(() => {
     const years = NURSING_SUPPLY_TRENDS.map(n => n.year);
@@ -107,7 +120,9 @@ export default function WorkforceDashboard() {
 
   const PHYSICIAN_SPECIALTY_ZONE = data?.PHYSICIAN_SPECIALTY_ZONE ?? [];
   const SPECIALIST_RECRUITMENT_NEEDS = data?.SPECIALIST_RECRUITMENT_NEEDS ?? [];
-  const ALLIED_HEALTH_SUPPLY = data?.ALLIED_HEALTH_SUPPLY ?? [];
+  const ALLIED_HEALTH_SUPPLY: AlliedHealthSupply[] = useCihiAllied
+    ? (data!.ALLIED_HEALTH_SUPPLY_CIHI as AlliedHealthSupply[])
+    : (data?.ALLIED_HEALTH_SUPPLY ?? []);
 
   // Physician calculations
   const physicianZoneData = useMemo(() => {
@@ -943,15 +958,17 @@ export default function WorkforceDashboard() {
               <div>
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Allied Health Professional Benchmarking</h3>
                 <p className="text-[10px] text-slate-500">Active staffing densities per 100,000 population: Alberta vs National Canadian Average</p>
-                <DataTimestamp compact metadata={metadata} arrayKey="ALLIED_HEALTH_SUPPLY" />
+                <DataTimestamp compact metadata={metadata} arrayKey={alliedSupplyMetadataKey} />
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
-                  Source: CIHI Health Workforce Quick Stats
+                  {useCihiAllied ? 'Source: CIHI Health Workforce Quick Stats' : 'Source: CIHI Health Workforce Quick Stats (hand-authored)'}
                 </span>
+                {!useCihiAllied && (
                 <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
                   Hand-authored
                 </span>
+                )}
               </div>
             </div>
 
