@@ -58,12 +58,17 @@ import { useDomainData } from '../hooks/useDomainData';
 type NursingSupplyDisplay = Omit<NursingSupplyGroup, 'profession'> & { profession: string };
 
 function cihiAlliedHasRates(rows: AlliedHealthSupply[] | undefined): boolean {
-  return (
-    (rows?.length ?? 0) > 0 &&
-    rows!.some(
-      (a) => a.nationalComparisonRatePer100k.alberta > 0 || a.nationalComparisonRatePer100k.canadaAvg > 0,
-    )
-  );
+  if (!rows || rows.length === 0) return false;
+  return rows.some((a) => {
+    const rates = a.nationalComparisonRatePer100k;
+    if (!rates) return false;
+    const ab = rates.alberta;
+    const ca = rates.canadaAvg;
+    return (
+      (typeof ab === 'number' && Number.isFinite(ab) && ab > 0) ||
+      (typeof ca === 'number' && Number.isFinite(ca) && ca > 0)
+    );
+  });
 }
 
 type JobVacancyDisplay = Omit<JobVacancyTrend, 'sector'> & { sector: string };

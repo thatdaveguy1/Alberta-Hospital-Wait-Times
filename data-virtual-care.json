@@ -135,26 +135,6 @@
       "availability": "7 Days a Week"
     }
   ],
-  "_handAuthoredMetadata": {
-    "VIRTUAL_MD_COHORT_STUDY": {
-      "source": "Canadian Journal of Emergency Medicine, June 2025",
-      "studyPeriod": "Apr 2022 \u2013 Mar 2023",
-      "lastVerified": "2026-07-05",
-      "verification": "Exact match to published study (cohort=19312, 55.7%/60%/52.5%)"
-    },
-    "VIRTUAL_MD_DISPOSITIONS": {
-      "source": "AHS Virtual MD program description (2025)",
-      "vintage": "Program-reported estimate",
-      "lastVerified": "2026-07-05",
-      "verification": "Matches AHS statement that ~50% of callers self-manage at home"
-    },
-    "EMS_811_DIVERSION_DATA": {
-      "source": "Estimated from AHS 811 program reports",
-      "vintage": "Approximate",
-      "lastVerified": "2026-07-05",
-      "verification": "Could not verify exact percentages \u2014 marked as estimate"
-    }
-  },
   "_dataMetadata": {
     "HEALTH_LINK_VOLUMES": {
       "source": "virtualCareFetcher",
@@ -164,11 +144,11 @@
       "verification": "PubMed checked but no new AHS program milestones are published, requiring manual monitoring."
     },
     "VIRTUAL_MD_COHORT_STUDY": {
-      "source": "Canadian Journal of Emergency Medicine, June 2025",
-      "sourceVintage": "Unknown",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
       "updateType": "manual",
-      "verification": "Exact match to published study (cohort=19312, 55.7%/60%/52.5%)"
+      "lastUpdated": "2026-07-15T22:50:34.131Z",
+      "source": "Canadian Journal of Emergency Medicine, June 2025",
+      "sourceVintage": "Apr 2022 – Mar 2023",
+      "verification": "Verified PMID 40465166: \"Health system utilization following medical advice from Alberta's Virtual MD: a descriptive analysis.\" (CJEM, 2025 Dec) — DOI: 10.1007/s43678-025-00928-z"
     },
     "VIRTUAL_MD_DISPOSITIONS": {
       "source": "AHS Virtual MD program description (2025)",
@@ -182,7 +162,7 @@
       "sourceVintage": "Approximate",
       "lastUpdated": "2026-07-05T12:00:00.000Z",
       "updateType": "manual",
-      "verification": "Could not verify exact percentages \u2014 marked as estimate"
+      "verification": "Could not verify exact percentages — marked as estimate"
     },
     "ADJACENT_HELPLINES": {
       "source": "alberta211Scraper",
@@ -190,6 +170,26 @@
       "lastUpdated": "2026-07-05T12:00:00.000Z",
       "updateType": "manual",
       "verification": "Helplines database is static due to 211 API limits, requiring manual registry checks."
+    }
+  },
+  "_handAuthoredMetadata": {
+    "VIRTUAL_MD_COHORT_STUDY": {
+      "source": "Canadian Journal of Emergency Medicine, June 2025",
+      "studyPeriod": "Apr 2022 – Mar 2023",
+      "lastVerified": "2026-07-05",
+      "verification": "Exact match to published study (cohort=19312, 55.7%/60%/52.5%)"
+    },
+    "VIRTUAL_MD_DISPOSITIONS": {
+      "source": "AHS Virtual MD program description (2025)",
+      "vintage": "Program-reported estimate",
+      "lastVerified": "2026-07-05",
+      "verification": "Matches AHS statement that ~50% of callers self-manage at home"
+    },
+    "EMS_811_DIVERSION_DATA": {
+      "source": "Estimated from AHS 811 program reports",
+      "vintage": "Approximate",
+      "lastVerified": "2026-07-05",
+      "verification": "Could not verify exact percentages — marked as estimate"
     }
   }
 }

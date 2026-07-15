@@ -626,7 +626,8 @@ export async function run(): Promise<SyncResult> {
       ownedMetadata.ALLIED_HEALTH_SUPPLY_CIHI = buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI Health Workforce Quick Stats 2024',
-        sourceVintage: 'Latest CIHI profile-sheet year',
+        sourceVintage:
+          'Supply counts 2015–2024; rates per 100k use 2024 population denominators (AB 4.8M / CA 41.0M)',
         lastUpdated: timestamp,
       });
     }

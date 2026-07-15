@@ -69,11 +69,14 @@ function asNumber(value: unknown): number | undefined {
 async function downloadBuffer(url: string): Promise<Buffer> {
   const response = await axios.get(url, {
     responseType: 'arraybuffer',
+    timeout: 60000,
     headers: {
       'User-Agent': 'AlbertaHospitals-Pipeline/1.0 (data sync)',
       Accept:
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream,*/*',
     },
+    maxRedirects: 5,
+    maxContentLength: 30 * 1024 * 1024,
   });
   return Buffer.from(response.data);
 }

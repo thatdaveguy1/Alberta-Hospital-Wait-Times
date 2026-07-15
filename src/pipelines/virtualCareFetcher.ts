@@ -68,9 +68,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 // Validate a parsed JSON blob against the expected virtual-care shape well
 // enough to safely merge. Unknown/missing keys default to empty arrays so a
-// corrupted file never clobbers hand-curated datasets.
+// corrupted file never clobbers hand-curated datasets. Extra top-level keys
+// (e.g. _handAuthoredMetadata) are preserved for round-trip writes.
 function coerceVirtualCareJson(raw: unknown): VirtualCareJson {
-  const base: VirtualCareJson = {
+  const base: VirtualCareJson & Record<string, unknown> = {
     HEALTH_LINK_VOLUMES: [],
     VIRTUAL_MD_COHORT_STUDY: [],
     VIRTUAL_MD_DISPOSITIONS: [],
@@ -78,6 +79,12 @@ function coerceVirtualCareJson(raw: unknown): VirtualCareJson {
     ADJACENT_HELPLINES: [],
   };
   if (isRecord(raw)) {
+    // Preserve unknown top-level keys first so explicit fields below can override.
+    for (const [key, value] of Object.entries(raw)) {
+      if (!(key in base) || key === '_dataMetadata') {
+        base[key] = value;
+      }
+    }
     if (Array.isArray(raw.HEALTH_LINK_VOLUMES))
       base.HEALTH_LINK_VOLUMES = raw.HEALTH_LINK_VOLUMES as HealthLinkVolume[];
     if (Array.isArray(raw.VIRTUAL_MD_COHORT_STUDY))
@@ -94,7 +101,7 @@ function coerceVirtualCareJson(raw: unknown): VirtualCareJson {
     if (raw._dataMetadata && typeof raw._dataMetadata === 'object')
       base._dataMetadata = raw._dataMetadata as DataMetadata;
   }
-  return base;
+  return base as VirtualCareJson;
 }
 
 function loadExistingVirtualCare(): VirtualCareJson {
@@ -310,10 +317,24 @@ export async function run(): Promise<SyncResult> {
     const ownedMetadata: DataMetadata = {};
     if (pubmedVerified) {
       const cohortExisting = existing._dataMetadata?.VIRTUAL_MD_COHORT_STUDY;
+      const existingRecord = existing as unknown as Record<string, unknown>;
+      const handAuthored = isRecord(existingRecord._handAuthoredMetadata)
+        ? (existingRecord._handAuthoredMetadata as Record<string, unknown>)
+        : undefined;
+      const handCohort = isRecord(handAuthored?.VIRTUAL_MD_COHORT_STUDY)
+        ? (handAuthored!.VIRTUAL_MD_COHORT_STUDY as Record<string, unknown>)
+        : undefined;
+      const studyPeriod =
+        typeof handCohort?.studyPeriod === 'string' ? handCohort.studyPeriod : undefined;
+      const existingVintage = cohortExisting?.sourceVintage;
+      const sourceVintage =
+        studyPeriod ||
+        (existingVintage && existingVintage !== 'Unknown' ? existingVintage : undefined) ||
+        'Cohort study indexed in PubMed';
       ownedMetadata.VIRTUAL_MD_COHORT_STUDY = buildMetadataEntry({
         updateType: cohortExisting?.updateType ?? 'manual',
         source: cohortExisting?.source ?? 'Canadian Journal of Emergency Medicine (PubMed PMID 40465166)',
-        sourceVintage: cohortExisting?.sourceVintage ?? 'Cohort study indexed in PubMed',
+        sourceVintage,
         verification: pubmedNote,
         lastUpdated: timestamp,
       });
