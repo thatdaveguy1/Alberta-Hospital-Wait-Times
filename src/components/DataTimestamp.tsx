@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { RefreshCw, FileText } from 'lucide-react';
+import { formatDataTimestamp } from '../lib/dataTimestampFormat';
 
 export interface ArrayMetadata {
   source: string;
@@ -22,7 +23,6 @@ interface DataTimestampProps {
   compact?: boolean;
 }
 
-const EDMONTON_TIMEZONE = 'America/Edmonton';
 
 /** Maps internal pipeline IDs and raw source strings to human-readable names so "Scraper" never leaks to the UI. */
 export function sanitizeSource(source: string): string {
@@ -77,24 +77,6 @@ export function sanitizeSource(source: string): string {
     .trim();
 }
 
-function formatTimestamp(ts: string): string {
-  if (!ts || ts === 'Unknown') return 'Unknown';
-  try {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return ts; // Not a date — show as-is (e.g. "2024-2025 fiscal year")
-    return d.toLocaleString('en-CA', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZone: EDMONTON_TIMEZONE,
-      timeZoneName: 'short',
-    });
-  } catch {
-    return ts;
-  }
-}
 
 export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimestampProps): React.ReactElement | null {
   const entry = metadata?.[arrayKey];
@@ -102,11 +84,12 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
 
   const isAuto = entry.updateType === 'auto';
   const sanitizedSource = sanitizeSource(entry.source);
-  const lastUpdated = formatTimestamp(entry.lastUpdated);
+  const lastUpdated = formatDataTimestamp(entry.lastUpdated);
+  const sourceVintage = formatDataTimestamp(entry.sourceVintage);
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2 text-[10px] text-slate-400">
+      <div className="flex items-center gap-2 text-[10px] text-slate-400 flex-wrap">
         <span
           className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider text-[9px] border ${
             isAuto
@@ -117,7 +100,11 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
           {isAuto ? 'Auto-updated\u00A0' : 'Manual\u00A0'}
         </span>
         <span className="font-medium">
-          Updated: <span className="font-mono text-slate-200 font-semibold">{lastUpdated}</span>
+          Last scrape: <span className="font-mono text-slate-200 font-semibold">{lastUpdated}</span>
+        </span>
+        <span className="text-slate-600">·</span>
+        <span className="text-slate-400">
+          Source period: <span className="text-slate-200 font-semibold">{sourceVintage}</span>
         </span>
         <span className="text-slate-600">·</span>
         <span className="text-slate-400">Source: <span className="text-slate-200 font-semibold">{sanitizedSource}</span></span>
@@ -148,11 +135,11 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
             {isAuto ? 'Auto-updated' : 'Manual update'}
           </span>
           <span className="text-xs font-bold text-slate-200">
-            Last Update: <span className="font-mono text-white font-black">{lastUpdated}</span>
+            Last scrape: <span className="font-mono text-white font-black">{lastUpdated}</span>
           </span>
           <span className="text-slate-600 text-xs hidden sm:inline">·</span>
           <span className="text-[11px] text-slate-400">
-            Data Timestamp: <span className="font-extrabold text-slate-200">{entry.sourceVintage}</span>
+            Source period: <span className="font-extrabold text-slate-200">{sourceVintage}</span>
           </span>
         </div>
         <div className="text-[11px] text-slate-400">

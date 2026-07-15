@@ -159,35 +159,35 @@
     "HEALTH_LINK_VOLUMES": {
       "source": "virtualCareFetcher",
       "sourceVintage": "AHS reports (no new publications)",
-      "lastUpdated": "2026-07-05",
+      "lastUpdated": "2026-07-05T12:00:00.000Z",
       "updateType": "manual",
       "verification": "PubMed checked but no new AHS program milestones are published, requiring manual monitoring."
     },
     "VIRTUAL_MD_COHORT_STUDY": {
       "source": "Canadian Journal of Emergency Medicine, June 2025",
       "sourceVintage": "Unknown",
-      "lastUpdated": "2026-07-05",
+      "lastUpdated": "2026-07-05T12:00:00.000Z",
       "updateType": "manual",
       "verification": "Exact match to published study (cohort=19312, 55.7%/60%/52.5%)"
     },
     "VIRTUAL_MD_DISPOSITIONS": {
       "source": "AHS Virtual MD program description (2025)",
       "sourceVintage": "Program-reported estimate",
-      "lastUpdated": "2026-07-05",
+      "lastUpdated": "2026-07-05T12:00:00.000Z",
       "updateType": "manual",
       "verification": "Matches AHS statement that ~50% of callers self-manage at home"
     },
     "EMS_811_DIVERSION_DATA": {
       "source": "Estimated from AHS 811 program reports",
       "sourceVintage": "Approximate",
-      "lastUpdated": "2026-07-05",
+      "lastUpdated": "2026-07-05T12:00:00.000Z",
       "updateType": "manual",
       "verification": "Could not verify exact percentages \u2014 marked as estimate"
     },
     "ADJACENT_HELPLINES": {
       "source": "alberta211Scraper",
       "sourceVintage": "Alberta 211 (API limitations)",
-      "lastUpdated": "2026-07-05",
+      "lastUpdated": "2026-07-05T12:00:00.000Z",
       "updateType": "manual",
       "verification": "Helplines database is static due to 211 API limits, requiring manual registry checks."
     }

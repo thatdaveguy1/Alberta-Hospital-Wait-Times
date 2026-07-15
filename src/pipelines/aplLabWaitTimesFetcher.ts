@@ -185,7 +185,7 @@ export async function run(): Promise<SyncResult> {
       LAB_LOCATION_WAITS: buildMetadataEntry({
         updateType: 'auto',
         source: 'APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)',
-        sourceVintage: 'Live data',
+        sourceVintage: 'Live APL QMe feed',
         lastUpdated: timestamp,
         verification: 'Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes.',
       }),

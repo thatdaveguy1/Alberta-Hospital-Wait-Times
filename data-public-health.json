@@ -70,7 +70,7 @@
       "site": "Calgary (Bonnybrook Plant)",
       "zone": "Calgary Zone",
       "populationServed": 950000,
-      "covidSignal": 0.0002482014404079443,
+      "covidSignal": 0.00036387645003420143,
       "fluASignal": 32.1,
       "rsvSignal": 18.4,
       "activityLevel": "Low",
@@ -80,7 +80,7 @@
       "site": "Edmonton (Gold Bar Plant)",
       "zone": "Edmonton Zone",
       "populationServed": 880000,
-      "covidSignal": 0.00004539013826034877,
+      "covidSignal": 9.441148758152545e-05,
       "fluASignal": 0.01,
       "rsvSignal": 0.01,
       "activityLevel": "Low",
@@ -90,17 +90,17 @@
       "site": "Red Deer Wastewater Plant",
       "zone": "Central Zone",
       "populationServed": 105000,
-      "covidSignal": 0.002780344754267375,
+      "covidSignal": 0.001136852077300438,
       "fluASignal": 41.2,
       "rsvSignal": 28.5,
       "activityLevel": "Low",
-      "trend": "Stable"
+      "trend": "Increasing"
     },
     {
       "site": "Grande Prairie Plant",
       "zone": "North Zone",
       "populationServed": 70000,
-      "covidSignal": 0,
+      "covidSignal": 0.0003221681671775478,
       "fluASignal": 15.6,
       "rsvSignal": 9.4,
       "activityLevel": "Low",
@@ -110,11 +110,11 @@
       "site": "Lethbridge Wastewater Plant",
       "zone": "South Zone",
       "populationServed": 98000,
-      "covidSignal": 0.0011705817657907765,
+      "covidSignal": 0.0009473969155038191,
       "fluASignal": 18.2,
       "rsvSignal": 14,
       "activityLevel": "Low",
-      "trend": "Increasing"
+      "trend": "Decreasing"
     },
     {
       "site": "Fort Saskatchewan",
@@ -130,7 +130,7 @@
       "site": "Fort McMurray",
       "zone": "North Zone",
       "populationServed": 76000,
-      "covidSignal": 0,
+      "covidSignal": 0.000622378544138592,
       "fluASignal": 0,
       "rsvSignal": 0,
       "activityLevel": "Low",
@@ -140,10 +140,10 @@
       "site": "Medicine Hat",
       "zone": "South Zone",
       "populationServed": 65000,
-      "covidSignal": 0.002526383640315495,
+      "covidSignal": 0.004697938117665331,
       "fluASignal": 0,
       "rsvSignal": 0,
-      "activityLevel": "Low",
+      "activityLevel": "Moderate",
       "trend": "Decreasing"
     },
     {
@@ -290,14 +290,14 @@
   "_dataMetadata": {
     "RESPIRATORY_VIRUS_SURVEILLANCE": {
       "source": "Alberta Respiratory Virus Dashboard (seasonal surveillance)",
-      "sourceVintage": "2024–2025 and 2025–2026 seasons (lab positivity & hospitalizations)",
+      "sourceVintage": "2024\u20132025 and 2025\u20132026 seasons (lab positivity & hospitalizations)",
       "updateType": "manual",
-      "lastUpdated": "2026-07-08",
+      "lastUpdated": "2026-07-15T12:04:09.947Z",
       "verification": "Seasonal metrics curated from AHS RVD; auto RVD summary arrays refresh separately under RVD_RESPIRATORY_CASE_COUNTS."
     },
     "WASTEWATER_SIGNALS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:03:52.778Z",
+      "lastUpdated": "2026-07-15T12:04:09.947Z",
       "source": "PHAC Health Infobase wastewater API + Alberta RVD",
       "sourceVintage": "Live weekly wastewater signals"
     },
@@ -305,35 +305,35 @@
       "source": "Alberta childhood immunization coverage by zone",
       "sourceVintage": "2025 reporting year baseline",
       "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
+      "lastUpdated": "2026-07-05T12:00:00.000Z"
     },
     "NOTIFIABLE_DISEASE_INCIDENCE": {
       "source": "Alberta notifiable disease incidence",
       "sourceVintage": "Hand-authored baseline",
       "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
+      "lastUpdated": "2026-07-05T12:00:00.000Z"
     },
     "ENVIRONMENTAL_ADVISORIES": {
       "source": "Alberta environmental health advisories",
       "sourceVintage": "Hand-authored baseline",
       "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
+      "lastUpdated": "2026-07-05T12:00:00.000Z"
     },
     "OUTBREAK_PROTOCOLS": {
       "source": "Alberta outbreak management protocols",
       "sourceVintage": "Hand-authored baseline",
       "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
+      "lastUpdated": "2026-07-05T12:00:00.000Z"
     },
     "RVD_RESPIRATORY_CASE_COUNTS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:03:52.778Z",
+      "lastUpdated": "2026-07-15T12:04:09.947Z",
       "source": "Alberta Respiratory Virus Dashboard summary",
       "sourceVintage": "2025-08-24 to 2026-08-23"
     },
     "RVD_IMMUNIZATION_DOSES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:03:52.778Z",
+      "lastUpdated": "2026-07-15T12:04:09.947Z",
       "source": "Alberta Respiratory Virus Dashboard immunizations",
       "sourceVintage": "2025-08-24 to 2026-08-23"
     }
@@ -567,7 +567,7 @@
     {
       "virus": "Influenza A (H1N1)",
       "weekEnding": "2026-07-05",
-      "count": 0
+      "count": 4
     },
     {
       "virus": "Influenza A (H1N1)",
@@ -832,7 +832,7 @@
     {
       "virus": "Influenza A (H3N2)",
       "weekEnding": "2026-07-05",
-      "count": 0
+      "count": 3
     },
     {
       "virus": "Influenza A (H3N2)",
@@ -1092,12 +1092,12 @@
     {
       "virus": "Influenza A (Untyped)",
       "weekEnding": "2026-06-28",
-      "count": 1
+      "count": 0
     },
     {
       "virus": "Influenza A (Untyped)",
       "weekEnding": "2026-07-05",
-      "count": 0
+      "count": 2
     },
     {
       "virus": "Influenza A (Untyped)",
@@ -1419,247 +1419,247 @@
     {
       "season": "2021-2022",
       "weekEnding": "2025-09-21",
-      "doses": 666
+      "doses": 667
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-09-28",
-      "doses": 16485
+      "doses": 16487
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-10-05",
-      "doses": 83147
+      "doses": 83149
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-10-12",
-      "doses": 190001
+      "doses": 190005
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-10-19",
-      "doses": 470673
+      "doses": 470679
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-10-26",
-      "doses": 665762
+      "doses": 665770
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-11-02",
-      "doses": 797612
+      "doses": 797620
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-11-09",
-      "doses": 896172
+      "doses": 896182
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-11-16",
-      "doses": 968753
+      "doses": 968765
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-11-23",
-      "doses": 1022075
+      "doses": 1022089
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-11-30",
-      "doses": 1060153
+      "doses": 1060168
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-12-07",
-      "doses": 1087554
+      "doses": 1087569
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-12-14",
-      "doses": 1113118
+      "doses": 1113135
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-12-21",
-      "doses": 1133213
+      "doses": 1133230
     },
     {
       "season": "2021-2022",
       "weekEnding": "2025-12-28",
-      "doses": 1146634
+      "doses": 1146651
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-01-04",
-      "doses": 1162538
+      "doses": 1162556
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-01-11",
-      "doses": 1174736
+      "doses": 1174754
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-01-18",
-      "doses": 1183574
+      "doses": 1183592
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-01-25",
-      "doses": 1189803
+      "doses": 1189822
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-02-01",
-      "doses": 1194676
+      "doses": 1194697
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-02-08",
-      "doses": 1198824
+      "doses": 1198845
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-02-15",
-      "doses": 1202092
+      "doses": 1202113
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-02-22",
-      "doses": 1204667
+      "doses": 1204688
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-03-01",
-      "doses": 1207212
+      "doses": 1207234
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-03-08",
-      "doses": 1209368
+      "doses": 1209390
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-03-15",
-      "doses": 1211275
+      "doses": 1211297
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-03-22",
-      "doses": 1212960
+      "doses": 1212982
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-03-29",
-      "doses": 1214271
+      "doses": 1214293
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-04-05",
-      "doses": 1214850
+      "doses": 1214872
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-04-12",
-      "doses": 1215353
+      "doses": 1215375
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-04-19",
-      "doses": 1215888
+      "doses": 1215910
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-04-26",
-      "doses": 1216486
+      "doses": 1216508
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-05-03",
-      "doses": 1216629
+      "doses": 1216651
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-05-10",
-      "doses": 1216751
+      "doses": 1216773
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-05-17",
-      "doses": 1216880
+      "doses": 1216903
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-05-24",
-      "doses": 1216990
+      "doses": 1217013
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-05-31",
-      "doses": 1217079
+      "doses": 1217102
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-06-07",
-      "doses": 1217171
+      "doses": 1217194
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-06-14",
-      "doses": 1217267
+      "doses": 1217290
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-06-21",
-      "doses": 1217370
+      "doses": 1217393
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-06-28",
-      "doses": 1217466
+      "doses": 1217489
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-07-05",
-      "doses": 1217544
+      "doses": 1217568
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-07-12",
-      "doses": 1217630
+      "doses": 1217654
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-07-19",
-      "doses": 1217702
+      "doses": 1217727
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-07-26",
-      "doses": 1217767
+      "doses": 1217792
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-08-02",
-      "doses": 1217824
+      "doses": 1217849
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-08-09",
-      "doses": 1217902
+      "doses": 1217927
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-08-16",
-      "doses": 1217978
+      "doses": 1218003
     },
     {
       "season": "2021-2022",
       "weekEnding": "2026-08-23",
-      "doses": 1218052
+      "doses": 1218077
     },
     {
       "season": "2022-2023",
@@ -1674,252 +1674,252 @@
     {
       "season": "2022-2023",
       "weekEnding": "2025-09-14",
-      "doses": 250
+      "doses": 251
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-09-21",
-      "doses": 389
+      "doses": 390
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-09-28",
-      "doses": 2368
+      "doses": 2370
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-10-05",
-      "doses": 18100
+      "doses": 18102
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-10-12",
-      "doses": 49134
+      "doses": 49138
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-10-19",
-      "doses": 346473
+      "doses": 346480
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-10-26",
-      "doses": 556174
+      "doses": 556182
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-11-02",
-      "doses": 690584
+      "doses": 690592
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-11-09",
-      "doses": 801118
+      "doses": 801129
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-11-16",
-      "doses": 925124
+      "doses": 925137
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-11-23",
-      "doses": 1015026
+      "doses": 1015041
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-11-30",
-      "doses": 1080227
+      "doses": 1080242
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-12-07",
-      "doses": 1134901
+      "doses": 1134916
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-12-14",
-      "doses": 1175375
+      "doses": 1175393
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-12-21",
-      "doses": 1197127
+      "doses": 1197147
     },
     {
       "season": "2022-2023",
       "weekEnding": "2025-12-28",
-      "doses": 1210273
+      "doses": 1210293
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-01-04",
-      "doses": 1226661
+      "doses": 1226681
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-01-11",
-      "doses": 1239586
+      "doses": 1239607
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-01-18",
-      "doses": 1248620
+      "doses": 1248642
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-01-25",
-      "doses": 1255113
+      "doses": 1255136
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-02-01",
-      "doses": 1260516
+      "doses": 1260540
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-02-08",
-      "doses": 1264951
+      "doses": 1264976
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-02-15",
-      "doses": 1268683
+      "doses": 1268708
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-02-22",
-      "doses": 1271435
+      "doses": 1271460
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-03-01",
-      "doses": 1274367
+      "doses": 1274392
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-03-08",
-      "doses": 1276920
+      "doses": 1276946
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-03-15",
-      "doses": 1279203
+      "doses": 1279230
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-03-22",
-      "doses": 1281087
+      "doses": 1281114
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-03-29",
-      "doses": 1282720
+      "doses": 1282748
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-04-05",
-      "doses": 1283210
+      "doses": 1283238
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-04-12",
-      "doses": 1283818
+      "doses": 1283846
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-04-19",
-      "doses": 1284320
+      "doses": 1284348
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-04-26",
-      "doses": 1284952
+      "doses": 1284980
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-05-03",
-      "doses": 1285066
+      "doses": 1285094
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-05-10",
-      "doses": 1285151
+      "doses": 1285179
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-05-17",
-      "doses": 1285238
+      "doses": 1285266
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-05-24",
-      "doses": 1285331
+      "doses": 1285359
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-05-31",
-      "doses": 1285426
+      "doses": 1285454
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-06-07",
-      "doses": 1285512
+      "doses": 1285540
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-06-14",
-      "doses": 1285599
+      "doses": 1285628
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-06-21",
-      "doses": 1285678
+      "doses": 1285707
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-06-28",
-      "doses": 1285752
+      "doses": 1285781
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-07-05",
-      "doses": 1285800
+      "doses": 1285829
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-07-12",
-      "doses": 1285875
+      "doses": 1285904
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-07-19",
-      "doses": 1285920
+      "doses": 1285950
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-07-26",
-      "doses": 1285964
+      "doses": 1285994
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-08-02",
-      "doses": 1286015
+      "doses": 1286045
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-08-09",
-      "doses": 1286081
+      "doses": 1286111
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-08-16",
-      "doses": 1286120
+      "doses": 1286150
     },
     {
       "season": "2022-2023",
       "weekEnding": "2026-08-23",
-      "doses": 1286168
+      "doses": 1286198
     },
     {
       "season": "2023-2024",
@@ -1934,252 +1934,252 @@
     {
       "season": "2023-2024",
       "weekEnding": "2025-09-14",
-      "doses": 158
+      "doses": 159
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-09-21",
-      "doses": 240
+      "doses": 241
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-09-28",
-      "doses": 1928
+      "doses": 1931
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-10-05",
-      "doses": 13742
+      "doses": 13747
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-10-12",
-      "doses": 47365
+      "doses": 47370
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-10-19",
-      "doses": 378706
+      "doses": 378714
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-10-26",
-      "doses": 592304
+      "doses": 592315
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-11-02",
-      "doses": 732456
+      "doses": 732467
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-11-09",
-      "doses": 825037
+      "doses": 825049
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-11-16",
-      "doses": 893292
+      "doses": 893307
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-11-23",
-      "doses": 942345
+      "doses": 942361
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-11-30",
-      "doses": 981834
+      "doses": 981852
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-12-07",
-      "doses": 1015695
+      "doses": 1015713
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-12-14",
-      "doses": 1046013
+      "doses": 1046031
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-12-21",
-      "doses": 1070089
+      "doses": 1070109
     },
     {
       "season": "2023-2024",
       "weekEnding": "2025-12-28",
-      "doses": 1080672
+      "doses": 1080692
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-01-04",
-      "doses": 1095320
+      "doses": 1095340
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-01-11",
-      "doses": 1106080
+      "doses": 1106101
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-01-18",
-      "doses": 1114205
+      "doses": 1114228
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-01-25",
-      "doses": 1121080
+      "doses": 1121103
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-02-01",
-      "doses": 1126636
+      "doses": 1126659
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-02-08",
-      "doses": 1130991
+      "doses": 1131014
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-02-15",
-      "doses": 1134637
+      "doses": 1134660
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-02-22",
-      "doses": 1137874
+      "doses": 1137897
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-03-01",
-      "doses": 1140858
+      "doses": 1140881
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-03-08",
-      "doses": 1143515
+      "doses": 1143538
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-03-15",
-      "doses": 1145864
+      "doses": 1145887
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-03-22",
-      "doses": 1147837
+      "doses": 1147860
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-03-29",
-      "doses": 1149552
+      "doses": 1149575
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-04-05",
-      "doses": 1150096
+      "doses": 1150119
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-04-12",
-      "doses": 1150581
+      "doses": 1150605
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-04-19",
-      "doses": 1151037
+      "doses": 1151062
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-04-26",
-      "doses": 1151536
+      "doses": 1151561
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-05-03",
-      "doses": 1151781
+      "doses": 1151806
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-05-10",
-      "doses": 1151832
+      "doses": 1151857
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-05-17",
-      "doses": 1151905
+      "doses": 1151930
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-05-24",
-      "doses": 1151954
+      "doses": 1151979
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-05-31",
-      "doses": 1151994
+      "doses": 1152020
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-06-07",
-      "doses": 1152030
+      "doses": 1152056
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-06-14",
-      "doses": 1152090
+      "doses": 1152116
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-06-21",
-      "doses": 1152113
+      "doses": 1152139
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-06-28",
-      "doses": 1152147
+      "doses": 1152173
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-07-05",
-      "doses": 1152184
+      "doses": 1152210
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-07-12",
-      "doses": 1152203
+      "doses": 1152229
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-07-19",
-      "doses": 1152231
+      "doses": 1152257
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-07-26",
-      "doses": 1152261
+      "doses": 1152287
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-08-02",
-      "doses": 1152286
+      "doses": 1152312
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-08-09",
-      "doses": 1152310
+      "doses": 1152336
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-08-16",
-      "doses": 1152339
+      "doses": 1152365
     },
     {
       "season": "2023-2024",
       "weekEnding": "2026-08-23",
-      "doses": 1152366
+      "doses": 1152392
     },
     {
       "season": "2024-2025",
@@ -2209,237 +2209,237 @@
     {
       "season": "2024-2025",
       "weekEnding": "2025-10-05",
-      "doses": 5616
+      "doses": 5618
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-10-12",
-      "doses": 38371
+      "doses": 38373
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-10-19",
-      "doses": 282007
+      "doses": 282010
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-10-26",
-      "doses": 500770
+      "doses": 500775
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-11-02",
-      "doses": 640317
+      "doses": 640322
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-11-09",
-      "doses": 737696
+      "doses": 737703
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-11-16",
-      "doses": 806433
+      "doses": 806442
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-11-23",
-      "doses": 852184
+      "doses": 852194
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-11-30",
-      "doses": 887246
+      "doses": 887257
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-12-07",
-      "doses": 914508
+      "doses": 914519
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-12-14",
-      "doses": 934583
+      "doses": 934595
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-12-21",
-      "doses": 950841
+      "doses": 950853
     },
     {
       "season": "2024-2025",
       "weekEnding": "2025-12-28",
-      "doses": 957917
+      "doses": 957930
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-01-04",
-      "doses": 968915
+      "doses": 968928
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-01-11",
-      "doses": 981650
+      "doses": 981664
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-01-18",
-      "doses": 991738
+      "doses": 991752
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-01-25",
-      "doses": 999202
+      "doses": 999216
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-02-01",
-      "doses": 1005131
+      "doses": 1005145
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-02-08",
-      "doses": 1010796
+      "doses": 1010811
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-02-15",
-      "doses": 1016557
+      "doses": 1016572
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-02-22",
-      "doses": 1020762
+      "doses": 1020776
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-03-01",
-      "doses": 1025100
+      "doses": 1025114
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-03-08",
-      "doses": 1028661
+      "doses": 1028675
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-03-15",
-      "doses": 1031572
+      "doses": 1031586
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-03-22",
-      "doses": 1034384
+      "doses": 1034398
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-03-29",
-      "doses": 1037068
+      "doses": 1037082
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-04-05",
-      "doses": 1038064
+      "doses": 1038078
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-04-12",
-      "doses": 1038644
+      "doses": 1038658
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-04-19",
-      "doses": 1039144
+      "doses": 1039158
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-04-26",
-      "doses": 1039737
+      "doses": 1039751
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-05-03",
-      "doses": 1040252
+      "doses": 1040267
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-05-10",
-      "doses": 1040293
+      "doses": 1040308
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-05-17",
-      "doses": 1040302
+      "doses": 1040319
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-05-24",
-      "doses": 1040323
+      "doses": 1040340
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-05-31",
-      "doses": 1040330
+      "doses": 1040347
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-06-07",
-      "doses": 1040346
+      "doses": 1040363
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-06-14",
-      "doses": 1040358
-    },
-    {
-      "season": "2024-2025",
-      "weekEnding": "2026-06-21",
       "doses": 1040376
     },
     {
       "season": "2024-2025",
+      "weekEnding": "2026-06-21",
+      "doses": 1040394
+    },
+    {
+      "season": "2024-2025",
       "weekEnding": "2026-06-28",
-      "doses": 1040387
+      "doses": 1040405
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-07-05",
-      "doses": 1040408
+      "doses": 1040426
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-07-12",
-      "doses": 1040423
+      "doses": 1040442
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-07-19",
-      "doses": 1040434
+      "doses": 1040454
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-07-26",
-      "doses": 1040447
+      "doses": 1040467
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-08-02",
-      "doses": 1040461
+      "doses": 1040481
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-08-09",
-      "doses": 1040470
+      "doses": 1040490
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-08-16",
-      "doses": 1040485
+      "doses": 1040505
     },
     {
       "season": "2024-2025",
       "weekEnding": "2026-08-23",
-      "doses": 1040497
+      "doses": 1040517
     },
     {
       "season": "2025-2026",
@@ -2454,217 +2454,222 @@
     {
       "season": "2025-2026",
       "weekEnding": "2025-09-07",
-      "doses": 45
+      "doses": 46
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-09-14",
-      "doses": 57
+      "doses": 59
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-09-21",
-      "doses": 119
+      "doses": 121
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-09-28",
-      "doses": 20505
+      "doses": 20509
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-10-05",
-      "doses": 73950
+      "doses": 73957
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-10-12",
-      "doses": 123341
+      "doses": 123350
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-10-19",
-      "doses": 379414
+      "doses": 379425
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-10-26",
-      "doses": 526829
+      "doses": 526842
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-11-02",
-      "doses": 630722
+      "doses": 630736
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-11-09",
-      "doses": 718336
+      "doses": 718351
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-11-16",
-      "doses": 778144
+      "doses": 778159
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-11-23",
-      "doses": 823233
+      "doses": 823250
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-11-30",
-      "doses": 861574
+      "doses": 861591
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-12-07",
-      "doses": 898271
+      "doses": 898289
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-12-14",
-      "doses": 936024
+      "doses": 936043
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-12-21",
-      "doses": 953263
+      "doses": 953282
     },
     {
       "season": "2025-2026",
       "weekEnding": "2025-12-28",
-      "doses": 969265
+      "doses": 969285
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-01-04",
-      "doses": 985501
+      "doses": 985522
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-01-11",
-      "doses": 996552
+      "doses": 996573
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-01-18",
-      "doses": 1003864
+      "doses": 1003886
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-01-25",
-      "doses": 1009733
+      "doses": 1009757
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-02-01",
-      "doses": 1014323
+      "doses": 1014347
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-02-08",
-      "doses": 1018056
+      "doses": 1018080
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-02-15",
-      "doses": 1020910
+      "doses": 1020934
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-02-22",
-      "doses": 1024106
+      "doses": 1024130
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-03-01",
-      "doses": 1026599
+      "doses": 1026623
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-03-08",
-      "doses": 1028835
+      "doses": 1028859
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-03-15",
-      "doses": 1030797
+      "doses": 1030821
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-03-22",
-      "doses": 1032774
+      "doses": 1032800
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-03-29",
-      "doses": 1033730
+      "doses": 1033756
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-04-05",
-      "doses": 1034266
+      "doses": 1034292
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-04-12",
-      "doses": 1034728
+      "doses": 1034754
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-04-19",
-      "doses": 1035261
+      "doses": 1035287
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-04-26",
-      "doses": 1035690
+      "doses": 1035718
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-05-03",
-      "doses": 1035720
+      "doses": 1035749
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-05-10",
-      "doses": 1035728
+      "doses": 1035757
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-05-17",
-      "doses": 1035732
+      "doses": 1035761
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-05-24",
-      "doses": 1035736
+      "doses": 1035767
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-05-31",
-      "doses": 1035737
+      "doses": 1035770
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-06-07",
-      "doses": 1035738
+      "doses": 1035771
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-06-14",
-      "doses": 1035738
+      "doses": 1035771
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-06-21",
-      "doses": 1035743
+      "doses": 1035776
     },
     {
       "season": "2025-2026",
       "weekEnding": "2026-06-28",
-      "doses": 1035743
+      "doses": 1035776
+    },
+    {
+      "season": "2025-2026",
+      "weekEnding": "2026-07-05",
+      "doses": 1035776
     }
   ]
 }

@@ -1024,101 +1024,101 @@
       "facilityId": "grey-nuns-community-hospital",
       "facilityName": "Grey Nuns Community Hospital",
       "city": "Edmonton",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 783,
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 719,
       "pctDischargedWithin4h": 14,
-      "admittedCount": 203,
-      "pctAdmittedWithin8h": 14
+      "admittedCount": 176,
+      "pctAdmittedWithin8h": 9
     },
     {
       "facilityId": "misericordia-community-hospital",
       "facilityName": "Misericordia Community Hospital",
       "city": "Edmonton",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 489,
-      "pctDischargedWithin4h": 8,
-      "admittedCount": 221,
-      "pctAdmittedWithin8h": 7
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 441,
+      "pctDischargedWithin4h": 9,
+      "admittedCount": 229,
+      "pctAdmittedWithin8h": 9
     },
     {
       "facilityId": "royal-alexandra-hospital",
       "facilityName": "Royal Alexandra Hospital",
       "city": "Edmonton",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 877,
-      "pctDischargedWithin4h": 13,
-      "admittedCount": 432,
-      "pctAdmittedWithin8h": 27
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 797,
+      "pctDischargedWithin4h": 15,
+      "admittedCount": 394,
+      "pctAdmittedWithin8h": 20
     },
     {
       "facilityId": "stollery-children-s-hospital",
       "facilityName": "Stollery Children's Hospital",
       "city": "Edmonton",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 795,
-      "pctDischargedWithin4h": 33,
-      "admittedCount": 97,
-      "pctAdmittedWithin8h": 37
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 792,
+      "pctDischargedWithin4h": 36,
+      "admittedCount": 122,
+      "pctAdmittedWithin8h": 34
     },
     {
       "facilityId": "university-of-alberta-hospital",
       "facilityName": "University of Alberta Hospital",
       "city": "Edmonton",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 607,
-      "pctDischargedWithin4h": 9,
-      "admittedCount": 388,
-      "pctAdmittedWithin8h": 24
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 645,
+      "pctDischargedWithin4h": 7,
+      "admittedCount": 412,
+      "pctAdmittedWithin8h": 27
     },
     {
       "facilityId": "alberta-children-s-hospital",
       "facilityName": "Alberta Children's Hospital",
       "city": "Calgary",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 1313,
-      "pctDischargedWithin4h": 69,
-      "admittedCount": 111,
-      "pctAdmittedWithin8h": 47
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 1227,
+      "pctDischargedWithin4h": 59,
+      "admittedCount": 116,
+      "pctAdmittedWithin8h": 52
     },
     {
       "facilityId": "foothills-medical-centre",
       "facilityName": "Foothills Medical Centre",
       "city": "Calgary",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 955,
-      "pctDischargedWithin4h": 12,
-      "admittedCount": 457,
-      "pctAdmittedWithin8h": 31
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 943,
+      "pctDischargedWithin4h": 16,
+      "admittedCount": 474,
+      "pctAdmittedWithin8h": 34
     },
     {
       "facilityId": "peter-lougheed-centre",
       "facilityName": "Peter Lougheed Centre",
       "city": "Calgary",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 1216,
-      "pctDischargedWithin4h": 21,
-      "admittedCount": 331,
-      "pctAdmittedWithin8h": 24
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 1206,
+      "pctDischargedWithin4h": 17,
+      "admittedCount": 359,
+      "pctAdmittedWithin8h": 21
     },
     {
       "facilityId": "rockyview-general-hospital",
       "facilityName": "Rockyview General Hospital",
       "city": "Calgary",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 1183,
-      "pctDischargedWithin4h": 26,
-      "admittedCount": 340,
-      "pctAdmittedWithin8h": 28
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 1201,
+      "pctDischargedWithin4h": 22,
+      "admittedCount": 338,
+      "pctAdmittedWithin8h": 20
     },
     {
       "facilityId": "south-health-campus",
       "facilityName": "South Health Campus",
       "city": "Calgary",
-      "weekEnding": "July 4, 2026",
-      "dischargedCount": 1052,
-      "pctDischargedWithin4h": 32,
-      "admittedCount": 241,
-      "pctAdmittedWithin8h": 17
+      "weekEnding": "July 11, 2026",
+      "dischargedCount": 1063,
+      "pctDischargedWithin4h": 33,
+      "admittedCount": 248,
+      "pctAdmittedWithin8h": 19
     }
   ],
   "CIHI_COMPARATORS": [
@@ -1301,49 +1301,49 @@
   "_dataMetadata": {
     "FACILITY_FLOW_METRICS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:01:06.109Z",
+      "lastUpdated": "2026-07-15T12:01:07.713Z",
       "source": "AHS public wait-times API + HQCA FOCUS analytical estimates",
       "sourceVintage": "Facility list live; metrics compiled from HQCA FOCUS 2025/2026 reports",
       "verification": "Facility names/cities/zones refreshed from AHS API. Occupancy, ALC, LWBS, bed wait, and ICU metrics are analytical estimates from HQCA FOCUS reports."
     },
     "CIHI_COMPARATORS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:01:06.109Z",
+      "lastUpdated": "2026-07-15T12:01:07.713Z",
       "source": "CIHI NACRS / Hospital Beds / ALC Indicators (derived from diagnostic + cancer data)",
       "sourceVintage": "Latest CIHI official releases",
       "verification": "Derived from data-diagnostic.json and data-cancer.json populated by CIHI downloaders."
     },
     "REGIONAL_LGA_DEMAND": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:01:06.109Z",
+      "lastUpdated": "2026-07-15T12:01:07.713Z",
       "source": "Open Alberta CKAN LGA community profiles: Table 10.1 (ED visit rates) + Figure 2.2 (population)",
       "sourceVintage": "Latest Open Alberta release (Table 10.1 + Figure 2.2)",
       "verification": "Derived from data-regional-inequity.json populated by openAlbertaInequityFetcher (Table 10.1 + Figure 2.2)."
     },
     "HISTORICAL_FLOW_TIMELINES": {
       "updateType": "manual",
-      "lastUpdated": "2026-07-08T12:01:06.109Z",
+      "lastUpdated": "2026-07-15T12:01:07.713Z",
       "source": "HQCA FOCUS quarterly performance reports",
       "sourceVintage": "2021-Q1 to 2026-Q1 compiled estimates",
       "verification": "Quarterly figures compiled from HQCA FOCUS datasets; preserved across runs."
     },
     "AHS_WEEKLY_ED_LOS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:01:07.112Z",
+      "lastUpdated": "2026-07-15T12:01:08.716Z",
       "source": "AHS Weekly ED Performance Reports (Edmonton + Calgary PDFs)",
       "sourceVintage": "AHS weekly ED LOS PDFs (week ending per report)",
       "verification": "Auto-parsed from AHS weekly ED wait/throughput PDFs via pdftotext; facility names normalized to existing hand-authored IDs."
     },
     "CIHI_OCCUPANCY_RATES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:04:04.193Z",
+      "lastUpdated": "2026-07-15T12:04:23.810Z",
       "source": "CIHI indicator XLSX (878 average acute occupancy rate)",
       "sourceVintage": "CIHI indicator data table (latest available)",
       "verification": "Auto-fetched and parsed from CIHI indicator XLSX data table."
     },
     "CIHI_ED_WAIT_INITIAL_ASSESSMENT": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:04:04.193Z",
+      "lastUpdated": "2026-07-15T12:04:23.810Z",
       "source": "CIHI indicator XLSX (811 ED wait time for physician initial assessment)",
       "sourceVintage": "CIHI indicator data table (latest available)",
       "verification": "Auto-fetched and parsed from CIHI indicator XLSX data table."

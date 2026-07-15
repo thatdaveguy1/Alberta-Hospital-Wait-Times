@@ -478,17 +478,27 @@ interface SurgicalJson {
   STATSCAN_SATISFACTION_STATS: unknown[];
   _dataMetadata?: DataMetadata;
 }
+function deriveSurgicalRecordsSourceVintage(records: SurgicalRecord[], periodLabel: string): string {
+  const isoEnds = records
+    .map((r) => r.reporting_period_end)
+    .filter((end): end is string => typeof end === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(end));
+  if (isoEnds.length > 0) {
+    const maxEnd = isoEnds.reduce((a, b) => (a > b ? a : b));
+    return `Reporting period ending ${maxEnd}`;
+  }
+  return periodLabel || 'Live data';
+}
+
 
 function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], periodLabel: string): number {
-  const sourceVintage = periodLabel || 'Live data';
-  const surgicalMeta = buildMetadataEntry({
-    updateType: 'auto',
-    source: 'Alberta Wait Times Reporting (Power BI scraper)',
-    sourceVintage,
-  });
-
   if (!fs.existsSync(filePath)) {
     console.warn(`[PowerBIScraper] ${filePath} not found — creating new file`);
+    const sourceVintage = deriveSurgicalRecordsSourceVintage(newRecords, periodLabel);
+    const surgicalMeta = buildMetadataEntry({
+      updateType: 'auto',
+      source: 'Alberta Wait Times Reporting (Power BI scraper)',
+      sourceVintage,
+    });
     const data: SurgicalJson = {
       SURGICAL_RECORDS: newRecords,
       ORTHOPEDIC_SPECIALTY_RECORDS: [],
@@ -511,6 +521,12 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], pe
   );
 
   parsed.SURGICAL_RECORDS = [...otherRecords, ...newRecords];
+  const sourceVintage = deriveSurgicalRecordsSourceVintage(parsed.SURGICAL_RECORDS, periodLabel);
+  const surgicalMeta = buildMetadataEntry({
+    updateType: 'auto',
+    source: 'Alberta Wait Times Reporting (Power BI scraper)',
+    sourceVintage,
+  });
   // Stamp SURGICAL_RECORDS freshness; preserve other _dataMetadata entries.
   parsed._dataMetadata = mergeDataMetadata(parsed._dataMetadata, {
     SURGICAL_RECORDS: surgicalMeta,

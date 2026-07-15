@@ -377,6 +377,9 @@ export async function run(): Promise<SyncResult> {
     // Stamp _dataMetadata for the arrays this scraper refreshes; preserve
     // hand-authored entries (RESPIRATORY_VIRUS_SURVEILLANCE, immunization
     // coverage, notifiable disease, advisories, outbreak protocols) via merge.
+    const existingMeta = isRecord(existing._dataMetadata)
+      ? (existing._dataMetadata as DataMetadata)
+      : undefined;
     const ownedMetadata: DataMetadata = {};
     if (parsed.length > 0) {
       ownedMetadata.WASTEWATER_SIGNALS = buildMetadataEntry({
@@ -402,9 +405,14 @@ export async function run(): Promise<SyncResult> {
         lastUpdated: timestamp,
       });
     }
-    const existingMeta = isRecord(existing._dataMetadata)
-      ? (existing._dataMetadata as DataMetadata)
-      : undefined;
+    // Keep seasonal curated table's last scrape aligned with RVD run time when present.
+    const seasonalExisting = existingMeta?.RESPIRATORY_VIRUS_SURVEILLANCE;
+    if (seasonalExisting && (summaryEntries.length > 0 || immEntries.length > 0 || parsed.length > 0)) {
+      ownedMetadata.RESPIRATORY_VIRUS_SURVEILLANCE = {
+        ...seasonalExisting,
+        lastUpdated: timestamp,
+      };
+    }
     output._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
 
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf8');

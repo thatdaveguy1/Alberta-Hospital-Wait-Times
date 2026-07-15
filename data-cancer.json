@@ -5582,38 +5582,38 @@
       "source": "Alberta Cancer Registry projected incidence/mortality (major cancers subset)",
       "sourceVintage": "2026 projected baseline",
       "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z",
+      "lastUpdated": "2026-07-05T12:00:00.000Z",
       "verification": "Totals reflect the selected major cancers tracked in this dashboard (breast, colorectal, lung, prostate, bladder, melanoma), not all annual cancer diagnoses in Alberta."
     },
     "CANCER_SCREENING_RATES": {
       "source": "Alberta screening program zone rates",
       "sourceVintage": "Hand-authored baseline",
       "updateType": "manual",
-      "lastUpdated": "2026-07-05T00:00:00Z"
+      "lastUpdated": "2026-07-05T12:00:00.000Z"
     },
     "CANCER_SURGERY_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:01:30.854Z",
+      "lastUpdated": "2026-07-15T12:01:52.906Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2013–2025"
+      "sourceVintage": "2013\u20132025"
     },
     "RADIATION_THERAPY_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:01:30.854Z",
+      "lastUpdated": "2026-07-15T12:01:52.906Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2010–2025"
+      "sourceVintage": "2010\u20132025"
     },
     "ALBERTA_CANCER_CENTRES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:01:17.076Z",
+      "lastUpdated": "2026-07-15T12:01:18.682Z",
       "source": "AHS Cancer Centre directory",
       "sourceVintage": "Live AHS directory"
     },
     "CIHI_CANCER_WAIT_TIMES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-08T12:04:29.810Z",
+      "lastUpdated": "2026-07-15T12:04:49.233Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2008–2025"
+      "sourceVintage": "2008\u20132025"
     }
   }
 }

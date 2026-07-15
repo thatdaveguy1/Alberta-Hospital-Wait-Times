@@ -607,7 +607,7 @@ export async function run(): Promise<SyncResult> {
         IMAGING_WAIT_TRENDS: buildMetadataEntry({
           updateType: 'auto',
           source: 'CIHI Wait Times Priority Procedures in Canada',
-          sourceVintage: 'Live data',
+          sourceVintage: 'CIHI priority procedures imaging time series',
           lastUpdated: timestamp,
         }),
       },

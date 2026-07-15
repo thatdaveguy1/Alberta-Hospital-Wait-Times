@@ -509,8 +509,8 @@ export default function App() {
   const erWaitTimesMetadata: DataMetadataMap = {
     ER_WAIT_TIMES: {
       source: 'Alberta Health Services Portal',
-      sourceVintage: 'Real-time Feed',
-      lastUpdated: syncStatus?.erWaitTimesLastUpdate ?? 'Live Feed',
+      sourceVintage: 'Live AHS feed (no source publish timestamp)',
+      lastUpdated: syncStatus?.erWaitTimesLastUpdate ?? 'Unknown',
       updateType: 'auto',
     },
   };

@@ -191,6 +191,12 @@ export default function PublicHealthDashboard() {
 
   // Computed Stats
   const activeAdvisoriesCount = (data?.ENVIRONMENTAL_ADVISORIES ?? []).filter(a => a.status === 'Active').length;
+
+  const respiratoryTimestampKey =
+    metadata?.RVD_RESPIRATORY_CASE_COUNTS != null
+      ? 'RVD_RESPIRATORY_CASE_COUNTS'
+      : 'RESPIRATORY_VIRUS_SURVEILLANCE';
+
   
   if (isLoading) {
     return (
@@ -337,7 +343,7 @@ export default function PublicHealthDashboard() {
       {/* SUBTAB 1: Respiratory Virus Burden */}
       {activeSubTab === 'respiratory' && (
         <div id="ph-respiratory-subtab" className="space-y-6 animate-fadeIn">
-          <DataTimestamp compact metadata={metadata} arrayKey="RESPIRATORY_VIRUS_SURVEILLANCE" />
+          <DataTimestamp compact metadata={metadata} arrayKey={respiratoryTimestampKey} />
           {/* Top-line Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button

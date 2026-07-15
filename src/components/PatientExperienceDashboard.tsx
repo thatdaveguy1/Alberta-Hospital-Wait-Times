@@ -48,9 +48,48 @@ import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
+type InpatientExperienceHqcaRow = {
+  year: string;
+  zone: string;
+  rating: number;
+  percentage: number;
+};
+
+function isAlbertaWideHqcaZone(zone: string): boolean {
+  const z = zone.trim().toUpperCase();
+  return z === 'ALL' || z === 'ALBERTA';
+}
+
+/** Sum rating 9–10 percentages per fiscal year (zone ALL preferred). */
+function deriveHqcaOverallExcellentSeries(
+  rows: InpatientExperienceHqcaRow[],
+): { year: string; overallExcellentRating: number }[] {
+  const byYear = new Map<string, InpatientExperienceHqcaRow[]>();
+  for (const row of rows) {
+    const bucket = byYear.get(row.year) ?? [];
+    bucket.push(row);
+    byYear.set(row.year, bucket);
+  }
+  const series: { year: string; overallExcellentRating: number }[] = [];
+  for (const [year, yearRows] of byYear) {
+    const albertaRows = yearRows.filter((r) => isAlbertaWideHqcaZone(r.zone));
+    const pool = albertaRows.length > 0 ? albertaRows : yearRows;
+    const excellent = pool
+      .filter((r) => r.rating === 9 || r.rating === 10)
+      .reduce((sum, r) => sum + r.percentage, 0);
+    series.push({
+      year,
+      overallExcellentRating: Math.round(excellent * 10) / 10,
+    });
+  }
+  return series.sort((a, b) => a.year.localeCompare(b.year));
+}
+
+
 type PatientExperienceData = {
   PATIENT_VOICE_BY_SETTING: SettingExperience[];
   INPATIENT_EXPERIENCE_TRENDS: InpatientDetail[];
+  INPATIENT_EXPERIENCE_TRENDS_HQCA?: InpatientExperienceHqcaRow[];
   ED_EXPERIENCE_TRENDS: EDExperienceTrend[];
   CLINICAL_SAFETY_TRENDS: HospitalHarmMetric[];
   PATIENT_COMPLAINTS: ComplaintCategory[];
@@ -61,6 +100,7 @@ export default function PatientExperienceDashboard() {
 
   const PATIENT_VOICE_BY_SETTING = data?.PATIENT_VOICE_BY_SETTING ?? [];
   const INPATIENT_EXPERIENCE_TRENDS = data?.INPATIENT_EXPERIENCE_TRENDS ?? [];
+  const INPATIENT_EXPERIENCE_TRENDS_HQCA = data?.INPATIENT_EXPERIENCE_TRENDS_HQCA ?? [];
   const ED_EXPERIENCE_TRENDS = data?.ED_EXPERIENCE_TRENDS ?? [];
   const CLINICAL_SAFETY_TRENDS = data?.CLINICAL_SAFETY_TRENDS ?? [];
   const PATIENT_COMPLAINTS = data?.PATIENT_COMPLAINTS ?? [];
@@ -183,6 +223,43 @@ export default function PatientExperienceDashboard() {
       c.description.toLowerCase().includes(complaintSearch.toLowerCase())
     );
   }, [complaintSearch, PATIENT_COMPLAINTS]);
+
+  const hasHqcaInpatient = INPATIENT_EXPERIENCE_TRENDS_HQCA.length > 0;
+
+  const inpatientRatingsFromHqca = useMemo(
+    () => deriveHqcaOverallExcellentSeries(INPATIENT_EXPERIENCE_TRENDS_HQCA),
+    [INPATIENT_EXPERIENCE_TRENDS_HQCA],
+  );
+
+  const inpatientRatingsDisplay = useMemo(() => {
+    if (hasHqcaInpatient && inpatientRatingsFromHqca.length > 0) {
+      return inpatientRatingsFromHqca;
+    }
+    return INPATIENT_EXPERIENCE_TRENDS.map((item) => ({
+      year: item.year,
+      overallExcellentRating: item.overallExcellentRating,
+    }));
+  }, [hasHqcaInpatient, inpatientRatingsFromHqca, INPATIENT_EXPERIENCE_TRENDS]);
+
+  const inpatientCommunicationChartData = useMemo(() => {
+    if (INPATIENT_EXPERIENCE_TRENDS.length > 0) {
+      return INPATIENT_EXPERIENCE_TRENDS;
+    }
+    if (hasHqcaInpatient && inpatientRatingsFromHqca.length > 0) {
+      return inpatientRatingsFromHqca.map((row) => ({
+        year: row.year,
+        overallExcellentRating: row.overallExcellentRating,
+      }));
+    }
+    return [] as Array<InpatientDetail | { year: string; overallExcellentRating: number }>;
+  }, [INPATIENT_EXPERIENCE_TRENDS, hasHqcaInpatient, inpatientRatingsFromHqca]);
+
+  const inpatientTimestampKey = hasHqcaInpatient
+    ? 'INPATIENT_EXPERIENCE_TRENDS_HQCA'
+    : 'INPATIENT_EXPERIENCE_TRENDS';
+
+  const inpatientUsesDomainChart = INPATIENT_EXPERIENCE_TRENDS.length > 0;
+
 
   const COLORS = ['#10b981', '#06b6d4', '#f59e0b', '#ef4444'];
 
@@ -525,29 +602,43 @@ export default function PatientExperienceDashboard() {
       {/* SUBTAB 2: Hospital Inpatient Care */}
       {activeSubTab === 'inpatient' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="INPATIENT_EXPERIENCE_TRENDS" />
+          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey={inpatientTimestampKey} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
               <div>
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Inpatient Care Experience Trends (2021 - 2025)</h3>
-                <p className="text-[10px] text-slate-500">Tracking long-term trends from the Inpatient CPES-IC surveys across key communication domains</p>
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  {hasHqcaInpatient
+                    ? 'Inpatient Care Experience Trends (HQCA FOCUS)'
+                    : 'Inpatient Care Experience Trends (2021 - 2025)'}
+                </h3>
+                <p className="text-[10px] text-slate-500">
+                  {inpatientUsesDomainChart
+                    ? 'Tracking long-term trends from the Inpatient CPES-IC surveys across key communication domains'
+                    : 'Overall excellent hospital rating (9–10) from HQCA FOCUS when domain communication trends are unavailable'}
+                </p>
               </div>
 
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={INPATIENT_EXPERIENCE_TRENDS}
+                    data={inpatientCommunicationChartData}
                     margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                     <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
-                    <YAxis label={{ value: 'Always %', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} stroke="#64748b" fontSize={9} />
+                    <YAxis label={{ value: inpatientUsesDomainChart ? 'Always %' : 'Excellent %', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} stroke="#64748b" fontSize={9} domain={inpatientUsesDomainChart ? undefined : [40, 80]} />
                     <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <Line type="monotone" dataKey="nursesCommunication" name="Nurse Comm (% Always)" stroke="#06b6d4" strokeWidth={2.5} activeDot={{ r: 6 }} />
-                    <Line type="monotone" dataKey="doctorsCommunication" name="Doctor Comm (% Always)" stroke="#10b981" strokeWidth={2} />
-                    <Line type="monotone" dataKey="painHelpfulness" name="Pain Efficacy (% Always)" stroke="#f59e0b" strokeWidth={2} />
-                    <Line type="monotone" dataKey="dischargeInformation" name="Discharge Info Received" stroke="#ef4444" strokeWidth={2} />
+                    {inpatientUsesDomainChart ? (
+                      <>
+                        <Line type="monotone" dataKey="nursesCommunication" name="Nurse Comm (% Always)" stroke="#06b6d4" strokeWidth={2.5} activeDot={{ r: 6 }} />
+                        <Line type="monotone" dataKey="doctorsCommunication" name="Doctor Comm (% Always)" stroke="#10b981" strokeWidth={2} />
+                        <Line type="monotone" dataKey="painHelpfulness" name="Pain Efficacy (% Always)" stroke="#f59e0b" strokeWidth={2} />
+                        <Line type="monotone" dataKey="dischargeInformation" name="Discharge Info Received" stroke="#ef4444" strokeWidth={2} />
+                      </>
+                    ) : (
+                      <Line type="monotone" dataKey="overallExcellentRating" name="Excellent rating (9–10)" stroke="#06b6d4" strokeWidth={2.5} activeDot={{ r: 6 }} />
+                    )}
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -558,10 +649,12 @@ export default function PatientExperienceDashboard() {
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Hospital Stay Ratings</h3>
               
               <div className="space-y-3">
-                {INPATIENT_EXPERIENCE_TRENDS.map((item, idx) => (
+                {inpatientRatingsDisplay.map((item, idx) => (
                   <div key={idx} className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-bold text-white">Fiscal Year {item.year}</span>
+                      <span className="text-xs font-bold text-white">
+                        {hasHqcaInpatient ? item.year : `Fiscal Year ${item.year}`}
+                      </span>
                       <p className="text-[10px] text-slate-400">Excellent hospital rating (9 or 10 / 10)</p>
                     </div>
                     <div className="text-right">

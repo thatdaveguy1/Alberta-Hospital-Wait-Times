@@ -4,8 +4,8 @@
 
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { RefreshCw, FileText } from 'lucide-react';
 import { sanitizeSource, type DataMetadataMap } from './DataTimestamp';
+import { formatDataTimestamp } from '../lib/dataTimestampFormat';
 
 interface DashboardHeaderProps {
   icon: LucideIcon;
@@ -16,26 +16,6 @@ interface DashboardHeaderProps {
   children?: React.ReactNode;
 }
 
-const EDMONTON_TIMEZONE = 'America/Edmonton';
-
-function formatTimestamp(ts: string): string {
-  if (!ts || ts === 'Unknown') return 'Unknown';
-  try {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return ts;
-    return d.toLocaleString('en-CA', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZone: EDMONTON_TIMEZONE,
-      timeZoneName: 'short',
-    });
-  } catch {
-    return ts;
-  }
-}
 
 export function DashboardHeader({
   icon: Icon,
@@ -47,8 +27,8 @@ export function DashboardHeader({
 }: DashboardHeaderProps): React.ReactElement {
   const entry = metadata?.[arrayKey];
   const isAuto = entry?.updateType === 'auto';
-  const lastUpdated = entry?.lastUpdated ? formatTimestamp(entry.lastUpdated) : 'Unknown';
-  const sourceVintage = entry?.sourceVintage || '—';
+  const lastUpdated = entry?.lastUpdated ? formatDataTimestamp(entry.lastUpdated) : 'Unknown';
+  const sourceVintage = entry?.sourceVintage ? formatDataTimestamp(entry.sourceVintage) : '—';
   const source = entry?.source ? sanitizeSource(entry.source) : '—';
 
   return (
@@ -78,11 +58,11 @@ export function DashboardHeader({
           </span>
           <span className="text-slate-600">·</span>
           <span>
-            Last Update: <span className="font-mono text-white font-black">{lastUpdated}</span>
+            Last scrape: <span className="font-mono text-white font-black">{lastUpdated}</span>
           </span>
           <span className="text-slate-600">·</span>
           <span>
-            Data Timestamp: <span className="font-extrabold text-slate-200">{sourceVintage}</span>
+            Source period: <span className="font-extrabold text-slate-200">{sourceVintage}</span>
           </span>
           <span className="text-slate-600">·</span>
           <span>
