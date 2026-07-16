@@ -1032,7 +1032,7 @@ export default function ErWaitDashboard() {
               'grid gap-3',
               isMapFullscreen
                 ? ''
-                : 'grid-cols-1 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]',
+                : 'grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.95fr)]',
             )}
           >
             <div
@@ -1069,7 +1069,7 @@ export default function ErWaitDashboard() {
                   )}
                 </button>
               </div>
-              <div className={cn('relative', isMapFullscreen ? 'flex-1 min-h-0' : 'h-[280px] sm:h-[340px]')}>
+              <div className={cn('relative', isMapFullscreen ? 'flex-1 min-h-0' : 'h-[260px] sm:h-[300px] xl:h-[320px]')}>
                 <MapComponent
                   hospitals={mapHospitals}
                   userLocation={userLocation}
