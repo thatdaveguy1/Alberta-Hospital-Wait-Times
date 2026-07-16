@@ -50,6 +50,7 @@ type ErTrendsBlob = {
   all?: Record<string, unknown[]>;
   zones?: Record<string, unknown[]>;
   maxStats?: { max24h: unknown; max7d: unknown; max30d: unknown };
+  facilities?: Record<string, Record<string, unknown[]>>;
 };
 
 type LabTrendsBlob = {
@@ -161,6 +162,11 @@ app.get('/api/trends/labs/:labId', async (c) => {
   return c.json([]);
 });
 app.get('/api/trends/:hospitalId', async (c) => {
+  const { hospitalId } = c.req.param();
+  const range = c.req.query('range') ?? '24h';
+  const blob = await readErTrendsBlob(c.env.SNAPSHOTS_KV);
+  const facilityData = blob?.facilities?.[hospitalId]?.[range];
+  if (facilityData) return c.json(facilityData);
   return c.json([]);
 });
 

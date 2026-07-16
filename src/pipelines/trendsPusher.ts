@@ -133,6 +133,43 @@ function computeErMaxStats(snapshots: WaitTimeSnapshot[], hospitals: Hospital[])
   };
 }
 
+function computeErTrendFacility(
+  snapshots: WaitTimeSnapshot[],
+  hospitalId: string,
+  range: Range,
+): { timestamp: string; waitTime: number }[] {
+  const cutoff = getRangeCutoff(range);
+  const filtered = snapshots.filter(
+    (s) => s.hospitalId === hospitalId && new Date(s.timestamp).getTime() >= cutoff,
+  );
+
+  if (range === '24h') {
+    const points = filtered.map((s) => ({ timestamp: s.timestamp, waitTime: s.waitTime }));
+    points.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    return points;
+  }
+
+  // Downsample to conserve memory/KV value sizes
+  const intervalMs = range === '7d' ? 60 * 60 * 1000 : 4 * 60 * 60 * 1000;
+  const buckets: { [bucketTime: string]: number[] } = {};
+
+  for (const snap of filtered) {
+    const time = new Date(snap.timestamp).getTime();
+    const roundedTime = Math.floor(time / intervalMs) * intervalMs;
+    const bucketStr = new Date(roundedTime).toISOString();
+    if (!buckets[bucketStr]) buckets[bucketStr] = [];
+    buckets[bucketStr].push(snap.waitTime);
+  }
+
+  const result = Object.entries(buckets).map(([timestamp, waitTimes]) => {
+    const valid = waitTimes.filter((t) => t >= 0);
+    const sum = valid.reduce((acc, t) => acc + t, 0);
+    return { timestamp, waitTime: valid.length > 0 ? Math.round(sum / valid.length) : 0 };
+  });
+
+  result.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  return result;
+}
 
 // --- Lab trend aggregates ---
 
@@ -178,13 +215,21 @@ export async function pushErTrends(
     all[range] = computeErTrendAll(snapshots, range);
     zones[range] = computeErTrendZones(snapshots, hospitals, range);
   }
+  const facilities: Record<string, Record<Range, { timestamp: string; waitTime: number }[]>> = {};
+  for (const h of hospitals) {
+    facilities[h.id] = {
+      '24h': computeErTrendFacility(snapshots, h.id, '24h'),
+      '7d': computeErTrendFacility(snapshots, h.id, '7d'),
+      '30d': computeErTrendFacility(snapshots, h.id, '30d'),
+    };
+  }
 
   const blob = {
     all,
     zones,
     maxStats: computeErMaxStats(snapshots, hospitals),
+    facilities,
   };
-
   const result = await pushToCloudflare('er-trends', blob);
   if (result.success && result.skipped) {
     console.log('[TrendsPusher] er-trends blob unchanged or cooldown — not written');
