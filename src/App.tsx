@@ -79,7 +79,6 @@ import SpendingDashboard from './components/SpendingDashboard';
 import VirtualCareDashboard from './components/VirtualCareDashboard';
 import { useSyncStatus } from './hooks/useSyncStatus';
 import { DashboardHeader } from './components/DashboardHeader';
-import { ContributionsSection } from './components/ContributionsSection';
 import type { DataMetadataMap } from './components/DataTimestamp';
 
 
@@ -2368,7 +2367,7 @@ export default function App() {
           </div>
       </main>
 
-      <ContributionsSection />
+
 
       <footer id="site-footer" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800 mt-12 text-slate-500">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
