@@ -60,7 +60,7 @@ type MaxStats = { max24h: MaxPeak; max7d: MaxPeak; max30d: MaxPeak };
 
 const LOCATION_SKIP_KEY = 'alberta_hospital_location_prompt_dismissed';
 /** Bump when verifying LAN deploy — shown in the decision bar. */
-const ER_UI_BUILD = '2026-07-16-trends-map';
+const ER_UI_BUILD = '2026-07-16-map-fill';
 const POLL_MS = 60_000;
 
 const waitTone: Record<string, string> = {
@@ -1038,19 +1038,20 @@ export default function ErWaitDashboard() {
             </div>
           </section>
 
-          {/* Map + sheet */}
+          {/* Map + sheet — stretch equal height on desktop so map fills left column */}
           <section
             className={cn(
-              'grid gap-3 items-start',
+              'grid gap-3 items-stretch',
               isMapFullscreen
                 ? ''
-                : 'grid-cols-1 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]',
+                : 'grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)] xl:min-h-[520px]',
             )}
           >
             <div
               className={cn(
-                'rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden flex flex-col self-start w-full',
-                isMapFullscreen && 'fixed inset-0 z-[9999] rounded-none bg-slate-950 p-3 sm:p-5 self-auto',
+                'rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden flex flex-col w-full min-h-0',
+                !isMapFullscreen && 'xl:h-full',
+                isMapFullscreen && 'fixed inset-0 z-[9999] rounded-none bg-slate-950 p-3 sm:p-5',
               )}
             >
               <div className="flex items-center justify-between gap-2 px-3.5 py-3 border-b border-slate-800/80">
@@ -1081,7 +1082,7 @@ export default function ErWaitDashboard() {
                   )}
                 </button>
               </div>
-              <div className={cn('er-map-slot', isMapFullscreen && '!fixed inset-0 z-[9998] !h-auto flex-1 min-h-0')}>
+              <div className={cn('er-map-slot', isMapFullscreen && 'er-map-slot--fullscreen')}>
                 <MapComponent
                   hospitals={mapHospitals}
                   userLocation={userLocation}
@@ -1513,7 +1514,7 @@ function FacilitySheet({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-slate-800 bg-slate-900/50 overflow-hidden flex flex-col',
+        'rounded-2xl border border-slate-800 bg-slate-900/50 overflow-hidden flex flex-col xl:h-full min-h-0',
         !open && 'opacity-80',
       )}
     >
