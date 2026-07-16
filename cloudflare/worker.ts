@@ -121,18 +121,32 @@ app.get('/api/trends/labs', async (c) => {
 app.get('/api/trends/labs/:labId', async (c) => {
   const labId = c.req.param('labId');
   const range = c.req.query('range') ?? '24h';
-  const data = await c.env.SNAPSHOTS_KV.get(`trends-labs-raw-${labId}`);
-  if (!data) return c.json([]);
-  const snapshots = JSON.parse(data) as Array<{ waitTime: number; timestamp: string }>;
+  // Packed map first (current). Fall back to legacy per-lab keys if present.
+  const packed = await c.env.SNAPSHOTS_KV.get('trends-labs-raw');
+  let snapshots: Array<{ waitTime: number; timestamp: string }> = [];
+  if (packed) {
+    const map = JSON.parse(packed) as Record<string, Array<{ waitTime: number; timestamp: string }>>;
+    snapshots = map[labId] ?? [];
+  } else {
+    const legacy = await c.env.SNAPSHOTS_KV.get(`trends-labs-raw-${labId}`);
+    if (legacy) snapshots = JSON.parse(legacy);
+  }
   const cutoff = Date.now() - (range === '7d' ? 7 : range === '30d' ? 30 : 1) * 24 * 60 * 60 * 1000;
   return c.json(snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff));
 });
 app.get('/api/trends/:hospitalId', async (c) => {
   const hospitalId = c.req.param('hospitalId');
   const range = c.req.query('range') ?? '24h';
-  const data = await c.env.SNAPSHOTS_KV.get(`trends-er-raw-${hospitalId}`);
-  if (!data) return c.json([]);
-  const snapshots = JSON.parse(data) as Array<{ waitTime: number; timestamp: string }>;
+  // Packed map first (current). Fall back to legacy per-hospital keys if present.
+  const packed = await c.env.SNAPSHOTS_KV.get('trends-er-raw');
+  let snapshots: Array<{ waitTime: number; timestamp: string }> = [];
+  if (packed) {
+    const map = JSON.parse(packed) as Record<string, Array<{ waitTime: number; timestamp: string }>>;
+    snapshots = map[hospitalId] ?? [];
+  } else {
+    const legacy = await c.env.SNAPSHOTS_KV.get(`trends-er-raw-${hospitalId}`);
+    if (legacy) snapshots = JSON.parse(legacy);
+  }
   const cutoff = Date.now() - (range === '7d' ? 7 : range === '30d' ? 30 : 1) * 24 * 60 * 60 * 1000;
   return c.json(snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff));
 });
@@ -253,16 +267,38 @@ app.post('/api/push/:domain', async (c) => {
     const data = JSON.parse(bodyText);
     if (SNAPSHOT_DOMAINS.has(domain)) {
       // Snapshot trend domains: payload is a { kvKey: value } map.
-      // Write each key individually to SNAPSHOTS_KV.
+      // Write each key individually to SNAPSHOTS_KV, skipping unchanged values
+      // so identical re-pushes don't burn the daily write quota.
       if (data && typeof data === 'object' && !Array.isArray(data)) {
+        let keysWritten = 0;
+        let keysSkipped = 0;
         for (const [kvKey, kvValue] of Object.entries(data)) {
-          await c.env.SNAPSHOTS_KV.put(kvKey, JSON.stringify(kvValue));
+          const next = JSON.stringify(kvValue);
+          const existing = await c.env.SNAPSHOTS_KV.get(kvKey);
+          if (existing === next) {
+            keysSkipped += 1;
+            continue;
+          }
+          await c.env.SNAPSHOTS_KV.put(kvKey, next);
+          keysWritten += 1;
         }
-        return c.json({ success: true, domain, keysWritten: Object.keys(data).length, timestamp: new Date().toISOString() });
+        return c.json({
+          success: true,
+          domain,
+          keysWritten,
+          keysSkipped,
+          timestamp: new Date().toISOString(),
+        });
       }
       return c.json({ error: 'Snapshot domain payload must be a key-value map' }, 400);
     }
-    await c.env.DATA_KV.put(`data-${domain}`, JSON.stringify(data));
+    const dataKey = `data-${domain}`;
+    const next = JSON.stringify(data);
+    const existing = await c.env.DATA_KV.get(dataKey);
+    if (existing === next) {
+      return c.json({ success: true, domain, skipped: true, timestamp: new Date().toISOString() });
+    }
+    await c.env.DATA_KV.put(dataKey, next);
     return c.json({ success: true, domain, timestamp: new Date().toISOString() });
   } catch {
     return c.json({ error: 'Invalid JSON body' }, 400);

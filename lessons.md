@@ -855,3 +855,9 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** Under-populated arrays like `CONTINUING_CARE_COMPLIANCE` (empty `[]`) resulted in divide-by-zero operations that output `"NaN% compliant"` on screen. Missing values in regional inequity and spending datasets rendered as literal `0` / `$0` / `0 km` for non-count metrics.
 - **Solution:** Guard calculations by checking array length before division (`total > 0 ? (count / total) * 100 : 0`). Check values in JSX and render `"—"` or `"Data not available"` for missing/fallback indicators instead of literal `0`.
 - **Prevention:** Never assume a domain dataset is always populated. Build standard empty-state blocks and value guards for every rate, wait-time, or percentage metric.
+## Session: 2026-07-16 (Cloudflare KV daily put limit)
+
+### Lesson: Per-entity SNAPSHOTS_KV writes will exhaust free-tier put quota in hours
+- **Mistake:** `trendsPusher.ts` wrote one KV key per hospital (`trends-er-raw-${id}`, ~31) and per lab (`trends-labs-raw-${id}`, ~60) on every successful ER (10 min) and lab (30 min) cycle. That alone is ~8.7k puts/day vs Cloudflare Workers KV free-tier ~1,000 writes/day. Domain data pushes are cheap; the raw series fan-out is not.
+- **Solution:** Pack all ER raw series into `trends-er-raw` and all lab raw series into `trends-labs-raw` (one put each). Worker extracts by id on read, with legacy per-id key fallback. Throttle ER trend pushes to 30 min while still refreshing live `er-waittimes` every 10 min. Worker skip-writes when payload is byte-identical to existing value.
+- **Prevention:** Before shipping any push path, compute `keys × cycles/day`. Keep free-tier under ~800 puts/day headroom. Prefer packed maps or aggregates over per-entity keys. Never re-write unchanged values.

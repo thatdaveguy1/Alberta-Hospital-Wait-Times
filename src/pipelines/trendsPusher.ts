@@ -6,8 +6,9 @@
 // { kvKey: value } map under the er-trends / lab-trends push domains.
 // The worker iterates the map and puts each key to SNAPSHOTS_KV.
 //
-// Mirrors the aggregation logic in server.ts trend endpoints so the deployed
-// dashboard sees the same data as the local dashboard.
+// Per-facility raw series are packed into ONE map key each (not one key per
+// facility). Cloudflare free-tier KV is ~1,000 writes/day; per-entity keys
+// blew past that in hours (31 hospitals + 60 labs every cycle).
 
 import type { WaitTimeSnapshot } from '../types';
 import type { LabWaitSnapshot } from './aplLabWaitTimesFetcher';
@@ -152,7 +153,7 @@ function computeLabTrendProvincial(snapshots: LabWaitSnapshot[], range: Range) {
 
 /**
  * Compute and push all ER trend aggregates to Cloudflare SNAPSHOTS_KV.
- * Call after each ER wait times fetch (every 10 min).
+ * Call from the ER pipeline; scheduler throttles this to ~30 min for KV budget.
  */
 export async function pushErTrends(
   snapshots: WaitTimeSnapshot[],
@@ -168,15 +169,14 @@ export async function pushErTrends(
   }
 
   kvMap['trends-max-stats'] = computeErMaxStats(snapshots, hospitals);
-
-  // Per-hospital raw snapshots: one KV key per hospital (trends-er-raw-${hospitalId}).
-  // Worker filters by range on read. ~4,320 entries per key (~200KB), well under 25MB.
-  const hospitalIds = new Set(snapshots.map(s => s.hospitalId));
-  for (const hospitalId of hospitalIds) {
-    kvMap[`trends-er-raw-${hospitalId}`] = snapshots
-      .filter(s => s.hospitalId === hospitalId)
-      .map(s => ({ waitTime: s.waitTime, timestamp: s.timestamp }));
+  // Pack all hospital series into one key so we pay 1 write, not N.
+  // Worker extracts by hospitalId on read. Keeps facility charts working.
+  const erRawByHospital: Record<string, Array<{ waitTime: number; timestamp: string }>> = {};
+  for (const snap of snapshots) {
+    const bucket = erRawByHospital[snap.hospitalId] ?? (erRawByHospital[snap.hospitalId] = []);
+    bucket.push({ waitTime: snap.waitTime, timestamp: snap.timestamp });
   }
+  kvMap['trends-er-raw'] = erRawByHospital;
 
   const result = await pushToCloudflare('er-trends', kvMap);
   if (result.success) {
@@ -196,14 +196,13 @@ export async function pushLabTrends(snapshots: LabWaitSnapshot[]): Promise<void>
   for (const range of RANGES) {
     kvMap[`trends-labs-${range}`] = computeLabTrendProvincial(snapshots, range);
   }
-  // Per-lab raw snapshots: one KV key per lab (trends-labs-raw-${labId}).
-  // Worker filters by range on read. ~4,320 entries per key (~200KB), well under 25MB.
-  const labIds = new Set(snapshots.map(s => s.labId));
-  for (const labId of labIds) {
-    kvMap[`trends-labs-raw-${labId}`] = snapshots
-      .filter(s => s.labId === labId)
-      .map(s => ({ waitTime: s.waitTime, timestamp: s.timestamp }));
+  // Pack all lab series into one key so we pay 1 write, not N.
+  const labRawByLab: Record<string, Array<{ waitTime: number; timestamp: string }>> = {};
+  for (const snap of snapshots) {
+    const bucket = labRawByLab[snap.labId] ?? (labRawByLab[snap.labId] = []);
+    bucket.push({ waitTime: snap.waitTime, timestamp: snap.timestamp });
   }
+  kvMap['trends-labs-raw'] = labRawByLab;
 
   const result = await pushToCloudflare('lab-trends', kvMap);
   if (result.success) {

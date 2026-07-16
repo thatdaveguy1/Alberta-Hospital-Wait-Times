@@ -15,6 +15,10 @@ import type { SyncResult } from './types';
 
 let erIntervalId: NodeJS.Timeout | null = null;
 let labIntervalId: NodeJS.Timeout | null = null;
+let lastErTrendsPushMs = 0;
+// Live ER board can refresh every 10 min; trend KV keys change every cycle and
+// are the write-budget killers. Cap trend pushes at 30 min.
+const ER_TRENDS_MIN_INTERVAL_MS = 30 * 60 * 1000;
 
 export function setAlertCheckFn(fn: () => void): void {
   setAlertChecker(fn);
@@ -40,8 +44,15 @@ async function runErWaitTimesPipeline(): Promise<void> {
       hospitals: getHospitals(),
       lastUpdated: result.timestamp,
     });
-    // Push pre-computed trend aggregates to SNAPSHOTS_KV
-    await pushErTrends(getSnapshots(), getHospitals());
+    // Trend aggregates + packed raw series — throttle to protect free-tier KV writes.
+    const now = Date.now();
+    if (now - lastErTrendsPushMs >= ER_TRENDS_MIN_INTERVAL_MS) {
+      await pushErTrends(getSnapshots(), getHospitals());
+      lastErTrendsPushMs = now;
+    } else {
+      const waitMin = Math.ceil((ER_TRENDS_MIN_INTERVAL_MS - (now - lastErTrendsPushMs)) / 60000);
+      console.log(`[Scheduler] Skipping ER trends push (next in ~${waitMin}m) to conserve KV writes`);
+    }
   }
 }
 
