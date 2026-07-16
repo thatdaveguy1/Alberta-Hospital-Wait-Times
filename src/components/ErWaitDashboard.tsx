@@ -59,6 +59,8 @@ type MaxPeak = { waitTime: number; hospitalName: string; timestamp: string } | n
 type MaxStats = { max24h: MaxPeak; max7d: MaxPeak; max30d: MaxPeak };
 
 const LOCATION_SKIP_KEY = 'alberta_hospital_location_prompt_dismissed';
+/** Bump when verifying LAN deploy — shown in the decision bar. */
+const ER_UI_BUILD = '2026-07-16-metro-map';
 const POLL_MS = 60_000;
 
 const waitTone: Record<string, string> = {
@@ -806,7 +808,9 @@ export default function ErWaitDashboard() {
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" aria-hidden />
                   {freshness}
                 </span>
-                <span className="hidden sm:inline text-slate-500">· {nextFresh}</span>
+                <span className="text-slate-600 font-mono text-[9px] shrink-0" title="UI bundle id">
+                  · {ER_UI_BUILD}
+                </span>
               </div>
             </div>
 
@@ -1069,12 +1073,7 @@ export default function ErWaitDashboard() {
                   )}
                 </button>
               </div>
-              <div
-                className={cn(
-                  'relative w-full shrink-0 overflow-hidden bg-slate-950',
-                  isMapFullscreen ? 'flex-1 min-h-0' : 'h-[300px] sm:h-[320px]',
-                )}
-              >
+              <div className={cn('er-map-slot', isMapFullscreen && '!fixed inset-0 z-[9998] !h-auto flex-1 min-h-0')}>
                 <MapComponent
                   hospitals={mapHospitals}
                   userLocation={userLocation}
@@ -1331,6 +1330,140 @@ function FacilityRow({
   );
 }
 
+function FacilityWaitTrendBlock({
+  trends,
+  loadingTrends,
+  hospitalRange,
+  setHospitalRange,
+  facilityTrendStats,
+}: {
+  trends: WaitTimeSnapshot[];
+  loadingTrends: boolean;
+  hospitalRange: string;
+  setHospitalRange: (r: string) => void;
+  facilityTrendStats: {
+    avg: number | null;
+    busiest: BusiestHourResult | null;
+    yDomain: [number, number | 'auto'];
+    rangeKey: string;
+  };
+}) {
+  return (
+    <div className="er-trend-panel rounded-xl border border-cyan-500/20 bg-slate-950/60 p-3">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <h4 className="text-[10px] font-bold uppercase tracking-widest text-cyan-400/90">Wait trend</h4>
+        <div className="flex rounded-lg border border-slate-800 bg-slate-950 p-0.5">
+          {['24h', '7d', '30D'].map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setHospitalRange(r)}
+              className={cn(
+                'px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider cursor-pointer',
+                hospitalRange === r ? 'bg-cyan-600 text-white' : 'text-slate-500 hover:text-slate-300',
+              )}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500 mb-2">
+        {facilityTrendStats.avg != null && (
+          <span>
+            Avg ({trendRangeLabel(facilityTrendStats.rangeKey)}):{' '}
+            <span className="text-slate-300 font-mono font-bold">{formatMinutesToHm(facilityTrendStats.avg)}</span>
+          </span>
+        )}
+        {facilityTrendStats.busiest && (
+          <span>
+            Busiest hour:{' '}
+            <span className="text-slate-300 font-mono font-bold">
+              {facilityTrendStats.busiest.hourLabel} (~{formatMinutesToHm(facilityTrendStats.busiest.avgWaitMinutes)})
+            </span>
+          </span>
+        )}
+      </div>
+      <div className="h-[120px] w-full rounded-lg border border-slate-800 bg-slate-950/80 p-1">
+        {loadingTrends ? (
+          <div className="h-full flex items-center justify-center">
+            <RefreshCw className="w-4 h-4 text-cyan-500/50 animate-spin" />
+          </div>
+        ) : trends.length > 0 ? (
+          <>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trends} margin={{ top: 4, right: 4, left: 0, bottom: 1 }}>
+                <defs>
+                  <linearGradient id="erFacilityWait" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.05} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                <XAxis
+                  dataKey="timestamp"
+                  tickFormatter={(tick) => formatChartXAxis(tick, hospitalRange)}
+                  stroke="#334155"
+                  tick={{ fill: '#64748b', fontSize: 9 }}
+                />
+                <YAxis
+                  width={36}
+                  domain={facilityTrendStats.yDomain}
+                  stroke="#334155"
+                  tick={{ fill: '#64748b', fontSize: 9 }}
+                  tickFormatter={(v) => formatMinutesToHm(Number(v))}
+                />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    return (
+                      <div className="chart-tooltip text-[10px] !p-2">
+                        <p className="chart-tooltip-value !text-cyan-300">
+                          {formatMinutesToHm(Number(payload[0].value))}
+                        </p>
+                        <p className="text-[8px] text-slate-500 font-mono mt-0.5">
+                          {format(new Date(payload[0].payload.timestamp), 'MMM d, HH:mm')}
+                        </p>
+                      </div>
+                    );
+                  }}
+                />
+                {facilityTrendStats.avg != null && (
+                  <ReferenceLine
+                    y={facilityTrendStats.avg}
+                    stroke="#64748b"
+                    strokeDasharray="4 4"
+                    label={{ value: 'Avg', position: 'insideTopRight', fill: '#94a3b8', fontSize: 8 }}
+                  />
+                )}
+                <Area
+                  type="monotone"
+                  dataKey="waitTime"
+                  stroke="#22d3ee"
+                  strokeWidth={2}
+                  fill="url(#erFacilityWait)"
+                  dot={trends.length <= 12 ? { r: 3, fill: '#22d3ee', strokeWidth: 0 } : false}
+                  activeDot={{ r: 4 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+            {trends.length < 6 && (
+              <p className="text-[9px] text-slate-500 text-center pt-1">
+                {trends.length} sample{trends.length === 1 ? '' : 's'} — tap <strong className="text-cyan-500">30D</strong> for full history.
+              </p>
+            )}
+          </>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-slate-600">
+            <TrendingUp className="w-4 h-4 mb-1" />
+            <p className="text-[10px]">No trend samples yet</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function FacilitySheet({
   hospital: h,
   userLocation,
@@ -1429,6 +1562,14 @@ function FacilitySheet({
           </div>
         </div>
 
+        <FacilityWaitTrendBlock
+          trends={trends}
+          loadingTrends={loadingTrends}
+          hospitalRange={hospitalRange}
+          setHospitalRange={setHospitalRange}
+          facilityTrendStats={facilityTrendStats}
+        />
+
         <div className="flex flex-wrap gap-1.5">
           <span className="text-[11px] font-semibold text-slate-300 bg-slate-800/80 border border-slate-700 rounded-lg px-2 py-1">
             {h.servesLabel}
@@ -1475,123 +1616,6 @@ function FacilitySheet({
           </a>
         </div>
 
-        <div>
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Wait trend</h4>
-            <div className="flex rounded-lg border border-slate-800 bg-slate-950 p-0.5">
-              {['24h', '7d', '30D'].map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setHospitalRange(r)}
-                  className={cn(
-                    'px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider cursor-pointer',
-                    hospitalRange === r ? 'bg-cyan-600 text-white' : 'text-slate-500 hover:text-slate-300',
-                  )}
-                >
-                  {r}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500 mb-2">
-            {facilityTrendStats.avg != null && (
-              <span>
-                Avg ({trendRangeLabel(facilityTrendStats.rangeKey)}):{' '}
-                <span className="text-slate-300 font-mono font-bold">
-                  {formatMinutesToHm(facilityTrendStats.avg)}
-                </span>
-              </span>
-            )}
-            {facilityTrendStats.busiest && (
-              <span>
-                Busiest hour:{' '}
-                <span className="text-slate-300 font-mono font-bold">
-                  {facilityTrendStats.busiest.hourLabel} (~
-                  {formatMinutesToHm(facilityTrendStats.busiest.avgWaitMinutes)})
-                </span>
-              </span>
-            )}
-          </div>
-          <div className="h-36 rounded-xl border border-slate-800 bg-slate-950/70 p-1.5 flex flex-col min-h-0">
-            {loadingTrends ? (
-              <div className="flex-1 flex items-center justify-center">
-                <RefreshCw className="w-4 h-4 text-cyan-500/50 animate-spin" />
-              </div>
-            ) : trends.length > 0 ? (
-              <>
-                <div className="flex-1 min-h-[88px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={trends} margin={{ top: 4, right: 4, left: 0, bottom: 1 }}>
-                      <defs>
-                        <linearGradient id="erFacilityWait" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.05} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
-                      <XAxis
-                        dataKey="timestamp"
-                        tickFormatter={(tick) => formatChartXAxis(tick, hospitalRange)}
-                        stroke="#334155"
-                        tick={{ fill: '#64748b', fontSize: 9 }}
-                      />
-                      <YAxis
-                        width={36}
-                        domain={facilityTrendStats.yDomain}
-                        stroke="#334155"
-                        tick={{ fill: '#64748b', fontSize: 9 }}
-                        tickFormatter={(v) => formatMinutesToHm(Number(v))}
-                      />
-                      <Tooltip
-                        content={({ active, payload }) => {
-                          if (!active || !payload?.length) return null;
-                          return (
-                            <div className="chart-tooltip text-[10px] !p-2">
-                              <p className="chart-tooltip-value !text-cyan-300">
-                                {formatMinutesToHm(Number(payload[0].value))}
-                              </p>
-                              <p className="text-[8px] text-slate-500 font-mono mt-0.5">
-                                {format(new Date(payload[0].payload.timestamp), 'MMM d, HH:mm')}
-                              </p>
-                            </div>
-                          );
-                        }}
-                      />
-                      {facilityTrendStats.avg != null && (
-                        <ReferenceLine
-                          y={facilityTrendStats.avg}
-                          stroke="#64748b"
-                          strokeDasharray="4 4"
-                          label={{ value: 'Avg', position: 'insideTopRight', fill: '#94a3b8', fontSize: 8 }}
-                        />
-                      )}
-                      <Area
-                        type="monotone"
-                        dataKey="waitTime"
-                        stroke="#22d3ee"
-                        strokeWidth={2}
-                        fill="url(#erFacilityWait)"
-                        dot={trends.length <= 12 ? { r: 3, fill: '#22d3ee', strokeWidth: 0 } : false}
-                        activeDot={{ r: 4 }}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-                {trends.length < 6 && (
-                  <p className="text-[9px] text-slate-500 text-center pt-1 shrink-0">
-                    {trends.length} sample{trends.length === 1 ? '' : 's'} in this window — more points every ~10 min.
-                  </p>
-                )}
-              </>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-slate-600">
-                <TrendingUp className="w-4 h-4 mb-1" />
-                <p className="text-[10px]">No trend samples yet</p>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );

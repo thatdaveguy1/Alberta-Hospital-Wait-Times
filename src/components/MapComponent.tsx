@@ -391,7 +391,7 @@ export function MapComponent({
     };
   }, []);
 
-  // Selection framing: pack selected facility + city peers so the canvas isn't empty.
+  // Selection framing: always pack the selected site's metro — never widen to user GPS.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedHospital || selectedHospital.latitude == null || selectedHospital.longitude == null) {
@@ -406,21 +406,18 @@ export function MapComponent({
       selectedHospital.longitude,
     ];
 
-    // Prefer same-city peers (dense metro frame). Fall back to ~22 km radius.
     const sameCity = hospitals
       .filter((h) => {
-        if (h.id === selectedHospital.id) return false;
         if (h.latitude == null || h.longitude == null) return false;
         return h.city.toLowerCase() === selectedHospital.city.toLowerCase();
       })
       .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
 
     const nearCoords =
-      sameCity.length > 0
+      sameCity.length > 1
         ? sameCity
         : hospitals
             .filter((h) => {
-              if (h.id === selectedHospital.id) return false;
               if (h.latitude == null || h.longitude == null) return false;
               return (
                 haversineKm(
@@ -428,34 +425,29 @@ export function MapComponent({
                   selectedHospital.longitude!,
                   h.latitude,
                   h.longitude,
-                ) <= 22
+                ) <= 18
               );
             })
             .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
 
-    if (userLocation) {
-      const local = hospitals
-        .filter((h) => {
-          if (h.latitude == null || h.longitude == null) return false;
-          return haversineKm(userLocation.lat, userLocation.lng, h.latitude, h.longitude) <= 40;
-        })
-        .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
-      frameToCoords(
-        map,
-        local.length > 0
-          ? [...local, [userLocation.lat, userLocation.lng], selectedCoord]
-          : [selectedCoord, [userLocation.lat, userLocation.lng]],
-        { maxZoom: 13, padding: [32, 32] },
-      );
-      return;
-    }
+    const coords = nearCoords.length > 0 ? nearCoords : [selectedCoord];
 
-    frameToCoords(
-      map,
-      nearCoords.length > 0 ? [selectedCoord, ...nearCoords] : [selectedCoord],
-      { maxZoom: 13, padding: [28, 28] },
-    );
-  }, [selectedHospital, userLocation, hospitals]);
+    requestAnimationFrame(() => {
+      if (!mapRef.current) return;
+      if (sameCity.length >= 2) {
+        const bounds = L.latLngBounds(coords);
+        const center = bounds.getCenter();
+        mapRef.current.invalidateSize();
+        mapRef.current.setView(center, 12, { animate: true, duration: 0.5 });
+        window.setTimeout(() => {
+          mapRef.current?.fitBounds(bounds, { padding: [18, 18], maxZoom: 13, animate: true, duration: 0.45 });
+        }, 80);
+      } else {
+        frameToCoords(mapRef.current, coords, { maxZoom: 14, padding: [22, 22] });
+      }
+      window.setTimeout(() => mapRef.current?.invalidateSize(), 250);
+    });
+  }, [selectedHospital, hospitals]);
 
   return (
     <div className="w-full h-full relative">

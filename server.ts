@@ -556,8 +556,19 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    app.use(
+      express.static(distPath, {
+        setHeaders(res, filePath) {
+          if (filePath.endsWith('index.html')) {
+            res.setHeader('Cache-Control', 'no-store, must-revalidate');
+          } else if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+            res.setHeader('Cache-Control', 'public, max-age=300');
+          }
+        },
+      }),
+    );
     app.get('*', (req, res) => {
+      res.setHeader('Cache-Control', 'no-store, must-revalidate');
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

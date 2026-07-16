@@ -55,6 +55,29 @@
   text-decoration: underline !important;
 }
 
+/* ER wait map — explicit height so Leaflet always fills the slot (not Tailwind-purge dependent). */
+.er-map-slot {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: #020617;
+}
+@media (min-width: 640px) {
+  .er-map-slot {
+    height: 320px;
+  }
+}
+.er-map-slot .leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  background: #020617;
+}
+.er-trend-panel {
+  min-height: 148px;
+}
+
 /* Standardized Chart Tooltip styles across all charts (both Recharts and custom tooltips) */
 .recharts-tooltip-wrapper {
   z-index: 1000 !important;
