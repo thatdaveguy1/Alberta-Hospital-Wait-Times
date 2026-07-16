@@ -47,10 +47,21 @@ export function useSyncStatus(): UseSyncStatusReturn {
           throw new Error(`HTTP ${response.status}`);
         }
         const data = (await response.json()) as SyncStatus;
-        if (active) {
-          setSyncStatus(data);
-          setError(null);
-        }
+        if (!active) return;
+        setSyncStatus((prev) => {
+          // Skip re-renders when nothing meaningful changed.
+          if (
+            prev &&
+            prev.erWaitTimesLastUpdate === data.erWaitTimesLastUpdate &&
+            prev.erWaitTimesNextUpdate === data.erWaitTimesNextUpdate &&
+            prev.lastSyncTimestamp === data.lastSyncTimestamp &&
+            prev.status === data.status
+          ) {
+            return prev;
+          }
+          return data;
+        });
+        setError(null);
       } catch (err) {
         if (active) {
           const msg = err instanceof Error ? err.message : String(err);

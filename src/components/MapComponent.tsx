@@ -29,6 +29,19 @@ interface MapComponentProps {
   sortBy?: 'net-wait' | 'proximity' | 'raw-wait';
 }
 
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export function MapComponent({
   hospitals,
   userLocation,
@@ -40,26 +53,69 @@ export function MapComponent({
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [key: string]: L.Marker }>({});
   const userMarkerRef = useRef<L.Marker | null>(null);
+  /** Last location key we auto-framed the map for — avoid re-flying on hospital poll. */
+  const framedLocationKeyRef = useRef<string | null>(null);
+  /** Skip auto-pan to selection while framing around the user. */
+  const suppressSelectionPanRef = useRef(false);
+  /** Last selection frame key (id + peer count) — reframe when peers load. */
+  const lastSelectionFrameKeyRef = useRef<string | null>(null);
+  const didInitialHospitalFrameRef = useRef(false);
+
+  const hospitalCoords = (list: Hospital[]) =>
+    list
+      .filter(
+        (h): h is Hospital & { latitude: number; longitude: number } =>
+          h.latitude != null &&
+          h.longitude != null &&
+          !Number.isNaN(h.latitude) &&
+          !Number.isNaN(h.longitude),
+      )
+      .map((h) => [h.latitude, h.longitude] as [number, number]);
+
+  /** Pack pins into the viewport — prefer dense city framing over empty provincial canvas. */
+  const frameToCoords = (
+    map: L.Map,
+    coords: [number, number][],
+    opts?: { maxZoom?: number; padding?: [number, number]; animate?: boolean },
+  ) => {
+    if (coords.length === 0) return;
+    map.invalidateSize();
+    if (coords.length === 1) {
+      map.setView(coords[0], opts?.maxZoom ?? 12, {
+        animate: opts?.animate ?? true,
+        duration: 0.55,
+      });
+      return;
+    }
+    const bounds = L.latLngBounds(coords);
+    map.fitBounds(bounds, {
+      padding: opts?.padding ?? [36, 36],
+      maxZoom: opts?.maxZoom ?? 12,
+      animate: opts?.animate ?? true,
+      duration: 0.55,
+    });
+  };
 
   // Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    // Set map center: Calgary/Alberta area (default) or user location
-    const centerLat = userLocation?.lat || 52.5;
-    const centerLng = userLocation?.lng || -114.5;
-    const initialZoom = userLocation ? 8 : 5.5;
+    // Start denser than provincial overview — hospitals effect will fitBounds to pins.
+    const centerLat = userLocation?.lat || 51.05;
+    const centerLng = userLocation?.lng || -114.07;
+    const initialZoom = userLocation ? 10 : 9;
 
     const map = L.map(mapContainerRef.current, {
       zoomControl: true,
       scrollWheelZoom: true,
-      attributionControl: true
+      attributionControl: true,
     }).setView([centerLat, centerLng], initialZoom);
 
     // Add clean, dark OpenStreetMap style layer
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      maxZoom: 20
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      maxZoom: 20,
     }).addTo(map);
 
     mapRef.current = map;
@@ -106,8 +162,7 @@ export function MapComponent({
 
     // Add or update markers
     hospitals.forEach(h => {
-      if (h.latitude === null || h.longitude === null) return;
-
+      if (h.latitude == null || h.longitude == null || Number.isNaN(h.latitude) || Number.isNaN(h.longitude)) return;
       const isSelected = selectedHospital?.id === h.id;
       const icon = createHospitalIcon(h.status, isSelected);
 
@@ -218,7 +273,20 @@ export function MapComponent({
     });
   }, [hospitals, selectedHospital, setSelectedHospital, sortBy]);
 
-  // Sync User Location Marker & Center Map on it
+  // Sync user marker; frame map only when the user location actually changes.
+  // When hospitals first arrive (no user location), frame the pin set instead of empty province.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || userLocation || didInitialHospitalFrameRef.current) return;
+    const coords = hospitalCoords(hospitals);
+    if (coords.length === 0) return;
+    // Don't fight selection framing — selection effect will pack to city cluster.
+    if (selectedHospital?.latitude != null) return;
+    didInitialHospitalFrameRef.current = true;
+    frameToCoords(map, coords, { maxZoom: 6.5, padding: [24, 24], animate: false });
+  }, [hospitals, userLocation, selectedHospital]);
+
+  // Sync user marker; frame map only when the user location actually changes.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -227,7 +295,6 @@ export function MapComponent({
       const userIcon = L.divIcon({
         html: `
           <div class="relative flex items-center justify-center" style="width: 32px; height: 32px;">
-            <span class="absolute inline-flex h-8 w-8 animate-ping rounded-full bg-blue-500 opacity-40"></span>
             <span class="relative inline-flex rounded-full h-4.5 w-4.5 bg-blue-500 border-2 border-white shadow-lg flex items-center justify-center">
               <svg class="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(45deg);">
                 <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
@@ -237,37 +304,55 @@ export function MapComponent({
         `,
         className: 'custom-leaflet-user-icon',
         iconSize: [32, 32],
-        iconAnchor: [16, 16]
+        iconAnchor: [16, 16],
       });
 
       if (userMarkerRef.current) {
         userMarkerRef.current.setLatLng([userLocation.lat, userLocation.lng]);
+        userMarkerRef.current.setIcon(userIcon);
       } else {
-        userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon, zIndexOffset: 2000 })
-          .addTo(map);
+        userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], {
+          icon: userIcon,
+          zIndexOffset: 2000,
+        }).addTo(map);
       }
 
-      // Automatically center map on user location and nearby hospitals
-      const hospitalCoords = hospitals
-        .filter((h): h is typeof h & { latitude: number; longitude: number } =>
-          h.distance !== undefined && h.distance <= 100 &&
-          h.latitude !== null && h.longitude !== null &&
-          !isNaN(h.latitude) && !isNaN(h.longitude)
-        )
-        .map(h => [h.latitude, h.longitude] as [number, number]);
+      const locationKey = `${userLocation.lat.toFixed(3)},${userLocation.lng.toFixed(3)}`;
 
-      map.invalidateSize();
-      if (hospitalCoords.length > 0) {
-        const bounds = L.latLngBounds(hospitalCoords);
-        bounds.extend([userLocation.lat, userLocation.lng]);
-        map.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 1 });
-      } else {
-        map.setView([userLocation.lat, userLocation.lng], 11, {
-          animate: true,
-          duration: 1
+      const nearbyCoords = hospitals
+        .filter((h) => {
+          if (h.latitude == null || h.longitude == null) return false;
+          if (Number.isNaN(h.latitude) || Number.isNaN(h.longitude)) return false;
+          return haversineKm(userLocation.lat, userLocation.lng, h.latitude, h.longitude) <= 55;
+        })
+        .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
+
+      // Frame once per location; allow a second frame when nearby hospitals first load.
+      const frameKey = `${locationKey}|${nearbyCoords.length > 0 ? 'near' : 'solo'}`;
+      if (framedLocationKeyRef.current === frameKey) return;
+      if (
+        framedLocationKeyRef.current?.startsWith(`${locationKey}|`) &&
+        nearbyCoords.length === 0
+      ) {
+        return;
+      }
+      framedLocationKeyRef.current = frameKey;
+      suppressSelectionPanRef.current = true;
+
+      if (nearbyCoords.length > 0) {
+        frameToCoords(map, [...nearbyCoords, [userLocation.lat, userLocation.lng]], {
+          maxZoom: 12,
+          padding: [40, 40],
         });
+      } else {
+        frameToCoords(map, [[userLocation.lat, userLocation.lng]], { maxZoom: 12 });
       }
+
+      window.setTimeout(() => {
+        suppressSelectionPanRef.current = false;
+      }, 900);
     } else {
+      framedLocationKeyRef.current = null;
       if (userMarkerRef.current) {
         userMarkerRef.current.remove();
         userMarkerRef.current = null;
@@ -288,31 +373,84 @@ export function MapComponent({
     });
 
     resizeObserver.observe(container);
-
-    // Initial delayed invalidateSize to make sure tiles load correctly after layout settles
     const timer = setTimeout(() => {
       if (mapRef.current) {
         mapRef.current.invalidateSize();
       }
     }, 150);
+    const timer2 = setTimeout(() => {
+      if (mapRef.current) {
+        mapRef.current.invalidateSize();
+      }
+    }, 600);
 
     return () => {
       resizeObserver.disconnect();
       clearTimeout(timer);
+      clearTimeout(timer2);
     };
   }, []);
 
-  // Pan to Selected Hospital
+  // Selection framing: always pack the selected site's metro — never widen to user GPS.
+  // Selection framing: pack selected site metro; reframe when peer pins arrive.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selectedHospital || selectedHospital.latitude === null || selectedHospital.longitude === null) return;
+    if (!map || !selectedHospital || selectedHospital.latitude == null || selectedHospital.longitude == null) {
+      return;
+    }
+    if (suppressSelectionPanRef.current) return;
 
-    map.setView([selectedHospital.latitude, selectedHospital.longitude], 8, {
-      animate: true,
-      duration: 1
+    const selectedCoord: [number, number] = [
+      selectedHospital.latitude,
+      selectedHospital.longitude,
+    ];
+
+    const sameCity = hospitals
+      .filter((h) => {
+        if (h.latitude == null || h.longitude == null) return false;
+        return h.city.toLowerCase() === selectedHospital.city.toLowerCase();
+      })
+      .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
+
+    const nearCoords =
+      sameCity.length > 1
+        ? sameCity
+        : hospitals
+            .filter((h) => {
+              if (h.latitude == null || h.longitude == null) return false;
+              return (
+                haversineKm(
+                  selectedHospital.latitude!,
+                  selectedHospital.longitude!,
+                  h.latitude,
+                  h.longitude,
+                ) <= 18
+              );
+            })
+            .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
+
+    const coords = nearCoords.length > 0 ? nearCoords : [selectedCoord];
+    const frameKey = `${selectedHospital.id}|${coords.length}`;
+    if (lastSelectionFrameKeyRef.current === frameKey) return;
+    lastSelectionFrameKeyRef.current = frameKey;
+
+    requestAnimationFrame(() => {
+      if (!mapRef.current) return;
+      if (coords.length >= 2) {
+        const bounds = L.latLngBounds(coords);
+        mapRef.current.invalidateSize();
+        mapRef.current.fitBounds(bounds, {
+          padding: [28, 28],
+          maxZoom: 12,
+          animate: true,
+          duration: 0.5,
+        });
+      } else {
+        frameToCoords(mapRef.current, coords, { maxZoom: 13, padding: [24, 24] });
+      }
+      window.setTimeout(() => mapRef.current?.invalidateSize(), 250);
     });
-  }, [selectedHospital]);
-
+  }, [selectedHospital, hospitals]);
   return (
     <div className="w-full h-full relative">
       <div ref={mapContainerRef} className="w-full h-full z-0" />

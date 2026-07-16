@@ -61,6 +61,10 @@ export function facilityTrendYDomain(snapshots: WaitTimeSnapshot[]): [number, nu
   if (valid.length === 0) return [0, 'auto'];
   const min = Math.min(...valid);
   const max = Math.max(...valid);
+  if (min === max) {
+    const pad = Math.max(20, Math.round(min * 0.25));
+    return [Math.max(0, min - pad), max + pad];
+  }
   const pad = Math.max(15, Math.round((max - min) * 0.15));
   return [Math.max(0, min - pad), max + pad];
 }
