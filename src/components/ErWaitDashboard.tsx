@@ -60,7 +60,7 @@ type MaxStats = { max24h: MaxPeak; max7d: MaxPeak; max30d: MaxPeak };
 
 const LOCATION_SKIP_KEY = 'alberta_hospital_location_prompt_dismissed';
 /** Bump when verifying LAN deploy — shown in the decision bar. */
-const ER_UI_BUILD = '2026-07-16-metro-map';
+const ER_UI_BUILD = '2026-07-16-trends-map';
 const POLL_MS = 60_000;
 
 const waitTone: Record<string, string> = {
@@ -639,18 +639,24 @@ export default function ErWaitDashboard() {
     [processed, selectedHospitalId, ranked],
   );
 
-  // When location is known, prefer the nearest open site until the user picks one.
+  // Prefer nearest when location is known; otherwise auto-select the top ranked site
+  // so detail sheet + trends load even without GPS.
   useEffect(() => {
-    if (!userLocation || processed.length === 0) return;
+    if (processed.length === 0) return;
     if (userPickedHospitalRef.current) return;
 
-    const nearest = [...processed]
-      .filter((h) => h.latitude != null && h.longitude != null && h.distance != null)
-      .sort((a, b) => (a.distance ?? 1e9) - (b.distance ?? 1e9))[0];
+    if (userLocation) {
+      const nearest = [...processed]
+        .filter((h) => h.latitude != null && h.longitude != null && h.distance != null)
+        .sort((a, b) => (a.distance ?? 1e9) - (b.distance ?? 1e9))[0];
 
-    if (nearest && nearest.id !== selectedHospitalId) {
-      setSelectedHospitalId(nearest.id);
-    } else if (!selectedHospitalId && ranked[0]) {
+      if (nearest && nearest.id !== selectedHospitalId) {
+        setSelectedHospitalId(nearest.id);
+        return;
+      }
+    }
+
+    if (!selectedHospitalId && ranked[0]) {
       setSelectedHospitalId(ranked[0].id);
     }
   }, [userLocation, processed, selectedHospitalId, ranked]);
@@ -715,17 +721,19 @@ export default function ErWaitDashboard() {
     return mins <= 0 ? 'refreshing soon' : `next ~${mins}m`;
   }, [nextUpdate, clockMin]);
 
+  // Always plot every facility with coords so city framing can show peers.
   const mapHospitals = useMemo(
     () =>
-      ranked.map((h) => ({
-        ...h,
-        // Map colors: closed/unavailable render muted via status override
-        status:
-          h.openState === 'closed' || h.effectiveWaitMinutes === null
-            ? ('Green' as const)
-            : h.status,
-      })),
-    [ranked],
+      processed
+        .filter((h) => h.latitude != null && h.longitude != null)
+        .map((h) => ({
+          ...h,
+          status:
+            h.openState === 'closed' || h.effectiveWaitMinutes === null
+              ? ('Green' as const)
+              : h.status,
+        })),
+    [processed],
   );
 
   const headerMetadata = useMemo<DataMetadataMap>(

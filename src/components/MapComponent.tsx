@@ -57,7 +57,8 @@ export function MapComponent({
   const framedLocationKeyRef = useRef<string | null>(null);
   /** Skip auto-pan to selection while framing around the user. */
   const suppressSelectionPanRef = useRef(false);
-  const lastSelectionPanIdRef = useRef<string | null>(null);
+  /** Last selection frame key (id + peer count) — reframe when peers load. */
+  const lastSelectionFrameKeyRef = useRef<string | null>(null);
   const didInitialHospitalFrameRef = useRef(false);
 
   const hospitalCoords = (list: Hospital[]) =>
@@ -161,8 +162,7 @@ export function MapComponent({
 
     // Add or update markers
     hospitals.forEach(h => {
-      if (h.latitude === null || h.longitude === null) return;
-
+      if (h.latitude == null || h.longitude == null || Number.isNaN(h.latitude) || Number.isNaN(h.longitude)) return;
       const isSelected = selectedHospital?.id === h.id;
       const icon = createHospitalIcon(h.status, isSelected);
 
@@ -392,14 +392,13 @@ export function MapComponent({
   }, []);
 
   // Selection framing: always pack the selected site's metro — never widen to user GPS.
+  // Selection framing: pack selected site metro; reframe when peer pins arrive.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedHospital || selectedHospital.latitude == null || selectedHospital.longitude == null) {
       return;
     }
     if (suppressSelectionPanRef.current) return;
-    if (lastSelectionPanIdRef.current === selectedHospital.id) return;
-    lastSelectionPanIdRef.current = selectedHospital.id;
 
     const selectedCoord: [number, number] = [
       selectedHospital.latitude,
@@ -431,24 +430,27 @@ export function MapComponent({
             .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
 
     const coords = nearCoords.length > 0 ? nearCoords : [selectedCoord];
+    const frameKey = `${selectedHospital.id}|${coords.length}`;
+    if (lastSelectionFrameKeyRef.current === frameKey) return;
+    lastSelectionFrameKeyRef.current = frameKey;
 
     requestAnimationFrame(() => {
       if (!mapRef.current) return;
-      if (sameCity.length >= 2) {
+      if (coords.length >= 2) {
         const bounds = L.latLngBounds(coords);
-        const center = bounds.getCenter();
         mapRef.current.invalidateSize();
-        mapRef.current.setView(center, 12, { animate: true, duration: 0.5 });
-        window.setTimeout(() => {
-          mapRef.current?.fitBounds(bounds, { padding: [18, 18], maxZoom: 13, animate: true, duration: 0.45 });
-        }, 80);
+        mapRef.current.fitBounds(bounds, {
+          padding: [28, 28],
+          maxZoom: 12,
+          animate: true,
+          duration: 0.5,
+        });
       } else {
-        frameToCoords(mapRef.current, coords, { maxZoom: 14, padding: [22, 22] });
+        frameToCoords(mapRef.current, coords, { maxZoom: 13, padding: [24, 24] });
       }
       window.setTimeout(() => mapRef.current?.invalidateSize(), 250);
     });
   }, [selectedHospital, hospitals]);
-
   return (
     <div className="w-full h-full relative">
       <div ref={mapContainerRef} className="w-full h-full z-0" />
