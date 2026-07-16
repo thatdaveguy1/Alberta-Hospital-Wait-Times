@@ -56,6 +56,10 @@
 }
 
 /* Standardized Chart Tooltip styles across all charts (both Recharts and custom tooltips) */
+.recharts-tooltip-wrapper {
+  z-index: 1000 !important;
+}
+
 .recharts-default-tooltip,
 .chart-tooltip {
   background-color: rgba(9, 13, 22, 0.95) !important;
