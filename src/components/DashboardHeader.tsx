@@ -41,8 +41,8 @@ export function DashboardHeader({
         <p className="text-xs text-slate-400 mt-1">{description}</p>
         <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-400 flex-wrap">
           {isAuto ? (
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 relative">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse absolute left-0.5 top-0.5" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             </span>
           ) : (
             <span className="w-2 h-2 rounded-full bg-slate-600 border border-slate-700 flex items-center justify-center shrink-0" />

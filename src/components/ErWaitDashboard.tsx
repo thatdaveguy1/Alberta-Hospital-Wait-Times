@@ -167,14 +167,6 @@ export default function ErWaitDashboard() {
     () => typeof window !== 'undefined' && localStorage.getItem(LOCATION_SKIP_KEY) === '1',
   );
 
-  const metadata: DataMetadataMap = {
-    ER_WAIT_TIMES: {
-      source: 'Alberta Health Services Portal',
-      sourceVintage: 'Live AHS feed (registration → physician assessment)',
-      lastUpdated: syncStatus?.erWaitTimesLastUpdate ?? 'Unknown',
-      updateType: 'auto',
-    },
-  };
 
   const fetchHospitals = useCallback(async (opts?: { quiet?: boolean }) => {
     if (!opts?.quiet) setLoading(true);
@@ -644,28 +636,52 @@ export default function ErWaitDashboard() {
 
   const lastUpdated = syncStatus?.erWaitTimesLastUpdate ?? null;
   const nextUpdate = syncStatus?.erWaitTimesNextUpdate ?? null;
-  const freshness =
-    lastUpdated != null
-      ? `Updated ${formatRelativeTime(lastUpdated)}`
-      : loading
-        ? 'Loading live waits…'
-        : 'Update time unknown';
-  const nextFresh =
-    nextUpdate != null
-      ? (() => {
-          const mins = Math.max(0, Math.round((new Date(nextUpdate).getTime() - Date.now()) / 60_000));
-          return mins <= 0 ? 'refreshing soon' : `next ~${mins}m`;
-        })()
-      : 'every ~10m';
 
-  const mapHospitals = ranked.map((h) => ({
-    ...h,
-    // Map colors: closed/unavailable render muted via status override
-    status:
-      h.openState === 'closed' || h.effectiveWaitMinutes === null
-        ? ('Green' as const)
-        : h.status,
-  }));
+  // Tick once a minute so relative labels stay fresh without re-rendering every parent update.
+  const [clockMin, setClockMin] = useState(() => Math.floor(Date.now() / 60_000));
+  useEffect(() => {
+    const id = window.setInterval(() => setClockMin(Math.floor(Date.now() / 60_000)), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const freshness = useMemo(() => {
+    void clockMin;
+    if (lastUpdated != null) return `Updated ${formatRelativeTime(lastUpdated)}`;
+    if (loading) return 'Loading live waits…';
+    return 'Update time unknown';
+  }, [lastUpdated, loading, clockMin]);
+
+  const nextFresh = useMemo(() => {
+    void clockMin;
+    if (nextUpdate == null) return 'every ~10m';
+    const mins = Math.max(0, Math.round((new Date(nextUpdate).getTime() - Date.now()) / 60_000));
+    return mins <= 0 ? 'refreshing soon' : `next ~${mins}m`;
+  }, [nextUpdate, clockMin]);
+
+  const mapHospitals = useMemo(
+    () =>
+      ranked.map((h) => ({
+        ...h,
+        // Map colors: closed/unavailable render muted via status override
+        status:
+          h.openState === 'closed' || h.effectiveWaitMinutes === null
+            ? ('Green' as const)
+            : h.status,
+      })),
+    [ranked],
+  );
+
+  const headerMetadata = useMemo<DataMetadataMap>(
+    () => ({
+      ER_WAIT_TIMES: {
+        source: 'Alberta Health Services Portal',
+        sourceVintage: 'Live AHS feed (registration → physician assessment)',
+        lastUpdated: lastUpdated ?? 'Unknown',
+        updateType: 'auto',
+      },
+    }),
+    [lastUpdated],
+  );
 
   return (
     <div className="space-y-4">
@@ -673,7 +689,7 @@ export default function ErWaitDashboard() {
         icon={Activity}
         title="Emergency wait times"
         description="Find the fastest path from where you are to a doctor — drive time plus live AHS queue estimates."
-        metadata={metadata}
+        metadata={headerMetadata}
         arrayKey="ER_WAIT_TIMES"
       />
 
@@ -730,12 +746,9 @@ export default function ErWaitDashboard() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-[11px] text-slate-400">
+              <div className="flex items-center gap-2 text-[11px] text-slate-400 tabular-nums">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-300 font-semibold">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  </span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" aria-hidden />
                   {freshness}
                 </span>
                 <span className="hidden sm:inline text-slate-500">· {nextFresh}</span>

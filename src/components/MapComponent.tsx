@@ -244,7 +244,6 @@ export function MapComponent({
       const userIcon = L.divIcon({
         html: `
           <div class="relative flex items-center justify-center" style="width: 32px; height: 32px;">
-            <span class="absolute inline-flex h-8 w-8 animate-ping rounded-full bg-blue-500 opacity-40"></span>
             <span class="relative inline-flex rounded-full h-4.5 w-4.5 bg-blue-500 border-2 border-white shadow-lg flex items-center justify-center">
               <svg class="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(45deg);">
                 <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
