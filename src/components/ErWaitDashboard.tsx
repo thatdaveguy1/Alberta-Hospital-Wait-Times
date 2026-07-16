@@ -255,7 +255,7 @@ export default function ErWaitDashboard() {
           const resolved: UserLocation = {
             lat,
             lng,
-            city: data.city,
+            city: toTitleCase(String(data.city)),
             region: data.region || 'Alberta',
             isGPS,
           };
@@ -267,37 +267,84 @@ export default function ErWaitDashboard() {
     } catch (err) {
       console.warn('Failed to reverse geocode user coordinates:', err);
     }
-    const fallback: UserLocation = { lat, lng, city: 'Alberta', region: 'Alberta', isGPS };
+    const fallback: UserLocation = { lat, lng, city: 'Your location', region: 'Alberta', isGPS };
     setUserLocation(fallback);
     saveLocation(fallback);
   }, []);
+
+  const geoErrorMessage = (err: GeolocationPositionError | null, insecure: boolean) => {
+    if (insecure) {
+      return 'GPS needs a secure page (https:// or http://localhost). Use localhost, or enter a city/postal code below.';
+    }
+    if (!err) return 'Could not detect location. Enter a city or postal code instead.';
+    if (err.code === err.PERMISSION_DENIED) {
+      return 'Location permission blocked. Allow location for this site, or enter a city/postal code.';
+    }
+    if (err.code === err.TIMEOUT) {
+      return 'Location timed out. Try again, or enter a city/postal code.';
+    }
+    return 'Could not detect location. Enter a city or postal code instead.';
+  };
 
   const requestGPSLocation = useCallback(() => {
     setLoadingGeo(true);
     setGpsRefused(false);
     setGeocodingError('');
-    if (!navigator.geolocation) {
-      setGeocodingError('Browser geolocation is not supported here.');
+
+    const insecure =
+      typeof window !== 'undefined' &&
+      !window.isSecureContext &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1';
+
+    if (insecure || !navigator.geolocation) {
+      setGeocodingError(
+        geoErrorMessage(null, insecure || !navigator.geolocation),
+      );
       setGpsRefused(true);
       setLoadingGeo(false);
+      setLocationPanelOpen(true);
       return;
     }
+
+    const onSuccess = (pos: GeolocationPosition) => {
+      updateLocationWithCityName(pos.coords.latitude, pos.coords.longitude, true);
+      setGpsRefused(false);
+      setGeocodingError('');
+      setSortBy('net-wait');
+      setLoadingGeo(false);
+      setLocationPanelOpen(false);
+    };
+
+    const tryLowAccuracy = () => {
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        (err) => {
+          console.warn('GPS low-accuracy failed:', err);
+          setGpsRefused(true);
+          setGeocodingError(geoErrorMessage(err, false));
+          setLoadingGeo(false);
+          setLocationPanelOpen(true);
+        },
+        { enableHighAccuracy: false, timeout: 12000, maximumAge: 120000 },
+      );
+    };
+
+    // High accuracy first (GPS); fall back to network location if it times out.
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        updateLocationWithCityName(pos.coords.latitude, pos.coords.longitude, true);
-        setGpsRefused(false);
-        setSortBy('net-wait');
-        setLoadingGeo(false);
-        setLocationPanelOpen(false);
-      },
+      onSuccess,
       (err) => {
-        console.warn('GPS access declined/failed:', err);
-        setGpsRefused(true);
-        setGeocodingError('Could not detect location. Enter a city or postal code instead.');
-        setLoadingGeo(false);
-        setLocationPanelOpen(true);
+        console.warn('GPS high-accuracy failed, retrying low-accuracy:', err);
+        if (err.code === err.PERMISSION_DENIED) {
+          setGpsRefused(true);
+          setGeocodingError(geoErrorMessage(err, false));
+          setLoadingGeo(false);
+          setLocationPanelOpen(true);
+          return;
+        }
+        tryLowAccuracy();
       },
-      { enableHighAccuracy: true, timeout: 8000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
     );
   }, [updateLocationWithCityName]);
 
@@ -408,7 +455,7 @@ export default function ErWaitDashboard() {
     }, POLL_MS);
 
     const saved = loadSavedLocation();
-    if (saved) {
+    if (saved && typeof saved.lat === 'number' && typeof saved.lng === 'number') {
       setUserLocation(saved);
       setSortBy('net-wait');
       if (
@@ -417,32 +464,40 @@ export default function ErWaitDashboard() {
           saved.city === 'My Precise GPS Location' ||
           saved.city === 'Determining...' ||
           saved.city === 'Determining…' ||
-          saved.city === 'Alberta')
+          saved.city === 'Alberta' ||
+          saved.city === 'Your location')
       ) {
         updateLocationWithCityName(saved.lat, saved.lng, true);
       }
       return () => clearInterval(poll);
     }
 
-    // Soft GPS attempt — never force a modal if refused
-    setLoadingGeo(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          updateLocationWithCityName(pos.coords.latitude, pos.coords.longitude, true);
-          setSortBy('net-wait');
-          setLoadingGeo(false);
-        },
-        () => {
-          setGpsRefused(true);
-          setLoadingGeo(false);
-        },
-        { enableHighAccuracy: true, timeout: 5000 },
-      );
-    } else {
-      setGpsRefused(true);
+    // Soft GPS only on secure contexts (localhost / https). LAN IP pages block geolocation.
+    const canSoftGps =
+      typeof navigator !== 'undefined' &&
+      !!navigator.geolocation &&
+      (window.isSecureContext ||
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1');
+
+    if (!canSoftGps) {
       setLoadingGeo(false);
+      return () => clearInterval(poll);
     }
+
+    setLoadingGeo(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        updateLocationWithCityName(pos.coords.latitude, pos.coords.longitude, true);
+        setSortBy('net-wait');
+        setLoadingGeo(false);
+      },
+      () => {
+        // Silent fail on autoload — user can still press "Use current location".
+        setLoadingGeo(false);
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 },
+    );
 
     return () => clearInterval(poll);
   }, [fetchHospitals, fetchMaxStats, updateLocationWithCityName]);
