@@ -263,8 +263,14 @@ app.post('/api/push/:domain', async (c) => {
   }
 
   // Parse and store in KV
+  let data: unknown;
   try {
-    const data = JSON.parse(bodyText);
+    data = JSON.parse(bodyText);
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  try {
     if (SNAPSHOT_DOMAINS.has(domain)) {
       // Snapshot trend domains: payload is a { kvKey: value } map.
       // Write each key individually to SNAPSHOTS_KV, skipping unchanged values
@@ -272,7 +278,7 @@ app.post('/api/push/:domain', async (c) => {
       if (data && typeof data === 'object' && !Array.isArray(data)) {
         let keysWritten = 0;
         let keysSkipped = 0;
-        for (const [kvKey, kvValue] of Object.entries(data)) {
+        for (const [kvKey, kvValue] of Object.entries(data as Record<string, unknown>)) {
           const next = JSON.stringify(kvValue);
           const existing = await c.env.SNAPSHOTS_KV.get(kvKey);
           if (existing === next) {
@@ -300,8 +306,22 @@ app.post('/api/push/:domain', async (c) => {
     }
     await c.env.DATA_KV.put(dataKey, next);
     return c.json({ success: true, domain, timestamp: new Date().toISOString() });
-  } catch {
-    return c.json({ error: 'Invalid JSON body' }, 400);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const lower = message.toLowerCase();
+    // Cloudflare free-tier daily put quota (and similar write failures) must not
+    // be misreported as bad JSON — clients need a real signal to back off.
+    if (
+      lower.includes('limit') ||
+      lower.includes('quota') ||
+      lower.includes('exceed') ||
+      lower.includes('429') ||
+      lower.includes('too many')
+    ) {
+      return c.json({ error: 'KV write limit exceeded', detail: message }, 429);
+    }
+    console.error(`[push/${domain}] KV write failed:`, message);
+    return c.json({ error: 'KV write failed', detail: message }, 500);
   }
 });
 

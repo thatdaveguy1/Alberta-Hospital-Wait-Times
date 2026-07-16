@@ -861,3 +861,8 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** `trendsPusher.ts` wrote one KV key per hospital (`trends-er-raw-${id}`, ~31) and per lab (`trends-labs-raw-${id}`, ~60) on every successful ER (10 min) and lab (30 min) cycle. That alone is ~8.7k puts/day vs Cloudflare Workers KV free-tier ~1,000 writes/day. Domain data pushes are cheap; the raw series fan-out is not.
 - **Solution:** Pack all ER raw series into `trends-er-raw` and all lab raw series into `trends-labs-raw` (one put each). Worker extracts by id on read, with legacy per-id key fallback. Throttle ER trend pushes to 30 min while still refreshing live `er-waittimes` every 10 min. Worker skip-writes when payload is byte-identical to existing value.
 - **Prevention:** Before shipping any push path, compute `keys × cycles/day`. Keep free-tier under ~800 puts/day headroom. Prefer packed maps or aggregates over per-entity keys. Never re-write unchanged values.
+
+### Lesson: Catch-all "Invalid JSON body" hid KV put-limit failures
+- **Mistake:** The Worker push endpoint wrapped parse + KV writes in one try/catch and returned `400 Invalid JSON body` for any error. When free-tier KV put quota was exhausted, the client retried thrice every cycle with a useless message.
+- **Solution:** Split JSON parse errors (400) from KV write errors (429 for quota/limit, 500 otherwise). Push client opens a cooldown until next UTC midnight on quota errors so it stops thrashing.
+- **Prevention:** Never map all backend failures to a client input error. Distinguish validation vs infrastructure quota and fail closed with backoff.

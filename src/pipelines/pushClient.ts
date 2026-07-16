@@ -13,6 +13,27 @@ interface PushResult {
   success: boolean;
   error?: string;
   attempts: number;
+  skipped?: boolean;
+}
+
+// Once Cloudflare returns a daily KV put-limit error, stop all pushes until the
+// next UTC day. Retries just thrash logs and waste remaining budget.
+let kvWriteCooldownUntilMs = 0;
+
+function nextUtcMidnightMs(fromMs = Date.now()): number {
+  const d = new Date(fromMs);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1);
+}
+
+function isKvQuotaError(status: number, body: string): boolean {
+  if (status === 429) return true;
+  const lower = body.toLowerCase();
+  return (
+    lower.includes('limit') ||
+    lower.includes('quota') ||
+    lower.includes('exceed') ||
+    lower.includes('too many')
+  );
 }
 
 // Push a single domain's data to Cloudflare KV
@@ -20,6 +41,18 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
   if (!CLOUDFLARE_WORKER_URL || !PUSH_SECRET) {
     // Push not configured — silently skip (local-only mode)
     return { domain, success: false, attempts: 0, error: 'Push not configured (CLOUDFLARE_WORKER_URL or PUSH_SECRET missing)' };
+  }
+
+  const now = Date.now();
+  if (now < kvWriteCooldownUntilMs) {
+    const mins = Math.ceil((kvWriteCooldownUntilMs - now) / 60000);
+    return {
+      domain,
+      success: false,
+      attempts: 0,
+      skipped: true,
+      error: `KV write cooldown active (~${mins}m left; resumes after UTC midnight)`,
+    };
   }
 
   const body = JSON.stringify(data);
@@ -51,9 +84,29 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
       const errorText = await response.text();
       console.warn(`[PushClient] Push ${domain} failed (attempt ${attempt}): ${response.status} ${errorText}`);
 
+      if (isKvQuotaError(response.status, errorText)) {
+        kvWriteCooldownUntilMs = nextUtcMidnightMs();
+        console.error(
+          `[PushClient] Cloudflare KV daily write limit hit — cooling down until ${new Date(kvWriteCooldownUntilMs).toISOString()}`,
+        );
+        return {
+          domain,
+          success: false,
+          attempts: attempt,
+          error: `HTTP ${response.status}: ${errorText}`,
+        };
+      }
+
+      // Auth / bad payload — don't thrash retries
+      if (response.status === 400 || response.status === 401 || response.status === 404) {
+        return { domain, success: false, attempts: attempt, error: `HTTP ${response.status}: ${errorText}` };
+      }
+
       if (attempt < 3) {
         const backoffMs = Math.pow(4, attempt - 1) * 1000; // 1s, 4s, 16s
-        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        const { promise, resolve } = Promise.withResolvers<void>();
+        setTimeout(resolve, backoffMs);
+        await promise;
       } else {
         return { domain, success: false, attempts: attempt, error: `HTTP ${response.status}: ${errorText}` };
       }
@@ -63,7 +116,9 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
 
       if (attempt < 3) {
         const backoffMs = Math.pow(4, attempt - 1) * 1000;
-        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        const { promise, resolve } = Promise.withResolvers<void>();
+        setTimeout(resolve, backoffMs);
+        await promise;
       } else {
         return { domain, success: false, attempts: attempt, error: errorMsg };
       }
