@@ -29,6 +29,19 @@ interface MapComponentProps {
   sortBy?: 'net-wait' | 'proximity' | 'raw-wait';
 }
 
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export function MapComponent({
   hospitals,
   userLocation,
@@ -40,7 +53,11 @@ export function MapComponent({
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [key: string]: L.Marker }>({});
   const userMarkerRef = useRef<L.Marker | null>(null);
-
+  /** Last location key we auto-framed the map for — avoid re-flying on hospital poll. */
+  const framedLocationKeyRef = useRef<string | null>(null);
+  /** Skip auto-pan to selection while framing around the user. */
+  const suppressSelectionPanRef = useRef(false);
+  const lastSelectionPanIdRef = useRef<string | null>(null);
   // Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -218,7 +235,7 @@ export function MapComponent({
     });
   }, [hospitals, selectedHospital, setSelectedHospital, sortBy]);
 
-  // Sync User Location Marker & Center Map on it
+  // Sync user marker; frame map only when the user location actually changes.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -242,32 +259,52 @@ export function MapComponent({
 
       if (userMarkerRef.current) {
         userMarkerRef.current.setLatLng([userLocation.lat, userLocation.lng]);
+        userMarkerRef.current.setIcon(userIcon);
       } else {
-        userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon, zIndexOffset: 2000 })
-          .addTo(map);
+        userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], {
+          icon: userIcon,
+          zIndexOffset: 2000,
+        }).addTo(map);
       }
 
-      // Automatically center map on user location and nearby hospitals
-      const hospitalCoords = hospitals
-        .filter((h): h is typeof h & { latitude: number; longitude: number } =>
-          h.distance !== undefined && h.distance <= 100 &&
-          h.latitude !== null && h.longitude !== null &&
-          !isNaN(h.latitude) && !isNaN(h.longitude)
-        )
-        .map(h => [h.latitude, h.longitude] as [number, number]);
+      // Round so tiny geocode jitter doesn't re-trigger framing.
+      const locationKey = `${userLocation.lat.toFixed(3)},${userLocation.lng.toFixed(3)}`;
+
+      const nearbyCoords = hospitals
+        .filter((h) => {
+          if (h.latitude == null || h.longitude == null) return false;
+          if (Number.isNaN(h.latitude) || Number.isNaN(h.longitude)) return false;
+          return haversineKm(userLocation.lat, userLocation.lng, h.latitude, h.longitude) <= 80;
+        })
+        .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
+
+      // Frame once per location; allow a second frame when nearby hospitals first load.
+      const frameKey = `${locationKey}|${nearbyCoords.length > 0 ? 'near' : 'solo'}`;
+      if (framedLocationKeyRef.current === frameKey) return;
+      // Don't re-frame to solo if we already framed nearby for this location.
+      if (
+        framedLocationKeyRef.current?.startsWith(`${locationKey}|`) &&
+        nearbyCoords.length === 0
+      ) {
+        return;
+      }
+      framedLocationKeyRef.current = frameKey;
+      suppressSelectionPanRef.current = true;
 
       map.invalidateSize();
-      if (hospitalCoords.length > 0) {
-        const bounds = L.latLngBounds(hospitalCoords);
+      if (nearbyCoords.length > 0) {
+        const bounds = L.latLngBounds(nearbyCoords);
         bounds.extend([userLocation.lat, userLocation.lng]);
-        map.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 1 });
+        map.fitBounds(bounds, { padding: [48, 48], maxZoom: 11, animate: true, duration: 0.75 });
       } else {
-        map.setView([userLocation.lat, userLocation.lng], 11, {
-          animate: true,
-          duration: 1
-        });
+        map.setView([userLocation.lat, userLocation.lng], 11, { animate: true, duration: 0.75 });
       }
+
+      window.setTimeout(() => {
+        suppressSelectionPanRef.current = false;
+      }, 900);
     } else {
+      framedLocationKeyRef.current = null;
       if (userMarkerRef.current) {
         userMarkerRef.current.remove();
         userMarkerRef.current = null;
@@ -302,16 +339,23 @@ export function MapComponent({
     };
   }, []);
 
-  // Pan to Selected Hospital
+  // Pan to selected hospital only on a real selection change — never fight user-location framing.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selectedHospital || selectedHospital.latitude === null || selectedHospital.longitude === null) return;
+    if (!map || !selectedHospital || selectedHospital.latitude == null || selectedHospital.longitude == null) {
+      return;
+    }
+    if (suppressSelectionPanRef.current) return;
+    if (lastSelectionPanIdRef.current === selectedHospital.id) return;
+    lastSelectionPanIdRef.current = selectedHospital.id;
 
-    map.setView([selectedHospital.latitude, selectedHospital.longitude], 8, {
+    // With a user location, keep a regional view so we don't snap to Calgary defaults.
+    const zoom = userLocation ? Math.max(map.getZoom(), 10) : 9;
+    map.setView([selectedHospital.latitude, selectedHospital.longitude], zoom, {
       animate: true,
-      duration: 1
+      duration: 0.6,
     });
-  }, [selectedHospital]);
+  }, [selectedHospital, userLocation]);
 
   return (
     <div className="w-full h-full relative">

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -144,6 +144,8 @@ export default function ErWaitDashboard() {
   const [selectedRegion, setSelectedRegion] = useState('All');
   const [sortBy, setSortBy] = useState<SortKey>('net-wait');
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
+  /** Once the user picks a facility, stop auto-jumping to nearest. */
+  const userPickedHospitalRef = useRef(false);
   const [trends, setTrends] = useState<WaitTimeSnapshot[]>([]);
   const [loadingTrends, setLoadingTrends] = useState(false);
   const [zoneTrends, setZoneTrends] = useState<any[]>([]);
@@ -174,13 +176,31 @@ export default function ErWaitDashboard() {
     },
   };
 
-  const fetchHospitals = useCallback(async () => {
+  const fetchHospitals = useCallback(async (opts?: { quiet?: boolean }) => {
+    if (!opts?.quiet) setLoading(true);
     try {
       const res = await fetch('/api/hospitals');
       const data = await res.json();
       if (Array.isArray(data)) {
-        setHospitals(data);
-        setSelectedHospitalId((prev) => prev ?? data[0]?.id ?? null);
+        setHospitals((prev) => {
+          // Skip state churn when the poll returns identical waits (reduces map/list flicker).
+          if (
+            prev.length === data.length &&
+            prev.every((h, i) => {
+              const n = data[i];
+              return (
+                h.id === n.id &&
+                h.waitTime === n.waitTime &&
+                h.waitTimeLabel === n.waitTimeLabel &&
+                h.status === n.status &&
+                h.updatedAt === n.updatedAt
+              );
+            })
+          ) {
+            return prev;
+          }
+          return data;
+        });
       } else {
         setHospitals([]);
       }
@@ -373,6 +393,7 @@ export default function ErWaitDashboard() {
   };
 
   const clearLocation = () => {
+    userPickedHospitalRef.current = false;
     setUserLocation(null);
     setOsrmData({});
     localStorage.removeItem('alberta_hospital_user_location');
@@ -390,7 +411,7 @@ export default function ErWaitDashboard() {
     fetchHospitals();
     fetchMaxStats();
     const poll = setInterval(() => {
-      fetchHospitals();
+      fetchHospitals({ quiet: true });
       fetchMaxStats();
     }, POLL_MS);
 
@@ -569,7 +590,24 @@ export default function ErWaitDashboard() {
     [processed, selectedHospitalId, ranked],
   );
 
+  // When location is known, prefer the nearest open site until the user picks one.
+  useEffect(() => {
+    if (!userLocation || processed.length === 0) return;
+    if (userPickedHospitalRef.current) return;
+
+    const nearest = [...processed]
+      .filter((h) => h.latitude != null && h.longitude != null && h.distance != null)
+      .sort((a, b) => (a.distance ?? 1e9) - (b.distance ?? 1e9))[0];
+
+    if (nearest && nearest.id !== selectedHospitalId) {
+      setSelectedHospitalId(nearest.id);
+    } else if (!selectedHospitalId && ranked[0]) {
+      setSelectedHospitalId(ranked[0].id);
+    }
+  }, [userLocation, processed, selectedHospitalId, ranked]);
+
   const selectHospital = (h: { id: string }) => {
+    userPickedHospitalRef.current = true;
     setSelectedHospitalId(h.id);
     setSheetOpen(true);
   };
@@ -721,26 +759,27 @@ export default function ErWaitDashboard() {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3 space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-semibold text-slate-200">
+                  <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-xs font-semibold text-slate-200 leading-snug pr-2">
                         Location ranks sites by drive + wait. Stored only in this browser.
                       </p>
                       <button
                         type="button"
                         onClick={() => setLocationPanelOpen(false)}
-                        className="p-1 rounded-md text-slate-500 hover:text-white cursor-pointer"
+                        className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-slate-800 cursor-pointer shrink-0"
                         aria-label="Close location panel"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+
+                    <div className="flex flex-col gap-2">
                       <button
                         type="button"
                         onClick={requestGPSLocation}
                         disabled={loadingGeo}
-                        className="h-10 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-500/15 disabled:opacity-50 cursor-pointer"
+                        className="w-full h-11 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-500/15 disabled:opacity-50 cursor-pointer"
                       >
                         <Compass className={cn('w-4 h-4', loadingGeo && 'animate-spin')} />
                         {loadingGeo ? 'Detecting…' : 'Use current location'}
@@ -749,33 +788,42 @@ export default function ErWaitDashboard() {
                         <button
                           type="button"
                           onClick={clearLocation}
-                          className="h-10 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 text-xs font-bold hover:border-slate-500 cursor-pointer"
+                          className="w-full h-10 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 text-xs font-bold hover:border-slate-500 cursor-pointer"
                         >
-                          Clear location
+                          Clear location ({userLocation.city})
                         </button>
                       )}
                     </div>
-                    <form onSubmit={handleAddressSubmit} className="flex flex-col sm:flex-row gap-2">
-                      <div className="relative flex-1">
+
+                    <div className="relative flex items-center justify-center py-0.5">
+                      <div className="absolute inset-x-0 top-1/2 border-t border-slate-800" />
+                      <span className="relative px-2 bg-slate-950/70 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        or enter a place
+                      </span>
+                    </div>
+
+                    <form onSubmit={handleAddressSubmit} className="space-y-2">
+                      <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
                         <input
                           value={addressInput}
                           onChange={(e) => setAddressInput(e.target.value)}
-                          placeholder="City or postal code (e.g. Calgary, T2P 2M5)"
-                          className="w-full h-10 pl-9 pr-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"
+                          placeholder="City or postal code (e.g. St. Albert, T8N)"
+                          className="w-full h-11 pl-9 pr-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"
                         />
                       </div>
                       <button
                         type="submit"
                         disabled={isGeocoding || !addressInput.trim()}
-                        className="h-10 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold disabled:opacity-50 cursor-pointer"
+                        className="w-full h-11 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold disabled:opacity-50 cursor-pointer"
                       >
-                        {isGeocoding ? 'Looking up…' : 'Set'}
+                        {isGeocoding ? 'Looking up…' : 'Set location'}
                       </button>
                     </form>
-                    {geocodingError && <p className="text-[11px] text-rose-300">{geocodingError}</p>}
+
+                    {geocodingError && <p className="text-[11px] text-rose-300 leading-snug">{geocodingError}</p>}
                     {gpsRefused && !userLocation && (
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-slate-500 leading-snug">
                         GPS blocked or unavailable — a city or postal code works just as well.
                       </p>
                     )}
