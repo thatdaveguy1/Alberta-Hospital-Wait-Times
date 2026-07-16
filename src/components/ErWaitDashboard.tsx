@@ -1069,7 +1069,12 @@ export default function ErWaitDashboard() {
                   )}
                 </button>
               </div>
-              <div className={cn('relative w-full', isMapFullscreen ? 'flex-1 min-h-0' : 'h-[240px] sm:h-[280px] xl:aspect-[16/11] xl:h-auto xl:min-h-[280px] xl:max-h-[360px]')}>
+              <div
+                className={cn(
+                  'relative w-full shrink-0 overflow-hidden bg-slate-950',
+                  isMapFullscreen ? 'flex-1 min-h-0' : 'h-[300px] sm:h-[320px]',
+                )}
+              >
                 <MapComponent
                   hospitals={mapHospitals}
                   userLocation={userLocation}
@@ -1077,17 +1082,19 @@ export default function ErWaitDashboard() {
                   setSelectedHospital={selectHospital}
                   sortBy={sortBy}
                 />
-              </div>
-              <div className="flex items-center justify-between gap-2 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 border-t border-slate-800/80">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" /> Quieter
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-400" /> Busy
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-400" /> Very busy
-                </span>
+                {!isMapFullscreen && (
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[500] flex items-center justify-between gap-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" /> Quieter
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-400" /> Busy
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-400" /> Very busy
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1506,68 +1513,79 @@ function FacilitySheet({
               </span>
             )}
           </div>
-          <div className="h-28 rounded-xl border border-slate-800 bg-slate-950/70 p-1.5">
+          <div className="h-36 rounded-xl border border-slate-800 bg-slate-950/70 p-1.5 flex flex-col min-h-0">
             {loadingTrends ? (
-              <div className="h-full flex items-center justify-center">
+              <div className="flex-1 flex items-center justify-center">
                 <RefreshCw className="w-4 h-4 text-cyan-500/50 animate-spin" />
               </div>
             ) : trends.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trends} margin={{ top: 4, right: 4, left: 0, bottom: 1 }}>
-                  <defs>
-                    <linearGradient id="erFacilityWait" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
-                  <XAxis
-                    dataKey="timestamp"
-                    tickFormatter={(tick) => formatChartXAxis(tick, hospitalRange)}
-                    stroke="#334155"
-                    tick={{ fill: '#64748b', fontSize: 9 }}
-                  />
-                  <YAxis
-                    width={30}
-                    domain={facilityTrendStats.yDomain}
-                    stroke="#334155"
-                    tick={{ fill: '#64748b', fontSize: 9 }}
-                    tickFormatter={(v) => formatMinutesToHm(Number(v))}
-                  />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null;
-                      return (
-                        <div className="chart-tooltip text-[10px] !p-2">
-                          <p className="chart-tooltip-value !text-cyan-300">
-                            {formatMinutesToHm(Number(payload[0].value))}
-                          </p>
-                          <p className="text-[8px] text-slate-500 font-mono mt-0.5">
-                            {format(new Date(payload[0].payload.timestamp), 'MMM d, HH:mm')}
-                          </p>
-                        </div>
-                      );
-                    }}
-                  />
-                  {facilityTrendStats.avg != null && (
-                    <ReferenceLine
-                      y={facilityTrendStats.avg}
-                      stroke="#64748b"
-                      strokeDasharray="4 4"
-                      label={{ value: 'Avg', position: 'insideTopRight', fill: '#94a3b8', fontSize: 8 }}
-                    />
-                  )}
-                  <Area
-                    type="monotone"
-                    dataKey="waitTime"
-                    stroke="#22d3ee"
-                    strokeWidth={2}
-                    fill="url(#erFacilityWait)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <>
+                <div className="flex-1 min-h-[88px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={trends} margin={{ top: 4, right: 4, left: 0, bottom: 1 }}>
+                      <defs>
+                        <linearGradient id="erFacilityWait" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.05} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                      <XAxis
+                        dataKey="timestamp"
+                        tickFormatter={(tick) => formatChartXAxis(tick, hospitalRange)}
+                        stroke="#334155"
+                        tick={{ fill: '#64748b', fontSize: 9 }}
+                      />
+                      <YAxis
+                        width={36}
+                        domain={facilityTrendStats.yDomain}
+                        stroke="#334155"
+                        tick={{ fill: '#64748b', fontSize: 9 }}
+                        tickFormatter={(v) => formatMinutesToHm(Number(v))}
+                      />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          return (
+                            <div className="chart-tooltip text-[10px] !p-2">
+                              <p className="chart-tooltip-value !text-cyan-300">
+                                {formatMinutesToHm(Number(payload[0].value))}
+                              </p>
+                              <p className="text-[8px] text-slate-500 font-mono mt-0.5">
+                                {format(new Date(payload[0].payload.timestamp), 'MMM d, HH:mm')}
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                      {facilityTrendStats.avg != null && (
+                        <ReferenceLine
+                          y={facilityTrendStats.avg}
+                          stroke="#64748b"
+                          strokeDasharray="4 4"
+                          label={{ value: 'Avg', position: 'insideTopRight', fill: '#94a3b8', fontSize: 8 }}
+                        />
+                      )}
+                      <Area
+                        type="monotone"
+                        dataKey="waitTime"
+                        stroke="#22d3ee"
+                        strokeWidth={2}
+                        fill="url(#erFacilityWait)"
+                        dot={trends.length <= 12 ? { r: 3, fill: '#22d3ee', strokeWidth: 0 } : false}
+                        activeDot={{ r: 4 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                {trends.length < 6 && (
+                  <p className="text-[9px] text-slate-500 text-center pt-1 shrink-0">
+                    {trends.length} sample{trends.length === 1 ? '' : 's'} in this window — more points every ~10 min.
+                  </p>
+                )}
+              </>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-600">
+              <div className="flex-1 flex flex-col items-center justify-center text-slate-600">
                 <TrendingUp className="w-4 h-4 mb-1" />
                 <p className="text-[10px]">No trend samples yet</p>
               </div>

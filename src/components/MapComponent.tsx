@@ -373,16 +373,21 @@ export function MapComponent({
     });
 
     resizeObserver.observe(container);
-
     const timer = setTimeout(() => {
       if (mapRef.current) {
         mapRef.current.invalidateSize();
       }
     }, 150);
+    const timer2 = setTimeout(() => {
+      if (mapRef.current) {
+        mapRef.current.invalidateSize();
+      }
+    }, 600);
 
     return () => {
       resizeObserver.disconnect();
       clearTimeout(timer);
+      clearTimeout(timer2);
     };
   }, []);
 
