@@ -1,14 +1,13 @@
 // Trends Pusher — computes trend aggregates from in-memory snapshots and
-// pushes them to Cloudflare SNAPSHOTS_KV via the authenticated push endpoint.
+// pushes a single JSON blob per domain to Cloudflare SNAPSHOTS_KV via the
+// authenticated push endpoint.
 //
-// The worker reads pre-computed KV keys (trends-all-24h, trends-labs-7d, etc.)
-// so this module computes all range variants and sends them as a
-// { kvKey: value } map under the er-trends / lab-trends push domains.
-// The worker iterates the map and puts each key to SNAPSHOTS_KV.
+// Domains `er-trends` and `lab-trends` each map to one SNAPSHOTS_KV key
+// (same name as the domain). The worker stores the full body; public routes
+// read slices from that blob (with legacy per-key fallback on the worker).
 //
-// Per-facility raw series are packed into ONE map key each (not one key per
-// facility). Cloudflare free-tier KV is ~1,000 writes/day; per-entity keys
-// blew past that in hours (31 hospitals + 60 labs every cycle).
+// Per-facility / per-lab raw time series stay on the Mac mini only — they are
+// not included in push payloads.
 
 import type { WaitTimeSnapshot } from '../types';
 import type { LabWaitSnapshot } from './aplLabWaitTimesFetcher';
@@ -31,9 +30,13 @@ function getRangeCutoff(range: Range): number {
   }
 }
 
+
+export type ErTrendAllPoint = { timestamp: string; waitTime: number };
+export type ErTrendZoneRow = { [key: string]: number | string };
+export type ErTrendProvincialPoint = { timestamp: string; waitTime: number };
 // --- ER trend aggregates ---
 
-function computeErTrendAll(snapshots: WaitTimeSnapshot[], range: Range) {
+function computeErTrendAll(snapshots: WaitTimeSnapshot[], range: Range): ErTrendAllPoint[] {
   const cutoff = getRangeCutoff(range);
   const filtered = snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff);
 
@@ -52,7 +55,7 @@ function computeErTrendAll(snapshots: WaitTimeSnapshot[], range: Range) {
   return averages;
 }
 
-function computeErTrendZones(snapshots: WaitTimeSnapshot[], hospitals: Hospital[], range: Range) {
+function computeErTrendZones(snapshots: WaitTimeSnapshot[], hospitals: Hospital[], range: Range): ErTrendZoneRow[] {
   const cutoff = getRangeCutoff(range);
   const filtered = snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff);
 
@@ -133,7 +136,7 @@ function computeErMaxStats(snapshots: WaitTimeSnapshot[], hospitals: Hospital[])
 
 // --- Lab trend aggregates ---
 
-function computeLabTrendProvincial(snapshots: LabWaitSnapshot[], range: Range) {
+function computeLabTrendProvincial(snapshots: LabWaitSnapshot[], range: Range): ErTrendProvincialPoint[] {
   const cutoff = getRangeCutoff(range);
   const filtered = snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff);
 
@@ -152,8 +155,8 @@ function computeLabTrendProvincial(snapshots: LabWaitSnapshot[], range: Range) {
 }
 
 /**
- * Compute and push all ER trend aggregates to Cloudflare SNAPSHOTS_KV.
- * Call from the ER pipeline; scheduler throttles this to ~30 min for KV budget.
+ * Compute and push ER trend aggregates as one `er-trends` blob to Cloudflare SNAPSHOTS_KV.
+ * Call from the ER pipeline; scheduler throttles cadence for KV budget.
  */
 export async function pushErTrends(
   snapshots: WaitTimeSnapshot[],
@@ -161,51 +164,57 @@ export async function pushErTrends(
 ): Promise<void> {
   if (snapshots.length === 0) return;
 
-  const kvMap: Record<string, unknown> = {};
-
+  const all: Record<Range, ErTrendAllPoint[]> = {
+    '24h': [],
+    '7d': [],
+    '30d': [],
+  };
+  const zones: Record<Range, ErTrendZoneRow[]> = {
+    '24h': [],
+    '7d': [],
+    '30d': [],
+  };
   for (const range of RANGES) {
-    kvMap[`trends-all-${range}`] = computeErTrendAll(snapshots, range);
-    kvMap[`trends-zones-${range}`] = computeErTrendZones(snapshots, hospitals, range);
+    all[range] = computeErTrendAll(snapshots, range);
+    zones[range] = computeErTrendZones(snapshots, hospitals, range);
   }
 
-  kvMap['trends-max-stats'] = computeErMaxStats(snapshots, hospitals);
-  // Pack all hospital series into one key so we pay 1 write, not N.
-  // Worker extracts by hospitalId on read. Keeps facility charts working.
-  const erRawByHospital: Record<string, Array<{ waitTime: number; timestamp: string }>> = {};
-  for (const snap of snapshots) {
-    const bucket = erRawByHospital[snap.hospitalId] ?? (erRawByHospital[snap.hospitalId] = []);
-    bucket.push({ waitTime: snap.waitTime, timestamp: snap.timestamp });
-  }
-  kvMap['trends-er-raw'] = erRawByHospital;
+  const blob = {
+    all,
+    zones,
+    maxStats: computeErMaxStats(snapshots, hospitals),
+  };
 
-  const result = await pushToCloudflare('er-trends', kvMap);
-  if (result.success) {
-    console.log(`[TrendsPusher] Pushed ${Object.keys(kvMap).length} ER trend keys to Cloudflare KV`);
+  const result = await pushToCloudflare('er-trends', blob);
+  if (result.success && result.skipped) {
+    console.log('[TrendsPusher] er-trends blob unchanged or cooldown — not written');
+  } else if (result.success) {
+    console.log('[TrendsPusher] Pushed er-trends blob to Cloudflare KV');
   }
 }
 
 /**
- * Compute and push all lab trend aggregates to Cloudflare SNAPSHOTS_KV.
- * Call after each APL lab wait times fetch (every 30 min).
+ * Compute and push lab trend aggregates as one `lab-trends` blob to Cloudflare SNAPSHOTS_KV.
+ * Call after each APL lab wait times fetch.
  */
 export async function pushLabTrends(snapshots: LabWaitSnapshot[]): Promise<void> {
   if (snapshots.length === 0) return;
 
-  const kvMap: Record<string, unknown> = {};
-
+  const provincial: Record<Range, ErTrendProvincialPoint[]> = {
+    '24h': [],
+    '7d': [],
+    '30d': [],
+  };
   for (const range of RANGES) {
-    kvMap[`trends-labs-${range}`] = computeLabTrendProvincial(snapshots, range);
+    provincial[range] = computeLabTrendProvincial(snapshots, range);
   }
-  // Pack all lab series into one key so we pay 1 write, not N.
-  const labRawByLab: Record<string, Array<{ waitTime: number; timestamp: string }>> = {};
-  for (const snap of snapshots) {
-    const bucket = labRawByLab[snap.labId] ?? (labRawByLab[snap.labId] = []);
-    bucket.push({ waitTime: snap.waitTime, timestamp: snap.timestamp });
-  }
-  kvMap['trends-labs-raw'] = labRawByLab;
 
-  const result = await pushToCloudflare('lab-trends', kvMap);
-  if (result.success) {
-    console.log(`[TrendsPusher] Pushed ${Object.keys(kvMap).length} lab trend keys to Cloudflare KV`);
+  const blob = { provincial };
+
+  const result = await pushToCloudflare('lab-trends', blob);
+  if (result.success && result.skipped) {
+    console.log('[TrendsPusher] lab-trends blob unchanged or cooldown — not written');
+  } else if (result.success) {
+    console.log('[TrendsPusher] Pushed lab-trends blob to Cloudflare KV');
   }
 }

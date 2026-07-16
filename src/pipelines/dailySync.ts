@@ -3,7 +3,7 @@
 // fresh without the Express server running.
 //
 // Flow:
-//   1. scrapeDisruptions()  → push `disruptions` domain to KV on success
+//   1. scrapeDisruptions()  → record result (disruptions pushed in bulk at end)
 //   2. runAllPipelines()    → collect Tier 1-4 results (one failure never stops the rest)
 //   3. recordDailySyncResults(results) → write data-sync-status.json
 //   4. pushAllToCloudflare() → bulk-push all 15 domain data files to KV
@@ -13,8 +13,6 @@
 // NOT abort the run — it is recorded as a failed SyncResult and the script continues.
 
 import 'dotenv/config';
-import fs from 'fs';
-import path from 'path';
 import { scrapeDisruptions } from './disruptionsScraper';
 import { runAllPipelines } from './orchestrator';
 import { recordDailySyncResults, getSyncStatus } from './syncStatus';
@@ -28,20 +26,9 @@ export async function runDailySyncFlow(): Promise<SyncResult[]> {
 
   const results: SyncResult[] = [];
 
-  // 1. Disruptions scraper — run first, push immediately on success.
+  // 1. Disruptions scraper — run first; KV push deferred to bulk pushAll at end.
   const disruptionsResult = await scrapeDisruptions();
   results.push(disruptionsResult);
-
-  if (disruptionsResult.status === 'success') {
-    const disruptionsFile = path.join(process.cwd(), 'data-disruptions.json');
-    try {
-      const data = fs.readFileSync(disruptionsFile, 'utf8');
-      const parsed = JSON.parse(data);
-      await pushToCloudflare('disruptions', parsed);
-    } catch (err) {
-      console.warn('[DailySync] Failed to push disruptions to Cloudflare:', err);
-    }
-  }
 
   // 2. Full orchestrator (Tier 1-4). Each pipeline is error-isolated inside
   //    runAllPipelines, so one failure won't stop the rest.
@@ -52,9 +39,8 @@ export async function runDailySyncFlow(): Promise<SyncResult[]> {
   recordDailySyncResults(results);
 
   // 4. Bulk-push every updated domain data file to Cloudflare KV. This covers
-  //    all 15 domains written by the orchestrator's pipelines (including a
-  //    fresh re-push of `disruptions` from the just-written file, which is
-  //    idempotent). `sync-status` is pushed separately below — it is not a
+  //    all 15 domains written by the orchestrator's pipelines (including
+  //    `disruptions` from the scraper). `sync-status` is pushed separately below — it is not a
   //    data domain and is not in pushAllToCloudflare's domain list.
   try {
     const pushResults = await pushAllToCloudflare();

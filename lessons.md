@@ -866,3 +866,8 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** The Worker push endpoint wrapped parse + KV writes in one try/catch and returned `400 Invalid JSON body` for any error. When free-tier KV put quota was exhausted, the client retried thrice every cycle with a useless message.
 - **Solution:** Split JSON parse errors (400) from KV write errors (429 for quota/limit, 500 otherwise). Push client opens a cooldown until next UTC midnight on quota errors so it stops thrashing.
 - **Prevention:** Never map all backend failures to a client input error. Distinguish validation vs infrastructure quota and fail closed with backoff.
+
+### Lesson: Free-tier KV needs single-blob trends and local-only raw history
+- **Mistake:** Even after packing per-facility keys, ER/lab trends still did 8+5 SNAPSHOTS puts every 30 min because aggregates were multi-key and packed raw always changed. Free-tier ~1k writes/day left almost no headroom.
+- **Solution:** One SNAPSHOTS_KV blob per domain (`er-trends`, `lab-trends`); facility/lab raw series stay on the Mac mini; trends/labs cadence hourly; client content-hash skip + durable cooldown file; worker skip-identical on single put.
+- **Prevention:** Budget as `keys × cycles/day` before shipping. Public edge should store precomputed chart blobs, not full time-series history.
