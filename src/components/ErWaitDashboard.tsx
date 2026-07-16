@@ -1029,16 +1029,16 @@ export default function ErWaitDashboard() {
           {/* Map + sheet */}
           <section
             className={cn(
-              'grid gap-3',
+              'grid gap-3 items-start',
               isMapFullscreen
                 ? ''
-                : 'grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.95fr)]',
+                : 'grid-cols-1 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]',
             )}
           >
             <div
               className={cn(
-                'rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden flex flex-col',
-                isMapFullscreen && 'fixed inset-0 z-[9999] rounded-none bg-slate-950 p-3 sm:p-5',
+                'rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden flex flex-col self-start w-full',
+                isMapFullscreen && 'fixed inset-0 z-[9999] rounded-none bg-slate-950 p-3 sm:p-5 self-auto',
               )}
             >
               <div className="flex items-center justify-between gap-2 px-3.5 py-3 border-b border-slate-800/80">
@@ -1069,7 +1069,7 @@ export default function ErWaitDashboard() {
                   )}
                 </button>
               </div>
-              <div className={cn('relative', isMapFullscreen ? 'flex-1 min-h-0' : 'h-[260px] sm:h-[300px] xl:h-[320px]')}>
+              <div className={cn('relative w-full', isMapFullscreen ? 'flex-1 min-h-0' : 'h-[240px] sm:h-[280px] xl:aspect-[16/11] xl:h-auto xl:min-h-[280px] xl:max-h-[360px]')}>
                 <MapComponent
                   hospitals={mapHospitals}
                   userLocation={userLocation}

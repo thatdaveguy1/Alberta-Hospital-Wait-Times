@@ -280,10 +280,11 @@ export function MapComponent({
     if (!map || userLocation || didInitialHospitalFrameRef.current) return;
     const coords = hospitalCoords(hospitals);
     if (coords.length === 0) return;
+    // Don't fight selection framing — selection effect will pack to city cluster.
+    if (selectedHospital?.latitude != null) return;
     didInitialHospitalFrameRef.current = true;
-    // Soft provincial pack — still readable, less dead west/east canvas.
-    frameToCoords(map, coords, { maxZoom: 7, padding: [28, 28], animate: false });
-  }, [hospitals, userLocation]);
+    frameToCoords(map, coords, { maxZoom: 6.5, padding: [24, 24], animate: false });
+  }, [hospitals, userLocation, selectedHospital]);
 
   // Sync user marker; frame map only when the user location actually changes.
   useEffect(() => {
@@ -385,7 +386,7 @@ export function MapComponent({
     };
   }, []);
 
-  // Selection framing: pack selected facility + nearby peers so the canvas isn't empty.
+  // Selection framing: pack selected facility + city peers so the canvas isn't empty.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedHospital || selectedHospital.latitude == null || selectedHospital.longitude == null) {
@@ -400,28 +401,38 @@ export function MapComponent({
       selectedHospital.longitude,
     ];
 
-    // Prefer peers within ~35 km (city cluster). Falls back to single-pin city zoom.
-    const peerCoords = hospitals
+    // Prefer same-city peers (dense metro frame). Fall back to ~22 km radius.
+    const sameCity = hospitals
       .filter((h) => {
         if (h.id === selectedHospital.id) return false;
         if (h.latitude == null || h.longitude == null) return false;
-        return (
-          haversineKm(
-            selectedHospital.latitude!,
-            selectedHospital.longitude!,
-            h.latitude,
-            h.longitude,
-          ) <= 35
-        );
+        return h.city.toLowerCase() === selectedHospital.city.toLowerCase();
       })
       .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
 
+    const nearCoords =
+      sameCity.length > 0
+        ? sameCity
+        : hospitals
+            .filter((h) => {
+              if (h.id === selectedHospital.id) return false;
+              if (h.latitude == null || h.longitude == null) return false;
+              return (
+                haversineKm(
+                  selectedHospital.latitude!,
+                  selectedHospital.longitude!,
+                  h.latitude,
+                  h.longitude,
+                ) <= 22
+              );
+            })
+            .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
+
     if (userLocation) {
-      // Keep regional context when routing — don't snap too tight away from user.
       const local = hospitals
         .filter((h) => {
           if (h.latitude == null || h.longitude == null) return false;
-          return haversineKm(userLocation.lat, userLocation.lng, h.latitude, h.longitude) <= 55;
+          return haversineKm(userLocation.lat, userLocation.lng, h.latitude, h.longitude) <= 40;
         })
         .map((h) => [h.latitude as number, h.longitude as number] as [number, number]);
       frameToCoords(
@@ -429,15 +440,15 @@ export function MapComponent({
         local.length > 0
           ? [...local, [userLocation.lat, userLocation.lng], selectedCoord]
           : [selectedCoord, [userLocation.lat, userLocation.lng]],
-        { maxZoom: 12, padding: [44, 44] },
+        { maxZoom: 13, padding: [32, 32] },
       );
       return;
     }
 
     frameToCoords(
       map,
-      peerCoords.length > 0 ? [selectedCoord, ...peerCoords] : [selectedCoord],
-      { maxZoom: peerCoords.length > 0 ? 12 : 12, padding: [40, 40] },
+      nearCoords.length > 0 ? [selectedCoord, ...nearCoords] : [selectedCoord],
+      { maxZoom: 13, padding: [28, 28] },
     );
   }, [selectedHospital, userLocation, hospitals]);
 
