@@ -8,6 +8,56 @@ import crypto from 'crypto';
 const PUSH_SECRET = process.env.PUSH_SECRET ?? '';
 const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL ?? '';
 
+const COOLDOWN_FILE = path.join(process.cwd(), '.kv-write-cooldown.json');
+const HASHES_FILE = path.join(process.cwd(), '.kv-push-hashes.json');
+
+function loadKvWriteCooldownFromDisk(): number {
+  try {
+    if (!fs.existsSync(COOLDOWN_FILE)) return 0;
+    const raw = fs.readFileSync(COOLDOWN_FILE, 'utf8');
+    const parsed = JSON.parse(raw) as { untilMs?: number };
+    const untilMs = typeof parsed.untilMs === 'number' ? parsed.untilMs : 0;
+    if (untilMs <= Date.now()) return 0;
+    return untilMs;
+  } catch {
+    return 0;
+  }
+}
+
+function persistKvWriteCooldown(untilMs: number): void {
+  try {
+    fs.writeFileSync(COOLDOWN_FILE, JSON.stringify({ untilMs }), 'utf8');
+  } catch (err) {
+    console.warn(
+      `[PushClient] Failed to persist KV cooldown: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
+function loadPushHashesFromDisk(): Record<string, string> {
+  try {
+    if (!fs.existsSync(HASHES_FILE)) return {};
+    const raw = fs.readFileSync(HASHES_FILE, 'utf8');
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    if (!parsed || typeof parsed !== 'object') return {};
+    return parsed;
+  } catch {
+    return {};
+  }
+}
+
+function persistPushHashes(hashes: Record<string, string>): void {
+  try {
+    fs.writeFileSync(HASHES_FILE, JSON.stringify(hashes), 'utf8');
+  } catch (err) {
+    console.warn(
+      `[PushClient] Failed to persist push hashes: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
+
+
 interface PushResult {
   domain: string;
   success: boolean;
@@ -18,7 +68,9 @@ interface PushResult {
 
 // Once Cloudflare returns a daily KV put-limit error, stop all pushes until the
 // next UTC day. Retries just thrash logs and waste remaining budget.
-let kvWriteCooldownUntilMs = 0;
+let kvWriteCooldownUntilMs = loadKvWriteCooldownFromDisk();
+let pushContentHashes: Record<string, string> = loadPushHashesFromDisk();
+
 
 function nextUtcMidnightMs(fromMs = Date.now()): number {
   const d = new Date(fromMs);
@@ -46,16 +98,27 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
   const now = Date.now();
   if (now < kvWriteCooldownUntilMs) {
     const mins = Math.ceil((kvWriteCooldownUntilMs - now) / 60000);
+    console.log(
+      `[PushClient] Skipping ${domain} — KV write cooldown active (~${mins}m left; resumes after UTC midnight)`,
+    );
     return {
       domain,
-      success: false,
+      success: true,
       attempts: 0,
       skipped: true,
       error: `KV write cooldown active (~${mins}m left; resumes after UTC midnight)`,
     };
   }
 
+
   const body = JSON.stringify(data);
+
+  const bodyHash = crypto.createHash('sha256').update(body).digest('hex');
+  if (pushContentHashes[domain] === bodyHash) {
+    console.log(`[PushClient] Skipping ${domain} — payload unchanged (content hash match)`);
+    return { domain, success: true, attempts: 0, skipped: true };
+  }
+
   const timestamp = Date.now().toString();
   const signature = crypto
     .createHmac('sha256', PUSH_SECRET)
@@ -77,6 +140,8 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
       });
 
       if (response.ok) {
+        pushContentHashes[domain] = bodyHash;
+        persistPushHashes(pushContentHashes);
         console.log(`[PushClient] Pushed ${domain} to Cloudflare KV (attempt ${attempt})`);
         return { domain, success: true, attempts: attempt };
       }
@@ -86,6 +151,7 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
 
       if (isKvQuotaError(response.status, errorText)) {
         kvWriteCooldownUntilMs = nextUtcMidnightMs();
+        persistKvWriteCooldown(kvWriteCooldownUntilMs);
         console.error(
           `[PushClient] Cloudflare KV daily write limit hit — cooling down until ${new Date(kvWriteCooldownUntilMs).toISOString()}`,
         );

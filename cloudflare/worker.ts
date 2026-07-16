@@ -46,6 +46,37 @@ const DOMAIN_WHITELIST = new Set([
 // Domains that go to SNAPSHOTS_KV instead of DATA_KV
 const SNAPSHOT_DOMAINS = new Set(['er-trends', 'lab-trends']);
 
+type ErTrendsBlob = {
+  all?: Record<string, unknown[]>;
+  zones?: Record<string, unknown[]>;
+  maxStats?: { max24h: unknown; max7d: unknown; max30d: unknown };
+};
+
+type LabTrendsBlob = {
+  provincial?: Record<string, unknown[]>;
+};
+
+async function readErTrendsBlob(kv: KVNamespace): Promise<ErTrendsBlob | null> {
+  const raw = await kv.get('er-trends');
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as ErTrendsBlob;
+  } catch {
+    return null;
+  }
+}
+
+async function readLabTrendsBlob(kv: KVNamespace): Promise<LabTrendsBlob | null> {
+  const raw = await kv.get('lab-trends');
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as LabTrendsBlob;
+  } catch {
+    return null;
+  }
+}
+
+
 // --- Health ---
 app.get('/api/health', (c) => {
   return c.json({
@@ -94,61 +125,43 @@ app.get('/api/sync/status', async (c) => {
 // --- Trends (from snapshots KV) ---
 app.get('/api/trends/all', async (c) => {
   const range = c.req.query('range') ?? '24h';
-  const data = await c.env.SNAPSHOTS_KV.get(`trends-all-${range}`);
-  if (!data) return c.json([]);
-  return c.json(JSON.parse(data));
+  const blob = await readErTrendsBlob(c.env.SNAPSHOTS_KV);
+  if (blob?.all?.[range]) return c.json(blob.all[range]);
+  const legacy = await c.env.SNAPSHOTS_KV.get(`trends-all-${range}`);
+  if (!legacy) return c.json([]);
+  return c.json(JSON.parse(legacy));
 });
 
 app.get('/api/trends/zones', async (c) => {
   const range = c.req.query('range') ?? '24h';
-  const data = await c.env.SNAPSHOTS_KV.get(`trends-zones-${range}`);
-  if (!data) return c.json([]);
-  return c.json(JSON.parse(data));
+  const blob = await readErTrendsBlob(c.env.SNAPSHOTS_KV);
+  if (blob?.zones?.[range]) return c.json(blob.zones[range]);
+  const legacy = await c.env.SNAPSHOTS_KV.get(`trends-zones-${range}`);
+  if (!legacy) return c.json([]);
+  return c.json(JSON.parse(legacy));
 });
 
 app.get('/api/trends/max-stats', async (c) => {
-  const data = await c.env.SNAPSHOTS_KV.get('trends-max-stats');
-  if (!data) return c.json({ max24h: 0, max7d: 0, max30d: 0 });
-  return c.json(JSON.parse(data));
+  const blob = await readErTrendsBlob(c.env.SNAPSHOTS_KV);
+  if (blob?.maxStats) return c.json(blob.maxStats);
+  const legacy = await c.env.SNAPSHOTS_KV.get('trends-max-stats');
+  if (!legacy) return c.json({ max24h: 0, max7d: 0, max30d: 0 });
+  return c.json(JSON.parse(legacy));
 });
 app.get('/api/trends/labs', async (c) => {
   const range = c.req.query('range') ?? '24h';
-  const data = await c.env.SNAPSHOTS_KV.get(`trends-labs-${range}`);
-  if (!data) return c.json([]);
-  return c.json(JSON.parse(data));
+  const blob = await readLabTrendsBlob(c.env.SNAPSHOTS_KV);
+  if (blob?.provincial?.[range]) return c.json(blob.provincial[range]);
+  const legacy = await c.env.SNAPSHOTS_KV.get(`trends-labs-${range}`);
+  if (!legacy) return c.json([]);
+  return c.json(JSON.parse(legacy));
 });
 
 app.get('/api/trends/labs/:labId', async (c) => {
-  const labId = c.req.param('labId');
-  const range = c.req.query('range') ?? '24h';
-  // Packed map first (current). Fall back to legacy per-lab keys if present.
-  const packed = await c.env.SNAPSHOTS_KV.get('trends-labs-raw');
-  let snapshots: Array<{ waitTime: number; timestamp: string }> = [];
-  if (packed) {
-    const map = JSON.parse(packed) as Record<string, Array<{ waitTime: number; timestamp: string }>>;
-    snapshots = map[labId] ?? [];
-  } else {
-    const legacy = await c.env.SNAPSHOTS_KV.get(`trends-labs-raw-${labId}`);
-    if (legacy) snapshots = JSON.parse(legacy);
-  }
-  const cutoff = Date.now() - (range === '7d' ? 7 : range === '30d' ? 30 : 1) * 24 * 60 * 60 * 1000;
-  return c.json(snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff));
+  return c.json([]);
 });
 app.get('/api/trends/:hospitalId', async (c) => {
-  const hospitalId = c.req.param('hospitalId');
-  const range = c.req.query('range') ?? '24h';
-  // Packed map first (current). Fall back to legacy per-hospital keys if present.
-  const packed = await c.env.SNAPSHOTS_KV.get('trends-er-raw');
-  let snapshots: Array<{ waitTime: number; timestamp: string }> = [];
-  if (packed) {
-    const map = JSON.parse(packed) as Record<string, Array<{ waitTime: number; timestamp: string }>>;
-    snapshots = map[hospitalId] ?? [];
-  } else {
-    const legacy = await c.env.SNAPSHOTS_KV.get(`trends-er-raw-${hospitalId}`);
-    if (legacy) snapshots = JSON.parse(legacy);
-  }
-  const cutoff = Date.now() - (range === '7d' ? 7 : range === '30d' ? 30 : 1) * 24 * 60 * 60 * 1000;
-  return c.json(snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff));
+  return c.json([]);
 });
 
 // --- Alerts ---
@@ -272,31 +285,27 @@ app.post('/api/push/:domain', async (c) => {
 
   try {
     if (SNAPSHOT_DOMAINS.has(domain)) {
-      // Snapshot trend domains: payload is a { kvKey: value } map.
-      // Write each key individually to SNAPSHOTS_KV, skipping unchanged values
-      // so identical re-pushes don't burn the daily write quota.
-      if (data && typeof data === 'object' && !Array.isArray(data)) {
-        let keysWritten = 0;
-        let keysSkipped = 0;
-        for (const [kvKey, kvValue] of Object.entries(data as Record<string, unknown>)) {
-          const next = JSON.stringify(kvValue);
-          const existing = await c.env.SNAPSHOTS_KV.get(kvKey);
-          if (existing === next) {
-            keysSkipped += 1;
-            continue;
-          }
-          await c.env.SNAPSHOTS_KV.put(kvKey, next);
-          keysWritten += 1;
-        }
+      if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        return c.json({ error: 'Snapshot domain payload must be a JSON object' }, 400);
+      }
+      const next = JSON.stringify(data);
+      const existing = await c.env.SNAPSHOTS_KV.get(domain);
+      if (existing === next) {
         return c.json({
           success: true,
           domain,
-          keysWritten,
-          keysSkipped,
+          skipped: true,
+          keysWritten: 0,
           timestamp: new Date().toISOString(),
         });
       }
-      return c.json({ error: 'Snapshot domain payload must be a key-value map' }, 400);
+      await c.env.SNAPSHOTS_KV.put(domain, next);
+      return c.json({
+        success: true,
+        domain,
+        keysWritten: 1,
+        timestamp: new Date().toISOString(),
+      });
     }
     const dataKey = `data-${domain}`;
     const next = JSON.stringify(data);

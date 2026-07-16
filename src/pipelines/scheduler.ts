@@ -1,5 +1,5 @@
 // Scheduler — manages timed execution of fast-tier pipelines.
-// ER wait times: every 10 minutes. Lab waits: every 30 minutes.
+// ER wait times: every 10 minutes. Lab waits: every 60 minutes.
 // The daily full sync is run by the standalone `npm run daily-sync` script
 // (src/pipelines/dailySync.ts), scheduled via launchd — not by this scheduler.
 
@@ -17,8 +17,8 @@ let erIntervalId: NodeJS.Timeout | null = null;
 let labIntervalId: NodeJS.Timeout | null = null;
 let lastErTrendsPushMs = 0;
 // Live ER board can refresh every 10 min; trend KV keys change every cycle and
-// are the write-budget killers. Cap trend pushes at 30 min.
-const ER_TRENDS_MIN_INTERVAL_MS = 30 * 60 * 1000;
+// are the write-budget killers. Cap trend pushes at 60 min.
+const ER_TRENDS_MIN_INTERVAL_MS = 60 * 60 * 1000;
 
 export function setAlertCheckFn(fn: () => void): void {
   setAlertChecker(fn);
@@ -44,7 +44,7 @@ async function runErWaitTimesPipeline(): Promise<void> {
       hospitals: getHospitals(),
       lastUpdated: result.timestamp,
     });
-    // Trend aggregates + packed raw series — throttle to protect free-tier KV writes.
+    // Provincial/zone trend blob — throttle hourly for free-tier KV budget.
     const now = Date.now();
     if (now - lastErTrendsPushMs >= ER_TRENDS_MIN_INTERVAL_MS) {
       await pushErTrends(getSnapshots(), getHospitals());
@@ -95,14 +95,15 @@ export async function startScheduler(): Promise<void> {
     });
   }, 10 * 60 * 1000);
 
-  // Schedule lab waits every 30 minutes
+  // Schedule lab waits every 60 minutes
   labIntervalId = setInterval(() => {
     runLabWaitsPipeline().catch(err => {
       console.error('[Scheduler] Lab waits pipeline error:', err);
     });
-  }, 30 * 60 * 1000);
+  }, 60 * 60 * 1000);
 
-  console.log('[Scheduler] Running. ER wait times: every 10 min. Lab waits: every 30 min.');
+  console.log('[Scheduler] Running. ER wait times: every 10 min. Lab waits: every 60 min.');
+
 }
 
 export function stopScheduler(): void {
