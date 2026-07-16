@@ -1189,21 +1189,6 @@ export default function App() {
 
   // Sort the zones themselves: closest zone to user first!
   groupedZones.sort((a, b) => {
-    if (sortBy === 'net-wait' && userLocation) {
-      const minNetWaitA = Math.min(...a.hospitals.map(h => {
-        const isUnav = isWaitTimeUnavailable(h);
-        if (isUnav) return Infinity;
-        const driveMins = h.driveMins || 0;
-        return driveMins + h.waitTime;
-      }));
-      const minNetWaitB = Math.min(...b.hospitals.map(h => {
-        const isUnav = isWaitTimeUnavailable(h);
-        if (isUnav) return Infinity;
-        const driveMins = h.driveMins || 0;
-        return driveMins + h.waitTime;
-      }));
-      if (minNetWaitA !== minNetWaitB) return minNetWaitA - minNetWaitB;
-    }
     return a.distance - b.distance;
   });
 
