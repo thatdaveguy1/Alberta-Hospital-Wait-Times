@@ -26,7 +26,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.use('*', cors({
   origin: (origin, c) => {
     const raw = c.env.CORS_ORIGINS;
-    const allowed = raw ? raw.split(',').map(s => s.trim()) : DEFAULT_CORS_ORIGINS;
+    const allowed = raw ? raw.split(',').map((s: string) => s.trim()) : DEFAULT_CORS_ORIGINS;
     return allowed.includes(origin) ? origin : allowed[0];
   },
   allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
