@@ -18,7 +18,8 @@ import path from 'path';
 import puppeteer, { type Browser, type Page, type HTTPResponse } from 'puppeteer';
 import type { SurgicalRecord } from '../surgicalData';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 
 const POWERBI_REPORT_URL =
   'https://app.powerbi.com/view?r=eyJrIjoiMjUzNjc1MWQtYjcxZC00NTMzLWIwNDctZTA0ZTNiMWQzODBlIiwidCI6IjJiYjUxYzA2LWFmOWItNDJjNS04YmY1LTNjM2I3YjEwODUwYiJ9';
@@ -508,15 +509,18 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], pe
       STATSCAN_SATISFACTION_STATS: [],
       _dataMetadata: { SURGICAL_RECORDS: surgicalMeta },
     };
+    applyWithheldPayloadGuard(data as unknown as Record<string, unknown>);
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     return newRecords.length;
   }
 
   const raw = fs.readFileSync(filePath, 'utf8');
   const parsed = JSON.parse(raw) as SurgicalJson;
+  // Force withheld facility panels empty so stale RMW copies cannot survive.
+  parsed.SURGICAL_FACILITIES = [];
 
   // Remove old Power BI records, keep records from other sources
-  const otherRecords = parsed.SURGICAL_RECORDS.filter(
+  const otherRecords = (parsed.SURGICAL_RECORDS ?? []).filter(
     (r) => r.source_name !== 'Alberta Health System Dashboard (Power BI)',
   );
 
@@ -531,6 +535,7 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], pe
   parsed._dataMetadata = mergeDataMetadata(parsed._dataMetadata, {
     SURGICAL_RECORDS: surgicalMeta,
   });
+  applyWithheldPayloadGuard(parsed as unknown as Record<string, unknown>);
   fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2));
   return newRecords.length;
 }

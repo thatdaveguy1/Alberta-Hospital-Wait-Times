@@ -16,14 +16,15 @@
 // registered persons per FTE) where available:
 //   services / (FTE physicians × registered persons per FTE).
 // Pathology and Radiology are excluded from Table 2.14 by the source, so
-// their `servicesPerPatient` is set to 0 with a verification note.
+// their `servicesPerPatient` is null (never zero-filled as measured).
 
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 
 const SPENDING_FILE = path.join(process.cwd(), 'data-spending.json');
 const RATE_LIMIT_MS = 2000;
@@ -332,13 +333,14 @@ function buildRecords(
     const servicesPerPatient =
       registered && registered > 0
         ? Math.round((serviceCount / registered) * 100) / 100
-        : 0;
+        : null;
     records.push({
       specialtyGroup: displayLabel(key),
       physicianCount,
       totalPaymentsMillions: Math.round((totalPayments / 1_000_000) * 10) / 10,
       averagePaymentGross,
-      servicesPerPatient,
+      // Cast: interface still types number; runtime null marks unavailable.
+      servicesPerPatient: servicesPerPatient as unknown as number,
     });
   }
   // Sort by total payments descending so the most material specialties lead.
@@ -415,11 +417,13 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // Merge into data-spending.json, preserving all other arrays. Stamp
+    // Merge into data-spending.json, preserving measured arrays. Stamp
     // _dataMetadata for PHYSICIAN_SPECIALTY_BILLING; sibling entries (e.g.
-    // NATIONAL_SPENDING_COMPARE, HOSPITAL_EFFICIENCY_TREND) are preserved
-    // via mergeDataMetadata.
+    // NATIONAL_SPENDING_COMPARE) are preserved via mergeDataMetadata.
+    // HOSPITAL_EFFICIENCY_TREND is withheld and forced empty on write.
     const existingJson = loadJsonFile(SPENDING_FILE);
+    // Never reintroduce scrubbed hospital-efficiency estimates via RMW.
+    existingJson.HOSPITAL_EFFICIENCY_TREND = [];
     const ownedMetadata: DataMetadata = {
       PHYSICIAN_SPECIALTY_BILLING: buildMetadataEntry({
         updateType: 'auto',
@@ -427,17 +431,19 @@ export async function run(): Promise<SyncResult> {
         sourceVintage: 'AHCIP Statistical Supplement — latest release (Tables 2.3, 2.12 A/B/D, 2.14)',
         lastUpdated: timestamp,
         verification:
-          'Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons, with registered persons derived from Table 2.14 FTE counts. Pathology and Radiology have no Table 2.14 entry, so their servicesPerPatient is 0.',
+          'Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons from Table 2.14 when present; otherwise null (Pathology/Radiology excluded by source — never zero-filled).',
       }),
     };
     const merged = {
       ...existingJson,
       PHYSICIAN_SPECIALTY_BILLING: records,
+      HOSPITAL_EFFICIENCY_TREND: [],
       _dataMetadata: mergeDataMetadata(
         existingJson._dataMetadata as DataMetadata | undefined,
         ownedMetadata,
       ),
     };
+    applyWithheldPayloadGuard(merged);
     fs.writeFileSync(SPENDING_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
 
     console.log(

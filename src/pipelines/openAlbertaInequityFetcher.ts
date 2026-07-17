@@ -2,15 +2,12 @@
 // Downloads LGA-level community profile XLSX tables published on Open Alberta
 // (Table 10.1 Community Need + Figure 4.2 Chronic Disease) and pivots them into
 // the COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, and ED_RELIANCE_METRICS
-// datasets, merging into data-regional-inequity.json while preserving the
-// TRAVEL_FOR_CARE and SERVICE_ACCESS_METRICS arrays.
+// datasets in data-regional-inequity.json.
 //
-// The Open Alberta workbooks are published in a tidy/long layout (one row per
-// LGA × indicator), so the parser pivots by LOCAL_NAME and extracts the LGA
-// Value for each indicator of interest. Indicators not present in the source
-// (e.g. medianHouseholdIncome, highSchoolGradPct, infantMortalityPer1000) are
-// preserved from the existing curated record for that LGA so a refresh never
-// clobbers hand-curated fields with zeros. All failures are caught and
+// Fail-closed: only fields present in the upstream workbooks are written.
+// Missing indicators stay 0/absent — never backfilled from hand-curated arrays.
+// TRAVEL_FOR_CARE and SERVICE_ACCESS_METRICS are never fabricated here; if the
+// file already has empty arrays they remain empty. All failures are caught and
 // returned as SyncResult — run() never throws.
 
 import axios from 'axios';
@@ -18,7 +15,7 @@ import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { applyWithheldPayloadGuard, buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 import type {
   CommunityNeedMetric,
   ChronicDiseaseBurden,
@@ -390,43 +387,13 @@ function asRecordArray<T>(value: unknown): T[] {
   return value.filter((v): v is T => typeof v === 'object' && v !== null) as T[];
 }
 
-// Merge new records into an existing array keyed by lgaName. Existing records
-// supply defaults for fields the source does not provide (medianHouseholdIncome,
-// highSchoolGradPct, infantMortalityPer1000, totalEdVisitsPer1000, etc.), and
-// the new record's defined fields override them. LGAs only in the existing
-// array are preserved; LGAs only in the new data are appended.
-function mergeByLga<T extends { lgaName: string }>(
-  existing: T[],
-  fresh: T[],
-): T[] {
-  const byName = new Map<string, T>();
-  for (const rec of existing) byName.set(rec.lgaName, rec);
-  for (const rec of fresh) {
-    const prev = byName.get(rec.lgaName);
-    if (!prev) {
-      byName.set(rec.lgaName, rec);
-      continue;
-    }
-    const merged: Record<string, unknown> = { ...prev };
-    for (const [key, value] of Object.entries(rec)) {
-      if (value === undefined || value === null) continue;
-      if (typeof value === 'number' && !Number.isFinite(value)) continue;
-      merged[key] = value;
-    }
-    byName.set(rec.lgaName, merged as unknown as T);
-  }
-  return Array.from(byName.values());
-}
+// Fresh upstream records only — LGAs not present in the source are dropped.
 
-// Build COMMUNITY_NEED_PROFILES records from the pivoted Table 10.1 data,
-// preserving zone/type/income/graduation from existing records when present.
+// Build COMMUNITY_NEED_PROFILES from pivoted Table 10.1 only.
 function buildCommunityNeed(
   pivoted: Map<string, PivotedLga>,
-  existing: CommunityNeedMetric[],
   populationByLga?: Map<string, number>,
 ): CommunityNeedMetric[] {
-  const existingByName = new Map<string, CommunityNeedMetric>();
-  for (const rec of existing) existingByName.set(rec.lgaName, rec);
   const out: CommunityNeedMetric[] = [];
   for (const [, entry] of pivoted) {
     const { lgaName, indicators } = entry;
@@ -439,34 +406,29 @@ function buildCommunityNeed(
     if (fpPer1000 === undefined && travelPct === undefined && acsc === undefined && deprivation === undefined) {
       continue;
     }
-    const prev = existingByName.get(lgaName);
-    const physiciansPer100k = fpPer1000 !== undefined ? fpPer1000 * 100 : prev?.physiciansPer100k ?? 0;
     out.push({
       lgaName,
-      zone: prev?.zone ?? deriveZone(lgaName),
-      type: prev?.type ?? deriveType(lgaName),
-      physiciansPer100k,
-      claimsOutsideLgaPct: travelPct ?? prev?.claimsOutsideLgaPct ?? 0,
-      acscRatePer100k: acsc ?? prev?.acscRatePer100k ?? 0,
-      deprivationIndex: deprivation ?? prev?.deprivationIndex ?? 0,
-      medianHouseholdIncome: prev?.medianHouseholdIncome ?? 0,
-      highSchoolGradPct: prev?.highSchoolGradPct ?? 0,
-      population: populationByLga?.get(lgaName) ?? prev?.population,
+      zone: deriveZone(lgaName),
+      type: deriveType(lgaName),
+      physiciansPer100k: fpPer1000 !== undefined ? fpPer1000 * 100 : 0,
+      claimsOutsideLgaPct: travelPct ?? 0,
+      acscRatePer100k: acsc ?? 0,
+      deprivationIndex: deprivation ?? 0,
+      // Not published in Table 10.1 — leave zero; UI must not invent values.
+      medianHouseholdIncome: 0,
+      highSchoolGradPct: 0,
+      population: populationByLga?.get(lgaName),
     });
   }
   return out;
 }
 
-// Build CHRONIC_DISEASE_BURDEN records from Figure 4.2 + the life-expectancy
-// indicator in Table 10.1. infantMortalityPer1000 is preserved from existing.
+// Build CHRONIC_DISEASE_BURDEN from Figure 4.2 + life expectancy in Table 10.1.
+// infantMortalityPer1000 is not in source → 0.
 function buildChronicDisease(
   chronicPivoted: Map<string, PivotedLga>,
   needPivoted: Map<string, PivotedLga>,
-  existing: ChronicDiseaseBurden[],
 ): ChronicDiseaseBurden[] {
-  const existingByName = new Map<string, ChronicDiseaseBurden>();
-  for (const rec of existing) existingByName.set(rec.lgaName, rec);
-  // Collect every LGA name appearing in either source.
   const lgaNames = new Set<string>();
   for (const name of chronicPivoted.keys()) lgaNames.add(name);
   for (const name of needPivoted.keys()) lgaNames.add(name);
@@ -478,42 +440,36 @@ function buildChronicDisease(
     const copd = chronic ? pickIndicator(chronic, [INDICATOR_COPD]) : undefined;
     const hypertension = chronic ? pickIndicator(chronic, [INDICATOR_HYPERTENSION]) : undefined;
     const lifeExp = need ? pickIndicator(need, [INDICATOR_LIFE_EXPECTANCY]) : undefined;
-    // Only emit if at least one chronic-disease or life-expectancy value exists.
     if (diabetes === undefined && copd === undefined && hypertension === undefined && lifeExp === undefined) {
       continue;
     }
-    const prev = existingByName.get(lgaName);
     out.push({
       lgaName,
-      diabetesPrevalencePct: diabetes ?? prev?.diabetesPrevalencePct ?? 0,
-      copdPrevalencePct: copd ?? prev?.copdPrevalencePct ?? 0,
-      hypertensionPrevalencePct: hypertension ?? prev?.hypertensionPrevalencePct ?? 0,
-      infantMortalityPer1000: prev?.infantMortalityPer1000 ?? 0,
-      lifeExpectancyYears: lifeExp ?? prev?.lifeExpectancyYears ?? 0,
+      diabetesPrevalencePct: diabetes ?? 0,
+      copdPrevalencePct: copd ?? 0,
+      hypertensionPrevalencePct: hypertension ?? 0,
+      infantMortalityPer1000: 0,
+      lifeExpectancyYears: lifeExp ?? 0,
     });
   }
   return out;
 }
 
-// Build ED_RELIANCE_METRICS from the mood/anxiety ED-visit indicator in
-// Table 10.1. The other ED-reliance fields are preserved from existing.
+// Build ED_RELIANCE_METRICS from mood/anxiety only. Other ED fields are not in
+// Open Alberta → 0 until a real source lands.
 function buildEdReliance(
   needPivoted: Map<string, PivotedLga>,
-  existing: EDRelianceMetric[],
 ): EDRelianceMetric[] {
-  const existingByName = new Map<string, EDRelianceMetric>();
-  for (const rec of existing) existingByName.set(rec.lgaName, rec);
   const out: EDRelianceMetric[] = [];
   for (const [, entry] of needPivoted) {
     const { lgaName, indicators } = entry;
     const moodAnxiety = pickIndicator(indicators, [INDICATOR_MOOD_ANXIETY]);
     if (moodAnxiety === undefined) continue;
-    const prev = existingByName.get(lgaName);
     out.push({
       lgaName,
-      totalEdVisitsPer1000: prev?.totalEdVisitsPer1000 ?? 0,
-      lowAcuityCtas45Pct: prev?.lowAcuityCtas45Pct ?? 0,
-      afterHoursEdPct: prev?.afterHoursEdPct ?? 0,
+      totalEdVisitsPer1000: 0,
+      lowAcuityCtas45Pct: 0,
+      afterHoursEdPct: 0,
       moodAnxietyEdRatePer100k: moodAnxiety,
     });
   }
@@ -679,15 +635,10 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // 5. Load existing JSON so we can preserve curated fields and other arrays.
-    const existingJson = loadJsonFile(INEQUITY_FILE);
-    const existingCommunityNeed = asRecordArray<CommunityNeedMetric>(existingJson['COMMUNITY_NEED_PROFILES']);
-    const existingChronicDisease = asRecordArray<ChronicDiseaseBurden>(existingJson['CHRONIC_DISEASE_BURDEN']);
-    const existingEdReliance = asRecordArray<EDRelianceMetric>(existingJson['ED_RELIANCE_METRICS']);
-
-    const freshCommunityNeed = buildCommunityNeed(needPivoted, existingCommunityNeed, populationByLga);
-    const freshChronicDisease = buildChronicDisease(chronicPivoted, needPivoted, existingChronicDisease);
-    const freshEdReliance = buildEdReliance(needPivoted, existingEdReliance);
+    // 5. Build fresh records from upstream only (no hand-authored merge).
+    const freshCommunityNeed = buildCommunityNeed(needPivoted, populationByLga);
+    const freshChronicDisease = buildChronicDisease(chronicPivoted, needPivoted);
+    const freshEdReliance = buildEdReliance(needPivoted);
 
     const recordsFetched =
       freshCommunityNeed.length + freshChronicDisease.length + freshEdReliance.length;
@@ -706,26 +657,10 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // 6. Per-LGA merge: preserve existing fields the source cannot supply, and
-    // preserve TRAVEL_FOR_CARE / SERVICE_ACCESS_METRICS untouched.
-    const mergedCommunityNeed = mergeByLga(existingCommunityNeed, freshCommunityNeed);
-    const mergedChronicDisease = mergeByLga(existingChronicDisease, freshChronicDisease);
-    const mergedEdReliance = mergeByLga(existingEdReliance, freshEdReliance);
+    // 6. Write only arrays this fetcher can populate. Clear travel/access so
+    // partial runs never re-stamp fabricated leave-behinds as current.
+    const existingJson = loadJsonFile(INEQUITY_FILE);
 
-    const merged: LoadedJson = {
-      COMMUNITY_NEED_PROFILES: mergedCommunityNeed,
-      CHRONIC_DISEASE_BURDEN: mergedChronicDisease,
-      ED_RELIANCE_METRICS: mergedEdReliance,
-    };
-    // Preserve any other arrays already in the file (TRAVEL_FOR_CARE,
-    // SERVICE_ACCESS_METRICS, and anything added later).
-    for (const [key, value] of Object.entries(existingJson)) {
-      if (merged[key] === undefined) merged[key] = value;
-    }
-
-    // Refresh _dataMetadata for the three arrays this fetcher owns; preserve
-    // any sibling entries (e.g. TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS) via
-    // mergeDataMetadata so a read-modify-write never strips them.
     const ownedMetadata: DataMetadata = {
       COMMUNITY_NEED_PROFILES: buildMetadataEntry({
         updateType: 'auto',
@@ -745,16 +680,37 @@ export async function run(): Promise<SyncResult> {
         sourceVintage: 'Latest Open Alberta Table 10.1 release',
         lastUpdated: timestamp,
       }),
+      TRAVEL_FOR_CARE: buildMetadataEntry({
+        updateType: 'manual',
+        source: 'No public LGA travel-for-care feed',
+        sourceVintage: 'Unavailable',
+        lastUpdated: timestamp,
+        verification: 'Array intentionally empty; no automated upstream. Do not treat as scraped.',
+      }),
+      SERVICE_ACCESS_METRICS: buildMetadataEntry({
+        updateType: 'manual',
+        source: 'No public LGA service-access feed',
+        sourceVintage: 'Unavailable',
+        lastUpdated: timestamp,
+        verification: 'Array intentionally empty; no automated upstream. Do not treat as scraped.',
+      }),
     };
-    merged._dataMetadata = mergeDataMetadata(
-      existingJson['_dataMetadata'] as DataMetadata | undefined,
-      ownedMetadata,
-    );
+
+    const merged: LoadedJson = {
+      COMMUNITY_NEED_PROFILES: freshCommunityNeed,
+      CHRONIC_DISEASE_BURDEN: freshChronicDisease,
+      ED_RELIANCE_METRICS: freshEdReliance,
+      TRAVEL_FOR_CARE: [],
+      SERVICE_ACCESS_METRICS: [],
+      _dataMetadata: mergeDataMetadata(
+        existingJson['_dataMetadata'] as DataMetadata | undefined,
+        ownedMetadata,
+      ),
+    };
 
     fs.writeFileSync(INEQUITY_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
     const recordsWritten =
-      mergedCommunityNeed.length + mergedChronicDisease.length + mergedEdReliance.length;
-
+      freshCommunityNeed.length + freshChronicDisease.length + freshEdReliance.length;
     const status: SyncResult['status'] = recordsWritten > 0 ? 'success' : 'skipped';
     console.log(
       `[OpenAlbertaInequity] Complete. fetched=${recordsFetched} written=${recordsWritten} in ${Date.now() - startTime}ms`,
@@ -884,6 +840,7 @@ export async function runPrimaryCare(): Promise<SyncResult> {
       ownedMetadata,
     );
 
+    applyWithheldPayloadGuard(merged);
     fs.writeFileSync(PRIMARY_CARE_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
 
     console.log(

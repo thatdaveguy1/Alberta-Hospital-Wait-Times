@@ -58,13 +58,12 @@ import * as regionalInequityData from '../regionalInequityData';
 import { DataTimestamp } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
-
 type RegionalInequityData = {
   COMMUNITY_NEED_PROFILES: CommunityNeedMetric[];
   CHRONIC_DISEASE_BURDEN: ChronicDiseaseBurden[];
   ED_RELIANCE_METRICS: EDRelianceMetric[];
-  TRAVEL_FOR_CARE: TravelForCare[];
-  SERVICE_ACCESS_METRICS: ServiceAccessMetric[];
+  TRAVEL_FOR_CARE?: TravelForCare[];
+  SERVICE_ACCESS_METRICS?: ServiceAccessMetric[];
 };
 
 const defaultNeed: CommunityNeedMetric = {
@@ -111,177 +110,47 @@ const defaultAccess: ServiceAccessMetric = {
   distanceToNearestImagingKm: 0,
   providersAcceptingPatients: 0
 };
+
+/** Treat 0 / null / undefined / NaN as missing for fail-closed display. */
+function hasMetric(value: number | null | undefined): value is number {
+  return typeof value === 'number' && !Number.isNaN(value) && value !== 0;
+}
+
+function formatMetric(
+  value: number | null | undefined,
+  opts?: { digits?: number; suffix?: string; prefix?: string },
+): string {
+  if (!hasMetric(value)) return 'N/A';
+  const digits = opts?.digits ?? 1;
+  const body = Number.isInteger(value) && digits === 0
+    ? String(value)
+    : value.toFixed(digits);
+  return `${opts?.prefix ?? ''}${body}${opts?.suffix ?? ''}`;
+}
+
 export default function RegionalInequityDashboard() {
-  // Live data fetched from /api/data/regional-inequity
+  // Live data fetched from /api/data/regional-inequity — no client-side estimation.
   const { data, metadata, isLoading, error, refresh } = useDomainData<RegionalInequityData>('regional-inequity', regionalInequityData);
-  const rawCommunityNeedProfiles = data?.COMMUNITY_NEED_PROFILES ?? [];
 
-  const COMMUNITY_NEED_PROFILES = useMemo(() => {
-    return rawCommunityNeedProfiles.map(p => {
-      const needsClaimsEstimation = !p.claimsOutsideLgaPct || p.claimsOutsideLgaPct === 0;
-      const needsGradEstimation = !p.highSchoolGradPct || p.highSchoolGradPct === 0;
-      const needsIncomeEstimation = !p.medianHouseholdIncome || p.medianHouseholdIncome === 0;
-      
-      if (needsClaimsEstimation || needsGradEstimation || needsIncomeEstimation) {
-        const baseClaims = {
-          'Urban Hub': 25.0,
-          'Suburban': 40.0,
-          'Rural': 60.0,
-          'Remote / Indigenous': 80.0
-        }[p.type] || 45.0;
-        const physRatio = (p.physiciansPer100k || 115) / 115;
-        const adjustedClaims = baseClaims + (1 - physRatio) * 20;
-        const claimsOutsideLgaPct = needsClaimsEstimation 
-          ? parseFloat(Math.max(10, Math.min(95, adjustedClaims)).toFixed(1))
-          : p.claimsOutsideLgaPct;
+  // Pass through only upstream-mapped arrays. Never invent claims/income/education/ED/travel/access values.
+  const COMMUNITY_NEED_PROFILES = data?.COMMUNITY_NEED_PROFILES ?? [];
+  const CHRONIC_DISEASE_BURDEN = data?.CHRONIC_DISEASE_BURDEN ?? [];
+  const ED_RELIANCE_METRICS = data?.ED_RELIANCE_METRICS ?? [];
+  // Travel / service-access stay empty until a real upstream writer exists.
+  const TRAVEL_FOR_CARE = data?.TRAVEL_FOR_CARE ?? [];
+  const SERVICE_ACCESS_METRICS = data?.SERVICE_ACCESS_METRICS ?? [];
+  const hasTravelAccessData = TRAVEL_FOR_CARE.length > 0 && SERVICE_ACCESS_METRICS.length > 0;
 
-        const baseGrad = {
-          'Urban Hub': 92.5,
-          'Suburban': 88.0,
-          'Rural': 78.5,
-          'Remote / Indigenous': 65.0
-        }[p.type] || 82.0;
-        const dev = (p.deprivationIndex || 7.3) - 7.3;
-        const adjustedGrad = baseGrad - (dev * 1.5);
-        const highSchoolGradPct = needsGradEstimation
-          ? parseFloat(Math.max(55, Math.min(98, adjustedGrad)).toFixed(1))
-          : p.highSchoolGradPct;
-
-        const baseIncome = {
-          'Urban Hub': 90000,
-          'Suburban': 95000,
-          'Rural': 75000,
-          'Remote / Indigenous': 60000
-        }[p.type] || 80000;
-        const adjustedIncome = baseIncome - (dev * 3000);
-        const medianHouseholdIncome = needsIncomeEstimation
-          ? Math.round(Math.max(45000, Math.min(130000, adjustedIncome)) / 100) * 100
-          : p.medianHouseholdIncome;
-
-        return {
-          ...p,
-          claimsOutsideLgaPct,
-          highSchoolGradPct,
-          medianHouseholdIncome
-        };
-      }
-      return p;
-    });
-  }, [rawCommunityNeedProfiles]);
-
-  const CHRONIC_DISEASE_BURDEN = useMemo(() => {
-    const raw = data?.CHRONIC_DISEASE_BURDEN ?? [];
-    return raw.map(d => {
-      const needsEstimation = !d.diabetesPrevalencePct || d.diabetesPrevalencePct === 0;
-      if (needsEstimation) {
-        const need = COMMUNITY_NEED_PROFILES.find(p => p.lgaName === d.lgaName);
-        const dev = ((need?.deprivationIndex || 7.3) - 7.3);
-        
-        const baseType = need?.type || 'Urban Hub';
-        const baseDiabetes = { 'Urban Hub': 5.8, 'Suburban': 6.8, 'Rural': 8.8, 'Remote / Indigenous': 11.8 }[baseType];
-        const baseCopd = { 'Urban Hub': 2.2, 'Suburban': 3.2, 'Rural': 5.2, 'Remote / Indigenous': 7.8 }[baseType];
-        const baseHypertension = { 'Urban Hub': 17.5, 'Suburban': 20.5, 'Rural': 24.5, 'Remote / Indigenous': 29.5 }[baseType];
-        const baseInfant = { 'Urban Hub': 2.8, 'Suburban': 3.8, 'Rural': 5.2, 'Remote / Indigenous': 7.8 }[baseType];
-
-        return {
-          ...d,
-          diabetesPrevalencePct: parseFloat(Math.max(3.0, Math.min(18.0, baseDiabetes + dev * 0.8)).toFixed(1)),
-          copdPrevalencePct: parseFloat(Math.max(1.0, Math.min(12.0, baseCopd + dev * 0.5)).toFixed(1)),
-          hypertensionPrevalencePct: parseFloat(Math.max(10.0, Math.min(45.0, baseHypertension + dev * 1.5)).toFixed(1)),
-          infantMortalityPer1000: parseFloat(Math.max(1.0, Math.min(12.0, baseInfant + dev * 0.6)).toFixed(1)),
-        };
-      }
-      return d;
-    });
-  }, [data?.CHRONIC_DISEASE_BURDEN, COMMUNITY_NEED_PROFILES]);
-
-  const ED_RELIANCE_METRICS = useMemo(() => {
-    const raw = data?.ED_RELIANCE_METRICS ?? [];
-    return raw.map(e => {
-      const needsEstimation = !e.totalEdVisitsPer1000 || e.totalEdVisitsPer1000 === 0;
-      if (needsEstimation) {
-        const need = COMMUNITY_NEED_PROFILES.find(p => p.lgaName === e.lgaName);
-        const dev = ((need?.deprivationIndex || 7.3) - 7.3);
-        
-        const baseType = need?.type || 'Urban Hub';
-        const baseEdVisits = { 'Urban Hub': 180, 'Suburban': 280, 'Rural': 550, 'Remote / Indigenous': 850 }[baseType];
-        const baseLowAcuity = { 'Urban Hub': 30.0, 'Suburban': 42.0, 'Rural': 58.0, 'Remote / Indigenous': 72.0 }[baseType];
-        const baseAfterHours = { 'Urban Hub': 35.0, 'Suburban': 48.0, 'Rural': 56.0, 'Remote / Indigenous': 65.0 }[baseType];
-
-        return {
-          ...e,
-          totalEdVisitsPer1000: Math.round(Math.max(80, Math.min(1200, baseEdVisits + dev * 40))),
-          lowAcuityCtas45Pct: parseFloat(Math.max(15.0, Math.min(90.0, baseLowAcuity + dev * 2.5)).toFixed(1)),
-          afterHoursEdPct: parseFloat(Math.max(20.0, Math.min(85.0, baseAfterHours + dev * 1.5)).toFixed(1)),
-        };
-      }
-      return e;
-    });
-  }, [data?.ED_RELIANCE_METRICS, COMMUNITY_NEED_PROFILES]);
-
-  const TRAVEL_FOR_CARE = useMemo(() => {
-    return COMMUNITY_NEED_PROFILES.map(p => {
-      const curated = (data?.TRAVEL_FOR_CARE ?? []).find(t => t.lgaName === p.lgaName);
-      if (curated) return curated;
-      
-      const careDeliveredOutsideLgaPct = p.claimsOutsideLgaPct;
-      const baseDist = { 'Urban Hub': 8.5, 'Suburban': 15.0, 'Rural': 55.0, 'Remote / Indigenous': 180.0 }[p.type] || 25.0;
-      const baseLeak = { 'Urban Hub': 15.0, 'Suburban': 28.0, 'Rural': 52.0, 'Remote / Indigenous': 78.0 }[p.type] || 35.0;
-      
-      const dev = (p.deprivationIndex - 7.3);
-      const avgTravelDistanceKm = parseFloat(Math.max(2.0, Math.min(450.0, baseDist + dev * 5.0)).toFixed(1));
-      const localBedLeakagePct = parseFloat(Math.max(5.0, Math.min(95.0, baseLeak + dev * 2.0)).toFixed(1));
-      
-      const topDestinationFacility = {
-        'North Zone': 'Northern Lights Regional Health Centre',
-        'Edmonton Zone': 'Royal Alexandra Hospital',
-        'Central Zone': 'Red Deer Regional Hospital',
-        'Calgary Zone': 'Foothills Medical Centre',
-        'South Zone': 'Chinook Regional Hospital (Lethbridge)'
-      }[p.zone] || 'Chinook Regional Hospital (Lethbridge)';
-
-      return {
-        lgaName: p.lgaName,
-        careDeliveredOutsideLgaPct,
-        topDestinationFacility,
-        avgTravelDistanceKm,
-        localBedLeakagePct
-      };
-    });
-  }, [data?.TRAVEL_FOR_CARE, COMMUNITY_NEED_PROFILES]);
-
-  const SERVICE_ACCESS_METRICS = useMemo(() => {
-    return COMMUNITY_NEED_PROFILES.map(p => {
-      const curated = (data?.SERVICE_ACCESS_METRICS ?? []).find(s => s.lgaName === p.lgaName);
-      if (curated) return curated;
-      
-      const baseFacs = { 'Urban Hub': 12.0, 'Suburban': 8.0, 'Rural': 2.8, 'Remote / Indigenous': 0.8 }[p.type] || 4.0;
-      const baseEdDist = { 'Urban Hub': 3.5, 'Suburban': 8.0, 'Rural': 35.0, 'Remote / Indigenous': 120.0 }[p.type] || 15.0;
-      const baseImgDist = { 'Urban Hub': 2.8, 'Suburban': 6.0, 'Rural': 32.0, 'Remote / Indigenous': 120.0 }[p.type] || 12.0;
-      const baseAccepting = { 'Urban Hub': 8, 'Suburban': 4, 'Rural': 1, 'Remote / Indigenous': 0 }[p.type] || 2;
-
-      const dev = (p.deprivationIndex - 7.3);
-      const facilitiesPer10k = parseFloat(Math.max(0.1, Math.min(25.0, baseFacs - dev * 0.5)).toFixed(2));
-      const distanceToNearestEdKm = parseFloat(Math.max(1.0, Math.min(300.0, baseEdDist + dev * 2.0)).toFixed(1));
-      const distanceToNearestImagingKm = parseFloat(Math.max(1.0, Math.min(300.0, baseImgDist + dev * 2.0)).toFixed(1));
-      
-      const physRatio = p.physiciansPer100k / 115;
-      const providersAcceptingPatients = Math.round(Math.max(0, Math.min(25, baseAccepting * physRatio)));
-
-      return {
-        lgaName: p.lgaName,
-        facilitiesPer10k,
-        distanceToNearestEdKm,
-        distanceToNearestImagingKm,
-        providersAcceptingPatients
-      };
-    });
-  }, [data?.SERVICE_ACCESS_METRICS, COMMUNITY_NEED_PROFILES]);
-
-  // ----------------------------------------------------------------------------
-  // PROVINCIAL BENCHMARKS (DYNAMICALLY CALCULATED FROM THE 5 REPRESENTATIVE LGAs)
-  // ----------------------------------------------------------------------------
+  // Provincial means are computed only from non-zero upstream values so zero-padded
+  // "not published" fields never look like a real provincial average of zero.
   const PROVINCIAL_BENCHMARKS = useMemo(() => {
+    const mean = (vals: number[], digits = 1): number => {
+      const usable = vals.filter((v) => typeof v === 'number' && !Number.isNaN(v) && v !== 0);
+      if (usable.length === 0) return 0;
+      const avg = usable.reduce((a, b) => a + b, 0) / usable.length;
+      const factor = 10 ** digits;
+      return Math.round(avg * factor) / factor;
+    };
     if (COMMUNITY_NEED_PROFILES.length === 0) {
       return {
         medianHouseholdIncome: 0, physiciansPer100k: 0, claimsOutsideLgaPct: 0, acscRatePer100k: 0,
@@ -292,34 +161,34 @@ export default function RegionalInequityDashboard() {
         facilitiesPer10k: 0, distanceToNearestEdKm: 0, distanceToNearestImagingKm: 0, providersAcceptingPatients: 0,
       };
     }
-    const n = COMMUNITY_NEED_PROFILES.length;
     return {
-      medianHouseholdIncome: Math.round(COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.medianHouseholdIncome, 0) / n),
-      physiciansPer100k: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.physiciansPer100k, 0) / n).toFixed(1)),
-      claimsOutsideLgaPct: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.claimsOutsideLgaPct, 0) / n).toFixed(1)),
-      acscRatePer100k: Math.round(COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.acscRatePer100k, 0) / n),
-      highSchoolGradPct: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.highSchoolGradPct, 0) / n).toFixed(1)),
-      deprivationIndex: parseFloat((COMMUNITY_NEED_PROFILES.reduce((acc, p) => acc + p.deprivationIndex, 0) / n).toFixed(1)),
+      // Income / education are not published in Table 10.1 — stay 0 unless a real feed lands.
+      medianHouseholdIncome: mean(COMMUNITY_NEED_PROFILES.map((p) => p.medianHouseholdIncome), 0),
+      physiciansPer100k: mean(COMMUNITY_NEED_PROFILES.map((p) => p.physiciansPer100k), 1),
+      claimsOutsideLgaPct: mean(COMMUNITY_NEED_PROFILES.map((p) => p.claimsOutsideLgaPct), 1),
+      acscRatePer100k: mean(COMMUNITY_NEED_PROFILES.map((p) => p.acscRatePer100k), 0),
+      highSchoolGradPct: mean(COMMUNITY_NEED_PROFILES.map((p) => p.highSchoolGradPct), 1),
+      deprivationIndex: mean(COMMUNITY_NEED_PROFILES.map((p) => p.deprivationIndex), 1),
 
-      diabetesPrevalencePct: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.diabetesPrevalencePct, 0) / n).toFixed(2)),
-      copdPrevalencePct: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.copdPrevalencePct, 0) / n).toFixed(2)),
-      hypertensionPrevalencePct: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.hypertensionPrevalencePct, 0) / n).toFixed(2)),
-      infantMortalityPer1000: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.infantMortalityPer1000, 0) / n).toFixed(2)),
-      lifeExpectancyYears: parseFloat((CHRONIC_DISEASE_BURDEN.reduce((acc, d) => acc + d.lifeExpectancyYears, 0) / n).toFixed(1)),
+      diabetesPrevalencePct: mean(CHRONIC_DISEASE_BURDEN.map((d) => d.diabetesPrevalencePct), 2),
+      copdPrevalencePct: mean(CHRONIC_DISEASE_BURDEN.map((d) => d.copdPrevalencePct), 2),
+      hypertensionPrevalencePct: mean(CHRONIC_DISEASE_BURDEN.map((d) => d.hypertensionPrevalencePct), 2),
+      infantMortalityPer1000: mean(CHRONIC_DISEASE_BURDEN.map((d) => d.infantMortalityPer1000), 2),
+      lifeExpectancyYears: mean(CHRONIC_DISEASE_BURDEN.map((d) => d.lifeExpectancyYears), 1),
 
-      totalEdVisitsPer1000: Math.round(ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.totalEdVisitsPer1000, 0) / n),
-      lowAcuityCtas45Pct: parseFloat((ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.lowAcuityCtas45Pct, 0) / n).toFixed(1)),
-      afterHoursEdPct: parseFloat((ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.afterHoursEdPct, 0) / n).toFixed(1)),
-      moodAnxietyEdRatePer100k: Math.round(ED_RELIANCE_METRICS.reduce((acc, e) => acc + e.moodAnxietyEdRatePer100k, 0) / n),
+      totalEdVisitsPer1000: mean(ED_RELIANCE_METRICS.map((e) => e.totalEdVisitsPer1000), 0),
+      lowAcuityCtas45Pct: mean(ED_RELIANCE_METRICS.map((e) => e.lowAcuityCtas45Pct), 1),
+      afterHoursEdPct: mean(ED_RELIANCE_METRICS.map((e) => e.afterHoursEdPct), 1),
+      moodAnxietyEdRatePer100k: mean(ED_RELIANCE_METRICS.map((e) => e.moodAnxietyEdRatePer100k), 0),
 
-      careDeliveredOutsideLgaPct: parseFloat((TRAVEL_FOR_CARE.reduce((acc, t) => acc + t.careDeliveredOutsideLgaPct, 0) / n).toFixed(1)),
-      avgTravelDistanceKm: parseFloat((TRAVEL_FOR_CARE.reduce((acc, t) => acc + t.avgTravelDistanceKm, 0) / n).toFixed(1)),
-      localBedLeakagePct: parseFloat((TRAVEL_FOR_CARE.reduce((acc, t) => acc + t.localBedLeakagePct, 0) / n).toFixed(1)),
+      careDeliveredOutsideLgaPct: mean(TRAVEL_FOR_CARE.map((t) => t.careDeliveredOutsideLgaPct), 1),
+      avgTravelDistanceKm: mean(TRAVEL_FOR_CARE.map((t) => t.avgTravelDistanceKm), 1),
+      localBedLeakagePct: mean(TRAVEL_FOR_CARE.map((t) => t.localBedLeakagePct), 1),
 
-      facilitiesPer10k: parseFloat((SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.facilitiesPer10k, 0) / n).toFixed(2)),
-      distanceToNearestEdKm: parseFloat((SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.distanceToNearestEdKm, 0) / n).toFixed(1)),
-      distanceToNearestImagingKm: parseFloat((SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.distanceToNearestImagingKm, 0) / n).toFixed(1)),
-      providersAcceptingPatients: Math.round(SERVICE_ACCESS_METRICS.reduce((acc, s) => acc + s.providersAcceptingPatients, 0) / n)
+      facilitiesPer10k: mean(SERVICE_ACCESS_METRICS.map((s) => s.facilitiesPer10k), 2),
+      distanceToNearestEdKm: mean(SERVICE_ACCESS_METRICS.map((s) => s.distanceToNearestEdKm), 1),
+      distanceToNearestImagingKm: mean(SERVICE_ACCESS_METRICS.map((s) => s.distanceToNearestImagingKm), 1),
+      providersAcceptingPatients: mean(SERVICE_ACCESS_METRICS.map((s) => s.providersAcceptingPatients), 0),
     };
   }, [COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, ED_RELIANCE_METRICS, TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS]);
   const [activeSubTab, setActiveSubTab] = useState<'lga-needs' | 'disease-burden' | 'ed-reliance' | 'access-travel' | 'compare-matrix' | 'data-explorer'>('lga-needs');
@@ -449,73 +318,82 @@ export default function RegionalInequityDashboard() {
     }
   }, [comparisonTarget, PROVINCIAL_BENCHMARKS, COMMUNITY_NEED_PROFILES, CHRONIC_DISEASE_BURDEN, ED_RELIANCE_METRICS, TRAVEL_FOR_CARE, SERVICE_ACCESS_METRICS]);
 
-  // Normalized Radar Chart Data
+  // Radar scores use only non-zero upstream values, scaled against the max among
+  // currently loaded LGAs (no hardcoded provincial standards or invented anchors).
   const radarChartData = useMemo(() => {
-    // Normalization Helpers (0 - 100 score, higher is better)
-    // 1. Doctor Density: Physicians per 100k relative to maximum (168.4)
-    const normalizePhysicians = (val: number) => {
-      if (val === undefined || isNaN(val)) return 0;
-      return Math.round((val / 168.4) * 100);
-    };
-    
-    // 2. Economic strength: Median household income relative to max ($112,500)
-    const normalizeIncome = (val: number) => {
-      if (val === undefined || isNaN(val)) return 0;
-      return Math.round((val / 112500) * 100);
-    };
-    
-    // 3. Preventative care efficacy: Inverse of ACSC rate (lower is better, max 845.1, min 184.2)
-    // Map so 845.1 becomes 15 and 184.2 becomes 95
-    const normalizePreventative = (val: number) => {
-      if (val === undefined || isNaN(val)) return 0;
-      const progress = (val - 184.2) / (845.1 - 184.2);
-      return Math.round(95 - (progress * 80));
+    const nonZero = (vals: Array<number | null | undefined>): number[] =>
+      vals.filter((v): v is number => typeof v === 'number' && !Number.isNaN(v) && v !== 0);
+
+    const scaleHigherBetter = (
+      val: number | null | undefined,
+      pool: number[],
+    ): number | null => {
+      if (!hasMetric(val) || pool.length === 0) return null;
+      const max = Math.max(...pool);
+      if (max <= 0) return null;
+      return Math.round((val / max) * 100);
     };
 
-    const normalizeProximity = (val: number | null | undefined) => {
-      if (val == null || isNaN(val)) return null;
-      const progress = (val - 2.1) / (145.8 - 2.1);
-      return Math.round(98 - (progress * 90));
+    const scaleLowerBetter = (
+      val: number | null | undefined,
+      pool: number[],
+    ): number | null => {
+      if (!hasMetric(val) || pool.length === 0) return null;
+      const max = Math.max(...pool);
+      if (max <= 0) return null;
+      return Math.round((1 - val / max) * 100);
     };
 
-    // 5. Care Retention: Retaining rostered patients locally (% rostered locally, which is 100 - claimsOutsideLgaPct)
-    const normalizeRetention = (val: number) => {
-      if (val === undefined || isNaN(val)) return 0;
-      return Math.round(100 - val);
-    };
-    return [
+    const physPool = nonZero(COMMUNITY_NEED_PROFILES.map((p) => p.physiciansPer100k));
+    const incomePool = nonZero(COMMUNITY_NEED_PROFILES.map((p) => p.medianHouseholdIncome));
+    const acscPool = nonZero(COMMUNITY_NEED_PROFILES.map((p) => p.acscRatePer100k));
+    const claimsPool = nonZero(COMMUNITY_NEED_PROFILES.map((p) => p.claimsOutsideLgaPct));
+    const edDistPool = nonZero(SERVICE_ACCESS_METRICS.map((s) => s.distanceToNearestEdKm));
+
+    const axes = [
       {
         subject: 'Primary Care Density',
-        [selectedLgaDetail]: normalizePhysicians(selectedFullData.physiciansPer100k),
-        [comparisonTarget]: normalizePhysicians(comparisonFullData.physiciansPer100k),
-        fullMark: 100,
+        selected: scaleHigherBetter(selectedFullData.physiciansPer100k, physPool),
+        comparison: scaleHigherBetter(comparisonFullData.physiciansPer100k, physPool),
       },
       {
         subject: 'Socioeconomic Affluence',
-        [selectedLgaDetail]: normalizeIncome(selectedFullData.medianHouseholdIncome),
-        [comparisonTarget]: normalizeIncome(comparisonFullData.medianHouseholdIncome),
-        fullMark: 100,
+        selected: scaleHigherBetter(selectedFullData.medianHouseholdIncome, incomePool),
+        comparison: scaleHigherBetter(comparisonFullData.medianHouseholdIncome, incomePool),
       },
       {
         subject: 'Preventative Efficacy',
-        [selectedLgaDetail]: normalizePreventative(selectedFullData.acscRatePer100k),
-        [comparisonTarget]: normalizePreventative(comparisonFullData.acscRatePer100k),
-        fullMark: 100,
+        selected: scaleLowerBetter(selectedFullData.acscRatePer100k, acscPool),
+        comparison: scaleLowerBetter(comparisonFullData.acscRatePer100k, acscPool),
       },
       {
         subject: 'Emergency Proximity',
-        [selectedLgaDetail]: normalizeProximity((selectedFullData as { distanceToNearestEdKm?: number | null }).distanceToNearestEdKm) ?? 0,
-        [comparisonTarget]: normalizeProximity((comparisonFullData as { distanceToNearestEdKm?: number | null }).distanceToNearestEdKm) ?? 0,
-        fullMark: 100,
+        selected: scaleLowerBetter(selectedFullData.distanceToNearestEdKm, edDistPool),
+        comparison: scaleLowerBetter(comparisonFullData.distanceToNearestEdKm, edDistPool),
       },
       {
         subject: 'Care Retention',
-        [selectedLgaDetail]: normalizeRetention(selectedFullData.claimsOutsideLgaPct),
-        [comparisonTarget]: normalizeRetention(comparisonFullData.claimsOutsideLgaPct),
-        fullMark: 100,
+        selected: scaleLowerBetter(selectedFullData.claimsOutsideLgaPct, claimsPool),
+        comparison: scaleLowerBetter(comparisonFullData.claimsOutsideLgaPct, claimsPool),
       },
     ];
-  }, [selectedLgaDetail, comparisonTarget, selectedFullData, comparisonFullData]);
+
+    return axes
+      .filter((a) => a.selected != null || a.comparison != null)
+      .map((a) => ({
+        subject: a.subject,
+        [selectedLgaDetail]: a.selected ?? 0,
+        [comparisonTarget]: a.comparison ?? 0,
+        fullMark: 100,
+      }));
+  }, [
+    selectedLgaDetail,
+    comparisonTarget,
+    selectedFullData,
+    comparisonFullData,
+    COMMUNITY_NEED_PROFILES,
+    SERVICE_ACCESS_METRICS,
+  ]);
 
   // Combined full table array for All Data Explorer
   const fullCombinedDataset = useMemo(() => {
@@ -569,100 +447,155 @@ export default function RegionalInequityDashboard() {
   };
 
   // ----------------------------------------------------------------------------
-  // DYNAMIC CASE STUDIES & INSIGHTS (100% PROGRAMMATIC - NO HARDCODED PLACEHOLDERS)
+  // DYNAMIC CASE STUDIES & INSIGHTS — only from real upstream numbers (no hardcoded standards)
   // ----------------------------------------------------------------------------
   const dynamicEquityCaseStudy = useMemo(() => {
-    const isHighDeprivation = selectedFullData.deprivationIndex >= 4;
-    const isMediumDeprivation = selectedFullData.deprivationIndex === 3;
-    
-    let classification = "an affluent Urban Hub profile";
-    if (isHighDeprivation) {
-      classification = "a highly vulnerable, resource-constrained environment";
-    } else if (isMediumDeprivation) {
-      classification = "a transitional, moderately underserved regional environment";
-    } else if (selectedFullData.deprivationIndex === 2) {
-      classification = "a stable suburban grid profile";
+    const phys = selectedFullData.physiciansPer100k;
+    const claims = selectedFullData.claimsOutsideLgaPct;
+    const acsc = selectedFullData.acscRatePer100k;
+    const depriv = selectedFullData.deprivationIndex;
+    const income = selectedFullData.medianHouseholdIncome;
+    const grad = selectedFullData.highSchoolGradPct;
+    const benchPhys = PROVINCIAL_BENCHMARKS.physiciansPer100k;
+    const benchAcsc = PROVINCIAL_BENCHMARKS.acscRatePer100k;
+
+    const parts: string[] = [];
+    if (hasMetric(depriv)) {
+      parts.push(`Deprivation index ${depriv.toFixed(2)} (upstream CIMD-style score).`);
+    }
+    if (hasMetric(income)) {
+      parts.push(`Median household income $${income.toLocaleString()} (upstream).`);
+    }
+    if (hasMetric(grad)) {
+      parts.push(`High school graduation ${grad}% (upstream).`);
+    }
+    if (parts.length === 0) {
+      parts.push('Income, education, and deprivation detail are limited or zero-padded for this LGA; missing fields are not estimated.');
     }
 
-    const docStatus = selectedFullData.physiciansPer100k < 115 
-      ? `exhibits a primary care density gap, operating ${((115 - selectedFullData.physiciansPer100k) / 115 * 100).toFixed(0)}% below the AHS provincial average standard of 115 family doctors per 100k`
-      : `boasts a primary care surplus, registering ${((selectedFullData.physiciansPer100k - 115) / 115 * 100).toFixed(0)}% more family doctors per 100k than the AHS provincial standard of 115`;
+    let infrastructure = 'Primary-care density and outward-claim metrics are unavailable for comparison.';
+    if (hasMetric(phys) && hasMetric(benchPhys)) {
+      const delta = phys - benchPhys;
+      infrastructure = `Rostered family physicians: ${phys.toFixed(1)} per 100k vs mean of loaded LGAs ${benchPhys.toFixed(1)} per 100k (${delta >= 0 ? '+' : ''}${delta.toFixed(1)}).`;
+    } else if (hasMetric(phys)) {
+      infrastructure = `Rostered family physicians: ${phys.toFixed(1)} per 100k (no non-zero provincial mean available from loaded rows).`;
+    }
+    if (hasMetric(claims)) {
+      infrastructure += ` Outward primary-care claims: ${claims.toFixed(1)}%.`;
+    }
 
-    const preventableAdmissionsMultiplier = (selectedFullData.acscRatePer100k / 184.2).toFixed(1);
-
-    const incomeString = selectedFullData.medianHouseholdIncome > 0
-      ? ` a median household income of $${selectedFullData.medianHouseholdIncome.toLocaleString()}`
-      : ' unspecified household income';
-
-    const gradString = selectedFullData.highSchoolGradPct > 0
-      ? ` high school graduation rates at ${selectedFullData.highSchoolGradPct}%`
-      : ' educational attainment statistics';
-
-    return {
-      title: `${selectedLgaDetail}: Demographic & Preventative Care Audit`,
-      summary: `Demographic audit classifies this LGA as ${classification}.${selectedFullData.medianHouseholdIncome > 0 || selectedFullData.highSchoolGradPct > 0 ? ` Economic metrics reveal${selectedFullData.medianHouseholdIncome > 0 ? incomeString : ''}${selectedFullData.medianHouseholdIncome > 0 && selectedFullData.highSchoolGradPct > 0 ? ' and' : ''}${selectedFullData.highSchoolGradPct > 0 ? gradString : ''}.` : ''} This socioeconomic posture is a primary driver of downstream clinical pathways.`,
-      infrastructure: `Healthcare supply and physicians density in this region ${docStatus}. Because local primary practices are so ${selectedFullData.physiciansPer100k < 100 ? 'congested or absent' : 'integrated'}, a substantial ${selectedFullData.claimsOutsideLgaPct}% of residents are rostered or treated outside of this LGA's boundaries.`,
-      downstreamEffect: `A direct consequence of failing to anchor primary preventative care is the escalation of avoidable hospitalizations. ${selectedLgaDetail} exhibits an Ambulatory Care Sensitive Conditions (ACSC) rate of ${selectedFullData.acscRatePer100k} per 100k. Compared to Calgary - West Bow (the provincial optimum), this avoidable hospitalization rate is ${preventableAdmissionsMultiplier}x higher, indicating a critical need for localized primary clinic investments.`
-    };
-  }, [selectedFullData, selectedLgaDetail]);
-
-  const dynamicChronicDiseaseInsight = useMemo(() => {
-    const lifeExpectancyDelta = (84.6 - selectedFullData.lifeExpectancyYears).toFixed(1);
-    const diabetesMultiplier = (selectedFullData.diabetesPrevalencePct / 4.8).toFixed(1);
-    const copdMultiplier = (selectedFullData.copdPrevalencePct / 1.9).toFixed(1);
-    
-    const infantMortalityText = selectedFullData.infantMortalityPer1000 > 0
-      ? ` pediatric audits also register infant mortality at ${selectedFullData.infantMortalityPer1000} per 1,000 births, demonstrating how pre-natal counseling and pediatric access gaps degrade early childhood health outcomes.`
-      : ' maternal audits suggest focusing on early childhood health outcomes and pediatric access gaps.';
-
-    const burdenText = (selectedFullData.diabetesPrevalencePct > 0 && selectedFullData.copdPrevalencePct > 0)
-      ? `Standardized age prevalence shows that diabetes is ${diabetesMultiplier}x higher and COPD is ${copdMultiplier}x higher in ${selectedLgaDetail} than the provincial optimums.`
-      : 'Standardized age prevalence rates indicate localized health challenges across chronic condition profiles.';
+    let downstreamEffect = 'Preventable ACSC admission rate is unavailable for this LGA.';
+    if (hasMetric(acsc) && hasMetric(benchAcsc)) {
+      downstreamEffect = `ACSC rate ${acsc.toFixed(1)} per 100k vs mean of loaded LGAs ${benchAcsc.toFixed(1)} per 100k.`;
+    } else if (hasMetric(acsc)) {
+      downstreamEffect = `ACSC rate ${acsc.toFixed(1)} per 100k (no non-zero provincial mean available from loaded rows).`;
+    }
 
     return {
-      expectancy: `Life expectancy in ${selectedLgaDetail} stands at ${selectedFullData.lifeExpectancyYears} years. When compared to the provincial maximum of 84.6 years (Calgary West Bow), this reveals an active longevity gap of ${lifeExpectancyDelta} years, demonstrating the profound real-world cost of health resource inequity.`,
-      burdenMultiplier: `${burdenText}${infantMortalityText}`
-    };
-  }, [selectedFullData, selectedLgaDetail]);
-  const dynamicEdRelianceInsight = useMemo(() => {
-    const avgEdVisits = PROVINCIAL_BENCHMARKS.totalEdVisitsPer1000;
-    const visitsComparison = selectedFullData.totalEdVisitsPer1000 > avgEdVisits
-      ? `${(selectedFullData.totalEdVisitsPer1000 - avgEdVisits)} more visits per 1,000 residents than the provincial average`
-      : `${(avgEdVisits - selectedFullData.totalEdVisitsPer1000)} fewer visits per 1,000 residents than the provincial average`;
-
-    const isERSubstitute = selectedFullData.lowAcuityCtas45Pct > 45;
-    const ERSubstitutionStatus = isERSubstitute
-      ? `A low-acuity rate of ${selectedFullData.lowAcuityCtas45Pct}% indicates that Emergency Departments are actively serving as primary care substitutes due to localized roster blockades`
-      : `A low-acuity rate of ${selectedFullData.lowAcuityCtas45Pct}% indicates stable clinic routing, meaning residents are using emergency trauma centers primarily for true acute events`;
-
-    return {
-      reliance: `Annual Emergency Department presentation rate stands at ${selectedFullData.totalEdVisitsPer1000} visits per 1,000 residents. This represents ${visitsComparison} (${avgEdVisits} visits).`,
-      substitution: `${ERSubstitutionStatus}. Furthermore, ${selectedFullData.afterHoursEdPct}% of ED visits occur between 18:00 and 08:00, signaling a lack of after-hours primary clinics or integrated weekend primary networks.`
+      title: `${selectedLgaDetail}: upstream community-need summary`,
+      summary: parts.join(' '),
+      infrastructure,
+      downstreamEffect,
     };
   }, [selectedFullData, selectedLgaDetail, PROVINCIAL_BENCHMARKS]);
+
+  const dynamicChronicDiseaseInsight = useMemo(() => {
+    const life = selectedFullData.lifeExpectancyYears;
+    const diabetes = selectedFullData.diabetesPrevalencePct;
+    const copd = selectedFullData.copdPrevalencePct;
+    const infant = selectedFullData.infantMortalityPer1000;
+    const benchLife = PROVINCIAL_BENCHMARKS.lifeExpectancyYears;
+    const benchDiabetes = PROVINCIAL_BENCHMARKS.diabetesPrevalencePct;
+    const benchCopd = PROVINCIAL_BENCHMARKS.copdPrevalencePct;
+
+    let expectancy = 'Life expectancy is unavailable (zero or missing upstream).';
+    if (hasMetric(life) && hasMetric(benchLife)) {
+      const delta = life - benchLife;
+      expectancy = `Life expectancy ${life.toFixed(1)} years vs mean of loaded LGAs ${benchLife.toFixed(1)} years (${delta >= 0 ? '+' : ''}${delta.toFixed(1)}).`;
+    } else if (hasMetric(life)) {
+      expectancy = `Life expectancy ${life.toFixed(1)} years (no non-zero provincial mean available from loaded rows).`;
+    }
+
+    const burdenBits: string[] = [];
+    if (hasMetric(diabetes) && hasMetric(benchDiabetes)) {
+      burdenBits.push(`diabetes ${diabetes.toFixed(1)}% vs mean ${benchDiabetes.toFixed(1)}%`);
+    } else if (hasMetric(diabetes)) {
+      burdenBits.push(`diabetes ${diabetes.toFixed(1)}%`);
+    }
+    if (hasMetric(copd) && hasMetric(benchCopd)) {
+      burdenBits.push(`COPD ${copd.toFixed(1)}% vs mean ${benchCopd.toFixed(1)}%`);
+    } else if (hasMetric(copd)) {
+      burdenBits.push(`COPD ${copd.toFixed(1)}%`);
+    }
+    if (hasMetric(infant)) {
+      burdenBits.push(`infant mortality ${infant.toFixed(1)} per 1,000 births`);
+    }
+    const burdenMultiplier = burdenBits.length > 0
+      ? `Upstream chronic metrics: ${burdenBits.join('; ')}.`
+      : 'Chronic prevalence and infant mortality are unavailable for this LGA; values are not estimated.';
+
+    return { expectancy, burdenMultiplier };
+  }, [selectedFullData, selectedLgaDetail, PROVINCIAL_BENCHMARKS]);
+
+  const dynamicEdRelianceInsight = useMemo(() => {
+    const visits = selectedFullData.totalEdVisitsPer1000;
+    const lowAcuity = selectedFullData.lowAcuityCtas45Pct;
+    const afterHours = selectedFullData.afterHoursEdPct;
+    const mood = selectedFullData.moodAnxietyEdRatePer100k;
+    const avgVisits = PROVINCIAL_BENCHMARKS.totalEdVisitsPer1000;
+    const avgLow = PROVINCIAL_BENCHMARKS.lowAcuityCtas45Pct;
+    const avgAfter = PROVINCIAL_BENCHMARKS.afterHoursEdPct;
+
+    let reliance = 'ED visit rate is unavailable (zero or missing upstream).';
+    if (hasMetric(visits) && hasMetric(avgVisits)) {
+      const delta = visits - avgVisits;
+      reliance = `ED visits ${visits.toFixed(1)} per 1,000 vs mean of loaded LGAs ${avgVisits.toFixed(1)} (${delta >= 0 ? '+' : ''}${delta.toFixed(1)}).`;
+    } else if (hasMetric(visits)) {
+      reliance = `ED visits ${visits.toFixed(1)} per 1,000 (no non-zero provincial mean available from loaded rows).`;
+    }
+
+    const subBits: string[] = [];
+    if (hasMetric(lowAcuity) && hasMetric(avgLow)) {
+      subBits.push(`low-acuity CTAS 4/5 ${lowAcuity.toFixed(1)}% vs mean ${avgLow.toFixed(1)}%`);
+    } else if (hasMetric(lowAcuity)) {
+      subBits.push(`low-acuity CTAS 4/5 ${lowAcuity.toFixed(1)}%`);
+    }
+    if (hasMetric(afterHours) && hasMetric(avgAfter)) {
+      subBits.push(`after-hours ED share ${afterHours.toFixed(1)}% vs mean ${avgAfter.toFixed(1)}%`);
+    } else if (hasMetric(afterHours)) {
+      subBits.push(`after-hours ED share ${afterHours.toFixed(1)}%`);
+    }
+    if (hasMetric(mood)) {
+      subBits.push(`mood/anxiety ED ${mood.toFixed(1)} per 100k`);
+    }
+    const substitution = subBits.length > 0
+      ? `Upstream ED composition: ${subBits.join('; ')}.`
+      : 'Low-acuity, after-hours, and mental-health ED metrics are unavailable; values are not estimated.';
+
+    return { reliance, substitution };
+  }, [selectedFullData, selectedLgaDetail, PROVINCIAL_BENCHMARKS]);
+
   const dynamicAccessTravelInsight = useMemo(() => {
     const hasTravel = TRAVEL_FOR_CARE.length > 0 && selectedLgaTravel != null;
     const hasAccess = SERVICE_ACCESS_METRICS.length > 0 && selectedLgaAccess != null;
     if (!hasTravel && !hasAccess) {
       return {
-        travel: 'Travel-for-care and facility-distance metrics are not published in the current Open Alberta LGA workbooks. Pipeline preserves curated arrays when present; otherwise values show as unavailable.',
-        leakage: 'Inpatient bed leakage and outward travel distance require a dedicated TRAVEL_FOR_CARE dataset — not yet backfilled from automated sources.'
+        travel: 'Travel-for-care and facility-distance metrics are not published in the current Open Alberta LGA workbooks. Arrays stay empty; values are not estimated.',
+        leakage: 'Inpatient bed leakage and outward travel distance require a dedicated TRAVEL_FOR_CARE upstream — currently unavailable.',
       };
     }
-    const travel = selectedFullData as typeof selectedFullData & {
-      avgTravelDistanceKm?: number | null;
-      topDestinationFacility?: string | null;
-      localBedLeakagePct?: number | null;
-    };
+    const dist = selectedLgaTravel?.avgTravelDistanceKm;
+    const dest = selectedLgaTravel?.topDestinationFacility;
+    const leak = selectedLgaTravel?.localBedLeakagePct;
     return {
-      travel: travel.avgTravelDistanceKm != null
-        ? `Remote specialty gaps force local residents to travel an average of ${travel.avgTravelDistanceKm} km per outpatient cycle. The primary regional facility absorbing this outward medical flow is ${travel.topDestinationFacility ?? 'not listed'}.`
-        : 'Average travel distance is not available for this LGA in the current dataset.',
-      leakage: travel.localBedLeakagePct != null
-        ? `This resource gap is confirmed by a local inpatient bed leakage rate of ${travel.localBedLeakagePct}%. Local diagnostics are unable to retain native clinical caseloads, requiring residents to leave their home districts for standard inpatient care.`
-        : 'Bed leakage rate is not available for this LGA.'
+      travel: hasMetric(dist)
+        ? `Average travel distance ${dist.toFixed(1)} km${dest ? `; top destination ${dest}` : ''}.`
+        : 'Average travel distance is unavailable for this LGA.',
+      leakage: hasMetric(leak)
+        ? `Local inpatient bed leakage ${leak.toFixed(1)}%.`
+        : 'Bed leakage rate is unavailable for this LGA.',
     };
-  }, [TRAVEL_FOR_CARE.length, SERVICE_ACCESS_METRICS.length, selectedLgaTravel, selectedLgaAccess, selectedFullData]);
+  }, [TRAVEL_FOR_CARE.length, SERVICE_ACCESS_METRICS.length, selectedLgaTravel, selectedLgaAccess]);
 
   if (isLoading) {
     return (
@@ -683,6 +616,24 @@ export default function RegionalInequityDashboard() {
           <RefreshCw className="w-3.5 h-3.5" />
           Retry
         </button>
+      </div>
+    );
+  }
+
+  // Fail closed when no upstream LGA arrays are present (empty payload / failed sync).
+  if (COMMUNITY_NEED_PROFILES.length === 0) {
+    return (
+      <div className="space-y-6">
+        <DashboardHeader
+          icon={MapPin}
+          title="Health Inequity & Community Need"
+          description="Open Alberta LGA community profiles only. Travel/access and unpublished income fields stay empty until a verified upstream exists."
+          metadata={metadata ?? undefined}
+          arrayKey="COMMUNITY_NEED_PROFILES"
+        />
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl text-sm text-slate-400">
+          No verified community-need, chronic-disease, or ED-reliance rows are available. Values are not estimated.
+        </div>
       </div>
     );
   }
@@ -731,6 +682,7 @@ export default function RegionalInequityDashboard() {
           <Activity className="w-4 h-4" />
           <span>ED Reliance</span>
         </button>
+        {hasTravelAccessData && (
         <button
           onClick={() => setActiveSubTab('access-travel')}
           className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
@@ -742,6 +694,7 @@ export default function RegionalInequityDashboard() {
           <MapPin className="w-4 h-4" />
           <span>Travel For Care</span>
         </button>
+        )}
         <button
           onClick={() => setActiveSubTab('compare-matrix')}
           className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
@@ -894,8 +847,10 @@ export default function RegionalInequityDashboard() {
                   {selectedLgaNeed.medianHouseholdIncome > 0 ? `$${selectedLgaNeed.medianHouseholdIncome.toLocaleString()}` : '—'}
                 </span>
                 <span className="text-[8px] text-slate-500 block font-medium mt-0.5">
-                  {selectedLgaNeed.medianHouseholdIncome > 0 
-                    ? (selectedLgaNeed.medianHouseholdIncome < 70000 ? 'Below Average' : 'Above Average')
+                  {hasMetric(selectedLgaNeed.medianHouseholdIncome)
+                    ? (hasMetric(PROVINCIAL_BENCHMARKS.medianHouseholdIncome)
+                      ? (selectedLgaNeed.medianHouseholdIncome < PROVINCIAL_BENCHMARKS.medianHouseholdIncome ? 'Below loaded-LGA mean' : 'At/above loaded-LGA mean')
+                      : 'Upstream income')
                     : 'No Data'}
                 </span>
               </div>
@@ -916,14 +871,14 @@ export default function RegionalInequityDashboard() {
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Rostered Family Physicians</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-rose-400">
-                      {typeof selectedLgaNeed.physiciansPer100k === 'number' 
-                        ? selectedLgaNeed.physiciansPer100k.toFixed(1) 
-                        : selectedLgaNeed.physiciansPer100k}
+                      {formatMetric(selectedLgaNeed.physiciansPer100k, { digits: 1 })}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">per 100k</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
-                    Provincial standard average: <strong className="text-slate-300">115 per 100k</strong>. Selected LGA is {selectedLgaNeed.physiciansPer100k < 115 ? 'below' : 'above'} standard.
+                    {hasMetric(selectedLgaNeed.physiciansPer100k) && hasMetric(PROVINCIAL_BENCHMARKS.physiciansPer100k)
+                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.physiciansPer100k.toFixed(1)} per 100k</strong>.</>
+                      : 'No hardcoded provincial standard is shown; missing upstream values render as N/A.'}
                   </p>
                 </div>
 
@@ -931,9 +886,7 @@ export default function RegionalInequityDashboard() {
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Primary Care Outside LGA</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-orange-400">
-                      {typeof selectedLgaNeed.claimsOutsideLgaPct === 'number'
-                        ? selectedLgaNeed.claimsOutsideLgaPct.toFixed(1)
-                        : selectedLgaNeed.claimsOutsideLgaPct}%
+                      {formatMetric(selectedLgaNeed.claimsOutsideLgaPct, { digits: 1, suffix: '%' })}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">outward claims</span>
                   </div>
@@ -946,9 +899,7 @@ export default function RegionalInequityDashboard() {
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Preventable ACSC Admissions</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-amber-500">
-                      {typeof selectedLgaNeed.acscRatePer100k === 'number'
-                        ? selectedLgaNeed.acscRatePer100k.toFixed(1)
-                        : selectedLgaNeed.acscRatePer100k}
+                      {formatMetric(selectedLgaNeed.acscRatePer100k, { digits: 1 })}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">per 100k</span>
                   </div>
@@ -1015,7 +966,7 @@ export default function RegionalInequityDashboard() {
                 <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 flex flex-col justify-between shadow-md">
                   <div className="space-y-1">
                     <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest font-sans">Socio-Demographic Disparity Audit</h3>
-                    <p className="text-[10px] text-slate-500">Selected LGA metrics relative to the Provincial Median Baseline</p>
+                    <p className="text-[10px] text-slate-500">Selected LGA metrics from upstream rows; comparisons use means of non-zero loaded LGAs only</p>
                   </div>
 
                   <div className="space-y-4 flex-1 justify-center flex flex-col">
@@ -1027,7 +978,7 @@ export default function RegionalInequityDashboard() {
                       <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
                         <div className="bg-rose-500 h-full rounded-full transition-all duration-500" style={{ width: `${selectedLgaNeed.highSchoolGradPct > 0 ? selectedLgaNeed.highSchoolGradPct : 0}%` }} />
                       </div>
-                      <p className="text-[10px] text-slate-500 mt-1">Provincial secondary educational baseline target is 90%.</p>
+                      <p className="text-[10px] text-slate-500 mt-1">{hasMetric(selectedLgaNeed.highSchoolGradPct) ? 'Upstream high school graduation rate for this LGA.' : 'High school graduation is unavailable for this LGA; not estimated.'}</p>
                     </div>
 
                     <div>
@@ -1067,12 +1018,14 @@ export default function RegionalInequityDashboard() {
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Life Expectancy</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-rose-400">
-                      {selectedLgaDisease.lifeExpectancyYears > 0 ? selectedLgaDisease.lifeExpectancyYears.toFixed(1) : '—'}
+                      {formatMetric(selectedLgaDisease.lifeExpectancyYears, { digits: 1 })}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">years</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
-                    Provincial average: <strong className="text-slate-300">79.0 years</strong>. Longevity delta is closely tied to local primary support density.
+                    {hasMetric(selectedLgaDisease.lifeExpectancyYears) && hasMetric(PROVINCIAL_BENCHMARKS.lifeExpectancyYears)
+                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.lifeExpectancyYears.toFixed(1)} years</strong>.</>
+                      : 'No hardcoded provincial life-expectancy average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
 
@@ -1080,12 +1033,14 @@ export default function RegionalInequityDashboard() {
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Infant Mortality Rate</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-orange-400">
-                      {selectedLgaDisease.infantMortalityPer1000 > 0 ? selectedLgaDisease.infantMortalityPer1000.toFixed(1) : '—'}
+                      {formatMetric(selectedLgaDisease.infantMortalityPer1000, { digits: 1 })}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">per 1,000 births</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
-                    Provincial average: <strong className="text-slate-300">4.9</strong>. Key clinical marker reflecting prenatal healthcare quality and pediatric density.
+                    {hasMetric(selectedLgaDisease.infantMortalityPer1000) && hasMetric(PROVINCIAL_BENCHMARKS.infantMortalityPer1000)
+                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.infantMortalityPer1000.toFixed(1)}</strong>.</>
+                      : 'Infant mortality is unavailable for this LGA; not estimated against a hardcoded provincial target.'}
                   </p>
                 </div>
 
@@ -1093,12 +1048,14 @@ export default function RegionalInequityDashboard() {
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Diabetes Prevalence</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-amber-500">
-                      {selectedLgaDisease.diabetesPrevalencePct > 0 ? `${selectedLgaDisease.diabetesPrevalencePct.toFixed(1)}%` : '—'}
+                      {formatMetric(selectedLgaDisease.diabetesPrevalencePct, { digits: 1, suffix: '%' })}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">of population</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
-                    Provincial average: <strong className="text-slate-300">8.3%</strong>. Chronic disease load indicating preventative clinical access and dietary factors.
+                    {hasMetric(selectedLgaDisease.diabetesPrevalencePct) && hasMetric(PROVINCIAL_BENCHMARKS.diabetesPrevalencePct)
+                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.diabetesPrevalencePct.toFixed(1)}%</strong>.</>
+                      : 'No hardcoded provincial diabetes average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
               </div>
@@ -1203,14 +1160,14 @@ export default function RegionalInequityDashboard() {
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">ED Visits per 1,000 residents</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-rose-400">
-                      {typeof selectedLgaEd.totalEdVisitsPer1000 === 'number' 
-                        ? selectedLgaEd.totalEdVisitsPer1000.toFixed(1) 
-                        : selectedLgaEd.totalEdVisitsPer1000}
+                      {formatMetric(selectedLgaEd.totalEdVisitsPer1000, { digits: 1 })}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">visits</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
-                    Provincial average: <strong className="text-slate-300">472 visits</strong>. Measures raw annual emergency care presentations per 1,000 local pop.
+                    {hasMetric(selectedLgaEd.totalEdVisitsPer1000) && hasMetric(PROVINCIAL_BENCHMARKS.totalEdVisitsPer1000)
+                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.totalEdVisitsPer1000.toFixed(1)} visits</strong>.</>
+                      : 'No hardcoded provincial ED visit average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
 
@@ -1218,14 +1175,14 @@ export default function RegionalInequityDashboard() {
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Low Acuity CTAS 4/5 Rate</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-orange-400">
-                      {typeof selectedLgaEd.lowAcuityCtas45Pct === 'number' 
-                        ? selectedLgaEd.lowAcuityCtas45Pct.toFixed(1) 
-                        : selectedLgaEd.lowAcuityCtas45Pct}%
+                      {formatMetric(selectedLgaEd.lowAcuityCtas45Pct, { digits: 1, suffix: '%' })}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">low acuity</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
-                    Provincial average: <strong className="text-slate-300">51.7%</strong>. Non-urgent presentations indicating primary practice scarcity.
+                    {hasMetric(selectedLgaEd.lowAcuityCtas45Pct) && hasMetric(PROVINCIAL_BENCHMARKS.lowAcuityCtas45Pct)
+                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.lowAcuityCtas45Pct.toFixed(1)}%</strong>.</>
+                      : 'No hardcoded provincial low-acuity average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
 
@@ -1233,14 +1190,14 @@ export default function RegionalInequityDashboard() {
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Mental Health ED Visits</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-amber-500">
-                      {typeof selectedLgaEd.moodAnxietyEdRatePer100k === 'number' 
-                        ? selectedLgaEd.moodAnxietyEdRatePer100k.toFixed(1) 
-                        : selectedLgaEd.moodAnxietyEdRatePer100k}
+                      {formatMetric(selectedLgaEd.moodAnxietyEdRatePer100k, { digits: 1 })}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">per 100k</span>
                   </div>
                   <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
-                    Provincial average: <strong className="text-slate-300">938 per 100k</strong>. Emergency visits triggered by psychiatric, mood, or substance crises.
+                    {hasMetric(selectedLgaEd.moodAnxietyEdRatePer100k) && hasMetric(PROVINCIAL_BENCHMARKS.moodAnxietyEdRatePer100k)
+                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.moodAnxietyEdRatePer100k.toFixed(1)} per 100k</strong>.</>
+                      : 'No hardcoded provincial mental-health ED average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
               </div>
@@ -1291,7 +1248,7 @@ export default function RegionalInequityDashboard() {
                   <div className="space-y-3.5 flex-1 justify-center flex flex-col">
                     <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
                       <span className="text-[9px] text-rose-400 font-mono font-bold uppercase block tracking-wider">Low-Acuity Congestion Impact</span>
-                      <p className="text-xs text-white font-extrabold mt-1">LGA Rate: {selectedLgaEd.lowAcuityCtas45Pct}% of ED presentations</p>
+                      <p className="text-xs text-white font-extrabold mt-1">LGA Rate: {formatMetric(selectedLgaEd.lowAcuityCtas45Pct, { digits: 1, suffix: '% of ED presentations' })}</p>
                       <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
                         {dynamicEdRelianceInsight.reliance}
                       </p>
@@ -1299,7 +1256,7 @@ export default function RegionalInequityDashboard() {
 
                     <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
                       <span className="text-[9px] text-amber-500 font-mono font-bold uppercase block tracking-wider">After-Hours Care Access Deficit</span>
-                      <p className="text-xs text-white font-extrabold mt-1">After-Hours Percentage: {selectedLgaEd.afterHoursEdPct}%</p>
+                      <p className="text-xs text-white font-extrabold mt-1">After-Hours Percentage: {formatMetric(selectedLgaEd.afterHoursEdPct, { digits: 1, suffix: '%' })}</p>
                       <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
                         {dynamicEdRelianceInsight.substitution}
                       </p>
@@ -1310,10 +1267,15 @@ export default function RegionalInequityDashboard() {
             </div>
           )}
 
-          {/* SUBTAB 4: Access & Travel */}
+          {/* SUBTAB 4: Access & Travel — only when real upstream arrays exist */}
           {activeSubTab === 'access-travel' && (
             <div id="ri-travel-view" className="space-y-6 animate-fadeIn">
-              {/* Access metrics */}
+              {!hasTravelAccessData ? (
+                <div className="bg-[#0b1226] border border-slate-800 p-6 rounded-2xl text-sm text-slate-400">
+                  Travel-for-care and service-access metrics are unavailable. No public LGA feed is wired; values are not estimated.
+                </div>
+              ) : (
+                <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Clinics per 10k population</span>
@@ -1321,134 +1283,59 @@ export default function RegionalInequityDashboard() {
                     <span className="text-2xl font-black text-rose-400">{selectedLgaAccess == null ? '—' : selectedLgaAccess.facilitiesPer10k}</span>
                     <span className="text-[10px] text-slate-500 font-medium">clinics</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
-                    Prov average: <strong className="text-slate-300">5.58</strong>. Medical sites per 10k residents.
-                  </p>
                 </div>
-
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Distance to Nearest ED</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-orange-400">{selectedLgaAccess == null ? '—' : selectedLgaAccess.distanceToNearestEdKm}</span>
                     <span className="text-[10px] text-slate-500 font-medium">km</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
-                    Prov average: <strong className="text-slate-300">51.4 km</strong>. Travel distance to open ER.
-                  </p>
                 </div>
-
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Distance to Nearest Imaging</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-indigo-400">{selectedLgaAccess == null ? '—' : selectedLgaAccess.distanceToNearestImagingKm}</span>
                     <span className="text-[10px] text-slate-500 font-medium">km</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
-                    Prov average: <strong className="text-slate-300">50.1 km</strong>. Surfaced imaging distance.
-                  </p>
                 </div>
-
                 <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Accepting Roster practices</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-amber-500">{selectedLgaAccess == null ? '—' : selectedLgaAccess.providersAcceptingPatients}</span>
                     <span className="text-[10px] text-slate-500 font-medium">clinics</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed text-[11px]">
-                    Active family practices accepting new rostered patients.
-                  </p>
                 </div>
               </div>
-
-              {/* Travel charts */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 shadow-md">
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Travel & Care Outside LGA (%)</h3>
-                  
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={zoneTravel}
-                        margin={{ top: 10, right: 10, left: 25, bottom: 35 }}
-                      >
-                        <defs>
-                          <linearGradient id="travelGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#ec4899" stopOpacity={0.4}/>
-                          </linearGradient>
-                          <linearGradient id="leakGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0.4}/>
-                          </linearGradient>
-                        </defs>
+                      <BarChart data={zoneTravel} margin={{ top: 10, right: 10, left: 25, bottom: 35 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                         <XAxis dataKey="lgaName" stroke="#64748b" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
-                        <YAxis label={{ value: 'Outside LGA %', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} stroke="#64748b" fontSize={9} width={45} tickLine={false} />
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#090e21', borderColor: '#1e293b', borderRadius: '12px' }}
-                          labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                        />
+                        <YAxis stroke="#64748b" fontSize={9} width={45} tickLine={false} />
+                        <Tooltip contentStyle={{ backgroundColor: '#090e21', borderColor: '#1e293b', borderRadius: '12px' }} />
                         <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                        <Bar dataKey="careDeliveredOutsideLgaPct" name="Outward Care Travel (%)" fill="url(#travelGrad)" radius={[4, 4, 0, 0]}>
-                          {zoneTravel.map((entry, index) => (
-                            <Cell 
-                              key={`cell-travel-${index}`} 
-                              fill={entry.lgaName === selectedLgaDetail ? '#f43f5e' : 'url(#travelGrad)'} 
-                            />
-                          ))}
-                        </Bar>
-                        <Bar dataKey="localBedLeakagePct" name="Inpatient Care Leakage (%)" fill="url(#leakGrad)" radius={[4, 4, 0, 0]}>
-                          {zoneTravel.map((entry, index) => (
-                            <Cell 
-                              key={`cell-leak-${index}`} 
-                              fill={entry.lgaName === selectedLgaDetail ? '#3b82f6' : 'url(#leakGrad)'} 
-                            />
-                          ))}
-                        </Bar>
+                        <Bar dataKey="careDeliveredOutsideLgaPct" name="Outward Care Travel (%)" fill="#ec4899" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="localBedLeakagePct" name="Inpatient Care Leakage (%)" fill="#6366f1" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-
-                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 flex flex-col justify-between shadow-md">
-                  <div className="space-y-1">
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Geographic Access Disparity</h3>
-                    <p className="text-[10px] text-slate-500">Assessing driving burdens and referral pathways</p>
-                  </div>
-
-                  <div className="space-y-3.5 flex-1 justify-center flex flex-col">
-                    <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl space-y-2">
-                      <span className="text-[9px] text-rose-400 font-mono font-bold uppercase tracking-wider block">Outward Care Referral Journey</span>
-                      
-                      {/* Interactive stylized travel path visualizer */}
-                      <div className="flex items-center gap-3 bg-slate-950 p-2.5 rounded-lg border border-slate-800/60 justify-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">Local Center</span>
-                        <div className="flex-1 flex items-center justify-center relative min-w-[100px]">
-                          <div className="w-full border-t border-dashed border-rose-500/40"></div>
-                          <span className="absolute bg-[#0b1226] border border-rose-500/30 text-[9px] px-2 py-0.5 rounded-full font-mono text-rose-300 font-bold">
-                            {selectedLgaTravel == null ? '—' : `${selectedLgaTravel.avgTravelDistanceKm} km`}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-black text-rose-400 truncate max-w-[120px]" title={selectedLgaTravel?.topDestinationFacility ?? undefined}>
-                          {selectedLgaTravel == null ? '—' : (selectedLgaTravel.topDestinationFacility ? (selectedLgaTravel.topDestinationFacility.split(' ')[0] + '...') : '—')}
-                        </span>
-                      </div>
-                      
-                      <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
-                        {dynamicAccessTravelInsight.travel}
-                      </p>
-                    </div>
-
-                    <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
-                      <span className="text-[9px] text-amber-500 font-mono font-bold uppercase tracking-wider block">Local Retention & Infrastructure Capacity</span>
-                      <p className="text-xs text-white font-extrabold mt-1">Bed Leakage: {TRAVEL_FOR_CARE.length === 0 ? '—' : `${selectedLgaTravel.localBedLeakagePct}%`}</p>
-                      <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
-                        {dynamicAccessTravelInsight.leakage}
-                      </p>
-                    </div>
-                  </div>
+                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 shadow-md">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Geographic Access</h3>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Avg travel: {selectedLgaTravel == null ? '—' : `${selectedLgaTravel.avgTravelDistanceKm} km`}
+                    {selectedLgaTravel?.topDestinationFacility ? ` → ${selectedLgaTravel.topDestinationFacility}` : ''}
+                  </p>
+                  <p className="text-xs text-white font-extrabold">
+                    Bed Leakage: {selectedLgaTravel == null ? '—' : `${selectedLgaTravel.localBedLeakagePct}%`}
+                  </p>
                 </div>
               </div>
+                </>
+              )}
             </div>
           )}
 

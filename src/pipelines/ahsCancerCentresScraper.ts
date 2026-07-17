@@ -1,20 +1,12 @@
 // AHS Cancer Centres Scraper — Alberta cancer centre directory
 // Scrapes the AHS "Cancer Centre Information" page (Page16313.aspx) for the
-// full list of Alberta cancer centres, parses each centre's name, city, and
-// type from the directory table, maps the city to its AHS zone, derives a
-// service profile from the centre type, and merges the result into
-// data-cancer.json as ALBERTA_CANCER_CENTRES while preserving all other
-// cancer datasets (CANCER_BURDEN_STATS, CANCER_SCREENING_RATES,
-// CANCER_SURGERY_WAIT_TRENDS, RADIATION_THERAPY_WAIT_TRENDS).
+// list of Alberta cancer centres and merges into data-cancer.json as
+// ALBERTA_CANCER_CENTRES only.
 //
-// The AHS directory page lists 17 cancer centres in a single HTML table. Each
-// row bundles the centre name, a "Location: <city>" tag, and a "Type:
-// <Tertiary|Regional|Community>" tag in one description cell. The page does
-// not publish street addresses, coordinates, or per-centre service lists, so
-// for centres already present in data-cancer.json we preserve the curated
-// address, coordinates, services, and therapy flags; for newly discovered
-// centres we derive a service profile from the type and leave address/coords
-// empty until a curator fills them in.
+// Fail-closed: never rewrites or re-stamps CANCER_BURDEN_STATS,
+// CANCER_SCREENING_RATES, CANCER_SURGERY_WAIT_TRENDS, or
+// RADIATION_THERAPY_WAIT_TRENDS. Those arrays are owned by other pipelines
+// (or intentionally empty until a real source lands).
 
 import axios from 'axios';
 import * as cheerio from 'cheerio';
@@ -22,6 +14,7 @@ import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -153,10 +146,6 @@ function coerceCancerJson(raw: unknown): CancerJson {
     for (const [key, value] of Object.entries(raw)) {
       if (!(key in base)) base[key] = value;
     }
-    if (Array.isArray(raw.CANCER_BURDEN_STATS))
-      base.CANCER_BURDEN_STATS = raw.CANCER_BURDEN_STATS as CancerBurdenItem[];
-    if (Array.isArray(raw.CANCER_SCREENING_RATES))
-      base.CANCER_SCREENING_RATES = raw.CANCER_SCREENING_RATES as CancerScreeningZoneRate[];
     if (Array.isArray(raw.CANCER_SURGERY_WAIT_TRENDS))
       base.CANCER_SURGERY_WAIT_TRENDS = raw.CANCER_SURGERY_WAIT_TRENDS as CancerSurgeryWaitTrend[];
     if (Array.isArray(raw.RADIATION_THERAPY_WAIT_TRENDS))
@@ -327,36 +316,44 @@ export async function run(): Promise<SyncResult> {
       scrapedCentres,
     );
 
-    const merged: CancerJson = {
-      ...existing,
-      ALBERTA_CANCER_CENTRES: mergedCentres,
-    };
+    const priorMeta = existing._dataMetadata?.ALBERTA_CANCER_CENTRES;
+    const contentChanged =
+      JSON.stringify(mergedCentres) !== JSON.stringify(existing.ALBERTA_CANCER_CENTRES);
 
-    // Stamp freshness for the array this scraper owns; preserve all other
-    // _dataMetadata entries (manual arrays + sibling CIHI writers) via merge.
+    // Preserve sibling arrays verbatim; only refresh centres + their metadata.
     const ownedMetadata: DataMetadata = {
       ALBERTA_CANCER_CENTRES: buildMetadataEntry({
         updateType: 'auto',
         source: 'AHS Cancer Centre directory',
         sourceVintage: 'Live AHS directory',
         lastUpdated: timestamp,
+        previous: priorMeta,
+        contentChanged,
       }),
     };
-    merged._dataMetadata = mergeDataMetadata(existing._dataMetadata, ownedMetadata);
 
-    fs.writeFileSync(CANCER_FILE, JSON.stringify(merged, null, 2), 'utf8');
+    const merged: CancerJson = {
+      ...existing,
+      ALBERTA_CANCER_CENTRES: mergedCentres,
+      _dataMetadata: mergeDataMetadata(existing._dataMetadata, ownedMetadata),
+    };
+
+    if (contentChanged || !priorMeta) {
+      applyWithheldPayloadGuard(merged as Record<string, unknown>);
+      fs.writeFileSync(CANCER_FILE, JSON.stringify(merged, null, 2), 'utf8');
+    }
 
     const durationMs = Date.now() - startTime;
     console.log(
-      `[AhsCancerCentresScraper] Complete. ${scrapedCentres.length} centres parsed, ${mergedCentres.length} written. ${durationMs}ms`,
+      `[AhsCancerCentresScraper] Complete. ${scrapedCentres.length} centres parsed, ${mergedCentres.length} written (changed=${contentChanged}). ${durationMs}ms`,
     );
 
     return {
       domain: 'cancer',
       pipeline: 'ahsCancerCentresScraper',
-      status: 'success',
+      status: contentChanged ? 'success' : 'partial',
       recordsFetched: scrapedCentres.length,
-      recordsWritten: mergedCentres.length,
+      recordsWritten: contentChanged ? mergedCentres.length : 0,
       durationMs,
       timestamp,
     };

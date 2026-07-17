@@ -1,66 +1,52 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useMemo, useState } from 'react';
 import {
-  Activity, 
-  Search, 
-  MapPin, 
-  AlertTriangle, 
-  Sparkles, 
-  ShieldCheck, 
-  TrendingUp, 
-  Layers, 
-  FileText, 
-  Info,
-  ChevronRight,
-  UserCheck,
+  MapPin,
+  Activity,
+  AlertTriangle,
   HeartPulse,
-  Award,
   Clock,
   BarChart2,
+  TrendingUp,
   TrendingDown,
   RefreshCw,
+  Search,
 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  Cell,
-  ReferenceLine
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
 } from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
 import * as cancerData from '../cancerData';
 import {
-  type CancerBurdenItem,
   type CancerSurgeryWaitTrend,
   type CancerCentreLocation,
   type RadiationTherapyCompliance,
-  type CancerScreeningZoneRate
 } from '../cancerData';
 import { DataTimestamp, DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
 type CancerData = {
-  CANCER_BURDEN_STATS: CancerBurdenItem[];
-  CANCER_SCREENING_RATES: CancerScreeningZoneRate[];
+  CANCER_BURDEN_STATS: unknown[];
+  CANCER_SCREENING_RATES: unknown[];
   CANCER_SURGERY_WAIT_TRENDS: CancerSurgeryWaitTrend[];
   RADIATION_THERAPY_WAIT_TRENDS: RadiationTherapyCompliance[];
   ALBERTA_CANCER_CENTRES: CancerCentreLocation[];
+  _dataMetadata?: DataMetadataMap;
 };
 
 export default function CancerDashboard() {
-  const [activeSubTab, setActiveSubTab] = useState<'burden' | 'screening' | 'surgery' | 'radiation' | 'facilities'>('burden');
+  const [activeSubTab, setActiveSubTab] = useState<'surgery' | 'radiation' | 'facilities'>('surgery');
   
   // Interactive Filter States
-  const [selectedCancer, setSelectedCancer] = useState<string>('All');
   const [selectedZone, setSelectedZone] = useState<string>('All');
   const [facilitySearch, setFacilitySearch] = useState<string>('');
   const { data, metadata, isLoading, error, refresh } = useDomainData<CancerData>('cancer', cancerData);
@@ -74,23 +60,7 @@ export default function CancerDashboard() {
     _dataMetadata: metadata ?? undefined
   }), [data, metadata]);
 
-  // Filter Cancer Burden stats
-  const filteredBurden = useMemo(() => {
-    if (selectedCancer === 'All') return domainData.CANCER_BURDEN_STATS;
-    return domainData.CANCER_BURDEN_STATS.filter(b => b.cancerType === selectedCancer);
-  }, [selectedCancer, domainData]);
-
-  // Aggregate stats for the burden tab
-  const burdenSummary = useMemo(() => {
-    const totalCases = domainData.CANCER_BURDEN_STATS.reduce((acc, curr) => acc + curr.projectedCases2026, 0);
-    const totalDeaths = domainData.CANCER_BURDEN_STATS.reduce((acc, curr) => acc + curr.projectedDeaths2026, 0);
-    const avgSurvival = domainData.CANCER_BURDEN_STATS.length > 0
-      ? domainData.CANCER_BURDEN_STATS.reduce((acc, curr) => acc + curr.fiveYearRelativeSurvivalPct, 0) / domainData.CANCER_BURDEN_STATS.length
-      : 0;
-    const lungDeaths = domainData.CANCER_BURDEN_STATS.find(b => b.cancerType === 'Lung Cancer')?.projectedDeaths2026 ?? 0;
-    const lungDeathPct = totalDeaths > 0 ? Math.round((lungDeaths / totalDeaths) * 100) : 0;
-    return { totalCases, totalDeaths, avgSurvival, lungDeaths, lungDeathPct };
-  }, [domainData]);
+  // Burden/screening are not shown until a verified upstream exists.
 
   // Filter Facilities by Zone and Search
   const filteredFacilities = useMemo(() => {
@@ -193,11 +163,11 @@ export default function CancerDashboard() {
     return null;
   }, [selectedTrend, domainData]);
 
-  const hasNoData = !data || 
-                    !data.CANCER_BURDEN_STATS || data.CANCER_BURDEN_STATS.length === 0 || 
-                    !data.CANCER_SURGERY_WAIT_TRENDS || data.CANCER_SURGERY_WAIT_TRENDS.length === 0 || 
-                    !data.RADIATION_THERAPY_WAIT_TRENDS || data.RADIATION_THERAPY_WAIT_TRENDS.length === 0 || 
-                    !data.ALBERTA_CANCER_CENTRES || data.ALBERTA_CANCER_CENTRES.length === 0;
+  const hasNoData =
+    !data ||
+    ((data.CANCER_SURGERY_WAIT_TRENDS?.length ?? 0) === 0 &&
+      (data.RADIATION_THERAPY_WAIT_TRENDS?.length ?? 0) === 0 &&
+      (data.ALBERTA_CANCER_CENTRES?.length ?? 0) === 0);
 
   if (isLoading) {
     return (
@@ -211,7 +181,11 @@ export default function CancerDashboard() {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
         <AlertTriangle className="w-6 h-6 text-amber-400" />
-        <span>{error ? `Failed to load cancer data: ${error}` : 'No cancer data available'}</span>
+        <span>
+          {error
+            ? `Failed to load cancer data: ${error}`
+            : 'No verified CIHI surgery/radiation wait trends or AHS cancer centres are available. Projected burden and screening rates stay withheld.'}
+        </span>
         <button
           onClick={refresh}
           className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
@@ -223,45 +197,44 @@ export default function CancerDashboard() {
     );
   }
 
+  // Prefer an available tab if the current selection's array is empty.
+  const effectiveSubTab: 'surgery' | 'radiation' | 'facilities' =
+    activeSubTab === 'surgery' && domainData.CANCER_SURGERY_WAIT_TRENDS.length > 0
+      ? 'surgery'
+      : activeSubTab === 'radiation' && domainData.RADIATION_THERAPY_WAIT_TRENDS.length > 0
+        ? 'radiation'
+        : activeSubTab === 'facilities' && domainData.ALBERTA_CANCER_CENTRES.length > 0
+          ? 'facilities'
+          : domainData.CANCER_SURGERY_WAIT_TRENDS.length > 0
+            ? 'surgery'
+            : domainData.RADIATION_THERAPY_WAIT_TRENDS.length > 0
+              ? 'radiation'
+              : 'facilities';
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <DashboardHeader
         icon={HeartPulse}
-        title="Cancer Care & Screening"
-        description="Track projected cases, screening participation rates, and radiation therapy benchmarks."
+        title="Cancer Care"
+        description="CIHI cancer surgery and radiation wait trends plus AHS cancer centre directory. Projected burden and screening rates are withheld until a verified upstream exists."
         metadata={domainData._dataMetadata}
-        arrayKey="CANCER_SURGERY_WAIT_TRENDS"
+        arrayKey={
+          domainData.CANCER_SURGERY_WAIT_TRENDS.length > 0
+            ? 'CANCER_SURGERY_WAIT_TRENDS'
+            : domainData.RADIATION_THERAPY_WAIT_TRENDS.length > 0
+              ? 'RADIATION_THERAPY_WAIT_TRENDS'
+              : 'ALBERTA_CANCER_CENTRES'
+        }
       />
 
-      {/* Sub-Tab Navigation */}
+      {/* Sub-Tab Navigation — only surfaces with verified upstreams */}
       <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
-        <button
-          onClick={() => setActiveSubTab('burden')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'burden'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <TrendingUp className="w-4 h-4" />
-          <span>Tumor Burden</span>
-        </button>
-        <button
-          onClick={() => setActiveSubTab('screening')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'screening'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <UserCheck className="w-4 h-4" />
-          <span>Screening Rates</span>
-        </button>
+        {domainData.CANCER_SURGERY_WAIT_TRENDS.length > 0 && (
         <button
           onClick={() => setActiveSubTab('surgery')}
           className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'surgery'
+            effectiveSubTab === 'surgery'
               ? 'border-blue-500 text-blue-400 bg-blue-500/5'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
@@ -269,10 +242,12 @@ export default function CancerDashboard() {
           <Activity className="w-4 h-4" />
           <span>Cancer Surgeries</span>
         </button>
+        )}
+        {domainData.RADIATION_THERAPY_WAIT_TRENDS.length > 0 && (
         <button
           onClick={() => setActiveSubTab('radiation')}
           className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'radiation'
+            effectiveSubTab === 'radiation'
               ? 'border-blue-500 text-blue-400 bg-blue-500/5'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
@@ -280,10 +255,12 @@ export default function CancerDashboard() {
           <Clock className="w-4 h-4" />
           <span>Radiation Gaps</span>
         </button>
+        )}
+        {domainData.ALBERTA_CANCER_CENTRES.length > 0 && (
         <button
           onClick={() => setActiveSubTab('facilities')}
           className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'facilities'
+            effectiveSubTab === 'facilities'
               ? 'border-blue-500 text-blue-400 bg-blue-500/5'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
@@ -291,192 +268,11 @@ export default function CancerDashboard() {
           <MapPin className="w-4 h-4" />
           <span>Therapy Centers</span>
         </button>
+        )}
       </div>
 
-      {/* SUBTAB 1: Tumor Burden & Survival Outcomes */}
-      {activeSubTab === 'burden' && (
-        <div className="space-y-6">
-          {/* Burden Cards Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">2026 Projected Major Cancer Diagnoses</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-white">~{(burdenSummary.totalCases).toLocaleString()}</span>
-                <span className="text-xs text-slate-400 font-mono">new cases (major cancers)</span>
-              </div>
-              <p className="text-[10px] text-slate-400 leading-relaxed pt-1 border-t border-slate-850">
-                Sum of projected 2026 cases for tracked major cancer types (not total provincial incidence). Registry vintage shown in data timestamp below.
-              </p>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">2026 Projected Annual Cancer Deaths</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-rose-500">~{(burdenSummary.totalDeaths).toLocaleString()}</span>
-                <span className="text-xs text-slate-400 font-mono">mortality count</span>
-              </div>
-              <p className="text-[10px] text-slate-400 leading-relaxed pt-1 border-t border-slate-850">
-                Lung cancer remains the leading cause of oncological mortality (~{burdenSummary.lungDeaths.toLocaleString()} cases), accounting for approximately {burdenSummary.lungDeathPct}% of all cancer deaths.
-              </p>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">Average 5-Year Survival Rate</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-emerald-400">{burdenSummary.avgSurvival.toFixed(1)}%</span>
-                <span className="text-xs text-slate-400 font-mono">relative average</span>
-              </div>
-              <p className="text-[10px] text-slate-400 leading-relaxed pt-1 border-t border-slate-850">
-                Prostate & breast cancers demonstrate high relative survival rates (&gt;89%), while lung cancer lags at 22.4% due to delayed diagnosis.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Interactive Burden chart */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Alberta Primary Cancer Burden Profiler</h3>
-                  <p className="text-[10px] text-slate-500">Projected incident cases for the tracked major cancers vs. actual mortality indicators (March 2026 Registry Update). This is not the total annual cancer burden for Alberta.</p>
-                <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="CANCER_BURDEN_STATS" />
-                </div>
-                <div className="relative">
-                  <select
-                    value={selectedCancer}
-                    onChange={(e) => setSelectedCancer(e.target.value)}
-                    className="bg-slate-950 text-xs border border-slate-800 rounded px-2.5 py-1 text-slate-300 focus:outline-none focus:border-emerald-500"
-                  >
-                    <option value="All">All Major Cancers</option>
-                    {domainData.CANCER_BURDEN_STATS.map(b => (
-                      <option key={b.cancerType} value={b.cancerType}>{b.cancerType}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={filteredBurden}
-                    margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="cancerType" stroke="#64748b" fontSize={10} />
-                    <YAxis stroke="#64748b" fontSize={9} />
-                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
-                    <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <Bar dataKey="projectedCases2026" name="Projected New Cases" fill="#059669" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                    <Bar dataKey="projectedDeaths2026" name="Projected Annual Deaths" fill="#e11d48" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Detailed Table view */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Surveillance Rates & Risks</h3>
-                  <p className="text-[10px] text-slate-500">Age-standardized rates per 100,000 population</p>
-                </div>
-
-                <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
-                  {filteredBurden.map(item => (
-                    <div key={item.cancerType} className="p-3 bg-slate-950/40 border border-slate-850 rounded-lg space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-white">{item.cancerType}</span>
-                        <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-                          {item.fiveYearRelativeSurvivalPct}% Survival
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400">
-                        <div>
-                          <span className="text-[9px] text-slate-500 block">Incidence Rate:</span>
-                          <strong className="text-slate-300 font-semibold">{item.ageStandardizedIncidenceRate} / 100k</strong>
-                        </div>
-                        <div>
-                          <span className="text-[9px] text-slate-500 block">Mortality Rate:</span>
-                          <strong className="text-slate-300 font-semibold">{item.ageStandardizedMortalityRate} / 100k</strong>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-850 text-[10px] text-slate-500 leading-relaxed flex items-start gap-2">
-                <Info className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <p>
-                  <strong>Age-Standardization:</strong> Minimizes differences in population age profiles when comparing different health regions or decades over time.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SUBTAB 2: Organized Cancer Screening by Zone */}
-      {activeSubTab === 'screening' && (
-        <div className="space-y-6">
-          <DataTimestamp compact metadata={domainData._dataMetadata} arrayKey="CANCER_SCREENING_RATES" />
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
-            <div>
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Screening for Life Participation by Zone</h3>
-              <p className="text-[10px] text-slate-500">Breast, cervical, and colorectal screening rates (% eligible population screened)</p>
-            </div>
-            {domainData.CANCER_SCREENING_RATES.length === 0 ? (
-              <p className="text-sm text-slate-500">No screening rate data available.</p>
-            ) : (
-              <>
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={domainData.CANCER_SCREENING_RATES}
-                      margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                      <XAxis dataKey="zone" stroke="#64748b" fontSize={10} />
-                      <YAxis stroke="#64748b" fontSize={9} domain={[0, 100]} />
-                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
-                      <Legend wrapperStyle={{ fontSize: 10 }} />
-                      <Bar dataKey="breastScreeningPct" name="Breast (%)" fill="#ec4899" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                      <Bar dataKey="cervicalScreeningPct" name="Cervical (%)" fill="#8b5cf6" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                      <Bar dataKey="colorectalScreeningPct" name="Colorectal (%)" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="text-slate-500 uppercase tracking-wider border-b border-slate-800">
-                        <th className="py-2 pr-4 font-extrabold">Zone</th>
-                        <th className="py-2 pr-4 font-extrabold">Breast %</th>
-                        <th className="py-2 pr-4 font-extrabold">Cervical %</th>
-                        <th className="py-2 font-extrabold">Colorectal %</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {domainData.CANCER_SCREENING_RATES.map((row) => (
-                        <tr key={row.zone} className="border-b border-slate-850 text-slate-300">
-                          <td className="py-2 pr-4 font-semibold text-white">{row.zone}</td>
-                          <td className="py-2 pr-4 font-mono">{row.breastScreeningPct}%</td>
-                          <td className="py-2 pr-4 font-mono">{row.cervicalScreeningPct}%</td>
-                          <td className="py-2 font-mono">{row.colorectalScreeningPct}%</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-
       {/* SUBTAB 3: Cancer Surgery Wait Times (CIHI Benchmarks) */}
-      {activeSubTab === 'surgery' && (
+      {effectiveSubTab === 'surgery' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
@@ -545,7 +341,7 @@ export default function CancerDashboard() {
                     <span className="text-[10px] text-emerald-400 font-mono font-bold">14 Days Max</span>
                   </div>
                   <p className="text-[10px] text-slate-400 leading-relaxed">
-                    Acute cases with rapid localized growth. Current AHS performance targets are generally met with 94.2% of patients receiving surgery within 14 days (program-reported estimate; no public registry source).
+                    Urgent cancer surgeries with clinical priority 1. Compliance percentages are not shown without a public registry source; use CIHI wait-day trends for measured performance.
                   </p>
                   <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-emerald-400/80 group-hover:text-emerald-400 transition-colors">
                     <BarChart2 className="w-3 h-3" />
@@ -573,7 +369,7 @@ export default function CancerDashboard() {
                     <span className="text-[10px] text-amber-500 font-mono font-bold">28 Days Max</span>
                   </div>
                   <p className="text-[10px] text-slate-400 leading-relaxed">
-                    Established primary solid tumors. 84.1% compliance rate within Alberta's central and metropolitan cancer hubs (program-reported estimate; no public registry source).
+                    Semi-urgent primary solid tumors. Program-reported compliance percentages are withheld; CIHI median and P90 wait days are the sourced metrics.
                   </p>
                   <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-amber-500/80 group-hover:text-amber-500 transition-colors">
                     <BarChart2 className="w-3 h-3" />
@@ -601,7 +397,7 @@ export default function CancerDashboard() {
                     <span className="text-[10px] text-indigo-400 font-mono font-bold">42 Days Max</span>
                   </div>
                   <p className="text-[10px] text-slate-400 leading-relaxed">
-                    Post-chemotherapy margin reconstruction or slow-growing prostate monitors. Compliance falls to 72.5% during high peak surgical volumes (program-reported estimate; no public registry source).
+                    Lower-urgency reconstructive or monitored cases. Fabricated compliance percentages were removed; refer to CIHI wait trends only.
                   </p>
                   <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-indigo-400/80 group-hover:text-indigo-400 transition-colors">
                     <BarChart2 className="w-3 h-3" />
@@ -686,7 +482,7 @@ export default function CancerDashboard() {
       )}
 
       {/* SUBTAB 4: Radiation Therapy Access */}
-      {activeSubTab === 'radiation' && (
+      {effectiveSubTab === 'radiation' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
@@ -801,9 +597,8 @@ export default function CancerDashboard() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-850 flex items-center gap-2">
-                <Award className="w-5 h-5 text-emerald-400 shrink-0" />
-                <span className="text-[10px] text-emerald-300 font-bold">Alberta maintains one of the shortest radiation queues in Western Canada.</span>
+              <div className="pt-3 border-t border-slate-850">
+                <span className="text-[10px] text-slate-400 font-bold">Radiation compliance trends are CIHI-sourced wait metrics only; comparative ranking claims are withheld without a verified source.</span>
               </div>
             </div>
           </div>
@@ -890,7 +685,7 @@ export default function CancerDashboard() {
       )}
 
       {/* SUBTAB 5: Treatment Access & Facility Map */}
-      {activeSubTab === 'facilities' && (
+      {effectiveSubTab === 'facilities' && (
         <div className="space-y-6">
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

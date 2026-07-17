@@ -16,6 +16,7 @@ import fs from 'fs';
 import * as XLSX from 'xlsx';
 import path from 'path';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -221,6 +222,7 @@ export async function run(): Promise<SyncResult> {
           ownedMetadata,
         ),
       };
+      applyWithheldPayloadGuard(merged);
       fs.writeFileSync(CANCER_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
       console.log(`[CihiWaitTimesPriority] Wrote ${cancerRecords.length} cancer records to data-cancer.json`);
     }
@@ -243,6 +245,7 @@ export async function run(): Promise<SyncResult> {
           ownedMetadata,
         ),
       };
+      applyWithheldPayloadGuard(merged);
       fs.writeFileSync(SURGICAL_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
       console.log(`[CihiWaitTimesPriority] Wrote ${surgicalRecords.length} surgical records to data-surgical.json`);
     }
@@ -265,6 +268,7 @@ export async function run(): Promise<SyncResult> {
           ownedMetadata,
         ),
       };
+      applyWithheldPayloadGuard(merged);
       fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
       console.log(`[CihiWaitTimesPriority] Wrote ${diagnosticRecords.length} diagnostic records to data-diagnostic.json`);
     }

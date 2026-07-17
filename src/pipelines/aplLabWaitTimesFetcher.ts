@@ -1,5 +1,5 @@
 // APL Lab Wait Times Fetcher Pipeline
-// Fetches live lab location wait times from the APL QMe REST API every 30 minutes.
+// Fetches live lab location wait times from the APL QMe REST API every 60 minutes.
 // The API returns 153 community lab locations with real-time WaitTime and SaveMyPlace fields.
 //
 // Endpoint: GET https://qmeapi.albertaprecisionlabs.ca/api/location
@@ -13,6 +13,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -153,8 +154,7 @@ export async function run(): Promise<SyncResult> {
       walkInAvailable: deriveWalkIn(site),
       latitude: parseFloat(site.Latitude) || 0,
       longitude: parseFloat(site.Longitude) || 0,
-      dailyVolume: 0,
-      peakHours: '',
+      // dailyVolume / peakHours are not provided by the QMe API — omit rather than invent zeros.
     }));
 
     // Read existing data-diagnostic.json, replace only LAB_LOCATION_WAITS, preserve everything else
@@ -195,7 +195,8 @@ export async function run(): Promise<SyncResult> {
       ownedMetadata,
     );
 
-    // Write back
+    // Write back (guard withheld residual arrays before RMW serialize)
+    applyWithheldPayloadGuard(existingData);
     fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(existingData, null, 2), 'utf8');
     console.log(`[AplLabWaitTimesFetcher] Wrote ${labLocations.length} lab locations to data-diagnostic.json`);
     // Append numeric-only wait snapshots for historical trend charting.
@@ -211,8 +212,8 @@ export async function run(): Promise<SyncResult> {
     }
 
     // Retain only last 90 days of lab snapshots.
-    // 153 labs × 48 fetches/day × 365 days ≈ 2.7M entries (~400MB) — too large.
-    // 90 days keeps ~660K entries (~100MB) while preserving seasonal trend visibility.
+    // 90 days keeps seasonal trend visibility without unbounded growth.
+    // Scheduler runs every 60 minutes (not 30).
     const retentionCutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
     currentLabSnapshots = currentLabSnapshots.filter(s => new Date(s.timestamp).getTime() > retentionCutoff);
 

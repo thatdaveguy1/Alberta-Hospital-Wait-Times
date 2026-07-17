@@ -61,158 +61,8 @@
       "ratePer100k": 327.2
     }
   ],
-  "NURSING_SUPPLY_TRENDS": [
-    {
-      "year": "2023",
-      "profession": "Registered Nurse (RN)",
-      "activePermits": 43210,
-      "growthRatePct": 1.4,
-      "vacancyRatePct": 9.2,
-      "directCarePct": 86.2,
-      "ruralRemotePct": 11.4
-    },
-    {
-      "year": "2024",
-      "profession": "Registered Nurse (RN)",
-      "activePermits": 44102,
-      "growthRatePct": 2.1,
-      "vacancyRatePct": 8.5,
-      "directCarePct": 85.8,
-      "ruralRemotePct": 11.1
-    },
-    {
-      "year": "2025",
-      "profession": "Registered Nurse (RN)",
-      "activePermits": 45171,
-      "growthRatePct": 2.4,
-      "vacancyRatePct": 7.8,
-      "directCarePct": 85.1,
-      "ruralRemotePct": 10.9
-    },
-    {
-      "year": "2023",
-      "profession": "Nurse Practitioner (NP)",
-      "activePermits": 840,
-      "growthRatePct": 8.5,
-      "vacancyRatePct": 12.4,
-      "directCarePct": 94.1,
-      "ruralRemotePct": 24.5
-    },
-    {
-      "year": "2024",
-      "profession": "Nurse Practitioner (NP)",
-      "activePermits": 935,
-      "growthRatePct": 11.3,
-      "vacancyRatePct": 10.8,
-      "directCarePct": 93.9,
-      "ruralRemotePct": 25.1
-    },
-    {
-      "year": "2025",
-      "profession": "Nurse Practitioner (NP)",
-      "activePermits": 1054,
-      "growthRatePct": 12.7,
-      "vacancyRatePct": 9.1,
-      "directCarePct": 93.5,
-      "ruralRemotePct": 26.2
-    },
-    {
-      "year": "2023",
-      "profession": "Licensed Practical Nurse (LPN)",
-      "activePermits": 18450,
-      "growthRatePct": 3.1,
-      "vacancyRatePct": 11.2,
-      "directCarePct": 91.5,
-      "ruralRemotePct": 16.8
-    },
-    {
-      "year": "2024",
-      "profession": "Licensed Practical Nurse (LPN)",
-      "activePermits": 19120,
-      "growthRatePct": 3.6,
-      "vacancyRatePct": 9.9,
-      "directCarePct": 91.2,
-      "ruralRemotePct": 16.4
-    },
-    {
-      "year": "2025",
-      "profession": "Licensed Practical Nurse (LPN)",
-      "activePermits": 19912,
-      "growthRatePct": 4.1,
-      "vacancyRatePct": 8.4,
-      "directCarePct": 90.9,
-      "ruralRemotePct": 16.1
-    },
-    {
-      "year": "2023",
-      "profession": "Health Care Aide (HCA)",
-      "activePermits": 24100,
-      "growthRatePct": 2.8,
-      "vacancyRatePct": 14.5,
-      "directCarePct": 98.2,
-      "ruralRemotePct": 18.2
-    },
-    {
-      "year": "2024",
-      "profession": "Health Care Aide (HCA)",
-      "activePermits": 25180,
-      "growthRatePct": 4.5,
-      "vacancyRatePct": 12.1,
-      "directCarePct": 98.1,
-      "ruralRemotePct": 18.5
-    },
-    {
-      "year": "2025",
-      "profession": "Health Care Aide (HCA)",
-      "activePermits": 26840,
-      "growthRatePct": 6.6,
-      "vacancyRatePct": 10.5,
-      "directCarePct": 98,
-      "ruralRemotePct": 18.9
-    }
-  ],
-  "WORKFORCE_AGE_PROFILE": [
-    {
-      "professionGroup": "Family Physicians",
-      "under35Pct": 14.5,
-      "age35to54Pct": 53.2,
-      "age55to64Pct": 20.8,
-      "over65Pct": 11.5,
-      "retirementRiskLevel": "High"
-    },
-    {
-      "professionGroup": "Surgical Specialists",
-      "under35Pct": 8.2,
-      "age35to54Pct": 55.4,
-      "age55to64Pct": 23.9,
-      "over65Pct": 12.5,
-      "retirementRiskLevel": "Critical"
-    },
-    {
-      "professionGroup": "Registered Nurses (RN)",
-      "under35Pct": 26.4,
-      "age35to54Pct": 48.5,
-      "age55to64Pct": 19.2,
-      "over65Pct": 5.9,
-      "retirementRiskLevel": "Moderate"
-    },
-    {
-      "professionGroup": "LPNs & HCAs",
-      "under35Pct": 34.2,
-      "age35to54Pct": 50.1,
-      "age55to64Pct": 12.8,
-      "over65Pct": 2.9,
-      "retirementRiskLevel": "Low"
-    },
-    {
-      "professionGroup": "Allied Health Professions",
-      "under35Pct": 22.1,
-      "age35to54Pct": 54.8,
-      "age55to64Pct": 17.6,
-      "over65Pct": 5.5,
-      "retirementRiskLevel": "Moderate"
-    }
-  ],
+  "NURSING_SUPPLY_TRENDS": [],
+  "WORKFORCE_AGE_PROFILE": [],
   "JOB_VACANCY_TRENDS": [
     {
       "quarter": "2023-Q1",
@@ -271,97 +121,8 @@
       "avgOfferedHourlyWage": 0
     }
   ],
-  "SPECIALIST_RECRUITMENT_NEEDS": [
-    {
-      "specialty": "Anesthesiology",
-      "currentActive": 412,
-      "forecasted10YrNeed": 580,
-      "plannedRecruitmentSeats": 120,
-      "gapShortageRisk": "Critical Deficit"
-    },
-    {
-      "specialty": "Emergency Medicine",
-      "currentActive": 495,
-      "forecasted10YrNeed": 650,
-      "plannedRecruitmentSeats": 110,
-      "gapShortageRisk": "High Gap"
-    },
-    {
-      "specialty": "Psychiatry",
-      "currentActive": 699,
-      "forecasted10YrNeed": 950,
-      "plannedRecruitmentSeats": 150,
-      "gapShortageRisk": "Critical Deficit"
-    },
-    {
-      "specialty": "Diagnostic Imaging",
-      "currentActive": 382,
-      "forecasted10YrNeed": 480,
-      "plannedRecruitmentSeats": 80,
-      "gapShortageRisk": "Moderate Gap"
-    },
-    {
-      "specialty": "General Surgery",
-      "currentActive": 315,
-      "forecasted10YrNeed": 360,
-      "plannedRecruitmentSeats": 60,
-      "gapShortageRisk": "Stable"
-    },
-    {
-      "specialty": "Obstetrics & Gynecology",
-      "currentActive": 288,
-      "forecasted10YrNeed": 375,
-      "plannedRecruitmentSeats": 55,
-      "gapShortageRisk": "High Gap"
-    }
-  ],
-  "ALLIED_HEALTH_SUPPLY": [
-    {
-      "profession": "Pharmacists",
-      "albertaCount": 6120,
-      "nationalComparisonRatePer100k": {
-        "alberta": 135.8,
-        "canadaAvg": 128.4
-      },
-      "vacancyActivePostings": 185
-    },
-    {
-      "profession": "Physiotherapists",
-      "albertaCount": 3890,
-      "nationalComparisonRatePer100k": {
-        "alberta": 86.4,
-        "canadaAvg": 95.2
-      },
-      "vacancyActivePostings": 240
-    },
-    {
-      "profession": "Occupational Therapists",
-      "albertaCount": 2450,
-      "nationalComparisonRatePer100k": {
-        "alberta": 54.4,
-        "canadaAvg": 58.9
-      },
-      "vacancyActivePostings": 145
-    },
-    {
-      "profession": "Respiratory Therapists",
-      "albertaCount": 1910,
-      "nationalComparisonRatePer100k": {
-        "alberta": 42.4,
-        "canadaAvg": 38.1
-      },
-      "vacancyActivePostings": 98
-    },
-    {
-      "profession": "Medical Lab Technologists",
-      "albertaCount": 4250,
-      "nationalComparisonRatePer100k": {
-        "alberta": 94.4,
-        "canadaAvg": 88.5
-      },
-      "vacancyActivePostings": 310
-    }
-  ],
+  "SPECIALIST_RECRUITMENT_NEEDS": [],
+  "ALLIED_HEALTH_SUPPLY": [],
   "PHYSICIAN_SUPPLY_CIHI": [
     {
       "zone": "Alberta",
@@ -6244,79 +6005,55 @@
   "_dataMetadata": {
     "PHYSICIAN_SPECIALTY_ZONE": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:01:11.853Z",
+      "lastUpdated": "2026-07-17T12:01:42.303Z",
       "source": "CPSA quarterly statistics",
       "sourceVintage": "Latest CPSA quarterly release"
     },
-    "NURSING_SUPPLY_TRENDS": {
-      "source": "Alberta nursing supply trends (CRNA/AHS-derived)",
-      "sourceVintage": "2023 hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
-    "WORKFORCE_AGE_PROFILE": {
-      "source": "Alberta workforce age profile by profession group",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
     "JOB_VACANCY_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:00:07.584Z",
+      "lastUpdated": "2026-07-17T12:00:06.754Z",
       "source": "StatCan table 14100371 via WDS CSV",
       "sourceVintage": "2023-Q1 to 2024-Q4"
     },
-    "SPECIALIST_RECRUITMENT_NEEDS": {
-      "source": "Alberta specialist recruitment needs / 10-yr forecast",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
-    "ALLIED_HEALTH_SUPPLY": {
-      "source": "Alberta allied health supply by profession",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
     "PHYSICIAN_SUPPLY_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:19.818Z",
+      "lastUpdated": "2026-07-17T12:05:14.025Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2015\u20132024"
+      "sourceVintage": "2015–2024"
     },
     "NURSE_SUPPLY_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:19.818Z",
+      "lastUpdated": "2026-07-17T12:05:14.025Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2015\u20132024"
+      "sourceVintage": "2015–2024"
     },
     "ALLIED_HEALTH_FLOW_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:19.818Z",
+      "lastUpdated": "2026-07-17T12:05:14.025Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2015\u20132024"
+      "sourceVintage": "2015–2024"
     },
     "ALLIED_HEALTH_SUPPLY_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:19.818Z",
+      "lastUpdated": "2026-07-17T12:05:14.025Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "Supply counts 2015\u20132024; rates per 100k use 2024 population denominators (AB 4.8M / CA 41.0M)"
+      "sourceVintage": "Supply counts 2015–2024; rates per 100k use 2024 population denominators (AB 4.8M / CA 41.0M)"
     },
     "NURSING_SUPPLY_TRENDS_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:19.818Z",
+      "lastUpdated": "2026-07-17T12:05:14.025Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2015\u20132024"
+      "sourceVintage": "2015–2024"
     },
     "WORKFORCE_AGE_PROFILE_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:19.818Z",
+      "lastUpdated": "2026-07-17T12:05:14.025Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
-      "sourceVintage": "2023\u20132024"
+      "sourceVintage": "2023–2024"
     },
     "JOB_VACANCY_TRENDS_CIHI": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:19.818Z",
+      "lastUpdated": "2026-07-17T12:05:14.025Z",
       "source": "CIHI Health Workforce Quick Stats 2024",
       "sourceVintage": "2015-Q4 to 2024-Q4"
     }

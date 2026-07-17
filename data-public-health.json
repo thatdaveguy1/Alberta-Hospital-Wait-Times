@@ -1,70 +1,5 @@
 {
-  "RESPIRATORY_VIRUS_SURVEILLANCE": [
-    {
-      "season": "2024-2025",
-      "virus": "COVID-19",
-      "testsPerformed": 142300,
-      "positivityRatePct": 14.8,
-      "hospitalizations": 1845,
-      "icuAdmissions": 168
-    },
-    {
-      "season": "2024-2025",
-      "virus": "Influenza A",
-      "testsPerformed": 112400,
-      "positivityRatePct": 11.2,
-      "hospitalizations": 1120,
-      "icuAdmissions": 94
-    },
-    {
-      "season": "2024-2025",
-      "virus": "RSV",
-      "testsPerformed": 68100,
-      "positivityRatePct": 8.5,
-      "hospitalizations": 642,
-      "icuAdmissions": 35
-    },
-    {
-      "season": "2024-2025",
-      "virus": "Influenza B",
-      "testsPerformed": 112400,
-      "positivityRatePct": 2.1,
-      "hospitalizations": 115,
-      "icuAdmissions": 8
-    },
-    {
-      "season": "2025-2026",
-      "virus": "COVID-19",
-      "testsPerformed": 124500,
-      "positivityRatePct": 12.3,
-      "hospitalizations": 1410,
-      "icuAdmissions": 124
-    },
-    {
-      "season": "2025-2026",
-      "virus": "Influenza A",
-      "testsPerformed": 105800,
-      "positivityRatePct": 9.8,
-      "hospitalizations": 924,
-      "icuAdmissions": 81
-    },
-    {
-      "season": "2025-2026",
-      "virus": "RSV",
-      "testsPerformed": 61400,
-      "positivityRatePct": 7.2,
-      "hospitalizations": 512,
-      "icuAdmissions": 28
-    },
-    {
-      "season": "2025-2026",
-      "virus": "Influenza B",
-      "testsPerformed": 105800,
-      "positivityRatePct": 3.4,
-      "hospitalizations": 184,
-      "icuAdmissions": 12
-    }
-  ],
+  "RESPIRATORY_VIRUS_SURVEILLANCE": [],
   "WASTEWATER_SIGNALS": [
     {
       "site": "Calgary (Bonnybrook Plant)",
@@ -167,173 +102,26 @@
       "trend": "Decreasing"
     }
   ],
-  "CHILDHOOD_IMMUNIZATION_COVERAGE": [
-    {
-      "zone": "Calgary Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "DTaP-IPV-Hib (Dose 4)",
-      "coverageRatePct": 77.2,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "Edmonton Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "DTaP-IPV-Hib (Dose 4)",
-      "coverageRatePct": 75.8,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "Central Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "DTaP-IPV-Hib (Dose 4)",
-      "coverageRatePct": 71.4,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "North Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "DTaP-IPV-Hib (Dose 4)",
-      "coverageRatePct": 68.5,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "South Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "DTaP-IPV-Hib (Dose 4)",
-      "coverageRatePct": 73.1,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "Alberta",
-      "ageMilestone": "Age 2",
-      "antigen": "DTaP-IPV-Hib (Dose 4)",
-      "coverageRatePct": 74.5,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "Calgary Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "Measles-Containing (Dose 1)",
-      "coverageRatePct": 83.1,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "Edmonton Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "Measles-Containing (Dose 1)",
-      "coverageRatePct": 81.4,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "Central Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "Measles-Containing (Dose 1)",
-      "coverageRatePct": 76.2,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "North Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "Measles-Containing (Dose 1)",
-      "coverageRatePct": 72.8,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "South Zone",
-      "ageMilestone": "Age 2",
-      "antigen": "Measles-Containing (Dose 1)",
-      "coverageRatePct": 79.5,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    },
-    {
-      "zone": "Alberta",
-      "ageMilestone": "Age 2",
-      "antigen": "Measles-Containing (Dose 1)",
-      "coverageRatePct": 80.2,
-      "targetPct": 95,
-      "reportingYear": "2025"
-    }
-  ],
+  "CHILDHOOD_IMMUNIZATION_COVERAGE": [],
   "NOTIFIABLE_DISEASE_INCIDENCE": [],
   "ENVIRONMENTAL_ADVISORIES": [],
-  "OUTBREAK_PROTOCOLS": {
-    "Acute Care Wards": {
-      "settingType": "Acute Care Site (Hospital Unit)",
-      "triggerThreshold": "2 or more epidemiologically linked cases of respiratory illness within a 72-hour window.",
-      "isolationProtocol": "Strict droplet & contact precautions. Patients isolated in single-occupancy rooms; staff cohorting initiated.",
-      "antiviralPolicy": "Proactive antiviral prophylaxis (Oseltamivir/Tamiflu) offered to all eligible ward contacts within 24 hours of confirmation."
-    },
-    "Continuing Care Homes": {
-      "settingType": "Continuing Care (Type A / Type B)",
-      "triggerThreshold": "2 or more residents on a unit exhibiting new clinical symptoms, or 1 lab-confirmed viral pathogen + 1 symptomatic resident.",
-      "isolationProtocol": "Immediate cell/room confinement of affected residents. All communal dining and group activities suspended on the unit.",
-      "antiviralPolicy": "Mandated prophylaxis for all asymptomatic residents on affected units immediately upon Medical Officer of Health (MOH) order."
-    },
-    "Supportive Living / Shelter": {
-      "settingType": "Congregate Settings & Homeless Shelters",
-      "triggerThreshold": "3 or more linked cases within 48 hours, or a rapid surge in typical respiratory or enteric symptoms.",
-      "isolationProtocol": "Designation of isolated cohort dormitories. Masks distributed to all residents and visitors in public areas.",
-      "antiviralPolicy": "Triage assessment for high-risk elderly or immunocompromised residents; direct referral to secondary urgent care."
-    }
-  },
+  "OUTBREAK_PROTOCOLS": {},
   "_dataMetadata": {
-    "RESPIRATORY_VIRUS_SURVEILLANCE": {
-      "source": "Alberta Respiratory Virus Dashboard (seasonal surveillance)",
-      "sourceVintage": "2024\u20132025 and 2025\u20132026 seasons (lab positivity & hospitalizations)",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-15T12:04:09.947Z",
-      "verification": "Seasonal metrics curated from AHS RVD; auto RVD summary arrays refresh separately under RVD_RESPIRATORY_CASE_COUNTS."
-    },
     "WASTEWATER_SIGNALS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:09.947Z",
+      "lastUpdated": "2026-07-17T12:05:04.363Z",
       "source": "PHAC Health Infobase wastewater API + Alberta RVD",
       "sourceVintage": "Live weekly wastewater signals"
     },
-    "CHILDHOOD_IMMUNIZATION_COVERAGE": {
-      "source": "Alberta childhood immunization coverage by zone",
-      "sourceVintage": "2025 reporting year baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
-    "NOTIFIABLE_DISEASE_INCIDENCE": {
-      "source": "Alberta notifiable disease incidence",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
-    "ENVIRONMENTAL_ADVISORIES": {
-      "source": "Alberta environmental health advisories",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
-    "OUTBREAK_PROTOCOLS": {
-      "source": "Alberta outbreak management protocols",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
     "RVD_RESPIRATORY_CASE_COUNTS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:09.947Z",
+      "lastUpdated": "2026-07-17T12:05:04.363Z",
       "source": "Alberta Respiratory Virus Dashboard summary",
       "sourceVintage": "2025-08-24 to 2026-08-23"
     },
     "RVD_IMMUNIZATION_DOSES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:09.947Z",
+      "lastUpdated": "2026-07-17T12:05:04.363Z",
       "source": "Alberta Respiratory Virus Dashboard immunizations",
       "sourceVintage": "2025-08-24 to 2026-08-23"
     }

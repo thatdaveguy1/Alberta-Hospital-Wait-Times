@@ -92,6 +92,21 @@ const EMPTY_SATISFACTION_STATS: StatsCanSatisfactionStats = {
   },
 };
 
+/** True only when a non-placeholder StatsCan satisfaction payload is present. */
+function hasVerifiedStatsCanSatisfaction(stats: StatsCanSatisfactionStats | null | undefined): boolean {
+  if (!stats?.metrics_alberta) return false;
+  const m = stats.metrics_alberta;
+  const hasMeta = Boolean(stats.reporting_title?.trim() || stats.survey_period?.trim());
+  const hasSegments = (m.waiting_segment_distribution?.length ?? 0) > 0;
+  const hasLifeImpact = (m.life_impact_categories?.length ?? 0) > 0;
+  const hasPositiveRates =
+    m.satisfied_with_wait > 0 ||
+    m.unsatisfied_with_wait > 0 ||
+    m.wait_affected_life_negatively > 0;
+  // Fail-closed empty object (zeros + empty arrays, blank title/period) is not observed data.
+  return hasMeta && (hasSegments || hasLifeImpact || hasPositiveRates);
+}
+
 export default function SurgicalDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'overview' | 'ortho' | 'comparisons' | 'statscan'>('overview');
   
@@ -106,9 +121,11 @@ export default function SurgicalDashboard() {
     );
   }, [data]);
   const ORTHOPEDIC_SPECIALTY_RECORDS = data?.ORTHOPEDIC_SPECIALTY_RECORDS ?? [];
-  const SURGICAL_FACILITIES = data?.SURGICAL_FACILITIES ?? [];
+  // SURGICAL_FACILITIES / FACILITY_COMPARISONS ops metrics are estimated — do not surface.
+  const SURGICAL_FACILITIES: typeof data extends { SURGICAL_FACILITIES: infer T } ? T : never[] = [] as any;
   const SPECIALISTS_LIST = data?.SPECIALISTS_LIST ?? [];
-  const STATSCAN_SATISFACTION_STATS = data?.STATSCAN_SATISFACTION_STATS ?? EMPTY_SATISFACTION_STATS;
+  // StatsCan satisfaction snapshot is manual/unverified in this domain — fail closed.
+  const STATSCAN_SATISFACTION_STATS = EMPTY_SATISFACTION_STATS;
   const rawHistoricalTrends = data?.HISTORICAL_WAIT_TRENDS ?? [];
   const HISTORICAL_WAIT_TRENDS = useMemo(() => {
     if (!rawHistoricalTrends || rawHistoricalTrends.length === 0) return [];
@@ -152,7 +169,7 @@ export default function SurgicalDashboard() {
     return Array.from(map.values()).sort((a, b) => a.year.localeCompare(b.year)) as HistoricalTrend[];
   }, [rawHistoricalTrends]);
   const STATSCAN_DEMOGRAPHICS = data?.STATSCAN_DEMOGRAPHICS ?? [];
-  const FACILITY_COMPARISONS = data?.FACILITY_COMPARISONS ?? [];
+  const FACILITY_COMPARISONS: typeof data extends { FACILITY_COMPARISONS: infer T } ? T : never[] = [] as any;
   const SPECIALIST_COMPARISONS = data?.SPECIALIST_COMPARISONS ?? [];
 
   useEffect(() => {
@@ -487,11 +504,14 @@ export default function SurgicalDashboard() {
 
   const procAData = findComparison90th(compProcedureA);
   const procBData = findComparison90th(compProcedureB);
-  // Pie chart stats for StatsCan Satisfaction
-  const satisfactionPieData = [
-    { name: 'Satisfied with wait time', value: STATSCAN_SATISFACTION_STATS.metrics_alberta.satisfied_with_wait, color: '#10b981' },
-    { name: 'Unsatisfied with wait time', value: STATSCAN_SATISFACTION_STATS.metrics_alberta.unsatisfied_with_wait, color: '#ef4444' }
-  ];
+  // Pie chart stats for StatsCan Satisfaction — only when verified non-empty payload exists
+  const hasStatsCanSatisfaction = hasVerifiedStatsCanSatisfaction(STATSCAN_SATISFACTION_STATS);
+  const satisfactionPieData = hasStatsCanSatisfaction
+    ? [
+        { name: 'Satisfied with wait time', value: STATSCAN_SATISFACTION_STATS.metrics_alberta.satisfied_with_wait, color: '#10b981' },
+        { name: 'Unsatisfied with wait time', value: STATSCAN_SATISFACTION_STATS.metrics_alberta.unsatisfied_with_wait, color: '#ef4444' },
+      ]
+    : [];
 
   if (isLoading) {
     return (
@@ -865,186 +885,48 @@ export default function SurgicalDashboard() {
                   <FileText className="w-4.5 h-4.5 text-slate-400" />
                   <h4 className="text-xs font-black text-slate-200 uppercase tracking-wider">Surgical Capacity & Initiatives</h4>
                 </div>
-                
                 <div className="space-y-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-300 font-medium">Chartered Surgical Facilities Share</span>
-                      <span className="text-emerald-400 font-bold">{surgicalCapacityStats.csfSharePct}%</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-850 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500" style={{ width: `${Math.min(100, surgicalCapacityStats.csfSharePct)}%` }}></div>
-                    </div>
-                    <p className="text-[9px] text-slate-500">
-                      {SURGICAL_FACILITIES.filter(f => f.chartered_partner_status).length} of {surgicalCapacityStats.total} tracked facilities are CSF partners
+                  <div className="p-3 bg-slate-950/50 border border-slate-850 rounded-xl space-y-1">
+                    <p className="text-[11px] text-slate-300 font-semibold">OR utilization & CSF share unavailable</p>
+                    <p className="text-[10px] text-slate-500 leading-relaxed">
+                      Facility OR utilization and chartered-facility share were estimated and not from a published feed. Removed rather than displayed.
                     </p>
                   </div>
-
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-300 font-medium">Provincial Operating Room (OR) Utilization</span>
-                      <span className="text-blue-400 font-bold">{surgicalCapacityStats.orUtilPct}%</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-850 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500" style={{ width: `${Math.min(100, surgicalCapacityStats.orUtilPct)}%` }}></div>
-                    </div>
-                    <p className="text-[9px] text-slate-500">Mean OR utilization across facilities reporting non-zero rates</p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-300 font-medium">ASI Hip/Knee Fast-Track Compliance</span>
+                      <span className="text-slate-300 font-medium">Hip % within CIHI 182-day benchmark</span>
                       <span className="text-amber-400 font-bold">
                         {surgicalCapacityStats.hipBenchPct != null ? `${surgicalCapacityStats.hipBenchPct}%` : '—'}
                       </span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-850 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-amber-500"
-                        style={{ width: `${Math.min(100, surgicalCapacityStats.hipBenchPct ?? 0)}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-[9px] text-slate-500">Hip replacement % within CIHI 182-day benchmark (provincial)</p>
+                    <p className="text-[9px] text-slate-500">From SURGICAL_RECORDS when the provincial Power BI row is present</p>
                   </div>
                 </div>
               </div>
 
-              {/* StatsCan Survey Snapshot */}
               <div className="bg-gradient-to-br from-[#0a0f1d] to-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Award className="w-4 h-4 text-amber-500" />
-                    <h4 className="text-xs font-black text-slate-200 uppercase tracking-wider">Patient Impact survey</h4>
-                  </div>
-                  <span className="text-[8px] font-bold text-slate-500">StatsCan 2024</span>
+                <div className="flex items-center gap-1.5">
+                  <Award className="w-4 h-4 text-amber-500" />
+                  <h4 className="text-xs font-black text-slate-200 uppercase tracking-wider">Patient Impact survey</h4>
                 </div>
-                
-                <div className="p-3 bg-amber-500/5 border border-amber-500/15 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-300">Wait negatively impacted life</span>
-                    <span className="text-amber-400 font-extrabold text-sm">42.6%</span>
-                  </div>
-                  <p className="text-[9.5px] text-slate-400 leading-normal">
-                    Provincial survey respondents experienced stress, pain or productivity losses while waiting for initial specialist consultations.
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest block">Top Impact Categories</span>
-                  <div className="grid grid-cols-2 gap-1.5 text-[9px]">
-                    <div className="p-1.5 bg-slate-900 border border-slate-800 rounded-lg">
-                      <div className="text-slate-300">Anxiety/Stress</div>
-                      <div className="text-slate-400 font-extrabold">78.5%</div>
-                    </div>
-                    <div className="p-1.5 bg-slate-900 border border-slate-800 rounded-lg">
-                      <div className="text-slate-300">Physical Pain</div>
-                      <div className="text-slate-400 font-extrabold">65.2%</div>
-                    </div>
-                    <div className="p-1.5 bg-slate-900 border border-slate-800 rounded-lg">
-                      <div className="text-slate-300">Income Loss</div>
-                      <div className="text-slate-400 font-extrabold font-mono">34.0%</div>
-                    </div>
-                    <div className="p-1.5 bg-slate-900 border border-slate-800 rounded-lg">
-                      <div className="text-slate-300">Health Decline</div>
-                      <div className="text-slate-400 font-extrabold">28.4%</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Unused State Integration: Surgical Facilities Directory & Live Capacity */}
-          <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 sm:p-5 space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/60 pb-4">
-              <div>
-                <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-cyan-400" />
-                  Surgical Facilities Directory & Capacity Monitor
-                </h3>
-                <p className="text-[11px] text-slate-400 leading-normal mt-1">
-                  Comprehensive tracking of all {surgicalCapacityStats.total} licensed acute care and contracted Chartered Surgical Facilities (CSF) performing specialized surgeries in Alberta.
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  StatsCan patient-impact figures are not shown until a table-backed fetch with field-level provenance is wired. Handwritten percentages have been removed.
                 </p>
               </div>
-
-              {/* Interactive Search & Zone Filters */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                {/* Search */}
-                <div className="relative shrink-0">
-                  <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Search name or city..."
-                    value={facilitySearch}
-                    onChange={(e) => setFacilitySearch(e.target.value)}
-                    className="w-full sm:w-48 bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
-                  />
-                </div>
-                {/* Zone filter */}
-                <select
-                  value={selectedZone}
-                  onChange={(e) => setSelectedZone(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500 cursor-pointer"
-                >
-                  {['All', ...Array.from(new Set(SURGICAL_FACILITIES.map(f => f.zone)))].map(zone => (
-                    <option key={zone} value={zone}>{zone}</option>
-                  ))}
-                </select>
-              </div>
             </div>
-
-            {/* Table layout for desktop */}
-            <div className="hidden md:block overflow-x-auto border border-slate-850/60 rounded-xl">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-slate-950/60 border-b border-slate-850 text-slate-400 font-bold">
-                    <th className="p-3">Facility Details</th>
-                    <th className="p-3">Zone & Region</th>
-                    <th className="p-3 text-center">OR Utilization Rate</th>
-                    <th className="p-3">Operating Status</th>
-                    <th className="p-3">Specialties Offered</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-850/40">
-                  {trackedFacilities.map(renderFacilityRow)}
-                  {untrackedFacilities.length > 0 && (
-                    <tr className="bg-slate-950/40">
-                      <td colSpan={5} className="p-3 text-[10px] font-black uppercase tracking-widest text-slate-500 border-y border-slate-850/80">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <span>Facilities Not Reporting Live Utilization</span>
-                          <span className="font-sans normal-case text-slate-500 font-medium text-[9.5px]">
-                            *Live telemetry not actively tracked under the current provincial OR registry program (e.g. community and pediatric clinics).
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                  {untrackedFacilities.map(renderFacilityRow)}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Grid layout for mobile */}
-            <div className="md:hidden grid grid-cols-1 gap-3">
-              {trackedFacilities.map(renderFacilityMobileCard)}
-              {untrackedFacilities.length > 0 && (
-                <div className="p-4 bg-slate-900/30 border border-slate-850 rounded-xl text-center space-y-1">
-                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Facilities Not Reporting Live Utilization</h4>
-                  <p className="text-[9px] text-slate-500 leading-normal">
-                    *Live telemetry not actively tracked under current provincial OR registry program (e.g. community and pediatric clinics).
-                  </p>
-                </div>
-              )}
-              {untrackedFacilities.map(renderFacilityMobileCard)}
-            </div>
-
-            {filteredFacilities.length === 0 && (
-              <div className="bg-slate-950/40 border border-slate-850/60 p-8 text-center rounded-xl">
-                <AlertTriangle className="w-7 h-7 text-amber-500 mx-auto mb-2" />
-                <p className="text-slate-400 text-xs">No facilities matched your search and zone parameters.</p>
-              </div>
-            )}
           </div>
+
+          {/* Estimated surgical facility OR utilization directory removed */}
+          <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 sm:p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-cyan-400" />
+              <h3 className="font-extrabold text-sm text-white">Surgical Facilities Directory & Capacity Monitor</h3>
+            </div>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Facility OR utilization rates and CSF partner flags were estimated (not from a published live OR registry feed) and have been removed. Provincial wait-time series remain available from Power BI surgical records when present.
+            </p>
+          </div>
+
         </div>
       )}
 
@@ -1061,6 +943,12 @@ export default function SurgicalDashboard() {
                 Detailed metrics by geography comparing hip and knee replacement wait segments and historical median values.
               </p>
               <DataTimestamp compact metadata={metadata} arrayKey="ORTHOPEDIC_SPECIALTY_RECORDS" />
+              {ORTHOPEDIC_SPECIALTY_RECORDS.length === 0 && (
+                <p className="text-[11px] text-amber-400/90">No current ABJHI orthopedic rows. Failed scrapes are not treated as fresh data.</p>
+              )}
+              {ORTHOPEDIC_SPECIALTY_RECORDS.length > 0 && metadata?.ORTHOPEDIC_SPECIALTY_RECORDS?.updateType === 'manual' && (
+                <p className="text-[11px] text-amber-400/90">ABJHI last scrape did not refresh these rows — treat as stale, not live.</p>
+              )}
             </div>
 
             {/* Procedure toggle */}
@@ -1199,17 +1087,23 @@ export default function SurgicalDashboard() {
       {activeSubTab === 'comparisons' && (
         <div className="space-y-8">
           
-          {/* COMPARISON BLOCK 1: FACILITY TO FACILITY */}
+          {/* COMPARISON BLOCK 1: FACILITY TO FACILITY — estimated ops metrics only when upstream present */}
           <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-6">
             <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3">
               <Building2 className="w-5 h-5 text-blue-400" />
               <div>
                 <h3 className="font-extrabold text-sm text-white uppercase tracking-wider">Facility Head-to-Head</h3>
-                <p className="text-[10px] text-slate-400">Select any two surgical facilities to compare operational metrics and waitlist counts side-by-side.</p>
+                <p className="text-[10px] text-slate-400">Operational facility comparison (OR utilization / waitlist) is only shown when a verified upstream provides rows.</p>
               <DataTimestamp compact metadata={metadata} arrayKey="FACILITY_COMPARISONS" />
               </div>
             </div>
 
+            {FACILITY_COMPARISONS.length === 0 ? (
+              <p className="text-[11px] text-slate-400 leading-relaxed p-3 bg-slate-950/40 border border-slate-850 rounded-xl">
+                Facility comparison metrics (OR utilization, completed volume, waitlists) were estimated and are not displayed. Use Power BI surgical records and ABJHI orthopedic rows when available.
+              </p>
+            ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Facility A</label>
@@ -1342,6 +1236,8 @@ export default function SurgicalDashboard() {
                   </div>
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
 
@@ -1552,14 +1448,35 @@ export default function SurgicalDashboard() {
           <div className="p-4 bg-purple-500/5 border border-purple-500/10 rounded-2xl flex items-start gap-3">
             <Info className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h4 className="text-xs font-black text-white uppercase tracking-wider">Statistics Canada Specialist Access Survey (2024 Survey release)</h4>
+              <h4 className="text-xs font-black text-white uppercase tracking-wider">
+                {hasStatsCanSatisfaction
+                  ? (STATSCAN_SATISFACTION_STATS.reporting_title || 'Statistics Canada Specialist Access Survey')
+                  : 'Statistics Canada Specialist Access Survey'}
+              </h4>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                This captures patient-reported outcomes on medical specialist initial consultation access. Prolonged waiting represents a severe bottleneck prior to decision-for-surgery scheduling.
+                {hasStatsCanSatisfaction
+                  ? 'Patient-reported outcomes on medical specialist initial consultation access. Prolonged waiting represents a bottleneck prior to decision-for-surgery scheduling.'
+                  : 'Patient-reported specialist-access satisfaction metrics stay withheld until a verified StatsCan table extract with field-level provenance is wired. Zero placeholders from the fail-closed satisfaction object are not treated as survey results.'}
               </p>
-              <DataTimestamp compact metadata={metadata} arrayKey="STATSCAN_SATISFACTION_STATS" />
+              {hasStatsCanSatisfaction && (
+                <DataTimestamp compact metadata={metadata} arrayKey="STATSCAN_SATISFACTION_STATS" />
+              )}
             </div>
           </div>
 
+          {!hasStatsCanSatisfaction ? (
+            <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-6 sm:p-8 text-center space-y-3">
+              <AlertTriangle className="w-6 h-6 text-amber-400 mx-auto" />
+              <p className="text-sm font-bold text-slate-200">StatsCan patient satisfaction unavailable</p>
+              <p className="text-xs text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                Statistics Canada specialist-access satisfaction percentages, wait-segment shares, and life-impact rates are not shown until a table-backed fetch with field-level provenance is wired. The pipeline fails closed with an empty satisfaction object; zero placeholders are withheld rather than rendered as observed survey outcomes.
+              </p>
+              <p className="text-[10px] text-slate-500 max-w-xl mx-auto leading-relaxed">
+                Expected source: Statistics Canada Health Care Access Survey / specialist consultation wait modules (typically annual or multi-year release cadence). Handwritten snapshot percentages have been removed.
+              </p>
+              <DataTimestamp compact metadata={metadata} arrayKey="STATSCAN_SATISFACTION_STATS" />
+            </div>
+          ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Pie Chart Satisfaction */}
             <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-between">
@@ -1636,13 +1553,25 @@ export default function SurgicalDashboard() {
               </div>
 
               <div className="pt-4 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-500">
-                <span>Total Patients Screened: Alberta Weighted</span>
-                <span>July 2025 release</span>
+                <span>
+                  {STATSCAN_SATISFACTION_STATS.reporting_title || 'Statistics Canada specialist access survey'}
+                </span>
+                <span>{STATSCAN_SATISFACTION_STATS.survey_period || 'Release pending provenance'}</span>
               </div>
             </div>
           </div>
+          )}
 
-          {/* Demographic filters cuts */}
+          {/* Demographic filters cuts — only when upstream rows exist */}
+          {STATSCAN_DEMOGRAPHICS.length === 0 ? (
+            <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-5 space-y-2">
+              <h4 className="font-bold text-xs text-slate-200 uppercase tracking-wider">Demographic Cuts & Life Impact Indicators</h4>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Demographic survey cuts are unavailable. No verified StatsCan demographic break rows are loaded; satisfaction and life-impact percentages by age, gender, or referral pathway are withheld.
+              </p>
+              <DataTimestamp compact metadata={metadata} arrayKey="STATSCAN_DEMOGRAPHICS" />
+            </div>
+          ) : (
           <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
               <div>
@@ -1703,6 +1632,7 @@ export default function SurgicalDashboard() {
               </table>
             </div>
           </div>
+          )}
         </div>
       )}
 

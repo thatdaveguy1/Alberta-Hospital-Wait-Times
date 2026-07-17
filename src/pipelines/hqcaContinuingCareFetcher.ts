@@ -19,6 +19,7 @@ import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -335,8 +336,7 @@ function coerceJson(raw: unknown): ContinuingCareJson {
       base.CONTINUING_CARE_PLACEMENT_STATS = raw.CONTINUING_CARE_PLACEMENT_STATS as PlacementMetric[];
     if (Array.isArray(raw.RESIDENT_QUALITY_OUTCOMES))
       base.RESIDENT_QUALITY_OUTCOMES = raw.RESIDENT_QUALITY_OUTCOMES as ResidentOutcomeQuality[];
-    if (Array.isArray(raw.HOME_CARE_EXPERIENCE))
-      base.HOME_CARE_EXPERIENCE = raw.HOME_CARE_EXPERIENCE as HomeCareContinuity[];
+    // Withheld: never rehydrate HOME_CARE_EXPERIENCE from raw.
     if (Array.isArray(raw.CONTINUING_CARE_COMPLIANCE))
       base.CONTINUING_CARE_COMPLIANCE = raw.CONTINUING_CARE_COMPLIANCE as CareFacilityCompliance[];
     if (isRecord(raw._dataMetadata)) base._dataMetadata = raw._dataMetadata as DataMetadata;
@@ -359,45 +359,38 @@ function loadExisting(): ContinuingCareJson {
 }
 
 // Merge fetched placement data into the existing array by (year, zone) key.
-// Existing records that match keep their daysWaitingP50/P90 fields; the two
-// percentage fields are updated from the fresh CSV data. Records only in the
-// new data are appended with zeroed wait-day fields.
+// HQCA CSVs supply only placement percentages. Wait-day fields have no verified
+// upstream in this pipeline — always null (never preserve hand-authored days or
+// zero-fill new rows as if they were measured).
 function mergePlacementStats(
   existing: PlacementMetric[],
   fetched: Map<string, { within30: number; preferred: number }>,
 ): PlacementMetric[] {
   const byKey = new Map<string, PlacementMetric>();
-  for (const row of existing) {
-    byKey.set(`${row.year}|${row.zone}`, { ...row });
-  }
+  // Start from fetched keys only so orphaned hand-only (year, zone) rows drop.
   for (const [key, vals] of fetched) {
-    const prev = byKey.get(key);
-    if (prev) {
-      prev.pctPlacedWithin30Days = vals.within30;
-      prev.pctPlacedPreferredOption = vals.preferred;
-    } else {
-      const [year, zone] = key.split('|');
-      byKey.set(key, {
-        year,
-        zone: zone as PlacementMetric['zone'],
-        pctPlacedWithin30Days: vals.within30,
-        pctPlacedPreferredOption: vals.preferred,
-        daysWaitingP50: 0,
-        daysWaitingP90: 0,
-      });
-    }
+    const [year, zone] = key.split('|');
+    byKey.set(key, {
+      year,
+      zone: zone as PlacementMetric['zone'],
+      pctPlacedWithin30Days: vals.within30,
+      pctPlacedPreferredOption: vals.preferred,
+      daysWaitingP50: null,
+      daysWaitingP90: null,
+    });
   }
+  // Silence unused param — existing wait days must never be re-hydrated.
+  void existing;
   return Array.from(byKey.values());
 }
 
-// Merge fetched antipsychotic outcomes into the existing array by year key,
-// replacing only the "Inappropriate Antipsychotic Use" metric rows and
-// preserving all other metric rows (Falls, Restraints, etc.).
+// Replace resident quality outcomes with only CIHI antipsychotic rows.
+// Falls / Physical Restraint rows are hand-authored and must not survive under
+// an auto HQCA+CIHI stamp.
 function mergeResidentOutcomes(
-  existing: ResidentOutcomeQuality[],
+  _existing: ResidentOutcomeQuality[],
   fetched: Map<string, { alberta: number; canada: number }>,
 ): ResidentOutcomeQuality[] {
-  const preserved = existing.filter((r) => r.metric !== METRIC_NAME);
   const added: ResidentOutcomeQuality[] = [];
   for (const [year, vals] of fetched) {
     added.push({
@@ -408,7 +401,7 @@ function mergeResidentOutcomes(
       directionIsLowerBetter: true,
     });
   }
-  return [...preserved, ...added];
+  return added;
 }
 
 // ---- Main run -------------------------------------------------------------
@@ -538,8 +531,9 @@ export async function run(): Promise<SyncResult> {
       }),
       RESIDENT_QUALITY_OUTCOMES: buildMetadataEntry({
         updateType: 'auto',
-        source: 'HQCA FOCUS continuing-care CSVs + CIHI LTCC indicators',
-        sourceVintage: '2021–latest HQCA/CIHI reporting period',
+        source: 'CIHI potentially inappropriate antipsychotics in long-term care',
+        sourceVintage: 'CIHI LTCC indicator data table (latest available)',
+        verification: 'Only Inappropriate Antipsychotic Use rows are auto-written; other quality metrics are not sourced.',
         lastUpdated: timestamp,
       }),
     });
@@ -551,6 +545,7 @@ export async function run(): Promise<SyncResult> {
       _dataMetadata: mergedMetadata,
     };
 
+    applyWithheldPayloadGuard(merged as unknown as Record<string, unknown>);
     fs.writeFileSync(CONTINUING_CARE_FILE, JSON.stringify(merged, null, 2), 'utf8');
     const recordsWritten = placementMap.size + outcomeMap.size;
 

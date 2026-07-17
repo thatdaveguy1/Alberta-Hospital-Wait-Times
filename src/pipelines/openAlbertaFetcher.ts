@@ -11,6 +11,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import { applyWithheldPayloadGuard } from './metadataHelpers';
 
 const CKAN_BASE = 'https://open.alberta.ca/api/3/action/package_search';
 const QUERIES = [
@@ -343,6 +344,7 @@ export async function run(): Promise<SyncResult> {
         const payload = resourceResponse.data;
         if (isObject(payload) && Object.keys(payload).length > 0) {
           const targetPath = path.join(process.cwd(), domainFile);
+          applyWithheldPayloadGuard(payload as Record<string, unknown>);
           writeJson(targetPath, payload);
           domainWrites += 1;
           console.log(

@@ -12,9 +12,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.570721,
-      "longitude": -113.389831,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.389831
     },
     {
       "id": "APL-AIR",
@@ -23,14 +21,12 @@
       "address": "103 - 217 Centre Ave SW",
       "city": "Airdrie",
       "region": "Calgary Zone",
-      "waitTimeMin": 26,
+      "waitTimeMin": 65,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.291030883789105,
-      "longitude": -114.016220092773,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.016220092773
     },
     {
       "id": "APL-ATHAB",
@@ -44,9 +40,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.7184143066406,
-      "longitude": -113.25506591796899,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.25506591796899
     },
     {
       "id": "APL-AVE",
@@ -55,14 +49,12 @@
       "address": "517 - 12445 Lake Fraser Dr SE",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 28,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.9440231323242,
-      "longitude": -114.06826019287101,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.06826019287101
     },
     {
       "id": "APL-BANFF",
@@ -76,9 +68,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.17919921875,
-      "longitude": -115.57593536377,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -115.57593536377
     },
     {
       "id": "APL-BANK",
@@ -87,14 +77,12 @@
       "address": "1439 - 1820 Richmond Rd SW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 19,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.03723144531249,
-      "longitude": -114.110206604004,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.110206604004
     },
     {
       "id": "APL-BHC",
@@ -108,9 +96,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.1190795898438,
-      "longitude": -114.399696350098,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.399696350098
     },
     {
       "id": "APL-BAS",
@@ -124,9 +110,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.5886383056641,
-      "longitude": -112.974052429199,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.974052429199
     },
     {
       "id": "APL-BASSA",
@@ -140,9 +124,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.7899475097656,
-      "longitude": -112.46142578125,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.46142578125
     },
     {
       "id": "APL-BVC",
@@ -151,14 +133,12 @@
       "address": "5009 - 52 Avenue",
       "city": "Beaumont",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 49,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.354855,
-      "longitude": -113.416482,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.416482
     },
     {
       "id": "APL-BLH",
@@ -172,9 +152,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 55.213737487793,
-      "longitude": -119.424835205078,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -119.424835205078
     },
     {
       "id": "APL-BEDD",
@@ -183,14 +161,12 @@
       "address": "209 - 8120 Beddington Blvd NW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": 58,
+      "waitTimeMin": 77,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.12756347656249,
-      "longitude": -114.073417663574,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.073417663574
     },
     {
       "id": "APL-BELC",
@@ -199,14 +175,12 @@
       "address": "2919 - 137 Avenue",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 2,
+      "waitTimeMin": 38,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.599827,
-      "longitude": -113.388565,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.388565
     },
     {
       "id": "APL-BCHC",
@@ -215,14 +189,12 @@
       "address": "312 3 St E",
       "city": "Oyen",
       "region": "South Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.3512382507324,
-      "longitude": -110.479270935059,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.479270935059
     },
     {
       "id": "APL-BV",
@@ -236,9 +208,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.2639389038086,
-      "longitude": -110.73907470703101,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.73907470703101
     },
     {
       "id": "APL-BIHC",
@@ -252,9 +222,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.8657684326172,
-      "longitude": -111.378265380859,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.378265380859
     },
     {
       "id": "APL-BOYLE",
@@ -268,9 +236,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.5885047912598,
-      "longitude": -112.801383972168,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.801383972168
     },
     {
       "id": "APL-BS",
@@ -279,14 +245,12 @@
       "address": "10628 - 96 Street ",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 3,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.551604,
-      "longitude": -113.485919,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.485919
     },
     {
       "id": "APL-BRT",
@@ -300,9 +264,7 @@
       "appointmentRequired": false,
       "walkInAvailable": false,
       "latitude": 53.10911178588871,
-      "longitude": -114.470069885254,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.470069885254
     },
     {
       "id": "APL-BROOK",
@@ -311,14 +273,12 @@
       "address": "7 - 500 Cassils Rd E",
       "city": "Brooks",
       "region": "South Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 4,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.5726013183594,
-      "longitude": -111.887657165527,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.887657165527
     },
     {
       "id": "APL-RIV",
@@ -327,14 +287,12 @@
       "address": "180 - 200 Rivercrest Dr SE",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": 24,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 18,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.9783668518066,
-      "longitude": -114.01155090332,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.01155090332
     },
     {
       "id": "APL-EWCC",
@@ -343,14 +301,12 @@
       "address": "216, 6655 - 178 Street",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 15,
+      "waitTimeMin": 26,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.501628,
-      "longitude": -113.630694,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.630694
     },
     {
       "id": "APL-CMR",
@@ -359,14 +315,12 @@
       "address": "6530 - 48 Avenue",
       "city": "Camrose",
       "region": "Central Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 15,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.018075,
-      "longitude": -112.852252,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.852252
     },
     {
       "id": "APL-CAN",
@@ -380,9 +334,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.093093872070305,
-      "longitude": -115.349807739258,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -115.349807739258
     },
     {
       "id": "APL-CLC",
@@ -391,14 +343,12 @@
       "address": "100, 9945- 50 Street",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 15,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.540269,
-      "longitude": -113.418413,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.418413
     },
     {
       "id": "APL-CARD",
@@ -412,9 +362,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.201961517334,
-      "longitude": -113.30581665039101,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.30581665039101
     },
     {
       "id": "APL-SRH",
@@ -428,9 +376,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 55.776969909668,
-      "longitude": -118.838836669922,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -118.838836669922
     },
     {
       "id": "APL-CHAP",
@@ -439,14 +385,12 @@
       "address": "2110, 1800 194 Ave SE",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": true,
       "walkInAvailable": false,
       "latitude": 50.8785320611392,
-      "longitude": -114.022182118114,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.022182118114
     },
     {
       "id": "APL-CHES",
@@ -455,14 +399,12 @@
       "address": "288 Kinniburgh Blvd ",
       "city": "Chestermere",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": false,
       "latitude": 51.022518157959,
-      "longitude": -113.81002044677699,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.81002044677699
     },
     {
       "id": "APL-CLARE",
@@ -476,9 +418,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.0190200805664,
-      "longitude": -113.58243560791,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.58243560791
     },
     {
       "id": "APL-COAL",
@@ -492,9 +432,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.7262268066406,
-      "longitude": -112.606414794922,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.606414794922
     },
     {
       "id": "APL-COCH",
@@ -503,14 +441,12 @@
       "address": "60 Grande Blvd",
       "city": "Cochrane",
       "region": "Calgary Zone",
-      "waitTimeMin": 20,
+      "waitTimeMin": 30,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.1847991943359,
-      "longitude": -114.474098205566,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.474098205566
     },
     {
       "id": "APL-COL",
@@ -524,9 +460,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.4683723449707,
-      "longitude": -110.196640014648,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.196640014648
     },
     {
       "id": "APL-CP",
@@ -535,14 +469,12 @@
       "address": "303, 8215 - 112 Street NW",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 9,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.51879,
-      "longitude": -113.520273,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.520273
     },
     {
       "id": "APL-CONSO",
@@ -556,9 +488,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.009944915771506,
-      "longitude": -110.782012939453,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.782012939453
     },
     {
       "id": "APL-CHCC",
@@ -572,9 +502,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.0964202880859,
-      "longitude": -111.45897674560499,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.45897674560499
     },
     {
       "id": "APL-CROW",
@@ -588,9 +516,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.61643600463871,
-      "longitude": -114.45841217041,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.45841217041
     },
     {
       "id": "APL-DAH",
@@ -604,9 +530,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.8689994812012,
-      "longitude": -112.27295684814499,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.27295684814499
     },
     {
       "id": "APL-DVH",
@@ -620,9 +544,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.3516426086426,
-      "longitude": -113.73104095459,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.73104095459
     },
     {
       "id": "APL-DIDS",
@@ -636,9 +558,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.6616516113281,
-      "longitude": -114.122833251953,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.122833251953
     },
     {
       "id": "APL-DRAY",
@@ -652,9 +572,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.21193313598631,
-      "longitude": -114.969291687012,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.969291687012
     },
     {
       "id": "APL-DRUM",
@@ -668,9 +586,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.469905853271506,
-      "longitude": -112.725921630859,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.725921630859
     },
     {
       "id": "APL-EDH",
@@ -684,9 +600,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.5912666320801,
-      "longitude": -116.406845092773,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -116.406845092773
     },
     {
       "id": "APL-ELK",
@@ -700,9 +614,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.8979263305664,
-      "longitude": -110.90666198730499,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.90666198730499
     },
     {
       "id": "APL-EV",
@@ -711,14 +623,12 @@
       "address": "5225 50 St",
       "city": "Evansburg",
       "region": "North Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 2,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": false,
       "latitude": 53.604689461937106,
-      "longitude": -115.01826088985501,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -115.01826088985501
     },
     {
       "id": "APL-FVH",
@@ -732,9 +642,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 56.071956634521506,
-      "longitude": -118.383926391602,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -118.383926391602
     },
     {
       "id": "APL-CLEOD",
@@ -748,9 +656,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.7266082763672,
-      "longitude": -113.39365386962899,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.39365386962899
     },
     {
       "id": "APL-FSCC",
@@ -759,14 +665,12 @@
       "address": "109, 9372 Southfort Drive",
       "city": "Fort Saskatchewan",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 20,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.693416,
-      "longitude": -113.213514,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.213514
     },
     {
       "id": "APL-FOX",
@@ -780,9 +684,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.404792785644496,
-      "longitude": -116.801467895508,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -116.801467895508
     },
     {
       "id": "APL-FKLN",
@@ -791,14 +693,12 @@
       "address": "#100 9521 Franklin Avenue",
       "city": "Fort McMurray",
       "region": "North Zone",
-      "waitTimeMin": 20,
+      "waitTimeMin": 4,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 56.7229301,
-      "longitude": -111.3744714,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.3744714
     },
     {
       "id": "APL-GWCC",
@@ -812,9 +712,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.516621,
-      "longitude": -113.497678,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.497678
     },
     {
       "id": "APL-SLHC",
@@ -828,9 +726,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.1213340759277,
-      "longitude": -112.464012145996,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.464012145996
     },
     {
       "id": "APL-GIB",
@@ -844,9 +740,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.8282432556152,
-      "longitude": -113.325233459473,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.325233459473
     },
     {
       "id": "APL-GLB",
@@ -855,14 +749,12 @@
       "address": "154 - 3715 51 St SW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": 40,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 30,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.0215377807617,
-      "longitude": -114.16149139404301,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.16149139404301
     },
     {
       "id": "APL-GLAND",
@@ -871,14 +763,12 @@
       "address": "D264 - 1600 90 Ave SW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 29,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.973560333252,
-      "longitude": -114.098251342773,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.098251342773
     },
     {
       "id": "APL-CACHE",
@@ -892,9 +782,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.8914070129394,
-      "longitude": -119.12001800537101,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -119.12001800537101
     },
     {
       "id": "APL-GP",
@@ -903,14 +791,12 @@
       "address": "101 - 11002 104 Ave",
       "city": "Grande Prairie",
       "region": "North Zone",
-      "waitTimeMin": 3,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 42,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 55.173835754394496,
-      "longitude": -118.826972961426,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -118.826972961426
     },
     {
       "id": "APL-GRIM",
@@ -924,9 +810,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 56.190502166748,
-      "longitude": -117.62720489502,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -117.62720489502
     },
     {
       "id": "APL-GULF",
@@ -935,14 +819,12 @@
       "address": "344 - 401 9 Ave SW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 25,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.0447845458984,
-      "longitude": -114.069244384766,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.069244384766
     },
     {
       "id": "APL-HANNA",
@@ -956,9 +838,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.65037155151369,
-      "longitude": -111.92716217041,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.92716217041
     },
     {
       "id": "APL-HRD",
@@ -972,9 +852,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.6690559387207,
-      "longitude": -111.30728912353501,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.30728912353501
     },
     {
       "id": "APL-HVMC",
@@ -983,14 +861,12 @@
       "address": "10917- 23 Ave",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 16,
+      "waitTimeMin": 42,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.453024,
-      "longitude": -113.510638,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.510638
     },
     {
       "id": "APL-HPR",
@@ -1004,9 +880,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 55.4316101074219,
-      "longitude": -116.45462799072301,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -116.45462799072301
     },
     {
       "id": "APL-HRIV",
@@ -1020,9 +894,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.5759506225586,
-      "longitude": -113.879043579102,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.879043579102
     },
     {
       "id": "APL-HIP",
@@ -1036,9 +908,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.3988151550293,
-      "longitude": -117.58506011962899,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -117.58506011962899
     },
     {
       "id": "APL-HY",
@@ -1047,14 +917,12 @@
       "address": "112, 11010 - 101 Street ",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 10,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.557595,
-      "longitude": -113.494137,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.494137
     },
     {
       "id": "APL-HYTHE",
@@ -1068,9 +936,7 @@
       "appointmentRequired": false,
       "walkInAvailable": false,
       "latitude": 55.3276160929089,
-      "longitude": -119.550468401677,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -119.550468401677
     },
     {
       "id": "APL-IHP",
@@ -1084,9 +950,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.0196723937988,
-      "longitude": -113.95092773437501,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.95092773437501
     },
     {
       "id": "APL-KL",
@@ -1100,9 +964,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.7892036437988,
-      "longitude": -111.85880279541,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.85880279541
     },
     {
       "id": "APL-LACR",
@@ -1116,9 +978,7 @@
       "appointmentRequired": false,
       "walkInAvailable": false,
       "latitude": 58.1866073608398,
-      "longitude": -116.419090270996,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -116.419090270996
     },
     {
       "id": "APL-LHP",
@@ -1132,15 +992,13 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.4609031677246,
-      "longitude": -113.740776062012,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.740776062012
     },
     {
       "id": "APL-LAKE",
       "name": "Lakewood ",
       "code": "LAKE",
-      "address": "204, 7319 \u2013 29 Ave ",
+      "address": "204, 7319 – 29 Ave ",
       "city": "Edmonton",
       "region": "Edmonton Zone",
       "waitTimeMin": "Closed",
@@ -1148,9 +1006,7 @@
       "appointmentRequired": false,
       "walkInAvailable": false,
       "latitude": 53.4594219,
-      "longitude": -113.445777,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.445777
     },
     {
       "id": "APL-LAM",
@@ -1164,9 +1020,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.7624435424805,
-      "longitude": -112.788314819336,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.788314819336
     },
     {
       "id": "APL-LEDUC",
@@ -1175,14 +1029,12 @@
       "address": "6 - 5309 Discovery Way",
       "city": "Leduc",
       "region": "Edmonton Zone",
-      "waitTimeMin": 8,
-      "saveMyPlaceAvailable": true,
+      "waitTimeMin": 9,
+      "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.2664756774902,
-      "longitude": -113.5673828125,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.5673828125
     },
     {
       "id": "APL-LCV",
@@ -1191,14 +1043,12 @@
       "address": "Unit 33, 1240 2A Ave N",
       "city": "Lethbridge",
       "region": "South Zone",
-      "waitTimeMin": 28,
-      "saveMyPlaceAvailable": true,
+      "waitTimeMin": 4,
+      "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.7001461,
-      "longitude": -112.8269232,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.8269232
     },
     {
       "id": "APL-LHL",
@@ -1212,9 +1062,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.6939998,
-      "longitude": -112.8962718,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.8962718
     },
     {
       "id": "APL-LLCC",
@@ -1223,14 +1071,12 @@
       "address": "108, 4402 - 52 avenue",
       "city": "Lloydminster",
       "region": "Central Zone",
-      "waitTimeMin": 4,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 5,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.278571,
-      "longitude": -110.010334,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.010334
     },
     {
       "id": "APL-MCHC",
@@ -1244,9 +1090,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 56.9281234741211,
-      "longitude": -117.62141418457,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -117.62141418457
     },
     {
       "id": "APL-MMALL",
@@ -1255,14 +1099,12 @@
       "address": "200 - 4935 40 Ave NW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": 34,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 46,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.0876731872559,
-      "longitude": -114.157829284668,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.157829284668
     },
     {
       "id": "APL-MARLB",
@@ -1271,14 +1113,12 @@
       "address": "455 - 433 Marlborough Way NE",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 42,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.05588912963871,
-      "longitude": -113.977928161621,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.977928161621
     },
     {
       "id": "APL-MYH",
@@ -1292,9 +1132,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.9485130310059,
-      "longitude": -115.131797790527,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -115.131797790527
     },
     {
       "id": "APL-MCK",
@@ -1303,14 +1141,12 @@
       "address": "5426 Falsbridge Dr NE",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": 19,
-      "saveMyPlaceAvailable": true,
+      "waitTimeMin": 90,
+      "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.0980796813965,
-      "longitude": -113.95629119873,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.95629119873
     },
     {
       "id": "APL-MHCC",
@@ -1319,14 +1155,12 @@
       "address": "240,156 Street and 87 Avenue",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 2,
+      "waitTimeMin": 37,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.519849,
-      "longitude": -113.590439,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.590439
     },
     {
       "id": "APL-HAT",
@@ -1335,14 +1169,12 @@
       "address": "1 - 44 Carry Dr SE",
       "city": "Medicine Hat",
       "region": "South Zone",
-      "waitTimeMin": 7,
+      "waitTimeMin": 33,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.0058479309082,
-      "longitude": -110.651245117188,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.651245117188
     },
     {
       "id": "APL-MILK",
@@ -1356,9 +1188,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.1490516662598,
-      "longitude": -112.07741546630899,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.07741546630899
     },
     {
       "id": "APL-MW",
@@ -1367,14 +1197,12 @@
       "address": "140, 3699 Millwoods Road NW",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 11,
+      "waitTimeMin": 14,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.472199,
-      "longitude": -113.453647,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.453647
     },
     {
       "id": "APL-MOC",
@@ -1383,14 +1211,12 @@
       "address": "9523 100 St",
       "city": "Morinville",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 35,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.7969741821289,
-      "longitude": -113.644195556641,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.644195556641
     },
     {
       "id": "APL-NAN",
@@ -1404,9 +1230,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.3475532531738,
-      "longitude": -113.77466583252,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.77466583252
     },
     {
       "id": "APL-NHILL",
@@ -1420,9 +1244,7 @@
       "appointmentRequired": true,
       "walkInAvailable": false,
       "latitude": 51.065914154052706,
-      "longitude": -114.098930358887,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.098930358887
     },
     {
       "id": "APL-NGCC",
@@ -1431,14 +1253,12 @@
       "address": "#2084, 9499 - 137 Avenue",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 64,
-      "saveMyPlaceAvailable": true,
+      "waitTimeMin": 90,
+      "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.598452,
-      "longitude": -113.487206,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.487206
     },
     {
       "id": "APL-HLV",
@@ -1452,9 +1272,7 @@
       "appointmentRequired": false,
       "walkInAvailable": false,
       "latitude": 58.5136337280274,
-      "longitude": -117.162162780762,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -117.162162780762
     },
     {
       "id": "APL-OIL",
@@ -1468,9 +1286,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.678249359130895,
-      "longitude": -114.23508453369101,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.23508453369101
     },
     {
       "id": "APL-OK",
@@ -1479,14 +1295,12 @@
       "address": "201 - 200 Southridge Dr",
       "city": "Okotoks",
       "region": "Calgary Zone",
-      "waitTimeMin": 2,
+      "waitTimeMin": 6,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.707893371582,
-      "longitude": -113.976127624512,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.976127624512
     },
     {
       "id": "APL-OLH",
@@ -1500,9 +1314,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.8015975952148,
-      "longitude": -114.11775207519501,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.11775207519501
     },
     {
       "id": "APL-OLI",
@@ -1511,14 +1323,12 @@
       "address": "204, 11936 104 Ave NW",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 14,
+      "waitTimeMin": 29,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.5465653,
-      "longitude": -113.5295791,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.5295791
     },
     {
       "id": "APL-OLX",
@@ -1532,9 +1342,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.7037773132324,
-      "longitude": -114.191688537598,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.191688537598
     },
     {
       "id": "APL-LADY",
@@ -1548,9 +1356,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.2234001159668,
-      "longitude": -111.90699005127,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.90699005127
     },
     {
       "id": "APL-CDC",
@@ -1559,14 +1365,12 @@
       "address": "12843 - 140 Avenue",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 51,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 40,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.60179,
-      "longitude": -113.543572,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.543572
     },
     {
       "id": "APL-PEACE",
@@ -1580,9 +1384,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 56.2305946350098,
-      "longitude": -117.35378265380899,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -117.35378265380899
     },
     {
       "id": "APL-PINCH",
@@ -1596,9 +1398,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.4934234619141,
-      "longitude": -113.94699859619101,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.94699859619101
     },
     {
       "id": "APL-PIY",
@@ -1612,9 +1412,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.873664855957,
-      "longitude": -112.777221679688,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.777221679688
     },
     {
       "id": "APL-PHP",
@@ -1628,9 +1426,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.6848182678223,
-      "longitude": -113.58956909179699,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.58956909179699
     },
     {
       "id": "APL-PRO",
@@ -1644,9 +1440,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.3579521179199,
-      "longitude": -110.264823913574,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.264823913574
     },
     {
       "id": "APL-RAN",
@@ -1655,14 +1449,12 @@
       "address": "150 - 1829 Ranchlands Blvd NW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": 14,
+      "waitTimeMin": 90,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.12333297729489,
-      "longitude": -114.197654724121,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.197654724121
     },
     {
       "id": "APL-RAY",
@@ -1676,9 +1468,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.4648895263672,
-      "longitude": -112.650520324707,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.650520324707
     },
     {
       "id": "APL-BP",
@@ -1687,14 +1477,12 @@
       "address": "108, 2325 - 50 Ave",
       "city": "Red Deer",
       "region": "Central Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 6,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.24157,
-      "longitude": -113.8151787,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.8151787
     },
     {
       "id": "APL-RDD",
@@ -1703,14 +1491,12 @@
       "address": "101A, 5002 55 Street",
       "city": "Red Deer",
       "region": "Central Zone",
-      "waitTimeMin": 36,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 11,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.268118,
-      "longitude": -113.80772,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.80772
     },
     {
       "id": "APL-RED",
@@ -1719,14 +1505,12 @@
       "address": "4812 58 St",
       "city": "Redwater",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.9498329162598,
-      "longitude": -113.12570953369101,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.12570953369101
     },
     {
       "id": "APL-RIMB",
@@ -1740,9 +1524,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.6404838562012,
-      "longitude": -114.246147155762,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.246147155762
     },
     {
       "id": "APL-RBC",
@@ -1751,14 +1533,12 @@
       "address": "636 Riverbend Square",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 13,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.46935,
-      "longitude": -113.584624,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.584624
     },
     {
       "id": "APL-RMH",
@@ -1772,9 +1552,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.37862014770511,
-      "longitude": -114.920181274414,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.920181274414
     },
     {
       "id": "APL-MCL",
@@ -1788,9 +1566,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 55.710521697998,
-      "longitude": -116.914024353027,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -116.914024353027
     },
     {
       "id": "APL-JPR",
@@ -1804,9 +1580,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.876049041748,
-      "longitude": -118.084266662598,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -118.084266662598
     },
     {
       "id": "APL-SMC",
@@ -1815,14 +1589,12 @@
       "address": "1213 4 St SW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 6,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.0412483215332,
-      "longitude": -114.071830749512,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.071830749512
     },
     {
       "id": "APL-SHPK",
@@ -1831,14 +1603,12 @@
       "address": "132, 80 Chippewa Road",
       "city": "Sherwood Park",
       "region": "Edmonton Zone",
-      "waitTimeMin": 6,
+      "waitTimeMin": 33,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.536405,
-      "longitude": -113.324557,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.324557
     },
     {
       "id": "APL-SWCC",
@@ -1847,14 +1617,12 @@
       "address": "133, 501 Bethel Drive",
       "city": "Sherwood Park",
       "region": "Edmonton Zone",
-      "waitTimeMin": 2,
+      "waitTimeMin": 19,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.547193,
-      "longitude": -113.295528,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.295528
     },
     {
       "id": "APL-SLH",
@@ -1868,9 +1636,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 55.2845497131348,
-      "longitude": -114.76072692871101,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.76072692871101
     },
     {
       "id": "APL-SLO",
@@ -1879,14 +1645,12 @@
       "address": "210 - 5920 1A St SW",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": "Closed",
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 6,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.0004272460938,
-      "longitude": -114.067420959473,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.067420959473
     },
     {
       "id": "APL-SCHC",
@@ -1895,14 +1659,12 @@
       "address": "211 - 31 Sunpark Plaza SE",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": 45,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 35,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.902664184570305,
-      "longitude": -114.058792114258,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.058792114258
     },
     {
       "id": "APL-SG",
@@ -1911,14 +1673,12 @@
       "address": "#103, 505 Queen Street",
       "city": "Spruce Grove",
       "region": "Edmonton Zone",
-      "waitTimeMin": 34,
+      "waitTimeMin": 54,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.544987,
-      "longitude": -113.905931,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.905931
     },
     {
       "id": "APL-STAB",
@@ -1927,14 +1687,12 @@
       "address": "160, 190 Boudreau Road",
       "city": "St. Albert",
       "region": "Edmonton Zone",
-      "waitTimeMin": 7,
+      "waitTimeMin": 29,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.653439,
-      "longitude": -113.625844,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.625844
     },
     {
       "id": "APL-VEG",
@@ -1943,14 +1701,12 @@
       "address": "5241 43 St",
       "city": "Vegreville",
       "region": "Central Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": "Appointments Only",
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.4940376281738,
-      "longitude": -112.03360748291,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.03360748291
     },
     {
       "id": "APL-TRO",
@@ -1964,9 +1720,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.8198890686035,
-      "longitude": -113.22704315185501,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.22704315185501
     },
     {
       "id": "APL-FVM",
@@ -1980,9 +1734,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 58.3858909606934,
-      "longitude": -116.01221466064499,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -116.01221466064499
     },
     {
       "id": "APL-STP",
@@ -1996,9 +1748,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.988983154296896,
-      "longitude": -111.290557861328,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.290557861328
     },
     {
       "id": "APL-SHCC",
@@ -2012,9 +1762,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.3238182067871,
-      "longitude": -112.723213195801,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.723213195801
     },
     {
       "id": "APL-SMORE",
@@ -2023,14 +1771,12 @@
       "address": "299 Edgefield Place",
       "city": "Strathmore",
       "region": "Calgary Zone",
-      "waitTimeMin": 2,
+      "waitTimeMin": 10,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.0392831718342,
-      "longitude": -113.37516198893299,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.37516198893299
     },
     {
       "id": "APL-MYRON",
@@ -2044,9 +1790,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.807746887207,
-      "longitude": -114.63600921630899,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.63600921630899
     },
     {
       "id": "APL-SUN",
@@ -2055,14 +1799,12 @@
       "address": "3 - 2681 36 St NE",
       "city": "Calgary",
       "region": "Calgary Zone",
-      "waitTimeMin": 61,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 47,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.0775947570801,
-      "longitude": -113.98307800293,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.98307800293
     },
     {
       "id": "APL-SWANH",
@@ -2076,9 +1818,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.7275619506836,
-      "longitude": -115.40282440185501,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -115.40282440185501
     },
     {
       "id": "APL-SYL",
@@ -2092,9 +1832,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.308567047119105,
-      "longitude": -114.09092712402301,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.09092712402301
     },
     {
       "id": "APL-TABER",
@@ -2108,9 +1846,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 49.7851448059082,
-      "longitude": -112.165084838867,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.165084838867
     },
     {
       "id": "APL-TA",
@@ -2119,14 +1855,12 @@
       "address": "3011 - 66 Street",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 27,
+      "waitTimeMin": 90,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.461839,
-      "longitude": -113.43412,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.43412
     },
     {
       "id": "APL-TCP",
@@ -2140,9 +1874,7 @@
       "appointmentRequired": true,
       "walkInAvailable": false,
       "latitude": 51.102142363887,
-      "longitude": -114.071317195506,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -114.071317195506
     },
     {
       "id": "APL-TH",
@@ -2156,9 +1888,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 51.7084732055664,
-      "longitude": -113.25122070312499,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.25122070312499
     },
     {
       "id": "APL-TMH",
@@ -2172,9 +1902,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.3727226257324,
-      "longitude": -112.650596618652,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -112.650596618652
     },
     {
       "id": "APL-TRS",
@@ -2183,14 +1911,12 @@
       "address": "10389 - 51 Avenue",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 2,
+      "waitTimeMin": 31,
       "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.488326,
-      "longitude": -113.497806,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.497806
     },
     {
       "id": "APL-TUDOR",
@@ -2199,14 +1925,12 @@
       "address": "2520 Tudor Glen",
       "city": "St. Albert",
       "region": "Edmonton Zone",
-      "waitTimeMin": "Closed",
+      "waitTimeMin": 4,
       "saveMyPlaceAvailable": false,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.620743,
-      "longitude": -113.6091058,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.6091058
     },
     {
       "id": "APL-TWH",
@@ -2220,9 +1944,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.7133369445801,
-      "longitude": -111.73176574707,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.73176574707
     },
     {
       "id": "APL-VVH",
@@ -2236,9 +1958,7 @@
       "appointmentRequired": false,
       "walkInAvailable": false,
       "latitude": 55.0668449401856,
-      "longitude": -117.273307800293,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -117.273307800293
     },
     {
       "id": "APL-VERM",
@@ -2252,9 +1972,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.3555946350098,
-      "longitude": -110.872535705566,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.872535705566
     },
     {
       "id": "APL-VIK",
@@ -2268,9 +1986,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.1003799438477,
-      "longitude": -111.776344299316,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.776344299316
     },
     {
       "id": "APL-VIL",
@@ -2284,9 +2000,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.1176261901856,
-      "longitude": -111.915473937988,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.915473937988
     },
     {
       "id": "APL-VUL",
@@ -2300,9 +2014,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 50.396209716796896,
-      "longitude": -113.25862121582,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.25862121582
     },
     {
       "id": "APL-WAD",
@@ -2316,9 +2028,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 55.94307327270511,
-      "longitude": -113.801872253418,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.801872253418
     },
     {
       "id": "APL-WNW",
@@ -2332,9 +2042,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.841293334960895,
-      "longitude": -110.86646270752,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -110.86646270752
     },
     {
       "id": "APL-WL",
@@ -2348,9 +2056,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.147315979003906,
-      "longitude": -113.85353088378899,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.85353088378899
     },
     {
       "id": "APL-STO",
@@ -2364,9 +2070,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.537635803222706,
-      "longitude": -113.97657775878899,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.97657775878899
     },
     {
       "id": "APL-WESTW",
@@ -2380,9 +2084,7 @@
       "appointmentRequired": true,
       "walkInAvailable": false,
       "latitude": 51.1012829855744,
-      "longitude": -113.965326571165,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.965326571165
     },
     {
       "id": "APL-WET",
@@ -2396,9 +2098,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 52.9869003295898,
-      "longitude": -113.36725616455101,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.36725616455101
     },
     {
       "id": "APL-WCGH",
@@ -2412,9 +2112,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.131290435791,
-      "longitude": -115.674423217773,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -115.674423217773
     },
     {
       "id": "APL-LLB",
@@ -2428,9 +2126,7 @@
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 54.7647590637207,
-      "longitude": -111.96435546875,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -111.96435546875
     },
     {
       "id": "APL-COW",
@@ -2439,66 +2135,15 @@
       "address": "101, 6103 Currents Dr NW",
       "city": "Edmonton",
       "region": "Edmonton Zone",
-      "waitTimeMin": 34,
-      "saveMyPlaceAvailable": false,
+      "waitTimeMin": 62,
+      "saveMyPlaceAvailable": true,
       "appointmentRequired": false,
       "walkInAvailable": true,
       "latitude": 53.4364958,
-      "longitude": -113.6021668,
-      "dailyVolume": 0,
-      "peakHours": ""
+      "longitude": -113.6021668
     }
   ],
-  "TEST_TURNAROUND_METRICS": [
-    {
-      "testName": "Cardiac Troponin T",
-      "category": "STAT / Critical",
-      "specimenType": "Plasma (Green/Li-hep)",
-      "statTurnaroundHrs": 0.8,
-      "routineTurnaroundDays": 0.1,
-      "volumePerYearMillions": 2.1
-    },
-    {
-      "testName": "Complete Blood Count (CBC) with Diff",
-      "category": "Urgent Routine",
-      "specimenType": "Whole Blood (Purple/EDTA)",
-      "statTurnaroundHrs": 1.2,
-      "routineTurnaroundDays": 0.4,
-      "volumePerYearMillions": 8.4
-    },
-    {
-      "testName": "Comprehensive Metabolic Panel (CMP)",
-      "category": "Urgent Routine",
-      "specimenType": "Serum (Gold/SST)",
-      "statTurnaroundHrs": 1.5,
-      "routineTurnaroundDays": 0.5,
-      "volumePerYearMillions": 12.1
-    },
-    {
-      "testName": "Surgical Biopsy Pathology Histology",
-      "category": "Specialty Pathology",
-      "specimenType": "Formalin-fixed Tissue",
-      "statTurnaroundHrs": 24,
-      "routineTurnaroundDays": 5,
-      "volumePerYearMillions": 0.45
-    },
-    {
-      "testName": "HLA Gene Typing & Tissue Matching",
-      "category": "Send-out Reference",
-      "specimenType": "Blood/DNA",
-      "statTurnaroundHrs": 48,
-      "routineTurnaroundDays": 14,
-      "volumePerYearMillions": 0.05
-    },
-    {
-      "testName": "Thyroid Stimulating Hormone (TSH)",
-      "category": "Urgent Routine",
-      "specimenType": "Serum",
-      "statTurnaroundHrs": 2,
-      "routineTurnaroundDays": 1,
-      "volumePerYearMillions": 3.8
-    }
-  ],
+  "TEST_TURNAROUND_METRICS": [],
   "IMAGING_WAIT_TRENDS": [
     {
       "year": "2018",
@@ -2629,134 +2274,8 @@
       "canadaP90Days": 207
     }
   ],
-  "FACILITY_IMAGING_WAITS": [
-    {
-      "facilityId": "FAC-RAH",
-      "facilityName": "Royal Alexandra Hospital",
-      "city": "Edmonton",
-      "zone": "Edmonton Zone",
-      "mriP50WaitDays": 42,
-      "mriP90WaitDays": 135,
-      "ctP50WaitDays": 18,
-      "ctP90WaitDays": 55,
-      "annualCompletedExamsCount": 45200,
-      "scannerUtilizationPct": 94.5
-    },
-    {
-      "facilityId": "FAC-FMC",
-      "facilityName": "Foothills Medical Centre",
-      "city": "Calgary",
-      "zone": "Calgary Zone",
-      "mriP50WaitDays": 38,
-      "mriP90WaitDays": 128,
-      "ctP50WaitDays": 14,
-      "ctP90WaitDays": 48,
-      "annualCompletedExamsCount": 52100,
-      "scannerUtilizationPct": 98.2
-    },
-    {
-      "facilityId": "FAC-PLC",
-      "facilityName": "Peter Lougheed Centre",
-      "city": "Calgary",
-      "zone": "Calgary Zone",
-      "mriP50WaitDays": 52,
-      "mriP90WaitDays": 172,
-      "ctP50WaitDays": 24,
-      "ctP90WaitDays": 72,
-      "annualCompletedExamsCount": 38400,
-      "scannerUtilizationPct": 91.8
-    },
-    {
-      "facilityId": "FAC-RDH",
-      "facilityName": "Red Deer Regional Hospital",
-      "city": "Red Deer",
-      "zone": "Central Zone",
-      "mriP50WaitDays": 68,
-      "mriP90WaitDays": 210,
-      "ctP50WaitDays": 32,
-      "ctP90WaitDays": 95,
-      "annualCompletedExamsCount": 22400,
-      "scannerUtilizationPct": 88.4
-    },
-    {
-      "facilityId": "FAC-MHH",
-      "facilityName": "Medicine Hat Regional Hospital",
-      "city": "Medicine Hat",
-      "zone": "South Zone",
-      "mriP50WaitDays": 45,
-      "mriP90WaitDays": 148,
-      "ctP50WaitDays": 21,
-      "ctP90WaitDays": 62,
-      "annualCompletedExamsCount": 18900,
-      "scannerUtilizationPct": 82.5
-    },
-    {
-      "facilityId": "FAC-QE2",
-      "facilityName": "Queen Elizabeth II Hospital",
-      "city": "Grande Prairie",
-      "zone": "North Zone",
-      "mriP50WaitDays": 78,
-      "mriP90WaitDays": 245,
-      "ctP50WaitDays": 38,
-      "ctP90WaitDays": 112,
-      "annualCompletedExamsCount": 14100,
-      "scannerUtilizationPct": 85.1
-    },
-    {
-      "facilityId": "FAC-UAH",
-      "facilityName": "University of Alberta Hospital",
-      "city": "Edmonton",
-      "zone": "Edmonton Zone",
-      "mriP50WaitDays": 35,
-      "mriP90WaitDays": 110,
-      "ctP50WaitDays": 15,
-      "ctP90WaitDays": 45,
-      "annualCompletedExamsCount": 54800,
-      "scannerUtilizationPct": 97.8
-    },
-    {
-      "facilityId": "FAC-SHC",
-      "facilityName": "South Health Campus",
-      "city": "Calgary",
-      "zone": "Calgary Zone",
-      "mriP50WaitDays": 48,
-      "mriP90WaitDays": 155,
-      "ctP50WaitDays": 19,
-      "ctP90WaitDays": 58,
-      "annualCompletedExamsCount": 31000,
-      "scannerUtilizationPct": 89.6
-    }
-  ],
-  "PRIORITY_TARGET_COMPLIANCE": [
-    {
-      "priority": "P1 Emergent",
-      "targetLimitText": "Within 24 hours",
-      "targetDaysMax": 1,
-      "albertaCtCompliancePct": 98.4,
-      "albertaMriCompliancePct": 96.8
-    },
-    {
-      "priority": "P2 Urgent",
-      "targetLimitText": "Within 7 days",
-      "targetDaysMax": 7,
-      "albertaCtCompliancePct": 76.2,
-      "albertaMriCompliancePct": 62.5
-    },
-    {
-      "priority": "P3 Semi-Urgent",
-      "targetLimitText": "Within 30 days",
-      "targetDaysMax": 30,
-      "albertaCtCompliancePct": 58.1,
-      "albertaMriCompliancePct": 41.2
-    },
-    {
-      "priority": "P4 Non-Urgent",
-      "targetLimitText": "Within 60 days",
-      "targetDaysMax": 60,
-      "albertaCtCompliancePct": 68.5,
-      "albertaMriCompliancePct": 52.4
-    }
-  ],
+  "FACILITY_IMAGING_WAITS": [],
+  "PRIORITY_TARGET_COMPLIANCE": [],
   "CIHI_DIAGNOSTIC_WAIT_TIMES": [
     {
       "reportingLevel": "Provincial",
@@ -7200,71 +6719,62 @@
     }
   ],
   "_handAuthoredMetadata": {
-    "TEST_TURNAROUND_METRICS": {
-      "source": "Alberta Precision Labs (APL) clinical standards",
-      "vintage": "Reference standards",
-      "lastVerified": "2026-07-05",
-      "verification": "Plausible APL STAT/routine turnaround targets; no structured feed"
-    },
-    "PRIORITY_TARGET_COMPLIANCE": {
-      "source": "Alberta Health performance reports / diagnostic imaging targets",
-      "vintage": "Alberta Health performance report (approximate 2023-2024)",
-      "lastVerified": "2026-07-05",
-      "verification": "Alberta Health publishes performance targets for diagnostic imaging wait times. Compliance percentages are plausible but could not be confirmed against a specific published report."
-    },
     "LAB_LOCATION_WAITS": {
       "source": "Alberta Precision Laboratories (APL) directory",
       "vintage": "APL directory (approximate 2024-2025)",
       "lastVerified": "2026-07-05",
       "verification": "APL is the real provincial lab service. Location names and addresses are likely real. Wait time minutes and Save My Spot availability are point-in-time estimates that cannot be verified retrospectively."
-    },
-    "FACILITY_IMAGING_WAITS": {
-      "source": "AHS imaging wait times (estimated from Power BI)",
-      "vintage": "Estimated (approximate 2024-2025)",
-      "lastVerified": "2026-07-05",
-      "verification": "Facility names are real AHS facilities. P50/P90 wait day metrics are estimates and could not be confirmed against published AHS data. Mark as estimated."
     }
   },
   "_dataMetadata": {
     "LAB_LOCATION_WAITS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T22:37:36.944Z",
+      "lastUpdated": "2026-07-17T14:13:35.786Z",
       "source": "APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)",
       "sourceVintage": "Live APL QMe feed",
       "verification": "Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes."
     },
-    "TEST_TURNAROUND_METRICS": {
-      "source": "Alberta Precision Labs (APL) clinical standards",
-      "sourceVintage": "Reference standards",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
-      "updateType": "manual",
-      "verification": "Plausible APL STAT/routine turnaround targets; no structured feed"
-    },
     "IMAGING_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:01:48.980Z",
+      "lastUpdated": "2026-07-17T12:02:31.344Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "CIHI priority procedures time series"
-    },
-    "FACILITY_IMAGING_WAITS": {
-      "source": "AHS imaging wait times (estimated; no live CIHI facility pipeline)",
-      "sourceVintage": "Estimated (approximate 2024-2025)",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
-      "updateType": "manual",
-      "verification": "Facility names are real AHS facilities. P50/P90 wait day metrics are estimates and could not be confirmed against published AHS data. Mark as estimated."
-    },
-    "PRIORITY_TARGET_COMPLIANCE": {
-      "source": "Alberta Health performance reports / diagnostic imaging targets",
-      "sourceVintage": "Alberta Health performance report (approximate 2023-2024)",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
-      "updateType": "manual",
-      "verification": "Alberta Health publishes performance targets for diagnostic imaging wait times. Compliance percentages are plausible but could not be confirmed against a specific published report."
+      "sourceVintage": "CIHI priority procedures imaging time series"
     },
     "CIHI_DIAGNOSTIC_WAIT_TIMES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:49.233Z",
+      "lastUpdated": "2026-07-17T12:05:43.459Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2008\u20132025"
+      "sourceVintage": "2008–2025"
     }
-  }
+  },
+  "CANCER_BURDEN_STATS": [],
+  "CANCER_SCREENING_RATES": [],
+  "HOME_CARE_EXPERIENCE": [],
+  "COMMUNITY_MH_WAITS": [],
+  "HOSPITAL_MHSU_BURDEN": [],
+  "INPATIENT_EXPERIENCE_TRENDS": [],
+  "ED_EXPERIENCE_TRENDS": [],
+  "CLINICAL_SAFETY_TRENDS": [],
+  "PATIENT_COMPLAINTS": [],
+  "PCN_CAPACITY": [],
+  "ED_RELIANCE_BY_CONTINUITY": [],
+  "CONTINUITY_SATISFACTION": [],
+  "RESPIRATORY_VIRUS_SURVEILLANCE": [],
+  "CHILDHOOD_IMMUNIZATION_COVERAGE": [],
+  "NOTIFIABLE_DISEASE_INCIDENCE": [],
+  "ENVIRONMENTAL_ADVISORIES": [],
+  "OUTBREAK_PROTOCOLS": {},
+  "HOSPITAL_EFFICIENCY_TREND": [],
+  "SURGICAL_FACILITIES": [],
+  "FACILITY_COMPARISONS": [],
+  "STATSCAN_SATISFACTION_STATS": {},
+  "STATSCAN_DEMOGRAPHICS": [],
+  "HISTORICAL_FLOW_TIMELINES": [],
+  "VIRTUAL_MD_DISPOSITIONS": [],
+  "EMS_811_DIVERSION_DATA": [],
+  "ADJACENT_HELPLINES": [],
+  "NURSING_SUPPLY_TRENDS": [],
+  "WORKFORCE_AGE_PROFILE": [],
+  "SPECIALIST_RECRUITMENT_NEEDS": [],
+  "ALLIED_HEALTH_SUPPLY": []
 }

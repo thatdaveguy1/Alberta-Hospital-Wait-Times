@@ -12,12 +12,13 @@
 // Table 14100371 reports province-level totals only (no NAICS sector
 // breakdown), so every emitted record uses sector 'All Alberta Sectors'. It
 // carries job-vacancy counts and the job-vacancy rate but NOT average offered
-// hourly wage, so avgOfferedHourlyWage defaults to 0 for records sourced here.
+// hourly wage, so avgOfferedHourlyWage is null for records sourced here
+// (never zero-filled as a measured wage).
 //
-// Other workforce datasets (PHYSICIAN_SPECIALTY_ZONE, NURSING_SUPPLY_TRENDS,
-// WORKFORCE_AGE_PROFILE, SPECIALIST_RECRUITMENT_NEEDS, ALLIED_HEALTH_SUPPLY)
-// are sourced from CIHI / CPSA / CRNA / AHS — NOT StatCan — so this fetcher
-// leaves them untouched and only refreshes JOB_VACANCY_TRENDS.
+// Other workforce datasets (PHYSICIAN_SPECIALTY_ZONE, measured CIHI arrays)
+// are sourced from CIHI / CPSA / CRNA / AHS — NOT StatCan. Illustrative
+// panels (NURSING_SUPPLY_TRENDS, WORKFORCE_AGE_PROFILE, SPECIALIST_RECRUITMENT_NEEDS,
+// ALLIED_HEALTH_SUPPLY) are withheld and forced empty on write.
 //
 // If the endpoint is unreachable or returns an unexpected shape, the fetcher
 // returns status 'skipped' with a clear error message rather than throwing or
@@ -31,7 +32,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { applyWithheldPayloadGuard, buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -83,8 +84,8 @@ interface JobVacancyTrendRecord {
   quarter: string;
   sector: 'Health Care & Social Assistance' | 'All Alberta Sectors';
   vacanciesCount: number;
-  vacancyRatePct: number;
-  avgOfferedHourlyWage: number;
+  vacancyRatePct: number | null;
+  avgOfferedHourlyWage: number | null;
 }
 
 /** WDS getFullTableDownloadCSV JSON envelope. */
@@ -300,13 +301,14 @@ function aggregateQuarters(
     const avgRate =
       b.rate.length > 0
         ? b.rate.reduce((sum, v) => sum + v, 0) / b.rate.length
-        : 0;
+        : null;
     records.push({
       quarter,
       sector: 'All Alberta Sectors',
       vacanciesCount: Math.round(avgVacancies),
-      vacancyRatePct: Math.round(avgRate * 10) / 10,
-      avgOfferedHourlyWage: 0,
+      vacancyRatePct: avgRate != null ? Math.round(avgRate * 10) / 10 : null,
+      // Table 14100371 has no offered-wage series — leave null, never fabricate 0.
+      avgOfferedHourlyWage: null,
     });
   }
 
@@ -466,15 +468,20 @@ export async function run(): Promise<SyncResult> {
       );
     }
 
-    // 5. Merge into existing workforce file — preserve every non-StatCan dataset.
+    // 5. Merge into existing workforce file — preserve measured non-StatCan datasets.
+    //    Force withheld illustrative panels empty so RMW cannot reintroduce them.
     const existing = readWorkforceFile();
     const merged: WorkforceJson = {
       ...existing,
       JOB_VACANCY_TRENDS: records,
+      NURSING_SUPPLY_TRENDS: [],
+      WORKFORCE_AGE_PROFILE: [],
+      ALLIED_HEALTH_SUPPLY: [],
     };
+    (merged as Record<string, unknown>).SPECIALIST_RECRUITMENT_NEEDS = [];
 
     // Refresh _dataMetadata for JOB_VACANCY_TRENDS; preserve all other entries
-    // (sibling writers' and hand-authored arrays) via mergeDataMetadata.
+    // (sibling writers' measured arrays) via mergeDataMetadata.
     const ownedMetadata: DataMetadata = {
       JOB_VACANCY_TRENDS: buildMetadataEntry({
         updateType: 'auto',
@@ -485,6 +492,7 @@ export async function run(): Promise<SyncResult> {
     };
     merged._dataMetadata = mergeDataMetadata(existing._dataMetadata, ownedMetadata);
 
+    applyWithheldPayloadGuard(merged as unknown as Record<string, unknown>);
     fs.writeFileSync(WORKFORCE_FILE, JSON.stringify(merged, null, 2), 'utf8');
 
     const durationMs = Date.now() - startTime;

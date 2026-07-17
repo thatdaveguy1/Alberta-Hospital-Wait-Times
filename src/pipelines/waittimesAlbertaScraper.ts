@@ -15,6 +15,7 @@ import type {
   ImagingWaitTrend,
 } from '../diagnosticData';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -440,7 +441,7 @@ function mergeSurgicalData(newRecords: SurgicalRecord[], timestamp: string): num
     existing._dataMetadata as DataMetadata | undefined,
     ownedMetadata,
   );
-
+  applyWithheldPayloadGuard(existing);
   fs.writeFileSync(SURGICAL_FILE, JSON.stringify(existing, null, 2), 'utf8');
   return merged.length;
 }
@@ -527,7 +528,7 @@ function mergeDiagnosticData(
     existing._dataMetadata as DataMetadata | undefined,
     ownedMetadata,
   );
-
+  applyWithheldPayloadGuard(existing);
   fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(existing, null, 2), 'utf8');
   return { facilitiesWritten: mergedFacilities.length, trendsWritten: mergedTrends.length };
 }

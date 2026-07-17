@@ -1,36 +1,20 @@
-// Virtual Care Fetcher — PubMed E-utilities + AHS News scrape
+// Virtual Care Fetcher — AHS News scrape only for Health Link volumes
 //
-// The virtual-care domain is dominated by one-time peer-reviewed studies and
-// hand-curated AHS Quick Facts figures, so this pipeline is mostly a
-// verification + best-effort scrape rather than a full refresh:
-//
-//   1. PubMed NCBI E-utilities esummary — verifies PMID 40465166 (the CJEM
-//      "Virtual MD" cohort study) still exists and rewrites the
-//      VIRTUAL_MD_COHORT_STUDY source metadata. The cohort percentages
-//      (55.7% primary care, 60.0% ED, 52.5% self-managed) come from a
-//      one-time descriptive analysis and are NOT re-derived here; we keep the
-//      existing data values and only confirm the article is still indexed.
-//
-//   2. AHS News listing — best-effort scrape of the latest news page for any
-//      Health Link / 811 call-volume announcements. If a release quotes a
-//      fiscal-year call volume we map it to a HEALTH_LINK_VOLUMES row;
-//      otherwise we preserve the existing rows and report 'skipped' for that
-//      shape.
-//
-// VIRTUAL_MD_DISPOSITIONS, EMS_811_DIVERSION_DATA, and ADJACENT_HELPLINES have
-// no automated upstream source — they are preserved untouched on every run.
-//
-// The pipeline therefore usually returns 'partial' (PubMed verified, no new
-// AHS volume announcement) or 'skipped' (PubMed unreachable and no AHS
-// volume found). It only returns 'success' when a new HEALTH_LINK_VOLUMES
-// row is actually written.
+// Fail-closed:
+//   - Writes HEALTH_LINK_VOLUMES only when a new fiscal-year volume row can be
+//     mapped from an AHS news announcement.
+//   - PubMed verification of PMID 40465166 is logged but MUST NOT rewrite
+//     VIRTUAL_MD_COHORT_STUDY values or stamp lastUpdated on manual study data.
+//   - VIRTUAL_MD_DISPOSITIONS, EMS_811_DIVERSION_DATA, and ADJACENT_HELPLINES
+//     have no automated upstream and are never re-stamped here.
 
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 import type {
   HealthLinkVolume,
   VirtualMDCohortStudy,
@@ -90,14 +74,10 @@ function coerceVirtualCareJson(raw: unknown): VirtualCareJson {
     if (Array.isArray(raw.VIRTUAL_MD_COHORT_STUDY))
       base.VIRTUAL_MD_COHORT_STUDY =
         raw.VIRTUAL_MD_COHORT_STUDY as VirtualMDCohortStudy[];
-    if (Array.isArray(raw.VIRTUAL_MD_DISPOSITIONS))
-      base.VIRTUAL_MD_DISPOSITIONS =
-        raw.VIRTUAL_MD_DISPOSITIONS as VirtualMDDisposition[];
-    if (Array.isArray(raw.EMS_811_DIVERSION_DATA))
-      base.EMS_811_DIVERSION_DATA =
-        raw.EMS_811_DIVERSION_DATA as EmsDiversionMetric[];
-    if (Array.isArray(raw.ADJACENT_HELPLINES))
-      base.ADJACENT_HELPLINES = raw.ADJACENT_HELPLINES as AdjacentHelplineVolume[];
+    // Withheld: never preserve dispositions / diversion / adjacent from raw.
+    base.VIRTUAL_MD_DISPOSITIONS = [];
+    base.EMS_811_DIVERSION_DATA = [];
+    base.ADJACENT_HELPLINES = [];
     if (raw._dataMetadata && typeof raw._dataMetadata === 'object')
       base._dataMetadata = raw._dataMetadata as DataMetadata;
   }
@@ -303,78 +283,94 @@ export async function run(): Promise<SyncResult> {
 
     await sleep(RATE_LIMIT_MS);
 
-    // 3. Merge. The cohort study values are one-time and preserved as-is; we
-    //    only re-write HEALTH_LINK_VOLUMES when we have new rows. All other
-    //    arrays are preserved verbatim.
-    const merged: VirtualCareJson = {
-      ...existing,
-      HEALTH_LINK_VOLUMES: [
-        ...existing.HEALTH_LINK_VOLUMES,
-        ...newVolumeRows,
-      ],
+    // 3. Write only when new HEALTH_LINK_VOLUMES rows were mapped.
+    //    Never re-stamp cohort / diversion / adjacent manual arrays as live.
+    //    PubMed verification is informational only.
+    if (newVolumeRows.length === 0) {
+      // Fail-closed scrub of residual manual study/proxy arrays left in payload.
+      const scrubbed: VirtualCareJson = {
+        ...existing,
+        HEALTH_LINK_VOLUMES: existing.HEALTH_LINK_VOLUMES ?? [],
+        VIRTUAL_MD_COHORT_STUDY: [],
+        VIRTUAL_MD_DISPOSITIONS: [],
+        EMS_811_DIVERSION_DATA: [],
+        ADJACENT_HELPLINES: [],
+        _dataMetadata: mergeDataMetadata(existing._dataMetadata, {
+          VIRTUAL_MD_COHORT_STUDY: buildMetadataEntry({
+            updateType: 'manual',
+            source: 'No automated Virtual MD cohort feed',
+            sourceVintage: 'Unavailable',
+            lastUpdated: timestamp,
+            verification: 'Cleared residual study rows; PubMed verifies PMID only.',
+          }),
+        }),
+      };
+      const residualPresent =
+        (existing.VIRTUAL_MD_COHORT_STUDY?.length ?? 0) > 0 ||
+        (existing.VIRTUAL_MD_DISPOSITIONS?.length ?? 0) > 0 ||
+        (existing.EMS_811_DIVERSION_DATA?.length ?? 0) > 0 ||
+        (existing.ADJACENT_HELPLINES?.length ?? 0) > 0;
+      if (residualPresent) {
+        applyWithheldPayloadGuard(scrubbed as unknown as Record<string, unknown>);
+        fs.writeFileSync(VIRTUAL_CARE_FILE, JSON.stringify(scrubbed, null, 2), 'utf8');
+      }
+
+      const durationMs = Date.now() - startTime;
+      console.log(
+        `[VirtualCareFetcher] skipped. PubMed verified=${pubmedVerified}, residual scrubbed=${residualPresent}, no new volume rows. ${durationMs}ms`,
+      );
+      return {
+        domain: 'virtual-care',
+        pipeline: 'virtualCareFetcher',
+        status: 'skipped',
+        recordsFetched: pubmedVerified ? 1 : 0,
+        recordsWritten: residualPresent ? 0 : 0,
+        durationMs,
+        error: `${pubmedNote} | ${ahsNote} | No metric arrays written (fail-closed).`,
+        timestamp,
+      };
+    }
+
+    const mergedVolumes = [
+      ...existing.HEALTH_LINK_VOLUMES,
+      ...newVolumeRows,
+    ];
+    const ownedMetadata: DataMetadata = {
+      HEALTH_LINK_VOLUMES: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'AHS news listing (Health Link volume announcements)',
+        sourceVintage: newVolumeRows.map((r) => r.fiscalYear).join(', '),
+        lastUpdated: timestamp,
+        verification: ahsNote,
+      }),
     };
 
-    const ownedMetadata: DataMetadata = {};
-    if (pubmedVerified) {
-      const cohortExisting = existing._dataMetadata?.VIRTUAL_MD_COHORT_STUDY;
-      const existingRecord = existing as unknown as Record<string, unknown>;
-      const handAuthored = isRecord(existingRecord._handAuthoredMetadata)
-        ? (existingRecord._handAuthoredMetadata as Record<string, unknown>)
-        : undefined;
-      const handCohort = isRecord(handAuthored?.VIRTUAL_MD_COHORT_STUDY)
-        ? (handAuthored!.VIRTUAL_MD_COHORT_STUDY as Record<string, unknown>)
-        : undefined;
-      const studyPeriod =
-        typeof handCohort?.studyPeriod === 'string' ? handCohort.studyPeriod : undefined;
-      const existingVintage = cohortExisting?.sourceVintage;
-      const sourceVintage =
-        studyPeriod ||
-        (existingVintage && existingVintage !== 'Unknown' ? existingVintage : undefined) ||
-        'Cohort study indexed in PubMed';
-      ownedMetadata.VIRTUAL_MD_COHORT_STUDY = buildMetadataEntry({
-        updateType: cohortExisting?.updateType ?? 'manual',
-        source: cohortExisting?.source ?? 'Canadian Journal of Emergency Medicine (PubMed PMID 40465166)',
-        sourceVintage,
-        verification: pubmedNote,
-        lastUpdated: timestamp,
-      });
-      merged._dataMetadata = mergeDataMetadata(existing._dataMetadata, ownedMetadata);
-    }
+    const merged: VirtualCareJson = {
+      ...existing,
+      HEALTH_LINK_VOLUMES: mergedVolumes,
+      // Clear manual study/proxy arrays so partial runs never re-present them as live.
+      VIRTUAL_MD_COHORT_STUDY: [],
+      VIRTUAL_MD_DISPOSITIONS: [],
+      EMS_811_DIVERSION_DATA: [],
+      ADJACENT_HELPLINES: [],
+      _dataMetadata: mergeDataMetadata(existing._dataMetadata, ownedMetadata),
+    };
 
-    const recordsWritten = newVolumeRows.length;
-    const recordsFetched = (pubmedVerified ? 1 : 0) + newVolumeRows.length;
-
-    if (recordsWritten > 0 || pubmedVerified) {
-      fs.writeFileSync(
-        VIRTUAL_CARE_FILE,
-        JSON.stringify(merged, null, 2),
-        'utf8',
-      );
-    }
+    applyWithheldPayloadGuard(merged as unknown as Record<string, unknown>);
+    fs.writeFileSync(VIRTUAL_CARE_FILE, JSON.stringify(merged, null, 2), 'utf8');
 
     const durationMs = Date.now() - startTime;
-    const status: SyncResult['status'] =
-      recordsWritten > 0
-        ? 'success'
-        : pubmedVerified
-          ? 'partial'
-          : 'skipped';
-
     console.log(
-      `[VirtualCareFetcher] ${status}. PubMed verified=${pubmedVerified}, new volume rows=${recordsWritten}. ${durationMs}ms`,
+      `[VirtualCareFetcher] success. new volume rows=${newVolumeRows.length}. ${durationMs}ms`,
     );
 
     return {
       domain: 'virtual-care',
       pipeline: 'virtualCareFetcher',
-      status,
-      recordsFetched,
-      recordsWritten,
+      status: 'success',
+      recordsFetched: (pubmedVerified ? 1 : 0) + newVolumeRows.length,
+      recordsWritten: newVolumeRows.length,
       durationMs,
-      error:
-        status === 'success' || status === 'partial'
-          ? undefined
-          : `${pubmedNote} | ${ahsNote}`,
       timestamp,
     };
   } catch (err) {

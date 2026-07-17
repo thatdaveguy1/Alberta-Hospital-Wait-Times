@@ -18,6 +18,7 @@ import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -265,6 +266,7 @@ export async function run(): Promise<SyncResult> {
           ownedMetadata,
         ),
       };
+      applyWithheldPayloadGuard(merged as Record<string, unknown>);
       fs.writeFileSync(PRIMARY_CARE_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
     }
 
@@ -289,11 +291,17 @@ export async function run(): Promise<SyncResult> {
       const merged = {
         ...existing,
         INPATIENT_EXPERIENCE_TRENDS_HQCA: experienceData,
+        // Withheld non-HQCA trends must not reappear from existing.
+        INPATIENT_EXPERIENCE_TRENDS: [],
+        ED_EXPERIENCE_TRENDS: [],
+        CLINICAL_SAFETY_TRENDS: [],
+        PATIENT_COMPLAINTS: [],
         _dataMetadata: mergeDataMetadata(
           existing._dataMetadata as DataMetadata | undefined,
           ownedMetadata,
         ),
       };
+      applyWithheldPayloadGuard(merged as Record<string, unknown>);
       fs.writeFileSync(PATIENT_EXPERIENCE_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
     }
 

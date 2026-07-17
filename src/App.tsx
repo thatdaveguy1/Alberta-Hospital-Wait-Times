@@ -136,29 +136,29 @@ const DASHBOARDS = [
     title: 'Diagnostic Imaging + Labs',
     shortName: 'Diagnostics & Labs',
     category: 'system-capacity' as CategoryId,
-    description: 'Live community lab waits, CT & MRI backlogs, compliance targets, and pathology result turnarounds.',
+    description: 'Community lab waits and CIHI CT/MRI imaging trends.',
     icon: FlaskConical,
     color: 'text-cyan-400',
     bgColor: 'bg-cyan-500/10',
     borderColor: 'border-cyan-500/20',
     badge: 'LIVE LABS',
     badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-    source: 'APL QMe, AHS & CIHI',
-    updateFrequency: 'Lab waits: every 30 min · Imaging/turnaround: annual/manual',
+    source: 'APL QMe & CIHI Diagnostic Imaging',
+    updateFrequency: 'Lab waits: every 60 min · Imaging: annual/manual',
   },
   {
     id: 'primary-care' as const,
     title: 'Primary Care Access',
     shortName: 'Primary Care',
     category: 'community-care' as CategoryId,
-    description: 'Family doctor attachment rates, accepting provider directories, and Local Geographic Area community healthcare needs.',
+    description: 'Family doctor attachment rates, accepting providers, and measured CIHI/HQCA access indicators.',
     icon: Stethoscope,
     color: 'text-emerald-400',
     bgColor: 'bg-emerald-500/10',
     borderColor: 'border-emerald-500/20',
     badge: 'COMMUNITY',
     badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    source: 'CIHI Shared Health Priorities & StatsCan Profiles',
+    source: 'CIHI Shared Health Priorities, HQCA & accepting providers',
     updateFrequency: 'Annual surveys',
   },
   {
@@ -166,7 +166,7 @@ const DASHBOARDS = [
     title: 'Long Term Care & Seniors Care',
     shortName: 'Long Term Care',
     category: 'community-care' as CategoryId,
-    description: 'Placement timelines, clinical outcome standards, home care professional continuity, and facility compliance registries.',
+    description: 'Placement timelines, measured quality outcomes, and facility compliance registries.',
     icon: Home,
     color: 'text-teal-400',
     bgColor: 'bg-teal-500/10',
@@ -181,14 +181,14 @@ const DASHBOARDS = [
     title: 'Patient Experience & Care Quality',
     shortName: 'Patient Experience',
     category: 'community-care' as CategoryId,
-    description: 'Patient-reported satisfaction, clinician communication efficacy, hospital harm rates, and advocacy diagnostics.',
+    description: 'Available HQCA, GoodCaring, and CIHI patient-experience and care-quality measures.',
     icon: HeartHandshake,
     color: 'text-violet-400',
     bgColor: 'bg-violet-500/10',
     borderColor: 'border-violet-500/20',
     badge: 'FOCUS SURVEY',
     badgeColor: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-    source: 'HQCA FOCUS & CIHI Inpatient CPES-IC',
+    source: 'HQCA FOCUS, GoodCaring & CIHI CPES-IC',
     updateFrequency: 'Quarterly Release',
   },
   {
@@ -196,29 +196,29 @@ const DASHBOARDS = [
     title: 'Virtual Care & 811 Access',
     shortName: 'Virtual Care',
     category: 'community-care' as CategoryId,
-    description: 'Health Link 811 call volumes, Virtual MD physician consult outcomes, 911-to-811 diversion pathways, and digital care access.',
+    description: 'Verified Health Link 811 call volumes when available (other virtual-care cohorts withheld).',
     icon: Phone,
     color: 'text-fuchsia-400',
     bgColor: 'bg-fuchsia-500/10',
     borderColor: 'border-fuchsia-500/20',
     badge: 'VIRTUAL CARE',
     badgeColor: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20',
-    source: 'AHS Quick Facts • CJEM Study • Primary Care Alberta',
-    updateFrequency: 'Quarterly Audits',
+    source: 'AHS Quick Facts',
+    updateFrequency: 'Per-array / when verified',
   },
   {
     id: 'cancer' as const,
-    title: 'Cancer Screening & Care',
+    title: 'Cancer Care',
     shortName: 'Cancer Care',
     category: 'prevention-surveillance' as CategoryId,
-    description: 'Oncology burden, cancer screening participation rates by health zone, surgery wait times, and treatment locations.',
+    description: 'Cancer surgery and radiation wait times, plus treatment centre locations.',
     icon: Ribbon,
     color: 'text-pink-400',
     bgColor: 'bg-pink-500/10',
     borderColor: 'border-pink-500/20',
     badge: 'ONCOLOGY',
     badgeColor: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
-    source: 'Cancer Care Alberta & CIHI',
+    source: 'Cancer Care Alberta & CIHI priority procedure waits',
     updateFrequency: 'Q1 2026 Release',
   },
   {
@@ -226,7 +226,7 @@ const DASHBOARDS = [
     title: 'Public Health & Outbreaks',
     shortName: 'Public Health',
     category: 'prevention-surveillance' as CategoryId,
-    description: 'Respiratory pathogens, wastewater early-warning monitors, and childhood immunization coverage (notifiable-disease and environmental-advisory views pending verified data).',
+    description: 'Respiratory case counts and wastewater early-warning monitors.',
     icon: Shield,
     color: 'text-lime-400',
     bgColor: 'bg-lime-500/10',
@@ -241,14 +241,14 @@ const DASHBOARDS = [
     title: 'Mental Health & Addictions',
     shortName: 'Mental Health',
     category: 'prevention-surveillance' as CategoryId,
-    description: 'Substance-related harms, live detoxification and recovery bed availability, and counselling wait times.',
+    description: 'ABED recovery beds, crisis helplines, and measured CIHI mental-health readmission indicators.',
     icon: Brain,
     color: 'text-purple-400',
     bgColor: 'bg-purple-500/10',
     borderColor: 'border-purple-500/20',
     badge: 'MHSU SYSTEM',
     badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-    source: 'Recovery Alberta & ABED Registry',
+    source: 'ABED Registry & CIHI indicators',
     updateFrequency: 'Daily updates',
   },
   {
@@ -256,14 +256,14 @@ const DASHBOARDS = [
     title: 'Regional Health Inequity',
     shortName: 'Health Inequity',
     category: 'equity-outcomes' as CategoryId,
-    description: 'Socioeconomic deprivation indicators, regional chronic disease burdens, emergency department reliance, and travel-for-care metrics.',
+    description: 'Verified regional health and socioeconomic profile indicators from upstream community data.',
     icon: Compass,
     color: 'text-rose-400',
     bgColor: 'bg-rose-500/10',
     borderColor: 'border-rose-500/20',
     badge: 'EQUITY INDEX',
     badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-    source: 'Alberta Health Community Profiles (132 LGAs)',
+    source: 'Alberta Health Community Profiles (LGA)',
     updateFrequency: 'Annual Audits',
   },
   {
@@ -271,7 +271,7 @@ const DASHBOARDS = [
     title: 'Health Spending & Productivity',
     shortName: 'Health Spending',
     category: 'equity-outcomes' as CategoryId,
-    description: 'CIHI spending benchmarks, hospital productivity indexes, case stay costs, and physician clinical payment analyses.',
+    description: 'Measured CIHI health spending trends and physician clinical payments.',
     icon: Coins,
     color: 'text-orange-400',
     bgColor: 'bg-orange-500/10',
@@ -283,8 +283,13 @@ const DASHBOARDS = [
   },
 ] as const;
 
+// Per-console registry for the Data Sources modal. Cadence/source strings are
+// descriptive only — they MUST NOT claim tab-wide "auto" when arrays are mixed
+// or manual. Prefer "mixed" / "manual" / "auto" based on the dominant verified
+// pipeline posture for that console. Field-level truth lives in each domain's
+// `_dataMetadata` and is rendered by DataTimestamp / DashboardHeader.
 const TAB_METADATA_MAP: Record<string, {
-  updateType: 'auto' | 'manual';
+  updateType: 'auto' | 'manual' | 'mixed';
   interval: string;
   sourceVintage: string;
   source: string;
@@ -303,93 +308,93 @@ const TAB_METADATA_MAP: Record<string, {
     source: 'AHS Emergency Advisories'
   },
   'system-flow': {
-    updateType: 'auto',
-    interval: 'daily at 06:00 MT',
-    sourceVintage: 'Auto-refreshed daily',
-    source: 'HQCA FOCUS & AHS Weekly reports'
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'HQCA FOCUS, AHS weekly ED LOS, CIHI indicators'
   },
   'surgical-waits': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: 'Live / April 2026',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'AHCIP Surgical Wait Time Registry & ABJHI Orthopedic feeds',
     domain: 'surgical'
   },
   'primary-care': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: '2024-2026',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'CIHI Shared Health Priorities & accepting providers database',
     domain: 'primary-care'
   },
   'workforce': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: '2015-2024',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'CIHI Health Workforce Database & CPSA Registry',
     domain: 'workforce'
   },
   'diagnostics': {
-    updateType: 'auto',
-    interval: 'Lab waits: every 30 min · Imaging: annual',
-    sourceVintage: '2025-2026',
-    source: 'APL QMe REST API, AHS Imaging & CIHI Diagnostic Imaging',
+    updateType: 'mixed',
+    interval: 'Lab waits: every 60 min · Imaging: annual/manual',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'APL QMe REST API & CIHI Diagnostic Imaging',
     domain: 'diagnostic'
   },
   'cancer': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: '2025 screening & wait trends',
-    source: 'Cancer Care Alberta & CIHI priority procedure waits',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'CIHI priority procedure waits & Cancer Care Alberta centres',
     domain: 'cancer'
   },
   'mental-health': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: '2019-2026 MHSU indicators',
-    source: 'Recovery Alberta, ASUSS & CIHI indicators',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'ABED Registry & CIHI mental-health indicators',
     domain: 'mental-health'
   },
   'long-term-care': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: '2020-2026 placement stats',
-    source: 'HQCA FOCUS, CIHI CCRS & AHS Continuing Care Registry',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'HQCA FOCUS, CIHI CCRS & continuing-care compliance',
     domain: 'continuing-care'
   },
   'patient-experience': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: '2026 survey data',
-    source: 'HQCA FOCUS & CIHI CPES-IC',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'HQCA FOCUS, GoodCaring & CIHI CPES-IC',
     domain: 'patient-experience'
   },
   'public-health': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: 'July 2026 surveillance indicators',
-    source: 'AHS ProvLab, PHAC Wastewater Feed & Alberta RVD',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'AHS ProvLab & PHAC Wastewater Feed',
     domain: 'public-health'
   },
   'regional-inequity': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: '2026 LGA Community Profiles',
-    source: 'Alberta Health Community Profiles (135 LGAs)',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'Alberta Health Community Profiles (LGA)',
     domain: 'regional-inequity'
   },
   'health-spending': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: '2025 spending benchmarks',
-    source: 'CIHI Spending Trends & AHCIP Supplement',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'CIHI Spending Trends & physician payment tables',
     domain: 'spending'
   },
   'virtual-care': {
-    updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: '2025-2026 program statistics',
-    source: 'AHS Quick Facts, CJEM Study & PubMed API',
+    updateType: 'mixed',
+    interval: 'daily sync · per-array provenance',
+    sourceVintage: 'Per-array (see dashboard timestamps)',
+    source: 'AHS Quick Facts (Health Link when verified)',
     domain: 'virtual-care'
   }
 };
@@ -778,17 +783,25 @@ export default function App() {
                     {Object.entries(TAB_METADATA_MAP).map(([key, meta]) => {
                       const dashboard = DASHBOARDS.find(d => d.id === key);
                       const name = dashboard ? dashboard.shortName : key;
-                      const isAuto = meta.updateType === 'auto';
+                      const updateKind = meta.updateType;
+                      const badgeClass =
+                        updateKind === 'auto'
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          : updateKind === 'mixed'
+                            ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                            : 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                      const badgeLabel =
+                        updateKind === 'auto'
+                          ? 'Auto'
+                          : updateKind === 'mixed'
+                            ? 'Mixed'
+                            : 'Manual';
                       return (
                         <tr key={key} className="hover:bg-slate-800/20 transition-colors">
                           <td className="py-3 pr-4 font-bold text-white">{name}</td>
                           <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${
-                              isAuto 
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                                : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                            }`}>
-                              {isAuto ? 'Auto' : 'Manual'}
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${badgeClass}`}>
+                              {badgeLabel}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-slate-400 font-mono">{meta.interval}</td>

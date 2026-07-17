@@ -7,13 +7,10 @@
 // The CPSA quarterly page embeds Power BI dashboards for the granular
 // specialty/zone breakdowns, which are not scrapable as static HTML. The page
 // does expose: (a) the headline fully-registered physician count, (b) the
-// reporting quarter, and (c) a link to the quarterly PDF report. We extract
-// the headline figure and use it to scale/validate the zone distribution that
-// is published in the page's methodology notes and the prior PDF reports. When
-// the Power BI iframe titles or page text expose zone-level counts, we parse
-// them; otherwise we fall back to the most recent published distribution
-// proportions applied to the fresh headline total so the dataset stays current
-// without overwriting hand-curated records with stale zeros.
+// reporting quarter, and (c) a link to the quarterly PDF report. We only write
+// measured values: real zone/specialty rows when parseable from the page, or a
+// single Alberta headline rollup with empty specialty breakdown. Proportional
+// zone/specialty synthesis is never emitted as measured data.
 
 import axios from 'axios';
 import * as cheerio from 'cheerio';
@@ -21,7 +18,8 @@ import type { AnyNode } from 'domhandler';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 import type { PhysicianSpecialtyZone } from '../workforceData';
 
 const CPSA_QUARTERLY_URL =
@@ -34,32 +32,6 @@ const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-type Zone = PhysicianSpecialtyZone['zone'];
-
-// AHS zone populations (Q1 2026 estimates, in thousands) used to derive
-// ratePer100k from absolute physician counts. Sourced from Alberta Health
-// regional population figures.
-const ZONE_POPULATION_THOUSANDS: Record<Exclude<Zone, 'Alberta'>, number> = {
-  'Calgary Zone': 1600,
-  'Edmonton Zone': 1450,
-  'Central Zone': 480,
-  'South Zone': 310,
-  'North Zone': 489,
-};
-
-// Most recent published specialty-mix proportions by zone (CPSA Q4 2025 /
-// AHCIP Statistical Supplement). Used to distribute a fresh headline total
-// across specialties when the Power BI dashboards cannot be parsed as HTML.
-const SPECIALTY_MIX_PROPORTIONS: Record<
-  Exclude<Zone, 'Alberta'>,
-  { familyMedicine: number; medicalSpecialties: number; surgicalSpecialties: number; laboratorySpecialties: number; psychiatry: number }
-> = {
-  'Calgary Zone': { familyMedicine: 0.461, medicalSpecialties: 0.314, surgicalSpecialties: 0.122, laboratorySpecialties: 0.029, psychiatry: 0.075 },
-  'Edmonton Zone': { familyMedicine: 0.409, medicalSpecialties: 0.345, surgicalSpecialties: 0.134, laboratorySpecialties: 0.035, psychiatry: 0.077 },
-  'Central Zone': { familyMedicine: 0.603, medicalSpecialties: 0.190, surgicalSpecialties: 0.115, laboratorySpecialties: 0.029, psychiatry: 0.063 },
-  'South Zone': { familyMedicine: 0.608, medicalSpecialties: 0.202, surgicalSpecialties: 0.107, laboratorySpecialties: 0.025, psychiatry: 0.058 },
-  'North Zone': { familyMedicine: 0.747, medicalSpecialties: 0.122, surgicalSpecialties: 0.081, laboratorySpecialties: 0.016, psychiatry: 0.035 },
-};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -89,89 +61,33 @@ function extractReportingQuarter($: cheerio.CheerioAPI): string | null {
   return null;
 }
 
-// Distribute a headline Alberta physician total across the five AHS zones
-// using the published zone-share proportions, then split each zone total into
-// specialty buckets. Returns the full PHYSICIAN_SPECIALTY_ZONE array including
-// the Alberta rollup row.
-function buildSpecialtyZoneFromTotal(albertaTotal: number): PhysicianSpecialtyZone[] {
-  // Zone share of the AB-address physician pool (CPSA "by AHS regional zones",
-  // which only reflects physicians with AB addresses). Out-of-province
-  // physicians are excluded from the zone chart per CPSA methodology.
-  const zoneShares: Record<Exclude<Zone, 'Alberta'>, number> = {
-    'Calgary Zone': 0.406,
-    'Edmonton Zone': 0.414,
-    'Central Zone': 0.078,
-    'South Zone': 0.050,
-    'North Zone': 0.052,
-  };
-
-  const rows: PhysicianSpecialtyZone[] = [];
-  let albertaRollup = {
-    familyMedicine: 0,
-    medicalSpecialties: 0,
-    surgicalSpecialties: 0,
-    laboratorySpecialties: 0,
-    psychiatry: 0,
-    totalActive: 0,
-  };
-
-  for (const zone of Object.keys(zoneShares) as Exclude<Zone, 'Alberta'>[]) {
-    const zoneTotal = Math.round(albertaTotal * zoneShares[zone]);
-    const mix = SPECIALTY_MIX_PROPORTIONS[zone];
-    const familyMedicine = Math.round(zoneTotal * mix.familyMedicine);
-    const medicalSpecialties = Math.round(zoneTotal * mix.medicalSpecialties);
-    const surgicalSpecialties = Math.round(zoneTotal * mix.surgicalSpecialties);
-    const laboratorySpecialties = Math.round(zoneTotal * mix.laboratorySpecialties);
-    const psychiatry = Math.round(zoneTotal * mix.psychiatry);
-    const totalActive =
-      familyMedicine +
-      medicalSpecialties +
-      surgicalSpecialties +
-      laboratorySpecialties +
-      psychiatry;
-    const pop = ZONE_POPULATION_THOUSANDS[zone];
-    const ratePer100k = Math.round((totalActive / pop) * 1000) / 10;
-
-    albertaRollup.familyMedicine += familyMedicine;
-    albertaRollup.medicalSpecialties += medicalSpecialties;
-    albertaRollup.surgicalSpecialties += surgicalSpecialties;
-    albertaRollup.laboratorySpecialties += laboratorySpecialties;
-    albertaRollup.psychiatry += psychiatry;
-    albertaRollup.totalActive += totalActive;
-
-    rows.push({
-      zone,
-      familyMedicine,
-      medicalSpecialties,
-      surgicalSpecialties,
-      laboratorySpecialties,
-      psychiatry,
-      totalActive,
-      ratePer100k,
-    });
-  }
-
-  const albertaPop = Object.values(ZONE_POPULATION_THOUSANDS).reduce((a, b) => a + b, 0);
-  rows.push({
-    zone: 'Alberta',
-    ...albertaRollup,
-    totalActive: albertaRollup.totalActive,
-    ratePer100k: Math.round((albertaRollup.totalActive / albertaPop) * 1000) / 10,
-  });
-
-  return rows;
+// Build a single Alberta rollup from the headline fully-registered total.
+// Specialty breakdown is intentionally empty (zeros) — CPSA HTML does not
+// expose measured specialty/zone counts, and we refuse to synthesize them.
+function buildHeadlineAlbertaRow(albertaTotal: number): PhysicianSpecialtyZone[] {
+  return [
+    {
+      zone: 'Alberta',
+      familyMedicine: 0,
+      medicalSpecialties: 0,
+      surgicalSpecialties: 0,
+      laboratorySpecialties: 0,
+      psychiatry: 0,
+      totalActive: albertaTotal,
+      ratePer100k: 0,
+    },
+  ];
 }
 
 // Try to parse zone-level counts from Power BI iframe titles / surrounding
 // text. The CPSA page does not render the dashboard tables as HTML, so this
-// is best-effort; returns null when no usable counts are found.
+// is best-effort; returns null when no usable measured counts are found.
 function tryParseZoneCounts(
   $: cheerio.CheerioAPI,
   _iframes: cheerio.Cheerio<AnyNode>,
 ): PhysicianSpecialtyZone[] | null {
   // Power BI embeds render into iframes whose DOM is not in the host page.
-  // We cannot reliably extract per-zone counts from the host HTML. Return
-  // null so the caller falls back to the proportional distribution.
+  // We cannot reliably extract per-zone counts from the host HTML.
   void $;
   void _iframes;
   return null;
@@ -209,11 +125,11 @@ async function scrapeCpsaQuarterly(): Promise<ScrapeOutcome> {
   }
 
   if (headlineTotal && headlineTotal > 0) {
-    const rows = buildSpecialtyZoneFromTotal(headlineTotal);
+    const rows = buildHeadlineAlbertaRow(headlineTotal);
     return {
       physicianSpecialtyZone: rows,
       recordsFetched: rows.length,
-      note: `Power BI dashboards not parseable as HTML; distributed headline total of ${headlineTotal} across zones using published proportions.`,
+      note: `Power BI dashboards not parseable as HTML; wrote Alberta headline total of ${headlineTotal} only (no specialty/zone synthesis).`,
     };
   }
 
@@ -264,10 +180,15 @@ export async function run(): Promise<SyncResult> {
     const merged: Record<string, unknown> = {
       ...existingRaw,
       PHYSICIAN_SPECIALTY_ZONE: outcome.physicianSpecialtyZone,
+      // Never reintroduce scrubbed illustrative workforce panels via RMW.
+      NURSING_SUPPLY_TRENDS: [],
+      WORKFORCE_AGE_PROFILE: [],
+      SPECIALIST_RECRUITMENT_NEEDS: [],
+      ALLIED_HEALTH_SUPPLY: [],
     };
 
     // Refresh _dataMetadata for PHYSICIAN_SPECIALTY_ZONE; preserve all other
-    // entries (sibling writers' and hand-authored arrays) via mergeDataMetadata.
+    // entries (sibling writers' measured arrays) via mergeDataMetadata.
     const existingMeta = existingRaw._dataMetadata as DataMetadata | undefined;
     const ownedMetadata: DataMetadata = {
       PHYSICIAN_SPECIALTY_ZONE: buildMetadataEntry({
@@ -279,6 +200,7 @@ export async function run(): Promise<SyncResult> {
     };
     merged._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
 
+    applyWithheldPayloadGuard(merged);
     fs.writeFileSync(
       WORKFORCE_FILE,
       JSON.stringify(merged, null, 2),

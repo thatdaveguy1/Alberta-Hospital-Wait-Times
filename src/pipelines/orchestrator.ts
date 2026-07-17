@@ -122,6 +122,7 @@ const PIPELINES: Pipeline[] = [
   { name: 'alberta-rvd', domain: 'public-health', run: albertaRvdRun },
   { name: 'cihi-workforce', domain: 'workforce', run: cihiWorkforceRun },
   { name: 'cihi-mh-safety', domain: 'mental-health', run: cihiMhSafetyRun },
+  { name: 'alberta-substance-use', domain: 'mental-health', run: albertaSubstanceUseRun },
   { name: 'cihi-wait-times-priority', domain: 'surgical', run: cihiWaitTimesPriorityRun },
 ];
 

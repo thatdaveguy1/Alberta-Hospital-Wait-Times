@@ -9,9 +9,16 @@ export interface DomainData<T> {
   refresh: () => void;
 }
 
+/**
+ * Fetch domain JSON from `/api/data/:domain`.
+ *
+ * The optional second argument is accepted only for call-site compatibility with
+ * legacy `*Data.ts` modules. It is intentionally ignored: empty or failed
+ * upstream payloads must surface as empty/null, never silent seed fallbacks.
+ */
 export function useDomainData<T = unknown>(
   domain: string,
-  fallback?: Record<string, unknown>
+  _legacySeedIgnored?: Record<string, unknown>
 ): DomainData<T> {
   const [data, setData] = useState<T | null>(null);
   const [metadata, setMetadata] = useState<DataMetadataMap | null>(null);
@@ -34,44 +41,22 @@ export function useDomainData<T = unknown>(
       .then((payload: { _dataMetadata?: DataMetadataMap } & T) => {
         if (cancelled) return;
         const { _dataMetadata: fetchedMetadata, ...rest } = payload;
-        const merged = { ...rest } as Record<string, unknown>;
-
-        if (fallback) {
-          for (const key of Object.keys(fallback)) {
-            if (key === '_dataMetadata') continue;
-            const existing = merged[key];
-            if (existing === undefined || (Array.isArray(existing) && existing.length === 0)) {
-              merged[key] = fallback[key];
-            }
-          }
-
-          const fallbackMeta = fallback._dataMetadata as DataMetadataMap | undefined;
-          if (fallbackMeta) {
-            const mergedMeta: DataMetadataMap = { ...(fetchedMetadata ?? {}) };
-            for (const key of Object.keys(fallbackMeta)) {
-              if (!mergedMeta[key]) {
-                mergedMeta[key] = fallbackMeta[key];
-              }
-            }
-            setMetadata(mergedMeta);
-          } else {
-            setMetadata(fetchedMetadata ?? null);
-          }
-        } else {
-          setMetadata(fetchedMetadata ?? null);
-        }
-
-        setData(merged as T);
+        // Fail closed: never fill empty arrays or missing keys from hand-authored seeds.
+        setMetadata(fetchedMetadata ?? null);
+        setData(rest as T);
         setIsLoading(false);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
+        // Failed fetch → empty surface, no seed substitution.
+        setData(null);
+        setMetadata(null);
         setError(err instanceof Error ? err.message : `Failed to load ${domain} data`);
         setIsLoading(false);
       });
 
     return () => { cancelled = true; };
-  }, [domain, fallback, refreshNonce]);
+  }, [domain, refreshNonce]);
 
   return { data, metadata, isLoading, error, refresh };
 }

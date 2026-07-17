@@ -13,7 +13,8 @@ import os from 'os';
 import path from 'path';
 import type { SyncResult } from './types';
 import type { AttachmentRate } from '../primaryCareData';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 
 const INDICATOR_XLSX_URL =
   'https://www.cihi.ca/sites/default/files/document/indicator-library-all-indicator-data-en.xlsx';
@@ -48,12 +49,18 @@ function loadJsonFile(file: string): LoadedJson {
   return {};
 }
 
-// Merge the ATTACHMENT_RATES array into the existing JSON, preserving every
-// other key (ACCEPTING_PROVIDERS, PCN_CAPACITY, etc.). Dedupe by id, preferring
-// the freshly fetched rows. Returns the number of records written.
+// Merge the ATTACHMENT_RATES array into the existing JSON, preserving genuine
+// upstream keys (ACCEPTING_PROVIDERS, etc.). Force withheld primary-care residual
+// arrays empty so RMW never reintroduces them. Dedupe by id, preferring the
+// freshly fetched rows. Returns the number of records written.
 function mergeAndWrite(file: string, newRates: AttachmentRate[]): number {
   if (newRates.length === 0) return 0;
   const existing = loadJsonFile(file);
+
+  // Force primary-care withheld residual arrays empty so RMW never reintroduces them.
+  existing.PCN_CAPACITY = [];
+  existing.ED_RELIANCE_BY_CONTINUITY = [];
+  existing.CONTINUITY_SATISFACTION = [];
 
   const prevRaw = existing['ATTACHMENT_RATES'];
   const prev: AttachmentRate[] = Array.isArray(prevRaw)
@@ -82,6 +89,7 @@ function mergeAndWrite(file: string, newRates: AttachmentRate[]): number {
     ownedMetadata,
   );
 
+  applyWithheldPayloadGuard(existing);
   fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
   return merged.length;
 }

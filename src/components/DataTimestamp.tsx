@@ -1,6 +1,7 @@
 // DataTimestamp — universal component showing data freshness for any array.
-// Shows BOTH our update time AND source data vintage for auto-updated data.
-// Shows only source data timestamp with "Manually updated" tag for static data.
+// Auto: shows pipeline refresh time + source vintage.
+// Manual: shows recorded update time with a Manual badge — never claims "scrape".
+// Missing metadata: renders nothing (empty/honest surface).
 
 import React from 'react';
 import { RefreshCw, FileText } from 'lucide-react';
@@ -33,37 +34,31 @@ export function sanitizeSource(source: string): string {
     alberta211Scraper: 'Alberta 211',
     albertaFindAProviderScraper: 'Alberta Find a Provider',
     albertaRespiratoryVirusScraper: 'Alberta Respiratory Virus Dashboard',
-    ahsCancerCentresScraper: 'AHS Cancer Centre Directory',
-    ahsWeeklyEdLosScraper: 'AHS Weekly ED LOS Reports',
+    ahsCancerCentresScraper: 'AHS Cancer Centres',
+    ahsWeeklyEdLosScraper: 'AHS Weekly ED LOS',
+    acuteCareScraper: 'AHS Acute Care',
+    abjhiScraper: 'ABJHI',
+    aplLabWaitTimesFetcher: 'APL QMe Lab Waits',
+    cihiDownloader: 'CIHI',
+    cihiMhSafetyFetcher: 'CIHI Mental Health & Safety',
+    cihiNationalCapacity: 'CIHI National Capacity',
+    cihiWaitTimesDownloader: 'CIHI Wait Times',
+    cihiWaitTimesPriorityFetcher: 'CIHI Priority Wait Times',
+    cihiWorkforceFetcher: 'CIHI Workforce',
+    continuingCareComplianceFetcher: 'Continuing Care Compliance',
     cpsaScraper: 'CPSA',
     disruptionsScraper: 'AHS Service Disruptions',
-    powerbiScraper: 'Alberta Wait Times Reporting',
-    'Alberta Wait Times Reporting (Power BI scraper)': 'Alberta Wait Times Reporting',
-    waittimesAlbertaScraper: 'Alberta Wait Times',
-    abjhiScraper: 'ABJHI',
-    acuteCareScraper: 'AHS Acute Care Capacity',
-    hqcaContinuingCareScraper: 'HQCA Continuing Care',
+    erWaitTimesFetcher: 'AHS ER Wait Times',
+    fraserDownloader: 'Fraser Institute',
+    hqcaContinuingCareFetcher: 'HQCA Continuing Care',
     hqcaFocusScraper: 'HQCA FOCUS',
-    // Downloader / fetcher pipeline IDs that may appear in metadata source fields
-    cihiDownloader: 'CIHI National Health Expenditure Trends (NHEX)',
-    cihiNhexDownloader: 'CIHI National Health Expenditure Trends (NHEX)',
-    cihiWaitTimesDownloader: 'CIHI Wait Times Priority Procedures in Canada',
-    cihiWaitTimesPriorityFetcher: 'CIHI Wait Times Priority Procedures in Canada',
-    cihiMhSafetyFetcher: 'CIHI Shared Health Priorities',
-    cihiWorkforceFetcher: 'CIHI Workforce Data',
-    primaryCareFetcher: 'CIHI Shared Health Priorities',
-    openAlbertaInequityFetcher: 'Open Alberta LGA Community Profiles',
-    openAlbertaBillingFetcher: 'Open Alberta AHCIP Statistical Supplement',
-    openAlbertaFetcher: 'Open Alberta',
+    openAlbertaBillingFetcher: 'Open Alberta Billing',
+    openAlbertaInequityFetcher: 'Open Alberta Inequity',
+    phacFetcher: 'PHAC',
+    powerbiScraper: 'AHS Power BI',
+    primaryCareFetcher: 'Primary Care',
     statscanFetcher: 'Statistics Canada',
-    phacFetcher: 'Public Health Agency of Canada',
-    virtualCareFetcher: 'AHS Virtual Care Reports',
-    erWaitTimesFetcher: 'Alberta Health Services Portal',
-    aplLabWaitTimesFetcher: 'Alberta Precision Laboratories',
-    'CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)':
-      'CIHI NHEX & indicators (877 beds, 823 CSHS)',
-    'Open Alberta AHCIP Statistical Supplement (combined workbook)': 'Open Alberta AHCIP Statistical Supplement',
-    'APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)': 'APL QMe REST API',
+    virtualCareFetcher: 'Virtual Care',
   };
 
   const normalized = source.trim();
@@ -84,8 +79,13 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
 
   const isAuto = entry.updateType === 'auto';
   const sanitizedSource = sanitizeSource(entry.source);
-  const lastUpdated = formatDataTimestamp(entry.lastUpdated);
-  const sourceVintage = formatDataTimestamp(entry.sourceVintage);
+  const lastUpdated = entry.lastUpdated
+    ? formatDataTimestamp(entry.lastUpdated)
+    : 'Unavailable';
+  const sourceVintage = entry.sourceVintage
+    ? formatDataTimestamp(entry.sourceVintage)
+    : '—';
+  const updatedLabel = isAuto ? 'Last pipeline refresh' : 'Last recorded update';
 
   if (compact) {
     return (
@@ -100,7 +100,7 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
           {isAuto ? 'Auto-updated\u00A0' : 'Manual\u00A0'}
         </span>
         <span className="font-medium">
-          Last scrape: <span className="font-mono text-slate-200 font-semibold">{lastUpdated}</span>
+          {updatedLabel}: <span className="font-mono text-slate-200 font-semibold">{lastUpdated}</span>
         </span>
         <span className="text-slate-600">·</span>
         <span className="text-slate-400">
@@ -135,7 +135,7 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
             {isAuto ? 'Auto-updated' : 'Manual update'}
           </span>
           <span className="text-xs font-bold text-slate-200">
-            Last scrape: <span className="font-mono text-white font-black">{lastUpdated}</span>
+            {updatedLabel}: <span className="font-mono text-white font-black">{lastUpdated}</span>
           </span>
           <span className="text-slate-600 text-xs hidden sm:inline">·</span>
           <span className="text-[11px] text-slate-400">

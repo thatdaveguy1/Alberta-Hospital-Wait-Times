@@ -6,10 +6,10 @@
 //   - Regional LGA demand: derived from data-regional-inequity.json
 //     (populated by openAlbertaInequityFetcher)
 //
-// Facility-level flow metrics (occupancy, ALC, LWBS, bed wait, ICU) and
-// historical quarterly timelines are NOT published by AHS in scrapeable form —
-// they come from HQCA FOCUS PDF/CSV reports. Those remain hand-authored
-// analytical estimates and are preserved (never clobbered) across runs.
+// Facility-level flow metrics (occupancy, ALC, LWBS, bed wait, ICU) are NOT
+// published by AHS in scrapeable form. Do NOT preserve hand-authored estimates —
+// identity fields only; numeric metrics stay empty until a verified HQCA FOCUS
+// feed is wired. Historical quarterly timelines are never invented here.
 // The weekly ED LOS PDF parse is handled by ahsWeeklyEdLosScraper.ts.
 
 import axios from 'axios';
@@ -23,9 +23,9 @@ import type {
   LGADemand,
   HistoricalFlowSnapshot,
 } from '../systemFlowData';
-import { HISTORICAL_FLOW_TIMELINES } from '../systemFlowData';
 import type { DataMetadata } from './metadataHelpers';
-import { buildMetadataEntry, mergeDataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 
 // ---- Configuration --------------------------------------------------------
 
@@ -63,9 +63,8 @@ function loadSystemFlow(): SystemFlowJson {
       AHS_WEEKLY_ED_LOS: parsed.AHS_WEEKLY_ED_LOS ?? [],
       CIHI_COMPARATORS: parsed.CIHI_COMPARATORS ?? [],
       REGIONAL_LGA_DEMAND: parsed.REGIONAL_LGA_DEMAND ?? [],
-      HISTORICAL_FLOW_TIMELINES: parsed.HISTORICAL_FLOW_TIMELINES?.length
-        ? parsed.HISTORICAL_FLOW_TIMELINES
-        : HISTORICAL_FLOW_TIMELINES,
+      // Never seed hand-authored historical estimates from disk or *Data.ts.
+      HISTORICAL_FLOW_TIMELINES: [],
       _dataMetadata: parsed._dataMetadata,
     };
   } catch {
@@ -74,7 +73,7 @@ function loadSystemFlow(): SystemFlowJson {
       AHS_WEEKLY_ED_LOS: [],
       CIHI_COMPARATORS: [],
       REGIONAL_LGA_DEMAND: [],
-      HISTORICAL_FLOW_TIMELINES,
+      HISTORICAL_FLOW_TIMELINES: [],
     };
   }
 }
@@ -218,39 +217,52 @@ function normalizeName(name: string): string {
   return NAME_ALIASES[base] ?? base;
 }
 
+function emptyFacilityMetrics(
+  id: string,
+  name: string,
+  city: string,
+  zone: AlbertaZone,
+  type: FacilityFlow['type'],
+): FacilityFlow {
+  return {
+    id,
+    name,
+    city,
+    zone,
+    type,
+    edDailyVolume: 0,
+    lwbsRate: 0,
+    medianLosDischarged: 0,
+    p90LosDischarged: 0,
+    medianLosAdmitted: 0,
+    p90LosAdmitted: 0,
+    medianBedWait: 0,
+    p90BedWait: 0,
+    avgHourlyAdmittedWaiting: 0,
+    hospitalOccupancy: 0,
+    alcRate: 0,
+    continuingCare30DayPlacements: 0,
+    staffedAcuteBeds: 0,
+    icuBedsOpen: 0,
+    icuOccupancy: 0,
+    returnedWithin72h: 0,
+  };
+}
+
 function mergeFacilityFlow(
   existing: FacilityFlow[],
   scraped: { id: string; name: string; city: string; zone: AlbertaZone; type: FacilityFlow['type'] }[],
 ): FacilityFlow[] {
-  // Match by normalized name so hand-authored records (e.g. "ach-calgary")
-  // merge with API records (e.g. "alberta-children-s-hospital") for the same site.
-  const byNormName = new Map<string, FacilityFlow>();
-  for (const f of existing) byNormName.set(normalizeName(f.name), f);
+  // Identity-only: never preserve hand-authored occupancy/ALC/LOS metrics.
+  // Prefer stable facilityId from a prior row when the same site is rematched.
+  const prevIdByNorm = new Map<string, string>();
+  for (const f of existing) prevIdByNorm.set(normalizeName(f.name), f.id);
 
+  const byNormName = new Map<string, FacilityFlow>();
   for (const s of scraped) {
     const norm = normalizeName(s.name);
-    const prev = byNormName.get(norm);
-    if (prev) {
-      // Same facility — update identity fields, preserve metrics, keep the
-      // hand-authored id so deep-dive links and weekly-ED-LOS joins stay stable.
-      byNormName.set(norm, {
-        ...prev,
-        name: s.name,
-        city: s.city,
-        zone: s.zone,
-        type: s.type,
-      });
-    } else {
-      // Genuinely new facility — insert a stub with zeros so it's tracked.
-      byNormName.set(norm, {
-        id: s.id, name: s.name, city: s.city, zone: s.zone, type: s.type,
-        edDailyVolume: 0, lwbsRate: 0, medianLosDischarged: 0, p90LosDischarged: 0,
-        medianLosAdmitted: 0, p90LosAdmitted: 0, medianBedWait: 0, p90BedWait: 0,
-        avgHourlyAdmittedWaiting: 0, hospitalOccupancy: 0, alcRate: 0,
-        continuingCare30DayPlacements: 0, staffedAcuteBeds: 0, icuBedsOpen: 0,
-        icuOccupancy: 0, returnedWithin72h: 0,
-      });
-    }
+    const stableId = prevIdByNorm.get(norm) ?? s.id;
+    byNormName.set(norm, emptyFacilityMetrics(stableId, s.name, s.city, s.zone, s.type));
   }
   return Array.from(byNormName.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -519,15 +531,17 @@ export async function run(): Promise<SyncResult> {
     const ownedMetadata: DataMetadata = {
       FACILITY_FLOW_METRICS: buildMetadataEntry({
         updateType: 'auto',
-        source: 'AHS public wait-times API + HQCA FOCUS analytical estimates',
-        sourceVintage: 'Facility list live; metrics compiled from HQCA FOCUS 2025/2026 reports',
-        verification: 'Facility names/cities/zones refreshed from AHS API. Occupancy, ALC, LWBS, bed wait, and ICU metrics are analytical estimates from HQCA FOCUS reports.',
+        source: 'AHS public wait-times API (facility identity only)',
+        sourceVintage: 'Live AHS facility list; no facility-level occupancy/ALC feed',
+        verification:
+          'Names/cities/zones refreshed from AHS API only. Occupancy, ALC, LWBS, bed wait, and ICU metrics are intentionally empty — prior hand-authored estimates are not preserved.',
       }),
       CIHI_COMPARATORS: buildMetadataEntry({
         updateType: 'auto',
-        source: 'CIHI NACRS / Hospital Beds / ALC Indicators (derived from diagnostic + cancer data)',
-        sourceVintage: 'Latest CIHI official releases',
-        verification: 'Derived from data-diagnostic.json and data-cancer.json populated by CIHI downloaders.',
+        source: 'CIHI Wait Times Priority Procedures (imaging + cancer series via diagnostic/cancer JSON)',
+        sourceVintage: 'Latest CIHI priority-procedure releases present in diagnostic/cancer files',
+        verification:
+          'Derived only from IMAGING_WAIT_TRENDS, CANCER_SURGERY_WAIT_TRENDS, and RADIATION_THERAPY_WAIT_TRENDS. Not NACRS bed/ALC indicators.',
       }),
       REGIONAL_LGA_DEMAND: buildMetadataEntry({
         updateType: 'auto',
@@ -535,20 +549,17 @@ export async function run(): Promise<SyncResult> {
         sourceVintage: 'Latest Open Alberta release (Table 10.1 + Figure 2.2)',
         verification: 'Derived from data-regional-inequity.json populated by openAlbertaInequityFetcher (Table 10.1 + Figure 2.2).',
       }),
-      HISTORICAL_FLOW_TIMELINES: buildMetadataEntry({
-        updateType: 'manual',
-        source: 'HQCA FOCUS quarterly performance reports',
-        sourceVintage: '2021-Q1 to 2026-Q1 compiled estimates',
-        verification: 'Quarterly figures compiled from HQCA FOCUS datasets; preserved across runs.',
-      }),
     };
     data._dataMetadata = mergeDataMetadata(data._dataMetadata, ownedMetadata);
+    // Drop hand-authored historical estimates from the payload.
+    data.HISTORICAL_FLOW_TIMELINES = [];
   }
 
   // --- Write file ---
   let recordsWritten = 0;
   if (updated) {
     try {
+      applyWithheldPayloadGuard(data as unknown as Record<string, unknown>);
       fs.writeFileSync(SYSTEM_FLOW_FILE, JSON.stringify(data, null, 2), 'utf8');
       recordsWritten =
         data.FACILITY_FLOW_METRICS.length +

@@ -1,7 +1,9 @@
 // AHS Service Disruptions Scraper
 // Parses the AHS temporary bed/space reductions page (Page17594.aspx)
 // Discovers all active disruptions from Bootstrap modal dialogs, merges with
-// existing hand-authored data, and writes the combined result to data-disruptions.json.
+// existing records, and writes the combined result to data-disruptions.json.
+// zone and disruptionType are inferred (city map / keyword heuristics).
+// alternativeCare is only written from explicit editorial overrides — never a generic template.
 
 import axios from 'axios';
 import * as cheerio from 'cheerio';
@@ -20,7 +22,8 @@ const ZONE_BY_CITY: Record<string, ServiceDisruption['zone']> =
   JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data-zone-by-city.json'), 'utf-8'));
 
 function deduceZone(city: string): ServiceDisruption['zone'] {
-  return ZONE_BY_CITY[city] ?? 'North Zone';
+  // City→zone map; unmapped cities leave zone empty rather than inventing North Zone.
+  return ZONE_BY_CITY[city] ?? '';
 }
 
 function makeFacilityId(name: string): string {
@@ -39,7 +42,7 @@ function normalizeCity(facilityId: string, facilityName: string, scrapedCity: st
 
 function deduceDisruptionType(bedReductionText: string): ServiceDisruption['disruptionType'] {
   const lower = bedReductionText.toLowerCase();
-  if (lower.includes('closure') || lower.includes('closed') || lower.includes('no physician available on site') && !lower.includes('overnight')) {
+  if (lower.includes('closure') || lower.includes('closed') || (lower.includes('no physician available on site') && !lower.includes('overnight'))) {
     return 'Closure';
   }
   if (lower.includes('reduced hours') || lower.includes('adjusted hours') || lower.includes('overnight') || lower.includes('hours of operation')) {
@@ -51,7 +54,8 @@ function deduceDisruptionType(bedReductionText: string): ServiceDisruption['disr
   if (lower.includes('suspension') || lower.includes('suspended') || lower.includes('no obstetrical')) {
     return 'Service Suspension';
   }
-  return 'Service Suspension';
+  // Unclassified — keep raw label rather than inventing a type.
+  return 'Unclassified';
 }
 
 // Parse a date string like "September 8, 2025" or "December 31, 2026" into ISO format
@@ -140,9 +144,9 @@ function parseModalBody($: cheerio.CheerioAPI, $modal: cheerio.Cheerio<AnyNode>)
     disruptions.push({
       facilityName,
       city,
-      serviceAffected: serviceAffected || 'Emergency Department',
+      serviceAffected: serviceAffected || '',
       bedReductionText,
-      reason: reason || 'Due to clinical personnel shortage',
+      reason: reason || '',
       startDate: parseAhsDate(startDate),
       endDate: parseAhsDate(endDate),
     });
@@ -222,8 +226,7 @@ export async function scrapeDisruptions(): Promise<SyncResult> {
         const existingDisr = existingByKey.get(key);
 
         if (existingDisr) {
-          // Update the existing disruption with fresh scraped data
-          // but preserve hand-authored details/alternativeCare if they exist
+          // Update with scraped fields only. alternativeCare only from overrides.
           newDisruptions.push({
             ...existingDisr,
             facilityName,
@@ -235,8 +238,8 @@ export async function scrapeDisruptions(): Promise<SyncResult> {
             startDate: parsed.startDate || existingDisr.startDate,
             endDate: parsed.endDate || existingDisr.endDate,
             reason: parsed.reason || existingDisr.reason,
-            details: override?.details ?? existingDisr.details ?? parsed.bedReductionText,
-            alternativeCare: override?.alternativeCare ?? existingDisr.alternativeCare ?? 'In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.',
+            details: override?.details ?? (parsed.bedReductionText || existingDisr.details),
+            alternativeCare: override?.alternativeCare ?? '',
             sourceUrl: AHS_DISRUPTIONS_URL,
             updatedAt: timestamp,
           });
@@ -255,7 +258,7 @@ export async function scrapeDisruptions(): Promise<SyncResult> {
             endDate: parsed.endDate,
             reason: parsed.reason,
             details: override?.details ?? parsed.bedReductionText,
-            alternativeCare: override?.alternativeCare ?? 'In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.',
+            alternativeCare: override?.alternativeCare ?? '',
             sourceUrl: AHS_DISRUPTIONS_URL,
             updatedAt: timestamp,
           });

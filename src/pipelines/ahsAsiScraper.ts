@@ -16,6 +16,7 @@ import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -158,7 +159,8 @@ function loadContinuingCare(): ContinuingCareJson {
     return {
       CONTINUING_CARE_PLACEMENT_STATS: existing.CONTINUING_CARE_PLACEMENT_STATS ?? [],
       RESIDENT_QUALITY_OUTCOMES: existing.RESIDENT_QUALITY_OUTCOMES ?? [],
-      HOME_CARE_EXPERIENCE: existing.HOME_CARE_EXPERIENCE ?? [],
+      // Withheld: never rehydrate from existing.
+      HOME_CARE_EXPERIENCE: [],
       CONTINUING_CARE_COMPLIANCE: existing.CONTINUING_CARE_COMPLIANCE ?? [],
       _dataMetadata: existing._dataMetadata,
     };
@@ -177,8 +179,9 @@ function loadMentalHealth(): MentalHealthJson {
     return {
       SUBSTANCE_HARM_TRENDS: existing.SUBSTANCE_HARM_TRENDS ?? [],
       ADDICTION_BED_CAPACITIES: existing.ADDICTION_BED_CAPACITIES ?? [],
-      COMMUNITY_MH_WAITS: existing.COMMUNITY_MH_WAITS ?? [],
-      HOSPITAL_MHSU_BURDEN: existing.HOSPITAL_MHSU_BURDEN ?? [],
+      // Withheld: never rehydrate from existing.
+      COMMUNITY_MH_WAITS: [],
+      HOSPITAL_MHSU_BURDEN: [],
       SUPPORT_HELPLINES: existing.SUPPORT_HELPLINES ?? [],
       CIHI_MH_READMISSION_RATES: existing.CIHI_MH_READMISSION_RATES,
       _dataMetadata: existing._dataMetadata,
@@ -620,67 +623,24 @@ function parseAbedBedAvailability($: cheerio.CheerioAPI): AddictionBedStatus[] {
   return found;
 }
 
-// Merge scraped helplines into existing, keyed by phone number.
+// Replace helplines with the scraped directory when the AHS page yields rows.
+// Do not merge with hand-authored numbers under an auto stamp.
 function mergeHelplines(
-  existing: SupportHelpline[],
+  _existing: SupportHelpline[],
   scraped: SupportHelpline[],
 ): SupportHelpline[] {
-  const byNumber = new Map<string, SupportHelpline>();
-  for (const h of existing) {
-    byNumber.set(h.number, h);
-  }
-  for (const h of scraped) {
-    if (!byNumber.has(h.number)) {
-      byNumber.set(h.number, h);
-    }
-  }
-  return Array.from(byNumber.values());
+  void _existing;
+  return scraped;
 }
 
-// Merge scraped bed capacities into existing. Existing hand-authored entries
-// are preserved; ABED entries update availability where the site name fuzzy-
-// matches, and new ABED-only sites are appended.
+// Keep only live ABED-sourced bed rows. Hand-authored BED-00x residuals are
+// dropped so the dashboard never mixes invented capacity with ABED availability.
 function mergeBedCapacities(
-  existing: AddictionBedStatus[],
+  _existing: AddictionBedStatus[],
   scraped: AddictionBedStatus[],
 ): AddictionBedStatus[] {
-  const result = [...existing];
-
-  // Build a normalized-name index of existing entries for quick lookup.
-  const existingIndex = new Map<string, number[]>();
-  result.forEach((b, idx) => {
-    const key = normalizeSiteName(b.siteName);
-    const arr = existingIndex.get(key) ?? [];
-    arr.push(idx);
-    existingIndex.set(key, arr);
-  });
-
-  for (const bed of scraped) {
-    const normKey = normalizeSiteName(bed.siteName);
-    const candidateIdxs = existingIndex.get(normKey);
-
-    if (candidateIdxs && candidateIdxs.length > 0) {
-      // Prefer matching on bedType too; fall back to the first same-site entry.
-      const byType = candidateIdxs.find(
-        i => result[i].bedType === bed.bedType,
-      );
-      const targetIdx = byType ?? candidateIdxs[0];
-
-      result[targetIdx] = {
-        ...result[targetIdx],
-        availableBeds: bed.availableBeds,
-        totalBeds: bed.totalBeds || result[targetIdx].totalBeds,
-        status: bed.status,
-        lastUpdated: bed.lastUpdated,
-      };
-    } else {
-      // New site from ABED — append.
-      result.push(bed);
-      existingIndex.set(normKey, [result.length - 1]);
-    }
-  }
-
-  return result;
+  void _existing;
+  return scraped.filter((b) => typeof b.id === 'string' && b.id.startsWith('BED-ABED-'));
 }
 
 // ---- HTTP fetch helper ----------------------------------------------------
@@ -705,7 +665,8 @@ export async function run(): Promise<SyncResult> {
   let recordsFetched = 0;
   let recordsWritten = 0;
   let continuingCareUpdated = false;
-  let mentalHealthUpdated = false;
+  let bedsUpdated = false;
+  let helplinesUpdated = false;
   const errors: string[] = [];
 
   // --- Continuing care ---
@@ -746,7 +707,7 @@ export async function run(): Promise<SyncResult> {
         mhData.SUPPORT_HELPLINES,
         scrapedHelplines,
       );
-      mentalHealthUpdated = true;
+      helplinesUpdated = true;
       recordsFetched += scrapedHelplines.length;
       console.log(`[AhsAsiScraper] Found ${scrapedHelplines.length} helplines.`);
     } else {
@@ -763,14 +724,14 @@ export async function run(): Promise<SyncResult> {
     console.log('[AhsAsiScraper] Fetching ABED dashboard (findaddictionbeds.alberta.ca)...');
     const html = await fetchPage(ABED_DASHBOARD_URL);
     const $ = cheerio.load(html);
-
     const scrapedBeds = parseAbedBedAvailability($);
+
     if (scrapedBeds.length > 0) {
       mhData.ADDICTION_BED_CAPACITIES = mergeBedCapacities(
         mhData.ADDICTION_BED_CAPACITIES,
         scrapedBeds,
       );
-      mentalHealthUpdated = true;
+      bedsUpdated = true;
       recordsFetched += scrapedBeds.length;
       console.log(`[AhsAsiScraper] Found ${scrapedBeds.length} bed availability records from ABED.`);
     } else {
@@ -786,8 +747,7 @@ export async function run(): Promise<SyncResult> {
   if (continuingCareUpdated) {
     try {
       // AHS ASI refreshes only the CONTINUING_CARE_COMPLIANCE array. Preserve
-      // existing metadata (HQCA-owned arrays, hand-authored HOME_CARE_EXPERIENCE)
-      // via mergeDataMetadata and stamp only the array this scraper owns.
+      // existing metadata via mergeDataMetadata and stamp only the array owned here.
       const ccMetadata = mergeDataMetadata(ccData._dataMetadata, {
         CONTINUING_CARE_COMPLIANCE: buildMetadataEntry({
           updateType: 'auto',
@@ -796,16 +756,14 @@ export async function run(): Promise<SyncResult> {
           lastUpdated: timestamp,
         }),
       });
+      const ccPayload = { ...ccData, _dataMetadata: ccMetadata };
+      applyWithheldPayloadGuard(ccPayload as Record<string, unknown>);
       fs.writeFileSync(
         CONTINUING_CARE_FILE,
-        JSON.stringify({ ...ccData, _dataMetadata: ccMetadata }, null, 2),
+        JSON.stringify(ccPayload, null, 2),
         'utf8',
       );
-      recordsWritten +=
-        ccData.CONTINUING_CARE_PLACEMENT_STATS.length +
-        ccData.RESIDENT_QUALITY_OUTCOMES.length +
-        ccData.HOME_CARE_EXPERIENCE.length +
-        ccData.CONTINUING_CARE_COMPLIANCE.length;
+      recordsWritten += ccData.CONTINUING_CARE_COMPLIANCE.length;
       console.log('[AhsAsiScraper] Wrote data-continuing-care.json');
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -814,37 +772,39 @@ export async function run(): Promise<SyncResult> {
     }
   }
 
+  const mentalHealthUpdated = bedsUpdated || helplinesUpdated;
   if (mentalHealthUpdated) {
     try {
-      // AHS ASI refreshes ADDICTION_BED_CAPACITIES and SUPPORT_HELPLINES.
-      // Preserve existing metadata (Alberta Substance Use Surveillance,
-      // hand-authored COMMUNITY_MH_WAITS / HOSPITAL_MHSU_BURDEN, CIHI) via
-      // mergeDataMetadata and stamp only the arrays this scraper owns.
-      const mhMetadata = mergeDataMetadata(mhData._dataMetadata, {
-        ADDICTION_BED_CAPACITIES: buildMetadataEntry({
+      // Stamp metadata only for arrays this run actually refreshed.
+      const owned: DataMetadata = {};
+      if (bedsUpdated) {
+        owned.ADDICTION_BED_CAPACITIES = buildMetadataEntry({
           updateType: 'auto',
           source: 'Addiction Bed Exploration Dashboard (ABED) - findaddictionbeds.alberta.ca',
           sourceVintage: 'Live (updated once daily, Mon-Fri)',
           lastUpdated: timestamp,
-        }),
-        SUPPORT_HELPLINES: buildMetadataEntry({
+        });
+      }
+      if (helplinesUpdated) {
+        owned.SUPPORT_HELPLINES = buildMetadataEntry({
           updateType: 'auto',
-          source: 'AHS Mental Health helplines + 211 Alberta directory',
-          sourceVintage: 'Live helpline directories',
+          source: 'AHS Mental Health helplines directory',
+          sourceVintage: 'Live AHS helplines page',
+          verification: 'Directory scraped from AHS Page16759; not a 211 live feed.',
           lastUpdated: timestamp,
-        }),
-      });
+        });
+      }
+      const mhMetadata = mergeDataMetadata(mhData._dataMetadata, owned);
+      const mhPayload = { ...mhData, _dataMetadata: mhMetadata };
+      applyWithheldPayloadGuard(mhPayload as Record<string, unknown>);
       fs.writeFileSync(
         MENTAL_HEALTH_FILE,
-        JSON.stringify({ ...mhData, _dataMetadata: mhMetadata }, null, 2),
+        JSON.stringify(mhPayload, null, 2),
         'utf8',
       );
       recordsWritten +=
-        mhData.SUBSTANCE_HARM_TRENDS.length +
-        mhData.ADDICTION_BED_CAPACITIES.length +
-        mhData.COMMUNITY_MH_WAITS.length +
-        mhData.HOSPITAL_MHSU_BURDEN.length +
-        mhData.SUPPORT_HELPLINES.length;
+        (bedsUpdated ? mhData.ADDICTION_BED_CAPACITIES.length : 0) +
+        (helplinesUpdated ? mhData.SUPPORT_HELPLINES.length : 0);
       console.log('[AhsAsiScraper] Wrote data-mental-health.json');
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);

@@ -39,13 +39,15 @@ export default function ServiceDisruptionsDashboard() {
   const { syncStatus } = useSyncStatus();
   const disruptionsSync = getDomainResult(syncStatus, 'disruptions');
 
-  const lastSyncTime = disruptionsSync?.timestamp || new Date().toISOString();
+  // Never invent a page-load timestamp when sync status is missing.
+  const lastSyncTime = disruptionsSync?.timestamp ?? '';
   const metadata = {
     disruptions: {
-      source: 'disruptionsScraper',
-      sourceVintage: 'Live Feed',
-      lastUpdated: lastSyncTime,
-      updateType: 'auto' as const
+      source: 'AHS temporary bed/space reductions page (Page17594)',
+      sourceVintage: 'Daily scrape of published AHS advisories (not continuous live poll)',
+      lastUpdated: lastSyncTime || '1970-01-01T00:00:00.000Z',
+      updateType: (lastSyncTime ? 'auto' : 'manual') as 'auto' | 'manual',
+      verification: 'Core fields scraped from AHS page. Zone/type are inferred from city map / keyword heuristics. alternativeCare only from editorial overrides.',
     }
   };
   // Filters state
@@ -497,19 +499,24 @@ export default function ServiceDisruptionsDashboard() {
                         </div>
                       </div>
 
-                      {/* Right: Alternative options */}
+                      {/* Right: Alternative options (only when editorial override exists) */}
                       <div className="space-y-2 p-3.5 bg-blue-950/5 border border-blue-950/20 rounded-xl">
                         <h4 className="font-extrabold text-blue-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
                           <ShieldAlert className="w-3.5 h-3.5" />
                           <span>Patient Divert & Alternative Care</span>
                         </h4>
                         <div className="text-slate-300 leading-relaxed space-y-2">
-                          <p className="text-[11px] bg-blue-900/10 p-2.5 border border-blue-900/20 text-slate-200 font-bold rounded">
-                            {disr.alternativeCare}
-                          </p>
-                          <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                            <Info className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                            <span>In case of severe medical situations, do not delay. Dial 911 immediately.</span>
+                          {disr.alternativeCare ? (
+                            <p className="text-[11px] bg-blue-900/10 p-2.5 border border-blue-900/20 text-slate-200 font-bold rounded">
+                              {disr.alternativeCare}
+                            </p>
+                          ) : (
+                            <p className="text-[11px] text-slate-400 leading-relaxed">
+                              No facility-specific divert guidance was published on the AHS advisory. See the official AHS page for details. In emergencies dial 911.
+                            </p>
+                          )}
+                          <p className="text-[10px] text-slate-500">
+                            Zone and disruption type are inferred from city maps / keywords when not explicit on the page.
                           </p>
                         </div>
                       </div>

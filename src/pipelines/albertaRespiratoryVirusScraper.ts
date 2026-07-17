@@ -20,7 +20,8 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 import type { WastewaterSignal } from '../publicHealthData';
 
 const OUTPUT_FILE = path.join(process.cwd(), 'data-public-health.json');
@@ -65,19 +66,7 @@ const SITE_TO_ZONE: Record<string, WastewaterSignal['zone']> = {
   'Banff': 'Calgary Zone',
 };
 
-// Population estimates for wastewater sites
-const SITE_POPULATION: Record<string, number> = {
-  'Edmonton': 1100000,
-  'Fort Saskatchewan': 27000,
-  'Fort McMurray': 76000,
-  'Grande Prairie': 70000,
-  'Red Deer': 110000,
-  'Calgary': 1500000,
-  'Medicine Hat': 65000,
-  'Lethbridge': 110000,
-  'Jasper': 5000,
-  'Banff': 8000,
-};
+// Population served is not published in RVD traces — leave 0 (never invent).
 
 // Extract the Plotly data array from embedded HTML
 function extractPlotlyData(html: string): unknown[] {
@@ -211,11 +200,10 @@ function mergeWastewaterSignals(
   for (let j = 0; j < parsed.length; j++) {
     if (usedParsed.has(j)) continue;
     const zone = SITE_TO_ZONE[parsed[j].site] ?? 'North Zone';
-    const pop = SITE_POPULATION[parsed[j].site] ?? 50000;
     merged.push({
       site: parsed[j].site,
       zone,
-      populationServed: pop,
+      populationServed: 0,
       covidSignal: parsed[j].covidSignal,
       fluASignal: 0,
       rsvSignal: 0,
@@ -357,6 +345,13 @@ export async function run(): Promise<SyncResult> {
 
     // Load existing data and merge all
     const existing = loadJsonFile(OUTPUT_FILE);
+    // Force withheld public-health residual arrays empty so RMW never reintroduces them.
+    existing.RESPIRATORY_VIRUS_SURVEILLANCE = [];
+    existing.CHILDHOOD_IMMUNIZATION_COVERAGE = [];
+    existing.NOTIFIABLE_DISEASE_INCIDENCE = [];
+    existing.ENVIRONMENTAL_ADVISORIES = [];
+    existing.OUTBREAK_PROTOCOLS = {};
+
     const existingSignals = Array.isArray(existing.WASTEWATER_SIGNALS)
       ? (existing.WASTEWATER_SIGNALS as WastewaterSignal[])
       : [];
@@ -365,6 +360,11 @@ export async function run(): Promise<SyncResult> {
 
     const output: Record<string, unknown> = {
       ...existing,
+      RESPIRATORY_VIRUS_SURVEILLANCE: [],
+      CHILDHOOD_IMMUNIZATION_COVERAGE: [],
+      NOTIFIABLE_DISEASE_INCIDENCE: [],
+      ENVIRONMENTAL_ADVISORIES: [],
+      OUTBREAK_PROTOCOLS: {},
       WASTEWATER_SIGNALS: mergedSignals,
     };
     if (summaryEntries.length > 0) {
@@ -374,19 +374,24 @@ export async function run(): Promise<SyncResult> {
       output.RVD_IMMUNIZATION_DOSES = immEntries;
     }
 
-    // Stamp _dataMetadata for the arrays this scraper refreshes; preserve
-    // hand-authored entries (RESPIRATORY_VIRUS_SURVEILLANCE, immunization
-    // coverage, notifiable disease, advisories, outbreak protocols) via merge.
+    // Stamp _dataMetadata only for arrays this scraper actually refreshed.
+    // Never re-timestamp hand-authored RESPIRATORY_VIRUS_SURVEILLANCE /
+    // CHILDHOOD_IMMUNIZATION_COVERAGE leave-behinds as if they were scraped.
     const existingMeta = isRecord(existing._dataMetadata)
       ? (existing._dataMetadata as DataMetadata)
       : undefined;
     const ownedMetadata: DataMetadata = {};
     if (parsed.length > 0) {
+      const prior = existingMeta?.WASTEWATER_SIGNALS;
+      const wwChanged =
+        JSON.stringify(mergedSignals) !== JSON.stringify(existingSignals);
       ownedMetadata.WASTEWATER_SIGNALS = buildMetadataEntry({
         updateType: 'auto',
-        source: 'PHAC Health Infobase wastewater API + Alberta RVD',
+        source: 'Alberta Respiratory Virus Dashboard wastewater',
         sourceVintage: 'Live weekly wastewater signals',
         lastUpdated: timestamp,
+        previous: prior,
+        contentChanged: wwChanged,
       });
     }
     if (summaryEntries.length > 0) {
@@ -405,16 +410,9 @@ export async function run(): Promise<SyncResult> {
         lastUpdated: timestamp,
       });
     }
-    // Keep seasonal curated table's last scrape aligned with RVD run time when present.
-    const seasonalExisting = existingMeta?.RESPIRATORY_VIRUS_SURVEILLANCE;
-    if (seasonalExisting && (summaryEntries.length > 0 || immEntries.length > 0 || parsed.length > 0)) {
-      ownedMetadata.RESPIRATORY_VIRUS_SURVEILLANCE = {
-        ...seasonalExisting,
-        lastUpdated: timestamp,
-      };
-    }
     output._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
 
+    applyWithheldPayloadGuard(output);
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf8');
 
     const totalFetched = parsed.length + summaryEntries.length + immEntries.length;

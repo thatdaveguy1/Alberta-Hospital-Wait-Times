@@ -22,6 +22,7 @@ import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -74,10 +75,7 @@ function coercePatientExperienceJson(raw: unknown): PatientExperienceJson {
   };
   if (isRecord(raw)) {
     if (Array.isArray(raw.PATIENT_VOICE_BY_SETTING)) base.PATIENT_VOICE_BY_SETTING = raw.PATIENT_VOICE_BY_SETTING as SettingExperience[];
-    if (Array.isArray(raw.INPATIENT_EXPERIENCE_TRENDS)) base.INPATIENT_EXPERIENCE_TRENDS = raw.INPATIENT_EXPERIENCE_TRENDS as InpatientDetail[];
-    if (Array.isArray(raw.ED_EXPERIENCE_TRENDS)) base.ED_EXPERIENCE_TRENDS = raw.ED_EXPERIENCE_TRENDS as EDExperienceTrend[];
-    if (Array.isArray(raw.CLINICAL_SAFETY_TRENDS)) base.CLINICAL_SAFETY_TRENDS = raw.CLINICAL_SAFETY_TRENDS as HospitalHarmMetric[];
-    if (Array.isArray(raw.PATIENT_COMPLAINTS)) base.PATIENT_COMPLAINTS = raw.PATIENT_COMPLAINTS as ComplaintCategory[];
+    // Withheld: force empty — never copy from raw.
     if (isRecord(raw._dataMetadata)) base._dataMetadata = raw._dataMetadata as DataMetadata;
   }
   return base;
@@ -228,30 +226,32 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // Merge-and-preserve: load existing patient-experience JSON, drop only the
-    // GoodCaring-sourced PATIENT_VOICE_BY_SETTING rows (identified by setting),
-    // append the fresh scrape, and keep every other dataset intact.
+    // Fail closed: write only verified GoodCaring Specialist Access wait-week
+    // rows. Do not preserve hand-authored Primary Care / ED / Inpatient % rows
+    // under a whole-array auto stamp.
     const existing = loadExistingPatientExperience();
-    const preservedVoiceRows = existing.PATIENT_VOICE_BY_SETTING.filter(
-      (row) => row.setting !== GOODCARING_SETTING,
-    );
-    const mergedVoiceRows = [...preservedVoiceRows, ...scrapedRows];
-
     const ownedMetadata: DataMetadata = {
       PATIENT_VOICE_BY_SETTING: buildMetadataEntry({
         updateType: 'auto',
         source: 'GoodCaring.ca Alberta specialist wait times',
-        sourceVintage: 'Live GoodCaring scrape',
+        sourceVintage: 'Live GoodCaring scrape (Specialist Access wait weeks only)',
+        verification: 'Only setting=Specialist Access rows are written; albertaRatePct stores median wait weeks, not a percentage.',
         lastUpdated: timestamp,
       }),
     };
 
     const merged: PatientExperienceJson = {
       ...existing,
-      PATIENT_VOICE_BY_SETTING: mergedVoiceRows,
+      PATIENT_VOICE_BY_SETTING: scrapedRows,
+      // Belt-and-suspenders: withheld keys stay empty after spread.
+      INPATIENT_EXPERIENCE_TRENDS: [],
+      ED_EXPERIENCE_TRENDS: [],
+      CLINICAL_SAFETY_TRENDS: [],
+      PATIENT_COMPLAINTS: [],
       _dataMetadata: mergeDataMetadata(existing._dataMetadata, ownedMetadata),
     };
 
+    applyWithheldPayloadGuard(merged as unknown as Record<string, unknown>);
     fs.writeFileSync(
       PATIENT_EXPERIENCE_FILE,
       JSON.stringify(merged, null, 2),

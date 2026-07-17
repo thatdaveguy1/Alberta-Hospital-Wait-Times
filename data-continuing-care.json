@@ -344,44 +344,7 @@
       "directionIsLowerBetter": true
     }
   ],
-  "HOME_CARE_EXPERIENCE": [
-    {
-      "zone": "Calgary Zone",
-      "overallCareRatingPct": 68.4,
-      "unmetNeedsPct": 16.2,
-      "differentStaffCountAverage": 8.4
-    },
-    {
-      "zone": "Edmonton Zone",
-      "overallCareRatingPct": 66.1,
-      "unmetNeedsPct": 18.5,
-      "differentStaffCountAverage": 9.1
-    },
-    {
-      "zone": "Central Zone",
-      "overallCareRatingPct": 62.4,
-      "unmetNeedsPct": 21.8,
-      "differentStaffCountAverage": 11.2
-    },
-    {
-      "zone": "South Zone",
-      "overallCareRatingPct": 61.8,
-      "unmetNeedsPct": 22.4,
-      "differentStaffCountAverage": 11.6
-    },
-    {
-      "zone": "North Zone",
-      "overallCareRatingPct": 54.2,
-      "unmetNeedsPct": 28.6,
-      "differentStaffCountAverage": 14.8
-    },
-    {
-      "zone": "Alberta",
-      "overallCareRatingPct": 64.2,
-      "unmetNeedsPct": 19.8,
-      "differentStaffCountAverage": 10.1
-    }
-  ],
+  "HOME_CARE_EXPERIENCE": [],
   "CONTINUING_CARE_COMPLIANCE": [
     {
       "id": "FAC-CC-204",
@@ -11883,25 +11846,19 @@
   "_dataMetadata": {
     "CONTINUING_CARE_PLACEMENT_STATS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:03:20.433Z",
+      "lastUpdated": "2026-07-17T12:04:07.117Z",
       "source": "HQCA FOCUS continuing-care CSVs",
       "sourceVintage": "2021–latest HQCA reporting period"
     },
     "RESIDENT_QUALITY_OUTCOMES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:03:20.433Z",
+      "lastUpdated": "2026-07-17T12:04:07.117Z",
       "source": "HQCA FOCUS continuing-care CSVs + CIHI LTCC indicators",
       "sourceVintage": "2021–latest HQCA/CIHI reporting period"
     },
-    "HOME_CARE_EXPERIENCE": {
-      "source": "HQCA home-care experience zone ratings",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
     "CONTINUING_CARE_COMPLIANCE": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T22:43:32.286Z",
+      "lastUpdated": "2026-07-17T12:04:13.471Z",
       "source": "Alberta Open Government — Continuing Care Accommodation Standards compliance reporting",
       "sourceVintage": "Dataset vintage: 2026-06-30",
       "verification": "Aggregated from open.alberta.ca XLSX (OGL-A). Per-facility record collapsed from per-visit/per-standard rows; violationsCount counts only open/unresolved non-compliances."

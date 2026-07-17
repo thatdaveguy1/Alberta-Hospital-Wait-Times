@@ -1,28 +1,20 @@
 // PHAC Health Infobase Fetcher Pipeline
 // Queries the Public Health Agency of Canada Health Infobase API
-// (https://health-infobase.canada.ca/api/) for Alberta-relevant public
-// health indicators and merges them into data-public-health.json.
+// (https://health-infobase.canada.ca/api/) for Alberta wastewater signals
+// and merges only WASTEWATER_SIGNALS into data-public-health.json.
 //
-// What PHAC exposes that is Alberta-specific:
-//   - Wastewater viral-load monitoring (Edmonton Goldbar site, pruid=48)
-//     with separate measures for covN2 (COVID-19), fluA, fluB, and rsv.
-//
-// What PHAC does NOT expose Alberta-specifically:
-//   - Childhood immunization coverage (Open Alberta / regional dashboard only)
-//   - Notifiable disease incidence (Open Alberta summary only)
-//   - Respiratory virus surveillance rates (cnisp-vri tables are national)
-//   - Environmental advisories (AHS EPH only)
-//   - Outbreak protocols (AHS CDC guidelines only)
-//
-// For datasets PHAC does not carry at the Alberta level, the existing
-// hand-authored values in data-public-health.json are preserved. The
-// Edmonton (Gold Bar Plant) wastewater entry is refreshed from live PHAC
-// data on each run; all other entries are left untouched.
+// Fail-closed: this pipeline never rewrites or re-stamps hand-authored
+// RESPIRATORY_VIRUS_SURVEILLANCE, CHILDHOOD_IMMUNIZATION_COVERAGE,
+// NOTIFIABLE_DISEASE_INCIDENCE, ENVIRONMENTAL_ADVISORIES, or OUTBREAK_PROTOCOLS.
+// Those arrays are left untouched (and should be emptied by the payload scrub
+// owner). Only Edmonton Gold Bar is refreshed from PHAC; non-Edmonton sites
+// may be updated from Alberta RVD traces when available.
 
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 import type { SyncResult } from './types';
 import type {
   WastewaterSignal,
@@ -127,22 +119,14 @@ function loadExistingData(): PublicHealthDataFile | null {
       ? (parsed['WASTEWATER_SIGNALS'] as unknown[])
       : [];
     return {
-      RESPIRATORY_VIRUS_SURVEILLANCE: Array.isArray(parsed['RESPIRATORY_VIRUS_SURVEILLANCE'])
-        ? (parsed['RESPIRATORY_VIRUS_SURVEILLANCE'] as RespiratoryVirusMetric[])
-        : [],
+      // Withheld residual public-health panels: force empty on load so RMW
+      // cannot reintroduce scrubbed rows from existing/raw.
+      RESPIRATORY_VIRUS_SURVEILLANCE: [],
       WASTEWATER_SIGNALS: signals as WastewaterSignal[],
-      CHILDHOOD_IMMUNIZATION_COVERAGE: Array.isArray(parsed['CHILDHOOD_IMMUNIZATION_COVERAGE'])
-        ? (parsed['CHILDHOOD_IMMUNIZATION_COVERAGE'] as ImmunizationCoverage[])
-        : [],
-      NOTIFIABLE_DISEASE_INCIDENCE: Array.isArray(parsed['NOTIFIABLE_DISEASE_INCIDENCE'])
-        ? (parsed['NOTIFIABLE_DISEASE_INCIDENCE'] as NotifiableDiseaseIncidence[])
-        : [],
-      ENVIRONMENTAL_ADVISORIES: Array.isArray(parsed['ENVIRONMENTAL_ADVISORIES'])
-        ? (parsed['ENVIRONMENTAL_ADVISORIES'] as EnvironmentalAdvisory[])
-        : [],
-      OUTBREAK_PROTOCOLS: isRecord(parsed['OUTBREAK_PROTOCOLS'])
-        ? (parsed['OUTBREAK_PROTOCOLS'] as Record<string, OutbreakGuidelines>)
-        : {},
+      CHILDHOOD_IMMUNIZATION_COVERAGE: [],
+      NOTIFIABLE_DISEASE_INCIDENCE: [],
+      ENVIRONMENTAL_ADVISORIES: [],
+      OUTBREAK_PROTOCOLS: {},
       _dataMetadata: isRecord(parsed['_dataMetadata'])
         ? (parsed['_dataMetadata'] as DataMetadata)
         : undefined,
@@ -411,49 +395,49 @@ export async function run(): Promise<SyncResult> {
       console.log(`[PhacFetcher] Updated ${nonEdmontonUpdates.length} non-Edmonton wastewater sites.`);
     }
 
-    // Stamp WASTEWATER_SIGNALS freshness; preserve other _dataMetadata entries
-    // (manual arrays are owned by hand-authored baselines, not this pipeline).
+    // Stamp only WASTEWATER_SIGNALS. Do not re-write or re-timestamp manual arrays.
+    const priorWwMeta = existing._dataMetadata?.WASTEWATER_SIGNALS;
+    const contentChanged =
+      JSON.stringify(mergedSignals) !== JSON.stringify(existing.WASTEWATER_SIGNALS);
     const ownedMetadata: DataMetadata = {
       WASTEWATER_SIGNALS: buildMetadataEntry({
         updateType: 'auto',
         source: 'PHAC Health Infobase wastewater API + Alberta RVD',
         sourceVintage: 'Live weekly wastewater signals',
         lastUpdated: timestamp,
+        previous: priorWwMeta,
+        contentChanged,
       }),
     };
 
+    // Preserve genuine upstream keys; force withheld residual public-health panels empty.
     const output: PublicHealthDataFile = {
-      RESPIRATORY_VIRUS_SURVEILLANCE: existing.RESPIRATORY_VIRUS_SURVEILLANCE,
+      ...existing,
+      RESPIRATORY_VIRUS_SURVEILLANCE: [],
+      CHILDHOOD_IMMUNIZATION_COVERAGE: [],
+      NOTIFIABLE_DISEASE_INCIDENCE: [],
+      ENVIRONMENTAL_ADVISORIES: [],
+      OUTBREAK_PROTOCOLS: {},
       WASTEWATER_SIGNALS: mergedSignals,
-      CHILDHOOD_IMMUNIZATION_COVERAGE: existing.CHILDHOOD_IMMUNIZATION_COVERAGE,
-      NOTIFIABLE_DISEASE_INCIDENCE: existing.NOTIFIABLE_DISEASE_INCIDENCE,
-      ENVIRONMENTAL_ADVISORIES: existing.ENVIRONMENTAL_ADVISORIES,
-      OUTBREAK_PROTOCOLS: existing.OUTBREAK_PROTOCOLS,
       _dataMetadata: mergeDataMetadata(existing._dataMetadata, ownedMetadata),
     };
 
-    fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf-8');
-
-    const recordsWritten =
-      output.RESPIRATORY_VIRUS_SURVEILLANCE.length +
-      output.WASTEWATER_SIGNALS.length +
-      output.CHILDHOOD_IMMUNIZATION_COVERAGE.length +
-      output.NOTIFIABLE_DISEASE_INCIDENCE.length +
-      output.ENVIRONMENTAL_ADVISORIES.length +
-      Object.keys(output.OUTBREAK_PROTOCOLS).length;
+    // Only write when wastewater content actually changed, or first stamp needed.
+    if (contentChanged || !priorWwMeta) {
+      applyWithheldPayloadGuard(output as unknown as Record<string, unknown>);
+      fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf-8');
+    }
 
     return {
       domain: 'public-health',
       pipeline,
-      status: 'partial',
+      status: contentChanged ? 'success' : 'partial',
       recordsFetched: rows.length,
-      recordsWritten,
+      recordsWritten: contentChanged ? mergedSignals.length : 0,
       durationMs: Date.now() - startTime,
-      error:
-        'PHAC provides Alberta-specific wastewater data only (Edmonton Goldbar). ' +
-        'Immunization coverage, notifiable disease incidence, respiratory surveillance, ' +
-        'environmental advisories, and outbreak protocols are not available Alberta-specifically ' +
-        'via the PHAC Infobase API and were left at their hand-authored values.',
+      error: contentChanged
+        ? undefined
+        : 'PHAC wastewater fetch succeeded but signal content unchanged; manual arrays not re-stamped.',
       timestamp,
     };
   } catch (err) {

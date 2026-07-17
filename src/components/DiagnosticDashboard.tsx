@@ -88,10 +88,11 @@ export default function DiagnosticDashboard() {
 
   const { data, metadata, isLoading, error, refresh } = useDomainData<DiagnosticData>('diagnostic', diagnosticDataModule);
   const LAB_LOCATION_WAITS = data?.LAB_LOCATION_WAITS ?? [];
-  const TEST_TURNAROUND_METRICS = data?.TEST_TURNAROUND_METRICS ?? [];
+  // Hand-authored / unconfirmed diagnostic arrays — fail closed (empty).
+  const TEST_TURNAROUND_METRICS: typeof data extends { TEST_TURNAROUND_METRICS: infer T } ? T : never[] = [] as any;
   const IMAGING_WAIT_TRENDS = data?.IMAGING_WAIT_TRENDS ?? [];
-  const FACILITY_IMAGING_WAITS = data?.FACILITY_IMAGING_WAITS ?? [];
-  const PRIORITY_TARGET_COMPLIANCE = data?.PRIORITY_TARGET_COMPLIANCE ?? [];
+  const FACILITY_IMAGING_WAITS: typeof data extends { FACILITY_IMAGING_WAITS: infer T } ? T : never[] = [] as any;
+  const PRIORITY_TARGET_COMPLIANCE: typeof data extends { PRIORITY_TARGET_COMPLIANCE: infer T } ? T : never[] = [] as any;
   const [refreshing, setRefreshing] = useState(false);
 
   // Location + drive-time sorting (mirrors ER tab behaviour)
@@ -208,7 +209,7 @@ export default function DiagnosticDashboard() {
           : 'Lab is closed or has no open walk-in hours right now',
       };
     }
-    return { label: formatMinutesToHm(lab.waitTimeMin as number), detail: 'Estimated live wait time' };
+    return { label: formatMinutesToHm(lab.waitTimeMin as number), detail: 'Live wait from APL QMe' };
   };
   const formatLabAvgWait = (minutes: number, validCount: number): string => {
     if (validCount === 0) return '—';
@@ -535,28 +536,7 @@ export default function DiagnosticDashboard() {
           <Clock className="w-4 h-4" />
           <span>Imaging Gaps</span>
         </button>
-        <button
-          onClick={() => setActiveSubTab('facilities')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'facilities'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <MapPin className="w-4 h-4" />
-          <span>Diagnostic Sites</span>
-        </button>
-        <button
-          onClick={() => setActiveSubTab('turnaround')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'turnaround'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <TrendingDown className="w-4 h-4" />
-          <span>Lab Turnaround</span>
-        </button>
+
       </div>
 
       {/* SUBTAB 1: Live Lab Waits */}
@@ -625,15 +605,15 @@ export default function DiagnosticDashboard() {
                     {labStats.maxWaitLab ? getLabStatus(labStats.maxWaitLab).label : '—'}
                   </p>
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                    Longest Estimated Wait Time
+                    Longest Live Wait Time
                   </p>
                 </div>
               </div>
               
               <div className="border-t border-slate-800/80 pt-2 mt-1">
-                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider block">Highest Volume Site</span>
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider block">Site with longest wait</span>
                 <span className="text-xs font-black text-red-400 font-mono block mt-0.5 truncate" title={labStats.maxWaitLab?.name}>
-                  {labStats.maxWaitLab ? labStats.maxWaitLab.name : 'N/A'}
+                  {labStats.maxWaitLab ? labStats.maxWaitLab.name : '—'}
                 </span>
               </div>
             </div>
@@ -820,7 +800,7 @@ export default function DiagnosticDashboard() {
                   Provincial Lab Wait Time Trend
                 </h3>
                 <p className="text-[10px] text-slate-500 mt-0.5">
-                  Average wait time across all monitored APL community labs, sampled every 30 minutes.
+                  Average wait time across all monitored APL community labs, sampled every 60 minutes.
                 </p>
               </div>
               <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
@@ -892,7 +872,7 @@ export default function DiagnosticDashboard() {
             ) : (
               <div className="h-64 flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
                 <Clock className="w-6 h-6 text-slate-600" />
-                <p>No trend data yet. Lab wait snapshots are collected every 30 minutes — check back shortly.</p>
+                <p>No trend data yet. Lab wait snapshots are collected every 60 minutes — check back shortly.</p>
               </div>
             )}
           </div>
@@ -1020,7 +1000,7 @@ export default function DiagnosticDashboard() {
                       <span>{processedLabs.find(l => l.id === selectedLabId)?.name ?? selectedLabId} — Wait Time Trend</span>
                     </h3>
                     <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
-                      Historical wait time for this lab site, sampled every 30 minutes from live APL QMe API data. Only numeric wait times are charted; 'Appointments Only' and 'Closed' states are excluded.
+                      Historical wait time for this lab site, sampled every 60 minutes from live APL QMe API data. Only numeric wait times are charted; 'Appointments Only' and 'Closed' states are excluded.
                     </p>
                   </div>
 
@@ -1074,7 +1054,7 @@ export default function DiagnosticDashboard() {
                   ) : (
                     <div className="h-64 flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
                       <Clock className="w-6 h-6 text-slate-600" />
-                      <p>No trend data yet for this lab. Snapshots are collected every 30 minutes — check back shortly.</p>
+                      <p>No trend data yet for this lab. Snapshots are collected every 60 minutes — check back shortly.</p>
                     </div>
                   )}
                 </div>
@@ -1345,7 +1325,12 @@ export default function DiagnosticDashboard() {
               </div>
 
               <div className="space-y-3">
-                {(PRIORITY_TARGET_COMPLIANCE ?? []).map(item => (
+                {(PRIORITY_TARGET_COMPLIANCE ?? []).length === 0 ? (
+                  <p className="text-[11px] text-slate-400 leading-relaxed p-3 bg-slate-950/40 border border-slate-850 rounded-xl">
+                    Priority target compliance is not shown. Prior values were unconfirmed estimates without a verified published report.
+                  </p>
+                ) : (
+                  (PRIORITY_TARGET_COMPLIANCE ?? []).map(item => (
                   <div key={item.priority} className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-2">
                     <div className="flex items-start justify-between">
                       <div>
@@ -1353,7 +1338,6 @@ export default function DiagnosticDashboard() {
                         <span className="text-[9px] text-slate-500 block">Target maximum: <strong>{item.targetLimitText}</strong></span>
                       </div>
                     </div>
-
                     <div className="space-y-1.5 pt-1">
                       <div className="flex justify-between text-[9px]">
                         <span className="text-slate-400">CT Compliance</span>
@@ -1362,7 +1346,6 @@ export default function DiagnosticDashboard() {
                       <div className="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
                         <div className="bg-cyan-500 h-full rounded-full" style={{ width: `${item.albertaCtCompliancePct}%` }} />
                       </div>
-
                       <div className="flex justify-between text-[9px] pt-1">
                         <span className="text-slate-400">MRI Compliance</span>
                         <span className={`font-mono font-bold ${item.albertaMriCompliancePct >= 90 ? 'text-emerald-400' : 'text-amber-500'}`}>{item.albertaMriCompliancePct}%</span>
@@ -1372,7 +1355,8 @@ export default function DiagnosticDashboard() {
                       </div>
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -1380,7 +1364,7 @@ export default function DiagnosticDashboard() {
       )}
 
       {/* SUBTAB 3: Imaging Facility Access */}
-      {activeSubTab === 'facilities' && (
+      {activeSubTab === 'facilities' && false && (
         <div className="space-y-6">
           <DataTimestamp compact metadata={metadata ?? {}} arrayKey="FACILITY_IMAGING_WAITS" />
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
@@ -1449,7 +1433,7 @@ export default function DiagnosticDashboard() {
       )}
 
       {/* SUBTAB 4: Lab Test Turnaround-Time Benchmarks */}
-      {activeSubTab === 'turnaround' && (
+      {activeSubTab === 'turnaround' && false && (
         <div className="space-y-6">
           <DataTimestamp compact metadata={metadata ?? {}} arrayKey="TEST_TURNAROUND_METRICS" />
 

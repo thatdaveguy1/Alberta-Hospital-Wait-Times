@@ -15,7 +15,8 @@ import fs from 'fs';
 import path from 'path';
 import * as XLSX from 'xlsx';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 
 const OUTPUT_FILE = path.join(process.cwd(), 'data-workforce.json');
 
@@ -166,21 +167,22 @@ function parseNursingSupply(
   const out: Record<string, unknown>[] = [];
   for (const [profession, yearMap] of byProf) {
     const years = [...yearMap.keys()].sort();
-    for (const year of years) {
+    for (let i = 0; i < years.length; i++) {
+      const year = years[i];
       const entry = yearMap.get(year)!;
-      const prev = yearMap.get(String(Number(year) - 1));
+      const prev = i > 0 ? yearMap.get(years[i - 1]) : undefined;
       const growthRatePct = prev && prev.total
         ? round1(((entry.total! - prev.total) / prev.total) * 100)
-        : 0;
+        : null;
 
       const vacMap = vacancyByProf.get(profession);
       const vac = vacMap?.get(year);
-      const vacancyRatePct = vac?.rate != null ? round1(vac.rate * 100) : 0;
+      const vacancyRatePct = vac?.rate != null ? round1(vac.rate * 100) : null;
 
       const directCarePct = entry.directCare != null && entry.total
-        ? round1((entry.directCare / entry.total) * 100) : 0;
+        ? round1((entry.directCare / entry.total) * 100) : null;
       const ruralRemotePct = entry.rural != null && entry.total
-        ? round1((entry.rural / entry.total) * 100) : 0;
+        ? round1((entry.rural / entry.total) * 100) : null;
 
       out.push({
         year,
@@ -271,7 +273,7 @@ function parseAgeProfile(
 // Output shape mirrors JOB_VACANCY_TRENDS:
 //   { quarter, sector, vacanciesCount, vacancyRatePct, avgOfferedHourlyWage }
 // CIHI data is annual (no quarter); quarter is set to `${year}-Q4`.
-// avgOfferedHourlyWage is not in the CIHI sheet (StatsCan JVWS only) → 0.
+// avgOfferedHourlyWage is not in the CIHI sheet → null (never zero-filled).
 function parseVacancyTrends(workbook: XLSX.WorkBook): Record<string, unknown>[] {
   const rows = sheetRows(workbook, 'VacancyData');
   const out: Record<string, unknown>[] = [];
@@ -280,14 +282,14 @@ function parseVacancyTrends(workbook: XLSX.WorkBook): Record<string, unknown>[] 
     const year = asString(row['Year']);
     if (!year) continue;
     const vacancies = cihiNumber(row['vacancies']);
-    if (vacancies === null) continue; // skip X/F/— rows
+    if (vacancies === null) continue; // skip X/F/— rows; never invent a count
     const prop = cihiNumber(row['vacancy_proportion']);
     out.push({
       quarter: `${year}-Q4`,
       sector: asString(row['Type_of_provider']),
       vacanciesCount: vacancies,
-      vacancyRatePct: prop != null ? round1(prop * 100) : 0,
-      avgOfferedHourlyWage: 0,
+      vacancyRatePct: prop != null ? round1(prop * 100) : null,
+      avgOfferedHourlyWage: null,
       supply: cihiNumber(row['Supply']),
       workforce: cihiNumber(row['Workforce']),
       yearOverYearChange: cihiNumber(row['Year_over_year_change']),
@@ -371,20 +373,22 @@ function parseAlliedHealthSupply(workbook: XLSX.WorkBook): Record<string, unknow
     const ca = vacCA.get(profession);
     const canadaCount = ca?.supply ?? null;
 
+    // Skip professions with no measured Alberta supply — never invent counts.
+    if (albertaCount == null || albertaCount <= 0) continue;
     const abVac = vacAB.get(profession);
-    const abCount = albertaCount ?? 0;
-    const albertaRate = alliedRatePer100k(abCount > 0 ? abCount : null, ALBERTA_POPULATION_2024);
+    const albertaRate = alliedRatePer100k(albertaCount, ALBERTA_POPULATION_2024);
     const canadaRate = alliedRatePer100k(canadaCount, CANADA_POPULATION_2024);
     out.push({
       profession,
-      albertaCount: abCount,
+      albertaCount,
       albertaDataYear: albertaYear,
       canadaSupply: canadaCount,
       nationalComparisonRatePer100k: {
-        alberta: albertaRate ?? 0,
-        canadaAvg: canadaRate ?? 0,
+        alberta: albertaRate,
+        canadaAvg: canadaRate,
       },
-      vacancyActivePostings: abVac?.count ?? 0,
+      // CIHI vacancy count when present; null when suppressed/missing (no zero-fill).
+      vacancyActivePostings: abVac?.count ?? null,
       source: `CIHI Health Workforce Quick Stats 2024 (${name} + VacancyData)`,
     });
   }
@@ -591,8 +595,13 @@ export async function run(): Promise<SyncResult> {
     // Profile-sheet allied supply (matches hand-authored ALLIED_HEALTH_SUPPLY shape)
     if (parsed.alliedHealthSupply.length > 0) merged.ALLIED_HEALTH_SUPPLY_CIHI = parsed.alliedHealthSupply;
     if (parsed.nursingSupplyTrends.length > 0) merged.NURSING_SUPPLY_TRENDS_CIHI = parsed.nursingSupplyTrends;
+    if (parsed.workforceAgeProfile.length > 0) merged.WORKFORCE_AGE_PROFILE_CIHI = parsed.workforceAgeProfile;
     if (parsed.jobVacancyTrends.length > 0) merged.JOB_VACANCY_TRENDS_CIHI = parsed.jobVacancyTrends;
-
+    // Never reintroduce scrubbed illustrative workforce panels via RMW.
+    merged.NURSING_SUPPLY_TRENDS = [];
+    merged.WORKFORCE_AGE_PROFILE = [];
+    merged.SPECIALIST_RECRUITMENT_NEEDS = [];
+    merged.ALLIED_HEALTH_SUPPLY = [];
     // Refresh _dataMetadata for the CIHI arrays this writer owns. Only arrays
     // actually refreshed this run are stamped; every other entry (sibling
     // writers' and hand-authored arrays) is preserved via mergeDataMetadata.
@@ -659,6 +668,7 @@ export async function run(): Promise<SyncResult> {
       merged._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
     }
 
+    applyWithheldPayloadGuard(merged);
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
 
     console.log(

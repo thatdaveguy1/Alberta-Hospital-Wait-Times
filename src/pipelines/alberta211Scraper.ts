@@ -1,7 +1,8 @@
 // Alberta 211 Directory Scraper
 // Queries the 211 Alberta directory (https://ab.211.ca/) for helpline listings
-// and writes SUPPORT_HELPLINES to data-mental-health.json and
-// ADJACENT_HELPLINES to data-virtual-care.json.
+// and writes SUPPORT_HELPLINES to data-mental-health.json.
+// ADJACENT_HELPLINES is a withheld residual virtual-care array — this scraper
+// must not reintroduce helpline volume rows into data-virtual-care.json.
 //
 // 211 Alberta is a service directory operated by 211 Alberta Partnership.
 // The directory has a search API at https://ab.211.ca/api/ that returns JSON.
@@ -10,7 +11,8 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 
 const MENTAL_HEALTH_FILE = path.join(process.cwd(), 'data-mental-health.json');
 const VIRTUAL_CARE_FILE = path.join(process.cwd(), 'data-virtual-care.json');
@@ -37,13 +39,6 @@ interface SupportHelpline {
   availability: string;
   scope: string;
   description: string;
-}
-
-interface AdjacentHelplineVolume {
-  lineName: string;
-  annualCalls: number;
-  clinicalType: string;
-  availability: string;
 }
 
 interface LoadedJson {
@@ -103,20 +98,6 @@ function mapToHelpline(record: Record<string, unknown>): SupportHelpline | null 
   };
 }
 
-// Map a 211 record to an AdjacentHelplineVolume
-function mapToAdjacentHelpline(record: Record<string, unknown>): AdjacentHelplineVolume | null {
-  const name = asString(record.name || record.title || record.service_name);
-  if (!name) return null;
-  const hours = asString(record.hours || record.schedule || record.availability);
-  const clinicalType = asString(record.service_type || record.category || record.type);
-
-  return {
-    lineName: name,
-    annualCalls: 0, // 211 directory does not publish call volumes
-    clinicalType: clinicalType || 'Helpline',
-    availability: hours || '24/7 — verify on 211 directory',
-  };
-}
 
 export async function run(): Promise<SyncResult> {
   const startTime = Date.now();
@@ -162,12 +143,11 @@ export async function run(): Promise<SyncResult> {
       .map(mapToHelpline)
       .filter((h): h is SupportHelpline => h !== null);
 
-    // Map to AdjacentHelplines for virtual-care
-    const adjacentHelplines: AdjacentHelplineVolume[] = allRecords
-      .map(mapToAdjacentHelpline)
-      .filter((h): h is AdjacentHelplineVolume => h !== null);
-
     const mhJson = loadJsonFile(MENTAL_HEALTH_FILE);
+    // Force mental-health withheld residual arrays empty so RMW never reintroduces them.
+    mhJson.COMMUNITY_MH_WAITS = [];
+    mhJson.HOSPITAL_MHSU_BURDEN = [];
+
     const mhOwnedMetadata: DataMetadata = {
       SUPPORT_HELPLINES: buildMetadataEntry({
         updateType: 'auto',
@@ -179,42 +159,35 @@ export async function run(): Promise<SyncResult> {
     };
     const mhMerged = {
       ...mhJson,
+      COMMUNITY_MH_WAITS: [],
+      HOSPITAL_MHSU_BURDEN: [],
       SUPPORT_HELPLINES: helplines,
       _dataMetadata: mergeDataMetadata(
         mhJson._dataMetadata as DataMetadata | undefined,
         mhOwnedMetadata,
       ),
     };
+    applyWithheldPayloadGuard(mhMerged);
     fs.writeFileSync(MENTAL_HEALTH_FILE, JSON.stringify(mhMerged, null, 2) + '\n', 'utf8');
 
-    // Merge into virtual-care data. Refresh _dataMetadata for
-    // ADJACENT_HELPLINES (the array this scraper owns in this file); preserve
-    // sibling entries (HEALTH_LINK_VOLUMES, VIRTUAL_MD_COHORT_STUDY,
-    // VIRTUAL_MD_DISPOSITIONS, EMS_811_DIVERSION_DATA) via mergeDataMetadata.
-    // The existing entry is the source of truth for
-    // source/sourceVintage/updateType/verification; only lastUpdated is
-    // refreshed.
+    // Virtual-care merge: preserve real HEALTH_LINK_VOLUMES / sibling keys, but
+    // never write ADJACENT_HELPLINES (withheld). Force dispositions/diversion/
+    // adjacent empty and strip their metadata stamps via the guard.
     const vcJson = loadJsonFile(VIRTUAL_CARE_FILE);
-    const vcExistingMeta = vcJson._dataMetadata as DataMetadata | undefined;
-    const vcOwnedMetadata: DataMetadata = {};
-    const adjExisting = vcExistingMeta?.ADJACENT_HELPLINES;
-    if (adjExisting) {
-      vcOwnedMetadata.ADJACENT_HELPLINES = buildMetadataEntry({
-        updateType: adjExisting.updateType,
-        source: adjExisting.source,
-        sourceVintage: adjExisting.sourceVintage,
-        verification: adjExisting.verification,
-        lastUpdated: timestamp,
-      });
-    }
     const vcMerged = {
       ...vcJson,
-      ADJACENT_HELPLINES: adjacentHelplines,
-      _dataMetadata: mergeDataMetadata(vcExistingMeta, vcOwnedMetadata),
+      VIRTUAL_MD_DISPOSITIONS: [],
+      EMS_811_DIVERSION_DATA: [],
+      ADJACENT_HELPLINES: [],
+      _dataMetadata: mergeDataMetadata(
+        vcJson._dataMetadata as DataMetadata | undefined,
+        {},
+      ),
     };
+    applyWithheldPayloadGuard(vcMerged);
     fs.writeFileSync(VIRTUAL_CARE_FILE, JSON.stringify(vcMerged, null, 2) + '\n', 'utf8');
 
-    const recordsWritten = helplines.length + adjacentHelplines.length;
+    const recordsWritten = helplines.length;
     console.log(
       `[Alberta211] Complete. fetched=${allRecords.length} written=${recordsWritten} in ${Date.now() - startTime}ms`,
     );

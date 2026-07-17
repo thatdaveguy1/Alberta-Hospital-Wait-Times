@@ -24,6 +24,7 @@ import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -570,6 +571,7 @@ function mergeAndWrite(
         );
       }
     }
+    applyWithheldPayloadGuard(existing);
     fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
   }
   return written;

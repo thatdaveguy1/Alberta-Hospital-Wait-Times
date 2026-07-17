@@ -58,7 +58,7 @@ export function recordLabWaitsUpdate(result: SyncResult): void {
   // an updated status while the server was running.
   loadSyncStatusFromDisk();
   currentStatus.labWaitsLastUpdate = result.timestamp;
-  currentStatus.labWaitsNextUpdate = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+  currentStatus.labWaitsNextUpdate = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
   const existingIdx = currentStatus.results.findIndex(
     r => r.pipeline === result.pipeline

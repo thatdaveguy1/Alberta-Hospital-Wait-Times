@@ -15,7 +15,8 @@ import fs from 'fs';
 import path from 'path';
 import type { AcceptingProvider } from '../primaryCareData';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
+  applyWithheldPayloadGuard } from './metadataHelpers';
 
 const API_ENDPOINT = 'https://albertafindaprovider.ca/search/directory/clinics';
 const DATA_FILE = path.join(process.cwd(), 'data-primary-care.json');
@@ -169,10 +170,16 @@ function mapClinicToProviders(clinic: ApiClinic): AcceptingProvider[] {
   }));
 }
 
-// Merge ACCEPTING_PROVIDERS into the existing JSON, preserving every other key.
-// Dedupe by id, preferring freshly fetched rows. Returns count written.
+// Merge ACCEPTING_PROVIDERS into the existing JSON, preserving genuine upstream
+// keys. Force withheld primary-care residual arrays empty so RMW never
+// reintroduces them. Dedupe by id, preferring freshly fetched rows.
 function mergeAndWrite(file: string, newProviders: AcceptingProvider[]): number {
   const existing = loadJsonFile(file);
+  // Force primary-care withheld residual arrays empty so RMW never reintroduces them.
+  existing.PCN_CAPACITY = [];
+  existing.ED_RELIANCE_BY_CONTINUITY = [];
+  existing.CONTINUITY_SATISFACTION = [];
+
   const oldProviders = Array.isArray(existing.ACCEPTING_PROVIDERS)
     ? (existing.ACCEPTING_PROVIDERS as AcceptingProvider[])
     : [];
@@ -196,6 +203,7 @@ function mergeAndWrite(file: string, newProviders: AcceptingProvider[]): number 
     ownedMetadata,
   );
 
+  applyWithheldPayloadGuard(existing);
   fs.writeFileSync(file, JSON.stringify(existing, null, 2));
   return merged.length;
 }

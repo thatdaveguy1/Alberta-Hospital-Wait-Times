@@ -15,6 +15,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import type { SyncResult } from './types';
+import { applyWithheldPayloadGuard } from './metadataHelpers';
 import type { NationalSpendingCompare } from '../spendingData';
 
 const FRASER_LANDING_URL = 'https://www.fraserinstitute.org/studies/health-care';
@@ -156,6 +157,7 @@ function mergeAlbertaSpending(file: string, update: Partial<NationalSpendingComp
   }
 
   existing['NATIONAL_SPENDING_COMPARE'] = merged;
+  applyWithheldPayloadGuard(existing);
   fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
   return merged.length;
 }

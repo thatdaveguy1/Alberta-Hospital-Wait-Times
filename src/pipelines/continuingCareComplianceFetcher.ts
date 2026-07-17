@@ -30,6 +30,7 @@ import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -58,6 +59,80 @@ const OPEN_NONCOMPLIANCE_STATUSES = new Set([
   'In Progress',
   'Ongoing',
 ]);
+
+// Map facility city → AHS zone. Unmapped cities stay as 'Alberta' rather than
+// inventing a default zone (previous code stamped every row 'Alberta' always).
+type AlbertaZone = CareFacilityCompliance['zone'];
+
+const ZONE_BY_CITY: Record<string, AlbertaZone> = {
+  // Calgary Zone
+  Calgary: 'Calgary Zone', Airdrie: 'Calgary Zone', Cochrane: 'Calgary Zone',
+  Okotoks: 'Calgary Zone', Chestermere: 'Calgary Zone', 'High River': 'Calgary Zone',
+  Canmore: 'Calgary Zone', Banff: 'Calgary Zone', Strathmore: 'Calgary Zone',
+  'Black Diamond': 'Calgary Zone', 'Diamond Valley': 'Calgary Zone',
+  Crossfield: 'Calgary Zone', 'Rocky View County': 'Calgary Zone',
+  Carstairs: 'Calgary Zone', Didsbury: 'Calgary Zone', Olds: 'Calgary Zone',
+  Sundre: 'Calgary Zone', Linden: 'Calgary Zone', Nanton: 'Calgary Zone',
+  Claresholm: 'Calgary Zone',
+  // Edmonton Zone
+  Edmonton: 'Edmonton Zone', 'St. Albert': 'Edmonton Zone',
+  'Sherwood Park': 'Edmonton Zone', Leduc: 'Edmonton Zone',
+  'Spruce Grove': 'Edmonton Zone', 'Stony Plain': 'Edmonton Zone',
+  'Fort Saskatchewan': 'Edmonton Zone', Beaumont: 'Edmonton Zone',
+  Morinville: 'Edmonton Zone', Devon: 'Edmonton Zone', Gibbons: 'Edmonton Zone',
+  Legal: 'Edmonton Zone', Redwater: 'Edmonton Zone',
+  'Parkland County': 'Edmonton Zone', 'Sturgeon County': 'Edmonton Zone',
+  Villeneuve: 'Edmonton Zone', Keephills: 'Edmonton Zone', Onoway: 'Edmonton Zone',
+  Warburg: 'Edmonton Zone',
+  // Central Zone
+  'Red Deer': 'Central Zone', Camrose: 'Central Zone', Lacombe: 'Central Zone',
+  Wetaskiwin: 'Central Zone', Ponoka: 'Central Zone', Innisfail: 'Central Zone',
+  'Sylvan Lake': 'Central Zone', Stettler: 'Central Zone',
+  'Rocky Mountain House': 'Central Zone', Drumheller: 'Central Zone',
+  Wainwright: 'Central Zone', Vegreville: 'Central Zone', Vermilion: 'Central Zone',
+  Lloydminster: 'Central Zone', Bashaw: 'Central Zone', Bentley: 'Central Zone',
+  Castor: 'Central Zone', Consort: 'Central Zone', Coronation: 'Central Zone',
+  Daysland: 'Central Zone', Eckville: 'Central Zone', Forestburg: 'Central Zone',
+  Hanna: 'Central Zone', Hardisty: 'Central Zone', Killam: 'Central Zone',
+  Provost: 'Central Zone', Rimbey: 'Central Zone', 'Three Hills': 'Central Zone',
+  Tofield: 'Central Zone', Trochu: 'Central Zone', Viking: 'Central Zone',
+  // South Zone
+  Lethbridge: 'South Zone', 'Medicine Hat': 'South Zone', Brooks: 'South Zone',
+  Taber: 'South Zone', Cardston: 'South Zone', 'Pincher Creek': 'South Zone',
+  'Fort Macleod': 'South Zone', Magrath: 'South Zone', Raymond: 'South Zone',
+  Coaldale: 'South Zone', 'Milk River': 'South Zone', 'Picture Butte': 'South Zone',
+  'Bow Island': 'South Zone', Bassano: 'South Zone', Vulcan: 'South Zone',
+  Blairmore: 'South Zone', Coleman: 'South Zone', 'Stand Off': 'South Zone',
+  Carmangay: 'South Zone', 'Cypress County': 'South Zone',
+  'Lethbridge County': 'South Zone',
+  // North Zone
+  'Grande Prairie': 'North Zone', 'Fort Mcmurray': 'North Zone',
+  'Fort McMurray': 'North Zone', 'Cold Lake': 'North Zone',
+  'Peace River': 'North Zone', 'High Level': 'North Zone',
+  'Slave Lake': 'North Zone', Athabasca: 'North Zone', Westlock: 'North Zone',
+  Whitecourt: 'North Zone', Hinton: 'North Zone', Edson: 'North Zone',
+  Bonnyville: 'North Zone', 'Grande Cache': 'North Zone',
+  'Grand Cache': 'North Zone', Barrhead: 'North Zone', Boyle: 'North Zone',
+  'Drayton Valley': 'North Zone', Fairview: 'North Zone', Falher: 'North Zone',
+  'Fort Chipewyan': 'North Zone', 'Fort Vermilion': 'North Zone',
+  Grimshaw: 'North Zone', 'High Prairie': 'North Zone',
+  'Hines Creek': 'North Zone', Hythe: 'North Zone', Jasper: 'North Zone',
+  'Lac LA Biche': 'North Zone', 'LA Crete': 'North Zone', Manning: 'North Zone',
+  Mayerthorpe: 'North Zone', Mclennan: 'North Zone', 'Smoky Lake': 'North Zone',
+  'Spirit River': 'North Zone', 'St. Paul': 'North Zone', Valleyview: 'North Zone',
+  Wabasca: 'North Zone',
+};
+
+function deduceZone(city: string): AlbertaZone {
+  if (!city) return 'Alberta';
+  const direct = ZONE_BY_CITY[city];
+  if (direct) return direct;
+  const lower = city.trim().toLowerCase();
+  for (const [k, z] of Object.entries(ZONE_BY_CITY)) {
+    if (k.toLowerCase() === lower) return z;
+  }
+  return 'Alberta';
+}
 
 // ---- Utilities ------------------------------------------------------------
 
@@ -288,7 +363,7 @@ function parseComplianceXlsx(buffer: Buffer): CareFacilityCompliance[] {
       type: classifyType(agg.accType, agg.accSub),
       operator: classifyOperator(agg.operator),
       city: agg.city,
-      zone: 'Alberta',
+      zone: deduceZone(agg.city),
       lastInspectionDate: lastInspection,
       standardsCompliant: agg.openViolations === 0,
       violationsCount: agg.openViolations,
@@ -332,8 +407,7 @@ function coerceJson(raw: unknown): ContinuingCareJson {
       base.CONTINUING_CARE_PLACEMENT_STATS = raw.CONTINUING_CARE_PLACEMENT_STATS as PlacementMetric[];
     if (Array.isArray(raw.RESIDENT_QUALITY_OUTCOMES))
       base.RESIDENT_QUALITY_OUTCOMES = raw.RESIDENT_QUALITY_OUTCOMES as ResidentOutcomeQuality[];
-    if (Array.isArray(raw.HOME_CARE_EXPERIENCE))
-      base.HOME_CARE_EXPERIENCE = raw.HOME_CARE_EXPERIENCE as HomeCareContinuity[];
+    // Withheld: never rehydrate HOME_CARE_EXPERIENCE from raw.
     if (Array.isArray(raw.CONTINUING_CARE_COMPLIANCE))
       base.CONTINUING_CARE_COMPLIANCE = raw.CONTINUING_CARE_COMPLIANCE as CareFacilityCompliance[];
     if (isRecord(raw._dataMetadata)) base._dataMetadata = raw._dataMetadata as DataMetadata;
@@ -445,6 +519,7 @@ export async function run(): Promise<SyncResult> {
       _dataMetadata: mergedMetadata,
     };
 
+    applyWithheldPayloadGuard(merged as unknown as Record<string, unknown>);
     fs.writeFileSync(CONTINUING_CARE_FILE, JSON.stringify(merged, null, 2), 'utf8');
     console.log(
       `[CcCompliance] Complete. wrote ${facilities.length} facilities in ${Date.now() - startTime}ms`,

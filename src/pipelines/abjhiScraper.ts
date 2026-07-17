@@ -11,6 +11,7 @@ import fs from 'fs';
 import path from 'path';
 import type { JointWaitRecord } from '../surgicalData';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -276,6 +277,7 @@ function mergeAndWrite(newRecords: JointWaitRecord[], timestamp: string): number
     ownedMetadata,
   );
 
+  applyWithheldPayloadGuard(existing);
   fs.writeFileSync(SURGICAL_FILE, JSON.stringify(existing, null, 2), 'utf8');
   return mergedOrtho.length;
 }
@@ -333,6 +335,33 @@ export async function run(): Promise<SyncResult> {
     const durationMs = Date.now() - startTime;
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.error('[AbjhiScraper] FAILED:', errorMsg);
+
+    // Fail closed: do not stamp auto/fresh metadata over stale rows. Mark the
+    // owned array as not refreshed so UI does not claim failed data is live.
+    try {
+      if (fs.existsSync(SURGICAL_FILE)) {
+        const existing = JSON.parse(fs.readFileSync(SURGICAL_FILE, 'utf8')) as Record<string, unknown>;
+        const priorMeta = (existing._dataMetadata as DataMetadata | undefined)?.ORTHOPEDIC_SPECIALTY_RECORDS;
+        const ownedMetadata: DataMetadata = {
+          ORTHOPEDIC_SPECIALTY_RECORDS: buildMetadataEntry({
+            updateType: 'manual',
+            source: 'Alberta Bone & Joint Health Institute wait times page',
+            sourceVintage: priorMeta?.sourceVintage ?? 'Unavailable — last scrape failed',
+            // Preserve prior lastUpdated if present so failure does not look like a fresh pull.
+            lastUpdated: priorMeta?.lastUpdated ?? '1970-01-01T00:00:00.000Z',
+            verification: `ABJHI scrape failed: ${errorMsg}. Existing orthopedic rows (if any) are not refreshed and must not be treated as current.`,
+          }),
+        };
+        existing._dataMetadata = mergeDataMetadata(
+          existing._dataMetadata as DataMetadata | undefined,
+          ownedMetadata,
+        );
+        applyWithheldPayloadGuard(existing);
+        fs.writeFileSync(SURGICAL_FILE, JSON.stringify(existing, null, 2), 'utf8');
+      }
+    } catch (metaErr) {
+      console.warn('[AbjhiScraper] Could not update failure metadata:', metaErr);
+    }
 
     return {
       domain: 'surgical',

@@ -1,6 +1,8 @@
 // DashboardHeader — standardized header for every main dashboard tab.
 // Matches the style used on the ER Wait Times tab: icon + title + description
 // plus an inline metadata row with auto/manual badge, last update, and data timestamp.
+// Renders only the per-array metadata entry for `arrayKey` — never invents a
+// tab-wide auto claim when the entry is missing or manual.
 
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
@@ -26,10 +28,17 @@ export function DashboardHeader({
   children,
 }: DashboardHeaderProps): React.ReactElement {
   const entry = metadata?.[arrayKey];
+  const hasEntry = Boolean(entry);
   const isAuto = entry?.updateType === 'auto';
-  const lastUpdated = entry?.lastUpdated ? formatDataTimestamp(entry.lastUpdated) : 'Unknown';
+  const lastUpdated = entry?.lastUpdated ? formatDataTimestamp(entry.lastUpdated) : 'Unavailable';
   const sourceVintage = entry?.sourceVintage ? formatDataTimestamp(entry.sourceVintage) : '—';
   const source = entry?.source ? sanitizeSource(entry.source) : '—';
+  const statusLabel = !hasEntry
+    ? 'No verified feed'
+    : isAuto
+      ? 'Auto-updated'
+      : 'Manual';
+  const updatedLabel = isAuto ? 'Last pipeline refresh' : 'Last recorded update';
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
@@ -54,11 +63,11 @@ export function DashboardHeader({
                 : 'bg-slate-800/60 text-slate-400 border-slate-750'
             }`}
           >
-            {isAuto ? 'Auto-updated' : 'Static / estimated'}
+            {statusLabel}
           </span>
           <span className="text-slate-600">·</span>
           <span>
-            Last scrape: <span className="font-mono text-white font-black">{lastUpdated}</span>
+            {updatedLabel}: <span className="font-mono text-white font-black">{lastUpdated}</span>
           </span>
           <span className="text-slate-600">·</span>
           <span>

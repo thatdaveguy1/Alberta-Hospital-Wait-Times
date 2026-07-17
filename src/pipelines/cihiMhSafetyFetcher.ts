@@ -16,6 +16,7 @@ import * as XLSX from 'xlsx';
 import path from 'path';
 import type { SyncResult } from './types';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -333,6 +334,7 @@ export async function run(): Promise<SyncResult> {
         }
       }
 
+      applyWithheldPayloadGuard(merged);
       fs.writeFileSync(file, JSON.stringify(merged, null, 2) + '\n', 'utf8');
       console.log(`[CihiMhSafety] Wrote ${Object.keys(domainUpdates).length} keys to ${path.basename(file)}`);
     }

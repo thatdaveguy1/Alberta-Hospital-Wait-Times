@@ -1,66 +1,5 @@
 {
-  "CANCER_BURDEN_STATS": [
-    {
-      "cancerType": "Breast Cancer",
-      "projectedCases2026": 3450,
-      "crudeIncidenceRate": 151.2,
-      "ageStandardizedIncidenceRate": 124.5,
-      "projectedDeaths2026": 480,
-      "crudeMortalityRate": 21.1,
-      "ageStandardizedMortalityRate": 16.8,
-      "fiveYearRelativeSurvivalPct": 89.2
-    },
-    {
-      "cancerType": "Colorectal Cancer",
-      "projectedCases2026": 2350,
-      "crudeIncidenceRate": 103,
-      "ageStandardizedIncidenceRate": 85.2,
-      "projectedDeaths2026": 780,
-      "crudeMortalityRate": 34.2,
-      "ageStandardizedMortalityRate": 27.5,
-      "fiveYearRelativeSurvivalPct": 64.8
-    },
-    {
-      "cancerType": "Lung Cancer",
-      "projectedCases2026": 2890,
-      "crudeIncidenceRate": 126.7,
-      "ageStandardizedIncidenceRate": 104.8,
-      "projectedDeaths2026": 1650,
-      "crudeMortalityRate": 72.3,
-      "ageStandardizedMortalityRate": 59.1,
-      "fiveYearRelativeSurvivalPct": 22.4
-    },
-    {
-      "cancerType": "Prostate Cancer",
-      "projectedCases2026": 3120,
-      "crudeIncidenceRate": 136.8,
-      "ageStandardizedIncidenceRate": 112.4,
-      "projectedDeaths2026": 420,
-      "crudeMortalityRate": 18.4,
-      "ageStandardizedMortalityRate": 15.1,
-      "fiveYearRelativeSurvivalPct": 91.5
-    },
-    {
-      "cancerType": "Bladder Cancer",
-      "projectedCases2026": 920,
-      "crudeIncidenceRate": 40.3,
-      "ageStandardizedIncidenceRate": 32.8,
-      "projectedDeaths2026": 210,
-      "crudeMortalityRate": 9.2,
-      "ageStandardizedMortalityRate": 7.2,
-      "fiveYearRelativeSurvivalPct": 75.1
-    },
-    {
-      "cancerType": "Melanoma",
-      "projectedCases2026": 1150,
-      "crudeIncidenceRate": 50.4,
-      "ageStandardizedIncidenceRate": 41.6,
-      "projectedDeaths2026": 130,
-      "crudeMortalityRate": 5.7,
-      "ageStandardizedMortalityRate": 4.5,
-      "fiveYearRelativeSurvivalPct": 88.5
-    }
-  ],
+  "CANCER_BURDEN_STATS": [],
   "CANCER_SCREENING_RATES": [],
   "CANCER_SURGERY_WAIT_TRENDS": [
     {
@@ -5578,42 +5517,29 @@
     }
   ],
   "_dataMetadata": {
-    "CANCER_BURDEN_STATS": {
-      "source": "Alberta Cancer Registry projected incidence/mortality (major cancers subset)",
-      "sourceVintage": "2026 projected baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
-      "verification": "Totals reflect the selected major cancers tracked in this dashboard (breast, colorectal, lung, prostate, bladder, melanoma), not all annual cancer diagnoses in Alberta."
-    },
-    "CANCER_SCREENING_RATES": {
-      "source": "Alberta screening program zone rates",
-      "sourceVintage": "Hand-authored baseline",
-      "updateType": "manual",
-      "lastUpdated": "2026-07-05T12:00:00.000Z"
-    },
     "CANCER_SURGERY_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:01:52.906Z",
+      "lastUpdated": "2026-07-17T12:02:35.852Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2013\u20132025"
+      "sourceVintage": "2013–2025"
     },
     "RADIATION_THERAPY_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:01:52.906Z",
+      "lastUpdated": "2026-07-17T12:02:35.852Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2010\u20132025"
+      "sourceVintage": "2010–2025"
     },
     "ALBERTA_CANCER_CENTRES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:01:18.682Z",
+      "lastUpdated": "2026-07-17T12:01:49.180Z",
       "source": "AHS Cancer Centre directory",
       "sourceVintage": "Live AHS directory"
     },
     "CIHI_CANCER_WAIT_TIMES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:04:49.233Z",
+      "lastUpdated": "2026-07-17T12:05:43.459Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2008\u20132025"
+      "sourceVintage": "2008–2025"
     }
   }
 }

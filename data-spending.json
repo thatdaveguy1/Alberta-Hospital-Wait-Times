@@ -653,48 +653,7 @@
       "physiciansCount": 12040
     }
   ],
-  "HOSPITAL_EFFICIENCY_TREND": [
-    {
-      "fiscalYear": "2021-2022",
-      "spendingPerStaffedBed": 212000,
-      "hospitalizationsPerBed": 42.4,
-      "surgeriesPerBed": 39.8,
-      "hoursWorkedPerBed": 1450,
-      "standardStayCost": 6540
-    },
-    {
-      "fiscalYear": "2022-2023",
-      "spendingPerStaffedBed": 228000,
-      "hospitalizationsPerBed": 41.8,
-      "surgeriesPerBed": 40.1,
-      "hoursWorkedPerBed": 1510,
-      "standardStayCost": 6810
-    },
-    {
-      "fiscalYear": "2023-2024",
-      "spendingPerStaffedBed": 245000,
-      "hospitalizationsPerBed": 40.5,
-      "surgeriesPerBed": 39.4,
-      "hoursWorkedPerBed": 1580,
-      "standardStayCost": 7120
-    },
-    {
-      "fiscalYear": "2024-2025",
-      "spendingPerStaffedBed": 268000,
-      "hospitalizationsPerBed": 39.1,
-      "surgeriesPerBed": 38.8,
-      "hoursWorkedPerBed": 1640,
-      "standardStayCost": 7350
-    },
-    {
-      "fiscalYear": "2025-2026",
-      "spendingPerStaffedBed": 292000,
-      "hospitalizationsPerBed": 37.8,
-      "surgeriesPerBed": 38.2,
-      "hoursWorkedPerBed": 1720,
-      "standardStayCost": 7420
-    }
-  ],
+  "HOSPITAL_EFFICIENCY_TREND": [],
   "PHYSICIAN_SPECIALTY_BILLING": [
     {
       "specialtyGroup": "General/Family Physicians (GP/FPs)",
@@ -3321,44 +3280,29 @@
       "__EMPTY_19": ""
     }
   ],
-  "_handAuthoredMetadata": {
-    "HOSPITAL_EFFICIENCY_TREND": {
-      "source": "CIHI Hospital Cost Performance report",
-      "vintage": "CIHI report (approximate 2021-2024)",
-      "lastVerified": "2026-07-05",
-      "verification": "CIHI publishes hospital cost performance indicators including spending per staffed bed and hospitalizations per bed. Fiscal year figures are plausible but could not be confirmed against a specific CIHI publication."
-    }
-  },
   "_dataMetadata": {
     "NATIONAL_SPENDING_COMPARE": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:01:21.857Z",
+      "lastUpdated": "2026-07-17T12:01:52.526Z",
       "source": "CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)",
       "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },
     "ALBERTA_ACTIVITY_VOLUME_TREND": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:01:21.857Z",
+      "lastUpdated": "2026-07-17T12:01:52.526Z",
       "source": "CIHI NHEX 2025 full data tables (Table O.1, derived activity volume)",
       "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },
-    "HOSPITAL_EFFICIENCY_TREND": {
-      "source": "CIHI Hospital Cost Performance report",
-      "sourceVintage": "CIHI report (approximate 2021-2024)",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
-      "updateType": "manual",
-      "verification": "CIHI publishes hospital cost performance indicators including spending per staffed bed and hospitalizations per bed. Fiscal year figures are plausible but could not be confirmed against a specific CIHI publication."
-    },
     "PHYSICIAN_SPECIALTY_BILLING": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T22:43:49.260Z",
+      "lastUpdated": "2026-07-17T12:04:32.398Z",
       "source": "Open Alberta AHCIP Statistical Supplement (combined workbook)",
       "sourceVintage": "AHCIP Statistical Supplement — latest release (Tables 2.3, 2.12 A/B/D, 2.14)",
       "verification": "Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons, with registered persons derived from Table 2.14 FTE counts. Pathology and Radiology have no Table 2.14 entry, so their servicesPerPatient is 0."
     },
     "ALBERTA_USE_OF_FUNDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-15T12:01:21.857Z",
+      "lastUpdated": "2026-07-17T12:01:52.526Z",
       "source": "CIHI NHEX 2025 full data tables (Series D1, Alberta sheet)",
       "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
     },

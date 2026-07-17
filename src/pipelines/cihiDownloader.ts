@@ -2,18 +2,17 @@
 // Downloads the NHEX 2025 full data tables ZIP from CIHI, extracts the XLSX
 // workbooks, and parses them with SheetJS (xlsx) to populate data-spending.json.
 //
-// Source: https://www.cihi.ca/sites/default/files/document/nhex-2025-full-data-tables-en.zip
 // Published Nov 27, 2025 — contains finalized 2023 actuals + preliminary 2024/2025 forecasts.
+// This pipeline excludes forecast-category rows and never preserves hand-authored
+// hospital activity / efficiency / GDP fields from prior JSON payloads.
 //
 // Extracted datasets:
 //   NATIONAL_SPENDING_COMPARE      — from Table O.1 (per-capita spending by province)
 //   bedsPer100k                    — CIHI indicator 877 + NHEX-implied population
 //   costPerStandardStay            — CIHI indicator 823 (CSHS), Province/territory level
 //   ALBERTA_USE_OF_FUNDS           — from series-d1 Alberta sheet (amounts + shares)
-//   ALBERTA_ACTIVITY_VOLUME_TREND  — from Table O.1 (Alberta total spending by year,
-//                                    preserving existing non-NHEX fields)
-//
-// All failures are caught and returned as SyncResult — run() never throws.
+//   ALBERTA_ACTIVITY_VOLUME_TREND  — NHEX Alberta total spending by year only
+//                                    (unsupported volume fields left empty/null)
 
 import AdmZip from 'adm-zip';
 import axios from 'axios';
@@ -21,7 +20,7 @@ import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import { applyWithheldPayloadGuard, buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
 import type {
   ActivityVolumeTrend,
   NationalSpendingCompare,
@@ -170,6 +169,9 @@ function mergeAndWrite(
         );
       }
     }
+    // Never reintroduce scrubbed hospital-efficiency estimates via RMW.
+    existing.HOSPITAL_EFFICIENCY_TREND = [];
+    applyWithheldPayloadGuard(existing);
     fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
   }
   return written;
@@ -191,20 +193,28 @@ function mergeAndWrite(
 //   8: Constant 2010 dollars per capita
 
 const COL_YEAR = 0;
+const COL_FORECAST_CATEGORY = 1;
 const COL_PROVINCE = 2;
 const COL_SECTOR = 3;
 const COL_UOF = 4;
 const COL_CURRENT_DOLLARS = 5;
 const COL_PER_CAPITA = 6;
 
+// Keep only source-backed non-forecast rows. Preliminary actuals are retained;
+// explicit Forecast category rows are excluded.
+function isForecastCategory(value: unknown): boolean {
+  const s = asString(value)?.toLowerCase() ?? '';
+  if (!s) return false;
+  return s.includes('forecast');
+}
 
-
-// Parse Table O.1 into typed row objects.
+// Parse Table O.1 into typed row objects (forecast rows dropped).
 function parseTableO1(rows: unknown[][]): TableO1Row[] {
   const result: TableO1Row[] = [];
   for (let i = 3; i < rows.length; i++) {
     const r = rows[i];
     if (!r) continue;
+    if (isForecastCategory(r[COL_FORECAST_CATEGORY])) continue;
     const year = asString(r[COL_YEAR]);
     if (!year || !/^\d{4}$/.test(year)) continue;
     const province = asString(r[COL_PROVINCE]);
@@ -287,58 +297,48 @@ function extractNationalSpending(tableRows: TableO1Row[]): NationalSpendingCompa
 async function enrichNationalSpendingCompare(
   base: NationalSpendingCompare[],
   tableRows: TableO1Row[],
-  existing: NationalSpendingCompare[],
+  _existing: NationalSpendingCompare[],
 ): Promise<NationalSpendingCompare[]> {
   if (base.length === 0) return base;
 
   const latestYear = tableRows.reduce((max, r) => (r.year > max ? r.year : max), '0');
   const bedsByProv = await fetchAcuteBedsByProvince();
   const cshsByProv = await fetchCshsByProvince();
-  const existingByProv = new Map(existing.map((r) => [r.province, r]));
+  // Intentionally ignore prior JSON GDP / beds / CSHS hand-authored leave-behinds.
+  void _existing;
 
   return base.map((row) => {
-    const prev = existingByProv.get(row.province);
-    let spendingAsPercentGdp: number | null = prev?.spendingAsPercentGdp ?? null;
-
     let bedsPer100k: number | null = null;
     const bedCount = bedsByProv.get(row.province);
     const pop = impliedPopulationFromO1(tableRows, row.province, latestYear);
     if (bedCount !== undefined && pop !== undefined) {
       bedsPer100k = computeBedsPer100k(bedCount, pop);
-    } else if (prev?.bedsPer100k != null && prev.bedsPer100k > 0) {
-      bedsPer100k = prev.bedsPer100k;
     }
 
-    let costPerStandardStay: number | null = cshsByProv.get(row.province) ?? null;
-    if (
-      costPerStandardStay == null &&
-      prev?.costPerStandardStay != null &&
-      prev.costPerStandardStay > 0
-    ) {
-      costPerStandardStay = prev.costPerStandardStay;
-    }
+    const costPerStandardStay: number | null = cshsByProv.get(row.province) ?? null;
 
-    if (spendingAsPercentGdp === 0) spendingAsPercentGdp = null;
-    if (bedsPer100k === 0) bedsPer100k = null;
-    if (costPerStandardStay === 0) costPerStandardStay = null;
-
+    // GDP share is not present in NHEX Table O.1 — always null (never preserve prior seed).
     return {
       ...row,
-      spendingAsPercentGdp,
-      bedsPer100k,
-      costPerStandardStay,
+      spendingAsPercentGdp: null,
+      bedsPer100k: bedsPer100k && bedsPer100k > 0 ? bedsPer100k : null,
+      costPerStandardStay:
+        costPerStandardStay != null && costPerStandardStay > 0
+          ? costPerStandardStay
+          : null,
     };
   });
 }
 
 // Extract ALBERTA_ACTIVITY_VOLUME_TREND: Alberta total spending by year (in
-// billions CAD). Only totalExpenseBillions is sourced from NHEX; all other
-// fields are preserved from the existing JSON data.
+// billions CAD) from NHEX only. Unsupported activity/volume fields are left
+// empty (null) — never preserved from hand-authored prior JSON.
 function extractActivityVolume(
   tableRows: TableO1Row[],
-  existing: ActivityVolumeTrend[],
+  _existing: ActivityVolumeTrend[],
 ): ActivityVolumeTrend[] {
-  if (tableRows.length === 0) return existing;
+  void _existing;
+  if (tableRows.length === 0) return [];
 
   // Collect Alberta total current-dollars by year (Public + Private combined).
   const totalByYear = new Map<string, number>();
@@ -357,37 +357,24 @@ function extractActivityVolume(
     return `${y}-${y + 1}`;
   };
 
-  // Index existing records by fiscal year for merging.
-  const existingByFy = new Map<string, ActivityVolumeTrend>();
-  for (const rec of existing) {
-    existingByFy.set(rec.fiscalYear, { ...rec });
-  }
-
-  // Update or create records for each NHEX year we have data for.
+  const records: ActivityVolumeTrend[] = [];
   for (const [year, totalDollars] of totalByYear) {
     const fiscalYear = nhexToFiscal(year);
     const totalExpenseBillions = Math.round((totalDollars / 1_000_000_000) * 10) / 10;
-    const existingRec = existingByFy.get(fiscalYear);
-    if (existingRec) {
-      existingRec.totalExpenseBillions = totalExpenseBillions;
-    } else {
-      existingByFy.set(fiscalYear, {
-        fiscalYear,
-        totalExpenseBillions,
-        surgeriesCount: 0,
-        ctExamsCount: 0,
-        labTestsMillions: 0,
-        edVisitsMillions: 0,
-        hospitalAdmissions: 0,
-        physiciansCount: 0,
-      });
-    }
+    records.push({
+      fiscalYear,
+      totalExpenseBillions,
+      // Not sourced from NHEX — leave empty rather than invent or preserve seeds.
+      surgeriesCount: null as unknown as number,
+      ctExamsCount: null as unknown as number,
+      labTestsMillions: null as unknown as number,
+      edVisitsMillions: null as unknown as number,
+      hospitalAdmissions: null as unknown as number,
+      physiciansCount: null as unknown as number,
+    });
   }
 
-  // Return sorted by fiscal year.
-  return [...existingByFy.values()].sort((a, b) =>
-    a.fiscalYear.localeCompare(b.fiscalYear),
-  );
+  return records.sort((a, b) => a.fiscalYear.localeCompare(b.fiscalYear));
 }
 
 // ---------------------------------------------------------------------------
@@ -423,6 +410,7 @@ function findD1Table(
   if (!headerRow) return null;
 
   // Collect data rows (year in col 0, numeric values in cols 1+).
+  // Year cells may carry a trailing "f" forecast marker — those rows are skipped.
   const yearRows: { year: string; values: number[] }[] = [];
   for (let i = headerIdx + 1; i < rows.length; i++) {
     const r = rows[i];
@@ -433,10 +421,16 @@ function findD1Table(
       if (yearRows.length > 0) break;
       continue;
     }
+    // Exclude forecast-marked years (e.g. "2025 f", "2025f").
+    if (/\bf\b/i.test(yearStr) || /forecast/i.test(yearStr) || /\d{4}\s*f/i.test(yearStr)) {
+      continue;
+    }
     const year = yearStr.replace(/\s*f.*$/i, '').trim();
     const values: number[] = [];
     for (let c = 1; c < headerRow.length; c++) {
-      values.push(asNumber(r[c]) ?? 0);
+      const n = asNumber(r[c]);
+      // Preserve missing cells as NaN so callers can skip rather than zero-fill.
+      values.push(n === undefined ? Number.NaN : n);
     }
     yearRows.push({ year, values });
   }
@@ -445,7 +439,7 @@ function findD1Table(
 }
 
 // Extract ALBERTA_USE_OF_FUNDS from the Alberta sheet of series-d1.
-// Uses the latest forecast year's amounts (millions -> billions) and percentage
+// Uses the latest non-forecast year's amounts (millions -> billions) and percentage
 // shares from the percentage-distribution table.
 function extractUseOfFunds(sheet: XLSX.WorkSheet): SpendingByUseOfFunds[] {
   const rows = sheetToRows(sheet);
@@ -474,20 +468,22 @@ function extractUseOfFunds(sheet: XLSX.WorkSheet): SpendingByUseOfFunds[] {
   }
   if (categoryCols.length === 0) return [];
 
-  // Use the latest year from the amounts table.
+  // Use the latest non-forecast year from the amounts table.
   const latestAmounts = amountsTable.yearRows[amountsTable.yearRows.length - 1];
   const latestShares = sharesTable.yearRows[sharesTable.yearRows.length - 1];
   if (!latestAmounts) return [];
 
   const records: SpendingByUseOfFunds[] = [];
   for (const { col, label } of categoryCols) {
-    const amountMillions = latestAmounts.values[col - 1] ?? 0;
-    const share = latestShares ? latestShares.values[col - 1] ?? 0 : 0;
-    if (amountMillions === 0 && share === 0) continue;
+    const amountMillions = latestAmounts.values[col - 1];
+    const share = latestShares ? latestShares.values[col - 1] : Number.NaN;
+    if (amountMillions == null || Number.isNaN(amountMillions)) continue;
+    if (amountMillions === 0 && (share == null || Number.isNaN(share) || share === 0)) continue;
     records.push({
       category: label,
       amountBillions: Math.round((amountMillions / 1000) * 100) / 100,
-      percentageShare: Math.round(share * 10) / 10,
+      percentageShare:
+        share != null && !Number.isNaN(share) ? Math.round(share * 10) / 10 : 0,
     });
   }
   return records;
@@ -639,29 +635,29 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // 7. Merge into data-spending.json, preserving PHYSICIAN_SPECIALTY_BILLING
-    //    and HOSPITAL_EFFICIENCY_TREND (not touched here). Stamp
-    //    _dataMetadata for the arrays refreshed this run; sibling entries
+    // 7. Merge into data-spending.json, preserving PHYSICIAN_SPECIALTY_BILLING.
+    //    HOSPITAL_EFFICIENCY_TREND is withheld and forced empty on write.
+    //    Stamp _dataMetadata for the arrays refreshed this run; sibling entries
     //    (e.g. CIHI_RESOURCE_USE_INTENSITY, CIHI_SPENDING_PER_PERSON) are
     //    preserved via mergeDataMetadata.
     const ownedMetadata: DataMetadata = {
       NATIONAL_SPENDING_COMPARE: buildMetadataEntry({
         updateType: 'auto',
         source:
-          'CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)',
-        sourceVintage: 'NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)',
+          'CIHI NHEX 2025 Table O.1 (non-forecast rows); bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)',
+        sourceVintage: 'NHEX 2025 release — actual/preliminary rows only (forecasts excluded); GDP share not sourced',
         lastUpdated: timestamp,
       }),
       ALBERTA_USE_OF_FUNDS: buildMetadataEntry({
         updateType: 'auto',
-        source: 'CIHI NHEX 2025 full data tables (Series D1, Alberta sheet)',
-        sourceVintage: 'NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)',
+        source: 'CIHI NHEX 2025 full data tables (Series D1, Alberta sheet, non-forecast years)',
+        sourceVintage: 'NHEX 2025 release — latest non-forecast year',
         lastUpdated: timestamp,
       }),
       ALBERTA_ACTIVITY_VOLUME_TREND: buildMetadataEntry({
         updateType: 'auto',
-        source: 'CIHI NHEX 2025 full data tables (Table O.1, derived activity volume)',
-        sourceVintage: 'NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)',
+        source: 'CIHI NHEX 2025 Table O.1 Alberta total health expenditure only',
+        sourceVintage: 'NHEX 2025 non-forecast years; activity/volume fields not sourced',
         lastUpdated: timestamp,
       }),
     };

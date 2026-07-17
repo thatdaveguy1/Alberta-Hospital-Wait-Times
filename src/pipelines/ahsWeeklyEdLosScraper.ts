@@ -22,6 +22,7 @@ import os from 'os';
 import path from 'path';
 import type { SyncResult } from './types';
 import {
+  applyWithheldPayloadGuard,
   buildMetadataEntry,
   mergeDataMetadata,
   type DataMetadata,
@@ -210,7 +211,9 @@ export async function run(): Promise<SyncResult> {
 
   let data: Record<string, unknown>;
   try {
-    data = JSON.parse(fs.readFileSync(SYSTEM_FLOW_FILE, 'utf8'));
+    data = JSON.parse(fs.readFileSync(SYSTEM_FLOW_FILE, 'utf8')) as Record<string, unknown>;
+    // Never reintroduce scrubbed historical estimates via RMW.
+    data.HISTORICAL_FLOW_TIMELINES = [];
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     errors.push(`read: ${msg}`);
@@ -270,20 +273,24 @@ export async function run(): Promise<SyncResult> {
       scrapedByNormName.set(norm(r.facilityName), r);
     }
 
-    // Replace existing entries that match a scraped facility; keep the
-    // hand-authored facilityId for link stability. Add new scraped entries.
-    const merged: WeeklyEDLOS[] = existing.map((e) => {
-      const scraped = scrapedByNormName.get(norm(e.facilityName));
-      if (scraped) {
-        return { ...scraped, facilityId: e.facilityId };
-      }
-      return e;
-    });
-
-    for (const r of scrapedRecords) {
-      if (!merged.find((m) => norm(m.facilityName) === norm(r.facilityName))) {
-        merged.push(r);
-      }
+    // Keep only scraped rows with a real weekEnding. Empty-week stubs are
+    // fabricated placeholders and must not survive the write.
+    const merged: WeeklyEDLOS[] = [];
+    const seenNorm = new Set<string>();
+    for (const scraped of scrapedRecords) {
+      if (!scraped.weekEnding || !String(scraped.weekEnding).trim()) continue;
+      const n = norm(scraped.facilityName);
+      const prior = existing.find((e) => norm(e.facilityName) === n);
+      merged.push({ ...scraped, facilityId: prior?.facilityId ?? scraped.facilityId });
+      seenNorm.add(n);
+    }
+    // Also keep any prior real rows not replaced this run (other cities / weeks).
+    for (const e of existing) {
+      if (!e.weekEnding || !String(e.weekEnding).trim()) continue;
+      const n = norm(e.facilityName);
+      if (seenNorm.has(n)) continue;
+      merged.push(e);
+      seenNorm.add(n);
     }
 
     data.AHS_WEEKLY_ED_LOS = merged;
@@ -301,7 +308,7 @@ export async function run(): Promise<SyncResult> {
         updateType: 'auto',
         source: 'AHS Weekly ED Performance Reports (Edmonton + Calgary PDFs)',
         sourceVintage: 'AHS weekly ED LOS PDFs (week ending per report)',
-        verification: 'Auto-parsed from AHS weekly ED wait/throughput PDFs via pdftotext; facility names normalized to existing hand-authored IDs.',
+        verification: 'Auto-parsed from AHS weekly ED wait/throughput PDFs via pdftotext. Only rows with a non-empty weekEnding are retained; empty stubs are dropped.',
         lastUpdated: timestamp,
       }),
     };
@@ -311,6 +318,7 @@ export async function run(): Promise<SyncResult> {
   let recordsWritten = 0;
   if (updated) {
     try {
+      applyWithheldPayloadGuard(data);
       fs.writeFileSync(SYSTEM_FLOW_FILE, JSON.stringify(data, null, 2), 'utf8');
       recordsWritten = (data.AHS_WEEKLY_ED_LOS as WeeklyEDLOS[]).length;
       console.log(`[AHSWeeklyEdLos] Wrote ${recordsWritten} records to data-system-flow.json`);

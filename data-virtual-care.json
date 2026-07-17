@@ -1,46 +1,5 @@
 {
-  "HEALTH_LINK_VOLUMES": [
-    {
-      "fiscalYear": "2021-2022",
-      "clinicalReceived": 820000,
-      "nonClinicalReceived": 410000,
-      "clinicalOutbound": 120000,
-      "nonClinicalOutbound": 90000,
-      "padisCalls": 44200
-    },
-    {
-      "fiscalYear": "2022-2023",
-      "clinicalReceived": 780000,
-      "nonClinicalReceived": 350000,
-      "clinicalOutbound": 110000,
-      "nonClinicalOutbound": 80000,
-      "padisCalls": 43100
-    },
-    {
-      "fiscalYear": "2023-2024",
-      "clinicalReceived": 810000,
-      "nonClinicalReceived": 390000,
-      "clinicalOutbound": 115000,
-      "nonClinicalOutbound": 85000,
-      "padisCalls": 44800
-    },
-    {
-      "fiscalYear": "2024-2025",
-      "clinicalReceived": 830000,
-      "nonClinicalReceived": 410000,
-      "clinicalOutbound": 120000,
-      "nonClinicalOutbound": 92000,
-      "padisCalls": 45200
-    },
-    {
-      "fiscalYear": "2025-2026",
-      "clinicalReceived": 850000,
-      "nonClinicalReceived": 430000,
-      "clinicalOutbound": 125000,
-      "nonClinicalOutbound": 95000,
-      "padisCalls": 46000
-    }
-  ],
+  "HEALTH_LINK_VOLUMES": [],
   "VIRTUAL_MD_COHORT_STUDY": [
     {
       "adviceCategory": "Advised Primary Care",
@@ -64,112 +23,16 @@
       "totalCohortSize": 19312
     }
   ],
-  "VIRTUAL_MD_DISPOSITIONS": [
-    {
-      "outcome": "Self-Care at Home",
-      "percentageShare": 50,
-      "description": "Condition successfully managed at home with nurse and physician advice, avoiding system utilization."
-    },
-    {
-      "outcome": "Primary Care Network Referral",
-      "percentageShare": 35,
-      "description": "Directed to follow up with local family physician or primary care clinic."
-    },
-    {
-      "outcome": "Urgent Care Centre Advice",
-      "percentageShare": 10,
-      "description": "Referred to community urgent care centres for non-life-threatening medical issues."
-    },
-    {
-      "outcome": "Emergency Department Triage",
-      "percentageShare": 5,
-      "description": "Direct instructions to proceed to the nearest active hospital Emergency Room."
-    }
-  ],
-  "EMS_811_DIVERSION_DATA": [
-    {
-      "disposition": "Community Services (Dentists, Pharmacists, Public Health)",
-      "percentageShare": 41.7,
-      "volumeProxy": 20850
-    },
-    {
-      "disposition": "Family Physician Consult Advice",
-      "percentageShare": 33.3,
-      "volumeProxy": 16650
-    },
-    {
-      "disposition": "Self-Care at Home Advice",
-      "percentageShare": 25,
-      "volumeProxy": 12500
-    }
-  ],
-  "ADJACENT_HELPLINES": [
-    {
-      "lineName": "Addiction & Mental Health Helpline",
-      "annualCalls": 38400,
-      "clinicalType": "Mental Health Triage",
-      "availability": "24/7"
-    },
-    {
-      "lineName": "Dementia Advice Line",
-      "annualCalls": 12200,
-      "clinicalType": "Specialist Nursing Support",
-      "availability": "24/7"
-    },
-    {
-      "lineName": "Rehabilitation Advice Line",
-      "annualCalls": 8500,
-      "clinicalType": "Physical / Occupational Therapy Triage",
-      "availability": "Monday-Friday"
-    },
-    {
-      "lineName": "Indigenous Support Line",
-      "annualCalls": 6200,
-      "clinicalType": "Culturally-Safe Navigation",
-      "availability": "24/7"
-    },
-    {
-      "lineName": "AlbertaQuits Helpline",
-      "annualCalls": 5400,
-      "clinicalType": "Tobacco / Vaping Cessation",
-      "availability": "7 Days a Week"
-    }
-  ],
+  "VIRTUAL_MD_DISPOSITIONS": [],
+  "EMS_811_DIVERSION_DATA": [],
+  "ADJACENT_HELPLINES": [],
   "_dataMetadata": {
-    "HEALTH_LINK_VOLUMES": {
-      "source": "virtualCareFetcher",
-      "sourceVintage": "AHS reports (no new publications)",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
-      "updateType": "manual",
-      "verification": "PubMed checked but no new AHS program milestones are published, requiring manual monitoring."
-    },
     "VIRTUAL_MD_COHORT_STUDY": {
       "updateType": "manual",
-      "lastUpdated": "2026-07-15T22:50:34.131Z",
+      "lastUpdated": "2026-07-17T12:04:25.743Z",
       "source": "Canadian Journal of Emergency Medicine, June 2025",
       "sourceVintage": "Apr 2022 – Mar 2023",
       "verification": "Verified PMID 40465166: \"Health system utilization following medical advice from Alberta's Virtual MD: a descriptive analysis.\" (CJEM, 2025 Dec) — DOI: 10.1007/s43678-025-00928-z"
-    },
-    "VIRTUAL_MD_DISPOSITIONS": {
-      "source": "AHS Virtual MD program description (2025)",
-      "sourceVintage": "Program-reported estimate",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
-      "updateType": "manual",
-      "verification": "Matches AHS statement that ~50% of callers self-manage at home"
-    },
-    "EMS_811_DIVERSION_DATA": {
-      "source": "Estimated from AHS 811 program reports",
-      "sourceVintage": "Approximate",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
-      "updateType": "manual",
-      "verification": "Could not verify exact percentages — marked as estimate"
-    },
-    "ADJACENT_HELPLINES": {
-      "source": "alberta211Scraper",
-      "sourceVintage": "Alberta 211 (API limitations)",
-      "lastUpdated": "2026-07-05T12:00:00.000Z",
-      "updateType": "manual",
-      "verification": "Helplines database is static due to 211 API limits, requiring manual registry checks."
     }
   },
   "_handAuthoredMetadata": {
@@ -178,18 +41,6 @@
       "studyPeriod": "Apr 2022 – Mar 2023",
       "lastVerified": "2026-07-05",
       "verification": "Exact match to published study (cohort=19312, 55.7%/60%/52.5%)"
-    },
-    "VIRTUAL_MD_DISPOSITIONS": {
-      "source": "AHS Virtual MD program description (2025)",
-      "vintage": "Program-reported estimate",
-      "lastVerified": "2026-07-05",
-      "verification": "Matches AHS statement that ~50% of callers self-manage at home"
-    },
-    "EMS_811_DIVERSION_DATA": {
-      "source": "Estimated from AHS 811 program reports",
-      "vintage": "Approximate",
-      "lastVerified": "2026-07-05",
-      "verification": "Could not verify exact percentages — marked as estimate"
     }
   }
 }

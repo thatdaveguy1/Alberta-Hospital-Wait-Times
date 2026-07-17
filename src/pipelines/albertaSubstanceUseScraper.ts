@@ -19,7 +19,12 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import type { SyncResult } from './types';
-import { buildMetadataEntry, mergeDataMetadata, type DataMetadata } from './metadataHelpers';
+import {
+  applyWithheldPayloadGuard,
+  buildMetadataEntry,
+  mergeDataMetadata,
+  type DataMetadata,
+} from './metadataHelpers';
 
 const OUTPUT_FILE = path.join(process.cwd(), 'data-mental-health.json');
 
@@ -250,65 +255,82 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // Merge into mental-health file — update SUBSTANCE_HARM_TRENDS
-    const existing = loadJsonFile(OUTPUT_FILE);
-    const existingTrends = Array.isArray(existing.SUBSTANCE_HARM_TRENDS)
-      ? (existing.SUBSTANCE_HARM_TRENDS as Record<string, unknown>[])
-      : [];
+    // Fail closed: only write rows with complete source-backed core metrics.
+    // Incomplete parses must not merge into (or stamp auto over) hand residuals.
+    // canadaRatePer100k is optional (often absent from provincial PDFs).
+    const completeRows = parsed
+      .filter(
+        (p) =>
+          p.apparentDeaths !== null &&
+          p.emsResponses !== null &&
+          p.hospitalizations !== null &&
+          p.albertaRatePer100k !== null,
+      )
+      .map((p) => ({
+        year: p.year,
+        substanceType: 'All Substances' as const,
+        apparentDeaths: p.apparentDeaths as number,
+        hospitalizations: p.hospitalizations as number,
+        emsOverdoseResponses: p.emsResponses as number,
+        albertaRatePer100k: p.albertaRatePer100k as number,
+        // Keep 0 only as typed placeholder when Canada rate is not in the PDF —
+        // UI should treat missing national comparator carefully if rate is 0 and
+        // canada was null in parse. Prefer storing null when type allows; interface
+        // currently requires number so 0 means "not reported".
+        canadaRatePer100k: p.canadaRatePer100k ?? 0,
+      }));
 
-    // Merge parsed data into existing trends by year
-    const existingByYear = new Map(existingTrends.map(t => [String(t['year']), t]));
-    for (const p of parsed) {
-      const prev = existingByYear.get(p.year);
-      if (prev) {
-        // Update existing entry with parsed values (don't clobber non-null existing values)
-        existingByYear.set(p.year, {
-          ...prev,
-          apparentDeaths: p.apparentDeaths ?? prev['apparentDeaths'],
-          emsOverdoseResponses: p.emsResponses ?? prev['emsOverdoseResponses'],
-          albertaRatePer100k: p.albertaRatePer100k ?? prev['albertaRatePer100k'],
-        });
-      } else {
-        // Add new entry
-        existingByYear.set(p.year, {
-          year: p.year,
-          apparentDeaths: p.apparentDeaths,
-          emsOverdoseResponses: p.emsResponses,
-          albertaRatePer100k: p.albertaRatePer100k,
-          canadaRatePer100k: p.canadaRatePer100k,
-        });
-      }
+    if (completeRows.length === 0) {
+      console.warn(
+        '[AlbertaSubstanceUse] No complete source-backed rows — leaving data files unchanged.',
+      );
+      return {
+        domain: 'mental-health',
+        pipeline: 'albertaSubstanceUseScraper',
+        status: 'skipped',
+        recordsFetched: parsed.length,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        timestamp,
+        error:
+          'Parsed PDF rows incomplete (need deaths, EMS, hospitalizations, AB rate); SUBSTANCE_HARM_TRENDS left unavailable',
+      };
     }
 
-    const mergedTrends = Array.from(existingByYear.values());
+    const existing = loadJsonFile(OUTPUT_FILE);
     const ownedMetadata: DataMetadata = {
       SUBSTANCE_HARM_TRENDS: buildMetadataEntry({
         updateType: 'auto',
         source: 'Alberta Substance Use Surveillance',
-        sourceVintage: '2019–latest surveillance year',
-        verification: 'Auto-scraped from Alberta Substance Use Surveillance PDF report.',
+        sourceVintage: `PDF-derived complete years (${completeRows.map((r) => r.year).join(', ')})`,
+        verification:
+          'Only complete rows (deaths+EMS+hospitalizations+AB rate) written; no hand merge.',
         lastUpdated: timestamp,
       }),
     };
     const output = {
       ...existing,
-      SUBSTANCE_HARM_TRENDS: mergedTrends,
+      SUBSTANCE_HARM_TRENDS: completeRows,
+      // Withheld residuals — never rehydrate scrubbed MH burden arrays.
+      COMMUNITY_MH_WAITS: [],
+      HOSPITAL_MHSU_BURDEN: [],
       _dataMetadata: mergeDataMetadata(
         existing._dataMetadata as DataMetadata | undefined,
         ownedMetadata,
       ),
     };
+    applyWithheldPayloadGuard(output);
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf8');
 
     console.log(
-      `[AlbertaSubstanceUse] Complete. fetched=${parsed.length} written=${mergedTrends.length} in ${Date.now() - startTime}ms`,
+      `[AlbertaSubstanceUse] Complete. fetched=${parsed.length} written=${completeRows.length} in ${Date.now() - startTime}ms`,
     );
     return {
       domain: 'mental-health',
       pipeline: 'albertaSubstanceUseScraper',
       status: 'success',
       recordsFetched: parsed.length,
-      recordsWritten: mergedTrends.length,
+      recordsWritten: completeRows.length,
       durationMs: Date.now() - startTime,
       timestamp,
     };
