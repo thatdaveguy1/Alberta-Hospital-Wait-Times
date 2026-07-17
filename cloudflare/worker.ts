@@ -110,7 +110,7 @@ app.get('/api/data/:domain', async (c) => {
   }
   const data = await c.env.DATA_KV.get(`data-${domain}`);
   if (!data) return c.json({ error: `No data for domain: ${domain}` }, 404);
-  c.header('Cache-Control', 'public, max-age=300, s-maxage=300');
+  c.header('Cache-Control', 'public, max-age=60, s-maxage=60');
   return c.json(JSON.parse(data));
 });
 

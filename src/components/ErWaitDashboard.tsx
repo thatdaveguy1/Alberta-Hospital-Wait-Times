@@ -139,6 +139,7 @@ export default function ErWaitDashboard() {
   const { syncStatus } = useSyncStatus();
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('me');
   const [search, setSearch] = useState('');
   const [careFilter, setCareFilter] = useState<CareFilter>('all');
@@ -195,11 +196,14 @@ export default function ErWaitDashboard() {
           }
           return data;
         });
+        setFetchError(false);
       } else {
         setHospitals([]);
+        setFetchError(false);
       }
     } catch (error) {
       console.error('Failed to fetch hospitals', error);
+      setFetchError(true);
     } finally {
       setLoading(false);
     }
@@ -753,10 +757,16 @@ export default function ErWaitDashboard() {
       <DashboardHeader
         icon={Activity}
         title="Emergency wait times"
-        description="Find the fastest path from where you are to a doctor — drive time plus live AHS queue estimates."
+        description="Find the fastest path from where you are to a doctor — drive time plus AHS queue estimates (refreshed every ~10 min)."
         metadata={headerMetadata}
         arrayKey="ER_WAIT_TIMES"
       />
+
+      {fetchError && (
+        <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm flex items-center gap-2">
+          <span>⚠️ Unable to refresh live ER wait times. Showing last received data.</span>
+        </div>
+      )}
 
       {/* Decision bar */}
       <div className="sticky top-[4.25rem] z-20 -mx-1 px-1">

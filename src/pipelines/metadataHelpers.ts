@@ -29,12 +29,13 @@ export type DataMetadata = Record<string, DataMetadataEntry>;
 /**
  * Build a single `_dataMetadata` entry.
  *
- * Content-refresh path (default): mints a fresh `lastUpdated` unless an
- * explicit `lastUpdated` is passed.
+ * Content-refresh path: pass `contentChanged: true` (or omit `previous`) to
+ * mint a fresh `lastUpdated` unless an explicit `lastUpdated` is passed.
  *
- * Verify-only / preserve path: pass `contentChanged: false` and the prior
- * entry via `previous` so `lastUpdated` is retained. Never invents freshness
- * for a no-op check.
+ * Verify-only / preserve path: pass `previous` without `contentChanged: true`
+ * so `lastUpdated` is retained. Never invents freshness for a no-op check.
+ * Prefer `mergeDataMetadata(..., contentChangedKeys)` so no-op merges cannot
+ * forge timestamps even when callers stamp a run-time ISO string.
  */
 export function buildMetadataEntry(opts: {
   updateType: DataMetadataUpdateType;
@@ -46,11 +47,16 @@ export function buildMetadataEntry(opts: {
   previous?: DataMetadataEntry;
   /**
    * When false, keep `previous.lastUpdated` (or explicit `lastUpdated`)
-   * instead of minting a new timestamp. Defaults to true.
+   * instead of minting a new timestamp.
+   * Defaults to false when `previous` is provided (verify/no-op path),
+   * true when there is no prior entry (first stamp).
    */
   contentChanged?: boolean;
 }): DataMetadataEntry {
-  const contentChanged = opts.contentChanged !== false;
+  // Only forge a new timestamp when content actually changed (explicit true)
+  // or when there is no previous entry to preserve. Callers that pass
+  // `previous` without `contentChanged: true` keep prior freshness.
+  const contentChanged = opts.contentChanged ?? !opts.previous;
 
   let lastUpdated: string;
   if (contentChanged) {
@@ -92,12 +98,41 @@ export function preserveMetadataEntry(existing: DataMetadataEntry): DataMetadata
  * Keys present in `owned` overwrite the same keys in `existing` (this writer is
  * refreshing them now); every other key is passed through untouched so sibling
  * writers' metadata survives the read-modify-write cycle.
+ *
+ * Freshness: when a key already exists and the caller has not listed it in
+ * `contentChangedKeys`, the existing `lastUpdated` is preserved so a no-op
+ * rewrite cannot forge a new scrape time. Pass the key in `contentChangedKeys`
+ * (or omit prior metadata) only when the payload array actually changed.
  */
 export function mergeDataMetadata(
   existing: DataMetadata | undefined,
   owned: DataMetadata,
+  contentChangedKeys?: Iterable<string>,
 ): DataMetadata {
-  return { ...(existing ?? {}), ...owned };
+  const changed =
+    contentChangedKeys === undefined ? null : new Set(contentChangedKeys);
+  const result: DataMetadata = { ...(existing ?? {}) };
+
+  for (const [key, entry] of Object.entries(owned)) {
+    const prior = result[key];
+    // When prior exists and key is not in the explicit content-changed set,
+    // preserve prior lastUpdated so no-op rewrites cannot forge freshness.
+    // contentChangedKeys === undefined means "caller did not declare changes"
+    // → preserve for all keys that already had metadata.
+    if (prior) {
+      const explicitlyChanged = changed !== null && changed.has(key);
+      if (!explicitlyChanged) {
+        result[key] = {
+          ...entry,
+          lastUpdated: prior.lastUpdated || entry.lastUpdated,
+        };
+        continue;
+      }
+    }
+    result[key] = entry;
+  }
+
+  return result;
 }
 
 /**

@@ -66,7 +66,7 @@ const DASHBOARDS = [
     color: 'text-red-400',
     bgColor: 'bg-red-500/10',
     borderColor: 'border-red-500/20',
-    badge: 'LIVE FEED',
+    badge: '10-MIN POLL',
     badgeColor: 'bg-red-500/10 text-red-400 border-red-500/20',
     source: 'Alberta Health Services Portal',
     updateFrequency: 'About every 10 minutes',
@@ -84,7 +84,7 @@ const DASHBOARDS = [
     badge: 'ACTIVE ALERTS',
     badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     source: 'AHS Emergency Advisories',
-    updateFrequency: 'Ad-hoc / Instant',
+    updateFrequency: 'Daily scrape (≈24h)',
   },
   {
     id: 'system-flow' as const,
@@ -98,7 +98,7 @@ const DASHBOARDS = [
     borderColor: 'border-indigo-500/20',
     badge: 'CAPACITY',
     badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-    source: 'AHS Clinical Operations DB',
+    source: 'HQCA FOCUS & CIHI ED Indicators',
     updateFrequency: 'Daily updates',
   },
   {
@@ -141,7 +141,7 @@ const DASHBOARDS = [
     color: 'text-cyan-400',
     bgColor: 'bg-cyan-500/10',
     borderColor: 'border-cyan-500/20',
-    badge: 'LIVE LABS',
+    badge: '60-MIN POLL',
     badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
     source: 'APL QMe & CIHI Diagnostic Imaging',
     updateFrequency: 'Lab waits: every 60 min · Imaging: annual/manual',
@@ -298,13 +298,13 @@ const TAB_METADATA_MAP: Record<string, {
   'er-waits': {
     updateType: 'auto',
     interval: 'about every 10 mins',
-    sourceVintage: 'Real-time feed',
+    sourceVintage: 'AHS WaitTimes Feed (~10m poll)',
     source: 'Alberta Health Services Portal'
   },
   'disruptions': {
     updateType: 'auto',
-    interval: 'every 24 hours',
-    sourceVintage: 'Live Active Alerts',
+    interval: 'Every 24 hours',
+    sourceVintage: 'Daily AHS Advisories',
     source: 'AHS Emergency Advisories'
   },
   'system-flow': {
@@ -435,7 +435,7 @@ export default function App() {
       : 'Alberta Health Data Monitor';
   const footerBlurb =
     activeTab === 'er-waits'
-      ? 'Data synchronized directly from the Alberta Health Services live portal. Estimated wait times refresh about every 10 minutes.'
+      ? 'Data synchronized from Alberta Health Services data feeds. Estimated ER wait times refresh about every 10 minutes.'
       : `Viewing ${activeDashboard.title}. Source: ${activeDashboard.source}. Update cadence: ${activeDashboard.updateFrequency}.`;
 
   return (

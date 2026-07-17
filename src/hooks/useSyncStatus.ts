@@ -27,6 +27,8 @@ interface UseSyncStatusReturn {
   syncStatus: SyncStatus | null;
   loading: boolean;
   error: string | null;
+  /** True when the latest status poll failed (network/HTTP error). */
+  isStale: boolean;
   refresh: () => void;
 }
 
@@ -88,7 +90,7 @@ export function useSyncStatus(): UseSyncStatusReturn {
     setRefreshKey(k => k + 1);
   };
 
-  return { syncStatus, loading, error, refresh };
+  return { syncStatus, loading, error, isStale: error !== null, refresh };
 }
 
 // Format an ISO timestamp as a human-readable relative time string.

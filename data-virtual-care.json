@@ -1,28 +1,6 @@
 {
   "HEALTH_LINK_VOLUMES": [],
-  "VIRTUAL_MD_COHORT_STUDY": [
-    {
-      "adviceCategory": "Advised Primary Care",
-      "metricLabel": "Sought Primary Care",
-      "followThroughPct": 55.7,
-      "timeframe": "Within 14 Days",
-      "totalCohortSize": 19312
-    },
-    {
-      "adviceCategory": "Advised ED / Urgent Care",
-      "metricLabel": "Sought ED / Urgent Care",
-      "followThroughPct": 60,
-      "timeframe": "Within 2 Days",
-      "totalCohortSize": 19312
-    },
-    {
-      "adviceCategory": "Advised Self-Management",
-      "metricLabel": "No Subsequent Health Use",
-      "followThroughPct": 52.5,
-      "timeframe": "Within 14 Days",
-      "totalCohortSize": 19312
-    }
-  ],
+  "VIRTUAL_MD_COHORT_STUDY": [],
   "VIRTUAL_MD_DISPOSITIONS": [],
   "EMS_811_DIVERSION_DATA": [],
   "ADJACENT_HELPLINES": [],

@@ -122,7 +122,37 @@ async function startServer() {
 
   // API Routes
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', time: new Date().toISOString() });
+    const SYNC_STATUS_FILE = path.join(process.cwd(), 'data-sync-status.json');
+    const STALE_AFTER_HOURS = 26;
+    let syncStale = true;
+    let lastSyncAgeHours: number | null = null;
+    let lastSyncTimestamp: string | null = null;
+
+    try {
+      if (fs.existsSync(SYNC_STATUS_FILE)) {
+        const raw = fs.readFileSync(SYNC_STATUS_FILE, 'utf8');
+        const status = JSON.parse(raw) as { lastSyncTimestamp?: string | null };
+        lastSyncTimestamp = status.lastSyncTimestamp ?? null;
+        if (lastSyncTimestamp) {
+          const ageMs = Date.now() - new Date(lastSyncTimestamp).getTime();
+          lastSyncAgeHours = Math.round((ageMs / (1000 * 60 * 60)) * 100) / 100;
+          syncStale = !Number.isFinite(lastSyncAgeHours) || lastSyncAgeHours > STALE_AFTER_HOURS;
+        }
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('[Server] /api/health failed to read data-sync-status.json:', message);
+      syncStale = true;
+      lastSyncAgeHours = null;
+    }
+
+    res.json({
+      status: 'ok',
+      time: new Date().toISOString(),
+      syncStale,
+      lastSyncAgeHours,
+      lastSyncTimestamp,
+    });
   });
 
   app.get('/api/hospitals', (req, res) => {

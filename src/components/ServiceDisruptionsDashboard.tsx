@@ -45,7 +45,7 @@ export default function ServiceDisruptionsDashboard() {
     disruptions: {
       source: 'AHS temporary bed/space reductions page (Page17594)',
       sourceVintage: 'Daily scrape of published AHS advisories (not continuous live poll)',
-      lastUpdated: lastSyncTime || '1970-01-01T00:00:00.000Z',
+      lastUpdated: lastSyncTime || undefined,
       updateType: (lastSyncTime ? 'auto' : 'manual') as 'auto' | 'manual',
       verification: 'Core fields scraped from AHS page. Zone/type are inferred from city map / keyword heuristics. alternativeCare only from editorial overrides.',
     }
@@ -79,7 +79,7 @@ export default function ServiceDisruptionsDashboard() {
       setError(null);
     } catch (err: any) {
       console.error(err);
-      setError('Could not establish secure communication with AHS disruptions endpoint. Using cached system records.');
+      setError('Unable to reach service disruptions feed.');
     } finally {
       setLoading(false);
     }
@@ -192,10 +192,16 @@ export default function ServiceDisruptionsDashboard() {
       <DashboardHeader
         icon={ShieldAlert}
         title="Temporary Service Disruptions"
-        description="Monitor real-time closures, reduced hours, and bed reductions across Alberta."
+        description="Monitor active health facility advisories and service disruptions across Alberta (updated daily)."
         metadata={metadata}
         arrayKey="disruptions"
       />
+
+      {error && (
+        <div className="p-4 mb-6 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm flex items-center gap-2">
+          <span>⚠️ {error}</span>
+        </div>
+      )}
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

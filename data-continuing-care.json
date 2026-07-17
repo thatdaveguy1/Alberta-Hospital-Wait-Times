@@ -77,192 +77,192 @@
       "zone": "Alberta",
       "pctPlacedWithin30Days": 72,
       "pctPlacedPreferredOption": 46,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2020",
       "zone": "Alberta",
       "pctPlacedWithin30Days": 75,
       "pctPlacedPreferredOption": 43.5,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2021",
       "zone": "Alberta",
       "pctPlacedWithin30Days": 69,
       "pctPlacedPreferredOption": 46.8,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2022",
       "zone": "Alberta",
       "pctPlacedWithin30Days": 72,
       "pctPlacedPreferredOption": 46.5,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2023",
       "zone": "Alberta",
       "pctPlacedWithin30Days": 71,
       "pctPlacedPreferredOption": 43.3,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2019",
       "zone": "Calgary Zone",
       "pctPlacedWithin30Days": 72,
       "pctPlacedPreferredOption": 40.3,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2020",
       "zone": "Calgary Zone",
       "pctPlacedWithin30Days": 78,
       "pctPlacedPreferredOption": 37,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2022",
       "zone": "Calgary Zone",
       "pctPlacedWithin30Days": 72,
       "pctPlacedPreferredOption": 40.3,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2019",
       "zone": "Central Zone",
       "pctPlacedWithin30Days": 63,
       "pctPlacedPreferredOption": 71.5,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2020",
       "zone": "Central Zone",
       "pctPlacedWithin30Days": 68,
       "pctPlacedPreferredOption": 64.8,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2021",
       "zone": "Central Zone",
       "pctPlacedWithin30Days": 60,
       "pctPlacedPreferredOption": 50.8,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2022",
       "zone": "Central Zone",
       "pctPlacedWithin30Days": 55,
       "pctPlacedPreferredOption": 57,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2023",
       "zone": "Central Zone",
       "pctPlacedWithin30Days": 52,
       "pctPlacedPreferredOption": 57,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2019",
       "zone": "Edmonton Zone",
       "pctPlacedWithin30Days": 85,
       "pctPlacedPreferredOption": 35.5,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2020",
       "zone": "Edmonton Zone",
       "pctPlacedWithin30Days": 84,
       "pctPlacedPreferredOption": 34.3,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2022",
       "zone": "Edmonton Zone",
       "pctPlacedWithin30Days": 81,
       "pctPlacedPreferredOption": 41.5,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2019",
       "zone": "North Zone",
       "pctPlacedWithin30Days": 49,
       "pctPlacedPreferredOption": 72.3,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2020",
       "zone": "North Zone",
       "pctPlacedWithin30Days": 49,
       "pctPlacedPreferredOption": 69.3,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2022",
       "zone": "North Zone",
       "pctPlacedWithin30Days": 67,
       "pctPlacedPreferredOption": 67.8,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2019",
       "zone": "South Zone",
       "pctPlacedWithin30Days": 47,
       "pctPlacedPreferredOption": 57.3,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2020",
       "zone": "South Zone",
       "pctPlacedWithin30Days": 44,
       "pctPlacedPreferredOption": 52.5,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2021",
       "zone": "South Zone",
       "pctPlacedWithin30Days": 69,
       "pctPlacedPreferredOption": 64.8,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2022",
       "zone": "South Zone",
       "pctPlacedWithin30Days": 64,
       "pctPlacedPreferredOption": 64.5,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     },
     {
       "year": "2023",
       "zone": "South Zone",
       "pctPlacedWithin30Days": 70,
       "pctPlacedPreferredOption": 68,
-      "daysWaitingP50": 0,
-      "daysWaitingP90": 0
+      "daysWaitingP50": null,
+      "daysWaitingP90": null
     }
   ],
   "RESIDENT_QUALITY_OUTCOMES": [
