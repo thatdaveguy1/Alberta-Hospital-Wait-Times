@@ -23,10 +23,22 @@ const DATA_FILE = path.join(process.cwd(), 'data-primary-care.json');
 const RATE_LIMIT_MS = 500; // be polite to the server
 const PAGE_SIZE = 25;
 const MAX_PAGES = 80; // safety cap (547 clinics / 25 = 22 pages)
+const MAX_API_RETRIES = 3;
+const RETRY_DELAYS_MS = [500, 1500, 3000];
+
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const SOURCE_NAME = 'Alberta Find a Provider (Primary Care Alberta)';
 const SOURCE_URL = 'https://albertafindaprovider.ca/';
+function isRetryableApiError(err: unknown): boolean {
+  if (axios.isAxiosError(err)) {
+    const code = err.code;
+    const status = err.response?.status;
+    if (status && status >= 500 && status < 600) return true;
+    if (code === 'ECONNRESET' || code === 'ETIMEDOUT' || code === 'ENOTFOUND' || code === 'EAI_AGAIN') return true;
+  }
+  return false;
+}
 
 interface ApiClinic {
   id: number;
@@ -226,15 +238,30 @@ export async function run(): Promise<SyncResult> {
 
       const url = `${API_ENDPOINT}?page=${page}&limit=${PAGE_SIZE}&anp=1&with[]=pcn&with[]=physicians&with[]=physicians.languages&with[]=physicians.specialties&with[]=services&with[]=specialties`;
 
-      let response;
-      try {
-        response = await axios.get<ApiResponse>(url, {
-          headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
-          timeout: 30000,
-        });
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.warn(`[AlbertaFindAProvider] API fetch failed on page ${page}: ${msg}`);
+      let response: { data: ApiResponse } | undefined;
+      let lastError: unknown;
+
+      for (let attempt = 0; attempt <= MAX_API_RETRIES; attempt++) {
+        try {
+          response = await axios.get<ApiResponse>(url, {
+            headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+            timeout: 30000,
+          });
+          break;
+        } catch (err) {
+          lastError = err;
+          if (!isRetryableApiError(err) || attempt === MAX_API_RETRIES) {
+            break;
+          }
+          const delayMs = RETRY_DELAYS_MS[attempt];
+          console.warn(`[AlbertaFindAProvider] Retry ${attempt + 1}/${MAX_API_RETRIES} for page ${page} failed (${err instanceof Error ? err.message : String(err)}); waiting ${delayMs}ms`);
+          await new Promise<void>(resolve => setTimeout(resolve, delayMs));
+        }
+      }
+
+      if (!response) {
+        const msg = lastError instanceof Error ? lastError.message : String(lastError);
+        console.warn(`[AlbertaFindAProvider] API fetch failed on page ${page} after ${MAX_API_RETRIES} retries: ${msg}`);
         return {
           domain: 'primary-care',
           pipeline: 'albertaFindAProviderScraper',
