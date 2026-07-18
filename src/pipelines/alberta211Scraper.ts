@@ -152,7 +152,7 @@ export async function run(): Promise<SyncResult> {
       SUPPORT_HELPLINES: buildMetadataEntry({
         updateType: 'auto',
         source: 'AHS Mental Health helplines + 211 Alberta directory',
-        sourceVintage: 'Live helpline directories',
+        sourceVintage: `Live directory as of ${timestamp} (AHS + 211 Alberta; updated continuously)`,
         verification: 'Auto-scraped from AHS helplines page and 211 Alberta API.',
         lastUpdated: timestamp,
       }),

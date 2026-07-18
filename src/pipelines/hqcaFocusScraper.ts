@@ -181,6 +181,29 @@ function parsePatientExperience(rows: string[][]): ExperienceRecord[] {
   }
   return records;
 }
+function deriveContinuitySourceVintage(records: ContinuityRecord[]): string {
+  const years = [...new Set(records.map((r) => r.fiscalYear).filter(Boolean))].sort((a, b) => {
+    const ay = parseInt(a.split('/')[0], 10) || 0;
+    const by = parseInt(b.split('/')[0], 10) || 0;
+    return ay - by;
+  });
+  if (years.length === 0) return 'HQCA FOCUS primary care continuity survey';
+  if (years.length === 1) return `Fiscal year ${years[0]}`;
+  return `Fiscal years ${years[0]} to ${years[years.length - 1]}`;
+}
+
+function deriveInpatientSourceVintage(records: ExperienceRecord[]): string {
+  const years = [...new Set(records.map((r) => r.year).filter(Boolean))].sort((a, b) => {
+    const am = a.match(/\d{4}/);
+    const bm = b.match(/\d{4}/);
+    const ay = am ? parseInt(am[0], 10) : 0;
+    const by = bm ? parseInt(bm[0], 10) : 0;
+    return ay - by;
+  });
+  if (years.length === 0) return 'Apr 2021 onward';
+  if (years.length === 1) return years[0];
+  return `${years[0]} to ${years[years.length - 1]}`;
+}
 
 export async function run(): Promise<SyncResult> {
   const startTime = Date.now();
@@ -255,7 +278,7 @@ export async function run(): Promise<SyncResult> {
         CONTINUITY_SATISFACTION_HQCA: buildMetadataEntry({
           updateType: 'auto',
           source: 'HQCA FOCUS Primary Healthcare Experience',
-          sourceVintage: 'HQCA FOCUS primary care continuity survey',
+          sourceVintage: deriveContinuitySourceVintage(continuityRecords),
         }),
       };
       const merged = {
@@ -284,7 +307,7 @@ export async function run(): Promise<SyncResult> {
         INPATIENT_EXPERIENCE_TRENDS_HQCA: buildMetadataEntry({
           updateType: 'auto',
           source: 'HQCA FOCUS patient experience CSV',
-          sourceVintage: 'Apr 2021 onward',
+          sourceVintage: deriveInpatientSourceVintage(experienceRecords),
           lastUpdated: timestamp,
         }),
       };

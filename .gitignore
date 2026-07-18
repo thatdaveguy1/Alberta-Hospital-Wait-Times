@@ -23,6 +23,8 @@ assets/.aistudio/
 
 # Lab wait snapshots (runtime-generated, grows every 30 min)
 data-lab-snapshots.json
+# ER wait snapshots (runtime-generated, grows every sync)
+data-snapshots.json
 
 # Push client local state (cooldown + content hashes)
 .kv-write-cooldown.json

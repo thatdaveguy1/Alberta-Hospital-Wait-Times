@@ -108,6 +108,12 @@ function asNumber(value: unknown): number | undefined {
   }
   return undefined;
 }
+// Map a NHEX calendar year to its fiscal-year label (e.g. 2023 -> '2023-2024').
+function nhexToFiscal(year: string): string {
+  const y = Number(year);
+  if (!Number.isFinite(y)) return year;
+  return `${y}-${y + 1}`;
+}
 
 // Read a worksheet into a 2D array of cell values (first row = row 1).
 function sheetToRows(sheet: XLSX.WorkSheet): unknown[][] {
@@ -350,12 +356,6 @@ function extractActivityVolume(
     totalByYear.set(r.year, (totalByYear.get(r.year) ?? 0) + r.currentDollars);
   }
 
-  // Map NHEX calendar year -> fiscal year label (e.g. 2023 -> '2023-2024').
-  const nhexToFiscal = (year: string): string => {
-    const y = Number(year);
-    if (!Number.isFinite(y)) return year;
-    return `${y}-${y + 1}`;
-  };
 
   const records: ActivityVolumeTrend[] = [];
   for (const [year, totalDollars] of totalByYear) {
@@ -441,17 +441,17 @@ function findD1Table(
 // Extract ALBERTA_USE_OF_FUNDS from the Alberta sheet of series-d1.
 // Uses the latest non-forecast year's amounts (millions -> billions) and percentage
 // shares from the percentage-distribution table.
-function extractUseOfFunds(sheet: XLSX.WorkSheet): SpendingByUseOfFunds[] {
+function extractUseOfFunds(sheet: XLSX.WorkSheet) {
   const rows = sheetToRows(sheet);
 
   // Table 1: amounts in millions of current dollars.
   const amountsTable = findD1Table(rows, 'Table D.1.9.1.a');
   // Table 2: percentage distribution.
   const sharesTable = findD1Table(rows, 'Table D.1.9.2.a');
-  if (!amountsTable || !sharesTable) return [];
+  if (!amountsTable || !sharesTable) return { records: [], year: undefined };
 
   const headerRow = rows[amountsTable.headerIdx];
-  if (!headerRow) return [];
+  if (!headerRow) return { records: [], year: undefined };
 
   // Build category column index from header labels. Header cells in CIHI
   // workbooks often contain embedded newlines (e.g. "Other\nInstitutions"),
@@ -466,12 +466,12 @@ function extractUseOfFunds(sheet: XLSX.WorkSheet): SpendingByUseOfFunds[] {
       categoryCols.push({ col: c, label: friendly });
     }
   }
-  if (categoryCols.length === 0) return [];
+  if (categoryCols.length === 0) return { records: [], year: undefined };
 
   // Use the latest non-forecast year from the amounts table.
   const latestAmounts = amountsTable.yearRows[amountsTable.yearRows.length - 1];
   const latestShares = sharesTable.yearRows[sharesTable.yearRows.length - 1];
-  if (!latestAmounts) return [];
+  if (!latestAmounts) return { records: [], year: undefined };
 
   const records: SpendingByUseOfFunds[] = [];
   for (const { col, label } of categoryCols) {
@@ -486,7 +486,8 @@ function extractUseOfFunds(sheet: XLSX.WorkSheet): SpendingByUseOfFunds[] {
         share != null && !Number.isNaN(share) ? Math.round(share * 10) / 10 : 0,
     });
   }
-  return records;
+  const useOfFundsYear = latestAmounts?.year;
+  return { records, year: useOfFundsYear };
 }
 
 // ---------------------------------------------------------------------------
@@ -598,11 +599,14 @@ export async function run(): Promise<SyncResult> {
 
     // 5. Parse series-d1 workbook (Alberta sheet) for use-of-funds.
     let useOfFunds: SpendingByUseOfFunds[] = [];
+    let useOfFundsYear: string | undefined;
     if (seriesD1Entry) {
       const seriesD1Wb = XLSX.read(seriesD1Entry.getData(), { type: 'buffer' });
       const albertaSheet = seriesD1Wb.Sheets['Alta.'];
       if (albertaSheet) {
-        useOfFunds = extractUseOfFunds(albertaSheet);
+        const useOfFundsResult = extractUseOfFunds(albertaSheet);
+        useOfFunds = useOfFundsResult.records;
+        useOfFundsYear = useOfFundsResult.year;
         console.log(`[CIHIDownloader] Series D1 Alberta: ${useOfFunds.length} use-of-funds records.`);
       } else {
         console.warn('[CIHIDownloader] Alberta sheet not found in series-d1 workbook.');
@@ -615,6 +619,11 @@ export async function run(): Promise<SyncResult> {
       ? (existingData.ALBERTA_ACTIVITY_VOLUME_TREND as ActivityVolumeTrend[])
       : [];
     const activityVolume = extractActivityVolume(tableO1Rows, existingActivityVolume);
+    const nationalSpendingYear = tableO1Rows.length > 0 ? [...tableO1Rows.map((r) => r.year)].sort().pop() ?? 'unknown' : 'unknown';
+    const activityYears = activityVolume.map((r) => r.fiscalYear).sort();
+    const activityMinYear = activityYears[0] ?? 'unknown';
+    const activityMaxYear = activityYears[activityYears.length - 1] ?? 'unknown';
+    const useOfFundsFiscalYear = useOfFundsYear ? nhexToFiscal(useOfFundsYear) : 'unknown';
 
     const recordsFetched =
       nationalSpending.length + useOfFunds.length + activityVolume.length;
@@ -645,19 +654,19 @@ export async function run(): Promise<SyncResult> {
         updateType: 'auto',
         source:
           'CIHI NHEX 2025 Table O.1 (non-forecast rows); bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)',
-        sourceVintage: 'NHEX 2025 release — actual/preliminary rows only (forecasts excluded); GDP share not sourced',
+        sourceVintage: `${nationalSpendingYear} calendar year (NHEX 2025 Table O.1 latest non-forecast year; GDP share not sourced)`,
         lastUpdated: timestamp,
       }),
       ALBERTA_USE_OF_FUNDS: buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI NHEX 2025 full data tables (Series D1, Alberta sheet, non-forecast years)',
-        sourceVintage: 'NHEX 2025 release — latest non-forecast year',
+        sourceVintage: `Fiscal year ${useOfFundsFiscalYear} (NHEX 2025 Series D1 Alberta use of funds, latest non-forecast year)`,
         lastUpdated: timestamp,
       }),
       ALBERTA_ACTIVITY_VOLUME_TREND: buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI NHEX 2025 Table O.1 Alberta total health expenditure only',
-        sourceVintage: 'NHEX 2025 non-forecast years; activity/volume fields not sourced',
+        sourceVintage: `Fiscal years ${activityMinYear} to ${activityMaxYear} (NHEX 2025 Table O.1; forecast-marked rows excluded where present; activity/volume fields not sourced)`,
         lastUpdated: timestamp,
       }),
     };

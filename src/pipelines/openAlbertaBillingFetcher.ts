@@ -157,16 +157,17 @@ function canonicalSpecialty(raw: string): string {
 }
 
 // Read a 2.12-style sheet (header on row 5, year columns 2..6, data from row 7)
-// and return a map of canonical specialty -> value for the latest year column.
+// and return the right-most non-empty year label plus a map of canonical
+// specialty -> value for that year column.
 function parseYearSeriesSheet(
   workbook: XLSX.WorkBook,
   sheetName: string,
-): Map<string, number> {
+): { year: string; values: Map<string, number> } {
   const sheet = workbook.Sheets[sheetName];
   const out = new Map<string, number>();
-  if (!sheet) return out;
+  if (!sheet) return { year: '', values: out };
   const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
-  if (rows.length < 7) return out;
+  if (rows.length < 7) return { year: '', values: out };
 
   // Header row 5 (index 4) holds the metric name; row 6 (index 5) holds year
   // labels. The latest year is the last non-empty cell in row 6.
@@ -178,7 +179,8 @@ function parseYearSeriesSheet(
       break;
     }
   }
-  if (latestCol < 0) return out;
+  if (latestCol < 0) return { year: '', values: out };
+  const serviceYear = asString(yearRow[latestCol]) ?? '';
 
   let started = false;
   for (let i = 6; i < rows.length; i++) {
@@ -214,7 +216,7 @@ function parseYearSeriesSheet(
     if (value === undefined) continue;
     out.set(canonicalSpecialty(label), value);
   }
-  return out;
+  return { year: serviceYear, values: out };
 }
 
 // Read Table 2.3 (single-year, four program columns) and return a map of
@@ -393,13 +395,20 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    const counts = parseYearSeriesSheet(workbook, 'Table_2.12 A');
-    const avgPayments = parseYearSeriesSheet(workbook, 'Table_2.12 B');
-    const services = parseYearSeriesSheet(workbook, 'Table_2.12 D');
+    const countsResult = parseYearSeriesSheet(workbook, 'Table_2.12 A');
+    const avgPaymentsResult = parseYearSeriesSheet(workbook, 'Table_2.12 B');
+    const servicesResult = parseYearSeriesSheet(workbook, 'Table_2.12 D');
     const payments = parsePaymentsBySpecialty(workbook);
     const registeredPersons = parseRegisteredPersons(workbook);
-
-    const records = buildRecords(counts, avgPayments, services, payments, registeredPersons);
+    const serviceYear =
+      countsResult.year || avgPaymentsResult.year || servicesResult.year;
+    const records = buildRecords(
+      countsResult.values,
+      avgPaymentsResult.values,
+      servicesResult.values,
+      payments,
+      registeredPersons,
+    );
 
     if (records.length === 0) {
       console.warn(
@@ -428,7 +437,7 @@ export async function run(): Promise<SyncResult> {
       PHYSICIAN_SPECIALTY_BILLING: buildMetadataEntry({
         updateType: 'auto',
         source: 'Open Alberta AHCIP Statistical Supplement (combined workbook)',
-        sourceVintage: 'AHCIP Statistical Supplement — latest release (Tables 2.3, 2.12 A/B/D, 2.14)',
+        sourceVintage: `${serviceYear} service year (AHCIP Statistical Supplement, Tables 2.3, 2.12 A/B/D, 2.14)`,
         lastUpdated: timestamp,
         verification:
           'Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons from Table 2.14 when present; otherwise null (Pathology/Radiology excluded by source — never zero-filled).',

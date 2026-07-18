@@ -3,7 +3,7 @@
     {
       "province": "Alberta",
       "spendingPerCapita": 9598,
-      "spendingAsPercentGdp": 12.2,
+      "spendingAsPercentGdp": null,
       "hospitalSpendingPerCapita": 2412,
       "physicianSpendingPerCapita": 1511,
       "drugSpendingPerCapita": 1251,
@@ -13,7 +13,7 @@
     {
       "province": "British Columbia",
       "spendingPerCapita": 10438,
-      "spendingAsPercentGdp": 11.8,
+      "spendingAsPercentGdp": null,
       "hospitalSpendingPerCapita": 2563,
       "physicianSpendingPerCapita": 1437,
       "drugSpendingPerCapita": 986,
@@ -83,7 +83,7 @@
     {
       "province": "Ontario",
       "spendingPerCapita": 9045,
-      "spendingAsPercentGdp": 11.2,
+      "spendingAsPercentGdp": null,
       "hospitalSpendingPerCapita": 2419,
       "physicianSpendingPerCapita": 1354,
       "drugSpendingPerCapita": 1272,
@@ -103,7 +103,7 @@
     {
       "province": "Quebec",
       "spendingPerCapita": 9320,
-      "spendingAsPercentGdp": 11.5,
+      "spendingAsPercentGdp": null,
       "hospitalSpendingPerCapita": 2286,
       "physicianSpendingPerCapita": 1090,
       "drugSpendingPerCapita": 1464,
@@ -113,7 +113,7 @@
     {
       "province": "Saskatchewan",
       "spendingPerCapita": 10191,
-      "spendingAsPercentGdp": 12,
+      "spendingAsPercentGdp": null,
       "hospitalSpendingPerCapita": 2595,
       "physicianSpendingPerCapita": 1480,
       "drugSpendingPerCapita": 1198,
@@ -133,12 +133,12 @@
     {
       "province": "Canada",
       "spendingPerCapita": 9626,
-      "spendingAsPercentGdp": 11.6,
+      "spendingAsPercentGdp": null,
       "hospitalSpendingPerCapita": 2506,
       "physicianSpendingPerCapita": 1327,
       "drugSpendingPerCapita": 1276,
-      "bedsPer100k": 232,
-      "costPerStandardStay": 6580
+      "bedsPer100k": null,
+      "costPerStandardStay": null
     }
   ],
   "ALBERTA_ACTIVITY_VOLUME_TREND": [
@@ -605,52 +605,52 @@
     {
       "fiscalYear": "2021-2022",
       "totalExpenseBillions": 39.2,
-      "surgeriesCount": 264200,
-      "ctExamsCount": 420000,
-      "labTestsMillions": 74.5,
-      "edVisitsMillions": 2.12,
-      "hospitalAdmissions": 282000,
-      "physiciansCount": 10850
+      "surgeriesCount": null,
+      "ctExamsCount": null,
+      "labTestsMillions": null,
+      "edVisitsMillions": null,
+      "hospitalAdmissions": null,
+      "physiciansCount": null
     },
     {
       "fiscalYear": "2022-2023",
       "totalExpenseBillions": 40.4,
-      "surgeriesCount": 278500,
-      "ctExamsCount": 454000,
-      "labTestsMillions": 81.2,
-      "edVisitsMillions": 2.25,
-      "hospitalAdmissions": 291000,
-      "physiciansCount": 11120
+      "surgeriesCount": null,
+      "ctExamsCount": null,
+      "labTestsMillions": null,
+      "edVisitsMillions": null,
+      "hospitalAdmissions": null,
+      "physiciansCount": null
     },
     {
       "fiscalYear": "2023-2024",
       "totalExpenseBillions": 43.3,
-      "surgeriesCount": 290100,
-      "ctExamsCount": 491000,
-      "labTestsMillions": 88.5,
-      "edVisitsMillions": 2.38,
-      "hospitalAdmissions": 298000,
-      "physiciansCount": 11450
+      "surgeriesCount": null,
+      "ctExamsCount": null,
+      "labTestsMillions": null,
+      "edVisitsMillions": null,
+      "hospitalAdmissions": null,
+      "physiciansCount": null
     },
     {
       "fiscalYear": "2024-2025",
       "totalExpenseBillions": 45.7,
-      "surgeriesCount": 302600,
-      "ctExamsCount": 532000,
-      "labTestsMillions": 96.4,
-      "edVisitsMillions": 2.45,
-      "hospitalAdmissions": 305000,
-      "physiciansCount": 11720
+      "surgeriesCount": null,
+      "ctExamsCount": null,
+      "labTestsMillions": null,
+      "edVisitsMillions": null,
+      "hospitalAdmissions": null,
+      "physiciansCount": null
     },
     {
       "fiscalYear": "2025-2026",
       "totalExpenseBillions": 47.5,
-      "surgeriesCount": 315400,
-      "ctExamsCount": 574000,
-      "labTestsMillions": 105.1,
-      "edVisitsMillions": 2.52,
-      "hospitalAdmissions": 312000,
-      "physiciansCount": 12040
+      "surgeriesCount": null,
+      "ctExamsCount": null,
+      "labTestsMillions": null,
+      "edVisitsMillions": null,
+      "hospitalAdmissions": null,
+      "physiciansCount": null
     }
   ],
   "HOSPITAL_EFFICIENCY_TREND": [],
@@ -667,7 +667,7 @@
       "physicianCount": 442,
       "totalPaymentsMillions": 533.8,
       "averagePaymentGross": 1182055,
-      "servicesPerPatient": 0
+      "servicesPerPatient": null
     },
     {
       "specialtyGroup": "Internal Medicine",
@@ -786,7 +786,7 @@
       "physicianCount": 22,
       "totalPaymentsMillions": 17.9,
       "averagePaymentGross": 437371,
-      "servicesPerPatient": 0
+      "servicesPerPatient": null
     },
     {
       "specialtyGroup": "Neurosurgery",
@@ -799,43 +799,43 @@
   "ALBERTA_USE_OF_FUNDS": [
     {
       "category": "Hospitals & Acute Care",
-      "amountBillions": 11.93,
-      "percentageShare": 25.1
+      "amountBillions": 10.93,
+      "percentageShare": 25.2
     },
     {
       "category": "Long-Term & Continuing Care",
-      "amountBillions": 5.19,
-      "percentageShare": 10.9
+      "amountBillions": 4.82,
+      "percentageShare": 11.1
     },
     {
       "category": "Physician Payments",
-      "amountBillions": 7.47,
-      "percentageShare": 15.7
+      "amountBillions": 6.52,
+      "percentageShare": 15.1
     },
     {
       "category": "Allied & Other Professionals",
-      "amountBillions": 5.85,
-      "percentageShare": 12.3
+      "amountBillions": 5.35,
+      "percentageShare": 12.4
     },
     {
       "category": "Drugs & Therapeutics",
-      "amountBillions": 6.19,
-      "percentageShare": 13
+      "amountBillions": 5.79,
+      "percentageShare": 13.4
     },
     {
       "category": "Public Health & Prevention",
-      "amountBillions": 4.02,
-      "percentageShare": 8.5
+      "amountBillions": 3.26,
+      "percentageShare": 7.5
     },
     {
       "category": "Administration & Infrastructure",
-      "amountBillions": 1.87,
-      "percentageShare": 3.9
+      "amountBillions": 1.6,
+      "percentageShare": 3.7
     },
     {
       "category": "Other Health Spending",
-      "amountBillions": 3.68,
-      "percentageShare": 7.8
+      "amountBillions": 3.62,
+      "percentageShare": 8.4
     }
   ],
   "CIHI_RESOURCE_USE_INTENSITY": [
@@ -3284,39 +3284,71 @@
     "NATIONAL_SPENDING_COMPARE": {
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:01:52.526Z",
-      "source": "CIHI NHEX 2025 Table O.1; bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)",
-      "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
+      "source": "CIHI NHEX 2025 Table O.1 (non-forecast rows); bedsPer100k from CIHI indicator 877 + NHEX population; costPerStandardStay from CIHI indicator 823 (CSHS)",
+      "sourceVintage": "2025 calendar year (NHEX 2025 Table O.1 latest non-forecast year; GDP share not sourced)"
     },
     "ALBERTA_ACTIVITY_VOLUME_TREND": {
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:01:52.526Z",
-      "source": "CIHI NHEX 2025 full data tables (Table O.1, derived activity volume)",
-      "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
+      "source": "CIHI NHEX 2025 Table O.1 Alberta total health expenditure only",
+      "sourceVintage": "Fiscal years 1975-1976 to 2025-2026 (NHEX 2025 Table O.1; forecast-marked rows excluded where present; activity/volume fields not sourced)"
     },
     "PHYSICIAN_SPECIALTY_BILLING": {
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:04:32.398Z",
       "source": "Open Alberta AHCIP Statistical Supplement (combined workbook)",
-      "sourceVintage": "AHCIP Statistical Supplement — latest release (Tables 2.3, 2.12 A/B/D, 2.14)",
-      "verification": "Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons, with registered persons derived from Table 2.14 FTE counts. Pathology and Radiology have no Table 2.14 entry, so their servicesPerPatient is 0."
+      "sourceVintage": "2021-22 service year (AHCIP Statistical Supplement, Tables 2.3, 2.12 A/B/D, 2.14)",
+      "verification": "Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons from Table 2.14 when present; otherwise null (Pathology/Radiology excluded by source — never zero-filled)."
     },
     "ALBERTA_USE_OF_FUNDS": {
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:01:52.526Z",
-      "source": "CIHI NHEX 2025 full data tables (Series D1, Alberta sheet)",
-      "sourceVintage": "NHEX 2025 release (finalized 2023 actuals + preliminary 2024/2025 forecasts)"
+      "source": "CIHI NHEX 2025 full data tables (Series D1, Alberta sheet, non-forecast years)",
+      "sourceVintage": "Fiscal year 2023-2024 (NHEX 2025 Series D1 Alberta use of funds, latest non-forecast year)"
     },
     "CIHI_RESOURCE_USE_INTENSITY": {
-      "source": "CIHI National Health Expenditure Trends (NHEX)",
-      "sourceVintage": "NHEX 2025 release",
-      "lastUpdated": "2026-07-05T15:56:27.339Z",
-      "updateType": "auto"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-18T15:50:03.205Z",
+      "source": "CIHI indicator 818, Average Acute Care Resource Use Intensity",
+      "sourceVintage": "Fiscal year 2024–2025"
     },
     "CIHI_SPENDING_PER_PERSON": {
-      "source": "CIHI National Health Expenditure Trends (NHEX)",
-      "sourceVintage": "NHEX 2025 release",
-      "lastUpdated": "2026-07-05T15:56:27.339Z",
-      "updateType": "auto"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-18T15:50:03.205Z",
+      "source": "CIHI indicator 879, Age-Adjusted Public Spending per Person",
+      "sourceVintage": "Calendar years 2014–2023"
     }
-  }
+  },
+  "CANCER_BURDEN_STATS": [],
+  "CANCER_SCREENING_RATES": [],
+  "HOME_CARE_EXPERIENCE": [],
+  "TEST_TURNAROUND_METRICS": [],
+  "FACILITY_IMAGING_WAITS": [],
+  "PRIORITY_TARGET_COMPLIANCE": [],
+  "COMMUNITY_MH_WAITS": [],
+  "HOSPITAL_MHSU_BURDEN": [],
+  "INPATIENT_EXPERIENCE_TRENDS": [],
+  "ED_EXPERIENCE_TRENDS": [],
+  "CLINICAL_SAFETY_TRENDS": [],
+  "PATIENT_COMPLAINTS": [],
+  "PCN_CAPACITY": [],
+  "ED_RELIANCE_BY_CONTINUITY": [],
+  "CONTINUITY_SATISFACTION": [],
+  "RESPIRATORY_VIRUS_SURVEILLANCE": [],
+  "CHILDHOOD_IMMUNIZATION_COVERAGE": [],
+  "NOTIFIABLE_DISEASE_INCIDENCE": [],
+  "ENVIRONMENTAL_ADVISORIES": [],
+  "OUTBREAK_PROTOCOLS": {},
+  "SURGICAL_FACILITIES": [],
+  "FACILITY_COMPARISONS": [],
+  "STATSCAN_SATISFACTION_STATS": {},
+  "STATSCAN_DEMOGRAPHICS": [],
+  "HISTORICAL_FLOW_TIMELINES": [],
+  "VIRTUAL_MD_DISPOSITIONS": [],
+  "EMS_811_DIVERSION_DATA": [],
+  "ADJACENT_HELPLINES": [],
+  "NURSING_SUPPLY_TRENDS": [],
+  "WORKFORCE_AGE_PROFILE": [],
+  "SPECIALIST_RECRUITMENT_NEEDS": [],
+  "ALLIED_HEALTH_SUPPLY": []
 }

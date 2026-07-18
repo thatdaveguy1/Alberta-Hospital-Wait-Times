@@ -77,11 +77,15 @@ function mergeAndWrite(file: string, newRates: AttachmentRate[]): number {
   const merged = Array.from(byId.values());
   existing['ATTACHMENT_RATES'] = merged;
 
+  const years = merged.map(r => r.reporting_year).sort();
+  const minYear = years[0];
+  const maxYear = years[years.length - 1];
+
   const ownedMetadata: DataMetadata = {
     ATTACHMENT_RATES: buildMetadataEntry({
       updateType: 'auto',
       source: SOURCE_NAME,
-      sourceVintage: 'CIHI Shared Health Priorities Primary Health Care dashboard',
+      sourceVintage: `${minYear}-${maxYear} (annual CIHI Shared Health Priorities data)`,
     }),
   };
   existing._dataMetadata = mergeDataMetadata(

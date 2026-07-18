@@ -100,61 +100,77 @@ const DOMAIN_METADATA_BUILDERS: Record<
   Record<string, (ts: string, records?: unknown[]) => DataMetadata[string]>
 > = {
   'primary-care': {
-    CIHI_SAME_DAY_ACCESS: (ts) =>
+    CIHI_SAME_DAY_ACCESS: (ts, records) =>
       buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI Shared Health Priorities',
-        sourceVintage: 'CIHI same-day/next-day access data table',
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         lastUpdated: ts,
       }),
   },
   'system-flow': {
-    CIHI_OCCUPANCY_RATES: (ts) =>
+    CIHI_OCCUPANCY_RATES: (ts, records) =>
       buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI indicator XLSX (878 average acute occupancy rate)',
-        sourceVintage: 'CIHI indicator data table (latest available)',
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
         lastUpdated: ts,
       }),
-    CIHI_ED_WAIT_INITIAL_ASSESSMENT: (ts) =>
+    CIHI_ED_WAIT_INITIAL_ASSESSMENT: (ts, records) =>
       buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI indicator XLSX (811 ED wait time for physician initial assessment)',
-        sourceVintage: 'CIHI indicator data table (latest available)',
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
         lastUpdated: ts,
       }),
   },
   'mental-health': {
-    CIHI_MH_READMISSION_RATES: (ts) =>
+    CIHI_MH_READMISSION_RATES: (ts, records) =>
       buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI 30-day mental-health readmission data table',
-        sourceVintage: 'CIHI latest release',
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         lastUpdated: ts,
       }),
   },
   'patient-experience': {
-    CIHI_ALL_READMISSION_RATES: (ts) =>
+    CIHI_ALL_READMISSION_RATES: (ts, records) =>
       buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI all-patients readmitted data table',
-        sourceVintage: 'CIHI latest release',
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         lastUpdated: ts,
       }),
-    CIHI_ACSC_HOSPITALIZATIONS: (ts) =>
+    CIHI_ACSC_HOSPITALIZATIONS: (ts, records) =>
       buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI ambulatory-care-sensitive-conditions hospitalizations',
-        sourceVintage: 'CIHI latest release',
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         lastUpdated: ts,
       }),
-    CIHI_WAIT_TIME_SATISFACTION: (ts) =>
+    CIHI_WAIT_TIME_SATISFACTION: (ts, records) =>
       buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI wait-time satisfaction data table',
-        sourceVintage: 'CIHI latest release',
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
+        lastUpdated: ts,
+      }),
+  },
+  'spending': {
+    CIHI_RESOURCE_USE_INTENSITY: (ts, records) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI indicator 818, Average Acute Care Resource Use Intensity',
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
+        lastUpdated: ts,
+      }),
+    CIHI_SPENDING_PER_PERSON: (ts, records) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI indicator 879, Age-Adjusted Public Spending per Person',
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         lastUpdated: ts,
       }),
   },
@@ -163,39 +179,63 @@ const DOMAIN_METADATA_BUILDERS: Record<
       buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI indicator XLSX (884 annual change in surgical volumes since start of COVID-19 pandemic)',
-        sourceVintage: `Fiscal years ${deriveFiscalYearRange(records || [])}`,
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         lastUpdated: ts,
       }),
     CIHI_JOINT_REPLACEMENT_WAITS: (ts, records) =>
       buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI indicator XLSX (843 joint replacement wait times)',
-        sourceVintage: `Fiscal years ${deriveFiscalYearRange(records || [])}`,
+        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         lastUpdated: ts,
       }),
   },
 };
 
-/** Derive a fiscal-year range string (e.g. "2019\u20132020 to 2024\u20132025") from CIHI indicator rows. */
-function deriveFiscalYearRange(records: unknown[]): string {
-  const ranges: { start: number; label: string }[] = [];
+/** Derive a CIHI `Time frame` range string from records, covering fiscal-year ranges (e.g. "2015–2016") and calendar years (e.g. "2024"). */
+function deriveCiHiTimeFrameRange(records: unknown[]): string {
+  const ranges: { start: number; label: string; isFiscal: boolean }[] = [];
   for (const raw of records) {
     if (!raw || typeof raw !== 'object') continue;
     const record = raw as Record<string, unknown>;
     const value = asString(record['Time frame']);
     if (!value) continue;
-    const match = value.match(/(\d{4})[\u2013-](\d{4})/);
-    if (match) {
-      const start = Number(match[1]);
-      const label = `${match[1]}\u2013${match[2]}`;
-      ranges.push({ start, label });
+    const scale = asString(record['Time Scale']).toLowerCase();
+
+    const fiscalMatch = value.match(/^(\d{4})[\u2013-](\d{4})$/);
+    if (fiscalMatch) {
+      const start = Number(fiscalMatch[1]);
+      const label = `${fiscalMatch[1]}\u2013${fiscalMatch[2]}`;
+      ranges.push({ start, label, isFiscal: scale ? scale.includes('fiscal') : true });
+      continue;
+    }
+
+    const yearMatch = value.match(/^(\d{4})$/);
+    if (yearMatch) {
+      const year = Number(yearMatch[1]);
+      ranges.push({ start: year, label: yearMatch[1], isFiscal: scale ? scale.includes('fiscal') : false });
     }
   }
-  ranges.sort((a, b) => a.start - b.start);
+
   if (ranges.length === 0) return 'latest CIHI release';
-  const first = ranges[0].label;
-  const last = ranges[ranges.length - 1].label;
-  return first === last ? first : `${first} to ${last}`;
+
+  const fiscalCount = ranges.filter((r) => r.isFiscal).length;
+  const calendarCount = ranges.length - fiscalCount;
+  const isFiscal = fiscalCount >= calendarCount;
+
+  const uniqueStarts = Array.from(new Map(ranges.map((r) => [r.start, r])).values()).sort(
+    (a, b) => a.start - b.start,
+  );
+  const first = uniqueStarts[0];
+  const last = uniqueStarts[uniqueStarts.length - 1];
+
+  if (isFiscal) {
+    return uniqueStarts.length === 1 ? `Fiscal year ${first.label}` : `Fiscal years ${first.label} to ${last.label}`;
+  }
+
+  return first.start === last.start
+    ? `Calendar year ${first.start}`
+    : `Calendar years ${first.start}\u2013${last.start}`;
 }
 
 interface LoadedJson {

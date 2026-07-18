@@ -53650,6 +53650,399 @@
         "onlineBooking": false
       },
       "pcnName": "Calgary Rural PCN"
+    },
+    {
+      "id": "anp-491-29481",
+      "name": "Dr. U. Nnaji",
+      "type": "Family Doctor",
+      "clinicName": "Care and Cure Medical Clinic",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "225, 3545 32 Ave NE",
+      "postalCode": "T1Y 6M6",
+      "phone": "403-453-5003",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Igbo"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-478-29484",
+      "name": "Dr. Y. Kang",
+      "type": "Family Doctor",
+      "clinicName": "Essence Medical Centres - Westwinds",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "150, 3650 Westwinds Dr NE",
+      "postalCode": "T3J 0W9",
+      "phone": "403-475-6001",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Korean"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-3236-28274",
+      "name": "Dr. T. Olaseinde",
+      "type": "Family Doctor",
+      "clinicName": "EverHeritage Medical Clinic",
+      "city": "Edmonton",
+      "zone": "Edmonton Zone",
+      "address": "107, 11816 26 Ave SW",
+      "postalCode": "T6W 5V5",
+      "phone": "780-328-1963",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Yoruba"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": true
+      },
+      "pcnName": "Edmonton Southside PCN"
+    },
+    {
+      "id": "anp-3236-28267",
+      "name": "Dr. A. Olaseinde",
+      "type": "Family Doctor",
+      "clinicName": "EverHeritage Medical Clinic",
+      "city": "Edmonton",
+      "zone": "Edmonton Zone",
+      "address": "107, 11816 26 Ave SW",
+      "postalCode": "T6W 5V5",
+      "phone": "780-328-1963",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": true
+      },
+      "pcnName": "Edmonton Southside PCN"
+    },
+    {
+      "id": "anp-3219-29468",
+      "name": "Dr. T. Okeke",
+      "type": "Family Doctor",
+      "clinicName": "Gilead Family Practice",
+      "city": "calgary",
+      "zone": "Calgary Zone",
+      "address": "150, 198 Nolanridge Cres NW",
+      "postalCode": "T3R 1W9",
+      "phone": "587-777-8309",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Calgary Foothills PCN"
+    },
+    {
+      "id": "anp-1945-29466",
+      "name": "Dr. P. Oriabure",
+      "type": "Family Doctor",
+      "clinicName": "High Prairie Health and Wellness Clinic",
+      "city": "High Prairie",
+      "zone": "North Zone",
+      "address": "5101 38 Street",
+      "postalCode": "T0G 1E0",
+      "phone": "780-523-2868",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Aspen PCN"
+    },
+    {
+      "id": "anp-1945-14020",
+      "name": "Dr. C. Itiekhao",
+      "type": "Family Doctor",
+      "clinicName": "High Prairie Health and Wellness Clinic",
+      "city": "High Prairie",
+      "zone": "North Zone",
+      "address": "5101 38 Street",
+      "postalCode": "T0G 1E0",
+      "phone": "780-523-2868",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Aspen PCN"
+    },
+    {
+      "id": "anp-1945-9607",
+      "name": "Dr. F. Mukuna",
+      "type": "Family Doctor",
+      "clinicName": "High Prairie Health and Wellness Clinic",
+      "city": "High Prairie",
+      "zone": "North Zone",
+      "address": "5101 38 Street",
+      "postalCode": "T0G 1E0",
+      "phone": "780-523-2868",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Aspen PCN"
+    },
+    {
+      "id": "anp-1945-1881",
+      "name": "Dr. A. Niazee",
+      "type": "Family Doctor",
+      "clinicName": "High Prairie Health and Wellness Clinic",
+      "city": "High Prairie",
+      "zone": "North Zone",
+      "address": "5101 38 Street",
+      "postalCode": "T0G 1E0",
+      "phone": "780-523-2868",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Aspen PCN"
+    },
+    {
+      "id": "anp-1945-13440",
+      "name": "Dr. J. Oriabure",
+      "type": "Family Doctor",
+      "clinicName": "High Prairie Health and Wellness Clinic",
+      "city": "High Prairie",
+      "zone": "North Zone",
+      "address": "5101 38 Street",
+      "postalCode": "T0G 1E0",
+      "phone": "780-523-2868",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Aspen PCN"
+    },
+    {
+      "id": "anp-1945-1882",
+      "name": "Dr. O. Osa-leko",
+      "type": "Family Doctor",
+      "clinicName": "High Prairie Health and Wellness Clinic",
+      "city": "High Prairie",
+      "zone": "North Zone",
+      "address": "5101 38 Street",
+      "postalCode": "T0G 1E0",
+      "phone": "780-523-2868",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Aspen PCN"
+    },
+    {
+      "id": "anp-814-22972",
+      "name": "Dr. O. Oke",
+      "type": "Family Doctor",
+      "clinicName": "King's Medical Centre",
+      "city": "Airdrie",
+      "zone": "Calgary Zone",
+      "address": "203-960 Yankee Valley Blvd SE",
+      "postalCode": "T4A 2E4",
+      "phone": "587-775-1768",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [
+        "Yoruba"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": true,
+        "wheelchairAccess": false,
+        "onlineBooking": true
+      },
+      "pcnName": "Highland PCN"
+    },
+    {
+      "id": "anp-2286-14576",
+      "name": "Dr. A. Efobi",
+      "type": "Family Doctor",
+      "clinicName": "Kingsview Family Medical & Pharmacy",
+      "city": "Airdrie",
+      "zone": "Calgary Zone",
+      "address": "203-2903 Kingsview Blvd SW",
+      "postalCode": "T4A 0C4",
+      "phone": "403-234-4133",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Yoruba"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": true,
+        "wheelchairAccess": false,
+        "onlineBooking": true
+      },
+      "pcnName": "Highland PCN"
+    },
+    {
+      "id": "anp-283-29475",
+      "name": "Dr. I. Iloekwe",
+      "type": "Family Doctor",
+      "clinicName": "Marlborough Medical Clinic",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "160, 495 36 St NE",
+      "postalCode": "T2A 6K3",
+      "phone": "403-514-6001",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-283-29473",
+      "name": "Dr. D. Keer",
+      "type": "Family Doctor",
+      "clinicName": "Marlborough Medical Clinic",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "160, 495 36 St NE",
+      "postalCode": "T2A 6K3",
+      "phone": "403-514-6001",
+      "acceptingNewPatients": true,
+      "gender": "Male",
+      "languages": [
+        "Hindi",
+        "Punjabi"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-289-29480",
+      "name": "Dr. R. Dogar",
+      "type": "Family Doctor",
+      "clinicName": "MediPlus 2 Clinic",
+      "city": "Calgary",
+      "zone": "Calgary Zone",
+      "address": "1146, 4818 Westwinds Dr NE",
+      "postalCode": "T3J 3Z5",
+      "phone": "403-293-5435",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Hindi",
+        "Punjabi",
+        "Urdu"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Mosaic PCN"
+    },
+    {
+      "id": "anp-3128-29467",
+      "name": "Dr. N. Fouche",
+      "type": "Family Doctor",
+      "clinicName": "Pinnacle Medical Centre (Harmony)",
+      "city": "rocky view county",
+      "zone": "Calgary Zone",
+      "address": "254 S Harmony Dr",
+      "postalCode": "T3Z 0H7",
+      "phone": "403-265-8148",
+      "acceptingNewPatients": true,
+      "gender": "Female",
+      "languages": [
+        "Afrikaans"
+      ],
+      "features": {
+        "walkIn": false,
+        "afterHours": false,
+        "virtualAppointments": false,
+        "wheelchairAccess": false,
+        "onlineBooking": false
+      },
+      "pcnName": "Calgary Foothills PCN"
     }
   ],
   "PCN_CAPACITY": [],
@@ -54410,7 +54803,7 @@
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:03:20.962Z",
       "source": "CIHI Shared Health Priorities",
-      "sourceVintage": "CIHI Shared Health Priorities Primary Health Care dashboard"
+      "sourceVintage": "2023-2024 (annual CIHI Shared Health Priorities data)"
     },
     "ACCEPTING_PROVIDERS": {
       "updateType": "auto",
@@ -54422,13 +54815,43 @@
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:05:03.344Z",
       "source": "HQCA FOCUS Primary Healthcare Experience",
-      "sourceVintage": "HQCA FOCUS primary care continuity survey"
+      "sourceVintage": "Fiscal years 2019/20 to 2023/24"
     },
     "CIHI_SAME_DAY_ACCESS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-17T12:05:18.009Z",
+      "lastUpdated": "2026-07-18T15:50:03.205Z",
       "source": "CIHI Shared Health Priorities",
-      "sourceVintage": "CIHI same-day/next-day access data table"
+      "sourceVintage": "Calendar year 2024"
     }
-  }
+  },
+  "CANCER_BURDEN_STATS": [],
+  "CANCER_SCREENING_RATES": [],
+  "HOME_CARE_EXPERIENCE": [],
+  "TEST_TURNAROUND_METRICS": [],
+  "FACILITY_IMAGING_WAITS": [],
+  "PRIORITY_TARGET_COMPLIANCE": [],
+  "COMMUNITY_MH_WAITS": [],
+  "HOSPITAL_MHSU_BURDEN": [],
+  "INPATIENT_EXPERIENCE_TRENDS": [],
+  "ED_EXPERIENCE_TRENDS": [],
+  "CLINICAL_SAFETY_TRENDS": [],
+  "PATIENT_COMPLAINTS": [],
+  "RESPIRATORY_VIRUS_SURVEILLANCE": [],
+  "CHILDHOOD_IMMUNIZATION_COVERAGE": [],
+  "NOTIFIABLE_DISEASE_INCIDENCE": [],
+  "ENVIRONMENTAL_ADVISORIES": [],
+  "OUTBREAK_PROTOCOLS": {},
+  "HOSPITAL_EFFICIENCY_TREND": [],
+  "SURGICAL_FACILITIES": [],
+  "FACILITY_COMPARISONS": [],
+  "STATSCAN_SATISFACTION_STATS": {},
+  "STATSCAN_DEMOGRAPHICS": [],
+  "HISTORICAL_FLOW_TIMELINES": [],
+  "VIRTUAL_MD_DISPOSITIONS": [],
+  "EMS_811_DIVERSION_DATA": [],
+  "ADJACENT_HELPLINES": [],
+  "NURSING_SUPPLY_TRENDS": [],
+  "WORKFORCE_AGE_PROFILE": [],
+  "SPECIALIST_RECRUITMENT_NEEDS": [],
+  "ALLIED_HEALTH_SUPPLY": []
 }

@@ -502,11 +502,20 @@ export async function run(): Promise<SyncResult> {
 
     // 3. Merge into data-continuing-care.json, preserving sibling-owned arrays.
     const existing = loadExisting();
+
+    // Derive sourceVintage from the actual inspection-date range in the records.
+    const inspectionDates = facilities.map((f) => f.lastInspectionDate).filter(Boolean).sort();
+    const minInspection = inspectionDates[0];
+    const maxInspection = inspectionDates[inspectionDates.length - 1];
+    const complianceVintage =
+      minInspection && maxInspection
+        ? `Inspection visits ${minInspection} to ${maxInspection}; Open Alberta quarterly release`
+        : `Open Alberta quarterly release (${discovered.vintage})`;
     const mergedMetadata = mergeDataMetadata(existing._dataMetadata, {
       CONTINUING_CARE_COMPLIANCE: buildMetadataEntry({
         updateType: 'auto',
         source: 'Alberta Open Government — Continuing Care Accommodation Standards compliance reporting',
-        sourceVintage: `Dataset vintage: ${discovered.vintage}`,
+        sourceVintage: complianceVintage,
         lastUpdated: timestamp,
         verification:
           'Aggregated from open.alberta.ca XLSX (OGL-A). Per-facility record collapsed from per-visit/per-standard rows; violationsCount counts only open/unresolved non-compliances.',

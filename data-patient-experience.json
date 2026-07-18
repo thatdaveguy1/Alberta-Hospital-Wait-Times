@@ -1,90 +1,6 @@
 {
   "PATIENT_VOICE_BY_SETTING": [
     {
-      "setting": "Primary Care",
-      "metric": "Doctor Listened Carefully",
-      "albertaRatePct": 78.4,
-      "canadaRatePct": 79.1,
-      "year": "2025"
-    },
-    {
-      "setting": "Primary Care",
-      "metric": "Doctor Showed Deep Respect",
-      "albertaRatePct": 84.2,
-      "canadaRatePct": 83.9,
-      "year": "2025"
-    },
-    {
-      "setting": "Primary Care",
-      "metric": "Involved in Care Decisions",
-      "albertaRatePct": 71.5,
-      "canadaRatePct": 72.8,
-      "year": "2025"
-    },
-    {
-      "setting": "Primary Care",
-      "metric": "Care Coordination/Transition",
-      "albertaRatePct": 62.1,
-      "canadaRatePct": 64.5,
-      "year": "2025"
-    },
-    {
-      "setting": "Emergency Dept",
-      "metric": "Staff Communication",
-      "albertaRatePct": 56.4,
-      "canadaRatePct": 59.2,
-      "year": "2025"
-    },
-    {
-      "setting": "Emergency Dept",
-      "metric": "Staff Introduced Themselves",
-      "albertaRatePct": 48.2,
-      "canadaRatePct": 51.5,
-      "year": "2025"
-    },
-    {
-      "setting": "Emergency Dept",
-      "metric": "Did Everything to Help Pain",
-      "albertaRatePct": 52.8,
-      "canadaRatePct": 55.4,
-      "year": "2025"
-    },
-    {
-      "setting": "Emergency Dept",
-      "metric": "Overall Care Rated 9 or 10/10",
-      "albertaRatePct": 49.5,
-      "canadaRatePct": 54.1,
-      "year": "2025"
-    },
-    {
-      "setting": "Hospital Inpatient",
-      "metric": "Nurses Communicated Well",
-      "albertaRatePct": 72.8,
-      "canadaRatePct": 74.2,
-      "year": "2025"
-    },
-    {
-      "setting": "Hospital Inpatient",
-      "metric": "Doctors Communicated Well",
-      "albertaRatePct": 69.1,
-      "canadaRatePct": 71.5,
-      "year": "2025"
-    },
-    {
-      "setting": "Hospital Inpatient",
-      "metric": "Did Everything to Help Pain",
-      "albertaRatePct": 64.5,
-      "canadaRatePct": 66.8,
-      "year": "2025"
-    },
-    {
-      "setting": "Hospital Inpatient",
-      "metric": "Discharge Plans Discussed",
-      "albertaRatePct": 58.2,
-      "canadaRatePct": 61.4,
-      "year": "2025"
-    },
-    {
       "setting": "Specialist Access",
       "metric": "Cardiovascular Median Wait (weeks)",
       "albertaRatePct": 19,
@@ -178,33 +94,63 @@
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:01:45.434Z",
       "source": "GoodCaring.ca Alberta specialist wait times",
-      "sourceVintage": "Live GoodCaring scrape"
+      "sourceVintage": "2025 GoodCaring specialist wait weeks (live scrape; Specialist Access wait weeks only)",
+      "verification": "Only setting=Specialist Access rows are written; albertaRatePct stores median wait weeks, not a percentage."
     },
     "INPATIENT_EXPERIENCE_TRENDS_HQCA": {
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:04:54.925Z",
       "source": "HQCA FOCUS patient experience CSV",
-      "sourceVintage": "Apr 2021 onward"
+      "sourceVintage": "Apr 2021 - Mar 2022 to Apr 2023 - Mar 2024"
     },
     "CIHI_ALL_READMISSION_RATES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-17T12:05:18.009Z",
+      "lastUpdated": "2026-07-18T15:50:03.205Z",
       "source": "CIHI all-patients readmitted data table",
-      "sourceVintage": "CIHI latest release"
+      "sourceVintage": "Fiscal years 2020–2021 to 2024–2025"
     },
     "CIHI_ACSC_HOSPITALIZATIONS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-17T12:05:18.009Z",
+      "lastUpdated": "2026-07-18T15:50:03.205Z",
       "source": "CIHI ambulatory-care-sensitive-conditions hospitalizations",
-      "sourceVintage": "CIHI latest release"
+      "sourceVintage": "Fiscal years 2013–2014 to 2024–2025"
     },
     "CIHI_WAIT_TIME_SATISFACTION": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-17T12:05:18.009Z",
+      "lastUpdated": "2026-07-18T15:50:03.205Z",
       "source": "CIHI wait-time satisfaction data table",
-      "sourceVintage": "CIHI latest release"
+      "sourceVintage": "Calendar year 2024"
     }
   },
+  "CANCER_BURDEN_STATS": [],
+  "CANCER_SCREENING_RATES": [],
+  "HOME_CARE_EXPERIENCE": [],
+  "TEST_TURNAROUND_METRICS": [],
+  "FACILITY_IMAGING_WAITS": [],
+  "PRIORITY_TARGET_COMPLIANCE": [],
+  "COMMUNITY_MH_WAITS": [],
+  "HOSPITAL_MHSU_BURDEN": [],
+  "PCN_CAPACITY": [],
+  "ED_RELIANCE_BY_CONTINUITY": [],
+  "CONTINUITY_SATISFACTION": [],
+  "RESPIRATORY_VIRUS_SURVEILLANCE": [],
+  "CHILDHOOD_IMMUNIZATION_COVERAGE": [],
+  "NOTIFIABLE_DISEASE_INCIDENCE": [],
+  "ENVIRONMENTAL_ADVISORIES": [],
+  "OUTBREAK_PROTOCOLS": {},
+  "HOSPITAL_EFFICIENCY_TREND": [],
+  "SURGICAL_FACILITIES": [],
+  "FACILITY_COMPARISONS": [],
+  "STATSCAN_SATISFACTION_STATS": {},
+  "STATSCAN_DEMOGRAPHICS": [],
+  "HISTORICAL_FLOW_TIMELINES": [],
+  "VIRTUAL_MD_DISPOSITIONS": [],
+  "EMS_811_DIVERSION_DATA": [],
+  "ADJACENT_HELPLINES": [],
+  "NURSING_SUPPLY_TRENDS": [],
+  "WORKFORCE_AGE_PROFILE": [],
+  "SPECIALIST_RECRUITMENT_NEEDS": [],
+  "ALLIED_HEALTH_SUPPLY": [],
   "INPATIENT_EXPERIENCE_TRENDS_HQCA": [
     {
       "year": "Apr 2021 - Mar 2022",

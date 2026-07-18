@@ -184,6 +184,41 @@ async function discoverXlsxByFilename(
   return fallbackUrl;
 }
 
+interface CkanPackageMetadata {
+  dateIssued?: string;
+  updateFrequency?: string;
+  timeCoverageFrom?: string;
+  timeCoverageTo?: string;
+  title?: string;
+}
+
+async function fetchCkanPackageMetadata(
+  packageId: string,
+): Promise<CkanPackageMetadata | undefined> {
+  try {
+    const resp = await axios.get(`${CKAN_PACKAGE_SHOW_BASE}${packageId}`, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'AlbertaHospitals-Pipeline/1.0 (data sync)',
+      },
+      timeout: 30000,
+    });
+    const pkg = resp.data?.result;
+    if (!pkg) return undefined;
+    return {
+      dateIssued: pkg.date_issued,
+      updateFrequency: pkg.updatefrequency,
+      timeCoverageFrom: pkg.time_coverage_from,
+      timeCoverageTo: pkg.time_coverage_to,
+      title: pkg.title,
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[OpenAlbertaInequity] CKAN package_show metadata (${packageId}): ${msg}`);
+    return undefined;
+  }
+}
+
 async function downloadBuffer(url: string): Promise<Buffer> {
   const res = await axios.get(url, {
     responseType: 'arraybuffer',
@@ -225,8 +260,8 @@ interface ColumnMap {
 }
 
 // Locate the columns we need by scanning the first ~40 rows for a header row
-// that carries LOCAL_NAME, Indicator, and an LGA Value column. Returns the
-// header row index and a column map, or null if no header is found.
+// that carries LOCAL_NAME, Indicator/Disease, and an LGA-specific value column.
+// The LGA value column is preferred over any "Alberta" comparison column.
 function findHeaderRow(rows: unknown[][]): { headerRow: number; columns: ColumnMap } | null {
   for (let r = 0; r < Math.min(rows.length, 40); r++) {
     const row = rows[r];
@@ -235,17 +270,32 @@ function findHeaderRow(rows: unknown[][]): { headerRow: number; columns: ColumnM
     let localName = -1;
     let indicator = -1;
     let lgaValue = -1;
+    let lgaValueLabel = '';
     for (let i = 0; i < norm.length; i++) {
       const label = norm[i];
       if (label === '') continue;
       if (localName === -1 && (label === 'local_name' || label === 'local name' || label === 'lga' || label === 'local_geographic_area' || label === 'community')) {
         localName = i;
       }
-      if (indicator === -1 && (label === 'indicator' || label === 'indicator_name' || label === 'measure' || label === 'metric')) {
+      if (indicator === -1 && (label === 'indicator' || label === 'indicator_name' || label === 'measure' || label === 'metric' || label === 'disease')) {
         indicator = i;
       }
-      if (lgaValue === -1 && (label === 'lga value' || label === 'lga_value' || label === 'value' || label === 'local value' || label === 'lga')) {
-        lgaValue = i;
+      const isLgaValueCandidate =
+        label === 'lga value' ||
+        label === 'lga_value' ||
+        label === 'value' ||
+        label === 'local value' ||
+        label === 'lga' ||
+        label.includes('prevalence rate');
+      if (isLgaValueCandidate) {
+        const isAlberta = label.includes('alberta');
+        if (
+          lgaValue === -1 ||
+          (lgaValueLabel.includes('alberta') && !isAlberta)
+        ) {
+          lgaValue = i;
+          lgaValueLabel = label;
+        }
       }
     }
     if (localName !== -1 && indicator !== -1 && lgaValue !== -1) {
@@ -475,6 +525,35 @@ function buildEdReliance(
   }
   return out;
 }
+function formatCoveragePeriod(meta: CkanPackageMetadata | undefined): string {
+  if (!meta) return 'latest available';
+  const from = meta.timeCoverageFrom;
+  const to = meta.timeCoverageTo;
+  const freq = meta.updateFrequency ? `, ${meta.updateFrequency.toLowerCase()}` : '';
+  if (from && to) {
+    const fromMatch = from.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    const toMatch = to.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (fromMatch && toMatch) {
+      const fromYear = Number(fromMatch[1]);
+      const fromMonth = Number(fromMatch[2]);
+      const fromDay = Number(fromMatch[3]);
+      const toYear = Number(toMatch[1]);
+      const toMonth = Number(toMatch[2]);
+      const toDay = Number(toMatch[3]);
+      // Fiscal year: starts in April and ends the following March.
+      if (fromMonth === 4 && fromDay === 1 && toMonth === 3 && toDay === 31 && toYear === fromYear + 1) {
+        return `Fiscal year ${fromYear}-${toYear}${freq}`;
+      }
+      // Calendar year: full January-to-December span within a single year.
+      if (fromMonth === 1 && fromDay === 1 && toMonth === 12 && toDay === 31 && fromYear === toYear) {
+        return `Calendar year ${fromYear}${freq}`;
+      }
+      return `${from} to ${to}${freq}`;
+    }
+  }
+  if (meta.dateIssued) return `${meta.dateIssued.slice(0, 4)}${freq}`;
+  return `latest available${freq}`;
+}
 
 export async function run(): Promise<SyncResult> {
   const startTime = Date.now();
@@ -482,6 +561,12 @@ export async function run(): Promise<SyncResult> {
   console.log('[OpenAlbertaInequity] Starting LGA community profile download + parse');
 
   try {
+    // Fetch CKAN package metadata up front so sourceVintage can describe the
+    // actual data coverage period and cadence.
+    const [table101Meta, figure42Meta] = await Promise.all([
+      fetchCkanPackageMetadata(TABLE_10_1_PACKAGE_ID),
+      fetchCkanPackageMetadata(FIGURE_4_2_PACKAGE_ID),
+    ]);
     // 1. Download Table 10.1 (Community Need).
     let table101Buffer: Buffer | null = null;
     try {
@@ -661,23 +746,27 @@ export async function run(): Promise<SyncResult> {
     // partial runs never re-stamp fabricated leave-behinds as current.
     const existingJson = loadJsonFile(INEQUITY_FILE);
 
+    const communityNeedVintage = `${formatCoveragePeriod(table101Meta)} (Open Alberta Table 10.1, community primary-care need)`;
+    const chronicVintage = `${formatCoveragePeriod(figure42Meta)} (Open Alberta Figure 4.2 chronic disease prevalence)`;
+    const edRelianceVintage = `${formatCoveragePeriod(table101Meta)} (Open Alberta Table 10.1 mood/anxiety ED rate; other ED reliance fields pending)`;
+
     const ownedMetadata: DataMetadata = {
       COMMUNITY_NEED_PROFILES: buildMetadataEntry({
         updateType: 'auto',
         source: 'Open Alberta CKAN LGA community profiles (Table 10.1)',
-        sourceVintage: 'Latest Open Alberta Table 10.1 release',
+        sourceVintage: communityNeedVintage,
         lastUpdated: timestamp,
       }),
       CHRONIC_DISEASE_BURDEN: buildMetadataEntry({
         updateType: 'auto',
         source: 'Open Alberta CKAN chronic disease indicators (Figure 4.2 + Table 10.1)',
-        sourceVintage: 'Latest Open Alberta Figure 4.2 release',
+        sourceVintage: chronicVintage,
         lastUpdated: timestamp,
       }),
       ED_RELIANCE_METRICS: buildMetadataEntry({
         updateType: 'auto',
         source: 'Open Alberta CKAN LGA community profiles (Table 10.1 mood/anxiety)',
-        sourceVintage: 'Latest Open Alberta Table 10.1 release',
+        sourceVintage: edRelianceVintage,
         lastUpdated: timestamp,
       }),
       TRAVEL_FOR_CARE: buildMetadataEntry({

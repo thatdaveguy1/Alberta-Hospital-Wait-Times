@@ -280,21 +280,43 @@ function parseSummaryTraces(traces: unknown[], dataAsOf: string | undefined): Re
 
 function parseImmunizationTraces(traces: unknown[], dataAsOf: string | undefined): ImmunizationEntry[] {
   const entries: ImmunizationEntry[] = [];
+  let currentStartYear: number | undefined;
+
   for (const trace of traces) {
     if (!isRecord(trace)) continue;
     const season = typeof trace['name'] === 'string' ? trace['name'] : '';
     if (!season) continue;
+
+    const seasonStartMatch = season.match(/^(\d{4})/);
+    if (!seasonStartMatch) continue;
+    const seasonStartYear = parseInt(seasonStartMatch[1], 10);
+
     const x = trace['x'];
     const y = trace['y'];
     if (!Array.isArray(x) || !Array.isArray(y)) continue;
+
+    if (currentStartYear === undefined && typeof x[0] === 'string') {
+      const firstDate = x[0] as string;
+      const yearMatch = firstDate.match(/^(\d{4})/);
+      if (yearMatch) currentStartYear = parseInt(yearMatch[1], 10);
+    }
+    if (currentStartYear === undefined) continue;
+
+    const yearDelta = currentStartYear - seasonStartYear;
+
     for (let i = 0; i < Math.min(x.length, y.length); i++) {
       const weekEndingRaw = x[i];
       const weekEnding = typeof weekEndingRaw === 'string' ? weekEndingRaw : '';
       const doses = typeof y[i] === 'number' ? y[i] : null;
-      if (weekEnding && doses !== null) {
-        if (dataAsOf && weekEnding > dataAsOf) continue;
-        entries.push({ season, weekEnding, doses });
-      }
+      if (!weekEnding || doses === null) continue;
+
+      const parsed = new Date(`${weekEnding}T00:00:00`);
+      if (Number.isNaN(parsed.getTime())) continue;
+      parsed.setFullYear(parsed.getFullYear() - yearDelta);
+      const adjusted = `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
+
+      if (dataAsOf && adjusted > dataAsOf) continue;
+      entries.push({ season, weekEnding: adjusted, doses });
     }
   }
   return entries;
@@ -322,15 +344,14 @@ function deriveWastewaterSourceVintage(signals: WastewaterSignal[]): string {
 function deriveImmunizationSourceVintage(entries: ImmunizationEntry[]): string {
   const seasons = Array.from(new Set(entries.map((e) => e.season))).sort();
   if (seasons.length === 0) return 'Alberta RVD immunizations (no seasons parsed)';
-  const currentSeason = seasons[seasons.length - 1];
-  const currentWeeks = entries
-    .filter((e) => e.season === currentSeason)
-    .map((e) => e.weekEnding)
-    .filter((d) => d.length > 0)
-    .sort();
-  const currentLatest = currentWeeks.length > 0 ? currentWeeks[currentWeeks.length - 1] : '';
-  const periods = seasons.map((s) => (s === currentSeason && currentLatest ? `${s} through ${currentLatest}` : s));
-  return `Cumulative influenza immunization doses by epidemiological week (${periods.join(', ')})`;
+
+  const range = deriveDateRange(entries.map((e) => e.weekEnding));
+  const seasonRange =
+    seasons.length === 1
+      ? seasons[0]
+      : `${seasons[0]} to ${seasons[seasons.length - 1]}`;
+
+  return `Influenza immunization doses by epidemiological week; seasons ${seasonRange}; week-ending range ${range}`;
 }
 
 

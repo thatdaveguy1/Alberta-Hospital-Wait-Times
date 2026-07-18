@@ -635,8 +635,7 @@ export async function run(): Promise<SyncResult> {
       ownedMetadata.ALLIED_HEALTH_SUPPLY_CIHI = buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI Health Workforce Quick Stats 2024',
-        sourceVintage:
-          'Supply counts 2015–2024; rates per 100k use 2024 population denominators (AB 4.8M / CA 41.0M)',
+        sourceVintage: '2024 supply counts; rates per 100k use 2024 population denominators (AB 4.8M / CA 41.0M)',
         lastUpdated: timestamp,
       });
     }
@@ -649,10 +648,11 @@ export async function run(): Promise<SyncResult> {
       });
     }
     if (parsed.workforceAgeProfile.length > 0) {
+      const ageProfileYears = Array.from(new Set(parsed.workforceAgeProfile.map((r) => asString(r.dataYear)))).filter((y) => y !== '').sort();
       ownedMetadata.WORKFORCE_AGE_PROFILE_CIHI = buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI Health Workforce Quick Stats 2024',
-        sourceVintage: '2023–2024',
+        sourceVintage: `Latest available profile year per profession group (${ageProfileYears.join(', ')})`,
         lastUpdated: timestamp,
       });
     }
@@ -660,7 +660,7 @@ export async function run(): Promise<SyncResult> {
       ownedMetadata.JOB_VACANCY_TRENDS_CIHI = buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI Health Workforce Quick Stats 2024',
-        sourceVintage: '2015-Q4 to 2024-Q4',
+        sourceVintage: 'Annual 2015–2024 (Q4 reference points; some years/values suppressed by sector)',
         lastUpdated: timestamp,
       });
     }

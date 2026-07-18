@@ -90,6 +90,14 @@ function mapCihiTimeFrame(tf: string): string | undefined {
   return end.length === 4 ? end : `20${end}`;
 }
 
+// Convert a calendar end-year (e.g. "2023") back to the HQCA fiscal-year label ("2022/23").
+function toFiscalYearLabel(calYear: string): string {
+  const y = Number.parseInt(calYear, 10);
+  const short = Number.isFinite(y) ? (y % 100).toString().padStart(2, '0') : '??';
+  const start = Number.isFinite(y) ? (y - 1).toString() : calYear;
+  return `${start}/${short}`;
+}
+
 // Derive a HQCA fiscal-year label from a quarterly period label.
 //   "Apr-Jun 2018" → "2018/19", "Jan-Mar 2019" → "2018/19"
 function quarterlyToFiscalYear(period: string): string | undefined {
@@ -522,17 +530,36 @@ export async function run(): Promise<SyncResult> {
       outcomeMap,
     );
 
+    // Derive truthful sourceVintage strings from the actual record year ranges.
+    const placementYears = Array.from(
+      new Set(Array.from(placementMap.keys()).map((key) => key.split('|')[0])),
+    ).sort();
+    const calStart = placementYears[0];
+    const calEnd = placementYears[placementYears.length - 1];
+    const placementVintage =
+      calStart && calEnd
+        ? `Fiscal years ${toFiscalYearLabel(calStart)}-${toFiscalYearLabel(calEnd)} (calendar years ${calStart}-${calEnd})`
+        : 'HQCA FOCUS continuing-care CSVs';
+
+    const outcomeYears = Array.from(outcomeMap.keys()).filter(Boolean).sort();
+    const outcomeStart = outcomeYears[0];
+    const outcomeEnd = outcomeYears[outcomeYears.length - 1];
+    const outcomeVintage =
+      outcomeStart && outcomeEnd
+        ? `Calendar years ${outcomeStart}-${outcomeEnd}`
+        : 'CIHI potentially inappropriate antipsychotics in long-term care';
+
     const mergedMetadata = mergeDataMetadata(existing._dataMetadata, {
       CONTINUING_CARE_PLACEMENT_STATS: buildMetadataEntry({
         updateType: 'auto',
         source: 'HQCA FOCUS continuing-care CSVs',
-        sourceVintage: '2021–latest HQCA reporting period',
+        sourceVintage: placementVintage,
         lastUpdated: timestamp,
       }),
       RESIDENT_QUALITY_OUTCOMES: buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI potentially inappropriate antipsychotics in long-term care',
-        sourceVintage: 'CIHI LTCC indicator data table (latest available)',
+        sourceVintage: outcomeVintage,
         verification: 'Only Inappropriate Antipsychotic Use rows are auto-written; other quality metrics are not sourced.',
         lastUpdated: timestamp,
       }),

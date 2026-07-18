@@ -302,12 +302,21 @@ export async function run(): Promise<SyncResult> {
   // The rest of `data` (including other writers' _dataMetadata entries) is
   // preserved because we write the whole read-modify-write object back.
   if (updated) {
+    const dates = ((data.AHS_WEEKLY_ED_LOS as WeeklyEDLOS[]) ?? [])
+      .map(r => new Date(r.weekEnding))
+      .filter(d => !isNaN(d.getTime()));
+    const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const minDate = new Date(dates.length ? Math.min(...dates.map(d => d.getTime())) : NaN);
+    const maxDate = new Date(dates.length ? Math.max(...dates.map(d => d.getTime())) : NaN);
+    const weekEndingSourceVintage = dates.length
+      ? `Week ending ${fmt(minDate)}${minDate.getTime() === maxDate.getTime() ? '' : ` to ${fmt(maxDate)}`} (AHS weekly ED LOS PDFs)`
+      : 'AHS weekly ED LOS PDFs (week ending per report)';
     const existingMeta = data._dataMetadata as DataMetadata | undefined;
     const ownedMetadata: DataMetadata = {
       AHS_WEEKLY_ED_LOS: buildMetadataEntry({
         updateType: 'auto',
         source: 'AHS Weekly ED Performance Reports (Edmonton + Calgary PDFs)',
-        sourceVintage: 'AHS weekly ED LOS PDFs (week ending per report)',
+        sourceVintage: weekEndingSourceVintage,
         verification: 'Auto-parsed from AHS weekly ED wait/throughput PDFs via pdftotext. Only rows with a non-empty weekEnding are retained; empty stubs are dropped.',
         lastUpdated: timestamp,
       }),

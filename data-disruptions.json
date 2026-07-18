@@ -6,15 +6,15 @@
     "city": "Athabasca",
     "zone": "North Zone",
     "serviceAffected": "Emergency Department",
-    "disruptionType": "Service Suspension",
+    "disruptionType": "Unclassified",
     "status": "Active",
     "startDate": "2026-07-02T06:00:00.000Z",
     "endDate": "2026-08-01T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
     "details": "No physician on site, nursing staff remain on site. VEP program engaged. July 2 (6 am - 6 pm), July 6 (6 am - 6 pm), July 28 (6 pm) - July 29 (6 am), July 31 (6 pm) - August 1 (6 am)",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-barrhead-healthcare-centre-mr87ujaz",
@@ -23,15 +23,15 @@
     "city": "Barrhead",
     "zone": "North Zone",
     "serviceAffected": "Obstetrics - all services",
-    "disruptionType": "Service Suspension",
+    "disruptionType": "Unclassified",
     "status": "Active",
     "startDate": "2026-06-01T06:00:00.000Z",
     "endDate": "2026-08-01T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
     "details": "No Obstetrics. June 1 (7 am) - June 3 (5 pm), June 4 (7 am - 5 pm), June 5 (7 am - 5 pm), June 6 (7 am) - June 10 (5 pm), June 11 (7 am) - June 17 (5 pm), June 18 (7 am) - July 1 (7 am), July 1 (7 am) - August 1 (7 am)",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-beaverlodge-municipal-hospital-mr87ujb8",
@@ -40,15 +40,32 @@
     "city": "Beaverlodge",
     "zone": "North Zone",
     "serviceAffected": "Emergency Department",
-    "disruptionType": "Reduced Hours",
+    "disruptionType": "Closure",
     "status": "Active",
-    "startDate": "2026-07-05T06:00:00.000Z",
-    "endDate": "2026-07-09T06:00:00.000Z",
+    "startDate": "2026-07-13T06:00:00.000Z",
+    "endDate": "2026-07-13T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
-    "details": "Emergency Department service disruption- no physician available on site. Nursing staff remain available on site supported by Virtual Emergency Physician for appropriate patients. EMS to patch to determine appropriate destination for patient as a care team.",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "details": "Emergency Department closed, nursing staff remain on site to provide Acute Care.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
+  },
+  {
+    "id": "disr-beaverlodge-municipal-hospital-mr87ujb8",
+    "facilityId": "beaverlodge-municipal-hospital",
+    "facilityName": "Beaverlodge Municipal Hospital",
+    "city": "Beaverlodge",
+    "zone": "North Zone",
+    "serviceAffected": "Emergency Department",
+    "disruptionType": "Unclassified",
+    "status": "Active",
+    "startDate": "2026-07-14T06:00:00.000Z",
+    "endDate": "2026-08-01T06:00:00.000Z",
+    "reason": "Due to clinical personnel shortage",
+    "details": "Emergency Department Service Disruption - No physician available on-site. Nursing staff remain on site for triage and supported by Virtual Physician for appropriate patients.EMS to patch ahead to discuss patient appropriate destination with Care Team. July 14 (8 pm) - July 15 (8 am), July 16 (8 pm) - July 17 (8 am), July 21 (8 pm) - July 22 (8 pm),July 23 (8 pm) - July 24 (8 am), July 29 (8 am - 8 pm), July 31 (8 am) - August 1 (8 am)",
+    "alternativeCare": "",
+    "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-bow-island-health-centre-mr87ujb7",
@@ -63,9 +80,9 @@
     "endDate": "2026-12-31T07:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
     "details": "Adjusted hours of operation:",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-02",
@@ -79,10 +96,27 @@
     "startDate": "2024-07-02T06:00:00.000Z",
     "endDate": "2026-08-31T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
-    "details": "Due to ongoing vacancy and recruiting challenges, the Emergency Department at Boyle Healthcare Centre will be temporarily closed daily between 8:00 PM and 8:00 AM. It will continue to operate regularly during daytime hours (8:00 AM to 8:00 PM).",
-    "alternativeCare": "For after-hours emergency services, please go to Athabasca Healthcare Centre (40 km away) or George McDougall - Smoky Lake Healthcare Centre (74 km away). Call Health Link at 811 for non-urgent health advice.",
+    "details": "Temporary reduction in Emergency Department operation to 12 hours daily (closed from 2100 - 0900); 4/4 treatment spaces.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
+  },
+  {
+    "id": "disr-cold-lake-healthcare-centre-mrqbf9ad",
+    "facilityId": "cold-lake-healthcare-centre",
+    "facilityName": "Cold Lake Healthcare Centre",
+    "city": "Cold Lake",
+    "zone": "North Zone",
+    "serviceAffected": "Obstetrics",
+    "disruptionType": "Unclassified",
+    "status": "Active",
+    "startDate": "2026-07-25T06:00:00.000Z",
+    "endDate": "2026-07-26T06:00:00.000Z",
+    "reason": "Due to clinical personnel shortage",
+    "details": "No anesthetic services available; obstetric disruption",
+    "alternativeCare": "",
+    "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-consort-hospital-care-centre-mr87ujb6",
@@ -97,9 +131,9 @@
     "endDate": "TBD",
     "reason": "Due to clinical personnel shortage",
     "details": "Emergency department closed, nursing staff remain on site. Regular operating hours are Monday - Thursday 0900 - 1700 and Friday 0900 – 1200.",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-coronation-hospital-and-care-centre-mr87ujb2",
@@ -108,32 +142,32 @@
     "city": "Coronation",
     "zone": "Central Zone",
     "serviceAffected": "Emergency Department",
-    "disruptionType": "Service Suspension",
+    "disruptionType": "Unclassified",
     "status": "Active",
     "startDate": "2026-07-02T06:00:00.000Z",
     "endDate": "2026-07-31T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
-    "details": "Emergency department on diversion, nursing staff remain on site. Virtual Emergency Physician (VEP) coverage may be available. July 2 (8 am) - July 3 (5 pm), July 7 (8 am) - July 8 (8 am), July 9 (8 am) - July 13 (8 am), July 14 (8 am) - July 15 (8 am), July 16 (8 am) - July 17 (8 am), July 21 (8 am) - July 22 (8 am), July 23 (8 am) - July 24 (5 pm), July 28 (8 am) - July 29 (8 am), July 30 (8 am) - July 31 (5 pm)",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "details": "Emergency department on diversion, nursing staff remain on site. Virtual Emergency Physician (VEP) coverage may be available. July 2 (8 am) - July 3 (5 pm), July 7 (8 am) - July 8 (8 am), July 9 (8 am) - July 10 (5 pm), July 14 (8 am) - July 15 (8 am), July 16 (8 am) - July 17 (8 am), July 21 (8 am) - July 22 (8 am), July 23 (8 am) - July 24 (5 pm), July 28 (8 am) - July 29 (8 am), July 30 (8 am) - July 31 (5 pm)",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
-    "id": "disr-edson-healthcare-centre-mr87ujb1",
+    "id": "disr-edson-healthcare-centre-mrqbf9g5",
     "facilityId": "edson-healthcare-centre",
     "facilityName": "Edson Healthcare Centre",
     "city": "Edson",
     "zone": "North Zone",
-    "serviceAffected": "Emergency Department",
-    "disruptionType": "Closure",
+    "serviceAffected": "Obstetrics - all services",
+    "disruptionType": "Unclassified",
     "status": "Active",
-    "startDate": "2026-07-02T06:00:00.000Z",
-    "endDate": "2026-07-27T06:00:00.000Z",
+    "startDate": "2026-07-17T06:00:00.000Z",
+    "endDate": "2026-07-20T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
-    "details": "Emergency department closed, nursing staff remain on site. July 2 (11 pm) - July 3 (8 am), July 8 (11 pm) - July 9 (8 am), July 10 (3 pm) - July 11 (8 am), July 11 (3 pm) - July 12 (8 am), July 14 (3 pm) - July 15 (8 am), July 18 (3 pm) - July 19 (8 am),July 19 (3 pm) - July 20 (8 am), July 25 (3 pm) - July 26 (8 am)",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "details": "No Obstetrics.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-george-mcdougall-smoky-lake-healthcare-centre-mr87ujb0",
@@ -148,9 +182,9 @@
     "endDate": "2026-07-31T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
     "details": "Emergency Dept Closed. Nursing staff remain on Site. July 1 (8 am) - July 2 (8 am), July 2 (4 pm) - July 3 (8 am), July 3 (4pm) - July 6 (8am), July 9 (4 pm) - July 10 (8 am), July 16 (4 pm) - July 17 (8 am), July 17 (4 pm) - July 20 (8 am), July 23 (4 pm) - July 24 (8 am), July 24 (4 pm) - July 27 (8 am), July 30 (4 pm) - July 31 (8 am)",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-grimshaw-berwyn-district-community-health-centre-mr87ujb5",
@@ -165,9 +199,9 @@
     "endDate": "2026-09-30T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
     "details": "Emergency Department closed from 2100-0900 daily",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-08",
@@ -181,10 +215,10 @@
     "startDate": "2025-12-05T07:00:00.000Z",
     "endDate": "TBD",
     "reason": "Due to clinical personnel shortage",
-    "details": "Temporary 3-day closure of the Emergency Department at Hardisty Health Centre. Full services were restored on schedule following locum coverage arrival.",
-    "alternativeCare": "Walk-in patients were directed to Killam Health Centre (20 km away) during the disruption.",
+    "details": "Emergency department closed Fridays, Saturdays and Sundays. Nursing staff remain on site, starting December 5 (7am)",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-hinton-healthcare-centre-mrbgmk4z",
@@ -198,10 +232,10 @@
     "startDate": "2026-07-01T06:00:00.000Z",
     "endDate": "2026-07-30T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
-    "details": "Emergency department closed, nursing staff remain on site. July 1 (9 pm) - July 2 (7 am), July 6 (3 pm) - July 7 (7 am), July 7 (3 pm) - July 8 (7 am), July 9 (3 pm) - July 10 (7 am), July 13 (9 pm) - July 14 (7 am), July 15 (9 pm) - July 16 (7 am), July 17 (9 pm) - July 18 (7 am), July 22 (9 pm) - July 23 (7 am), July 29 (9 pm) - July 30 (7 am)",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "details": "Emergency department closed, nursing staff remain on site. July 1 (9 pm) - July 2 (7 am), July 6 (3 pm) - July 7 (7 am), July 7 (3 pm) - July 8 (7 am), July 9 (3 pm) - July 10 (7 am), July 13 (9 pm) - July 14 (7 am), July 15 (9 pm) - July 16 (7 am), July 22 (9 pm) - July 23 (7 am), July 29 (9 pm) - July 30 (7 am)",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-olds-hospital-and-care-centre-mr87ujax",
@@ -210,15 +244,49 @@
     "city": "Olds",
     "zone": "Central Zone",
     "serviceAffected": "Obstetrics - All Services",
-    "disruptionType": "Service Suspension",
+    "disruptionType": "Unclassified",
     "status": "Active",
     "startDate": "2026-07-04T06:00:00.000Z",
     "endDate": "2026-07-05T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
     "details": "No Obstetric trained staff available. C sections and imminent births are not affected.",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
+  },
+  {
+    "id": "disr-ponoka-hospital-and-care-centre-mrqbf975",
+    "facilityId": "ponoka-hospital-and-care-centre",
+    "facilityName": "Ponoka Hospital and Care Centre",
+    "city": "Ponoka",
+    "zone": "",
+    "serviceAffected": "Obstetrics - all services",
+    "disruptionType": "Unclassified",
+    "status": "Active",
+    "startDate": "2026-07-19T06:00:00.000Z",
+    "endDate": "2026-07-19T06:00:00.000Z",
+    "reason": "Due to clinical personnel shortage",
+    "details": "No obstetrics July 19 (11 a.m.) - July 19 (5 p.m.).",
+    "alternativeCare": "",
+    "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
+    "updatedAt": "2026-07-18T12:00:39.959Z"
+  },
+  {
+    "id": "disr-ponoka-hospital-and-care-centre-mrqbf976",
+    "facilityId": "ponoka-hospital-and-care-centre",
+    "facilityName": "Ponoka Hospital and Care Centre",
+    "city": "Ponoka",
+    "zone": "",
+    "serviceAffected": "Obstetrics - all services",
+    "disruptionType": "Service Suspension",
+    "status": "Active",
+    "startDate": "2026-07-11T06:00:00.000Z",
+    "endDate": "2026-07-13T06:00:00.000Z",
+    "reason": "Due to clinical personnel shortage",
+    "details": "No obstetrical services.",
+    "alternativeCare": "",
+    "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-rimbey-hospital-and-care-centre-mr87ujb3",
@@ -227,15 +295,15 @@
     "city": "Rimbey",
     "zone": "Central Zone",
     "serviceAffected": "Obstetrics",
-    "disruptionType": "Service Suspension",
+    "disruptionType": "Unclassified",
     "status": "Active",
     "startDate": "2025-12-01T07:00:00.000Z",
     "endDate": "TBD",
     "reason": "Due to clinical personnel shortage",
     "details": "No obstetrics.",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-stettler-hospital-and-care-centre-mr87ujay",
@@ -244,15 +312,32 @@
     "city": "Stettler",
     "zone": "Central Zone",
     "serviceAffected": "Obstetrics - all services",
-    "disruptionType": "Service Suspension",
+    "disruptionType": "Unclassified",
     "status": "Active",
-    "startDate": "2026-07-02T06:00:00.000Z",
-    "endDate": "2026-07-06T06:00:00.000Z",
+    "startDate": "2026-07-18T06:00:00.000Z",
+    "endDate": "2026-07-20T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
-    "details": "No Obstetrical services available.",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "details": "No obstetricas July 18 (7 a.m.) - July 20 (7 a.m.)",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
+  },
+  {
+    "id": "disr-10",
+    "facilityId": "swan-hills-healthcare-centre",
+    "facilityName": "Swan Hills Healthcare Centre",
+    "city": "Swan Hills",
+    "zone": "North Zone",
+    "serviceAffected": "Emergency Department",
+    "disruptionType": "Closure",
+    "status": "Active",
+    "startDate": "2026-07-11T06:00:00.000Z",
+    "endDate": "2026-07-13T06:00:00.000Z",
+    "reason": "Due to clinical personnel shortage",
+    "details": "Emergency Department closed due to nursing staff shortage. July 11 (7 pm) - July 12 (7 am), July 12 (7 pm) - July 13 (7 am)",
+    "alternativeCare": "",
+    "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-three-hills-health-centre-mr87ujb4",
@@ -267,9 +352,26 @@
     "endDate": "TBD",
     "reason": "Due to clinical personnel shortage",
     "details": "No obstetrical services on site",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
+  },
+  {
+    "id": "disr-tofield-health-centre-mrqbf951",
+    "facilityId": "tofield-health-centre",
+    "facilityName": "Tofield Health Centre",
+    "city": "Tofield",
+    "zone": "",
+    "serviceAffected": "Emergency Department",
+    "disruptionType": "Closure",
+    "status": "Active",
+    "startDate": "2026-07-13T06:00:00.000Z",
+    "endDate": "2026-07-15T06:00:00.000Z",
+    "reason": "Due to clinical personnel shortage",
+    "details": "Emergency Department closed but nursing staff remain on site to support.",
+    "alternativeCare": "",
+    "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-viking-health-centre-mr87ujb8",
@@ -281,12 +383,12 @@
     "disruptionType": "Service Suspension",
     "status": "Active",
     "startDate": "2026-06-29T06:00:00.000Z",
-    "endDate": "2026-07-14T06:00:00.000Z",
+    "endDate": "2026-07-31T06:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
-    "details": "No obstetrical coverage June 29 (7 am) - July 14 (5 pm).",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "details": "No obstetrical.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-westlock-healthcare-centre-mr87ujb6",
@@ -295,15 +397,15 @@
     "city": "Westlock",
     "zone": "North Zone",
     "serviceAffected": "Obstetrics",
-    "disruptionType": "Service Suspension",
+    "disruptionType": "Unclassified",
     "status": "Active",
     "startDate": "2022-12-13T07:00:00.000Z",
     "endDate": "2026-12-01T07:00:00.000Z",
     "reason": "Due to clinical personnel shortage",
     "details": "No obstetrics services including c-section",
-    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "alternativeCare": "",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-08T12:00:07.510Z"
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-12",
@@ -338,6 +440,23 @@
     "alternativeCare": "Access emergency medical services at Coronation Hospital and Care Centre (50 km away) or Provost Health Centre (80 km away). Call 911 in emergencies.",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
     "updatedAt": "2026-07-05T18:31:57.171Z"
+  },
+  {
+    "id": "disr-edson-healthcare-centre-mr87ujb1",
+    "facilityId": "edson-healthcare-centre",
+    "facilityName": "Edson Healthcare Centre",
+    "city": "Edson",
+    "zone": "North Zone",
+    "serviceAffected": "Emergency Department",
+    "disruptionType": "Closure",
+    "status": "Resolved",
+    "startDate": "2026-07-02T06:00:00.000Z",
+    "endDate": "2026-07-18",
+    "reason": "Due to clinical personnel shortage",
+    "details": "Emergency department closed, nursing staff remain on site. July 2 (11 pm) - July 3 (8 am), July 8 (11 pm) - July 9 (8 am), July 10 (3 pm) - July 11 (8 am), July 11 (3 pm) - July 12 (8 am), July 14 (3 pm) - July 15 (8 am), July 18 (3 pm) - July 19 (8 am),July 19 (3 pm) - July 20 (8 am), July 25 (3 pm) - July 26 (8 am)",
+    "alternativeCare": "In an emergency, dial 911. Call Health Link at 811 for non-urgent health advice.",
+    "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
+    "updatedAt": "2026-07-18T12:00:39.959Z"
   },
   {
     "id": "disr-09",
@@ -423,23 +542,6 @@
     "alternativeCare": "No immediate patient action is required. Inpatients requiring intensive acute care may be transferred to High Level General Hospital if capacity limits are reached.",
     "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
     "updatedAt": "2026-07-05T18:31:57.171Z"
-  },
-  {
-    "id": "disr-10",
-    "facilityId": "swan-hills-healthcare-centre",
-    "facilityName": "Swan Hills Healthcare Centre",
-    "city": "Swan Hills",
-    "zone": "North Zone",
-    "serviceAffected": "Emergency Department",
-    "disruptionType": "Service Suspension",
-    "status": "Resolved",
-    "startDate": "2022-06-01T08:00:00Z",
-    "endDate": "2026-07-05",
-    "reason": "Lack of nursing staff",
-    "details": "The Emergency Department will remain closed overnight from 7:00 PM to 7:00 AM daily due to long-term clinical nursing vacancies. Daylight hours remain fully open.",
-    "alternativeCare": "After-hours patients should seek emergency care at Whitecourt Healthcare Centre (80 km away) or Slave Lake Healthcare Centre (115 km away).",
-    "sourceUrl": "https://www.albertahealthservices.ca/br/Page17594.aspx",
-    "updatedAt": "2026-07-05T18:31:57.172Z"
   },
   {
     "id": "disr-04",

@@ -234,7 +234,7 @@ export async function run(): Promise<SyncResult> {
       PATIENT_VOICE_BY_SETTING: buildMetadataEntry({
         updateType: 'auto',
         source: 'GoodCaring.ca Alberta specialist wait times',
-        sourceVintage: 'Live GoodCaring scrape (Specialist Access wait weeks only)',
+        sourceVintage: `${year} GoodCaring specialist wait weeks (live scrape; Specialist Access wait weeks only)`,
         verification: 'Only setting=Specialist Access rows are written; albertaRatePct stores median wait weeks, not a percentage.',
         lastUpdated: timestamp,
       }),

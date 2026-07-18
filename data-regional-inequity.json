@@ -1,63 +1,6 @@
 {
   "COMMUNITY_NEED_PROFILES": [
     {
-      "lgaName": "Calgary - West Bow",
-      "zone": "Calgary Zone",
-      "type": "Urban Hub",
-      "physiciansPer100k": 275,
-      "claimsOutsideLgaPct": 18.2,
-      "acscRatePer100k": 361.86,
-      "deprivationIndex": 8.95,
-      "medianHouseholdIncome": 112500,
-      "highSchoolGradPct": 94.5,
-      "population": 21479
-    },
-    {
-      "lgaName": "Edmonton - Woodcroft (North Central)",
-      "zone": "Edmonton Zone",
-      "type": "Suburban",
-      "physiciansPer100k": 114.2,
-      "claimsOutsideLgaPct": 35.6,
-      "acscRatePer100k": 295.4,
-      "deprivationIndex": 2,
-      "medianHouseholdIncome": 84300,
-      "highSchoolGradPct": 88.2
-    },
-    {
-      "lgaName": "Red Deer - North",
-      "zone": "Central Zone",
-      "type": "Rural",
-      "physiciansPer100k": 67,
-      "claimsOutsideLgaPct": 54.1,
-      "acscRatePer100k": 325.34,
-      "deprivationIndex": 12.61,
-      "medianHouseholdIncome": 74200,
-      "highSchoolGradPct": 81.4,
-      "population": 35615
-    },
-    {
-      "lgaName": "South rural (Lethbridge/Cardston area)",
-      "zone": "South Zone",
-      "type": "Rural",
-      "physiciansPer100k": 58.2,
-      "claimsOutsideLgaPct": 68.4,
-      "acscRatePer100k": 589.5,
-      "deprivationIndex": 4,
-      "medianHouseholdIncome": 63100,
-      "highSchoolGradPct": 76.5
-    },
-    {
-      "lgaName": "Wood Buffalo / Fort McKay",
-      "zone": "North Zone",
-      "type": "Remote / Indigenous",
-      "physiciansPer100k": 32.4,
-      "claimsOutsideLgaPct": 82.3,
-      "acscRatePer100k": 845.1,
-      "deprivationIndex": 5,
-      "medianHouseholdIncome": 58900,
-      "highSchoolGradPct": 64.1
-    },
-    {
       "lgaName": "Crowsnest Pass",
       "zone": "South Zone",
       "type": "Urban Hub",
@@ -284,6 +227,18 @@
       "medianHouseholdIncome": 0,
       "highSchoolGradPct": 0,
       "population": 62712
+    },
+    {
+      "lgaName": "Calgary - West Bow",
+      "zone": "Calgary Zone",
+      "type": "Suburban",
+      "physiciansPer100k": 275,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 361.86,
+      "deprivationIndex": 8.95,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0,
+      "population": 21479
     },
     {
       "lgaName": "Calgary - Centre North",
@@ -884,6 +839,18 @@
       "medianHouseholdIncome": 0,
       "highSchoolGradPct": 0,
       "population": 36896
+    },
+    {
+      "lgaName": "Red Deer - North",
+      "zone": "Central Zone",
+      "type": "Urban Hub",
+      "physiciansPer100k": 67,
+      "claimsOutsideLgaPct": 0,
+      "acscRatePer100k": 325.34,
+      "deprivationIndex": 12.61,
+      "medianHouseholdIncome": 0,
+      "highSchoolGradPct": 0,
+      "population": 35615
     },
     {
       "lgaName": "Red Deer - SW",
@@ -1620,76 +1587,1060 @@
   ],
   "CHRONIC_DISEASE_BURDEN": [
     {
-      "lgaName": "Calgary - West Bow",
-      "diabetesPrevalencePct": 4.8,
-      "copdPrevalencePct": 1.9,
-      "hypertensionPrevalencePct": 15.2,
-      "infantMortalityPer1000": 2.1,
-      "lifeExpectancyYears": 79.04
-    },
-    {
-      "lgaName": "Edmonton - Woodcroft (North Central)",
-      "diabetesPrevalencePct": 6.5,
-      "copdPrevalencePct": 3.1,
-      "hypertensionPrevalencePct": 19.8,
-      "infantMortalityPer1000": 3.8,
-      "lifeExpectancyYears": 81.2
-    },
-    {
-      "lgaName": "Red Deer - North",
-      "diabetesPrevalencePct": 8.1,
-      "copdPrevalencePct": 4.4,
-      "hypertensionPrevalencePct": 23.5,
-      "infantMortalityPer1000": 4.9,
-      "lifeExpectancyYears": 80.16
-    },
-    {
-      "lgaName": "South rural (Lethbridge/Cardston area)",
-      "diabetesPrevalencePct": 9.4,
-      "copdPrevalencePct": 5.8,
-      "hypertensionPrevalencePct": 27.2,
-      "infantMortalityPer1000": 5.6,
-      "lifeExpectancyYears": 77.1
-    },
-    {
-      "lgaName": "Wood Buffalo / Fort McKay",
-      "diabetesPrevalencePct": 12.8,
-      "copdPrevalencePct": 8.4,
-      "hypertensionPrevalencePct": 32.1,
-      "infantMortalityPer1000": 8.2,
-      "lifeExpectancyYears": 72.8
-    },
-    {
       "lgaName": "Crowsnest Pass",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
+      "diabetesPrevalencePct": 7.6607,
+      "copdPrevalencePct": 3.6527,
+      "hypertensionPrevalencePct": 20.169,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 79
     },
     {
       "lgaName": "Pincher Creek",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
+      "diabetesPrevalencePct": 7.9337,
+      "copdPrevalencePct": 1.9311,
+      "hypertensionPrevalencePct": 17.454,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 77.41
     },
     {
       "lgaName": "Fort Macleod",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
+      "diabetesPrevalencePct": 9.3499,
+      "copdPrevalencePct": 2.2601,
+      "hypertensionPrevalencePct": 21.275,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 78.25
     },
     {
       "lgaName": "Cardston-Kainai",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
+      "diabetesPrevalencePct": 10.981,
+      "copdPrevalencePct": 1.4592,
+      "hypertensionPrevalencePct": 19.586,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 75.15
+    },
+    {
+      "lgaName": "County Of Lethbridge",
+      "diabetesPrevalencePct": 7.5889,
+      "copdPrevalencePct": 2.2506,
+      "hypertensionPrevalencePct": 19.364,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Taber Md",
+      "diabetesPrevalencePct": 7.292,
+      "copdPrevalencePct": 2.1828,
+      "hypertensionPrevalencePct": 18.867,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "County Of Warner",
+      "diabetesPrevalencePct": 8.6335,
+      "copdPrevalencePct": 2.0724,
+      "hypertensionPrevalencePct": 22.202,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "County Of Forty Mile",
+      "diabetesPrevalencePct": 8.3144,
+      "copdPrevalencePct": 2.098,
+      "hypertensionPrevalencePct": 22.123,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Newell",
+      "diabetesPrevalencePct": 9.9315,
+      "copdPrevalencePct": 4.5917,
+      "hypertensionPrevalencePct": 26.289,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.25
+    },
+    {
+      "lgaName": "Oyen",
+      "diabetesPrevalencePct": 8.4952,
+      "copdPrevalencePct": 2.93,
+      "hypertensionPrevalencePct": 23.686,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.05
+    },
+    {
+      "lgaName": "Cypress County",
+      "diabetesPrevalencePct": 8.7199,
+      "copdPrevalencePct": 3.7893,
+      "hypertensionPrevalencePct": 22.079,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Medicine Hat",
+      "diabetesPrevalencePct": 8.8741,
+      "copdPrevalencePct": 4.0772,
+      "hypertensionPrevalencePct": 22.282,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.21
+    },
+    {
+      "lgaName": "Lethbridge - West",
+      "diabetesPrevalencePct": 7.5588,
+      "copdPrevalencePct": 1.4844,
+      "hypertensionPrevalencePct": 19.527,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.02
+    },
+    {
+      "lgaName": "Lethbridge - North",
+      "diabetesPrevalencePct": 9.665,
+      "copdPrevalencePct": 2.8222,
+      "hypertensionPrevalencePct": 21.608,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.58
+    },
+    {
+      "lgaName": "Lethbridge - South",
+      "diabetesPrevalencePct": 8.2524,
+      "copdPrevalencePct": 2.2869,
+      "hypertensionPrevalencePct": 19.563,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.92
+    },
+    {
+      "lgaName": "Calgary - Upper Nw",
+      "diabetesPrevalencePct": 7.9048,
+      "copdPrevalencePct": 1.1336,
+      "hypertensionPrevalencePct": 18.725,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Calgary - North",
+      "diabetesPrevalencePct": 9.3791,
+      "copdPrevalencePct": 1.4287,
+      "hypertensionPrevalencePct": 20.697,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 84.26
+    },
+    {
+      "lgaName": "Calgary - Nose Hill",
+      "diabetesPrevalencePct": 7.3103,
+      "copdPrevalencePct": 2.2235,
+      "hypertensionPrevalencePct": 17.991,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.91
+    },
+    {
+      "lgaName": "Calgary - Lower Nw",
+      "diabetesPrevalencePct": 5.8508,
+      "copdPrevalencePct": 1.1858,
+      "hypertensionPrevalencePct": 16.901,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Calgary - West Bow",
+      "diabetesPrevalencePct": 7.2599,
+      "copdPrevalencePct": 2.8641,
+      "hypertensionPrevalencePct": 18.44,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.04
+    },
+    {
+      "lgaName": "Calgary - Centre North",
+      "diabetesPrevalencePct": 5.9856,
+      "copdPrevalencePct": 2.0191,
+      "hypertensionPrevalencePct": 16.004,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.95
+    },
+    {
+      "lgaName": "Calgary - Upper Ne",
+      "diabetesPrevalencePct": 14.196,
+      "copdPrevalencePct": 1.5896,
+      "hypertensionPrevalencePct": 25.18,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Calgary - Lower Ne",
+      "diabetesPrevalencePct": 12.032,
+      "copdPrevalencePct": 2.6967,
+      "hypertensionPrevalencePct": 23.466,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Calgary - East",
+      "diabetesPrevalencePct": 11.138,
+      "copdPrevalencePct": 4.1234,
+      "hypertensionPrevalencePct": 23.099,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.53
+    },
+    {
+      "lgaName": "Calgary - Se",
+      "diabetesPrevalencePct": 7.909,
+      "copdPrevalencePct": 1.6132,
+      "hypertensionPrevalencePct": 19.443,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Calgary - West",
+      "diabetesPrevalencePct": 6.2775,
+      "copdPrevalencePct": 1.3128,
+      "hypertensionPrevalencePct": 16.688,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 85.23
+    },
+    {
+      "lgaName": "Calgary - Centre",
+      "diabetesPrevalencePct": 6.9684,
+      "copdPrevalencePct": 2.3876,
+      "hypertensionPrevalencePct": 16.415,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.44
+    },
+    {
+      "lgaName": "Calgary - Centre West",
+      "diabetesPrevalencePct": 6.1229,
+      "copdPrevalencePct": 2.0201,
+      "hypertensionPrevalencePct": 16.49,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.18
+    },
+    {
+      "lgaName": "Calgary - Elbow",
+      "diabetesPrevalencePct": 5.7898,
+      "copdPrevalencePct": 1.7998,
+      "hypertensionPrevalencePct": 15.825,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.8
+    },
+    {
+      "lgaName": "Calgary - Fish Creek",
+      "diabetesPrevalencePct": 7.2883,
+      "copdPrevalencePct": 1.9503,
+      "hypertensionPrevalencePct": 18.692,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.43
+    },
+    {
+      "lgaName": "Calgary - Sw",
+      "diabetesPrevalencePct": 8.0365,
+      "copdPrevalencePct": 1.5678,
+      "hypertensionPrevalencePct": 19.518,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Okotoks-Priddis",
+      "diabetesPrevalencePct": 5.9848,
+      "copdPrevalencePct": 1.629,
+      "hypertensionPrevalencePct": 17.441,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.77
+    },
+    {
+      "lgaName": "Black Diamond",
+      "diabetesPrevalencePct": 6.239,
+      "copdPrevalencePct": 2.8223,
+      "hypertensionPrevalencePct": 17.345,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.64
+    },
+    {
+      "lgaName": "High River",
+      "diabetesPrevalencePct": 7.3135,
+      "copdPrevalencePct": 2.2696,
+      "hypertensionPrevalencePct": 20.592,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.13
+    },
+    {
+      "lgaName": "Claresholm",
+      "diabetesPrevalencePct": 8.307,
+      "copdPrevalencePct": 2.3917,
+      "hypertensionPrevalencePct": 19.713,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.72
+    },
+    {
+      "lgaName": "Vulcan",
+      "diabetesPrevalencePct": 8.4133,
+      "copdPrevalencePct": 2.5464,
+      "hypertensionPrevalencePct": 23.247,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.99
+    },
+    {
+      "lgaName": "Airdrie",
+      "diabetesPrevalencePct": 8.5934,
+      "copdPrevalencePct": 2.1943,
+      "hypertensionPrevalencePct": 20.447,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.93
+    },
+    {
+      "lgaName": "Chestermere",
+      "diabetesPrevalencePct": 9.8176,
+      "copdPrevalencePct": 1.6998,
+      "hypertensionPrevalencePct": 21.242,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.35
+    },
+    {
+      "lgaName": "Strathmore",
+      "diabetesPrevalencePct": 11.064,
+      "copdPrevalencePct": 2.9737,
+      "hypertensionPrevalencePct": 22.783,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.22
+    },
+    {
+      "lgaName": "Crossfield",
+      "diabetesPrevalencePct": 8.2996,
+      "copdPrevalencePct": 2.8154,
+      "hypertensionPrevalencePct": 21.128,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.13
+    },
+    {
+      "lgaName": "Didsbury",
+      "diabetesPrevalencePct": 7.5617,
+      "copdPrevalencePct": 2.5363,
+      "hypertensionPrevalencePct": 20.573,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.56
+    },
+    {
+      "lgaName": "Cochrane-Springbank",
+      "diabetesPrevalencePct": 5.4607,
+      "copdPrevalencePct": 1.2469,
+      "hypertensionPrevalencePct": 16.267,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 84.56
+    },
+    {
+      "lgaName": "Canmore",
+      "diabetesPrevalencePct": 5.3308,
+      "copdPrevalencePct": 1.3494,
+      "hypertensionPrevalencePct": 14.336,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.59
+    },
+    {
+      "lgaName": "Banff",
+      "diabetesPrevalencePct": 4.7074,
+      "copdPrevalencePct": 1.2388,
+      "hypertensionPrevalencePct": 14.255,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 86.69
+    },
+    {
+      "lgaName": "Rocky Mountain House",
+      "diabetesPrevalencePct": 8.0588,
+      "copdPrevalencePct": 2.9279,
+      "hypertensionPrevalencePct": 18.929,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.68
+    },
+    {
+      "lgaName": "Drayton Valley",
+      "diabetesPrevalencePct": 8.5403,
+      "copdPrevalencePct": 3.5456,
+      "hypertensionPrevalencePct": 21.694,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.48
+    },
+    {
+      "lgaName": "Sundre",
+      "diabetesPrevalencePct": 6.1545,
+      "copdPrevalencePct": 2.6342,
+      "hypertensionPrevalencePct": 18.337,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.14
+    },
+    {
+      "lgaName": "Olds",
+      "diabetesPrevalencePct": 8.0279,
+      "copdPrevalencePct": 2.4706,
+      "hypertensionPrevalencePct": 19.716,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.47
+    },
+    {
+      "lgaName": "Innisfail",
+      "diabetesPrevalencePct": 7.6794,
+      "copdPrevalencePct": 2.88,
+      "hypertensionPrevalencePct": 19.504,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.89
+    },
+    {
+      "lgaName": "Red Deer County",
+      "diabetesPrevalencePct": 7.2217,
+      "copdPrevalencePct": 2.8873,
+      "hypertensionPrevalencePct": 19.1,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Sylvan Lake",
+      "diabetesPrevalencePct": 6.6206,
+      "copdPrevalencePct": 2.8478,
+      "hypertensionPrevalencePct": 18.28,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.63
+    },
+    {
+      "lgaName": "Three Hills/Highway 21",
+      "diabetesPrevalencePct": 7.7765,
+      "copdPrevalencePct": 2.7383,
+      "hypertensionPrevalencePct": 19.133,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.3
+    },
+    {
+      "lgaName": "Starland County/Drumheller",
+      "diabetesPrevalencePct": 8.8829,
+      "copdPrevalencePct": 3.6344,
+      "hypertensionPrevalencePct": 22.672,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.59
+    },
+    {
+      "lgaName": "Planning & Special Area 2",
+      "diabetesPrevalencePct": 8.6579,
+      "copdPrevalencePct": 3.4817,
+      "hypertensionPrevalencePct": 21.971,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.23
+    },
+    {
+      "lgaName": "Stettler & County",
+      "diabetesPrevalencePct": 8.228,
+      "copdPrevalencePct": 2.8266,
+      "hypertensionPrevalencePct": 22.201,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.56
+    },
+    {
+      "lgaName": "Castor/Coronation/Consort",
+      "diabetesPrevalencePct": 7.5579,
+      "copdPrevalencePct": 3.9157,
+      "hypertensionPrevalencePct": 23.656,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.11
+    },
+    {
+      "lgaName": "Wetaskiwin County",
+      "diabetesPrevalencePct": 11.308,
+      "copdPrevalencePct": 4.6859,
+      "hypertensionPrevalencePct": 24.801,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 76.18
+    },
+    {
+      "lgaName": "Ponoka",
+      "diabetesPrevalencePct": 7.9322,
+      "copdPrevalencePct": 2.6398,
+      "hypertensionPrevalencePct": 20.229,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.08
+    },
+    {
+      "lgaName": "Rimbey",
+      "diabetesPrevalencePct": 7.5889,
+      "copdPrevalencePct": 2.9166,
+      "hypertensionPrevalencePct": 18.327,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.99
+    },
+    {
+      "lgaName": "Lacombe",
+      "diabetesPrevalencePct": 7.0121,
+      "copdPrevalencePct": 2.3313,
+      "hypertensionPrevalencePct": 17.929,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.57
+    },
+    {
+      "lgaName": "Camrose & County",
+      "diabetesPrevalencePct": 8.2857,
+      "copdPrevalencePct": 2.9223,
+      "hypertensionPrevalencePct": 24.338,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.86
+    },
+    {
+      "lgaName": "Tofield",
+      "diabetesPrevalencePct": 8.9864,
+      "copdPrevalencePct": 4.0919,
+      "hypertensionPrevalencePct": 23.211,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.28
+    },
+    {
+      "lgaName": "Viking",
+      "diabetesPrevalencePct": 8.8347,
+      "copdPrevalencePct": 3.9838,
+      "hypertensionPrevalencePct": 23.237,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.07
+    },
+    {
+      "lgaName": "Flagstaff County",
+      "diabetesPrevalencePct": 9.1158,
+      "copdPrevalencePct": 3.3145,
+      "hypertensionPrevalencePct": 24.059,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.98
+    },
+    {
+      "lgaName": "Md Of Provost",
+      "diabetesPrevalencePct": 7.9272,
+      "copdPrevalencePct": 2.4407,
+      "hypertensionPrevalencePct": 21.579,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Md Of Wainwright",
+      "diabetesPrevalencePct": 8.403,
+      "copdPrevalencePct": 2.9162,
+      "hypertensionPrevalencePct": 22.326,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Lamont County",
+      "diabetesPrevalencePct": 10.721,
+      "copdPrevalencePct": 5.1058,
+      "hypertensionPrevalencePct": 24.907,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.41
+    },
+    {
+      "lgaName": "Two Hills County",
+      "diabetesPrevalencePct": 9.1759,
+      "copdPrevalencePct": 4.9769,
+      "hypertensionPrevalencePct": 23.332,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.13
+    },
+    {
+      "lgaName": "Vegreville/Minburn County",
+      "diabetesPrevalencePct": 10.152,
+      "copdPrevalencePct": 4.9359,
+      "hypertensionPrevalencePct": 22.139,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.04
+    },
+    {
+      "lgaName": "Vermilion River County",
+      "diabetesPrevalencePct": 8.6869,
+      "copdPrevalencePct": 3.1049,
+      "hypertensionPrevalencePct": 21.696,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 86.6
+    },
+    {
+      "lgaName": "Red Deer - North",
+      "diabetesPrevalencePct": 9.3079,
+      "copdPrevalencePct": 3.4424,
+      "hypertensionPrevalencePct": 21.175,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.16
+    },
+    {
+      "lgaName": "Red Deer - Sw",
+      "diabetesPrevalencePct": 9.004,
+      "copdPrevalencePct": 3.8984,
+      "hypertensionPrevalencePct": 19.603,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Red Deer - East",
+      "diabetesPrevalencePct": 7.3565,
+      "copdPrevalencePct": 2.2098,
+      "hypertensionPrevalencePct": 18.979,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.41
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft East (North Central)",
+      "diabetesPrevalencePct": 9.6214,
+      "copdPrevalencePct": 3.7099,
+      "hypertensionPrevalencePct": 19.904,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.39
+    },
+    {
+      "lgaName": "Edmonton - Woodcroft West (North Central)",
+      "diabetesPrevalencePct": 9.4601,
+      "copdPrevalencePct": 3.6452,
+      "hypertensionPrevalencePct": 20.148,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.99
+    },
+    {
+      "lgaName": "Edmonton - Jasper Place",
+      "diabetesPrevalencePct": 11.263,
+      "copdPrevalencePct": 3.6315,
+      "hypertensionPrevalencePct": 22.192,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.57
+    },
+    {
+      "lgaName": "Edmonton - West Jasper Place",
+      "diabetesPrevalencePct": 9.3027,
+      "copdPrevalencePct": 2.1442,
+      "hypertensionPrevalencePct": 20.723,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.44
+    },
+    {
+      "lgaName": "Edmonton - Castle Downs",
+      "diabetesPrevalencePct": 10.986,
+      "copdPrevalencePct": 2.6741,
+      "hypertensionPrevalencePct": 22.124,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.33
+    },
+    {
+      "lgaName": "Edmonton - Northgate",
+      "diabetesPrevalencePct": 11.428,
+      "copdPrevalencePct": 3.3153,
+      "hypertensionPrevalencePct": 22.718,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.69
+    },
+    {
+      "lgaName": "Edmonton - Eastwood",
+      "diabetesPrevalencePct": 10.479,
+      "copdPrevalencePct": 4.5287,
+      "hypertensionPrevalencePct": 20.906,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.47
+    },
+    {
+      "lgaName": "Edmonton - Abbottsfield",
+      "diabetesPrevalencePct": 11.542,
+      "copdPrevalencePct": 4.9218,
+      "hypertensionPrevalencePct": 22.991,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.44
+    },
+    {
+      "lgaName": "Edmonton - Ne",
+      "diabetesPrevalencePct": 12.189,
+      "copdPrevalencePct": 3.4032,
+      "hypertensionPrevalencePct": 23.442,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Edmonton - Bonnie Doon",
+      "diabetesPrevalencePct": 7.2203,
+      "copdPrevalencePct": 2.6453,
+      "hypertensionPrevalencePct": 17.609,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.56
+    },
+    {
+      "lgaName": "Edmonton - Mill Woods West",
+      "diabetesPrevalencePct": 11.711,
+      "copdPrevalencePct": 2.4908,
+      "hypertensionPrevalencePct": 22.061,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.1
+    },
+    {
+      "lgaName": "Edmonton - Mill Woods South & East",
+      "diabetesPrevalencePct": 12.095,
+      "copdPrevalencePct": 1.7654,
+      "hypertensionPrevalencePct": 22.383,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 82.92
+    },
+    {
+      "lgaName": "Edmonton - Duggan",
+      "diabetesPrevalencePct": 9.02,
+      "copdPrevalencePct": 1.9226,
+      "hypertensionPrevalencePct": 18.944,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.03
+    },
+    {
+      "lgaName": "Edmonton - Twin Brooks",
+      "diabetesPrevalencePct": 7.4985,
+      "copdPrevalencePct": 1.1994,
+      "hypertensionPrevalencePct": 17.448,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 85.38
+    },
+    {
+      "lgaName": "Edmonton - Rutherford",
+      "diabetesPrevalencePct": 10.329,
+      "copdPrevalencePct": 1.3239,
+      "hypertensionPrevalencePct": 20.383,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.48
+    },
+    {
+      "lgaName": "Sturgeon County West",
+      "diabetesPrevalencePct": 8.7133,
+      "copdPrevalencePct": 3.1068,
+      "hypertensionPrevalencePct": 21.56,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.84
+    },
+    {
+      "lgaName": "Sturgeon County East",
+      "diabetesPrevalencePct": 8.9381,
+      "copdPrevalencePct": 3.7269,
+      "hypertensionPrevalencePct": 23.227,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.8
+    },
+    {
+      "lgaName": "Fort Saskatchewan",
+      "diabetesPrevalencePct": 9.4228,
+      "copdPrevalencePct": 3.1185,
+      "hypertensionPrevalencePct": 23.065,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.7
+    },
+    {
+      "lgaName": "Sherwood Park",
+      "diabetesPrevalencePct": 7.7292,
+      "copdPrevalencePct": 2.2782,
+      "hypertensionPrevalencePct": 20.142,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.35
+    },
+    {
+      "lgaName": "Strathcona County Excluding Sherwood Park",
+      "diabetesPrevalencePct": 6.9181,
+      "copdPrevalencePct": 2.2436,
+      "hypertensionPrevalencePct": 19.414,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Beaumont",
+      "diabetesPrevalencePct": 7.8201,
+      "copdPrevalencePct": 2.0647,
+      "hypertensionPrevalencePct": 19.333,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.86
+    },
+    {
+      "lgaName": "Leduc & Devon",
+      "diabetesPrevalencePct": 8.9573,
+      "copdPrevalencePct": 3.0441,
+      "hypertensionPrevalencePct": 21.148,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.93
+    },
+    {
+      "lgaName": "Thorsby",
+      "diabetesPrevalencePct": 8.2718,
+      "copdPrevalencePct": 3.0857,
+      "hypertensionPrevalencePct": 21.039,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.06
+    },
+    {
+      "lgaName": "Stony Plain & Spruce Grove",
+      "diabetesPrevalencePct": 8.6279,
+      "copdPrevalencePct": 3.2114,
+      "hypertensionPrevalencePct": 20.334,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.53
+    },
+    {
+      "lgaName": "Westview Excluding Stony Plain & Spruce Grove",
+      "diabetesPrevalencePct": 7.8924,
+      "copdPrevalencePct": 2.9876,
+      "hypertensionPrevalencePct": 19.641,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "St. Albert",
+      "diabetesPrevalencePct": 7.3506,
+      "copdPrevalencePct": 2.1523,
+      "hypertensionPrevalencePct": 20.781,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.43
+    },
+    {
+      "lgaName": "Jasper",
+      "diabetesPrevalencePct": 6.046,
+      "copdPrevalencePct": 1.9182,
+      "hypertensionPrevalencePct": 16.909,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 83.74
+    },
+    {
+      "lgaName": "Hinton",
+      "diabetesPrevalencePct": 8.904,
+      "copdPrevalencePct": 3.1735,
+      "hypertensionPrevalencePct": 18.784,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.36
+    },
+    {
+      "lgaName": "Edson",
+      "diabetesPrevalencePct": 8.8792,
+      "copdPrevalencePct": 2.9242,
+      "hypertensionPrevalencePct": 18.647,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.72
+    },
+    {
+      "lgaName": "Whitecourt",
+      "diabetesPrevalencePct": 9.2449,
+      "copdPrevalencePct": 3.8187,
+      "hypertensionPrevalencePct": 21.527,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.9
+    },
+    {
+      "lgaName": "Mayerthorpe",
+      "diabetesPrevalencePct": 8.8652,
+      "copdPrevalencePct": 3.956,
+      "hypertensionPrevalencePct": 22.394,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.34
+    },
+    {
+      "lgaName": "Barrhead",
+      "diabetesPrevalencePct": 7.9922,
+      "copdPrevalencePct": 3.4296,
+      "hypertensionPrevalencePct": 22.805,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 81.4
+    },
+    {
+      "lgaName": "Westlock",
+      "diabetesPrevalencePct": 9.9947,
+      "copdPrevalencePct": 4.1684,
+      "hypertensionPrevalencePct": 25,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.64
+    },
+    {
+      "lgaName": "Frog Lake",
+      "diabetesPrevalencePct": 12.634,
+      "copdPrevalencePct": 6.7304,
+      "hypertensionPrevalencePct": 25.349,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 75.71
+    },
+    {
+      "lgaName": "St. Paul",
+      "diabetesPrevalencePct": 12.317,
+      "copdPrevalencePct": 4.0883,
+      "hypertensionPrevalencePct": 24.046,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 76.26
+    },
+    {
+      "lgaName": "Smoky Lake",
+      "diabetesPrevalencePct": 10.857,
+      "copdPrevalencePct": 4.6979,
+      "hypertensionPrevalencePct": 25.913,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.42
+    },
+    {
+      "lgaName": "Cold Lake",
+      "diabetesPrevalencePct": 9.8354,
+      "copdPrevalencePct": 3.6254,
+      "hypertensionPrevalencePct": 22.513,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.27
+    },
+    {
+      "lgaName": "Bonnyville",
+      "diabetesPrevalencePct": 10.27,
+      "copdPrevalencePct": 4.1519,
+      "hypertensionPrevalencePct": 24.789,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.04
+    },
+    {
+      "lgaName": "Boyle",
+      "diabetesPrevalencePct": 9.9176,
+      "copdPrevalencePct": 4.4445,
+      "hypertensionPrevalencePct": 24.816,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 76.55
+    },
+    {
+      "lgaName": "Athabasca",
+      "diabetesPrevalencePct": 8.4067,
+      "copdPrevalencePct": 3.8861,
+      "hypertensionPrevalencePct": 21.383,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.58
+    },
+    {
+      "lgaName": "Lac La Biche",
+      "diabetesPrevalencePct": 10.296,
+      "copdPrevalencePct": 5.4271,
+      "hypertensionPrevalencePct": 23.423,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.7
+    },
+    {
+      "lgaName": "Grande Cache",
+      "diabetesPrevalencePct": 9.4969,
+      "copdPrevalencePct": 4.0757,
+      "hypertensionPrevalencePct": 21.777,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.03
+    },
+    {
+      "lgaName": "Fox Creek",
+      "diabetesPrevalencePct": 11.586,
+      "copdPrevalencePct": 4.896,
+      "hypertensionPrevalencePct": 26.468,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 78.43
+    },
+    {
+      "lgaName": "Valleyview",
+      "diabetesPrevalencePct": 10.717,
+      "copdPrevalencePct": 3.7499,
+      "hypertensionPrevalencePct": 21.814,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.03
+    },
+    {
+      "lgaName": "Beaverlodge",
+      "diabetesPrevalencePct": 7.7097,
+      "copdPrevalencePct": 3.7028,
+      "hypertensionPrevalencePct": 20.282,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.09
+    },
+    {
+      "lgaName": "Grande Prairie County",
+      "diabetesPrevalencePct": 7.89,
+      "copdPrevalencePct": 3.2359,
+      "hypertensionPrevalencePct": 20.505,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Swan Hills",
+      "diabetesPrevalencePct": 11.065,
+      "copdPrevalencePct": 5.6858,
+      "hypertensionPrevalencePct": 23.585,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.74
+    },
+    {
+      "lgaName": "Slave Lake",
+      "diabetesPrevalencePct": 11.476,
+      "copdPrevalencePct": 6.7008,
+      "hypertensionPrevalencePct": 23.165,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.05
+    },
+    {
+      "lgaName": "Wabasca",
+      "diabetesPrevalencePct": 18.778,
+      "copdPrevalencePct": 8.2016,
+      "hypertensionPrevalencePct": 28.563,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 72.52
+    },
+    {
+      "lgaName": "High Prairie",
+      "diabetesPrevalencePct": 14.193,
+      "copdPrevalencePct": 6.239,
+      "hypertensionPrevalencePct": 26.933,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 75.58
+    },
+    {
+      "lgaName": "High Level",
+      "diabetesPrevalencePct": 9.9882,
+      "copdPrevalencePct": 3.4739,
+      "hypertensionPrevalencePct": 23.084,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.14
+    },
+    {
+      "lgaName": "Manning",
+      "diabetesPrevalencePct": 10.075,
+      "copdPrevalencePct": 4.805,
+      "hypertensionPrevalencePct": 24.189,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.21
+    },
+    {
+      "lgaName": "Peace River",
+      "diabetesPrevalencePct": 8.9124,
+      "copdPrevalencePct": 3.4026,
+      "hypertensionPrevalencePct": 21.321,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 77.99
+    },
+    {
+      "lgaName": "Falher",
+      "diabetesPrevalencePct": 8.7973,
+      "copdPrevalencePct": 3.2817,
+      "hypertensionPrevalencePct": 23.247,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 79.76
+    },
+    {
+      "lgaName": "Spirit River",
+      "diabetesPrevalencePct": 7.1942,
+      "copdPrevalencePct": 2.908,
+      "hypertensionPrevalencePct": 20.246,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.73
+    },
+    {
+      "lgaName": "Fairview",
+      "diabetesPrevalencePct": 9.2473,
+      "copdPrevalencePct": 3.5241,
+      "hypertensionPrevalencePct": 20.665,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 80.19
+    },
+    {
+      "lgaName": "Wood Buffalo",
+      "diabetesPrevalencePct": 11.813,
+      "copdPrevalencePct": 4.8926,
+      "hypertensionPrevalencePct": 25.565,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "Fort Mcmurray",
+      "diabetesPrevalencePct": 10.96,
+      "copdPrevalencePct": 2.6647,
+      "hypertensionPrevalencePct": 22.424,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
+    },
+    {
+      "lgaName": "City Of Grande Prairie",
+      "diabetesPrevalencePct": 9.2548,
+      "copdPrevalencePct": 3.1644,
+      "hypertensionPrevalencePct": 21.032,
+      "infantMortalityPer1000": 0,
+      "lifeExpectancyYears": 0
     },
     {
       "lgaName": "County of Lethbridge excluding the City of Lethbridge",
@@ -1724,60 +2675,12 @@
       "lifeExpectancyYears": 81.14
     },
     {
-      "lgaName": "Newell",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.25
-    },
-    {
-      "lgaName": "Oyen",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.05
-    },
-    {
       "lgaName": "Cypress County excluding Medicine Hat",
       "diabetesPrevalencePct": 0,
       "copdPrevalencePct": 0,
       "hypertensionPrevalencePct": 0,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 80.94
-    },
-    {
-      "lgaName": "Medicine Hat",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.21
-    },
-    {
-      "lgaName": "Lethbridge - West",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.02
-    },
-    {
-      "lgaName": "Lethbridge - North",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 78.58
-    },
-    {
-      "lgaName": "Lethbridge - South",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.92
     },
     {
       "lgaName": "Calgary - Upper NW",
@@ -1788,36 +2691,12 @@
       "lifeExpectancyYears": 86.13
     },
     {
-      "lgaName": "Calgary - North",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 84.26
-    },
-    {
-      "lgaName": "Calgary - Nose Hill",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.91
-    },
-    {
       "lgaName": "Calgary - Lower NW",
       "diabetesPrevalencePct": 0,
       "copdPrevalencePct": 0,
       "hypertensionPrevalencePct": 0,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 85.95
-    },
-    {
-      "lgaName": "Calgary - Centre North",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.95
     },
     {
       "lgaName": "Calgary - Upper NE",
@@ -1836,60 +2715,12 @@
       "lifeExpectancyYears": 82.19
     },
     {
-      "lgaName": "Calgary - East",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.53
-    },
-    {
       "lgaName": "Calgary - SE",
       "diabetesPrevalencePct": 0,
       "copdPrevalencePct": 0,
       "hypertensionPrevalencePct": 0,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 83.23
-    },
-    {
-      "lgaName": "Calgary - West",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 85.23
-    },
-    {
-      "lgaName": "Calgary - Centre",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.44
-    },
-    {
-      "lgaName": "Calgary - Centre West",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.18
-    },
-    {
-      "lgaName": "Calgary - Elbow",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.8
-    },
-    {
-      "lgaName": "Calgary - Fish Creek",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.43
     },
     {
       "lgaName": "Calgary - SW",
@@ -1900,268 +2731,12 @@
       "lifeExpectancyYears": 83.63
     },
     {
-      "lgaName": "Okotoks-Priddis",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.77
-    },
-    {
-      "lgaName": "Black Diamond",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.64
-    },
-    {
-      "lgaName": "High River",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.13
-    },
-    {
-      "lgaName": "Claresholm",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.72
-    },
-    {
-      "lgaName": "Vulcan",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.99
-    },
-    {
-      "lgaName": "Airdrie",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.93
-    },
-    {
-      "lgaName": "Chestermere",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.35
-    },
-    {
-      "lgaName": "Strathmore",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.22
-    },
-    {
-      "lgaName": "Crossfield",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.13
-    },
-    {
-      "lgaName": "Didsbury",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.56
-    },
-    {
-      "lgaName": "Cochrane-Springbank",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 84.56
-    },
-    {
-      "lgaName": "Canmore",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.59
-    },
-    {
-      "lgaName": "Banff",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 86.69
-    },
-    {
-      "lgaName": "Rocky Mountain House",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 78.68
-    },
-    {
-      "lgaName": "Drayton Valley",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.48
-    },
-    {
-      "lgaName": "Sundre",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.14
-    },
-    {
-      "lgaName": "Olds",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.47
-    },
-    {
-      "lgaName": "Innisfail",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.89
-    },
-    {
       "lgaName": "Red Deer County excluding the City of Red Deer",
       "diabetesPrevalencePct": 0,
       "copdPrevalencePct": 0,
       "hypertensionPrevalencePct": 0,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 81.22
-    },
-    {
-      "lgaName": "Sylvan Lake",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.63
-    },
-    {
-      "lgaName": "Three Hills/Highway 21",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.3
-    },
-    {
-      "lgaName": "Starland County/Drumheller",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 78.59
-    },
-    {
-      "lgaName": "Planning & Special Area 2",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.23
-    },
-    {
-      "lgaName": "Stettler & County",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.56
-    },
-    {
-      "lgaName": "Castor/Coronation/Consort",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.11
-    },
-    {
-      "lgaName": "Wetaskiwin County",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 76.18
-    },
-    {
-      "lgaName": "Ponoka",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.08
-    },
-    {
-      "lgaName": "Rimbey",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 78.99
-    },
-    {
-      "lgaName": "Lacombe",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.57
-    },
-    {
-      "lgaName": "Camrose & County",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.86
-    },
-    {
-      "lgaName": "Tofield",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.28
-    },
-    {
-      "lgaName": "Viking",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.07
-    },
-    {
-      "lgaName": "Flagstaff County",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 78.98
     },
     {
       "lgaName": "MD of Provost",
@@ -2180,116 +2755,12 @@
       "lifeExpectancyYears": 79.61
     },
     {
-      "lgaName": "Lamont County",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 78.41
-    },
-    {
-      "lgaName": "Two Hills County",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.13
-    },
-    {
-      "lgaName": "Vegreville/Minburn County",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.04
-    },
-    {
-      "lgaName": "Vermilion River County",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 86.6
-    },
-    {
       "lgaName": "Red Deer - SW",
       "diabetesPrevalencePct": 0,
       "copdPrevalencePct": 0,
       "hypertensionPrevalencePct": 0,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 80.1
-    },
-    {
-      "lgaName": "Red Deer - East",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.41
-    },
-    {
-      "lgaName": "Edmonton - Woodcroft East (North Central)",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.39
-    },
-    {
-      "lgaName": "Edmonton - Woodcroft West (North Central)",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.99
-    },
-    {
-      "lgaName": "Edmonton - Jasper Place",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.57
-    },
-    {
-      "lgaName": "Edmonton - West Jasper Place",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.44
-    },
-    {
-      "lgaName": "Edmonton - Castle Downs",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.33
-    },
-    {
-      "lgaName": "Edmonton - Northgate",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.69
-    },
-    {
-      "lgaName": "Edmonton - Eastwood",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.47
-    },
-    {
-      "lgaName": "Edmonton - Abbottsfield",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 78.44
     },
     {
       "lgaName": "Edmonton - NE",
@@ -2300,124 +2771,12 @@
       "lifeExpectancyYears": 81
     },
     {
-      "lgaName": "Edmonton - Bonnie Doon",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.56
-    },
-    {
-      "lgaName": "Edmonton - Mill Woods West",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.1
-    },
-    {
-      "lgaName": "Edmonton - Mill Woods South & East",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 82.92
-    },
-    {
-      "lgaName": "Edmonton - Duggan",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.03
-    },
-    {
-      "lgaName": "Edmonton - Twin Brooks",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 85.38
-    },
-    {
-      "lgaName": "Edmonton - Rutherford",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.48
-    },
-    {
-      "lgaName": "Sturgeon County West",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.84
-    },
-    {
-      "lgaName": "Sturgeon County East",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.8
-    },
-    {
-      "lgaName": "Fort Saskatchewan",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.7
-    },
-    {
-      "lgaName": "Sherwood Park",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.35
-    },
-    {
       "lgaName": "Strathcona County excluding Sherwood Park",
       "diabetesPrevalencePct": 0,
       "copdPrevalencePct": 0,
       "hypertensionPrevalencePct": 0,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 82.32
-    },
-    {
-      "lgaName": "Beaumont",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.86
-    },
-    {
-      "lgaName": "Leduc & Devon",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.93
-    },
-    {
-      "lgaName": "Thorsby",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.06
-    },
-    {
-      "lgaName": "Stony Plain & Spruce Grove",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.53
     },
     {
       "lgaName": "Westview excluding Stony Plain and Spruce Grove",
@@ -2428,252 +2787,12 @@
       "lifeExpectancyYears": 79.49
     },
     {
-      "lgaName": "St. Albert",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.43
-    },
-    {
-      "lgaName": "Jasper",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 83.74
-    },
-    {
-      "lgaName": "Hinton",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.36
-    },
-    {
-      "lgaName": "Edson",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.72
-    },
-    {
-      "lgaName": "Whitecourt",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.9
-    },
-    {
-      "lgaName": "Mayerthorpe",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.34
-    },
-    {
-      "lgaName": "Barrhead",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 81.4
-    },
-    {
-      "lgaName": "Westlock",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.64
-    },
-    {
-      "lgaName": "Frog Lake",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 75.71
-    },
-    {
-      "lgaName": "St. Paul",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 76.26
-    },
-    {
-      "lgaName": "Smoky Lake",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.42
-    },
-    {
-      "lgaName": "Cold Lake",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.27
-    },
-    {
-      "lgaName": "Bonnyville",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.04
-    },
-    {
-      "lgaName": "Boyle",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 76.55
-    },
-    {
-      "lgaName": "Athabasca",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.58
-    },
-    {
-      "lgaName": "Lac La Biche",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.7
-    },
-    {
-      "lgaName": "Grande Cache",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.03
-    },
-    {
-      "lgaName": "Fox Creek",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 78.43
-    },
-    {
-      "lgaName": "Valleyview",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.03
-    },
-    {
-      "lgaName": "Beaverlodge",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.09
-    },
-    {
       "lgaName": "Grande Prairie County excluding the City of Grande Prairie",
       "diabetesPrevalencePct": 0,
       "copdPrevalencePct": 0,
       "hypertensionPrevalencePct": 0,
       "infantMortalityPer1000": 0,
       "lifeExpectancyYears": 81.5
-    },
-    {
-      "lgaName": "Swan Hills",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.74
-    },
-    {
-      "lgaName": "Slave Lake",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.05
-    },
-    {
-      "lgaName": "Wabasca",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 72.52
-    },
-    {
-      "lgaName": "High Prairie",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 75.58
-    },
-    {
-      "lgaName": "High Level",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.14
-    },
-    {
-      "lgaName": "Manning",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.21
-    },
-    {
-      "lgaName": "Peace River",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 77.99
-    },
-    {
-      "lgaName": "Falher",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 79.76
-    },
-    {
-      "lgaName": "Spirit River",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.73
-    },
-    {
-      "lgaName": "Fairview",
-      "diabetesPrevalencePct": 0,
-      "copdPrevalencePct": 0,
-      "hypertensionPrevalencePct": 0,
-      "infantMortalityPer1000": 0,
-      "lifeExpectancyYears": 80.19
     },
     {
       "lgaName": "Wood Buffalo excluding Fort McMurray",
@@ -2701,41 +2820,6 @@
     }
   ],
   "ED_RELIANCE_METRICS": [
-    {
-      "lgaName": "Calgary - West Bow",
-      "totalEdVisitsPer1000": 142,
-      "lowAcuityCtas45Pct": 24.5,
-      "afterHoursEdPct": 31.4,
-      "moodAnxietyEdRatePer100k": 1152.78
-    },
-    {
-      "lgaName": "Edmonton - Woodcroft (North Central)",
-      "totalEdVisitsPer1000": 220,
-      "lowAcuityCtas45Pct": 38.2,
-      "afterHoursEdPct": 45.1,
-      "moodAnxietyEdRatePer100k": 580
-    },
-    {
-      "lgaName": "Red Deer - North",
-      "totalEdVisitsPer1000": 410,
-      "lowAcuityCtas45Pct": 52.3,
-      "afterHoursEdPct": 54.8,
-      "moodAnxietyEdRatePer100k": 1351.68
-    },
-    {
-      "lgaName": "South rural (Lethbridge/Cardston area)",
-      "totalEdVisitsPer1000": 640,
-      "lowAcuityCtas45Pct": 64.8,
-      "afterHoursEdPct": 61.2,
-      "moodAnxietyEdRatePer100k": 1120
-    },
-    {
-      "lgaName": "Wood Buffalo / Fort McKay",
-      "totalEdVisitsPer1000": 950,
-      "lowAcuityCtas45Pct": 78.5,
-      "afterHoursEdPct": 69.8,
-      "moodAnxietyEdRatePer100k": 1840
-    },
     {
       "lgaName": "Crowsnest Pass",
       "totalEdVisitsPer1000": 0,
@@ -2868,6 +2952,13 @@
       "lowAcuityCtas45Pct": 0,
       "afterHoursEdPct": 0,
       "moodAnxietyEdRatePer100k": 629.7
+    },
+    {
+      "lgaName": "Calgary - West Bow",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1152.78
     },
     {
       "lgaName": "Calgary - Centre North",
@@ -3218,6 +3309,13 @@
       "lowAcuityCtas45Pct": 0,
       "afterHoursEdPct": 0,
       "moodAnxietyEdRatePer100k": 628
+    },
+    {
+      "lgaName": "Red Deer - North",
+      "totalEdVisitsPer1000": 0,
+      "lowAcuityCtas45Pct": 0,
+      "afterHoursEdPct": 0,
+      "moodAnxietyEdRatePer100k": 1351.68
     },
     {
       "lgaName": "Red Deer - SW",
@@ -3647,24 +3745,40 @@
       "moodAnxietyEdRatePer100k": 1245.09
     }
   ],
+  "TRAVEL_FOR_CARE": [],
+  "SERVICE_ACCESS_METRICS": [],
   "_dataMetadata": {
     "COMMUNITY_NEED_PROFILES": {
       "updateType": "auto",
       "lastUpdated": "2026-07-15T22:43:52.396Z",
       "source": "Open Alberta CKAN LGA community profiles (Table 10.1)",
-      "sourceVintage": "Latest Open Alberta Table 10.1 release"
+      "sourceVintage": "Fiscal year 2023-2024, biennial (Open Alberta Table 10.1, community primary-care need)"
     },
     "CHRONIC_DISEASE_BURDEN": {
       "updateType": "auto",
       "lastUpdated": "2026-07-15T22:43:52.396Z",
       "source": "Open Alberta CKAN chronic disease indicators (Figure 4.2 + Table 10.1)",
-      "sourceVintage": "Latest Open Alberta Figure 4.2 release"
+      "sourceVintage": "Calendar year 2023, biennial (Open Alberta Figure 4.2 chronic disease prevalence)"
     },
     "ED_RELIANCE_METRICS": {
       "updateType": "auto",
       "lastUpdated": "2026-07-15T22:43:52.396Z",
       "source": "Open Alberta CKAN LGA community profiles (Table 10.1 mood/anxiety)",
-      "sourceVintage": "Latest Open Alberta Table 10.1 release"
+      "sourceVintage": "Fiscal year 2023-2024, biennial (Open Alberta Table 10.1 mood/anxiety ED rate; other ED reliance fields pending)"
+    },
+    "TRAVEL_FOR_CARE": {
+      "updateType": "manual",
+      "lastUpdated": "2026-07-18T12:18:10.583Z",
+      "source": "No public LGA travel-for-care feed",
+      "sourceVintage": "Unavailable",
+      "verification": "Array intentionally empty; no automated upstream. Do not treat as scraped."
+    },
+    "SERVICE_ACCESS_METRICS": {
+      "updateType": "manual",
+      "lastUpdated": "2026-07-18T12:18:10.583Z",
+      "source": "No public LGA service-access feed",
+      "sourceVintage": "Unavailable",
+      "verification": "Array intentionally empty; no automated upstream. Do not treat as scraped."
     }
   }
 }

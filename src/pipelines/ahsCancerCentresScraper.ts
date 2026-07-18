@@ -319,16 +319,18 @@ export async function run(): Promise<SyncResult> {
     const priorMeta = existing._dataMetadata?.ALBERTA_CANCER_CENTRES;
     const contentChanged =
       JSON.stringify(mergedCentres) !== JSON.stringify(existing.ALBERTA_CANCER_CENTRES);
+    const newSourceVintage = 'Live AHS directory (updated as needed)';
+    const metadataChanged = !priorMeta || priorMeta.sourceVintage !== newSourceVintage;
 
     // Preserve sibling arrays verbatim; only refresh centres + their metadata.
     const ownedMetadata: DataMetadata = {
       ALBERTA_CANCER_CENTRES: buildMetadataEntry({
         updateType: 'auto',
         source: 'AHS Cancer Centre directory',
-        sourceVintage: 'Live AHS directory',
+        sourceVintage: newSourceVintage,
         lastUpdated: timestamp,
         previous: priorMeta,
-        contentChanged,
+        contentChanged: contentChanged || metadataChanged,
       }),
     };
 
@@ -338,7 +340,7 @@ export async function run(): Promise<SyncResult> {
       _dataMetadata: mergeDataMetadata(existing._dataMetadata, ownedMetadata),
     };
 
-    if (contentChanged || !priorMeta) {
+    if (contentChanged || metadataChanged) {
       applyWithheldPayloadGuard(merged as Record<string, unknown>);
       fs.writeFileSync(CANCER_FILE, JSON.stringify(merged, null, 2), 'utf8');
     }

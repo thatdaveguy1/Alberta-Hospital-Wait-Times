@@ -296,8 +296,9 @@ interface RadiationTherapyCompliance {
   albertaP90WaitDays: number;
 }
 
-function buildCihiComparators(): CIHIComparator[] {
+function buildCihiComparators(): { comparators: CIHIComparator[]; years: string[] } {
   const comparators: CIHIComparator[] = [];
+  const years: string[] = [];
 
   const diagnostic = loadJson<Record<string, unknown>>(DIAGNOSTIC_FILE);
   if (diagnostic) {
@@ -314,6 +315,7 @@ function buildCihiComparators(): CIHIComparator[] {
           unit: 'days',
           description: `Days that 90% of patients wait for a ${modality} in Alberta vs the Canadian average (CIHI Wait Times, ${latest.year}).`,
         });
+        years.push(latest.year);
       }
     }
   }
@@ -328,8 +330,8 @@ function buildCihiComparators(): CIHIComparator[] {
       arr.push(r);
       byYear.set(r.year, arr);
     }
-    const years = Array.from(byYear.keys()).sort((a, b) => b.localeCompare(a));
-    const latestYear = years[0];
+    const sortedSurgeryYears = Array.from(byYear.keys()).sort((a, b) => b.localeCompare(a));
+    const latestYear = sortedSurgeryYears[0];
     const latestRows = byYear.get(latestYear) ?? [];
     if (latestRows.length > 0) {
       const avgAlberta = latestRows.reduce((s, r) => s + r.albertaP90Days, 0) / latestRows.length;
@@ -341,6 +343,7 @@ function buildCihiComparators(): CIHIComparator[] {
         unit: 'days',
         description: `Blended 90th-percentile wait days across cancer surgery types in Alberta vs Canada (CIHI, ${latestYear}).`,
       });
+      years.push(latestYear);
     }
 
     const radiation = (cancer.RADIATION_THERAPY_WAIT_TRENDS as RadiationTherapyCompliance[] | undefined) ?? [];
@@ -353,10 +356,12 @@ function buildCihiComparators(): CIHIComparator[] {
         unit: 'percent',
         description: `Percentage of radiation therapy patients treated within the 28-day benchmark (CIHI, ${latestRad.year}).`,
       });
+      years.push(latestRad.year);
     }
   }
 
-  return comparators;
+  const uniqueYears = Array.from(new Set(years)).sort();
+  return { comparators, years: uniqueYears };
 }
 
 // ---- Regional LGA demand writer (from regional-inequity JSON) -------------
@@ -461,6 +466,7 @@ function buildRegionalLgaDemand(): LGADemand[] {
   return picked;
 }
 
+
 // ---- Main pipeline --------------------------------------------------------
 
 export async function run(): Promise<SyncResult> {
@@ -471,6 +477,7 @@ export async function run(): Promise<SyncResult> {
   let recordsFetched = 0;
   let updated = false;
   const errors: string[] = [];
+  let cihiYears: string[] = [];
 
   const data = loadSystemFlow();
 
@@ -494,7 +501,8 @@ export async function run(): Promise<SyncResult> {
 
   // --- CIHI comparators (derived from diagnostic + cancer JSON) ---
   try {
-    const comparators = buildCihiComparators();
+    const { comparators, years } = buildCihiComparators();
+    cihiYears = years;
     if (comparators.length > 0) {
       data.CIHI_COMPARATORS = comparators;
       updated = true;
@@ -528,6 +536,14 @@ export async function run(): Promise<SyncResult> {
 
   // --- Metadata ---
   if (updated) {
+    const ri = loadJson<Record<string, unknown>>(REGIONAL_INEQUITY_FILE);
+    const meta = (ri?._dataMetadata ?? {}) as Record<string, unknown>;
+    const regionalEntry = meta.COMMUNITY_NEED_PROFILES as { sourceVintage?: string } | undefined;
+    const regionalVintage = regionalEntry?.sourceVintage;
+    const regionalSourceVintage =
+      regionalVintage && !regionalVintage.toLowerCase().startsWith('latest')
+        ? regionalVintage
+        : '2022 Open Alberta Community Profiles, biennial';
     const ownedMetadata: DataMetadata = {
       FACILITY_FLOW_METRICS: buildMetadataEntry({
         updateType: 'auto',
@@ -539,14 +555,14 @@ export async function run(): Promise<SyncResult> {
       CIHI_COMPARATORS: buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI Wait Times Priority Procedures (imaging + cancer series via diagnostic/cancer JSON)',
-        sourceVintage: 'Latest CIHI priority-procedure releases present in diagnostic/cancer files',
+        sourceVintage: cihiYears.length > 0 ? `${cihiYears.join(', ')} (CIHI priority-procedure comparator years; annual)` : 'No CIHI priority-procedure comparator years available',
         verification:
           'Derived only from IMAGING_WAIT_TRENDS, CANCER_SURGERY_WAIT_TRENDS, and RADIATION_THERAPY_WAIT_TRENDS. Not NACRS bed/ALC indicators.',
       }),
       REGIONAL_LGA_DEMAND: buildMetadataEntry({
         updateType: 'auto',
         source: 'Open Alberta CKAN LGA community profiles: Table 10.1 (ED visit rates) + Figure 2.2 (population)',
-        sourceVintage: 'Latest Open Alberta release (Table 10.1 + Figure 2.2)',
+        sourceVintage: regionalSourceVintage,
         verification: 'Derived from data-regional-inequity.json populated by openAlbertaInequityFetcher (Table 10.1 + Figure 2.2).',
       }),
     };

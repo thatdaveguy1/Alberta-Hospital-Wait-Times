@@ -789,7 +789,7 @@ export async function run(): Promise<SyncResult> {
         owned.SUPPORT_HELPLINES = buildMetadataEntry({
           updateType: 'auto',
           source: 'AHS Mental Health helplines directory',
-          sourceVintage: 'Live AHS helplines page',
+          sourceVintage: `Live directory as of ${timestamp} (AHS + 211 Alberta; updated continuously)`,
           verification: 'Directory scraped from AHS Page16759; not a 211 live feed.',
           lastUpdated: timestamp,
         });

@@ -1482,6 +1482,746 @@
       ]
     },
     {
+      "id": "62daa7e0-75d1-44f5-81a7-b3a0626bb96b",
+      "name": "enforcement-order-eo-pla-2023-0046",
+      "title": "Enforcement Order - EO-PLA-2023-0046",
+      "organization": "Forestry and Parks",
+      "notes": "Enforcement order issued to 1617453 Alberta Ltd. and Joel Melanson. ",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 1,
+      "resources": [
+        {
+          "id": "cde0f849-a6a4-4638-ab30-63c1f9b92978",
+          "name": "Enforcement Order EO-PLA-2023-0046",
+          "url": "https://open.alberta.ca/dataset/62daa7e0-75d1-44f5-81a7-b3a0626bb96b/resource/cde0f849-a6a4-4638-ab30-63c1f9b92978/download/2026-07-06-enforcement-order-eo-pla-2023-0046.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "32409984-60a3-422f-9c2f-9852af011bff",
+      "name": "7027108",
+      "title": "Engineering consultant guidelines for highway, bridge and water projects. Volume 2. Construction contract administration 2013",
+      "organization": "Transportation and Economic Corridors",
+      "notes": "This manual outlines the Department of Transportation’s expectations for the provision of engineering services for the design and tendering of all provincial highway, bridge, and water management projects where a consultant is hired directly by the Department. The manual also serves to ensure uniformity and consistency in the provisions of these services to the Department, and to outline specific responsibilities and authorities of the consultant when providing these services.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 24,
+      "resources": [
+        {
+          "id": "85479e98-260a-452f-83c8-3113f45ccfd0",
+          "name": "Engineering consultant guidelines for highway, bridge and water projects. Volume 2. Construction contract administration 2013",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/85479e98-260a-452f-83c8-3113f45ccfd0/download/7027108-2015-engineering-consultant-guidelines-hway-bridge-projects-v2.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "aa0b6f1a-5c76-419c-93f2-5972610df366",
+          "name": "Amendment No. 2 / September 2016",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/aa0b6f1a-5c76-419c-93f2-5972610df366/download/amendment-no-2-2016-september-2013-ecg-vol-2.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "bc73674a-fc58-4d72-b88b-5ffac9d580a6",
+          "name": "Amendment No.1 / March 2016",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/bc73674a-fc58-4d72-b88b-5ffac9d580a6/download/amendment-no-1-march-2016-2013-ecg-vol-2.docx",
+          "format": "DOCX",
+          "isStructured": false
+        },
+        {
+          "id": "750020bc-0e77-44c9-a1c8-ee8566bb431f",
+          "name": "Appendix A. General construction administration forms [July 2026]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/750020bc-0e77-44c9-a1c8-ee8566bb431f/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2026-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "7d7933d9-1f7e-4044-922c-5db13d79cc55",
+          "name": "Appendix A. General construction administration forms [July 2026]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/7d7933d9-1f7e-4044-922c-5db13d79cc55/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2026-07.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "95a73adf-e50b-4404-8175-a37a3587a8e4",
+          "name": "Appendix B. Highway construction administration forms [January 2025] ",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/95a73adf-e50b-4404-8175-a37a3587a8e4/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-b-2025-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "e1d32ce8-3422-4d2f-aeb1-f71b074d5ea6",
+          "name": "Appendix B. Highway construction administration forms [February 2025]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/e1d32ce8-3422-4d2f-aeb1-f71b074d5ea6/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-b-2025-02.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "fb705bf4-b9da-41d0-904f-a567c98ea177",
+          "name": "Appendix C. Bridge construction administration forms [April 2026]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/fb705bf4-b9da-41d0-904f-a567c98ea177/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-c-2026-04.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "aece5cf0-4400-448e-bbc4-d9dcf49fdc7f",
+          "name": "Appendix C. Bridge construction administration forms [April 2026]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/aece5cf0-4400-448e-bbc4-d9dcf49fdc7f/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-c-2026-04.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "0a2f6421-861f-40b9-b0eb-319d27fb15e6",
+          "name": "Appendix D. Final details forms [March 2025]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/0a2f6421-861f-40b9-b0eb-319d27fb15e6/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-d-2025-03.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "fa87e5cd-17dc-47cb-837f-9743753e7337",
+          "name": "Appendix D. Final details forms [March 2025]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/fa87e5cd-17dc-47cb-837f-9743753e7337/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-d-2025-03.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "b00decaa-3331-43d8-ab5f-3c2e38b496d3",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [August 2025]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/b00decaa-3331-43d8-ab5f-3c2e38b496d3/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2025-08.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "7601a68b-9139-4664-81a9-88c970281945",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [August 2025]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/7601a68b-9139-4664-81a9-88c970281945/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2025-08.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "d801094c-a9c2-451e-8e96-085341126a3b",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [January 2025]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/d801094c-a9c2-451e-8e96-085341126a3b/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2025-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "fa7408f8-ee16-4bba-8164-0cae6f591c39",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [January 2025]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/fa7408f8-ee16-4bba-8164-0cae6f591c39/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2025-01.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "1d3c6095-b392-4434-997e-1bba1c0ad2bb",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [December 2023]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/1d3c6095-b392-4434-997e-1bba1c0ad2bb/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2023-12.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "42bb4d6a-85a1-40bf-b759-fa950560a167",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [September 2023]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/42bb4d6a-85a1-40bf-b759-fa950560a167/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2023-09.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "218d47f4-9011-4d7a-b2f8-3fae574b4358",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [September 2023]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/218d47f4-9011-4d7a-b2f8-3fae574b4358/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2023-09.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "34100324-06d7-4554-93b1-37643195e550",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [July 2023]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/34100324-06d7-4554-93b1-37643195e550/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2023-07.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "7731d7be-fff5-4f07-ba9a-c8bf08a756b3",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [July 2023]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/7731d7be-fff5-4f07-ba9a-c8bf08a756b3/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2023-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "7a114160-3982-41c5-a81c-2ce23246c8eb",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [February 2023]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/7a114160-3982-41c5-a81c-2ce23246c8eb/download/tran-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2023.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "a4d5d41f-e895-47dd-a4e2-2e86f514cf25",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [February 2023]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/a4d5d41f-e895-47dd-a4e2-2e86f514cf25/download/tran-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2023.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "dd2ce593-ba29-4c81-9174-eb38c5302218",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [December 2023]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/dd2ce593-ba29-4c81-9174-eb38c5302218/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a-2023-12.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "d9390de1-481d-4325-8eac-03f5abcf49a1",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [October 2019]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/d9390de1-481d-4325-8eac-03f5abcf49a1/download/trans-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "63b66395-49e3-452a-9d2e-8c5f21a9488d",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [October 2019]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/63b66395-49e3-452a-9d2e-8c5f21a9488d/download/trans-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-a.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "d711b920-d547-46d9-bf5a-232838a0d341",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [March 2018]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/d711b920-d547-46d9-bf5a-232838a0d341/download/appendix-a-march-2018.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "4c49b9ff-ebf9-46d0-be7f-06366164ff40",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [June 2017]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/4c49b9ff-ebf9-46d0-be7f-06366164ff40/download/appendix-a-revised-june-2017.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "e7176b97-7caf-418f-a0a4-b8d9a010cff8",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [June 2017]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/e7176b97-7caf-418f-a0a4-b8d9a010cff8/download/appendix-a.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "eb9f06f5-c396-4c0b-a4f5-0425b2353d81",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [April 2017]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/eb9f06f5-c396-4c0b-a4f5-0425b2353d81/download/appendix-a-updated-may-2017.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "4e47b11a-52f2-493c-bacc-854ccff87573",
+          "name": "[SUPERSEDED] - Appendix A. General construction administration forms [December 2013]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/4e47b11a-52f2-493c-bacc-854ccff87573/download/appendix-a-7027108.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "6693d5e8-d4c3-4755-b6fc-23d7099bf86f",
+          "name": "[SUPERSEDED] - Appendix B. Highway construction administration forms [January 2025] ",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/6693d5e8-d4c3-4755-b6fc-23d7099bf86f/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-b-2025-01.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "94ec7314-cd86-4e26-a7bc-1d5ff4e78a6b",
+          "name": "[SUPERSEDED] - Appendix B. Highway construction administration forms [December 2013]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/94ec7314-cd86-4e26-a7bc-1d5ff4e78a6b/download/2013-ecg-vol2-appendix-b-2013-12-revised.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "f03ff030-8c31-46f9-a955-3cdfa21133ac",
+          "name": "[SUPERSEDED] - Appendix B. Highway construction administration forms[December 2013]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/f03ff030-8c31-46f9-a955-3cdfa21133ac/download/trans-engineering-consultant-guidelines-volume-2-appendix-b.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "39ec6419-cf78-4260-a2c8-c43b58f96415",
+          "name": "[SUPERSEDED] - Appendix C. Bridge construction administration forms [June 2018]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/39ec6419-cf78-4260-a2c8-c43b58f96415/download/trans-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-c-2018-06.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "4e46bba3-5fc9-4434-9bfc-9479d4eac6ff",
+          "name": "[SUPERSEDED] - Appendix C. Bridge construction administration forms [June 2018]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/4e46bba3-5fc9-4434-9bfc-9479d4eac6ff/download/trans-engineering-consultant-guidelines-volume-2-appendix-c.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "d2bafb20-115b-4631-9be3-6fe108aafd79",
+          "name": "[SUPERSEDED] - Appendix C. Bridge construction administration forms [2013]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/d2bafb20-115b-4631-9be3-6fe108aafd79/download/2013-ecg-vol2-appendix-c-2013-12-revised.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "a5cecf06-a73a-4db0-b7db-54567b7c0799",
+          "name": "[SUPERSEDED] - Appendix D. Final details forms [January 2025]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/a5cecf06-a73a-4db0-b7db-54567b7c0799/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-d-2025-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "eec254fc-9565-432f-85b9-5104f13adfa6",
+          "name": "[SUPERSEDED] - Appendix D. Final details forms [January 2025]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/eec254fc-9565-432f-85b9-5104f13adfa6/download/tec-engineering-consultant-guidelines-highway-bridge-water-projects-vol-2-app-d-2025-01.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "1b4cb6fe-a371-4af7-b321-dc4ba60f98b9",
+          "name": "[SUPERSEDED] - Appendix D. Final details forms [June 2021]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/1b4cb6fe-a371-4af7-b321-dc4ba60f98b9/download/trans-engineering-consultant-guidelines-volume-2-appendix-d-2021-06.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "6199b435-38b0-45e4-97d8-cc3bb9cceb19",
+          "name": "[SUPERSEDED] - Appendix D. Final details forms  [June 2021]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/6199b435-38b0-45e4-97d8-cc3bb9cceb19/download/trans-engineering-consultant-guidelines-volume-2-appendix-d-2021-06.zip",
+          "format": "ZIP",
+          "isStructured": false
+        },
+        {
+          "id": "6383276f-e939-439f-9497-ea0cabbb2b57",
+          "name": "[SUPERSEDED] - Appendix D. Final details forms [2013]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/6383276f-e939-439f-9497-ea0cabbb2b57/download/2013-ecg-vol2-appendix-d-2013-12-revised.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "98346d3b-1ede-4b59-b0b1-04eb7135e63e",
+          "name": "[SUPERSEDED] - Appendix D. Final details forms [2013]",
+          "url": "https://open.alberta.ca/dataset/32409984-60a3-422f-9c2f-9852af011bff/resource/98346d3b-1ede-4b59-b0b1-04eb7135e63e/download/trans-engineering-consultant-guidelines-volume-2-appendix-d.zip",
+          "format": "ZIP",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "977d5176-f1d3-4dca-914c-ee4058816bbc",
+      "name": "mha-6-2026",
+      "title": "Ministerial Order 6/2026 [Mental Health and Addiction]",
+      "organization": "King's Printer",
+      "notes": "This Ministerial Order makes the Mental Health Act Forms and Designation Amendment Regulation (Alberta Regulation 185/2026).",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 1,
+      "resources": [
+        {
+          "id": "2d0a3cc8-32fe-47d7-b585-e69edef79d82",
+          "name": "Ministerial Order 6/2026 [Mental Health and Addiction]",
+          "url": "http://kings-printer.alberta.ca/Documents/MinOrders/2026/Mental_Health_and_Addiction/2026_006_Mental_Health_and_Addiction.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "93476f98-035f-478c-9836-33c4e8c7fe86",
+      "name": "rangeland-sustainability-program-grant-approval-fact-sheet",
+      "title": "Rangeland sustainability program : grant approval fact sheet",
+      "organization": "Forestry and Parks",
+      "notes": "The Rangeland Sustainability Program promotes the conservation and long-term sustainability of Alberta’s rangelands and the ecosystem services they provide. Grant approval fact sheet lists grant recipients, grant totals, and a description of approved projects.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 6,
+      "resources": [
+        {
+          "id": "cfb5a385-9425-4674-ba2f-675a5c312ed9",
+          "name": "Rangeland sustainability program : 2025-2026 grant approval fact sheet",
+          "url": "https://open.alberta.ca/dataset/93476f98-035f-478c-9836-33c4e8c7fe86/resource/cfb5a385-9425-4674-ba2f-675a5c312ed9/download/fp-rangeland-sustainability-program-grant-approval-fact-sheet-2025-2026.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "993513f0-85f4-40a4-a11f-f0e3db0bef44",
+          "name": "Rangeland sustainability program : 2024-2025 grant approval fact sheet",
+          "url": "https://open.alberta.ca/dataset/93476f98-035f-478c-9836-33c4e8c7fe86/resource/993513f0-85f4-40a4-a11f-f0e3db0bef44/download/fp-rangeland-sustainability-program-grant-approval-fact-sheet-2024-2025.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "c948c12d-c8b8-4b6b-b05e-cf0ce2b1c206",
+          "name": "Rangeland sustainability program : 2023-2024 grant approval fact sheet",
+          "url": "https://open.alberta.ca/dataset/93476f98-035f-478c-9836-33c4e8c7fe86/resource/c948c12d-c8b8-4b6b-b05e-cf0ce2b1c206/download/fp-rangeland-sustainability-program-grant-approval-fact-sheet-2023-2024.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "bf8b4fa7-bedb-4836-83a9-56f3ae906954",
+          "name": "Rangeland sustainability program : 2022-2023 grant approval fact sheet",
+          "url": "https://open.alberta.ca/dataset/93476f98-035f-478c-9836-33c4e8c7fe86/resource/bf8b4fa7-bedb-4836-83a9-56f3ae906954/download/fp-rangeland-sustainability-program-grant-approval-fact-sheet-2022-2023.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "af16e1f2-0877-4583-83bd-2d8c4ca33bde",
+          "name": "Rangeland sustainability program : 2021-2022 grant approval fact sheet",
+          "url": "https://open.alberta.ca/dataset/93476f98-035f-478c-9836-33c4e8c7fe86/resource/af16e1f2-0877-4583-83bd-2d8c4ca33bde/download/fp-rangeland-sustainability-program-grant-approval-fact-sheet-2021-2022.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "da0a8aea-71a9-4514-ae4a-738f9b0e9545",
+          "name": "Rangeland sustainability program : 2020-2021 grant approval fact sheet",
+          "url": "https://open.alberta.ca/dataset/93476f98-035f-478c-9836-33c4e8c7fe86/resource/da0a8aea-71a9-4514-ae4a-738f9b0e9545/download/fp-rangeland-sustainability-program-grant-approval-fact-sheet-2020-2021.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "e79e42cd-a5d9-4076-a474-4517456d5c73",
+      "name": "responses-to-public-fatality-inquiry-recommendations",
+      "title": "Responses to public fatality inquiry recommendations",
+      "organization": "Justice",
+      "notes": "This dataset serves as a public tracking system for responses to recommendations made by judges as a result of a public fatality inquiry. For each inquiry, the tracking system records the name of the deceased, the cause and manner of death, the recommendations made by the judge to prevent similar deaths, the persons and organizations who were asked to respond to the recommendations, and their responses, if any.",
+      "structuredResourceCount": 1,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "3531460d-c641-48bf-8ffd-9a9b2b473064",
+          "name": "Responses to public fatality inquiry recommendations",
+          "url": "https://open.alberta.ca/dataset/e79e42cd-a5d9-4076-a474-4517456d5c73/resource/3531460d-c641-48bf-8ffd-9a9b2b473064/download/responses-to-fatality-inquiry-recommendations.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        }
+      ]
+    },
+    {
+      "id": "e42ff11d-1a65-45a7-8f12-df7318e75e9c",
+      "name": "recognition-ontario-working-heights-training-program-standard",
+      "title": "Recognition of the Ontario Working at Heights Training Program Standard : OHS information for employers and workers",
+      "organization": "Jobs, Economy, Trade and Immigration",
+      "notes": "Provides information about Alberta’s recognition of the Ontario Working at Heights Training Program for workers who work across Canada or have relocated to work in Alberta, and employers that might hire them.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 1,
+      "resources": [
+        {
+          "id": "4181d4c8-2c47-439b-9a37-436e1a468167",
+          "name": "Recognition of the Ontario Working at Heights Training Program Standard : OHS information for employers and workers",
+          "url": "https://open.alberta.ca/dataset/e42ff11d-1a65-45a7-8f12-df7318e75e9c/resource/4181d4c8-2c47-439b-9a37-436e1a468167/download/jeti-ohsorp-ijr001-recognition-ontario-working-heights-training-program-standard-2026-07.pdf.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "2003f13d-33ad-4d3f-865d-0d9488ace84d",
+      "name": "continuing-care-accommodation-standards-compliance-reporting",
+      "title": "Continuing Care Accommodation Standards compliance reporting",
+      "organization": "Assisted Living and Social Services",
+      "notes": "The Ministry of Assisted Living and Social Services oversees the licensing and compliance monitoring of continuing care homes and supportive living accommodations.  The Ministry assures adherence to the requirements and expectations set out in the Continuing Care Act, its regulations, and the associated accommodation and health service standards. Eligible continuing care homes and supportive living accommodations are monitored to assure compliance with these accommodation standards. \r\n\r\nThe Accommodation Standards aim to ensure high-quality services (e.g. meals, building maintenance, security and housekeeping) that promote the safety, security and quality of life of Albertans in these living environments. Continuing care homes Type A and B are also monitored for compliance to the Continuing Care Health Service Standards, a set of legislated, minimum standards that operators must comply with in the provision of health care (e.g. medication management, care planning, staff training).\r\n\r\nAssisted Living and Social Services currently reports publicly on the results of monitoring visits in Continuing Care Homes and Supportive Living Accommodations across the province at http://standardsandlicensing.alberta.ca.",
+      "structuredResourceCount": 2,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "f5bc439f-0ba1-44b9-89a3-d52c01721f59",
+          "name": "Continuing Care Accommodation Standards compliance reporting as of June 2026",
+          "url": "https://open.alberta.ca/dataset/2003f13d-33ad-4d3f-865d-0d9488ace84d/resource/f5bc439f-0ba1-44b9-89a3-d52c01721f59/download/alss-continuing-care-accommodation-standards-compliance-reporting-2026-06.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        },
+        {
+          "id": "05716327-511e-4468-9069-acf4d0f03962",
+          "name": "Column descriptions",
+          "url": "https://open.alberta.ca/dataset/2003f13d-33ad-4d3f-865d-0d9488ace84d/resource/05716327-511e-4468-9069-acf4d0f03962/download/facility-compliance-column-descriptions.xlsx",
+          "format": "XLSX",
+          "isStructured": true
+        }
+      ]
+    },
+    {
+      "id": "266d93c8-8a72-4161-9f7d-750eef4c9b56",
+      "name": "seniors-programs-and-services-information-guide",
+      "title": "Seniors programs and services information guide",
+      "organization": "Assisted Living and Social Services",
+      "notes": "This Guide is designed to help seniors and their families stay informed about the assistance available to seniors in our province, through programs such as the Alberta Seniors Benefit. This important program provides a monthly cash benefit to eligible, low-income seniors. Information about our other programs is also available in this Guide, including Dental and Optical Assistance, Alberta Aids to Daily Living, Education Property Tax Assistance, and Special Needs Assistance for Seniors. In addition to providing information about provincial programs and services, this Guide includes details on federal and community-based programs and services that support seniors.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 24,
+      "resources": [
+        {
+          "id": "baf11fb4-d4bd-42a5-add4-ee675be9aee2",
+          "name": "Seniors programs and services information guide [July 2026]",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/baf11fb4-d4bd-42a5-add4-ee675be9aee2/download/alss-seniors-programs-and-services-information-guide-2026-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "5b359239-931d-4954-b0e0-ad2b80676a86",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide [January 2026]",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/5b359239-931d-4954-b0e0-ad2b80676a86/download/alss-seniors-programs-and-services-information-guide-2026-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "c8483d74-a8ff-4393-a84d-40cee90c31ac",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide [July 2025]",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/c8483d74-a8ff-4393-a84d-40cee90c31ac/download/alss-seniors-programs-and-services-information-guide-2025-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "fc50e59f-1286-47f2-a3d2-b2dac84a42ae",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide [January 2025]",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/fc50e59f-1286-47f2-a3d2-b2dac84a42ae/download/scss-seniors-programs-and-services-information-guide-2025-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "ee5c4a22-3a0f-4825-a23e-00b6e94fd51a",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide [July 2024]",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/ee5c4a22-3a0f-4825-a23e-00b6e94fd51a/download/scss-seniors-programs-and-services-information-guide-2024-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "b2391736-7adc-4dd8-b0db-b6baea62a824",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide [January 2024]",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/b2391736-7adc-4dd8-b0db-b6baea62a824/download/scss-seniors-programs-and-services-information-guide-2024-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "b3df35a8-1d1b-42c8-95e8-558ef267883f",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide [July 2023]",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/b3df35a8-1d1b-42c8-95e8-558ef267883f/download/scss-seniors-programs-and-services-information-guide-2023-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "f9af7b97-9713-4dc0-bcef-5c859ba7157e",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide, July 2022",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/f9af7b97-9713-4dc0-bcef-5c859ba7157e/download/sh-seniors-programs-and-services-information-guide-2022-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "0dfbb778-f549-4fbe-920e-6f33b1cd052e",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide, July 2021",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/0dfbb778-f549-4fbe-920e-6f33b1cd052e/download/sh-seniors-programs-and-services-information-guide-2021-07-.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "7c826a6a-e06c-4b05-abf5-4e1925ff3582",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide, July 2020",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/7c826a6a-e06c-4b05-abf5-4e1925ff3582/download/sh-seniors-programs-and-services-information-guide-2020-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "bcf381da-651b-4113-92ae-9d59b2742762",
+          "name": "[SUPERSEDED] - Seniors programs and services information guide, July 2019",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/bcf381da-651b-4113-92ae-9d59b2742762/download/seniors-progserv-infoguide-2019.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "2e1f33ea-e4d7-4094-b3a0-473d1e251898",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide : July 2018 – June 2019",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/2e1f33ea-e4d7-4094-b3a0-473d1e251898/download/seniors-programsservicesguide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "bb41de5f-d3f2-4045-a9a8-4a30e8bf344e",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide, July 2017",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/bb41de5f-d3f2-4045-a9a8-4a30e8bf344e/download/seniors-programsservicesguide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "19a8309e-3fc7-4e13-83e3-5a9252dd489c",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide, July 2016",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/19a8309e-3fc7-4e13-83e3-5a9252dd489c/download/seniors-programsservices-english.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "867527cc-15b2-4902-babe-191ea6d8b28a",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2015-2016",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/867527cc-15b2-4902-babe-191ea6d8b28a/download/seniors-programsservicesguide-2015-2016.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "82afb13e-061f-439b-9c5a-1cad4d3e8a41",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2014-2015",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/82afb13e-061f-439b-9c5a-1cad4d3e8a41/download/seniors-programsservicesguide-2014-2015.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "aa1b062b-2e06-41c0-8442-0bea55e2f6fc",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2011-2012",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/aa1b062b-2e06-41c0-8442-0bea55e2f6fc/download/3143445-2011-2012-seniors-information-guide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "82036b64-b4e5-47a9-b24f-c47927e97493",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2010-2011",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/82036b64-b4e5-47a9-b24f-c47927e97493/download/3143445-2010-2011-seniors-information-guide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "4201c455-c751-499b-b1e3-b5c466bf8337",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2009-2010",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/4201c455-c751-499b-b1e3-b5c466bf8337/download/3143445-2009-2010-seniors-information-guide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "6dc098cc-fa16-41c0-8d4a-bdd0d28d21af",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2008-2009",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/6dc098cc-fa16-41c0-8d4a-bdd0d28d21af/download/3143445-2008-2009-seniors-information-guide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "519971b6-cbae-471e-a715-f4b640057eca",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2007-2008",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/519971b6-cbae-471e-a715-f4b640057eca/download/3143445-2007-2008-seniors-information-guide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "224dfb0f-0a59-4f94-97bf-2d69ff34a1dd",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2006-2007",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/224dfb0f-0a59-4f94-97bf-2d69ff34a1dd/download/3143445-2006-2007-seniors-information-guide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "fc98acdb-e28d-47e6-aa7c-ef79adb87be5",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2005-2006",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/fc98acdb-e28d-47e6-aa7c-ef79adb87be5/download/3143445-2005-2006-seniors-information-guide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "6a7bed58-397a-4d91-8330-627d0341f320",
+          "name": "[SUPERSEDED] - Seniors programs and services : information guide 2004-2005",
+          "url": "https://open.alberta.ca/dataset/266d93c8-8a72-4161-9f7d-750eef4c9b56/resource/6a7bed58-397a-4d91-8330-627d0341f320/download/3143445-2004-2005-seniors-information-guide.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "e0dad291-b3b0-4ad4-8ba4-cac5b9d9cfff",
+      "name": "pesticide-use-remotely-piloted-aircraft-systems-drones-alberta",
+      "title": "Pesticide use with remotely piloted aircraft systems (drones) in Alberta",
+      "organization": "Environment and Protected Areas",
+      "notes": "This document clarifies the pesticide use by RPAS requirements in Alberta in context with Health Canada's Pesticide Regulatory Directive's science policy note \"Allowing Pesticide Application by Remotely Piloted Aircraft Systems (RPAS; commonly known as drones) for Products Currently Registered for Aerial Application\". This document outlines what training and certification is required for the applicator/pilot, what registrations are required for business and what exemptions exist for farmers on their own property. ",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 1,
+      "resources": [
+        {
+          "id": "8b8592e1-f9bd-4699-b143-0e8f0ec5b58b",
+          "name": "Pesticide use with remotely piloted aircraft systems (drones) in Alberta",
+          "url": "https://open.alberta.ca/dataset/e0dad291-b3b0-4ad4-8ba4-cac5b9d9cfff/resource/8b8592e1-f9bd-4699-b143-0e8f0ec5b58b/download/epa-pesticide-use-remotely-piloted-aircraft-systems-drones-alberta-2026.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "5441008f-4300-4a1c-a13d-06dbf4152ad2",
+      "name": "dental-and-optical-assistance-for-seniors-programs",
+      "title": "Dental and optical assistance for seniors programs : information about who qualifies and how to apply",
+      "organization": "Primary and Preventative Health Services",
+      "notes": "Provides program information and eligibility requirements for dental and optical assistance for seniors programs.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 11,
+      "resources": [
+        {
+          "id": "846e90d7-f46e-4e5e-b306-3eb15cce33f8",
+          "name": "Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2026]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/846e90d7-f46e-4e5e-b306-3eb15cce33f8/download/pphs-dental-and-optical-assistance-for-seniors-programs-2026-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "6364963f-44f9-478a-bc92-6613b2a9823e",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2025]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/6364963f-44f9-478a-bc92-6613b2a9823e/download/pphs-dental-and-optical-assistance-for-seniors-programs-2025-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "2500e5f3-576f-4407-be7f-2e4a395d6401",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2024]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/2500e5f3-576f-4407-be7f-2e4a395d6401/download/hlth-dental-and-optical-assistance-for-seniors-programs-2024.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "b3519595-ab35-45f1-a524-8da0147f98b8",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2023]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/b3519595-ab35-45f1-a524-8da0147f98b8/download/hlth-dental-and-optical-assistance-for-seniors-programs-2023.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "6ba28ef7-17a1-4a68-9292-c4762f392243",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2022]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/6ba28ef7-17a1-4a68-9292-c4762f392243/download/sh-dental-and-optical-assistance-for-seniors-programs-2022.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "0ec22d34-8e10-422c-bc0e-440531a00c19",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2021]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/0ec22d34-8e10-422c-bc0e-440531a00c19/download/sh-dental-and-optical-assistance-for-seniors-programs-2021.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "cfba24ee-e045-4e86-91e8-a1f5d11fcd8f",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2020]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/cfba24ee-e045-4e86-91e8-a1f5d11fcd8f/download/sh-dental-and-optical-assistance-for-seniors-programs-2020.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "e85793a8-ac40-4a18-9c26-3e430703b6d0",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2019]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/e85793a8-ac40-4a18-9c26-3e430703b6d0/download/senior-optical-dental-assistance-brochure-2019.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "e1c694cd-376f-4ace-91b6-3284d38e7af6",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [2018]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/e1c694cd-376f-4ace-91b6-3284d38e7af6/download/senior-optical-dental-assistance-brochure-002.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "8320fb0f-884e-4541-acd3-703be868304f",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2017]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/8320fb0f-884e-4541-acd3-703be868304f/download/dasp-oasp-brochure.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "ef299618-483d-446f-bd0f-eadeb082c2c5",
+          "name": "[OUT OF DATE] - Dental and optical assistance for seniors programs : information about who qualifies and how to apply [July 2013]",
+          "url": "https://open.alberta.ca/dataset/5441008f-4300-4a1c-a13d-06dbf4152ad2/resource/ef299618-483d-446f-bd0f-eadeb082c2c5/download/2013-sfa-dental-optical-brochure-2013-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
       "id": "0a312cd4-2d3f-49b2-8f94-edb19a70742e",
       "name": "alberta-population-projections-2026-2051",
       "title": "Alberta population projections, 2026-2051 - Alberta and local geographic areas (LGAs) - data tables",
@@ -1605,6 +2345,213 @@
       ]
     },
     {
+      "id": "a18c14dc-c816-481a-a8c0-f1cd2496e25d",
+      "name": "alberta-health-facility-and-functional-centre-definitions-and-facility-listing",
+      "title": "Facility and functional centre definitions and facility listing",
+      "organization": "Primary and Preventative Health Services",
+      "notes": "Claims to the Alberta Health Care Insurance Plan for insured services provided in formally-recognized or -accredited facilities in Alberta require a facility number and functional centre code. This resource contains the facility numbers and functional centre codes that Alberta Health has assigned to these facilities.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 28,
+      "resources": [
+        {
+          "id": "e102689f-f64a-4193-a0e7-7ec439d2c353",
+          "name": "Facility and functional centre definitions and facility listing [July 2026]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/e102689f-f64a-4193-a0e7-7ec439d2c353/download/pphs-ahcip-facility-listing-2026-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "34c34674-01a1-4460-a7b2-20abaf375f33",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [April 2026]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/34c34674-01a1-4460-a7b2-20abaf375f33/download/pphs-ahcip-facility-listing-2026-04.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "09793f27-0ad6-49ca-8951-810d07d995cc",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [January 2026]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/09793f27-0ad6-49ca-8951-810d07d995cc/download/pphs-ahcip-facility-listing-2026-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "04a6e9b8-6639-46ed-8e7e-8f1beb65793a",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [October 2025]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/04a6e9b8-6639-46ed-8e7e-8f1beb65793a/download/pphs-ahcip-facility-listing-2025-10.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "01fe931d-0d56-47e4-9f1a-0c68e0bfd2db",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [July 2025]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/01fe931d-0d56-47e4-9f1a-0c68e0bfd2db/download/pphs-ahcip-facility-listing-2025-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "54c2f21f-d90a-4a4f-b0a9-baf8a90ca9bf",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [January 2025]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/54c2f21f-d90a-4a4f-b0a9-baf8a90ca9bf/download/hlth-ahcip-facility-listing-2025-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "e1934c4c-1c85-4f3e-9e25-ffc81b0bbe29",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [October 2024]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/e1934c4c-1c85-4f3e-9e25-ffc81b0bbe29/download/hlth-ahcip-facility-listing-2024-10.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "2cc57c8d-4ab9-41b8-ad99-039da32a2a7e",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [July 2024]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/2cc57c8d-4ab9-41b8-ad99-039da32a2a7e/download/hlth-ahcip-facility-listing-2024-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "bcc242e0-69c1-43b0-80ae-3e36b0255306",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [April 2024]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/bcc242e0-69c1-43b0-80ae-3e36b0255306/download/hlth-ahcip-facility-listing-2024-04.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "4588e00d-1e08-404a-8575-a96609ebf810",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [January 2024]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/4588e00d-1e08-404a-8575-a96609ebf810/download/hlth-ahcip-facility-listing-2024-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "c34634e1-4853-4b0d-97fa-00e52187898b",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing [October 2023]",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/c34634e1-4853-4b0d-97fa-00e52187898b/download/hlth-ahcip-facility-listing-2023-10.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "36f0a2bb-5433-480d-81fb-1e521218c13c",
+          "name": "[SUPERSEDED] - Facility and functional centre definitions and facility listing as of July 2023",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/36f0a2bb-5433-480d-81fb-1e521218c13c/download/health-ahcip-facility-listing-2023-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "a0303d6d-2969-40e6-9f8c-1d649e58bdd4",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of April 1, 2022",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/a0303d6d-2969-40e6-9f8c-1d649e58bdd4/download/health-ahcip-facility-listing-2022-04.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "d65279fd-a76d-4476-8ad0-490adbe7f81b",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of January 1, 2022",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/d65279fd-a76d-4476-8ad0-490adbe7f81b/download/health-ahcip-facility-listing-2022-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "c08ed077-747a-4e5e-8d7b-a7c79830bcae",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of July 5, 2021",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/c08ed077-747a-4e5e-8d7b-a7c79830bcae/download/health-ahcip-facility-listing-2021-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "142e7a54-0b68-4cca-a58e-9c843e6c7493",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of April 6, 2021",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/142e7a54-0b68-4cca-a58e-9c843e6c7493/download/health-ahcip-facility-listing-2021-04.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "2723cc1f-1062-47d4-8bd8-e4a8c331b176",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of January 1, 2021",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/2723cc1f-1062-47d4-8bd8-e4a8c331b176/download/health-ahcip-facility-listing-2021-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "2e502a7b-ba76-4cb2-b5ec-b068cc1a0ccf",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of October 19, 2020",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/2e502a7b-ba76-4cb2-b5ec-b068cc1a0ccf/download/health-ahcip-facility-listing-2020-10.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "36cc1a54-0706-4a5f-9bd7-e83a8fc4c57d",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of January 1, 2020",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/36cc1a54-0706-4a5f-9bd7-e83a8fc4c57d/download/health-ahcip-facility-listing-2020-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "dc8b9fba-38f7-41cd-a7d4-c26a1a5bcbc0",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of October 1, 2019",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/dc8b9fba-38f7-41cd-a7d4-c26a1a5bcbc0/download/health-ahcip-facility-listing-2019-10.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "f783dc10-ef06-4893-8375-e001cbc3251e",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of April 1, 2019",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/f783dc10-ef06-4893-8375-e001cbc3251e/download/ahcip-facility-listing-2019-04.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "b226bc15-6424-4915-b61e-e6ded26af2f9",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of January 1, 2019",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/b226bc15-6424-4915-b61e-e6ded26af2f9/download/ahcip-facility-listing-2019-02.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "d8957336-ee26-43c0-8309-0514bec9626f",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of October 1, 2018",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/d8957336-ee26-43c0-8309-0514bec9626f/download/ahcip-facility-listing-2018-10.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "fe1b8d14-0c8c-42e8-b25c-de8817a6a86f",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of July 1, 2018",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/fe1b8d14-0c8c-42e8-b25c-de8817a6a86f/download/ahcip-facility-listing-2018-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "8a87fb99-6d77-4b33-804f-ff9777c21c5a",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of April 1, 2018",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/8a87fb99-6d77-4b33-804f-ff9777c21c5a/download/facility-listing-20180401.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "a11fea9a-4576-4a5b-b019-4ea6a675dc25",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of January 1, 2018",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/a11fea9a-4576-4a5b-b019-4ea6a675dc25/download/ahcip-facility-listing-2018-01.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "437872d8-fa25-4b95-8757-6c5701aa8a66",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of October 1, 2017",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/437872d8-fa25-4b95-8757-6c5701aa8a66/download/ahcip-facility-listing-2017-10.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "761ccb54-17c4-42ac-a4b0-8df7d6f84f8b",
+          "name": "[SUPERSEDED] - Alberta Health facility and functional centre definitions and facility listing as of May 10, 2017",
+          "url": "https://open.alberta.ca/dataset/a18c14dc-c816-481a-a8c0-f1cd2496e25d/resource/761ccb54-17c4-42ac-a4b0-8df7d6f84f8b/download/ahcip-facility-listing-2017-05.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
       "id": "428e6cb3-e5db-4786-a810-4f45e35ea195",
       "name": "assistant-deputy-minister-newsletter-indigenous-health-division",
       "title": "Assistant Deputy Minister Newsletter - Indigenous Health Division",
@@ -1721,6 +2668,42 @@
       ]
     },
     {
+      "id": "4b21e1c8-5840-4ba3-9ec4-1d2ea7740cc7",
+      "name": "2023_022",
+      "title": "Health Professions Restricted Activity Regulation",
+      "organization": "King's Printer",
+      "notes": "This Regulation authorizes the performance of restricted activities by regulated health professions governed under the Health Professions Act.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "5ab57a12-74c5-42bd-be87-e9d8022b3d3d",
+          "name": "Health Professions Restricted Activity Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779860821&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "6723d7d8-17a8-4991-8bfb-0a4cfbb027b6",
+      "name": "2005_061",
+      "title": "Medical Diagnostic and Therapeutic Technologists Profession Regulation",
+      "organization": "King's Printer",
+      "notes": "This Regulation regulates the Medical Diagnostic and Therapeutic Technologists Profession under the Health Professions Act.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "80ff33aa-edda-4649-a7e8-8ce9b7fba9bd",
+          "name": "Medical Diagnostic and Therapeutic Technologists Profession Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779861200&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
       "id": "f0480dee-8ff6-444a-9467-b2464772343f",
       "name": "adjudication-guide",
       "title": "Adjudication guide",
@@ -1739,42 +2722,6 @@
       ]
     },
     {
-      "id": "8a6d9229-a98f-4700-ab1e-01738e022605",
-      "name": "health-professionals-guide-completing-disability-income-assistance-application",
-      "title": "Health professionals’ guide to completing the Disability income Assistance application : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
-      "organization": "Assisted Living and Social Services",
-      "notes": "The Health Professionals’ Guide to Completing the Disability Income Assistance Application outlines the steps health professionals should follow when completing their portion of the Disability Income Assistance Application.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 1,
-      "resources": [
-        {
-          "id": "1ae4aff7-2140-40b7-88cd-e57175cb4162",
-          "name": "Health professionals’ guide to completing the Disability income Assistance application Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
-          "url": "https://open.alberta.ca/dataset/8a6d9229-a98f-4700-ab1e-01738e022605/resource/1ae4aff7-2140-40b7-88cd-e57175cb4162/download/alss-health-professionals-guide-completing-disability-income-assistance-application-2026-07.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "bc54b5d9-0f23-4c60-aa01-6fcf3a08e35f",
-      "name": "your-guide-to-completing-disability-income-assistance-application",
-      "title": "Your guide to completing the Disability Income Assistance application : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
-      "organization": "Assisted Living and Social Services",
-      "notes": "Your Guide to completing the Disability Income Assistance application explains the steps to applying for Assured Income for the Severely Handicapped and the Alberta Disability Assistance Program. ",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 1,
-      "resources": [
-        {
-          "id": "d8b76039-9c96-40e3-81b3-3d3243b95aa0",
-          "name": "Your guide to completing the Disability Income Assistance application : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
-          "url": "https://open.alberta.ca/dataset/bc54b5d9-0f23-4c60-aa01-6fcf3a08e35f/resource/d8b76039-9c96-40e3-81b3-3d3243b95aa0/download/alss-your-guide-to-completing-disability-income-assistance-application-2026-07.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
       "id": "0148b6b8-898b-4b30-a628-727695883b26",
       "name": "financial-benefits-summary-aish-adap",
       "title": "Financial benefits summary : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
@@ -1787,24 +2734,6 @@
           "id": "f57ac93a-11b6-4118-b997-9ff67ccfa471",
           "name": "Financial benefits summary : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
           "url": "https://open.alberta.ca/dataset/0148b6b8-898b-4b30-a628-727695883b26/resource/f57ac93a-11b6-4118-b997-9ff67ccfa471/download/alss-financial-benefits-summary-aish-adap-2026-07-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "05e07999-8214-47b9-a1dd-e924e7aae4cf",
-      "name": "your-guide-to-disability-income-assistance",
-      "title": "Your guide to disability income assistance : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
-      "organization": "Assisted Living and Social Services",
-      "notes": "Your Guide to Disability Income Assistance gives an overview of the Assured Income for the Severely Handicapped program, the Alberta Disability Assistance Program and the application process. Topics covered in the guide include: eligibility criteria; benefits eligible Albertans may get; how to apply, receive payments and report changes; understanding overpayments, underpayments and debts; how to appeal; and contacts to answer questions and get other help.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 1,
-      "resources": [
-        {
-          "id": "59595112-6c16-457f-a25f-db5f385171d0",
-          "name": "Your guide to disability income assistance : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
-          "url": "https://open.alberta.ca/dataset/05e07999-8214-47b9-a1dd-e924e7aae4cf/resource/59595112-6c16-457f-a25f-db5f385171d0/download/alss-your-guide-to-disability-income-assistance-2026-07.pdf",
           "format": "PDF",
           "isStructured": false
         }
@@ -2493,6 +3422,150 @@
       ]
     },
     {
+      "id": "b22f3b40-d341-4285-939e-0d20e5a42162",
+      "name": "1981_217",
+      "title": "Health Insurance Premiums Regulation",
+      "organization": "King's Printer",
+      "notes": "This Regulation establishes the premiums for the Alberta Health Care Insurance Plan (Plan), establishes employer groups for the purposes of the Plan, prescribes the registration of Albertans in the Plan, and establishes the premiums for the Alberta Blue Cross Plan for drug coverage.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "40722153-3d02-48c2-9a15-908bf72c4807",
+          "name": "Health Insurance Premiums Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863143&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "69b9d949-cad3-4f50-9037-46bc1aa0ab32",
+      "name": "2007_089",
+      "title": "Applications and Appeals (Ministerial) Regulation",
+      "organization": "King's Printer",
+      "notes": "The Applications and Appeals (Ministerial) Regulation, under the Assured Income for the Severely Handicapped Act, establishes the application and appeal provisions for the Assured Income for the Severely Handicapped program and Alberta Disability Assistance Program.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "f32bc5b1-eb28-4570-ae8e-5e699c697749",
+          "name": "Applications and Appeals (Ministerial) Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779862344&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "f1c75fb1-9f04-4436-81ed-1c4654514022",
+      "name": "2011_122",
+      "title": "Income Support, Training and Health Benefits Regulation",
+      "organization": "King's Printer",
+      "notes": "The Income Support, Training and Health Benefits Regulation, under the Income and Employment Supports Act, establishes eligibility criteria; income support, training and health benefits; and appeal provisions to provide financial and other supports for Albertans who are working or seeking employment, those who have barriers to full employment, and those who are participating full-time or part-time in various training programs.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "7f4f0b45-1727-4d74-aa7f-9cd046a3d006",
+          "name": "Income Support, Training and Health Benefits Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779862351&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "05e07999-8214-47b9-a1dd-e924e7aae4cf",
+      "name": "your-guide-to-disability-income-assistance",
+      "title": "Your guide to disability income assistance : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
+      "organization": "Assisted Living and Social Services",
+      "notes": "Your Guide to Disability Income Assistance gives an overview of the Assured Income for the Severely Handicapped program, the Alberta Disability Assistance Program and the application process. Topics covered in the guide include: eligibility criteria; benefits eligible Albertans may get; how to apply, receive payments and report changes; understanding overpayments, underpayments and debts; how to appeal; and contacts to answer questions and get other help.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 1,
+      "resources": [
+        {
+          "id": "59595112-6c16-457f-a25f-db5f385171d0",
+          "name": "Your guide to disability income assistance : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
+          "url": "https://open.alberta.ca/dataset/05e07999-8214-47b9-a1dd-e924e7aae4cf/resource/59595112-6c16-457f-a25f-db5f385171d0/download/alss-your-guide-to-disability-income-assistance-2026-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "8a6d9229-a98f-4700-ab1e-01738e022605",
+      "name": "health-professionals-guide-completing-disability-income-assistance-application",
+      "title": "Health professionals’ guide to completing the Disability income Assistance application : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
+      "organization": "Assisted Living and Social Services",
+      "notes": "The Health Professionals’ Guide to Completing the Disability Income Assistance Application outlines the steps health professionals should follow when completing their portion of the Disability Income Assistance Application.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 1,
+      "resources": [
+        {
+          "id": "1ae4aff7-2140-40b7-88cd-e57175cb4162",
+          "name": "Health professionals’ guide to completing the Disability income Assistance application Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
+          "url": "https://open.alberta.ca/dataset/8a6d9229-a98f-4700-ab1e-01738e022605/resource/1ae4aff7-2140-40b7-88cd-e57175cb4162/download/alss-health-professionals-guide-completing-disability-income-assistance-application-2026-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "bc54b5d9-0f23-4c60-aa01-6fcf3a08e35f",
+      "name": "your-guide-to-completing-disability-income-assistance-application",
+      "title": "Your guide to completing the Disability Income Assistance application : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
+      "organization": "Assisted Living and Social Services",
+      "notes": "Your Guide to completing the Disability Income Assistance application explains the steps to applying for Assured Income for the Severely Handicapped and the Alberta Disability Assistance Program. ",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 1,
+      "resources": [
+        {
+          "id": "d8b76039-9c96-40e3-81b3-3d3243b95aa0",
+          "name": "Your guide to completing the Disability Income Assistance application : Assured Income for the Severely Handicapped (AISH) and Alberta Disability Assistance Program (ADAP)",
+          "url": "https://open.alberta.ca/dataset/bc54b5d9-0f23-4c60-aa01-6fcf3a08e35f/resource/d8b76039-9c96-40e3-81b3-3d3243b95aa0/download/alss-your-guide-to-completing-disability-income-assistance-application-2026-07.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "135059ef-ca6f-443b-9c6a-e601e4eb0801",
+      "name": "2001_070",
+      "title": "Health Information Regulation",
+      "organization": "King's Printer",
+      "notes": "This Regulation regulates matters pertaining to the designation of custodians; provisions for affiliates; registration information; exclusions from the definition of a health service, the collection use and disclosure of specified health information; the information manager agreement, and; the security of health information and fees.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "258818d0-d643-470a-99ba-e666c95e1acd",
+          "name": "Health Information Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863747&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "7c78eaf6-d97c-4344-aac4-5bc69bb379b0",
+      "name": "2026_106",
+      "title": "Health Information (Ministerial) Regulation",
+      "organization": "King's Printer",
+      "notes": "This regulation sets out privacy impact assessment requirements, requirements for disclosing registration information, and designates regulated health services providers as custodians.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "df1df355-33b6-4196-b163-723f0b14202a",
+          "name": "Health Information (Ministerial) Regulation",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863754&search_by=link",
+          "format": "URI",
+          "isStructured": false
+        }
+      ]
+    },
+    {
       "id": "53ff18e1-a8b5-4683-8dc8-ca8c092f9b5a",
       "name": "dental-assistance-for-seniors-program-policy-manual",
       "title": "Dental assistance for seniors policy manual",
@@ -2520,6 +3593,24 @@
           "name": "[OUT OF DATE] - Dental assistance for seniors policy manual [2024]",
           "url": "https://open.alberta.ca/dataset/53ff18e1-a8b5-4683-8dc8-ca8c092f9b5a/resource/45a440f1-9ad1-4047-a8a5-121c9a8be26c/download/hlth-dental-assistance-for-seniors-program-policy-manual-2024-07.pdf",
           "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "cfc0221b-c109-4e50-b40a-fe349c47bcdf",
+      "name": "l17",
+      "title": "Livestock Industry Diversification Act",
+      "organization": "King's Printer",
+      "notes": "The Livestock Industry Diversification Act establishes the framework for licensing and regulating diversified livestock farms, including diversified livestock production farms and harvest preserves. It defines diversified livestock animals and sets out requirements for licences, permits, and the operation of farms, including provisions regarding animal identification, registration, containment, and record keeping. The Act also addresses the possession, transportation, importation and exportation of diversified livestock animals, and includes provisions governing harvesting on harvest preserves and related restrictions on use and commerce. The Act provides for inspection and enforcement, including offences and penalties, and enables regulations related to species eligibility, farm operations, animal health and care, and the management of strays.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 0,
+      "resources": [
+        {
+          "id": "33d2ca5b-4f52-47f9-a98f-fd4d12bffa0e",
+          "name": "Livestock Industry Diversification Act",
+          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863228&search_by=link",
+          "format": "URI",
           "isStructured": false
         }
       ]
@@ -3142,31 +4233,6 @@
       ]
     },
     {
-      "id": "1691b07e-4961-4e36-8e4e-1f0280e9715b",
-      "name": "ch071-chemical-hazards",
-      "title": "Lead at the work site : OHS information for employers, supervisors and workers",
-      "organization": "Jobs, Economy, Trade and Immigration",
-      "notes": "Introduces key properties, usages and health effects, and points to more information about legal requirements that support healthy and safe use of lead at your work site.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 2,
-      "resources": [
-        {
-          "id": "9523d2d4-aca7-4ef1-8ced-4749244e192e",
-          "name": "Lead at the work site : OHS information for employers, supervisors and workers",
-          "url": "https://open.alberta.ca/dataset/1691b07e-4961-4e36-8e4e-1f0280e9715b/resource/9523d2d4-aca7-4ef1-8ced-4749244e192e/download/jeti-ohsorp-ch071-lead-at-the-work-site-2026-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "aa1a7639-b48a-4e61-834b-567845897339",
-          "name": "[SUPERSEDED] - Lead at the work site",
-          "url": "https://open.alberta.ca/dataset/1691b07e-4961-4e36-8e4e-1f0280e9715b/resource/aa1a7639-b48a-4e61-834b-567845897339/download/ohs-bulletin-ch071.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
       "id": "69b5e6b2-0b31-40c0-94b1-4f1e04ab8bd3",
       "name": "bh018-mould-in-the-workplace",
       "title": "Mould in the workplace : OHS information for employers, supervisors and workers",
@@ -3211,31 +4277,6 @@
           "id": "6e5fa239-f03f-45f7-844a-a508b1ff3c57",
           "name": "[SUPERSEDED] - Coal dust at the work site ",
           "url": "https://open.alberta.ca/dataset/10f95477-680f-4033-bd63-5956187e93e1/resource/6e5fa239-f03f-45f7-844a-a508b1ff3c57/download/whs-pub-ch063.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "18cab3a0-444a-4303-95ce-3d8d2b1e61c3",
-      "name": "ch059-chemical-hazards",
-      "title": "Silica at the work site : OHS information for employers, supervisors, workers and physicians",
-      "organization": "Jobs, Economy, Trade and Immigration",
-      "notes": "Introduces key properties and health effects of silica, and points to more information about legal requirements that will apply at work sites where silica may be present.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 2,
-      "resources": [
-        {
-          "id": "1829a4bb-7b4a-4a94-b1f4-c6d2cab1e549",
-          "name": "Silica at the work site : OHS information for employers, supervisors, workers and physicians",
-          "url": "https://open.alberta.ca/dataset/18cab3a0-444a-4303-95ce-3d8d2b1e61c3/resource/1829a4bb-7b4a-4a94-b1f4-c6d2cab1e549/download/jeti-ohsorp-ch059-silica-at-the-work-site-2026-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "383ac443-24a4-477b-8be1-92c1a5eb7c7e",
-          "name": "[SUPERSEDED] - Crystalline silica at the work site ",
-          "url": "https://open.alberta.ca/dataset/18cab3a0-444a-4303-95ce-3d8d2b1e61c3/resource/383ac443-24a4-477b-8be1-92c1a5eb7c7e/download/whs-pub-ch059.pdf",
           "format": "PDF",
           "isStructured": false
         }
@@ -3328,6 +4369,56 @@
           "id": "7813ecfe-514b-4489-9766-c3aa6e2c5ffb",
           "name": "Harmful substances in the workplace : OHS information for employers, supervisors and workers",
           "url": "https://open.alberta.ca/dataset/2af7af84-7174-4ec9-a887-2a7095ec0d46/resource/7813ecfe-514b-4489-9766-c3aa6e2c5ffb/download/jeti-ohsorp-gs022-harmful-substances-in-the-workplace-2026-06.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "1691b07e-4961-4e36-8e4e-1f0280e9715b",
+      "name": "ch071-chemical-hazards",
+      "title": "Lead at the work site : OHS information for employers, supervisors and workers",
+      "organization": "Jobs, Economy, Trade and Immigration",
+      "notes": "Introduces key properties, usages and health effects, and points to more information about legal requirements that support healthy and safe use of lead at your work site.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 2,
+      "resources": [
+        {
+          "id": "9523d2d4-aca7-4ef1-8ced-4749244e192e",
+          "name": "Lead at the work site : OHS information for employers, supervisors and workers",
+          "url": "https://open.alberta.ca/dataset/1691b07e-4961-4e36-8e4e-1f0280e9715b/resource/9523d2d4-aca7-4ef1-8ced-4749244e192e/download/jeti-ohsorp-ch071-lead-at-the-work-site-2026-06.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "aa1a7639-b48a-4e61-834b-567845897339",
+          "name": "[SUPERSEDED] - Lead at the work site",
+          "url": "https://open.alberta.ca/dataset/1691b07e-4961-4e36-8e4e-1f0280e9715b/resource/aa1a7639-b48a-4e61-834b-567845897339/download/ohs-bulletin-ch071.pdf",
+          "format": "PDF",
+          "isStructured": false
+        }
+      ]
+    },
+    {
+      "id": "18cab3a0-444a-4303-95ce-3d8d2b1e61c3",
+      "name": "ch059-chemical-hazards",
+      "title": "Silica at the work site : OHS information for employers, supervisors, workers and physicians",
+      "organization": "Jobs, Economy, Trade and Immigration",
+      "notes": "Introduces key properties and health effects of silica, and points to more information about legal requirements that will apply at work sites where silica may be present.",
+      "structuredResourceCount": 0,
+      "pdfResourceCount": 2,
+      "resources": [
+        {
+          "id": "1829a4bb-7b4a-4a94-b1f4-c6d2cab1e549",
+          "name": "Silica at the work site : OHS information for employers, supervisors, workers and physicians",
+          "url": "https://open.alberta.ca/dataset/18cab3a0-444a-4303-95ce-3d8d2b1e61c3/resource/1829a4bb-7b4a-4a94-b1f4-c6d2cab1e549/download/jeti-ohsorp-ch059-silica-at-the-work-site-2026-06.pdf",
+          "format": "PDF",
+          "isStructured": false
+        },
+        {
+          "id": "383ac443-24a4-477b-8be1-92c1a5eb7c7e",
+          "name": "[SUPERSEDED] - Crystalline silica at the work site ",
+          "url": "https://open.alberta.ca/dataset/18cab3a0-444a-4303-95ce-3d8d2b1e61c3/resource/383ac443-24a4-477b-8be1-92c1a5eb7c7e/download/whs-pub-ch059.pdf",
           "format": "PDF",
           "isStructured": false
         }
@@ -3504,1216 +4595,6 @@
           "id": "2f58ce38-80f4-42ff-8393-d47f907ac63b",
           "name": "[SUPERSEDED] - AADL program manual. Manual GN : general policy & procedures manual [October 2014]",
           "url": "https://open.alberta.ca/dataset/8476d5ff-7280-495f-a858-f14286566406/resource/2f58ce38-80f4-42ff-8393-d47f907ac63b/download/2014-10-01-aadl-general-policy-procedures-manual.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "fd568bfc-6ac2-4f56-b022-105cf7c0bf38",
-      "name": "alberta-aids-to-daily-living-aadl-bulletin",
-      "title": "The Alberta Aids to Daily Living (AADL) bulletin [151 to 200]",
-      "organization": "Primary and Preventative Health Services",
-      "notes": "Alberta Aids to Daily Living assists Albertans with a long-term disability, chronic illness or terminal illness, in maintaining independence in their community. AADL provides funding for basic medical equipment and supplies to meet clinically assessed needs. The AADL bulletin provides notices, updates and reminders to AADL providers, vendors, suppliers and other interested parties.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 49,
-      "resources": [
-        {
-          "id": "fe333b98-e7cf-45a9-b503-fd5474463258",
-          "name": "Bulletin 199 - AADL and ABC launch non-authorizer access to online health portal",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/fe333b98-e7cf-45a9-b503-fd5474463258/download/pphs-aadl-bulletin-199-new-nonauthorizer-access-2026-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "1ff58896-5679-4bc3-83ae-663f1c4cf28f",
-          "name": "Bulletin 198 - Respiratory updates : short-term oxygen funding, discontinue and hospitalization dates",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/1ff58896-5679-4bc3-83ae-663f1c4cf28f/download/pphs-aadl-bulletin-198-respiratory-updates-2026-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "e038428b-fee1-4b5e-84fc-5cdeefac7f72",
-          "name": "Bulletin 197 - Product list update : voice restoration and electrolarynx devices",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/e038428b-fee1-4b5e-84fc-5cdeefac7f72/download/pphs-aadl-bulletin-197-voice-restoration-electrolarynx-benefits-2026-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "551eb4c3-9444-4bf1-9489-2062d93616be",
-          "name": "Bulletin 196 - Product list update : mobility",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/551eb4c3-9444-4bf1-9489-2062d93616be/download/pphs-aadl-bulletin-196-mobility-benefits-2026-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "2e57cb95-2155-4bc1-b4b8-5de9adc26ed3",
-          "name": "Bulletin 195 - Catheter and ostomy authorization duration change",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/2e57cb95-2155-4bc1-b4b8-5de9adc26ed3/download/pphs-aadl-bulletin-195-catheter-ostomy-authorization-duration-change-2025-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "75bca982-e785-4b0a-aa93-77c832db8245",
-          "name": "Bulletin 194 - Launch of the Vendor Search Tool",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/75bca982-e785-4b0a-aa93-77c832db8245/download/pphs-aadl-bulletin-194-launch-of-vendor-search-tool-2025-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "d053efe2-f9e6-4dc1-8090-dd0b5324c498",
-          "name": "Bulletin 193 - Product list update : Homecare beds",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/d053efe2-f9e6-4dc1-8090-dd0b5324c498/download/pphs-aadl-bulletin-193-product-list-update-beds-2025-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "66dd9033-32fe-4f00-8ec5-d06fa1d2c759",
-          "name": "Bulletin 192 - Respiratory updates",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/66dd9033-32fe-4f00-8ec5-d06fa1d2c759/download/pphs-aadl-bulletin-192-respiratory-updates-2025-10.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f6008a45-9598-4c52-bda7-fbd58a7ee739",
-          "name": "Bulletin 191 - Product list updates : Speech Generating Communication Devices (SGCD)",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/f6008a45-9598-4c52-bda7-fbd58a7ee739/download/pphs-aadl-bulletin-191-product-list-update-communications-2025-10.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "9774de88-1204-42c8-b46d-e37eaf3fdc4d",
-          "name": "Bulletin 190 - Product list update : mobility",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/9774de88-1204-42c8-b46d-e37eaf3fdc4d/download/pphs-aadl-bulletin-190-product-list-update-mobility-2025-09.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "a777004a-ab6a-40f8-8728-c476397148bd",
-          "name": "Bulletin 189 - Program manual update : burn scar garment process change",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/a777004a-ab6a-40f8-8728-c476397148bd/download/pphs-aadl-bulletin-189-program-manual-update-burn-scar-garments-2025-08.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "16d863a7-b634-4def-998a-1274fdf99906",
-          "name": "Bulletin 188 - Product list update : mobility",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/16d863a7-b634-4def-998a-1274fdf99906/download/pphs-aadl-bulletin-188-product-list-update-mobility-2025-08.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "c3b97bbf-5a0e-4b7f-b4f0-a96ab8001598",
-          "name": "Bulletin 187 - Temporary pause on new vendor applications for medical surgical and mobility equipment benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/c3b97bbf-5a0e-4b7f-b4f0-a96ab8001598/download/pphs-aadl-bulletin-187-2025-07.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "0a4a692c-32ba-4c33-b677-7cccd87a737a",
-          "name": "Bulletin 186 - Product list update: incontinence supplies",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/0a4a692c-32ba-4c33-b677-7cccd87a737a/download/pphs-aadl-bulletin-186-2025-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "d873104d-6122-429c-b046-4c1cdcb37679",
-          "name": "Bulletin 185 - Program manual and product list updates: removal of injection supplies",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/d873104d-6122-429c-b046-4c1cdcb37679/download/pphs-aadl-bulletin-185-2025-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "ce0016ba-a202-41a4-be09-cd269bd70ff6",
-          "name": "Bulletin 184 - Product list update: amplification benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/ce0016ba-a202-41a4-be09-cd269bd70ff6/download/pphs-aadl-bulletin-184-2025-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "78ebf8cd-a556-43a0-9106-f8ff0608fe91",
-          "name": "Bulletin 183 - Product list update: mobility",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/78ebf8cd-a556-43a0-9106-f8ff0608fe91/download/pphs-aadl-bulletin-183-2025-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "2dbbe043-1e02-4624-8c30-c41d90a58419",
-          "name": "Bulletin 182 - Product list updates: burn scar garments, medical and surgical, ready-made and custom compression garments",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/2dbbe043-1e02-4624-8c30-c41d90a58419/download/pphs-aadl-bulletin-182-2025-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f21d5f47-d4bd-456c-ae65-c89b1496d084",
-          "name": "Bulletin 181 - Respiratory updates",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/f21d5f47-d4bd-456c-ae65-c89b1496d084/download/hlth-aadl-bulletin-181-respiratory-updates-2025-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "58dd2895-5b96-485c-a5b4-4291e9062b02",
-          "name": "Bulletin 180 - Product list update : prosthetic and orthotic benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/58dd2895-5b96-485c-a5b4-4291e9062b02/download/hlth-aadl-bulletin-180-prosthetic-orthotic-benefits-2025-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "9d793e19-33b6-43b7-aaaa-227e17ef15d7",
-          "name": "Bulletin 179 - Product list updates : voice restoration and electrolarynx benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/9d793e19-33b6-43b7-aaaa-227e17ef15d7/download/hlth-aadl-bulletin-179-voice-restoration-electrolarynx-benefits-2024-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "39a019c4-3183-4acd-8d26-b576aed139c5",
-          "name": "Bulletin 178 - Product list update: custom-made ocular prosthetics benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/39a019c4-3183-4acd-8d26-b576aed139c5/download/hlth-aadl-bulletin-178-ocular-prosthetic-benefits-2024-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "8b48a557-9ef5-40c5-8229-781340ba6ae7",
-          "name": "Bulletin 177 - Product list update : amplification benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/8b48a557-9ef5-40c5-8229-781340ba6ae7/download/hlth-aadl-bulletin-177-amplification-benefits-2024-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "dd1426d6-e9a1-4f2a-8a32-8e0fae9b0bab",
-          "name": "Bulletin 176 - Seating benefit updates : key takeaways",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/dd1426d6-e9a1-4f2a-8a32-8e0fae9b0bab/download/hlth-aadl-bulletin-176-seating-benefits-key-takeaways-2024-10.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "d013c228-2784-4460-a1eb-18bbff5a1112",
-          "name": "Bulletin 175 - Policy and product list updates: mobility and large equipment",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/d013c228-2784-4460-a1eb-18bbff5a1112/download/hlth-aadl-bulletin-175-mobility-policy-changes-2024-09.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "50d24493-ccce-4264-8358-69757f12ec39",
-          "name": "Bulletin 174 - Coming October 1: seating benefits policy and product list updates",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/50d24493-ccce-4264-8358-69757f12ec39/download/hlth-aadl-bulletin-174-seating-policy-changes-sept-2024.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "874b01ef-c93a-48c2-b5e9-643326ffeb6c",
-          "name": "Bulletin 173 - Product list update : amplification benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/874b01ef-c93a-48c2-b5e9-643326ffeb6c/download/hlth-aadl-bulletin-173-product-list-updates-amplification-2024-08.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "4c05bf7c-a206-4904-af97-66ff7e1f8f85",
-          "name": "Bulletin 172 - Coming Sept 1 : new authorizer application process and eligibility criteria",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/4c05bf7c-a206-4904-af97-66ff7e1f8f85/download/hlth-aadl-bulletin-172-new-authorizer-application-process-2024-08.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "33a7be13-3878-4456-bf33-10ada2857a35",
-          "name": "Bulletin 171 - Product list updates: Incontinence products",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/33a7be13-3878-4456-bf33-10ada2857a35/download/hlth-aadl-bulletin-171-product-list-update-incontinence-2024-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "ffbd345b-bf1a-4515-9d7e-5684af398716",
-          "name": "Bulletin 170 - Alberta wildfires 2024: Information for clients, vendors and authorizers",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/ffbd345b-bf1a-4515-9d7e-5684af398716/download/hlth-aadl-bulletin-170-information-for-authorizers-wildfire-2024-05-16.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "2b54ba7e-2dbd-4a67-bc30-f8a9a2f52199",
-          "name": "Bulletin 169 - Policy updates : respiratory benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/2b54ba7e-2dbd-4a67-bc30-f8a9a2f52199/download/hlth-aadl-bulletin-169-policy-updates-respiratory-benefits-2024-04-03.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "49d1dfd4-fee8-4ff9-b5b1-7fbc1803b48d",
-          "name": "Bulletin 168 - Product list updates : large and small bathing and toileting equipment",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/49d1dfd4-fee8-4ff9-b5b1-7fbc1803b48d/download/hlth-aadl-bulletin-168-2024-03-28.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "2e3046ba-c9b2-4c43-bed6-46784988823c",
-          "name": "Bulletin 167 - Product list updates : prosthetic and orthotic benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/2e3046ba-c9b2-4c43-bed6-46784988823c/download/hlth-aadl-bulletin-167-product-list-updates-po-2024-03.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "c562bb48-1493-460c-a181-9e575760add0",
-          "name": "Bulletin 166 - Product list updates: Oxygen benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/c562bb48-1493-460c-a181-9e575760add0/download/hlth-aadl-bulletin-166-product-list-updates-rural-oxygen-2024-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "885f061a-2765-45e2-98ad-c99b211a03ac",
-          "name": "Bulletin 165 - Product list updates: voice restoration and electrolarynx benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/885f061a-2765-45e2-98ad-c99b211a03ac/download/hlth-aadl-bulletin-165-product-list-updates-vre-2024-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "32dee123-2b4d-4455-bd10-2adb35152958",
-          "name": "Bulletin 164 - Product list updates : speech generating communication devices",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/32dee123-2b4d-4455-bd10-2adb35152958/download/hlth-aadl-bulletin-164-product-list-updates-sgcd-2024-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "e52aed64-a303-4b8a-ba57-4cbcf302f272",
-          "name": "Bulletin 163 - Policy update : amplification benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/e52aed64-a303-4b8a-ba57-4cbcf302f272/download/hlth-aadl-bulletin-163-policy-updates-amplification-2024-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "18457f9d-613d-4bfe-9b13-7e8830fe3931",
-          "name": "Bulletin 162 - Update to generic knee joints",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/18457f9d-613d-4bfe-9b13-7e8830fe3931/download/hlth-aadl-bulletin-162-updates-generic-knee-joints-jan-2024.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "75a652ca-8237-46a8-be28-5e54388eafc0",
-          "name": "Bulletin 161 - Product list updates : wheelchairs",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/75a652ca-8237-46a8-be28-5e54388eafc0/download/hlth-aadl-bulletin-161-product-updates-wheelchairs-2023-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "c5c6751d-ed84-4828-b23f-66b193d12c8b",
-          "name": "Bulletin 160 - Product list updates : pediatric recycle equipment",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/c5c6751d-ed84-4828-b23f-66b193d12c8b/download/hlth-aadl-bulletin-160-product-list-updates-pediatric-recycle-2023-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "6ab43c0e-a3fc-48a3-8b26-faa647d23949",
-          "name": "Bulletin 159 - Product list updates : manufacturers added for custom compression garments, back and abdominal supports",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/6ab43c0e-a3fc-48a3-8b26-faa647d23949/download/hlth-aadl-bulletin-159-product-list-updates-apl-s-and-t-2023-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "c1bca2f8-6fde-4a39-8164-32bdd45eae6c",
-          "name": "Bulletin 158 - Updates to mobility benefits",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/c1bca2f8-6fde-4a39-8164-32bdd45eae6c/download/hlth-aadl-bulletin-158-updates-mobility-benefits-2023-10.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "5bcd4b3b-2701-4f28-83a9-70a8ac7b141f",
-          "name": "Bulletin 157 - Alberta wildfires : emergency renewal of oxygen and BPAP funding",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/5bcd4b3b-2701-4f28-83a9-70a8ac7b141f/download/hlth-aadl-bulletin-157-wildfires-2023-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "15eb52d6-d581-490e-a7b8-c7ec2646f361",
-          "name": "Bulletin 156 - Information for AADL clients, vendors and authorizers regarding wildfires",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/15eb52d6-d581-490e-a7b8-c7ec2646f361/download/hlth-aadl-bulletin-156-information-for-authorizers-wildfire-2023-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "ada5db1e-9403-4254-922b-795581598bfe",
-          "name": "Bulletin 155 - April updates to prosthetic and orthotic approved product lists",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/ada5db1e-9403-4254-922b-795581598bfe/download/hlth-aadl-bulletin-155-april-updates-po-apl-apr-2023.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "94880f41-70f8-4936-bcfe-1bb3534503fd",
-          "name": "Bulletin 154 - Pre-lubricated/hydrophilic intermittent catheters added to program",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/94880f41-70f8-4936-bcfe-1bb3534503fd/download/hlth-aadl-bulletin-154-prelube-hydrophilic-catheters-added-2023-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "825afc1b-370a-4c93-9c3c-a2123df07c43",
-          "name": "Bulletin 153 - Updates to respiratory approved product list",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/825afc1b-370a-4c93-9c3c-a2123df07c43/download/hlth-aadl-bulletin-153-updates-to-respiratory-2023-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "7e3a9b2e-cfef-43fc-9496-ce744fc38674",
-          "name": "Bulletin 152 - Updates to custom compression garments approved product list",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/7e3a9b2e-cfef-43fc-9496-ce744fc38674/download/hlth-aadl-bulletin-152-updates-compression-garment-apl-2023-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "8f030b00-d8d6-4f04-a1d5-9fc34f3db5c6",
-          "name": "Bulletin 151 - Reminder : updates to online health portal coming February 2.",
-          "url": "https://open.alberta.ca/dataset/fd568bfc-6ac2-4f56-b022-105cf7c0bf38/resource/8f030b00-d8d6-4f04-a1d5-9fc34f3db5c6/download/hlth-aadl-bulletin-151-reminder-updates-2023-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "5a52cfe1-16e5-4489-a335-62ebf8eb7cc4",
-          "name": "SEE ALSO: issues of Alberta Aids to Daily Living (AADL) Bulletins for other years",
-          "url": "https://open.alberta.ca/dataset?q=title%3A%22Alberta+Aids+to+Daily+Living+%28AADL%29+bulletin%22&sort=date_modified+desc&metadata_created=",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "8bcc04df-568d-4e3f-9f08-1c8f1834c089",
-      "name": "2010_118",
-      "title": "Alberta Electronic Health Record Regulation",
-      "organization": "King's Printer",
-      "notes": "This Regulation outlines the department’s duties operating and managing the Alberta Electronic Health Record (Alberta EHR); sets eligibility requirements to become an authorized custodian; sets out requirements that the Office of the Chief Medical Examiner and health services providers outside of Alberta must meet to gain access to the Alberta EHR; sets out types and classes of health information; describes the manner in which health information must be made accessible by regulated health professionals; logging capacity; the audit of information logs; and provides rules for investigations and restricting access to the Alberta EHR.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "20cd8990-05f9-4085-a59d-1a164a0221fe",
-          "name": "Alberta Electronic Health Record Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779862863&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "135059ef-ca6f-443b-9c6a-e601e4eb0801",
-      "name": "2001_070",
-      "title": "Health Information Regulation",
-      "organization": "King's Printer",
-      "notes": "This Regulation regulates matters pertaining to the designation of custodians; provisions for affiliates; registration information; exclusions from the definition of a health service, the collection use and disclosure of specified health information; the information manager agreement, and; the security of health information and fees.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "148a3eb5-4a61-414a-bfb0-73c2a2a480c6",
-          "name": "Health Information Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779862870&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "f30df77c-3451-448d-9f83-10bb22a75ac0",
-      "name": "ministers-office-expenses-mental-health-and-addiction",
-      "title": "Minister's office expenses : Mental Health and Addiction",
-      "organization": "Mental Health and Addiction",
-      "notes": "Ministers' office expenses are disclosed to the public on a monthly basis, posted by the end of the following month. Expenses reported are those of the ministers, their executive assistants and their administrative support staff, and are reported in the following categories: meals, accommodation and travel; hospitality and working sessions; and goods, supplies and services.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 42,
-      "resources": [
-        {
-          "id": "806e315c-ea45-4451-a83d-620decb9ec1e",
-          "name": "April 2026",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/806e315c-ea45-4451-a83d-620decb9ec1e/download/mental-health-and-addiction-minister-office-expenses-2026-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "5cbdd6d0-33d4-493a-be92-9cd9805a1079",
-          "name": "March 2026",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/5cbdd6d0-33d4-493a-be92-9cd9805a1079/download/mental-health-and-addiction-minister-office-expenses-2026-03.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "b1c96fbe-7f39-4fe3-83a1-73381f87486c",
-          "name": "February 2026",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/b1c96fbe-7f39-4fe3-83a1-73381f87486c/download/mental-health-and-addiction-minister-office-expenses-2026-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "89a6eeb5-98bb-4b76-8d87-9b38a321eaf1",
-          "name": "January 2026",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/89a6eeb5-98bb-4b76-8d87-9b38a321eaf1/download/mental-health-and-addiction-minister-office-expenses-2026-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "ef62bdbf-c589-42f6-a38b-1e000bf719a6",
-          "name": "December 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/ef62bdbf-c589-42f6-a38b-1e000bf719a6/download/mental-health-and-addiction-minister-office-expenses-2025-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "61cc5667-e9f8-40b0-9e7e-8a4c33a64d21",
-          "name": "November 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/61cc5667-e9f8-40b0-9e7e-8a4c33a64d21/download/mental-health-and-addiction-minister-office-expenses-2025-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "1c6f347b-0fba-4773-8c17-a38533812e9b",
-          "name": "October 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/1c6f347b-0fba-4773-8c17-a38533812e9b/download/mental-health-and-addiction-minister-office-expenses-2025-10.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "13bb8797-6d2e-4c59-be56-aceaf129ad74",
-          "name": "September 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/13bb8797-6d2e-4c59-be56-aceaf129ad74/download/mental-health-and-addiction-minister-office-expenses-2025-09.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "4fe3c706-2669-4e78-bbf0-0f9884fe07a7",
-          "name": "August 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/4fe3c706-2669-4e78-bbf0-0f9884fe07a7/download/mental-health-and-addiction-minister-office-expenses-2025-08.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "627b9971-befc-4a5d-8866-70c4e39fdc14",
-          "name": "July 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/627b9971-befc-4a5d-8866-70c4e39fdc14/download/mental-health-and-addiction-minister-office-expenses-2025-07.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "314ffd2e-7176-4f05-8c97-ea7297c1d9dc",
-          "name": "June 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/314ffd2e-7176-4f05-8c97-ea7297c1d9dc/download/mental-health-and-addiction-minister-office-expenses-2025-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "d5794e29-b200-45a0-8ee1-ca41212cecdf",
-          "name": "May 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/d5794e29-b200-45a0-8ee1-ca41212cecdf/download/mental-health-and-addiction-minister-office-expenses-2025-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f1df7270-b7b1-4084-bf51-62018fee01d4",
-          "name": "April 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/f1df7270-b7b1-4084-bf51-62018fee01d4/download/mental-health-and-addiction-minister-office-expenses-2025-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "ae5bb27d-4677-4363-a4f9-468b568698d4",
-          "name": "March 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/ae5bb27d-4677-4363-a4f9-468b568698d4/download/mental-health-and-addiction-minister-office-expenses-2025-03.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "77ff8538-210a-4142-a632-b722dcf793dd",
-          "name": "February 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/77ff8538-210a-4142-a632-b722dcf793dd/download/mental-health-and-addiction-minister-office-expenses-2025-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "89d156cc-b0e0-4601-99ae-e41d3d9cc7ec",
-          "name": "January 2025",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/89d156cc-b0e0-4601-99ae-e41d3d9cc7ec/download/mental-health-and-addiction-minister-office-expenses-2025-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "7ba3019c-9078-41e0-8e7a-505d7e750918",
-          "name": "December 2024 ",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/7ba3019c-9078-41e0-8e7a-505d7e750918/download/mental-health-and-addiction-minister-office-expenses-2024-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "d917de13-8829-429b-a80f-c4fda73bfdde",
-          "name": "November 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/d917de13-8829-429b-a80f-c4fda73bfdde/download/mental-health-and-addiction-minister-office-expenses-2024-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "ec55352d-d275-43da-a989-48e6be19030a",
-          "name": "October 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/ec55352d-d275-43da-a989-48e6be19030a/download/mental-health-and-addiction-minister-office-expenses-2024-10.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "a00c83e6-c337-4288-8ef8-d89ed9559f91",
-          "name": "September 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/a00c83e6-c337-4288-8ef8-d89ed9559f91/download/mental-health-and-addiction-minister-office-expenses-2024-09.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "0a723d68-9d05-446c-b7d0-ce6b42d5a5a6",
-          "name": "August 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/0a723d68-9d05-446c-b7d0-ce6b42d5a5a6/download/mental-health-and-addiction-minister-office-expenses-2024-08.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "febb8688-c527-437d-9ebb-754c0772b904",
-          "name": "July 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/febb8688-c527-437d-9ebb-754c0772b904/download/mental-health-and-addiction-minister-office-expenses-2024-07.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "151c6312-f887-407b-b97a-ffc5c39b754d",
-          "name": "June 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/151c6312-f887-407b-b97a-ffc5c39b754d/download/mental-health-and-addiction-minister-office-expenses-2024-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "363d8da9-e5f4-444e-854d-66ee22e54abf",
-          "name": "May 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/363d8da9-e5f4-444e-854d-66ee22e54abf/download/mental-health-and-addiction-minister-office-expenses-2024-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "af8fe8c5-c0c0-44a1-93f6-8a5bf9c434a5",
-          "name": "April 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/af8fe8c5-c0c0-44a1-93f6-8a5bf9c434a5/download/mental-health-and-addiction-minister-office-expenses-2024-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "1fb29283-9712-4080-b08d-00ad2cad6426",
-          "name": "March 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/1fb29283-9712-4080-b08d-00ad2cad6426/download/mental-health-and-addiction-minister-office-expenses-2024-03.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "bc7c80ac-3051-4b64-8c51-4f2fab8c669c",
-          "name": "February 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/bc7c80ac-3051-4b64-8c51-4f2fab8c669c/download/mental-health-and-addiction-minister-office-expenses-2024-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f70edd65-4626-4ed9-a49d-546cf7e848f7",
-          "name": "January 2024",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/f70edd65-4626-4ed9-a49d-546cf7e848f7/download/mental-health-and-addiction-minister-office-expenses-2024-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "86b5c3ff-0bff-4b95-bc70-050309d3f160",
-          "name": "December 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/86b5c3ff-0bff-4b95-bc70-050309d3f160/download/mental-health-and-addiction-minister-office-expenses-2023-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "3c873883-503d-4544-b3be-997851c61122",
-          "name": "November 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/3c873883-503d-4544-b3be-997851c61122/download/mental-health-and-addiction-minister-office-expenses-2023-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "72b01aeb-ba0b-4e66-a553-2878de4ac2d6",
-          "name": "October 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/72b01aeb-ba0b-4e66-a553-2878de4ac2d6/download/mental-health-and-addiction-minister-office-expenses-2023-10.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f6a7c7ea-377e-46ea-9bfc-c76deb14366c",
-          "name": "September 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/f6a7c7ea-377e-46ea-9bfc-c76deb14366c/download/mental-health-and-addiction-minister-office-expenses-2023-09.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "a28bdd61-a84d-4a72-ae52-e56b3b1330b7",
-          "name": "August 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/a28bdd61-a84d-4a72-ae52-e56b3b1330b7/download/mental-health-and-addiction-minister-office-expenses-2023-08_copy.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "6b1732e4-1bb8-46d7-b71e-c59265e6af9d",
-          "name": "July 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/6b1732e4-1bb8-46d7-b71e-c59265e6af9d/download/mental-health-and-addiction-minister-office-expenses-2023-07.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "9ca684b6-0ee7-4b5a-9d7e-42fa47f8760c",
-          "name": "June 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/9ca684b6-0ee7-4b5a-9d7e-42fa47f8760c/download/mental-health-and-addiction-minister-office-expenses-2023-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f64da720-dbc8-46a2-adb0-e3467b631a5b",
-          "name": "May 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/f64da720-dbc8-46a2-adb0-e3467b631a5b/download/mental-health-and-addiction-minister-office-expenses-2023-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "10254a69-e860-43d1-9d93-2f74a8252903",
-          "name": "April 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/10254a69-e860-43d1-9d93-2f74a8252903/download/mental-health-and-addiction-minister-office-expenses-2023-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "7080591f-d5f6-4b38-8486-8d40cc97033b",
-          "name": "March 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/7080591f-d5f6-4b38-8486-8d40cc97033b/download/mental-health-and-addiction-minister-office-expenses-2023-03.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "4cfad479-6765-42f2-b8e8-ed47dab662c6",
-          "name": "February 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/4cfad479-6765-42f2-b8e8-ed47dab662c6/download/mental-health-and-addiction-minister-office-expenses-2023-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "56a6dbaa-8b38-442d-b845-e68c05f029a6",
-          "name": "January 2023",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/56a6dbaa-8b38-442d-b845-e68c05f029a6/download/mental-health-and-addiction-minister-office-expenses-2023-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "39ccf76d-654f-435c-bf66-0622ccf1dcbc",
-          "name": "December 2022",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/39ccf76d-654f-435c-bf66-0622ccf1dcbc/download/mental-health-and-addiction-minister-office-expenses-2022-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f8964eb0-00e3-4322-b3f8-cc3e914e16da",
-          "name": "November 2022",
-          "url": "https://open.alberta.ca/dataset/f30df77c-3451-448d-9f83-10bb22a75ac0/resource/f8964eb0-00e3-4322-b3f8-cc3e914e16da/download/mental-health-and-addiction-minister-office-expenses-2022-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "a9845c52-cb95-4c15-8851-5ea0f9cec4e0",
-      "name": "ministers-office-expenses-primary-and-preventative-health-services",
-      "title": "Minister's office expenses : Primary and Preventative Health Services",
-      "organization": "Primary and Preventative Health Services",
-      "notes": "Ministers' office expenses are disclosed to the public on a monthly basis, posted by the end of the following month. Expenses reported are those of the ministers, their executive assistants and their administrative support staff, and are reported in the following categories: meals, accommodation and travel; hospitality and working sessions; and goods, supplies and services.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 12,
-      "resources": [
-        {
-          "id": "6526bcec-246a-4da2-bb33-8928aee086ff",
-          "name": "April 2026",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/6526bcec-246a-4da2-bb33-8928aee086ff/download/primary-and-preventative-health-services-minister-office-expenses-2026-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "25b82ca8-f500-4e11-9147-439970f4bb25",
-          "name": "March 2026",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/25b82ca8-f500-4e11-9147-439970f4bb25/download/primary-and-preventative-health-services-minister-office-expenses-2026-03.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "14d7e082-015f-420e-8a69-16cce8e3b2a0",
-          "name": "February 2026",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/14d7e082-015f-420e-8a69-16cce8e3b2a0/download/primary-and-preventative-health-services-minister-office-expenses-2026-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "a0add69f-a5ad-4f5c-90ea-bad6d943e477",
-          "name": "January 2026",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/a0add69f-a5ad-4f5c-90ea-bad6d943e477/download/primary-and-preventative-health-services-minister-office-expenses-2026-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "4f1fed7e-4102-4dd9-95b5-ff0e57d6db58",
-          "name": "December 2025",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/4f1fed7e-4102-4dd9-95b5-ff0e57d6db58/download/primary-and-preventative-health-services-minister-office-expenses-2025-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "c06f4ef7-6827-42fa-abff-5a58c21546e2",
-          "name": "November 2025",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/c06f4ef7-6827-42fa-abff-5a58c21546e2/download/primary-and-preventative-health-services-minister-office-expenses-2025-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "10f7e804-b35e-4bad-b668-49f768197a86",
-          "name": "October 2025",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/10f7e804-b35e-4bad-b668-49f768197a86/download/primary-and-preventative-health-services-minister-office-expenses-2025-10.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "2c55fdcd-d46d-4b01-af4e-4acf41c76d14",
-          "name": "September 2025",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/2c55fdcd-d46d-4b01-af4e-4acf41c76d14/download/primary-and-preventative-health-services-minister-office-expenses-2025-09.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "1af92bc5-47da-44ac-a37c-252de91e7bb5",
-          "name": "August 2025",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/1af92bc5-47da-44ac-a37c-252de91e7bb5/download/primary-and-preventative-health-services-minister-office-expenses-2025-08.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "3f3c2a45-5bf0-4156-8e9d-494fac3587c0",
-          "name": "July 2025",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/3f3c2a45-5bf0-4156-8e9d-494fac3587c0/download/primary-and-preventative-health-services-minister-office-expenses-2025-07.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "6fead492-8a82-44d6-8f70-668186dacb7c",
-          "name": "June 2025",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/6fead492-8a82-44d6-8f70-668186dacb7c/download/primary-and-preventative-health-services-minister-office-expenses-2025-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "5f72de50-4446-41f6-a9ea-80126bd978e2",
-          "name": "May 2025",
-          "url": "https://open.alberta.ca/dataset/a9845c52-cb95-4c15-8851-5ea0f9cec4e0/resource/5f72de50-4446-41f6-a9ea-80126bd978e2/download/primary-and-preventative-health-services-minister-office-expenses-2025-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "7d4fb108-336f-438d-b5de-54dccaeb9600",
-      "name": "ministers-office-expenses-hospital-and-surgical-health-services",
-      "title": "Minister's office expenses : Hospital and Surgical Health Services",
-      "organization": "Hospital and Surgical Health Services",
-      "notes": "Ministers' office expenses are disclosed to the public on a monthly basis, posted by the end of the following month. Expenses reported are those of the ministers, their executive assistants and their administrative support staff, and are reported in the following categories: meals, accommodation and travel; hospitality and working sessions; and goods, supplies and services.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 11,
-      "resources": [
-        {
-          "id": "7f81fb05-e167-49dd-9260-a373d17f652f",
-          "name": "April 2026",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/7f81fb05-e167-49dd-9260-a373d17f652f/download/hospital-and-surgical-health-services-minister-office-expenses-2026-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "cda141ac-7d6a-406f-abc0-997ea66dfda8",
-          "name": "March 2026",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/cda141ac-7d6a-406f-abc0-997ea66dfda8/download/hospital-and-surgical-health-services-minister-office-expenses-2026-03.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f6427af4-4956-4129-ab96-8fc27121bd54",
-          "name": "February 2026",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/f6427af4-4956-4129-ab96-8fc27121bd54/download/hospital-and-surgical-health-services-minister-office-expenses-2026-02.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "22e26b4e-42cf-41cd-992c-c27c3d76ff46",
-          "name": "January 2026",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/22e26b4e-42cf-41cd-992c-c27c3d76ff46/download/hospital-and-surgical-health-services-minister-office-expenses-2026-01.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "6bb8c890-78e6-43c7-88a3-6480e2247ed4",
-          "name": "December 2025",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/6bb8c890-78e6-43c7-88a3-6480e2247ed4/download/hospital-and-surgical-health-services-minister-office-expenses-2025-12.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f582df45-1cab-4b22-8c17-5f74203cb122",
-          "name": "November 2025",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/f582df45-1cab-4b22-8c17-5f74203cb122/download/hospital-and-surgical-health-services-minister-office-expenses-2025-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "39ff4de2-bb68-4929-8754-b844ad503c67",
-          "name": "October 2025",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/39ff4de2-bb68-4929-8754-b844ad503c67/download/hospital-and-surgical-health-services-minister-office-expenses-2025-10.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "5707243e-7134-420c-bfc8-d0ac6503b0a7",
-          "name": "September 2025",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/5707243e-7134-420c-bfc8-d0ac6503b0a7/download/hospital-and-surgical-health-services-minister-office-expenses-2025-09.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "f75c0716-467a-4301-8d93-db39edd40122",
-          "name": "August 2025",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/f75c0716-467a-4301-8d93-db39edd40122/download/hospital-and-surgical-health-services-minister-office-expenses-2025-08.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "a500bae2-2e8e-466b-b0f1-7daab389b2b0",
-          "name": "July 2025",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/a500bae2-2e8e-466b-b0f1-7daab389b2b0/download/hospital-and-surgical-health-services-minister-office-expenses-2025-07.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "090c6b17-56c0-43d9-8613-3bf3e1cdd757",
-          "name": "June 2025",
-          "url": "https://open.alberta.ca/dataset/7d4fb108-336f-438d-b5de-54dccaeb9600/resource/090c6b17-56c0-43d9-8613-3bf3e1cdd757/download/hospital-and-surgical-health-services-minister-office-expenses-2025-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "da311f78-0d6e-4712-a5d6-047395e783be",
-      "name": "pphs-25-2026",
-      "title": "Ministerial Order 25/2026 [Primary and Preventative Health Services]",
-      "organization": "Primary and Preventative Health Services",
-      "notes": "This ministerial order makes the Health Information (Ministerial) Amendment Regulation (Alberta Regulation 159/2026).",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 1,
-      "resources": [
-        {
-          "id": "2e458d12-b897-402c-8cfc-1a92bf5b5615",
-          "name": "Ministerial Order 25/2026 [Primary and Preventative Health Services]",
-          "url": "http://kings-printer.alberta.ca/Documents/MinOrders/2026/Primary_and_Preventative_Health_Services/2026_025_Primary_and_Preventative_Health_Services.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "8ed36af2-dc22-4fee-ad72-568125f804db",
-      "name": "pphs-27-2026",
-      "title": "Ministerial Order 27/2026 [Primary and Preventative Health Services]",
-      "organization": "Primary and Preventative Health Services",
-      "notes": "This ministerial order operationalizes Cabinet-approved conditions and restrictions to implement the dual practice model for physicians, while safeguarding the public health system.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 1,
-      "resources": [
-        {
-          "id": "61487e02-8773-4437-a09a-c0d44c357aad",
-          "name": "Ministerial Order 27/2026 [Primary and Preventative Health Services]",
-          "url": "http://kings-printer.alberta.ca/Documents/MinOrders/2026/Primary_and_Preventative_Health_Services/2026_027_Primary_and_Preventative_Health_Services.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "2e4f4c3b-2bf4-4213-b9a1-62f2d6f8e62f",
-      "name": "2026_134",
-      "title": "Primary Care Corridor Provincial Health Corporations Regulation",
-      "organization": "King's Printer",
-      "notes": "This Regulation establishes seven Primary Care Corridor Provincial Health Corporations, designates the responsible Minister and outlines responsibilities and duties for this provincial health corporation relating to members, governance, bylaws, financial matters, ancillary operations, agreements, a patient concerns resolution process, and other key operational requirements.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "601d376c-76a9-45c8-a5f2-2c6cde1deeb7",
-          "name": "Primary Care Corridor Provincial Health Corporations Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863273&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "cfa7dbb2-8293-4db2-bba3-4e40b45e2cac",
-      "name": "2026_140",
-      "title": "Dual Practice Records Regulation",
-      "organization": "King's Printer",
-      "notes": "The Dual Practice Records Regulation establishes the specific record keeping and reporting obligations for dual practice (flexibly participating) and fully private (non-participating) physicians.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "1aa285bd-e491-4440-8a77-d79ae627c30d",
-          "name": "Dual Practice Records Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863372&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "7a415e73-6941-4c89-bafc-1272f6f9b5dc",
-      "name": "sustainable-forest-management-forest-management-plans",
-      "title": "Sustainable forest management : forest management plans",
-      "organization": "Forestry and Parks",
-      "notes": "The Alberta government practices and promotes sustainable forest management. Forested public land is managed to maintain and enhance the long-term health and productivity of forest ecosystems. This fact sheet provides information on forest management plans in Alberta.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 1,
-      "resources": [
-        {
-          "id": "15e7d625-2d72-4be2-aca1-dfb717617e0b",
-          "name": "Sustainable forest management : forest management plans",
-          "url": "https://open.alberta.ca/dataset/7a415e73-6941-4c89-bafc-1272f6f9b5dc/resource/15e7d625-2d72-4be2-aca1-dfb717617e0b/download/fp-sustainable-forest-management-forest-management-plans-2026.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "e1ec585f-3f52-40f2-a022-5a38ea3397e5",
-      "name": "income-support-caseload-alberta",
-      "title": "Income Support Caseload",
-      "organization": "Assisted Living and Social Services",
-      "notes": "This Assisted Living and Social Services (ALSS) dataset describes the monthly Income Support caseload in Alberta, including two client groups: those Expected to Work (ETW) and those who have Barriers to Full Employment (BFE).\r\n\r\nIncome Support provides financial benefits to individuals and families who do not have the resources to meet their basic needs, like food, clothing, and shelter. The caseload is defined as the number of households categorized as ETW or BFE during a specific reporting period. Most commonly, this is reported as the average volume for a specific period (e.g., annually).\r\n\r\n&nbsp;\r\n\r\nThe composition of the caseload is made up of single individuals, lone-parent families, couples with children and couples without children. In April 2018, a breakdown of the number of caseloads by SCSS Regions was added to provide greater context.\r\n\r\n&nbsp;\r\n\r\nNOTE:  (1) - Due to a change in how region information is tracked within source systems, region caseloads have been updated as of January 2025 to include an additional category 'Unknown', reflecting new postal codes being introduced to the data record within source systems. This change has been retroactively applied to all past data.\r\n\r\n(2) - All regions report that the primary factor for reduced Income Support caseloads from April-2020 is due to Albertans accessing the federal government’s Canada Emergency Response Benefit (CERB).\r\n\r\n&nbsp;",
-      "structuredResourceCount": 2,
-      "pdfResourceCount": 2,
-      "resources": [
-        {
-          "id": "f660db62-5687-4614-8f53-327652856f80",
-          "name": "Income Support Caseload (.xlsx)",
-          "url": "https://open.alberta.ca/dataset/e1ec585f-3f52-40f2-a022-5a38ea3397e5/resource/f660db62-5687-4614-8f53-327652856f80/download/is-aggregated-data-april-2005-mar-2026.xlsx",
-          "format": "XLSX",
-          "isStructured": true
-        },
-        {
-          "id": "4f97a3ae-1b3a-48e9-a96f-f65c58526e07",
-          "name": "Income Support Caseload (.csv)",
-          "url": "https://open.alberta.ca/dataset/e1ec585f-3f52-40f2-a022-5a38ea3397e5/resource/4f97a3ae-1b3a-48e9-a96f-f65c58526e07/download/is-aggregated-data-april-2005-mar-2026.csv",
-          "format": "CSV",
-          "isStructured": true
-        },
-        {
-          "id": "07b7a69b-af57-4227-92ad-2187959a0bf8",
-          "name": "Income Support Data Visualization",
-          "url": "https://open.alberta.ca/dataset/e1ec585f-3f52-40f2-a022-5a38ea3397e5/resource/07b7a69b-af57-4227-92ad-2187959a0bf8/download/is-data-visualization-mar-2026.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "a118d3c2-473f-4eb0-bbda-0e608a786e3e",
-          "name": "Seniors, Community and Social Services Delivery Zones Map",
-          "url": "https://open.alberta.ca/dataset/e1ec585f-3f52-40f2-a022-5a38ea3397e5/resource/a118d3c2-473f-4eb0-bbda-0e608a786e3e/download/communityandsocialservicesdelivery_oct2024.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "8817a7ca-73fa-404c-8745-f7d2157a48a4",
-      "name": "alis-alberta-ca-web-traffic",
-      "title": "alis.alberta.ca - Web Traffic Statistics",
-      "organization": "Assisted Living and Social Services",
-      "notes": "Through its Employment and Financial Services (EFS) division, Assisted Living and Social Services (ALSS) programs form a strong foundation of support to help many Albertans find and keep jobs. \r\n&nbsp;\r\n\r\nThe ministry provides financial support, employment services, career resources, referrals, information on job fairs and workshops, and local labor market information. The goal is to help individuals and families gain independence by providing opportunities to enhance their skills to get jobs. \r\n\r\n&nbsp;\r\n\r\n\r\nThe alis.alberta.ca website provides employment resources to help Albertans enhance their employability, plan for education and training, make informed career choices, and connect to and be successful in the labour market. \r\n\r\n&nbsp;\r\n\r\nThis dataset provides information on web traffic statistics for the alis website, including information on pageviews and web sessions, demographic information for web sessions, and traffic information for the alis YouTube channel at: https://www.youtube.com/user/ALISwebsite. ",
-      "structuredResourceCount": 1,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "7317045c-ba73-45e8-b192-cd1546007b8d",
-          "name": "alis Website Traffic Dashboard",
-          "url": "https://lookerstudio.google.com/reporting/741fefa3-d46b-4726-8d20-05b049b885c5/page/FIKvB",
-          "format": "URI",
-          "isStructured": false
-        },
-        {
-          "id": "1d09b9f6-e96f-40ac-801a-e323b4e57701",
-          "name": "Alis Web Traffic Statistics Open Data - 2025-26 Q4",
-          "url": "https://open.alberta.ca/dataset/8817a7ca-73fa-404c-8745-f7d2157a48a4/resource/1d09b9f6-e96f-40ac-801a-e323b4e57701/download/alis-web-traffic-statistics-open-data-2025-26-q4.xlsx",
-          "format": "XLSX",
-          "isStructured": true
-        }
-      ]
-    },
-    {
-      "id": "10b1dee3-c85a-45bd-8a17-f9954d4306b6",
-      "name": "office-of-the-public-guardian-and-trustee-caseload",
-      "title": "Office of the Public Guardian and Trustee Caseload",
-      "organization": "Assisted Living and Social Services",
-      "notes": "The Office of the Public Guardian and Trustee (OPGT) assists people with a variety of services, information and resources in the areas of: \r\n&nbsp;\r\n\r\n• Guardianship services.\r\n&nbsp;\r\n\r\n• Trusteeship services.\r\n&nbsp;\r\n\r\n• Capacity assessment information and court applications.\r\n&nbsp;\r\n\r\n• Complaints about guardians, trustees, and agents.\r\n&nbsp;\r\n\r\n• Advance planning.\r\n\r\n&nbsp;\r\n\r\nThe OGPT dataset provides an overview of referrals received and adults represented by the Public Guardian and Public Trustee, as well as information on the number of minors trusts and deceased estates administered by the Public Trustee.",
-      "structuredResourceCount": 1,
-      "pdfResourceCount": 1,
-      "resources": [
-        {
-          "id": "7eab1a9b-e026-46d3-9415-f952ff686eb5",
-          "name": "Office of the Public Guardian and Trustee Caseload - Visualization 2025_26",
-          "url": "https://open.alberta.ca/dataset/10b1dee3-c85a-45bd-8a17-f9954d4306b6/resource/7eab1a9b-e026-46d3-9415-f952ff686eb5/download/office-of-the-public-guardian-and-trustee-caseload-visualization-2025_26.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "224f8f09-d921-4733-9394-6f60eb9cd22e",
-          "name": "Office of the Public Guardian and Trustee Caseload -  2025_26.xlsx",
-          "url": "https://open.alberta.ca/dataset/10b1dee3-c85a-45bd-8a17-f9954d4306b6/resource/224f8f09-d921-4733-9394-6f60eb9cd22e/download/office-of-the-public-guardian-and-trustee-caseload-2025_26.xlsx",
-          "format": "XLSX",
-          "isStructured": true
-        }
-      ]
-    },
-    {
-      "id": "d2aa6410-6912-4659-8c12-8f565e23d98d",
-      "name": "appeals-overview",
-      "title": "Appeals Overview",
-      "organization": "Assisted Living and Social Services",
-      "notes": "This Assisted Living and Social Services (ALSS) dataset describes quarterly statistics regarding the Citizen's Appeals Panel. The panel provides an appeal process for those who do not agree with decisions made by the Ministry of Assisted Living and Social Services and the Ministry of Children and Family Services, Ministry of Jobs, Economy and Trade, Ministry of Health and Ministry of Mental Health and Addiction.\r\n\r\n&nbsp;\r\n\r\nThe service offers impartial, neutral, and unbiased hearings for appeals and renders decisions, within the discretion allowed under relevant legislation that has been vested in adjudication panels, an appeal process that ensures all parties involved have equal opportunity to present their case, hear all evidence presented, assess all written information presented or referenced, and question the validity of any or all of the information presented, and a written decision providing the findings of the hearing. \r\n\r\n&nbsp;\r\n\r\nThe Appeals Overview dataset includes quarterly information on appeals filed, appeals withdrawn, and decisions rendered for each of ALSS's four core legislated programs, Income Support, Assured Income for the Severely Handicapped (AISH), Persons with Developmental Disabilities (PDD) and Family Support for Children with Disabilities (FSCD). \r\n\r\n&nbsp;\r\n\r\nNote that all values less than 5 have been suppressed for privacy purposes, and that data for PDD and FSCD appeals are presented annually, to prevent having to suppress data with small sample sizes at the quarterly level.",
-      "structuredResourceCount": 1,
-      "pdfResourceCount": 1,
-      "resources": [
-        {
-          "id": "788874ab-b969-4663-8828-ae998ca8c585",
-          "name": "Appeals Overview - Data Visualization - 2025-26 Q4",
-          "url": "https://open.alberta.ca/dataset/d2aa6410-6912-4659-8c12-8f565e23d98d/resource/788874ab-b969-4663-8828-ae998ca8c585/download/appeals-overview-open-data-data-visualization-2025-26-q4.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "22b4f5b4-37da-488c-bae3-b1957fabbf02",
-          "name": "Appeals Overview - Data - 2025-26 Q4",
-          "url": "https://open.alberta.ca/dataset/d2aa6410-6912-4659-8c12-8f565e23d98d/resource/22b4f5b4-37da-488c-bae3-b1957fabbf02/download/appeals-overview-data-2025-26-q4.xlsx",
-          "format": "XLSX",
-          "isStructured": true
-        }
-      ]
-    },
-    {
-      "id": "d4a906b8-add1-49b0-a3bc-84623b2f5f5e",
-      "name": "transforming-our-future-albertas-strategic-plan-cancer",
-      "title": "Transforming our future : Alberta’s strategic plan for cancer to 2036",
-      "organization": "Hospital and Surgical Health Services",
-      "notes": "Comprehensive, long-term plan to guide the province's delivery of cancer care across the health care system. The strategy considers current challenges, emerging technologies and innovations, growing volumes of cancer cases, and what is needed to support providing prevention, diagnostic, treatment and management care over the next ten years. The strategy will also inform operational and budget decisions going forward.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 1,
-      "resources": [
-        {
-          "id": "703af434-0712-46ca-a8af-5cbe7ba72dd1",
-          "name": "Transforming our future : Alberta’s strategic plan for cancer to 2036",
-          "url": "https://open.alberta.ca/dataset/d4a906b8-add1-49b0-a3bc-84623b2f5f5e/resource/703af434-0712-46ca-a8af-5cbe7ba72dd1/download/hshs-transforming-our-future-albertas-strategic-plan-for-cancer-to-2036.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "df7b7b00-c5c3-4d0e-97ff-5f902537fac0",
-      "name": "assured-income-for-the-severely-handicapped-aish-caseload-alberta",
-      "title": "Assured Income for the Severely Handicapped (AISH) Caseload",
-      "organization": "Assisted Living and Social Services",
-      "notes": "This Assisted Living and Social Services (ALSS) dataset describes the monthly Assured Income for the Severely Handicapped (AISH) caseload in Alberta. The AISH program provides financial and health benefits to eligible adult Albertans with a permanent medical condition that prevents them from earning a living.\r\n\r\n&nbsp;\r\n\r\nCaseloads are reported as the actual volume each month and by the Alberta government’s fiscal year. Depending on an individual’s situation, some AISH benefits may also be provided for a spouse or partner and dependent children.\r\n\r\n&nbsp;\r\n\r\nMonthly caseloads are also shown as a portion of the entire Alberta population; and by gender, age, primary medical condition, family composition, employment participation and six service delivery regions across the province.\r\n\r\n&nbsp;\r\n\r\nFor locations of AISH delivery regions, choose  the Alberta Assisted Living and Social Services Regions Map within the Resources section.\r\n\r\n&nbsp;\r\n",
-      "structuredResourceCount": 2,
-      "pdfResourceCount": 3,
-      "resources": [
-        {
-          "id": "be94d17b-66b8-4fad-9d2e-780bdc563bd7",
-          "name": "Assured Income for the Severely Handicapped Caseload (.xlsx)",
-          "url": "https://open.alberta.ca/dataset/df7b7b00-c5c3-4d0e-97ff-5f902537fac0/resource/be94d17b-66b8-4fad-9d2e-780bdc563bd7/download/aish-aggregated-data-apr-2008-mar-2026.xlsx",
-          "format": "XLSX",
-          "isStructured": true
-        },
-        {
-          "id": "0567ecf0-5f29-4591-a509-8a49f09ea240",
-          "name": "Assured Income for the Severely Handicapped Caseload (.csv)",
-          "url": "https://open.alberta.ca/dataset/df7b7b00-c5c3-4d0e-97ff-5f902537fac0/resource/0567ecf0-5f29-4591-a509-8a49f09ea240/download/aish-aggregated-data-apr-2008-mar-2026.csv",
-          "format": "CSV",
-          "isStructured": true
-        },
-        {
-          "id": "4ffaa6a4-383d-47ab-b515-014f8fe2f015",
-          "name": "AISH Data Visualization",
-          "url": "https://open.alberta.ca/dataset/df7b7b00-c5c3-4d0e-97ff-5f902537fac0/resource/4ffaa6a4-383d-47ab-b515-014f8fe2f015/download/aish-data-visualization-mar-2026.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "2ec9f952-99d4-4cd7-a51a-239409802c93",
-          "name": "Community and Social Services Regions Map",
-          "url": "https://open.alberta.ca/dataset/df7b7b00-c5c3-4d0e-97ff-5f902537fac0/resource/2ec9f952-99d4-4cd7-a51a-239409802c93/download/community-and-social-services-delivery_provincial-offices-services_20200424.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "a371243a-d29e-42cf-9876-9949a948ed44",
-          "name": "Your Guide to AISH - April 2024",
-          "url": "https://open.alberta.ca/dataset/df7b7b00-c5c3-4d0e-97ff-5f902537fac0/resource/a371243a-d29e-42cf-9876-9949a948ed44/download/scss-your-guide-to-aish-2024-04.pdf",
-          "format": "PDF",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "a98c8682-cae5-438d-9819-0720a6b7eb4c",
-      "name": "2026_129",
-      "title": "Health Insurance Registration Renewal Regulation",
-      "organization": "King's Printer",
-      "notes": "This Regulation establishes processes for Alberta Health Care Insurance Plan coverage renewal, including expiry and cancellation notifications, reinstatement of cancelled registrations, issuance of new or replacement certificates, and requirements to surrender certificates to prevent use of expired or duplicate documents.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 0,
-      "resources": [
-        {
-          "id": "f72eabf1-68fb-4cd7-aa77-a036f8e9c749",
-          "name": "Health Insurance Registration Renewal Regulation",
-          "url": "https://kings-printer.alberta.ca/570.cfm?frm_isbn=9780779863181&search_by=link",
-          "format": "URI",
-          "isStructured": false
-        }
-      ]
-    },
-    {
-      "id": "adfb8959-5a88-4b7c-a2f0-8cefb7dc6b09",
-      "name": "yellow-fever",
-      "title": "Alberta public health disease management guidelines : yellow fever",
-      "organization": "Primary and Preventative Health Services",
-      "notes": "Intended for public health professionals, this resource presents the recommended practices for the management and reporting of Yellow Fever as a notifiable disease. Topics covered include: a case definition of the disease and information on reporting requirements. The guidelines were developed by PPHS with input and advice from Medical Officers of Health, public health nurses, public health inspectors and medical infectious disease specialists.",
-      "structuredResourceCount": 0,
-      "pdfResourceCount": 4,
-      "resources": [
-        {
-          "id": "7b3c9b61-6c4c-48a5-b26f-ce52279ca4a7",
-          "name": "Yellow fever [June 2026]",
-          "url": "https://open.alberta.ca/dataset/adfb8959-5a88-4b7c-a2f0-8cefb7dc6b09/resource/7b3c9b61-6c4c-48a5-b26f-ce52279ca4a7/download/pphs-phdmg-yellow-fever-2026-06.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "88b9bfb9-8683-4871-9198-cb13de0eb9dd",
-          "name": "[SUPERSEDED] - Yellow fever [November 2021]",
-          "url": "https://open.alberta.ca/dataset/adfb8959-5a88-4b7c-a2f0-8cefb7dc6b09/resource/88b9bfb9-8683-4871-9198-cb13de0eb9dd/download/health-phdmg-yellow-fever-2021-11.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "1afe9e80-9200-482b-9e4a-d9af69aceeb0",
-          "name": "[SUPERSEDED] - Yellow fever [May 2018]",
-          "url": "https://open.alberta.ca/dataset/adfb8959-5a88-4b7c-a2f0-8cefb7dc6b09/resource/1afe9e80-9200-482b-9e4a-d9af69aceeb0/download/guidelines-yellow-fever-2018-05.pdf",
-          "format": "PDF",
-          "isStructured": false
-        },
-        {
-          "id": "261d1728-019c-4874-9ee0-bc8d79f5fa88",
-          "name": "[SUPERSEDED] - Yellow fever [July 2012]",
-          "url": "https://open.alberta.ca/dataset/adfb8959-5a88-4b7c-a2f0-8cefb7dc6b09/resource/261d1728-019c-4874-9ee0-bc8d79f5fa88/download/guidelines-yellow-fever-2012.pdf",
           "format": "PDF",
           "isStructured": false
         }

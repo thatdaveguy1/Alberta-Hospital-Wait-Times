@@ -101,7 +101,7 @@ interface ParsedWorkbook {
   cancerSurgery: CancerSurgeryWaitTrend[];
   radiation: RadiationTherapyCompliance[];
   provincialComparators: ProvincialComparator[];
-  comparatorLatestYear: string | undefined;
+  comparatorYears: string[];
   historicalWaitTrends: HistoricalWaitTrend[];
 }
 
@@ -422,29 +422,31 @@ const PROVINCE_COMPARATOR_NAMES: Record<string, true> = {
   'Alberta': true, 'British Columbia': true, 'Saskatchewan': true,
   'Manitoba': true, 'Ontario': true, 'Quebec': true, 'Canada': true,
 };
-
-function buildProvincialComparators(rows: LongRow[]): { comparators: ProvincialComparator[]; latestYear?: string } {
-  const accMap = new Map<string, { hip?: number; knee?: number; cataract?: number; mri?: number }>();
-  let latestYear: string | undefined;
+function buildProvincialComparators(rows: LongRow[]): { comparators: ProvincialComparator[]; comparatorYears: string[] } {
+  const accMap = new Map<string, { hip?: number; hipYear?: string; knee?: number; kneeYear?: string; cataract?: number; cataractYear?: string; mri?: number; mriYear?: string }>();
   for (const row of rows) {
     if (!PROVINCE_COMPARATOR_NAMES[row.province]) continue;
     const isWithinBenchmark = row.metric.includes('% within benchmark') || row.metric.includes('within benchmark');
     const isMedian = row.metric.includes('50th percentile') || row.metric.includes('median');
     if (!isWithinBenchmark && !isMedian) continue;
-    if (row.year && (!latestYear || row.year > latestYear)) latestYear = row.year;
 
     let acc = accMap.get(row.province);
     if (!acc) { acc = {}; accMap.set(row.province, acc); }
 
-    if (row.indicator.toLowerCase().includes('hip') && isWithinBenchmark) acc.hip = row.result;
-    else if (row.indicator.toLowerCase().includes('knee') && isWithinBenchmark) acc.knee = row.result;
-    else if (row.indicator.toLowerCase().includes('cataract') && isWithinBenchmark) acc.cataract = row.result;
-    else if (row.indicator.toLowerCase().includes('mri') && isMedian) acc.mri = row.result;
+    if (row.indicator.toLowerCase().includes('hip') && isWithinBenchmark) { acc.hip = row.result; acc.hipYear = row.year; }
+    else if (row.indicator.toLowerCase().includes('knee') && isWithinBenchmark) { acc.knee = row.result; acc.kneeYear = row.year; }
+    else if (row.indicator.toLowerCase().includes('cataract') && isWithinBenchmark) { acc.cataract = row.result; acc.cataractYear = row.year; }
+    else if (row.indicator.toLowerCase().includes('mri') && isMedian) { acc.mri = row.result; acc.mriYear = row.year; }
   }
 
   const out: ProvincialComparator[] = [];
+  const comparatorYears = new Set<string>();
   for (const [province, acc] of accMap) {
     if (acc.hip === undefined && acc.knee === undefined && acc.cataract === undefined && acc.mri === undefined) continue;
+    if (acc.hip !== undefined && acc.hipYear) comparatorYears.add(acc.hipYear);
+    if (acc.knee !== undefined && acc.kneeYear) comparatorYears.add(acc.kneeYear);
+    if (acc.cataract !== undefined && acc.cataractYear) comparatorYears.add(acc.cataractYear);
+    if (acc.mri !== undefined && acc.mriYear) comparatorYears.add(acc.mriYear);
     out.push({
       province: province === 'Canada' ? 'National Average' : province,
       hip_within_benchmark: acc.hip ?? 0,
@@ -453,7 +455,7 @@ function buildProvincialComparators(rows: LongRow[]): { comparators: ProvincialC
       mri_median_wait_days: acc.mri ?? 0,
     });
   }
-  return { comparators: out, latestYear };
+  return { comparators: out, comparatorYears: Array.from(comparatorYears).sort() };
 }
 
 // Historical wait trends: yearly median wait days for hip/knee/cataract/MRI/CT
@@ -493,13 +495,13 @@ function buildHistoricalWaitTrends(rows: LongRow[]): HistoricalWaitTrend[] {
 
 function parseWorkbook(workbook: XLSX.WorkBook): ParsedWorkbook {
   const rows = extractLongRows(workbook);
-  const { comparators, latestYear } = buildProvincialComparators(rows);
+  const { comparators, comparatorYears } = buildProvincialComparators(rows);
   return {
     imaging: buildImagingTrends(rows),
     cancerSurgery: buildCancerSurgeryTrends(rows),
     radiation: buildRadiationTrends(rows),
     provincialComparators: comparators,
-    comparatorLatestYear: latestYear,
+    comparatorYears,
     historicalWaitTrends: buildHistoricalWaitTrends(rows),
   };
 }
@@ -768,7 +770,7 @@ export async function runSurgical(): Promise<SyncResult> {
       ownedMetadata.CIHI_PROVINCIAL_COMPARATORS = buildMetadataEntry({
         updateType: 'auto',
         source: 'CIHI Wait Times Priority Procedures in Canada',
-        sourceVintage: `CIHI priority procedures (latest data year ${parsed.comparatorLatestYear || 'unknown'})`,
+        sourceVintage: `${parsed.comparatorYears.join(', ') || 'unknown'} (CIHI priority-procedure comparator years; annual)`,
         lastUpdated: timestamp,
       });
     }
