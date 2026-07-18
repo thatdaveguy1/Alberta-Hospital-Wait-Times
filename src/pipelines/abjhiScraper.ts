@@ -1,9 +1,8 @@
-// Alberta Bone & Joint Health Institute (ABJHI) Scraper
-// Scrapes https://albertaboneandjoint.com/resources/wait-times/ for orthopedic
-// hip & knee wait times by geography. Parses TablePress HTML tables embedded in
-// Elementor tab widgets, converts weekly figures to days, merges with existing
-// data-surgical.json, and writes the combined result.
-
+// Alberta Bone & Joint Health Institute / IIHO (now iiho.ca) Scraper
+// Scrapes https://iiho.ca/wait-times/ for orthopedic hip & knee wait times
+// by geography. Parses hidden HTML tables referenced by geography selects,
+// converts weekly figures to days, merges with existing data-surgical.json,
+// and writes the combined result.
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
@@ -18,7 +17,7 @@ import {
 } from './metadataHelpers';
 import type { SyncResult } from './types';
 
-const ABJHI_URL = 'https://albertaboneandjoint.com/resources/wait-times/';
+const ABJHI_URL = 'https://iiho.ca/wait-times/';
 const SURGICAL_FILE = path.join(process.cwd(), 'data-surgical.json');
 const RATE_LIMIT_MS = 2000;
 const WEEKS_TO_DAYS = 7;
@@ -82,7 +81,7 @@ function findLastValidColumn(
   return -1;
 }
 
-// Parse a TablePress table and extract the most recent quarter's metrics.
+// Parse a hidden wait-times table and extract the most recent quarter's metrics.
 function parseTableMetrics(
   $: cheerio.CheerioAPI,
   $table: cheerio.Cheerio<AnyNode>,
@@ -95,57 +94,62 @@ function parseTableMetrics(
 
   const quarter = $($headerCells.get(lastCol + 1)).text().trim() || null;
 
-  // Build a map of row label → cell value at the target column.
-  const rowValues: Record<string, number | null> = {};
+  const metrics: RawTableMetrics = {
+    longest10Weeks: null,
+    averageWeeks: null,
+    shortest25Weeks: null,
+    count: null,
+    quarter,
+  };
+
   $table.find('tbody tr').each((_, tr) => {
     const $cells = $(tr).find('td');
     if ($cells.length < lastCol + 2) return;
-    const label = $($cells.get(0)).text().trim();
+    const label = $($cells.get(0))
+      .text()
+      .toLowerCase()
+      .replace(/\u00a0/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     const value = parseCellNumber($($cells.get(lastCol + 1)).text());
-    rowValues[label] = value;
+
+    if (label === 'average') {
+      metrics.averageWeeks = value;
+    } else if (
+      /longest\s*10%\s*(?:\(?\s*90t?h?\s*percentile\s*\)?)?/i.test(label)
+    ) {
+      metrics.longest10Weeks = value;
+    } else if (/shortest\s*25%/i.test(label)) {
+      metrics.shortest25Weeks = value;
+    } else if (
+      /(?:consult|surgery)\s*count/i.test(label) ||
+      /surgeries\s*\(#\)/i.test(label) ||
+      /surgeon\s*consults?\s*\(#\)/i.test(label)
+    ) {
+      metrics.count = value;
+    }
   });
 
-  return {
-    longest10Weeks: rowValues['Longest 10% (90th Percentile)'] ?? null,
-    averageWeeks: rowValues['Average'] ?? null,
-    shortest25Weeks: rowValues['Shortest 25%'] ?? null,
-    count: rowValues['Surgeries (#)'] ?? rowValues['Surgeon Consults (#)'] ?? null,
-    quarter,
-  };
-}
+  if (metrics.longest10Weeks === null && metrics.averageWeeks === null) {
+    return null;
+  }
 
-// Determine whether a table is a Hip Surgery or Knee Surgery table from its header text.
-function classifySurgeryTable(
-  $: cheerio.CheerioAPI,
-  $table: cheerio.Cheerio<AnyNode>,
-): Procedure | null {
-  const headerText = $table.find('thead th').first().text().trim().toLowerCase();
-  if (headerText.includes('hip')) return 'Hip Replacement';
-  if (headerText.includes('knee')) return 'Knee Replacement';
-  return null;
+  return metrics;
 }
-
-// Parse the "Wait for Surgeon Consult" section — first tab widget on the page.
-// Returns a map of geography → consult metrics (90th percentile wait + consult count).
+// Parse the "Wait for Surgeon Consult" section. Each select option points to a
+// hidden table container. Returns a map of geography → consult metrics.
 function parseConsultSection(
   $: cheerio.CheerioAPI,
-  $wrapper: cheerio.Cheerio<AnyNode>,
 ): Map<string, ConsultMetrics> {
   const consultData = new Map<string, ConsultMetrics>();
 
-  $wrapper.find('.elementor-tab-content').each((_, contentEl) => {
-    const $content = $(contentEl);
-    const tabNum = $content.attr('data-tab');
-    if (!tabNum) return;
+  $('#wait-surgeon-consult-select option').each((_, optionEl) => {
+    const $option = $(optionEl);
+    const value = $option.attr('value')?.trim();
+    const geography = $option.text().trim();
+    if (!value || !geography) return;
 
-    // Match the tab title (mobile or desktop) with the same data-tab number.
-    const $title = $wrapper
-      .find(`.elementor-tab-title[data-tab="${tabNum}"]`)
-      .first();
-    const geography = $title.text().trim();
-    if (!geography) return;
-
-    const $table = $content.find('table').first();
+    const $table = $(`#wait-surgeon-consult-${value}-container.waittimes.wait-surgeon-consult table`).first();
     if ($table.length === 0) return;
 
     const metrics = parseTableMetrics($, $table);
@@ -160,37 +164,37 @@ function parseConsultSection(
   return consultData;
 }
 
-// Parse the "Wait for Surgery" section — second tab widget on the page.
-// Returns an array of surgery metrics tagged with procedure type and geography.
+// Parse the "Wait for Surgery" section. Hip and knee each have a select whose
+// options map to hidden table containers. Returns an array of surgery metrics
+// tagged with procedure type and geography.
 function parseSurgerySection(
   $: cheerio.CheerioAPI,
-  $wrapper: cheerio.Cheerio<AnyNode>,
 ): SurgeryMetrics[] {
   const results: SurgeryMetrics[] = [];
 
-  $wrapper.find('.elementor-tab-content').each((_, contentEl) => {
-    const $content = $(contentEl);
-    const tabNum = $content.attr('data-tab');
-    if (!tabNum) return;
+  const parseFamily = (
+    selectId: string,
+    containerClass: string,
+    procedure: Procedure,
+  ) => {
+    $(`#${selectId} option`).each((_, optionEl) => {
+      const $option = $(optionEl);
+      const value = $option.attr('value')?.trim();
+      const geography = $option.text().trim();
+      if (!value || !geography) return;
 
-    const $title = $wrapper
-      .find(`.elementor-tab-title[data-tab="${tabNum}"]`)
-      .first();
-    const geography = $title.text().trim();
-    if (!geography) return;
-
-    // Each surgery tab content has two tables: hip and knee.
-    $content.find('table').each((_, tableEl) => {
-      const $table = $(tableEl);
-      const procedure = classifySurgeryTable($, $table);
-      if (!procedure) return;
+      const $table = $(`#${containerClass}-${value}-container.waittimes.${containerClass} table`).first();
+      if ($table.length === 0) return;
 
       const metrics = parseTableMetrics($, $table);
       if (!metrics) return;
 
       results.push({ ...metrics, procedure, geography });
     });
-  });
+  };
+
+  parseFamily('wait-surgery-hip-select', 'wait-surgery-hip', 'Hip Replacement');
+  parseFamily('wait-surgery-knee-select', 'wait-surgery-knee', 'Knee Replacement');
 
   return results;
 }
@@ -322,20 +326,11 @@ export async function run(): Promise<SyncResult> {
     });
 
     const $ = cheerio.load(response.data);
-    const $wrappers = $('.elementor-tabs-content-wrapper');
-
-    if ($wrappers.length < 2) {
-      throw new Error(
-        `Expected 2 tab sections (consult + surgery), found ${$wrappers.length}`,
-      );
-    }
-
-    // Section 1: "Wait for Surgeon Consult" — tables 1-8.
-    const consultData = parseConsultSection($, $wrappers.eq(0));
+    const consultData = parseConsultSection($);
     console.log(`[AbjhiScraper] Parsed ${consultData.size} consult geographies`);
 
-    // Section 2: "Wait for Surgery" — hip tables 101+, knee tables 201+.
-    const surgeryMetrics = parseSurgerySection($, $wrappers.eq(1));
+    // Section 2: "Wait for Surgery" — hip and knee hidden tables.
+    const surgeryMetrics = parseSurgerySection($);
     console.log(`[AbjhiScraper] Parsed ${surgeryMetrics.length} surgery records`);
 
     if (surgeryMetrics.length === 0) {
