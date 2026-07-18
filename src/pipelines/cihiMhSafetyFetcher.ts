@@ -97,7 +97,7 @@ const INDICATOR_URLS: { url: string; domain: string; key: string }[] = [
 // sibling writers' entries are preserved via mergeDataMetadata.
 const DOMAIN_METADATA_BUILDERS: Record<
   string,
-  Record<string, (ts: string) => DataMetadata[string]>
+  Record<string, (ts: string, records?: unknown[]) => DataMetadata[string]>
 > = {
   'primary-care': {
     CIHI_SAME_DAY_ACCESS: (ts) =>
@@ -158,7 +158,45 @@ const DOMAIN_METADATA_BUILDERS: Record<
         lastUpdated: ts,
       }),
   },
+  'surgical': {
+    CIHI_SURGICAL_VOLUME_TRENDS: (ts, records) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI indicator XLSX (884 annual change in surgical volumes since start of COVID-19 pandemic)',
+        sourceVintage: `Fiscal years ${deriveFiscalYearRange(records || [])}`,
+        lastUpdated: ts,
+      }),
+    CIHI_JOINT_REPLACEMENT_WAITS: (ts, records) =>
+      buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI indicator XLSX (843 joint replacement wait times)',
+        sourceVintage: `Fiscal years ${deriveFiscalYearRange(records || [])}`,
+        lastUpdated: ts,
+      }),
+  },
 };
+
+/** Derive a fiscal-year range string (e.g. "2019\u20132020 to 2024\u20132025") from CIHI indicator rows. */
+function deriveFiscalYearRange(records: unknown[]): string {
+  const ranges: { start: number; label: string }[] = [];
+  for (const raw of records) {
+    if (!raw || typeof raw !== 'object') continue;
+    const record = raw as Record<string, unknown>;
+    const value = asString(record['Time frame']);
+    if (!value) continue;
+    const match = value.match(/(\d{4})[\u2013-](\d{4})/);
+    if (match) {
+      const start = Number(match[1]);
+      const label = `${match[1]}\u2013${match[2]}`;
+      ranges.push({ start, label });
+    }
+  }
+  ranges.sort((a, b) => a.start - b.start);
+  if (ranges.length === 0) return 'latest CIHI release';
+  const first = ranges[0].label;
+  const last = ranges[ranges.length - 1].label;
+  return first === last ? first : `${first} to ${last}`;
+}
 
 interface LoadedJson {
   [key: string]: unknown;
@@ -323,13 +361,14 @@ export async function run(): Promise<SyncResult> {
         for (const key of Object.keys(domainUpdates)) {
           const builder = domainBuilders[key];
           if (builder) {
-            ownedMetadata[key] = builder(timestamp);
+            ownedMetadata[key] = builder(timestamp, updates[domain][key]);
           }
         }
         if (Object.keys(ownedMetadata).length > 0) {
           merged._dataMetadata = mergeDataMetadata(
             existing._dataMetadata as DataMetadata | undefined,
             ownedMetadata,
+            Object.keys(domainUpdates),
           );
         }
       }

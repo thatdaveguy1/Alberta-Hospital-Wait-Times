@@ -86,11 +86,22 @@ function normaliseYear(raw: unknown): string | undefined {
   return match ? match[0] : s;
 }
 
+function deriveYearRange(years: (string | undefined)[]): string {
+  const valid = years
+    .filter((y): y is string => typeof y === 'string' && y.length > 0)
+    .sort();
+  if (valid.length === 0) return 'unknown';
+  const first = valid[0];
+  const last = valid[valid.length - 1];
+  return first === last ? first : `${first}\u2013${last}`;
+}
+
 interface ParsedWorkbook {
   imaging: ImagingWaitTrend[];
   cancerSurgery: CancerSurgeryWaitTrend[];
   radiation: RadiationTherapyCompliance[];
   provincialComparators: ProvincialComparator[];
+  comparatorLatestYear: string | undefined;
   historicalWaitTrends: HistoricalWaitTrend[];
 }
 
@@ -412,15 +423,15 @@ const PROVINCE_COMPARATOR_NAMES: Record<string, true> = {
   'Manitoba': true, 'Ontario': true, 'Quebec': true, 'Canada': true,
 };
 
-function buildProvincialComparators(rows: LongRow[]): ProvincialComparator[] {
-  // CIHI uses "% within benchmark" metric for hip/knee/cataract
-  // and "50th percentile" for MRI median wait days
+function buildProvincialComparators(rows: LongRow[]): { comparators: ProvincialComparator[]; latestYear?: string } {
   const accMap = new Map<string, { hip?: number; knee?: number; cataract?: number; mri?: number }>();
+  let latestYear: string | undefined;
   for (const row of rows) {
     if (!PROVINCE_COMPARATOR_NAMES[row.province]) continue;
     const isWithinBenchmark = row.metric.includes('% within benchmark') || row.metric.includes('within benchmark');
     const isMedian = row.metric.includes('50th percentile') || row.metric.includes('median');
     if (!isWithinBenchmark && !isMedian) continue;
+    if (row.year && (!latestYear || row.year > latestYear)) latestYear = row.year;
 
     let acc = accMap.get(row.province);
     if (!acc) { acc = {}; accMap.set(row.province, acc); }
@@ -442,7 +453,7 @@ function buildProvincialComparators(rows: LongRow[]): ProvincialComparator[] {
       mri_median_wait_days: acc.mri ?? 0,
     });
   }
-  return out;
+  return { comparators: out, latestYear };
 }
 
 // Historical wait trends: yearly median wait days for hip/knee/cataract/MRI/CT
@@ -482,11 +493,13 @@ function buildHistoricalWaitTrends(rows: LongRow[]): HistoricalWaitTrend[] {
 
 function parseWorkbook(workbook: XLSX.WorkBook): ParsedWorkbook {
   const rows = extractLongRows(workbook);
+  const { comparators, latestYear } = buildProvincialComparators(rows);
   return {
     imaging: buildImagingTrends(rows),
     cancerSurgery: buildCancerSurgeryTrends(rows),
     radiation: buildRadiationTrends(rows),
-    provincialComparators: buildProvincialComparators(rows),
+    provincialComparators: comparators,
+    comparatorLatestYear: latestYear,
     historicalWaitTrends: buildHistoricalWaitTrends(rows),
   };
 }
@@ -568,6 +581,7 @@ function mergeAndWrite(
         existing._dataMetadata = mergeDataMetadata(
           existing._dataMetadata as DataMetadata | undefined,
           stamped,
+          refreshedKeys,
         );
       }
     }
@@ -600,6 +614,7 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
+    const imagingYearRange = deriveYearRange(parsed.imaging.map((r) => r.year));
     const recordsWritten = mergeAndWrite(
       DIAGNOSTIC_FILE,
       {
@@ -609,7 +624,7 @@ export async function run(): Promise<SyncResult> {
         IMAGING_WAIT_TRENDS: buildMetadataEntry({
           updateType: 'auto',
           source: 'CIHI Wait Times Priority Procedures in Canada',
-          sourceVintage: 'CIHI priority procedures imaging time series',
+          sourceVintage: imagingYearRange,
           lastUpdated: timestamp,
         }),
       },
@@ -748,7 +763,25 @@ export async function runSurgical(): Promise<SyncResult> {
     if (parsed.historicalWaitTrends.length > 0) {
       newPartial.HISTORICAL_WAIT_TRENDS = parsed.historicalWaitTrends;
     }
-    const recordsWritten = mergeAndWrite(SURGICAL_FILE, newPartial);
+    const ownedMetadata: DataMetadata = {};
+    if (parsed.provincialComparators.length > 0) {
+      ownedMetadata.CIHI_PROVINCIAL_COMPARATORS = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Wait Times Priority Procedures in Canada',
+        sourceVintage: `CIHI priority procedures (latest data year ${parsed.comparatorLatestYear || 'unknown'})`,
+        lastUpdated: timestamp,
+      });
+    }
+    if (parsed.historicalWaitTrends.length > 0) {
+      const historicalRange = deriveYearRange(parsed.historicalWaitTrends.map((r) => r.year));
+      ownedMetadata.HISTORICAL_WAIT_TRENDS = buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI Wait Times Priority Procedures in Canada',
+        sourceVintage: historicalRange,
+        lastUpdated: timestamp,
+      });
+    }
+    const recordsWritten = mergeAndWrite(SURGICAL_FILE, newPartial, ownedMetadata);
     const status: SyncResult['status'] = recordsWritten > 0 ? 'success' : 'skipped';
     console.log(
       `[CIHIWaitTimes] Surgical complete. fetched=${recordsFetched} written=${recordsWritten} in ${Date.now() - startTime}ms`,

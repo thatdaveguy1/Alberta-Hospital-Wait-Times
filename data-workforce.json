@@ -1,64 +1,14 @@
 {
   "PHYSICIAN_SPECIALTY_ZONE": [
     {
-      "zone": "Calgary Zone",
-      "familyMedicine": 2649,
-      "medicalSpecialties": 1805,
-      "surgicalSpecialties": 701,
-      "laboratorySpecialties": 167,
-      "psychiatry": 431,
-      "totalActive": 5753,
-      "ratePer100k": 359.6
-    },
-    {
-      "zone": "Edmonton Zone",
-      "familyMedicine": 2397,
-      "medicalSpecialties": 2022,
-      "surgicalSpecialties": 785,
-      "laboratorySpecialties": 205,
-      "psychiatry": 451,
-      "totalActive": 5860,
-      "ratePer100k": 404.1
-    },
-    {
-      "zone": "Central Zone",
-      "familyMedicine": 666,
-      "medicalSpecialties": 210,
-      "surgicalSpecialties": 127,
-      "laboratorySpecialties": 32,
-      "psychiatry": 70,
-      "totalActive": 1105,
-      "ratePer100k": 230.2
-    },
-    {
-      "zone": "South Zone",
-      "familyMedicine": 430,
-      "medicalSpecialties": 143,
-      "surgicalSpecialties": 76,
-      "laboratorySpecialties": 18,
-      "psychiatry": 41,
-      "totalActive": 708,
-      "ratePer100k": 228.4
-    },
-    {
-      "zone": "North Zone",
-      "familyMedicine": 550,
-      "medicalSpecialties": 90,
-      "surgicalSpecialties": 60,
-      "laboratorySpecialties": 12,
-      "psychiatry": 26,
-      "totalActive": 738,
-      "ratePer100k": 150.9
-    },
-    {
       "zone": "Alberta",
-      "familyMedicine": 6692,
-      "medicalSpecialties": 4270,
-      "surgicalSpecialties": 1749,
-      "laboratorySpecialties": 434,
-      "psychiatry": 1019,
-      "totalActive": 14164,
-      "ratePer100k": 327.2
+      "familyMedicine": 0,
+      "medicalSpecialties": 0,
+      "surgicalSpecialties": 0,
+      "laboratorySpecialties": 0,
+      "psychiatry": 0,
+      "totalActive": 14156,
+      "ratePer100k": 0
     }
   ],
   "NURSING_SUPPLY_TRENDS": [],
@@ -69,56 +19,98 @@
       "sector": "All Alberta Sectors",
       "vacanciesCount": 88823,
       "vacancyRatePct": 4.3,
-      "avgOfferedHourlyWage": 0
+      "avgOfferedHourlyWage": null
     },
     {
       "quarter": "2023-Q2",
       "sector": "All Alberta Sectors",
       "vacanciesCount": 96508,
       "vacancyRatePct": 4.6,
-      "avgOfferedHourlyWage": 0
+      "avgOfferedHourlyWage": null
     },
     {
       "quarter": "2023-Q3",
       "sector": "All Alberta Sectors",
       "vacanciesCount": 90283,
       "vacancyRatePct": 4.2,
-      "avgOfferedHourlyWage": 0
+      "avgOfferedHourlyWage": null
     },
     {
       "quarter": "2023-Q4",
       "sector": "All Alberta Sectors",
       "vacanciesCount": 78315,
       "vacancyRatePct": 3.6,
-      "avgOfferedHourlyWage": 0
+      "avgOfferedHourlyWage": null
     },
     {
       "quarter": "2024-Q1",
       "sector": "All Alberta Sectors",
       "vacanciesCount": 73298,
       "vacancyRatePct": 3.5,
-      "avgOfferedHourlyWage": 0
+      "avgOfferedHourlyWage": null
     },
     {
       "quarter": "2024-Q2",
       "sector": "All Alberta Sectors",
       "vacanciesCount": 77173,
       "vacancyRatePct": 3.6,
-      "avgOfferedHourlyWage": 0
+      "avgOfferedHourlyWage": null
     },
     {
       "quarter": "2024-Q3",
       "sector": "All Alberta Sectors",
       "vacanciesCount": 74257,
       "vacancyRatePct": 3.4,
-      "avgOfferedHourlyWage": 0
+      "avgOfferedHourlyWage": null
     },
     {
       "quarter": "2024-Q4",
       "sector": "All Alberta Sectors",
       "vacanciesCount": 63825,
       "vacancyRatePct": 2.9,
-      "avgOfferedHourlyWage": 0
+      "avgOfferedHourlyWage": null
+    },
+    {
+      "quarter": "2025-Q1",
+      "sector": "All Alberta Sectors",
+      "vacanciesCount": 59377,
+      "vacancyRatePct": 2.8,
+      "avgOfferedHourlyWage": null
+    },
+    {
+      "quarter": "2025-Q2",
+      "sector": "All Alberta Sectors",
+      "vacanciesCount": 70268,
+      "vacancyRatePct": 3.3,
+      "avgOfferedHourlyWage": null
+    },
+    {
+      "quarter": "2025-Q3",
+      "sector": "All Alberta Sectors",
+      "vacanciesCount": 63818,
+      "vacancyRatePct": 2.9,
+      "avgOfferedHourlyWage": null
+    },
+    {
+      "quarter": "2025-Q4",
+      "sector": "All Alberta Sectors",
+      "vacanciesCount": 58365,
+      "vacancyRatePct": 2.7,
+      "avgOfferedHourlyWage": null
+    },
+    {
+      "quarter": "2026-Q1",
+      "sector": "All Alberta Sectors",
+      "vacanciesCount": 60965,
+      "vacancyRatePct": 2.8,
+      "avgOfferedHourlyWage": null
+    },
+    {
+      "quarter": "2026-Q2",
+      "sector": "All Alberta Sectors",
+      "vacanciesCount": 70170,
+      "vacancyRatePct": 3.3,
+      "avgOfferedHourlyWage": null
     }
   ],
   "SPECIALIST_RECRUITMENT_NEEDS": [],
@@ -6007,13 +5999,13 @@
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:01:42.303Z",
       "source": "CPSA quarterly statistics",
-      "sourceVintage": "Latest CPSA quarterly release"
+      "sourceVintage": "Q2 2026 (as of 2026-06-30)"
     },
     "JOB_VACANCY_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-17T12:00:06.754Z",
+      "lastUpdated": "2026-07-18T13:09:33.493Z",
       "source": "StatCan table 14100371 via WDS CSV",
-      "sourceVintage": "2023-Q1 to 2024-Q4"
+      "sourceVintage": "2023-Q1 to 2026-Q2"
     },
     "PHYSICIAN_SUPPLY_CIHI": {
       "updateType": "auto",

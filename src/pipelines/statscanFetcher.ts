@@ -50,10 +50,9 @@ const STATCAN_WDS_BASE = 'https://www150.statcan.gc.ca/t1/wds/rest';
 // download endpoint (the product ID 14-10-0371-01 maps to table 14100371).
 const JVWS_TABLE_ID = '14100371';
 
-// Quarters to emit — covers the historical window used by the dashboard.
-// Monthly CSV rows outside this window are dropped during aggregation.
+// Earliest quarter to emit — the dashboard historical window. The end quarter
+// is derived from the latest monthly REF_DATE actually present in the upstream CSV.
 const START_PERIOD = '2023-Q1';
-const END_PERIOD = '2024-Q4';
 
 const REQUEST_TIMEOUT_MS = 30_000;
 const MIN_INTERVAL_MS = 2_000; // rate limit: 1 request / 2s
@@ -246,19 +245,17 @@ interface QuarterBucket {
  *  Keeps Alberta rows whose Statistics column is "Job vacancies" or
  *  "Job vacancy rate", buckets them by quarter, averages the monthly values
  *  within each quarter, and emits one record per quarter sorted ascending.
- *  Records outside [startPeriod, endPeriod] are dropped.
+ *  Only rows from START_PERIOD onward are kept; the latest available quarter
+ *  is determined from the data itself, so output is never capped at a fixed end.
  */
 function aggregateQuarters(
   rows: CsvRow[],
-  startPeriod: string,
-  endPeriod: string
+  startPeriod: string
 ): JobVacancyTrendRecord[] {
   const startRange = quarterToMonthRange(startPeriod);
-  const endRange = quarterToMonthRange(endPeriod);
-  if (!startRange || !endRange) return [];
+  if (!startRange) return [];
 
   const startMonth = startRange[0];
-  const endMonth = endRange[1];
 
   const byQuarter = new Map<string, QuarterBucket>();
 
@@ -267,7 +264,7 @@ function aggregateQuarters(
     if (geo !== 'Alberta') continue;
 
     const refDate = row['REF_DATE'];
-    if (!refDate || refDate < startMonth || refDate > endMonth) continue;
+    if (!refDate || refDate < startMonth) continue;
 
     const statistic = row['Statistics'];
     if (statistic !== 'Job vacancies' && statistic !== 'Job vacancy rate') {
@@ -447,7 +444,7 @@ export async function run(): Promise<SyncResult> {
     let records: JobVacancyTrendRecord[];
     try {
       const rows = parseCsv(csvText);
-      records = aggregateQuarters(rows, START_PERIOD, END_PERIOD);
+      records = aggregateQuarters(rows, START_PERIOD);
     } catch (parseErr) {
       const msg = parseErr instanceof Error ? parseErr.message : String(parseErr);
       return skipped(
@@ -463,14 +460,20 @@ export async function run(): Promise<SyncResult> {
         startTime,
         timestamp,
         `StatCan table ${JVWS_TABLE_ID} yielded no Alberta job-vacancy rows ` +
-          `over ${START_PERIOD}–${END_PERIOD}. The table contents or ` +
+          `from ${START_PERIOD} through the latest available month. The table contents or ` +
           'geography coding may have changed.'
       );
     }
 
+    const sourceVintage = records.length
+      ? `${records[0].quarter} to ${records[records.length - 1].quarter}`
+      : '';
     // 5. Merge into existing workforce file — preserve measured non-StatCan datasets.
     //    Force withheld illustrative panels empty so RMW cannot reintroduce them.
     const existing = readWorkforceFile();
+    const contentChanged =
+      JSON.stringify(existing.JOB_VACANCY_TRENDS ?? []) !==
+      JSON.stringify(records);
     const merged: WorkforceJson = {
       ...existing,
       JOB_VACANCY_TRENDS: records,
@@ -486,11 +489,15 @@ export async function run(): Promise<SyncResult> {
       JOB_VACANCY_TRENDS: buildMetadataEntry({
         updateType: 'auto',
         source: 'StatCan table 14100371 via WDS CSV',
-        sourceVintage: '2023-Q1 to 2024-Q4',
+        sourceVintage,
         lastUpdated: timestamp,
       }),
     };
-    merged._dataMetadata = mergeDataMetadata(existing._dataMetadata, ownedMetadata);
+    merged._dataMetadata = mergeDataMetadata(
+      existing._dataMetadata,
+      ownedMetadata,
+      contentChanged ? ['JOB_VACANCY_TRENDS'] : []
+    );
 
     applyWithheldPayloadGuard(merged as unknown as Record<string, unknown>);
     fs.writeFileSync(WORKFORCE_FILE, JSON.stringify(merged, null, 2), 'utf8');
@@ -498,7 +505,7 @@ export async function run(): Promise<SyncResult> {
     const durationMs = Date.now() - startTime;
     console.log(
       `[StatsCanFetcher] Sync complete. ${records.length} quarters written to ` +
-        `data-workforce.json (${START_PERIOD}–${END_PERIOD}). ${durationMs}ms`
+        `data-workforce.json (${sourceVintage}). ${durationMs}ms`
     );
 
     return {

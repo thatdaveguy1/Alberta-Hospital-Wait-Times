@@ -51,6 +51,22 @@ function loadJsonFile(file: string): LoadedJson {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
+function extractDataAsOf(html: string): string | undefined {
+  const match = html.match(/up-to-date as of ([A-Za-z]+ \d{1,2}, \d{4})/i);
+  if (!match) return undefined;
+  const dateMatch = match[1].match(/^([A-Za-z]+) (\d{1,2}), (\d{4})$/);
+  if (!dateMatch) return undefined;
+  const monthNames: Record<string, number> = {
+    January: 0, February: 1, March: 2, April: 3, May: 4, June: 5,
+    July: 6, August: 7, September: 8, October: 9, November: 10, December: 11,
+  };
+  const month = monthNames[dateMatch[1]];
+  const day = parseInt(dateMatch[2], 10);
+  const year = parseInt(dateMatch[3], 10);
+  if (month === undefined || Number.isNaN(day) || Number.isNaN(year)) return undefined;
+  return new Date(Date.UTC(year, month, day)).toISOString().slice(0, 10);
+}
+
 
 // Zone mapping for Alberta wastewater sites
 const SITE_TO_ZONE: Record<string, WastewaterSignal['zone']> = {
@@ -65,6 +81,9 @@ const SITE_TO_ZONE: Record<string, WastewaterSignal['zone']> = {
   'Jasper': 'Edmonton Zone',
   'Banff': 'Calgary Zone',
 };
+const DEPRECATED_SITES: Record<string, true> = { Jasper: true, Banff: true };
+const EDMONTON_SITE_KEY = 'Edmonton (Gold Bar Plant)';
+
 
 // Population served is not published in RVD traces — leave 0 (never invent).
 
@@ -134,10 +153,17 @@ function parseWastewaterTraces(traces: unknown[]): ParsedSignal[] {
     if (!Array.isArray(x) || !Array.isArray(y) || x.length === 0 || y.length === 0) continue;
     if (x.length !== y.length) continue;
 
-    // Get latest value
-    const latestIdx = y.length - 1;
-    const latestValue = typeof y[latestIdx] === 'number' ? (y[latestIdx] as number) : 0;
-    const latestDate = typeof x[latestIdx] === 'string' ? (x[latestIdx] as string) : '';
+    // Get latest non-null value
+    let latestIdx = y.length - 1;
+    while (latestIdx >= 0 && (typeof y[latestIdx] !== 'number' || y[latestIdx] === null)) {
+      latestIdx--;
+    }
+    if (latestIdx === -1) continue;
+    const latestValueRaw = y[latestIdx];
+    if (typeof latestValueRaw !== 'number') continue;
+    const latestValue = latestValueRaw;
+    const latestDateRaw = x[latestIdx];
+    const latestDate = typeof latestDateRaw === 'string' ? latestDateRaw : '';
 
     // Compute trend from last 5 vs previous 5 values
     const recent = (y as number[]).slice(-5);
@@ -168,47 +194,50 @@ function parseWastewaterTraces(traces: unknown[]): ParsedSignal[] {
   return signals;
 }
 
-// Map parsed signals to existing WastewaterSignal entries by site name
 function mergeWastewaterSignals(
   existing: WastewaterSignal[],
   parsed: ParsedSignal[],
 ): WastewaterSignal[] {
-  const merged = [...existing];
-  const usedParsed = new Set<number>();
+  const merged: WastewaterSignal[] = [];
+  const existingBySite = new Map(existing.map((s) => [s.site.toLowerCase(), s]));
 
-  // Match by site name (case-insensitive partial match)
-  for (let i = 0; i < merged.length; i++) {
-    const existingSite = merged[i].site.toLowerCase();
-    for (let j = 0; j < parsed.length; j++) {
-      if (usedParsed.has(j)) continue;
-      const parsedSite = parsed[j].site.toLowerCase();
-      // Match if one contains the other
-      if (existingSite.includes(parsedSite) || parsedSite.includes(existingSite)) {
-        merged[i] = {
-          ...merged[i],
-          covidSignal: parsed[j].covidSignal,
-          trend: parsed[j].trend,
-          activityLevel: parsed[j].activityLevel,
-        };
-        usedParsed.add(j);
+  for (const p of parsed) {
+    // Official RVD note: "Data from Jasper and Banff National Parks will not be
+    // updated after April 2025." Do not surface stale national-park sites as live.
+    if (DEPRECATED_SITES[p.site]) continue;
+
+    const parsedSite = p.site.toLowerCase();
+    let prev: WastewaterSignal | undefined;
+    for (const [site, sig] of existingBySite) {
+      if (site.includes(parsedSite) || parsedSite.includes(site)) {
+        prev = sig;
         break;
       }
     }
-  }
 
-  // Add any parsed signals that didn't match existing entries
-  for (let j = 0; j < parsed.length; j++) {
-    if (usedParsed.has(j)) continue;
-    const zone = SITE_TO_ZONE[parsed[j].site] ?? 'North Zone';
-    merged.push({
-      site: parsed[j].site,
-      zone,
+    // COVID is the only verified RVD wastewater trace. Do not carry forward
+    // prior fluA/rsv values as current measurements.
+    const isEdmonton = prev ? prev.site === EDMONTON_SITE_KEY : false;
+    const base = prev ?? {
+      site: p.site,
+      zone: SITE_TO_ZONE[p.site] ?? 'North Zone',
       populationServed: 0,
-      covidSignal: parsed[j].covidSignal,
-      fluASignal: 0,
-      rsvSignal: 0,
-      activityLevel: parsed[j].activityLevel,
-      trend: parsed[j].trend,
+      covidSignal: 0,
+      activityLevel: 'Low' as const,
+      trend: 'Stable' as const,
+    };
+    const fluASignal = isEdmonton ? prev!.fluASignal : undefined;
+    const rsvSignal = isEdmonton ? prev!.rsvSignal : undefined;
+
+    merged.push({
+      ...base,
+      site: base.site,
+      covidSignal: p.covidSignal,
+      trend: p.trend,
+      activityLevel: p.activityLevel,
+      sampleDate: p.latestDate,
+      fluASignal,
+      rsvSignal,
     });
   }
 
@@ -227,8 +256,7 @@ interface ImmunizationEntry {
  doses: number;
 }
 
-// Parse summary page traces (respiratory virus case counts by type)
-function parseSummaryTraces(traces: unknown[]): RespiratoryVirusEntry[] {
+function parseSummaryTraces(traces: unknown[], dataAsOf: string | undefined): RespiratoryVirusEntry[] {
   const entries: RespiratoryVirusEntry[] = [];
   for (const trace of traces) {
     if (!isRecord(trace)) continue;
@@ -238,9 +266,11 @@ function parseSummaryTraces(traces: unknown[]): RespiratoryVirusEntry[] {
     const y = trace['y'];
     if (!Array.isArray(x) || !Array.isArray(y)) continue;
     for (let i = 0; i < Math.min(x.length, y.length); i++) {
-      const weekEnding = typeof x[i] === 'string' ? (x[i] as string) : '';
-      const count = typeof y[i] === 'number' ? (y[i] as number) : null;
+      const weekEndingRaw = x[i];
+      const weekEnding = typeof weekEndingRaw === 'string' ? weekEndingRaw : '';
+      const count = typeof y[i] === 'number' ? y[i] : null;
       if (weekEnding && count !== null) {
+        if (dataAsOf && weekEnding > dataAsOf) continue;
         entries.push({ virus, weekEnding, count });
       }
     }
@@ -248,7 +278,7 @@ function parseSummaryTraces(traces: unknown[]): RespiratoryVirusEntry[] {
   return entries;
 }
 
-function parseImmunizationTraces(traces: unknown[]): ImmunizationEntry[] {
+function parseImmunizationTraces(traces: unknown[], dataAsOf: string | undefined): ImmunizationEntry[] {
   const entries: ImmunizationEntry[] = [];
   for (const trace of traces) {
     if (!isRecord(trace)) continue;
@@ -258,9 +288,11 @@ function parseImmunizationTraces(traces: unknown[]): ImmunizationEntry[] {
     const y = trace['y'];
     if (!Array.isArray(x) || !Array.isArray(y)) continue;
     for (let i = 0; i < Math.min(x.length, y.length); i++) {
-      const weekEnding = typeof x[i] === 'string' ? (x[i] as string) : '';
-      const doses = typeof y[i] === 'number' ? (y[i] as number) : null;
+      const weekEndingRaw = x[i];
+      const weekEnding = typeof weekEndingRaw === 'string' ? weekEndingRaw : '';
+      const doses = typeof y[i] === 'number' ? y[i] : null;
       if (weekEnding && doses !== null) {
+        if (dataAsOf && weekEnding > dataAsOf) continue;
         entries.push({ season, weekEnding, doses });
       }
     }
@@ -276,6 +308,31 @@ function deriveDateRange(weekEndings: string[]): string {
   const last = dates[dates.length - 1];
   return first === last ? first : `${first} to ${last}`;
 }
+function deriveWastewaterSourceVintage(signals: WastewaterSignal[]): string {
+  const sampleDates = signals
+    .map((s) => s.sampleDate)
+    .filter((d): d is string => typeof d === 'string' && d.length > 0)
+    .sort();
+  if (sampleDates.length === 0) return 'Unavailable';
+  const first = sampleDates[0];
+  const last = sampleDates[sampleDates.length - 1];
+  return first === last ? first : `${first} to ${last}`;
+}
+
+function deriveImmunizationSourceVintage(entries: ImmunizationEntry[]): string {
+  const seasons = Array.from(new Set(entries.map((e) => e.season))).sort();
+  if (seasons.length === 0) return 'Alberta RVD immunizations (no seasons parsed)';
+  const currentSeason = seasons[seasons.length - 1];
+  const currentWeeks = entries
+    .filter((e) => e.season === currentSeason)
+    .map((e) => e.weekEnding)
+    .filter((d) => d.length > 0)
+    .sort();
+  const currentLatest = currentWeeks.length > 0 ? currentWeeks[currentWeeks.length - 1] : '';
+  const periods = seasons.map((s) => (s === currentSeason && currentLatest ? `${s} through ${currentLatest}` : s));
+  return `Cumulative influenza immunization doses by epidemiological week (${periods.join(', ')})`;
+}
+
 
 
 export async function run(): Promise<SyncResult> {
@@ -294,6 +351,8 @@ export async function run(): Promise<SyncResult> {
     await new Promise<void>((resolve) => setTimeout(resolve, RATE_LIMIT_MS));
 
     const wwHtml = wwResponse.data;
+    const dataAsOf = extractDataAsOf(wwHtml);
+    console.log(`[AlbertaRVDScraper] Dashboard as-of date: ${dataAsOf ?? 'not found'}`);
     console.log(`[AlbertaRVDScraper] Wastewater page: ${wwHtml.length} bytes`);
     const wwTraces = extractPlotlyData(wwHtml);
     console.log(`[AlbertaRVDScraper] Found ${wwTraces.length} wastewater traces`);
@@ -313,7 +372,7 @@ export async function run(): Promise<SyncResult> {
     await new Promise<void>((resolve) => setTimeout(resolve, RATE_LIMIT_MS));
     const sumHtml = sumResponse.data;
     const sumTraces = extractPlotlyData(sumHtml);
-    const summaryEntries = parseSummaryTraces(sumTraces);
+    const summaryEntries = parseSummaryTraces(sumTraces, dataAsOf);
     console.log(`[AlbertaRVDScraper] Parsed ${summaryEntries.length} respiratory virus summary entries`);
 
     // === 3. Immunizations ===
@@ -326,7 +385,7 @@ export async function run(): Promise<SyncResult> {
     await new Promise<void>((resolve) => setTimeout(resolve, RATE_LIMIT_MS));
     const immHtml = immResponse.data;
     const immTraces = extractPlotlyData(immHtml);
-    const immEntries = parseImmunizationTraces(immTraces);
+    const immEntries = parseImmunizationTraces(immTraces, dataAsOf);
     console.log(`[AlbertaRVDScraper] Parsed ${immEntries.length} immunization entries`);
 
     if (parsed.length === 0 && summaryEntries.length === 0 && immEntries.length === 0) {
@@ -356,17 +415,18 @@ export async function run(): Promise<SyncResult> {
       ? (existing.WASTEWATER_SIGNALS as WastewaterSignal[])
       : [];
     const mergedSignals = parsed.length > 0 ? mergeWastewaterSignals(existingSignals, parsed) : existingSignals;
-    const newCount = mergedSignals.length - existingSignals.length;
 
-    const output: Record<string, unknown> = {
-      ...existing,
-      RESPIRATORY_VIRUS_SURVEILLANCE: [],
-      CHILDHOOD_IMMUNIZATION_COVERAGE: [],
-      NOTIFIABLE_DISEASE_INCIDENCE: [],
-      ENVIRONMENTAL_ADVISORIES: [],
-      OUTBREAK_PROTOCOLS: {},
-      WASTEWATER_SIGNALS: mergedSignals,
-    };
+    const existingCaseCounts = Array.isArray(existing.RVD_RESPIRATORY_CASE_COUNTS)
+      ? existing.RVD_RESPIRATORY_CASE_COUNTS
+      : [];
+    const existingImmDoses = Array.isArray(existing.RVD_IMMUNIZATION_DOSES)
+      ? existing.RVD_IMMUNIZATION_DOSES
+      : [];
+
+    const output: Record<string, unknown> = { ...existing };
+    if (parsed.length > 0) {
+      output.WASTEWATER_SIGNALS = mergedSignals;
+    }
     if (summaryEntries.length > 0) {
       output.RVD_RESPIRATORY_CASE_COUNTS = summaryEntries;
     }
@@ -374,60 +434,86 @@ export async function run(): Promise<SyncResult> {
       output.RVD_IMMUNIZATION_DOSES = immEntries;
     }
 
-    // Stamp _dataMetadata only for arrays this scraper actually refreshed.
-    // Never re-timestamp hand-authored RESPIRATORY_VIRUS_SURVEILLANCE /
-    // CHILDHOOD_IMMUNIZATION_COVERAGE leave-behinds as if they were scraped.
     const existingMeta = isRecord(existing._dataMetadata)
       ? (existing._dataMetadata as DataMetadata)
       : undefined;
     const ownedMetadata: DataMetadata = {};
+    const contentChangedKeys: string[] = [];
+
+    const wwContentChanged =
+      parsed.length > 0 && JSON.stringify(mergedSignals) !== JSON.stringify(existingSignals);
     if (parsed.length > 0) {
       const prior = existingMeta?.WASTEWATER_SIGNALS;
-      const wwChanged =
-        JSON.stringify(mergedSignals) !== JSON.stringify(existingSignals);
       ownedMetadata.WASTEWATER_SIGNALS = buildMetadataEntry({
         updateType: 'auto',
         source: 'Alberta Respiratory Virus Dashboard wastewater',
-        sourceVintage: 'Live weekly wastewater signals',
+        sourceVintage: deriveWastewaterSourceVintage(mergedSignals),
         lastUpdated: timestamp,
         previous: prior,
-        contentChanged: wwChanged,
+        contentChanged: wwContentChanged,
       });
+      if (wwContentChanged) contentChangedKeys.push('WASTEWATER_SIGNALS');
     }
+
+    const caseCountsContentChanged =
+      summaryEntries.length > 0 && JSON.stringify(summaryEntries) !== JSON.stringify(existingCaseCounts);
     if (summaryEntries.length > 0) {
+      const prior = existingMeta?.RVD_RESPIRATORY_CASE_COUNTS;
       ownedMetadata.RVD_RESPIRATORY_CASE_COUNTS = buildMetadataEntry({
         updateType: 'auto',
         source: 'Alberta Respiratory Virus Dashboard summary',
         sourceVintage: deriveDateRange(summaryEntries.map((e) => e.weekEnding)),
         lastUpdated: timestamp,
+        previous: prior,
+        contentChanged: caseCountsContentChanged,
       });
+      if (caseCountsContentChanged) contentChangedKeys.push('RVD_RESPIRATORY_CASE_COUNTS');
     }
+
+    const immContentChanged =
+      immEntries.length > 0 && JSON.stringify(immEntries) !== JSON.stringify(existingImmDoses);
     if (immEntries.length > 0) {
+      const prior = existingMeta?.RVD_IMMUNIZATION_DOSES;
       ownedMetadata.RVD_IMMUNIZATION_DOSES = buildMetadataEntry({
         updateType: 'auto',
         source: 'Alberta Respiratory Virus Dashboard immunizations',
-        sourceVintage: deriveDateRange(immEntries.map((e) => e.weekEnding)),
+        sourceVintage: deriveImmunizationSourceVintage(immEntries),
         lastUpdated: timestamp,
+        previous: prior,
+        contentChanged: immContentChanged,
       });
+      if (immContentChanged) contentChangedKeys.push('RVD_IMMUNIZATION_DOSES');
     }
-    output._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
 
-    applyWithheldPayloadGuard(output);
-    fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf8');
+    output._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata, contentChangedKeys);
+
+    const anyContentChanged = contentChangedKeys.length > 0;
+    if (anyContentChanged) {
+      applyWithheldPayloadGuard(output);
+      fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf8');
+    } else {
+      console.log('[AlbertaRVDScraper] No content changes; data files left unchanged.');
+    }
 
     const totalFetched = parsed.length + summaryEntries.length + immEntries.length;
-    const totalWritten = mergedSignals.length + summaryEntries.length + immEntries.length;
+    const totalWritten =
+      (wwContentChanged ? mergedSignals.length : 0) +
+      (caseCountsContentChanged ? summaryEntries.length : 0) +
+      (immContentChanged ? immEntries.length : 0);
     console.log(
-      `[AlbertaRVDScraper] Complete. fetched=${totalFetched} written=${totalWritten} (new wastewater: ${newCount}) in ${Date.now() - startTime}ms`,
+      `[AlbertaRVDScraper] Complete. fetched=${totalFetched} written=${totalWritten} (new wastewater: ${mergedSignals.length - existingSignals.length}) in ${Date.now() - startTime}ms`,
     );
     return {
       domain: 'public-health',
       pipeline: 'albertaRespiratoryVirusScraper',
-      status: 'success',
+      status: anyContentChanged ? 'success' : 'partial',
       recordsFetched: totalFetched,
       recordsWritten: totalWritten,
       durationMs: Date.now() - startTime,
       timestamp,
+      error: anyContentChanged
+        ? undefined
+        : 'Parsed RVD data identical to existing; no writes performed.',
     };
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);

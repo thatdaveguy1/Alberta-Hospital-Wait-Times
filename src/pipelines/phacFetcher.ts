@@ -32,6 +32,7 @@ const ALBERTA_PRUID = '48';
 // Edmonton Goldbar is the only Alberta site PHAC reports. It maps to the
 // hand-authored "Edmonton (Gold Bar Plant)" entry in WASTEWATER_SIGNALS.
 const EDMONTON_SITE_KEY = 'Edmonton (Gold Bar Plant)';
+const DEPRECATED_SITES: Record<string, true> = { Jasper: true, Banff: true };
 const OUTPUT_FILE = path.join(process.cwd(), 'data-public-health.json');
 
 // Rate limit: minimum 2 seconds between upstream requests.
@@ -218,16 +219,21 @@ async function fetchNonEdmontonWastewater(existing: WastewaterSignal[]): Promise
     for (const trace of traces) {
       if (!isRecord(trace)) continue;
       const siteName = typeof trace['name'] === 'string' ? trace['name'] : '';
-      if (!siteName) continue;
+      if (!siteName || DEPRECATED_SITES[siteName]) continue;
 
       const x = trace['x'];
       const y = trace['y'];
       if (!Array.isArray(x) || !Array.isArray(y) || x.length === 0 || y.length === 0) continue;
 
-      // Get latest value
-      const latestIdx = y.length - 1;
-      const covidSignal = typeof y[latestIdx] === 'number' ? (y[latestIdx] as number) : null;
-      if (covidSignal === null) continue;
+      // Get latest non-null value and date
+      let latestIdx = y.length - 1;
+      while (latestIdx >= 0 && typeof y[latestIdx] !== 'number') {
+        latestIdx--;
+      }
+      if (latestIdx === -1) continue;
+      const covidSignalRaw = y[latestIdx];
+      if (typeof covidSignalRaw !== 'number') continue;
+      const covidSignal = covidSignalRaw;
 
       // Match to existing entry by site name (case-insensitive partial)
       const siteLower = siteName.toLowerCase();
@@ -239,23 +245,31 @@ async function fetchNonEdmontonWastewater(existing: WastewaterSignal[]): Promise
         }
       }
       if (!prev) continue; // Only update existing entries
+      if (prev.site === EDMONTON_SITE_KEY) continue; // RVD non-Edmonton path should not clobber PHAC Edmonton
 
-      // Compute trend from last 5 vs previous 5
-      const recent = (y as number[]).slice(-5);
-      const prev5 = (y as number[]).slice(-10, -5);
+
+      // Compute trend from last 5 vs previous 5 values
+      const recent = y.slice(-5).filter((v): v is number => typeof v === 'number');
+      const prev5 = y.slice(-10, -5).filter((v): v is number => typeof v === 'number');
       let trend: WastewaterSignal['trend'] = 'Stable';
-      if (prev5.length > 0) {
+      if (prev5.length > 0 && recent.length > 0) {
         const avgR = recent.reduce((a, b) => a + b, 0) / recent.length;
         const avgP = prev5.reduce((a, b) => a + b, 0) / prev5.length;
         if (avgR > avgP * 1.2) trend = 'Increasing';
         else if (avgR < avgP * 0.8) trend = 'Decreasing';
       }
 
+      const sampleDateRaw = x[latestIdx];
+      const sampleDate = typeof sampleDateRaw === 'string' ? sampleDateRaw : undefined;
+      const isEdmonton = prev.site === EDMONTON_SITE_KEY;
       updated.push({
         ...prev,
         covidSignal,
         trend,
         activityLevel: deriveActivityLevel(covidSignal),
+        sampleDate,
+        fluASignal: isEdmonton ? prev.fluASignal : undefined,
+        rsvSignal: isEdmonton ? prev.rsvSignal : undefined,
       });
     }
 
@@ -270,6 +284,7 @@ async function fetchNonEdmontonWastewater(existing: WastewaterSignal[]): Promise
 interface MeasureSummary {
   signal: number;
   trend: WastewaterSignal['trend'];
+  date?: string;
 }
 
 function summarizeMeasure(rows: PhacWastewaterRow[], measureId: string): MeasureSummary | null {
@@ -282,6 +297,8 @@ function summarizeMeasure(rows: PhacWastewaterRow[], measureId: string): Measure
   const latest = asNumber(measureRows[0].seven_day_rolling_avg);
   if (latest === null) return null;
 
+  const latestDate = typeof measureRows[0].Date === 'string' ? measureRows[0].Date : undefined;
+
   let trend: WastewaterSignal['trend'] = 'Stable';
   if (measureRows.length > 1) {
     const prev = asNumber(measureRows[1].seven_day_rolling_avg);
@@ -291,7 +308,7 @@ function summarizeMeasure(rows: PhacWastewaterRow[], measureId: string): Measure
       else if (deltaPct < -5) trend = 'Decreasing';
     }
   }
-  return { signal: latest, trend };
+  return { signal: latest, trend, date: latestDate };
 }
 
 function deriveActivityLevel(covidSignal: number): WastewaterSignal['activityLevel'] {
@@ -324,10 +341,22 @@ function buildEdmontonSignal(
     covidSignal: Number(covid.signal.toFixed(2)),
     fluASignal: fluA ? Number(fluA.signal.toFixed(2)) : 0,
     rsvSignal: rsv ? Number(rsv.signal.toFixed(2)) : 0,
+    sampleDate: covid.date,
     activityLevel: deriveActivityLevel(covid.signal),
     trend,
   };
 }
+function deriveWastewaterSourceVintage(signals: WastewaterSignal[]): string {
+  const sampleDates = signals
+    .map((s) => s.sampleDate)
+    .filter((d): d is string => typeof d === 'string' && d.length > 0)
+    .sort();
+  if (sampleDates.length === 0) return 'Unavailable';
+  const first = sampleDates[0];
+  const last = sampleDates[sampleDates.length - 1];
+  return first === last ? first : `${first} to ${last}`;
+}
+
 
 // ---------------------------------------------------------------------------
 // Pipeline entry point.
@@ -371,7 +400,7 @@ export async function run(): Promise<SyncResult> {
     }
 
     // Merge: replace the Edmonton entry, preserve every other hand-authored entry.
-    const mergedSignals: WastewaterSignal[] = [];
+    let mergedSignals: WastewaterSignal[] = [];
     let replaced = false;
     for (const sig of existing.WASTEWATER_SIGNALS) {
       if (sig.site === EDMONTON_SITE_KEY) {
@@ -387,13 +416,16 @@ export async function run(): Promise<SyncResult> {
     console.log('[PhacFetcher] Attempting non-Edmonton wastewater fetch from Alberta RVD...');
     const nonEdmontonUpdates = await fetchNonEdmontonWastewater(mergedSignals);
     if (nonEdmontonUpdates.length > 0) {
-      const updateBySite = new Map(nonEdmontonUpdates.map(u => [u.site, u]));
+      const updateBySite = new Map(nonEdmontonUpdates.map((u) => [u.site, u]));
       for (let i = 0; i < mergedSignals.length; i++) {
         const updated = updateBySite.get(mergedSignals[i].site);
         if (updated) mergedSignals[i] = updated;
       }
       console.log(`[PhacFetcher] Updated ${nonEdmontonUpdates.length} non-Edmonton wastewater sites.`);
     }
+
+    // Drop any deprecated/stale sites (e.g. Jasper, Banff) from the preserved set.
+    mergedSignals = mergedSignals.filter((s) => !DEPRECATED_SITES[s.site]);
 
     // Stamp only WASTEWATER_SIGNALS. Do not re-write or re-timestamp manual arrays.
     const priorWwMeta = existing._dataMetadata?.WASTEWATER_SIGNALS;
@@ -403,7 +435,7 @@ export async function run(): Promise<SyncResult> {
       WASTEWATER_SIGNALS: buildMetadataEntry({
         updateType: 'auto',
         source: 'PHAC Health Infobase wastewater API + Alberta RVD',
-        sourceVintage: 'Live weekly wastewater signals',
+        sourceVintage: deriveWastewaterSourceVintage(mergedSignals),
         lastUpdated: timestamp,
         previous: priorWwMeta,
         contentChanged,

@@ -19,10 +19,11 @@ export interface WastewaterSignal {
   zone: 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'North Zone' | 'South Zone';
   populationServed: number;
   covidSignal: number; // Normalized viral load (copies/mL or index)
-  fluASignal: number;
-  rsvSignal: number;
+  fluASignal?: number; // Only present when a verified upstream trace exists
+  rsvSignal?: number; // Only present when a verified upstream trace exists
   activityLevel: 'Low' | 'Moderate' | 'High' | 'Very High';
   trend: 'Increasing' | 'Stable' | 'Decreasing';
+  sampleDate?: string; // Latest actual wastewater collection date (YYYY-MM-DD)
 }
 
 export interface ImmunizationCoverage {

@@ -235,9 +235,35 @@ function buildJointRecords(
   return records;
 }
 
+const QUARTER_END_MONTHS: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+};
+
+/** Pick the most recent quarter label (e.g. "2026 Jan-Mar") from parsed surgery tables. */
+function deriveLatestQuarter(metrics: SurgeryMetrics[]): string | undefined {
+  let best: { label: string; end: number } | undefined;
+  for (const metric of metrics) {
+    const q = metric.quarter;
+    if (!q) continue;
+    const match = q.trim().match(/^(\d{4})\s+([a-z]{3})-([a-z]{3})$/i);
+    if (!match) continue;
+    const year = Number(match[1]);
+    const endMonth = QUARTER_END_MONTHS[match[3].toLowerCase()];
+    if (!Number.isFinite(year) || endMonth === undefined) continue;
+    const end = new Date(year, endMonth + 1, 0).getTime();
+    if (!best || end > best.end) best = { label: q, end };
+  }
+  return best?.label;
+}
+
 // Load existing data-surgical.json and merge new orthopedic records into
 // ORTHOPEDIC_SPECIALTY_RECORDS, replacing records with matching geography+procedure.
-function mergeAndWrite(newRecords: JointWaitRecord[], timestamp: string): number {
+function mergeAndWrite(
+  newRecords: JointWaitRecord[],
+  timestamp: string,
+  latestQuarter?: string,
+): number {
   type SurgicalJson = Record<string, unknown>;
   let existing: SurgicalJson = {};
   try {
@@ -264,17 +290,19 @@ function mergeAndWrite(newRecords: JointWaitRecord[], timestamp: string): number
 
   // Refresh _dataMetadata for ORTHOPEDIC_SPECIALTY_RECORDS; preserve all other
   // entries (sibling writers' and hand-authored arrays) via mergeDataMetadata.
+  const quarterLabel = latestQuarter ?? 'latest quarter';
   const ownedMetadata: DataMetadata = {
     ORTHOPEDIC_SPECIALTY_RECORDS: buildMetadataEntry({
       updateType: 'auto',
-      source: 'Alberta Bone & Joint Health Institute wait times page',
-      sourceVintage: 'Live weekly orthopedic hip & knee wait times',
+      source: 'Alberta Bone & Joint Health Institute / IIHO wait times page',
+      sourceVintage: `ABJHI / IIHO orthopedic hip & knee wait times — ${quarterLabel}`,
       lastUpdated: timestamp,
     }),
   };
   existing._dataMetadata = mergeDataMetadata(
     existing._dataMetadata as DataMetadata | undefined,
     ownedMetadata,
+    ['ORTHOPEDIC_SPECIALTY_RECORDS'],
   );
 
   applyWithheldPayloadGuard(existing);
@@ -314,8 +342,9 @@ export async function run(): Promise<SyncResult> {
       throw new Error('No surgery metrics parsed from ABJHI tables');
     }
 
+    const latestQuarter = deriveLatestQuarter(surgeryMetrics);
     const jointRecords = buildJointRecords(surgeryMetrics, consultData);
-    const totalWritten = mergeAndWrite(jointRecords, timestamp);
+    const totalWritten = mergeAndWrite(jointRecords, timestamp, latestQuarter);
 
     const durationMs = Date.now() - startTime;
     console.log(
@@ -345,11 +374,11 @@ export async function run(): Promise<SyncResult> {
         const ownedMetadata: DataMetadata = {
           ORTHOPEDIC_SPECIALTY_RECORDS: buildMetadataEntry({
             updateType: 'manual',
-            source: 'Alberta Bone & Joint Health Institute wait times page',
-            sourceVintage: priorMeta?.sourceVintage ?? 'Unavailable — last scrape failed',
+            source: 'Alberta Bone & Joint Health Institute / IIHO wait times page',
+            sourceVintage: 'Unavailable — ABJHI/IIHO scrape failed; existing rows are stale',
             // Preserve prior lastUpdated if present so failure does not look like a fresh pull.
             lastUpdated: priorMeta?.lastUpdated ?? '1970-01-01T00:00:00.000Z',
-            verification: `ABJHI scrape failed: ${errorMsg}. Existing orthopedic rows (if any) are not refreshed and must not be treated as current.`,
+            verification: `ABJHI/IIHO scrape failed: ${errorMsg}. Existing orthopedic rows (if any) are not refreshed and must not be treated as current.`,
           }),
         };
         existing._dataMetadata = mergeDataMetadata(

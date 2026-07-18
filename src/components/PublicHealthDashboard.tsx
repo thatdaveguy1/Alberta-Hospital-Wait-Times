@@ -112,8 +112,8 @@ export default function PublicHealthDashboard() {
   }, [wastewater, wastewaterSearch]);
 
   // Only show signal fields that are actually non-zero somewhere (comparable fields).
-  const wastewaterHasFlu = filteredWastewater.some((w) => w.fluASignal > 0);
-  const wastewaterHasRsv = filteredWastewater.some((w) => w.rsvSignal > 0);
+  const wastewaterHasFlu = filteredWastewater.some((w) => w.fluASignal != null);
+  const wastewaterHasRsv = filteredWastewater.some((w) => w.rsvSignal != null);
 
   const wastewaterChartData = useMemo(
     () =>
@@ -353,6 +353,7 @@ export default function PublicHealthDashboard() {
                       <div>
                         <p className="text-sm font-bold text-white">{w.site}</p>
                         <p className="text-[10px] text-slate-500 font-mono">{w.zone}</p>
+                        <p className="text-[9px] text-slate-500 font-mono">Sampled {w.sampleDate ?? 'unknown'}</p>
                       </div>
                       <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                         {w.activityLevel}
@@ -363,16 +364,26 @@ export default function PublicHealthDashboard() {
                         <span className="block text-slate-500">COVID</span>
                         <strong className="text-cyan-300 font-mono">{formatWastewaterSignal(w.covidSignal)}</strong>
                       </div>
-                      {w.fluASignal > 0 && (
+                      {w.fluASignal != null ? (
                         <div>
                           <span className="block text-slate-500">Flu A</span>
                           <strong className="text-amber-300 font-mono">{formatWastewaterSignal(w.fluASignal)}</strong>
                         </div>
+                      ) : (
+                        <div>
+                          <span className="block text-slate-500">Flu A</span>
+                          <strong className="text-slate-600 font-mono">Not reported</strong>
+                        </div>
                       )}
-                      {w.rsvSignal > 0 && (
+                      {w.rsvSignal != null ? (
                         <div>
                           <span className="block text-slate-500">RSV</span>
                           <strong className="text-violet-300 font-mono">{formatWastewaterSignal(w.rsvSignal)}</strong>
+                        </div>
+                      ) : (
+                        <div>
+                          <span className="block text-slate-500">RSV</span>
+                          <strong className="text-slate-600 font-mono">Not reported</strong>
                         </div>
                       )}
                       <div>

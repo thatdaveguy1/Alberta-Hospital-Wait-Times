@@ -479,13 +479,47 @@ interface SurgicalJson {
   STATSCAN_SATISFACTION_STATS: unknown[];
   _dataMetadata?: DataMetadata;
 }
+const MONTH_NAME_TO_END_ISO: Record<string, { year: number; month: number }> = {
+  january: { year: 0, month: 1 },
+  february: { year: 0, month: 2 },
+  march: { year: 0, month: 3 },
+  april: { year: 0, month: 4 },
+  may: { year: 0, month: 5 },
+  june: { year: 0, month: 6 },
+  july: { year: 0, month: 7 },
+  august: { year: 0, month: 8 },
+  september: { year: 0, month: 9 },
+  october: { year: 0, month: 10 },
+  november: { year: 0, month: 11 },
+  december: { year: 0, month: 12 },
+};
+
+/** Convert a Power BI month-year label (e.g. "April 2026") to an ISO end-of-month date. */
+function monthYearLabelToEndDate(label: string): string | undefined {
+  const parts = label.trim().toLowerCase().split(/\s+/);
+  if (parts.length !== 2) return undefined;
+  const month = MONTH_NAME_TO_END_ISO[parts[0]];
+  if (!month) return undefined;
+  const year = Number(parts[1]);
+  if (!Number.isFinite(year) || year < 2000 || year > 2100) return undefined;
+  const d = new Date(year, month.month, 0);
+  return d.toISOString().slice(0, 10);
+}
+
 function deriveSurgicalRecordsSourceVintage(records: SurgicalRecord[], periodLabel: string): string {
-  const isoEnds = records
-    .map((r) => r.reporting_period_end)
-    .filter((end): end is string => typeof end === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(end));
-  if (isoEnds.length > 0) {
-    const maxEnd = isoEnds.reduce((a, b) => (a > b ? a : b));
-    return `Reporting period ending ${maxEnd}`;
+  const parsedEnds: number[] = [];
+  for (const end of records.map((r) => r.reporting_period_end)) {
+    if (typeof end !== 'string') continue;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(end)) {
+      parsedEnds.push(new Date(end).getTime());
+    } else {
+      const iso = monthYearLabelToEndDate(end);
+      if (iso) parsedEnds.push(new Date(iso).getTime());
+    }
+  }
+  if (parsedEnds.length > 0) {
+    const maxEnd = new Date(Math.max(...parsedEnds));
+    return `Reporting period ending ${maxEnd.toISOString().slice(0, 10)}`;
   }
   return periodLabel || 'Live data';
 }
@@ -534,7 +568,7 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], pe
   // Stamp SURGICAL_RECORDS freshness; preserve other _dataMetadata entries.
   parsed._dataMetadata = mergeDataMetadata(parsed._dataMetadata, {
     SURGICAL_RECORDS: surgicalMeta,
-  });
+  }, ['SURGICAL_RECORDS']);
   applyWithheldPayloadGuard(parsed as unknown as Record<string, unknown>);
   fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2));
   return newRecords.length;

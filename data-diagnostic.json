@@ -6736,9 +6736,9 @@
     },
     "IMAGING_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-17T12:02:31.344Z",
+      "lastUpdated": "2026-07-18T13:14:03.660Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "CIHI priority procedures imaging time series"
+      "sourceVintage": "2018–2025"
     },
     "CIHI_DIAGNOSTIC_WAIT_TIMES": {
       "updateType": "auto",

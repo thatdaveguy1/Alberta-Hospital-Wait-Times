@@ -19550,19 +19550,20 @@
       "updateType": "auto",
       "lastUpdated": "2026-07-17T12:01:28.976Z",
       "source": "Alberta Wait Times Reporting (Power BI scraper)",
-      "sourceVintage": "Reporting period ending 2026-03-31"
+      "sourceVintage": "Reporting period ending 2026-04-30"
     },
     "ORTHOPEDIC_SPECIALTY_RECORDS": {
-      "updateType": "auto",
+      "updateType": "manual",
       "lastUpdated": "2026-07-15T12:01:00.240Z",
-      "source": "Alberta Bone & Joint Health Institute wait times page",
-      "sourceVintage": "Live weekly orthopedic hip & knee wait times"
+      "source": "Alberta Bone & Joint Health Institute / IIHO wait times page",
+      "sourceVintage": "Unavailable — ABJHI/IIHO scrape failed; existing rows are stale",
+      "verification": "ABJHI/IIHO scrape failed: Expected 2 tab sections (consult + surgery), found 0. Existing orthopedic rows (if any) are not refreshed and must not be treated as current."
     },
     "CIHI_PROVINCIAL_COMPARATORS": {
-      "source": "CIHI provincial wait-time comparators (cached)",
-      "sourceVintage": "CIHI release (cached)",
-      "lastUpdated": "2026-07-05T15:55:19.035Z",
-      "updateType": "manual"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-18T13:14:15.625Z",
+      "source": "CIHI Wait Times Priority Procedures in Canada",
+      "sourceVintage": "CIHI priority procedures (latest data year 2025)"
     },
     "FRASER_MEDIAN_WEEKS_2025": {
       "source": "Fraser Institute — Waiting Your Turn",
@@ -19571,22 +19572,22 @@
       "updateType": "manual"
     },
     "HISTORICAL_WAIT_TRENDS": {
-      "source": "CIHI / Alberta historical wait-time series",
-      "sourceVintage": "2008–2025",
-      "lastUpdated": "2026-07-05T15:55:19.035Z",
-      "updateType": "manual"
+      "updateType": "auto",
+      "lastUpdated": "2026-07-18T13:14:15.625Z",
+      "source": "CIHI Wait Times Priority Procedures in Canada",
+      "sourceVintage": "2008–2025"
     },
     "CIHI_SURGICAL_VOLUME_TRENDS": {
-      "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2019–2020 to 2023–2024",
+      "updateType": "auto",
       "lastUpdated": "2026-07-05T15:55:19.035Z",
-      "updateType": "manual"
+      "source": "CIHI indicator XLSX (884 annual change in surgical volumes since start of COVID-19 pandemic)",
+      "sourceVintage": "Fiscal years 2019–2020 to 2024–2025"
     },
     "CIHI_JOINT_REPLACEMENT_WAITS": {
-      "source": "CIHI Wait Times Priority Procedures in Canada",
-      "sourceVintage": "2019–2020 to 2023–2024",
+      "updateType": "auto",
       "lastUpdated": "2026-07-05T15:55:19.035Z",
-      "updateType": "manual"
+      "source": "CIHI indicator XLSX (843 joint replacement wait times)",
+      "sourceVintage": "Fiscal years 2019–2020 to 2025–2026"
     },
     "CIHI_PRIORITY_PROCEDURE_WAITS": {
       "updateType": "auto",

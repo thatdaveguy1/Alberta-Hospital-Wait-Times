@@ -51,14 +51,69 @@ function extractHeadlineTotal($: cheerio.CheerioAPI): number | null {
   return Number.isFinite(num) ? num : null;
 }
 
-// Extract the reporting quarter label (e.g. "Q1 2026") from the page heading.
-function extractReportingQuarter($: cheerio.CheerioAPI): string | null {
+// Parse a CPSA "Month DD, YYYY" string into a local Date.
+const MONTH_TO_INDEX: Record<string, number> = {
+  january: 0,
+  february: 1,
+  march: 2,
+  april: 3,
+  may: 4,
+  june: 5,
+  july: 6,
+  august: 7,
+  september: 8,
+  october: 9,
+  november: 10,
+  december: 11,
+};
+
+function parseCpsaDate(value: string): Date | null {
+  const m = value.match(/^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/);
+  if (!m) return null;
+  const month = MONTH_TO_INDEX[m[1].toLowerCase()];
+  if (month === undefined) return null;
+  const day = parseInt(m[2], 10);
+  const year = parseInt(m[3], 10);
+  if (!Number.isFinite(day) || !Number.isFinite(year)) return null;
+  return new Date(year, month, day);
+}
+
+function formatCpsaDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+interface ReportingQuarter {
+  quarterLabel: string | null;
+  endDate: string | null;
+}
+
+// Extract the reporting quarter label and the as-of quarter-end date.
+function extractReportingQuarter($: cheerio.CheerioAPI): ReportingQuarter {
+  const pageText = $('body').text() ?? '';
   const heading = $('h1, h2, h3').first().text() ?? '';
-  const match = heading.match(/Q([1-4])\s*(\d{4})/i);
-  if (match) return `Q${match[1]} ${match[2]}`;
-  const bodyMatch = ($('body').text() ?? '').match(/as of\s+\w+\s+\d{1,2},\s*(\d{4})/i);
-  if (bodyMatch) return bodyMatch[1] ?? null;
-  return null;
+  const headingMatch = heading.match(/Q([1-4])\s*(\d{4})/i);
+
+  const asOfMatch = pageText.match(/as of\s+([A-Za-z]+\s+\d{1,2},\s*\d{4})/i);
+  let endDate: string | null = null;
+  let inferredLabel: string | null = null;
+  if (asOfMatch) {
+    const parsed = parseCpsaDate(asOfMatch[1]);
+    if (parsed) {
+      endDate = formatCpsaDate(parsed);
+      const month = parsed.getMonth() + 1;
+      const year = parsed.getFullYear();
+      inferredLabel = `Q${Math.ceil(month / 3)} ${year}`;
+    }
+  }
+
+  const quarterLabel = headingMatch
+    ? `Q${headingMatch[1]} ${headingMatch[2]}`
+    : inferredLabel;
+
+  return { quarterLabel, endDate };
 }
 
 // Build a single Alberta rollup from the headline fully-registered total.
@@ -103,6 +158,7 @@ interface ScrapeOutcome {
   physicianSpecialtyZone: PhysicianSpecialtyZone[];
   recordsFetched: number;
   note: string;
+  quarter: ReportingQuarter;
 }
 
 async function scrapeCpsaQuarterly(): Promise<ScrapeOutcome> {
@@ -115,12 +171,14 @@ async function scrapeCpsaQuarterly(): Promise<ScrapeOutcome> {
   const headlineTotal = extractHeadlineTotal($);
   const iframes = $('iframe[src*="app.powerbi.com"]');
   const zoneCounts = tryParseZoneCounts($, iframes);
+  const quarter = extractReportingQuarter($);
 
   if (zoneCounts && zoneCounts.length > 0) {
     return {
       physicianSpecialtyZone: zoneCounts,
       recordsFetched: zoneCounts.length,
       note: 'Parsed zone-level counts from CPSA quarterly page.',
+      quarter,
     };
   }
 
@@ -130,14 +188,15 @@ async function scrapeCpsaQuarterly(): Promise<ScrapeOutcome> {
       physicianSpecialtyZone: rows,
       recordsFetched: rows.length,
       note: `Power BI dashboards not parseable as HTML; wrote Alberta headline total of ${headlineTotal} only (no specialty/zone synthesis).`,
+      quarter,
     };
   }
 
-  // No headline figure could be extracted — signal a partial scrape.
   return {
     physicianSpecialtyZone: [],
     recordsFetched: 0,
     note: 'Could not extract headline physician total or zone counts from CPSA quarterly page.',
+    quarter,
   };
 }
 
@@ -148,6 +207,10 @@ export async function run(): Promise<SyncResult> {
 
   try {
     const outcome = await scrapeCpsaQuarterly();
+    const sourceVintage =
+      outcome.quarter.quarterLabel && outcome.quarter.endDate
+        ? `${outcome.quarter.quarterLabel} (as of ${outcome.quarter.endDate})`
+        : (outcome.quarter.quarterLabel ?? 'CPSA quarterly statistics (quarter not extracted)');
     await sleep(RATE_LIMIT_MS);
 
     if (outcome.physicianSpecialtyZone.length === 0) {
@@ -177,6 +240,9 @@ export async function run(): Promise<SyncResult> {
     } catch {
       // First run / missing file — start from an empty record.
     }
+    const contentChanged =
+      JSON.stringify(existingRaw.PHYSICIAN_SPECIALTY_ZONE ?? []) !==
+      JSON.stringify(outcome.physicianSpecialtyZone);
     const merged: Record<string, unknown> = {
       ...existingRaw,
       PHYSICIAN_SPECIALTY_ZONE: outcome.physicianSpecialtyZone,
@@ -194,11 +260,15 @@ export async function run(): Promise<SyncResult> {
       PHYSICIAN_SPECIALTY_ZONE: buildMetadataEntry({
         updateType: 'auto',
         source: 'CPSA quarterly statistics',
-        sourceVintage: 'Latest CPSA quarterly release',
+        sourceVintage,
         lastUpdated: timestamp,
       }),
     };
-    merged._dataMetadata = mergeDataMetadata(existingMeta, ownedMetadata);
+    merged._dataMetadata = mergeDataMetadata(
+      existingMeta,
+      ownedMetadata,
+      contentChanged ? ['PHYSICIAN_SPECIALTY_ZONE'] : []
+    );
 
     applyWithheldPayloadGuard(merged);
     fs.writeFileSync(
