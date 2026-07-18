@@ -5519,13 +5519,13 @@
   "_dataMetadata": {
     "CANCER_SURGERY_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:47:32.185Z",
+      "lastUpdated": "2026-07-18T17:42:54.871Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
       "sourceVintage": "2013–2025"
     },
     "RADIATION_THERAPY_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:47:32.185Z",
+      "lastUpdated": "2026-07-18T17:42:54.871Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
       "sourceVintage": "2010–2025"
     },

@@ -46,8 +46,8 @@
       "status": "success",
       "recordsFetched": 152,
       "recordsWritten": 152,
-      "durationMs": 155,
-      "timestamp": "2026-07-18T15:11:10.796Z"
+      "durationMs": 3424,
+      "timestamp": "2026-07-18T17:11:10.821Z"
     },
     {
       "domain": "surgical",
@@ -314,12 +314,12 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 77,
-      "timestamp": "2026-07-18T15:51:10.825Z"
+      "durationMs": 73,
+      "timestamp": "2026-07-18T17:41:11.650Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-18T15:51:10.825Z",
-  "erWaitTimesNextUpdate": "2026-07-18T16:01:10.902Z",
-  "labWaitsLastUpdate": "2026-07-18T15:11:10.796Z",
-  "labWaitsNextUpdate": "2026-07-18T16:11:10.951Z"
+  "erWaitTimesLastUpdate": "2026-07-18T17:41:11.650Z",
+  "erWaitTimesNextUpdate": "2026-07-18T17:51:11.723Z",
+  "labWaitsLastUpdate": "2026-07-18T17:11:10.821Z",
+  "labWaitsNextUpdate": "2026-07-18T18:11:14.247Z"
 }

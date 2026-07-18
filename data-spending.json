@@ -3308,13 +3308,13 @@
     },
     "CIHI_RESOURCE_USE_INTENSITY": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:50:03.205Z",
+      "lastUpdated": "2026-07-18T17:45:47.001Z",
       "source": "CIHI indicator 818, Average Acute Care Resource Use Intensity",
       "sourceVintage": "Fiscal year 2024–2025"
     },
     "CIHI_SPENDING_PER_PERSON": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:50:03.205Z",
+      "lastUpdated": "2026-07-18T17:45:47.001Z",
       "source": "CIHI indicator 879, Age-Adjusted Public Spending per Person",
       "sourceVintage": "Calendar years 2014–2023"
     }

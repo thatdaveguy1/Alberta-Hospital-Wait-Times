@@ -2353,78 +2353,78 @@
     {
       "geography": "Alberta (Provincial)",
       "procedure": "Hip Replacement",
-      "count_completed": 1084,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 351,
-      "shortest_25_days": 71,
-      "average_days": 177,
-      "longest_10_days": 351
+      "count_completed": 1564,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 436,
+      "shortest_25_days": 81,
+      "average_days": 201,
+      "longest_10_days": 436
     },
     {
       "geography": "Calgary",
       "procedure": "Hip Replacement",
-      "count_completed": 381,
-      "consult_wait_days_90th": 624,
-      "surgery_wait_days_90th": 362,
-      "shortest_25_days": 93,
-      "average_days": 188,
-      "longest_10_days": 362
+      "count_completed": 529,
+      "consult_wait_days_90th": 438,
+      "surgery_wait_days_90th": 391,
+      "shortest_25_days": 92,
+      "average_days": 192,
+      "longest_10_days": 391
     },
     {
       "geography": "Edmonton",
       "procedure": "Hip Replacement",
-      "count_completed": 310,
-      "consult_wait_days_90th": 584,
-      "surgery_wait_days_90th": 279,
-      "shortest_25_days": 62,
-      "average_days": 138,
-      "longest_10_days": 279
+      "count_completed": 522,
+      "consult_wait_days_90th": 505,
+      "surgery_wait_days_90th": 394,
+      "shortest_25_days": 71,
+      "average_days": 182,
+      "longest_10_days": 394
     },
     {
       "geography": "Lethbridge",
       "procedure": "Hip Replacement",
-      "count_completed": 57,
-      "consult_wait_days_90th": 587,
-      "surgery_wait_days_90th": 702,
-      "shortest_25_days": 138,
-      "average_days": 327,
-      "longest_10_days": 702
+      "count_completed": 79,
+      "consult_wait_days_90th": 557,
+      "surgery_wait_days_90th": 728,
+      "shortest_25_days": 67,
+      "average_days": 307,
+      "longest_10_days": 728
     },
     {
       "geography": "Red Deer",
       "procedure": "Hip Replacement",
-      "count_completed": 98,
-      "consult_wait_days_90th": 619,
-      "surgery_wait_days_90th": 481,
-      "shortest_25_days": 53,
-      "average_days": 187,
-      "longest_10_days": 481
+      "count_completed": 110,
+      "consult_wait_days_90th": 657,
+      "surgery_wait_days_90th": 307,
+      "shortest_25_days": 76,
+      "average_days": 168,
+      "longest_10_days": 307
     },
     {
       "geography": "Grande Prairie",
       "procedure": "Hip Replacement",
-      "count_completed": 45,
-      "consult_wait_days_90th": 179,
-      "surgery_wait_days_90th": 861,
-      "shortest_25_days": 88,
-      "average_days": 296,
-      "longest_10_days": 861
+      "count_completed": 74,
+      "consult_wait_days_90th": 174,
+      "surgery_wait_days_90th": 392,
+      "shortest_25_days": 97,
+      "average_days": 212,
+      "longest_10_days": 392
     },
     {
       "geography": "Fort McMurray",
       "procedure": "Hip Replacement",
-      "count_completed": 10,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 224,
-      "shortest_25_days": 123,
-      "average_days": 161,
-      "longest_10_days": 224
+      "count_completed": 20,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 419,
+      "shortest_25_days": 21,
+      "average_days": 139,
+      "longest_10_days": 419
     },
     {
       "geography": "Alberta (Provincial)",
       "procedure": "Knee Replacement",
-      "count_completed": 2602,
-      "consult_wait_days_90th": 574,
+      "count_completed": 2637,
+      "consult_wait_days_90th": 501,
       "surgery_wait_days_90th": 559,
       "shortest_25_days": 111,
       "average_days": 265,
@@ -2433,162 +2433,172 @@
     {
       "geography": "Calgary",
       "procedure": "Knee Replacement",
-      "count_completed": 827,
-      "consult_wait_days_90th": 624,
-      "surgery_wait_days_90th": 503,
-      "shortest_25_days": 102,
-      "average_days": 234,
-      "longest_10_days": 503
+      "count_completed": 878,
+      "consult_wait_days_90th": 438,
+      "surgery_wait_days_90th": 442,
+      "shortest_25_days": 109,
+      "average_days": 217,
+      "longest_10_days": 442
     },
     {
       "geography": "Edmonton",
       "procedure": "Knee Replacement",
-      "count_completed": 358,
-      "consult_wait_days_90th": 584,
-      "surgery_wait_days_90th": 422,
-      "shortest_25_days": 78,
-      "average_days": 204,
-      "longest_10_days": 422
+      "count_completed": 921,
+      "consult_wait_days_90th": 505,
+      "surgery_wait_days_90th": 574,
+      "shortest_25_days": 115,
+      "average_days": 278,
+      "longest_10_days": 574
     },
     {
       "geography": "Lethbridge",
       "procedure": "Knee Replacement",
-      "count_completed": 116,
-      "consult_wait_days_90th": 587,
-      "surgery_wait_days_90th": 690,
-      "shortest_25_days": 207,
-      "average_days": 383,
-      "longest_10_days": 690
+      "count_completed": 156,
+      "consult_wait_days_90th": 557,
+      "surgery_wait_days_90th": 722,
+      "shortest_25_days": 209,
+      "average_days": 385,
+      "longest_10_days": 722
     },
     {
       "geography": "Red Deer",
       "procedure": "Knee Replacement",
-      "count_completed": 84,
-      "consult_wait_days_90th": 619,
-      "surgery_wait_days_90th": 573,
-      "shortest_25_days": 101,
-      "average_days": 235,
-      "longest_10_days": 573
+      "count_completed": 95,
+      "consult_wait_days_90th": 657,
+      "surgery_wait_days_90th": 361,
+      "shortest_25_days": 72,
+      "average_days": 203,
+      "longest_10_days": 361
     },
     {
       "geography": "Grande Prairie",
       "procedure": "Knee Replacement",
-      "count_completed": 90,
-      "consult_wait_days_90th": 179,
-      "surgery_wait_days_90th": 1069,
-      "shortest_25_days": 136,
-      "average_days": 448,
-      "longest_10_days": 1069
+      "count_completed": 122,
+      "consult_wait_days_90th": 174,
+      "surgery_wait_days_90th": 606,
+      "shortest_25_days": 141,
+      "average_days": 330,
+      "longest_10_days": 606
     },
     {
       "geography": "Bonnyville",
       "procedure": "Hip Replacement",
-      "count_completed": 14,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 281,
-      "shortest_25_days": 6,
-      "average_days": 142,
-      "longest_10_days": 281
+      "count_completed": 11,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 222,
+      "shortest_25_days": 97,
+      "average_days": 175,
+      "longest_10_days": 222
     },
     {
       "geography": "Bonnyville",
       "procedure": "Knee Replacement",
       "count_completed": 20,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 281,
-      "shortest_25_days": 161,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 284,
+      "shortest_25_days": 148,
       "average_days": 197,
-      "longest_10_days": 281
+      "longest_10_days": 284
     },
     {
       "geography": "Camrose",
       "procedure": "Hip Replacement",
-      "count_completed": 25,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 387,
-      "shortest_25_days": 230,
-      "average_days": 277,
-      "longest_10_days": 387
+      "count_completed": 30,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 344,
+      "shortest_25_days": 113,
+      "average_days": 223,
+      "longest_10_days": 344
     },
     {
       "geography": "Camrose",
       "procedure": "Knee Replacement",
-      "count_completed": 45,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 652,
-      "shortest_25_days": 348,
-      "average_days": 384,
-      "longest_10_days": 652
+      "count_completed": 57,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 453,
+      "shortest_25_days": 165,
+      "average_days": 288,
+      "longest_10_days": 453
     },
     {
       "geography": "Fort McMurray",
       "procedure": "Knee Replacement",
-      "count_completed": 13,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 582,
-      "shortest_25_days": 117,
-      "average_days": 308,
-      "longest_10_days": 582
+      "count_completed": 31,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 690,
+      "shortest_25_days": 71,
+      "average_days": 277,
+      "longest_10_days": 690
     },
     {
       "geography": "Hinton",
       "procedure": "Hip Replacement",
-      "count_completed": 13,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 307,
+      "count_completed": 42,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 225,
       "shortest_25_days": 76,
-      "average_days": 188,
-      "longest_10_days": 307
+      "average_days": 124,
+      "longest_10_days": 225
     },
     {
       "geography": "Hinton",
       "procedure": "Knee Replacement",
-      "count_completed": 16,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 339,
-      "shortest_25_days": 139,
-      "average_days": 219,
-      "longest_10_days": 339
+      "count_completed": 43,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 312,
+      "shortest_25_days": 83,
+      "average_days": 171,
+      "longest_10_days": 312
     },
     {
       "geography": "Medicine Hat",
       "procedure": "Hip Replacement",
-      "count_completed": 95,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 314,
-      "shortest_25_days": 39,
-      "average_days": 156,
-      "longest_10_days": 314
+      "count_completed": 107,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 563,
+      "shortest_25_days": 153,
+      "average_days": 327,
+      "longest_10_days": 563
     },
     {
       "geography": "Medicine Hat",
       "procedure": "Knee Replacement",
-      "count_completed": 118,
-      "consult_wait_days_90th": 574,
-      "surgery_wait_days_90th": 360,
-      "shortest_25_days": 56,
-      "average_days": 188,
-      "longest_10_days": 360
+      "count_completed": 161,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 634,
+      "shortest_25_days": 316,
+      "average_days": 445,
+      "longest_10_days": 634
     },
     {
       "geography": "Westlock",
       "procedure": "Hip Replacement",
-      "count_completed": 48,
-      "consult_wait_days_90th": 324,
-      "surgery_wait_days_90th": 372,
-      "shortest_25_days": 160,
-      "average_days": 262,
-      "longest_10_days": 372
+      "count_completed": 40,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 448,
+      "shortest_25_days": 64,
+      "average_days": 187,
+      "longest_10_days": 448
     },
     {
       "geography": "Westlock",
       "procedure": "Knee Replacement",
-      "count_completed": 60,
-      "consult_wait_days_90th": 324,
-      "surgery_wait_days_90th": 583,
-      "shortest_25_days": 230,
-      "average_days": 349,
-      "longest_10_days": 583
+      "count_completed": 66,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 424,
+      "shortest_25_days": 74,
+      "average_days": 222,
+      "longest_10_days": 424
+    },
+    {
+      "geography": "Rocky Mountain House",
+      "procedure": "Knee Replacement",
+      "count_completed": 87,
+      "consult_wait_days_90th": 501,
+      "surgery_wait_days_90th": 226,
+      "shortest_25_days": 80,
+      "average_days": 129,
+      "longest_10_days": 226
     }
   ],
   "SURGICAL_FACILITIES": [],
@@ -19548,20 +19558,19 @@
   "_dataMetadata": {
     "SURGICAL_RECORDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:46:36.910Z",
+      "lastUpdated": "2026-07-18T17:42:01.991Z",
       "source": "Alberta Wait Times Reporting (Power BI scraper)",
       "sourceVintage": "Reporting period 2025-12-31 to 2026-04-30 (mixed sources: monthly AHS Power BI, quarterly waittimes.alberta.ca, annual CIHI)"
     },
     "ORTHOPEDIC_SPECIALTY_RECORDS": {
-      "updateType": "manual",
-      "lastUpdated": "2026-07-15T12:01:00.240Z",
+      "updateType": "auto",
+      "lastUpdated": "2026-07-18T17:42:03.013Z",
       "source": "Alberta Bone & Joint Health Institute / IIHO wait times page",
-      "sourceVintage": "Unavailable — ABJHI/IIHO scrape failed; existing rows are stale",
-      "verification": "ABJHI/IIHO scrape failed: Expected 2 tab sections (consult + surgery), found 0. Existing orthopedic rows (if any) are not refreshed and must not be treated as current."
+      "sourceVintage": "ABJHI / IIHO orthopedic hip & knee wait times — 2026 Jan-Mar"
     },
     "CIHI_PROVINCIAL_COMPARATORS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:52:27.732Z",
+      "lastUpdated": "2026-07-18T17:42:55.878Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
       "sourceVintage": "2025 (CIHI priority-procedure comparator years; annual)"
     },
@@ -19573,19 +19582,19 @@
     },
     "HISTORICAL_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:52:27.732Z",
+      "lastUpdated": "2026-07-18T17:42:55.878Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
       "sourceVintage": "2008–2025"
     },
     "CIHI_SURGICAL_VOLUME_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:50:03.205Z",
+      "lastUpdated": "2026-07-18T17:45:47.001Z",
       "source": "CIHI indicator XLSX (884 annual change in surgical volumes since start of COVID-19 pandemic)",
       "sourceVintage": "Fiscal years 2019–2020 to 2024–2025"
     },
     "CIHI_JOINT_REPLACEMENT_WAITS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:50:03.205Z",
+      "lastUpdated": "2026-07-18T17:45:47.001Z",
       "source": "CIHI indicator XLSX (843 joint replacement wait times)",
       "sourceVintage": "Fiscal years 2019–2020 to 2025–2026"
     },

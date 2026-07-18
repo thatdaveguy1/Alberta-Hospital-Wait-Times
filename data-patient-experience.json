@@ -105,19 +105,19 @@
     },
     "CIHI_ALL_READMISSION_RATES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:50:03.205Z",
+      "lastUpdated": "2026-07-18T17:45:47.001Z",
       "source": "CIHI all-patients readmitted data table",
       "sourceVintage": "Fiscal years 2020–2021 to 2024–2025"
     },
     "CIHI_ACSC_HOSPITALIZATIONS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:50:03.205Z",
+      "lastUpdated": "2026-07-18T17:45:47.001Z",
       "source": "CIHI ambulatory-care-sensitive-conditions hospitalizations",
       "sourceVintage": "Fiscal years 2013–2014 to 2024–2025"
     },
     "CIHI_WAIT_TIME_SATISFACTION": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:50:03.205Z",
+      "lastUpdated": "2026-07-18T17:45:47.001Z",
       "source": "CIHI wait-time satisfaction data table",
       "sourceVintage": "Calendar year 2024"
     }

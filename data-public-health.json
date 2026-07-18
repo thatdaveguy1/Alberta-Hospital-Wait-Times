@@ -83,19 +83,19 @@
   "_dataMetadata": {
     "WASTEWATER_SIGNALS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:49:49.494Z",
+      "lastUpdated": "2026-07-18T17:45:35.522Z",
       "source": "Alberta Respiratory Virus Dashboard wastewater",
       "sourceVintage": "2026-07-05 to 2026-07-07"
     },
     "RVD_RESPIRATORY_CASE_COUNTS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:49:49.494Z",
+      "lastUpdated": "2026-07-18T17:45:35.522Z",
       "source": "Alberta Respiratory Virus Dashboard summary",
       "sourceVintage": "2025-08-24 to 2026-07-05"
     },
     "RVD_IMMUNIZATION_DOSES": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T15:49:49.494Z",
+      "lastUpdated": "2026-07-18T17:45:35.522Z",
       "source": "Alberta Respiratory Virus Dashboard immunizations",
       "sourceVintage": "Influenza immunization doses by epidemiological week; seasons 2021-2022 to 2025-2026; week-ending range 2021-08-31 to 2026-07-05"
     }

@@ -31,9 +31,7 @@ const OUTPUT_FILE = path.join(process.cwd(), 'data-mental-health.json');
 const SUBSTANCE_USE_PAGE_URL = 'https://www.alberta.ca/substance-use-surveillance-data';
 const RATE_LIMIT_MS = 2000;
 const USER_AGENT =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
-  '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36';
 interface LoadedJson {
   [key: string]: unknown;
 }
@@ -44,6 +42,22 @@ function loadJsonFile(file: string): LoadedJson {
   } catch {
     return {};
   }
+}
+
+function locatePdftotext(): string {
+  const envPath = process.env.PDFTOTEXT_PATH;
+  const candidates: string[] = [
+    ...(envPath ? [envPath] : []),
+    '/opt/homebrew/bin/pdftotext',
+    '/usr/local/bin/pdftotext',
+    '/usr/bin/pdftotext',
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return 'pdftotext';
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -93,13 +107,23 @@ async function downloadAndExtractPdf(url: string): Promise<string | null> {
     const response = await axios.get<Buffer>(url, {
       timeout: 60000,
       responseType: 'arraybuffer',
-      headers: { 'User-Agent': USER_AGENT },
+      headers: {
+        'User-Agent': USER_AGENT,
+        Referer: 'https://open.alberta.ca/',
+        Accept: 'application/pdf,*/*;q=0.8',
+      },
       maxContentLength: 50 * 1024 * 1024,
     });
     fs.writeFileSync(pdfPath, Buffer.from(response.data));
 
-    // Extract text with pdftotext
-    const text = execFileSync('pdftotext', ['-layout', pdfPath, '-'], {
+    // Resolve and extract text with pdftotext
+    const pdftotextPath = locatePdftotext();
+    if (path.isAbsolute(pdftotextPath) && !fs.existsSync(pdftotextPath)) {
+      console.warn(`[AlbertaSubstanceUse] pdftotext binary not found at ${pdftotextPath}; PDF extraction unavailable.`);
+      return null;
+    }
+
+    const text = execFileSync(pdftotextPath, ['-layout', pdfPath, '-'], {
       encoding: 'utf-8',
       timeout: 30000,
     });
