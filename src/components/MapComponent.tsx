@@ -1,6 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { getTheme, THEME_CHANGE_EVENT, type Theme } from '../lib/theme';
+
+const MAP_TILES: Record<Theme, string> = {
+  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+};
+
+const MAP_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 interface Hospital {
   id: string;
@@ -54,11 +63,12 @@ export function MapComponent({
   userLocation,
   selectedHospital,
   setSelectedHospital,
-  sortBy = 'net-wait'
+  sortBy = 'net-wait',
 }: MapComponentProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [key: string]: L.Marker }>({});
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   /** Last location key we auto-framed the map for — avoid re-flying on hospital poll. */
   const framedLocationKeyRef = useRef<string | null>(null);
@@ -118,22 +128,41 @@ export function MapComponent({
       attributionControl: true,
     }).setView([centerLat, centerLng], initialZoom);
 
-    // Light CARTO Positron base — calm canvas for the wait-band pins.
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    // Theme-aware base tiles — dark_all by default, light_all when html.light.
+    const initialTheme = getTheme();
+    const layer = L.tileLayer(MAP_TILES[initialTheme], {
+      attribution: MAP_ATTRIBUTION,
       maxZoom: 20,
     }).addTo(map);
+    tileLayerRef.current = layer;
 
     mapRef.current = map;
 
+    const onThemeChange = () => {
+      const next = getTheme();
+      if (!mapRef.current) return;
+      if (tileLayerRef.current) {
+        mapRef.current.removeLayer(tileLayerRef.current);
+        tileLayerRef.current = null;
+      }
+      tileLayerRef.current = L.tileLayer(MAP_TILES[next], {
+        attribution: MAP_ATTRIBUTION,
+        maxZoom: 20,
+      }).addTo(mapRef.current);
+    };
+    window.addEventListener(THEME_CHANGE_EVENT, onThemeChange);
+
     return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange);
+      tileLayerRef.current = null;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
   }, []);
+
+
 
   // Sync Markers & Hospital list
   useEffect(() => {

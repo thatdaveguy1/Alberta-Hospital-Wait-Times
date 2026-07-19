@@ -3,7 +3,7 @@
 // desktop (full-screen sheet on mobile), a live ER-feed freshness chip, and a
 // ⌘K command palette that jumps to any module or any ER facility.
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Activity, ChevronDown, MapPin, Menu, Search, X } from 'lucide-react';
+import { Activity, ChevronDown, MapPin, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import {
   CATEGORIES,
   CATEGORY_TITLE_BY_ID,
@@ -12,6 +12,7 @@ import {
 } from '../lib/dashboardRegistry';
 import { dashboardMatchesSearch } from '../lib/dashboardModuleSearch';
 import { formatRelativeTime, useSyncStatus } from '../hooks/useSyncStatus';
+import { useTheme } from '../hooks/useTheme';
 import { cn } from '../lib/utils';
 import type { Hospital } from '../types';
 
@@ -225,6 +226,7 @@ function CommandPalette({
 }
 
 export function SiteHeader({ activeView, onNavigate, onSelectFacility }: SiteHeaderProps) {
+  const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -312,6 +314,19 @@ export function SiteHeader({ activeView, onNavigate, onSelectFacility }: SiteHea
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <FreshnessChip />
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            className="rounded-lg border border-line bg-surface p-2 text-ink-2 transition-colors hover:bg-paper hover:text-ink cursor-pointer"
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4" aria-hidden />
+            ) : (
+              <Moon className="h-4 w-4" aria-hidden />
+            )}
+          </button>
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}

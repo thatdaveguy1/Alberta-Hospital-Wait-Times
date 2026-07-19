@@ -1,9 +1,10 @@
-/* Clinical Ledger design system — light-first.
+/* Clinical Ledger design system — dark default, light opt-in.
  * Type: IBM Plex Sans (UI) + IBM Plex Mono (data/provenance).
  * Color: restrained — tinted neutrals + one accent blue; semantic status
  * hues (ok/warn/crit) are the only other color and always carry a text label.
  * Elevation: hairline borders are the default container; shadows are reserved
  * for sticky bars and overlays.
+ * Theme: html.dark (default) / html.light — toggled from the top nav.
  */
 @import '@fontsource/ibm-plex-sans/400.css';
 @import '@fontsource/ibm-plex-sans/500.css';
@@ -18,21 +19,47 @@
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Surfaces & ink */
-  --color-paper: oklch(0.978 0.003 240);     /* page background */
-  --color-surface: oklch(1 0 0);             /* panels */
-  --color-ink: oklch(0.27 0.025 255);        /* primary text */
-  --color-ink-2: oklch(0.4 0.03 255);        /* secondary text */
-  --color-ink-3: oklch(0.47 0.025 255);      /* meta text — AA on paper */
-  --color-line: oklch(0.91 0.005 240);       /* hairlines */
-  --color-line-2: oklch(0.83 0.008 240);     /* strong borders */
+  /* Surfaces & ink — dark defaults (product default theme) */
+  --color-paper: oklch(0.16 0.02 255);       /* page background */
+  --color-surface: oklch(0.2 0.022 255);     /* panels */
+  --color-ink: oklch(0.96 0.008 255);        /* primary text */
+  --color-ink-2: oklch(0.78 0.015 255);      /* secondary text */
+  --color-ink-3: oklch(0.62 0.02 255);       /* meta text */
+  --color-line: oklch(0.28 0.02 255);        /* hairlines */
+  --color-line-2: oklch(0.36 0.022 255);     /* strong borders */
 
-  /* Single accent — deep clinical blue */
+  /* Single accent — clinical blue, lifted for dark surfaces */
+  --color-accent: oklch(0.68 0.13 252);
+  --color-accent-strong: oklch(0.74 0.12 252);
+  --color-accent-soft: oklch(0.28 0.06 252);
+
+  /* Semantic status — meaning, not decoration */
+  --color-ok: oklch(0.78 0.12 155);
+  --color-ok-soft: oklch(0.28 0.05 155);
+  --color-warn: oklch(0.82 0.12 85);
+  --color-warn-soft: oklch(0.3 0.05 85);
+  --color-crit: oklch(0.75 0.14 25);
+  --color-crit-soft: oklch(0.28 0.06 25);
+  --color-neutral-chip: oklch(0.26 0.015 255);
+
+  /* Map underlay (slot background while tiles load) */
+  --color-map-slot: oklch(0.14 0.018 255);
+}
+
+/* Light theme — opt-in via html.light */
+html.light {
+  --color-paper: oklch(0.978 0.003 240);
+  --color-surface: oklch(1 0 0);
+  --color-ink: oklch(0.27 0.025 255);
+  --color-ink-2: oklch(0.4 0.03 255);
+  --color-ink-3: oklch(0.47 0.025 255);
+  --color-line: oklch(0.91 0.005 240);
+  --color-line-2: oklch(0.83 0.008 240);
+
   --color-accent: oklch(0.45 0.11 252);
   --color-accent-strong: oklch(0.39 0.11 252);
   --color-accent-soft: oklch(0.95 0.02 250);
 
-  /* Semantic status — meaning, not decoration */
   --color-ok: oklch(0.47 0.1 155);
   --color-ok-soft: oklch(0.94 0.03 155);
   --color-warn: oklch(0.47 0.1 75);
@@ -40,6 +67,8 @@
   --color-crit: oklch(0.47 0.15 25);
   --color-crit-soft: oklch(0.945 0.025 25);
   --color-neutral-chip: oklch(0.94 0.005 240);
+
+  --color-map-slot: #e9edf2;
 }
 
 @layer base {
@@ -81,12 +110,12 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Leaflet (light)
+ * Leaflet — theme-aware via CSS variables
  * ------------------------------------------------------------------------- */
 .custom-leaflet-tooltip {
-  background: #ffffff !important;
+  background: var(--color-surface) !important;
   border: 1px solid var(--color-line-2) !important;
-  box-shadow: 0 8px 16px -6px rgb(23 32 46 / 0.18) !important;
+  box-shadow: 0 8px 16px -6px rgb(0 0 0 / 0.35) !important;
   color: var(--color-ink) !important;
   border-radius: 0.5rem !important;
   padding: 0.5rem 0.75rem !important;
@@ -107,7 +136,7 @@
 }
 
 .leaflet-container .leaflet-control-attribution {
-  background: rgb(255 255 255 / 0.88) !important;
+  background: color-mix(in oklch, var(--color-surface) 88%, transparent) !important;
   border-top-left-radius: 0.375rem !important;
   color: var(--color-ink-3) !important;
   font-family: var(--font-sans) !important;
@@ -131,7 +160,7 @@
   flex: 1 1 auto;
   min-height: 280px;
   overflow: hidden;
-  background: #e9edf2;
+  background: var(--color-map-slot);
 }
 @media (min-width: 640px) {
   .er-map-slot {
@@ -157,14 +186,14 @@
 .er-map-slot .leaflet-container {
   width: 100% !important;
   height: 100%;
-  background: #e9edf2;
+  background: var(--color-map-slot);
 }
 .er-trend-panel {
   min-height: 148px;
 }
 
 /* ---------------------------------------------------------------------------
- * Chart tooltips (shared by every dashboard; light card floats over any chart)
+ * Chart tooltips — theme-aware surface
  * ------------------------------------------------------------------------- */
 .recharts-tooltip-wrapper {
   z-index: 1000 !important;
@@ -172,9 +201,9 @@
 
 .recharts-default-tooltip,
 .chart-tooltip {
-  background-color: rgb(255 255 255 / 0.98) !important;
+  background-color: color-mix(in oklch, var(--color-surface) 98%, transparent) !important;
   border: 1px solid var(--color-line-2) !important;
-  box-shadow: 0 12px 24px -10px rgb(23 32 46 / 0.25) !important;
+  box-shadow: 0 12px 24px -10px rgb(0 0 0 / 0.4) !important;
   border-radius: 0.5rem !important;
   padding: 0.625rem 0.875rem !important;
   font-family: var(--font-sans) !important;
