@@ -573,7 +573,7 @@ export default function DiagnosticDashboard() {
                   <div className="p-1.5 bg-paper border border-line rounded-lg">
                     <Clock className="w-4 h-4 text-accent" />
                   </div>
-                  <span className="text-[10px] font-medium text-accent-strong bg-accent-soft border border-line px-1.5 py-0.5 rounded-full">
+                  <span className="text-xs font-medium text-accent-strong bg-accent-soft border border-line px-1.5 py-0.5 rounded-full">
                     Lab State Average
                   </span>
                 </div>
@@ -589,19 +589,19 @@ export default function DiagnosticDashboard() {
               
               <div className="grid grid-cols-3 gap-2 border-t border-line pt-2.5 mt-1">
                 <div className="p-2 bg-paper border border-line rounded-xl text-center min-w-0">
-                  <span className="text-[10px] font-medium text-ink-3 block">Edmonton</span>
+                  <span className="text-xs font-medium text-ink-3 block">Edmonton</span>
                   <span className="text-sm font-medium text-ink font-mono tabular-nums block mt-0.5">
                     {formatLabAvgWait(labStats.edmontonAvg, labStats.edmontonLabCount)}
                   </span>
                 </div>
                 <div className="p-2 bg-paper border border-line rounded-xl text-center min-w-0">
-                  <span className="text-[10px] font-medium text-ink-3 block">Calgary</span>
+                  <span className="text-xs font-medium text-ink-3 block">Calgary</span>
                   <span className="text-sm font-medium text-ink font-mono tabular-nums block mt-0.5">
                     {formatLabAvgWait(labStats.calgaryAvg, labStats.calgaryLabCount)}
                   </span>
                 </div>
                 <div className="p-2 bg-paper border border-line rounded-xl text-center min-w-0">
-                  <span className="text-[10px] font-medium text-ink-3 block">Rest AB</span>
+                  <span className="text-xs font-medium text-ink-3 block">Rest AB</span>
                   <span className="text-sm font-medium text-ink font-mono tabular-nums block mt-0.5">
                     {formatLabAvgWait(labStats.restAvg, labStats.restLabCount)}
                   </span>
@@ -616,7 +616,7 @@ export default function DiagnosticDashboard() {
                   <div className="p-1.5 bg-paper border border-line rounded-lg">
                     <AlertCircle className="w-4 h-4 text-crit" />
                   </div>
-                  <span className="text-[10px] font-medium text-crit bg-crit-soft border border-line px-1.5 py-0.5 rounded-full">
+                  <span className="text-xs font-medium text-crit bg-crit-soft border border-line px-1.5 py-0.5 rounded-full">
                     Peak Delay Lab
                   </span>
                 </div>
@@ -631,7 +631,7 @@ export default function DiagnosticDashboard() {
               </div>
               
               <div className="border-t border-line pt-2 mt-1">
-                <span className="text-[10px] font-medium text-ink-3 block">Site with longest wait</span>
+                <span className="text-xs font-medium text-ink-3 block">Site with longest wait</span>
                 <span className="text-xs font-medium text-crit font-mono tabular-nums block mt-0.5 truncate" title={labStats.maxWaitLab?.name}>
                   {labStats.maxWaitLab ? labStats.maxWaitLab.name : '—'}
                 </span>
@@ -646,7 +646,7 @@ export default function DiagnosticDashboard() {
                     <Compass className="w-4 h-4 text-accent" />
                   </div>
                   {userLocation ? (
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                    <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
                       userLocation.isGPS
                         ? 'bg-ok-soft border border-line text-ok'
                         : 'bg-accent-soft border border-line text-accent-strong'
@@ -654,7 +654,7 @@ export default function DiagnosticDashboard() {
                       {userLocation.isGPS ? 'Auto-Detected' : 'Custom'}
                     </span>
                   ) : (
-                    <span className="px-1.5 py-0.5 bg-neutral-chip border border-line-2 text-ink-2 rounded-full text-[10px] font-medium">
+                    <span className="px-1.5 py-0.5 bg-neutral-chip border border-line-2 text-ink-2 rounded-full text-xs font-medium">
                       Inactive
                     </span>
                   )}
@@ -665,7 +665,7 @@ export default function DiagnosticDashboard() {
                     Treatment Calculator
                   </h3>
                 </div>
-                <p className="text-[10px] text-ink-2 leading-normal">
+                <p className="text-xs text-ink-2 leading-normal">
                   Combine your driving time with live lab wait times to find the fastest check-in.
                 </p>
               </div>
@@ -674,7 +674,7 @@ export default function DiagnosticDashboard() {
                 {userLocation ? (
                   <div className="p-2 bg-paper border border-line rounded-xl flex items-center justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-medium text-ink-3">Location Origin</p>
+                      <p className="text-xs font-medium text-ink-3">Location Origin</p>
                       <p className="text-[11px] font-semibold text-ink truncate flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-accent shrink-0" />
                         <span>{userLocation.city}, AB</span>
@@ -716,7 +716,7 @@ export default function DiagnosticDashboard() {
                         }
                       }}
                       disabled={loadingGeo}
-                      className="py-1.5 px-2 text-[10px] font-semibold rounded-lg border border-line bg-paper text-ink-2 hover:bg-neutral-chip hover:text-ink transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                      className="py-1.5 px-2 text-xs font-semibold rounded-lg border border-line bg-paper text-ink-2 hover:bg-neutral-chip hover:text-ink transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Compass className={cn('w-3 h-3', loadingGeo && 'animate-spin')} />
                       <span>{loadingGeo ? '...' : 'Use GPS'}</span>
@@ -725,7 +725,7 @@ export default function DiagnosticDashboard() {
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent('open-location-modal'));
                       }}
-                      className="py-1.5 px-2 text-[10px] font-semibold rounded-lg border border-line bg-paper text-ink-2 hover:bg-neutral-chip hover:text-ink transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                      className="py-1.5 px-2 text-xs font-semibold rounded-lg border border-line bg-paper text-ink-2 hover:bg-neutral-chip hover:text-ink transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <MapPin className="w-3 h-3" />
                       <span>Manual</span>
@@ -737,7 +737,7 @@ export default function DiagnosticDashboard() {
                   onClick={() => {
                     window.dispatchEvent(new CustomEvent('open-location-modal'));
                   }}
-                  className="w-full py-1.5 px-2 text-[10px] font-semibold rounded-lg border border-line bg-paper text-ink-2 hover:bg-neutral-chip hover:text-ink transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  className="w-full py-1.5 px-2 text-xs font-semibold rounded-lg border border-line bg-paper text-ink-2 hover:bg-neutral-chip hover:text-ink transition-colors flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <MapPin className="w-3 h-3" />
                   <span>{userLocation ? 'Change Location' : 'Set Location'}</span>
@@ -758,7 +758,7 @@ export default function DiagnosticDashboard() {
                   <Sparkles className="h-4 w-4 text-accent" />
                   <h3 className="text-sm font-semibold text-ink tracking-tight">Optimal Route Planner: Shortest Time to Lab</h3>
                 </div>
-                <p className="text-[10px] text-ink-2">
+                <p className="text-xs text-ink-2">
                   Live APL lab waits + driving times combined to calculate the fastest path.
                 </p>
               </div>
@@ -778,20 +778,20 @@ export default function DiagnosticDashboard() {
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <span className={cn(
-                          'text-[10px] font-medium px-1.5 py-0.5 rounded-full',
+                          'text-xs font-medium px-1.5 py-0.5 rounded-full',
                           i === 0 ? 'bg-accent text-white' : 'bg-neutral-chip text-ink-2',
                         )}>
                           {i === 0 ? 'Rank 1: Fastest Lab' : `Rank ${i + 1}`}
                         </span>
-                        <span className="text-[10px] text-ink-2 font-mono tabular-nums">{lab.distance} km away</span>
+                        <span className="text-xs text-ink-2 font-mono tabular-nums">{lab.distance} km away</span>
                       </div>
                       <h4 className="text-xs font-semibold text-ink break-words mt-0.5 leading-tight">{lab.name}</h4>
-                      <p className="text-[10px] text-ink-2 mt-0.5">{lab.city}</p>
+                      <p className="text-xs text-ink-2 mt-0.5">{lab.city}</p>
                     </div>
 
                     <div className="mt-2 pt-1.5 border-t border-line flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] font-medium text-ink-3 leading-none">Est. Total</p>
+                        <p className="text-xs font-medium text-ink-3 leading-none">Est. Total</p>
                         <p className="text-sm font-semibold text-ink mt-0.5 leading-none">{formatMinutesToHm(lab.totalTime)}</p>
                       </div>
                       <div className="text-right text-xs text-ink-2 font-semibold space-y-0.5 leading-none">
@@ -819,7 +819,7 @@ export default function DiagnosticDashboard() {
                   <TrendingUp className="w-4 h-4 text-accent" />
                   Provincial Lab Wait Time Trend
                 </h3>
-                <p className="text-[10px] text-ink-3 mt-0.5">
+                <p className="text-xs text-ink-3 mt-0.5">
                   Average wait time across all monitored APL community labs, sampled every 60 minutes.
                 </p>
               </div>
@@ -828,7 +828,7 @@ export default function DiagnosticDashboard() {
                   <button
                     key={r}
                     onClick={() => setLabTrendRange(r)}
-                    className={`px-3 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                    className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
                       labTrendRange === r ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink'
                     }`}
                   >
@@ -1102,7 +1102,7 @@ export default function DiagnosticDashboard() {
                 <div className="p-1.5 bg-paper border border-line rounded-lg">
                   <Activity className="w-4 h-4 text-accent" />
                 </div>
-                <span className="text-[10px] font-medium text-accent-strong bg-accent-soft border border-line px-1.5 py-0.5 rounded-full">
+                <span className="text-xs font-medium text-accent-strong bg-accent-soft border border-line px-1.5 py-0.5 rounded-full">
                   CT Scan P90
                 </span>
               </div>
@@ -1114,7 +1114,7 @@ export default function DiagnosticDashboard() {
                   Alberta 90th Percentile Wait (Days)
                 </p>
               </div>
-              <div className="pt-1.5 flex items-center gap-1 text-[10px] font-medium text-accent group-hover:text-accent-strong transition-colors">
+              <div className="pt-1.5 flex items-center gap-1 text-xs font-medium text-accent group-hover:text-accent-strong transition-colors">
                 <BarChart2 className="w-3 h-3" />
                 <span>{selectedKpi === 'CT Scan' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
               </div>
@@ -1142,7 +1142,7 @@ export default function DiagnosticDashboard() {
                 <div className="p-1.5 bg-paper border border-line rounded-lg">
                   <Activity className="w-4 h-4 text-accent-strong" />
                 </div>
-                <span className="text-[10px] font-medium text-accent-strong bg-accent-soft border border-line px-1.5 py-0.5 rounded-full">
+                <span className="text-xs font-medium text-accent-strong bg-accent-soft border border-line px-1.5 py-0.5 rounded-full">
                   MRI Scan P90
                 </span>
               </div>
@@ -1154,7 +1154,7 @@ export default function DiagnosticDashboard() {
                   Alberta 90th Percentile Wait (Days)
                 </p>
               </div>
-              <div className="pt-1.5 flex items-center gap-1 text-[10px] font-medium text-accent-strong group-hover:text-accent transition-colors">
+              <div className="pt-1.5 flex items-center gap-1 text-xs font-medium text-accent-strong group-hover:text-accent transition-colors">
                 <BarChart2 className="w-3 h-3" />
                 <span>{selectedKpi === 'MRI Scan' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
               </div>
@@ -1200,19 +1200,19 @@ export default function DiagnosticDashboard() {
                   {/* Stats highlights */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-paper border border-line">
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-medium text-ink-3 block">Baseline (2019)</span>
+                      <span className="text-xs font-medium text-ink-3 block">Baseline (2019)</span>
                       <span className="text-xl font-medium text-ink-2 font-mono tabular-nums">{kpiStats.baseline}{selectedKpiDetails.unit}</span>
                     </div>
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-medium text-ink-3 block">Current (2025)</span>
+                      <span className="text-xs font-medium text-ink-3 block">Current (2025)</span>
                       <span className="text-xl font-medium text-ink font-mono tabular-nums">{kpiStats.latest}{selectedKpiDetails.unit}</span>
                     </div>
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-medium text-ink-3 block">Peak</span>
+                      <span className="text-xs font-medium text-ink-3 block">Peak</span>
                       <span className={`text-xl font-medium font-mono tabular-nums ${selectedKpiDetails.colorClass}`}>{kpiStats.peak}{selectedKpiDetails.unit}</span>
                     </div>
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-medium text-ink-3 block">Overall Shift</span>
+                      <span className="text-xs font-medium text-ink-3 block">Overall Shift</span>
                       <span className={`text-xl font-medium font-mono tabular-nums flex items-center justify-center sm:justify-start gap-1 ${
                         kpiStats.isIncrease ? 'text-crit' : 'text-ok'
                       }`}>
@@ -1268,7 +1268,7 @@ export default function DiagnosticDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-xs font-semibold text-ink-2">CIHI CT & MRI Diagnostic Wait Days</h3>
-                  <p className="text-[10px] text-ink-3">Comparing Alberta (P50 and P90 percentile days) against Canadian averages (2018 - 2025)</p>
+                  <p className="text-xs text-ink-3">Comparing Alberta (P50 and P90 percentile days) against Canadian averages (2018 - 2025)</p>
                 </div>
 
                 <div className="flex bg-paper p-0.5 rounded-lg border border-line">
@@ -1276,7 +1276,7 @@ export default function DiagnosticDashboard() {
                     <button
                       key={m}
                       onClick={() => setSelectedModality(m)}
-                      className={`px-3 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                      className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
                         selectedModality === m 
                           ? 'bg-accent text-white' 
                           : 'text-ink-2 hover:text-ink'
@@ -1318,7 +1318,7 @@ export default function DiagnosticDashboard() {
                 </ResponsiveContainer>
               </div>
 
-              <p className="text-[10px] text-ink-2">
+              <p className="text-xs text-ink-2">
                 💡 <strong>90th Percentile (P90):</strong> The number of days in which 90% of patients received their scan. High gaps between Median (P50) and P90 reflect structural wait-list accumulation for lower-priority outpatients.
               </p>
             </div>
@@ -1327,7 +1327,7 @@ export default function DiagnosticDashboard() {
             <div className="bg-surface border border-line p-5 rounded-xl space-y-4 flex flex-col justify-between">
               <div>
                 <h3 className="text-xs font-semibold text-ink-2">National CAR Performance Targets</h3>
-                <p className="text-[10px] text-ink-3">Alberta wait-time compliance relative to Canadian Association of Radiologists standards</p>
+                <p className="text-xs text-ink-3">Alberta wait-time compliance relative to Canadian Association of Radiologists standards</p>
               </div>
 
               <div className="space-y-3">
