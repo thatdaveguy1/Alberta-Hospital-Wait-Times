@@ -87,8 +87,10 @@ export default function App() {
             requestedFacilityId={requestedFacilityId}
             onRequestedFacilityHandled={() => setRequestedFacilityId(null)}
           />
+        ) : activeView === 'diagnostics' ? (
+          <DiagnosticDashboard />
         ) : (
-          /* Legacy wrapper: keeps the 13 not-yet-redesigned dashboards readable
+          /* Legacy wrapper: keeps remaining not-yet-redesigned dashboards readable
              inside the light shell until each gets its own pass. */
           <div className="rounded-2xl border border-slate-800 bg-[#070b19] p-4 text-slate-100 sm:p-6">
             {activeView === 'surgical-waits' ? (
@@ -101,8 +103,6 @@ export default function App() {
               <PrimaryCareDashboard />
             ) : activeView === 'workforce' ? (
               <WorkforceDashboard />
-            ) : activeView === 'diagnostics' ? (
-              <DiagnosticDashboard />
             ) : activeView === 'cancer' ? (
               <CancerDashboard />
             ) : activeView === 'mental-health' ? (

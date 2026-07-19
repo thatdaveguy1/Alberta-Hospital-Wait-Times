@@ -22,8 +22,9 @@ interface DataTimestampProps {
   arrayKey: string;
   /** Optional compact mode — single line instead of two */
   compact?: boolean;
+  /** Visual theme variant */
+  variant?: 'dark' | 'light';
 }
-
 
 /** Maps internal pipeline IDs and raw source strings to human-readable names so "Scraper" never leaks to the UI. */
 export function sanitizeSource(source: string): string {
@@ -73,7 +74,7 @@ export function sanitizeSource(source: string): string {
 }
 
 
-export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimestampProps): React.ReactElement | null {
+export function DataTimestamp({ metadata, arrayKey, compact = false, variant = 'dark' }: DataTimestampProps): React.ReactElement | null {
   const entry = metadata?.[arrayKey];
   if (!entry) return null;
 
@@ -88,6 +89,29 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
   const updatedLabel = isAuto ? 'Last pipeline refresh' : 'Last recorded update';
 
   if (compact) {
+    if (variant === 'light') {
+      return (
+        <div className="flex items-center gap-2 text-xs text-ink-3 flex-wrap">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
+              isAuto ? 'bg-ok-soft text-ok' : 'bg-warn-soft text-warn'
+            }`}
+          >
+            {isAuto ? 'Auto-updated\u00A0' : 'Manual\u00A0'}
+          </span>
+          <span className="text-ink-3">
+            {updatedLabel}: <span className="font-mono tabular-nums text-ink">{lastUpdated}</span>
+          </span>
+          {' · '}
+          <span className="text-ink-3">
+            Source period: <span className="font-mono tabular-nums text-ink">{sourceVintage}</span>
+          </span>
+          {' · '}
+          <span className="text-ink-3">Source: <span className="font-mono tabular-nums text-ink">{sanitizedSource}</span></span>
+        </div>
+      );
+    }
+
     return (
       <div className="flex items-center gap-2 text-[10px] text-slate-400 flex-wrap">
         <span
@@ -108,6 +132,41 @@ export function DataTimestamp({ metadata, arrayKey, compact = false }: DataTimes
         </span>
         <span className="text-slate-600">·</span>
         <span className="text-slate-400">Source: <span className="text-slate-200 font-semibold">{sanitizedSource}</span></span>
+      </div>
+    );
+  }
+
+  if (variant === 'light') {
+    return (
+      <div className="rounded-xl border border-line bg-surface px-3 py-2.5 flex items-center gap-3 mt-2 mb-4">
+        <div
+          className={`p-1.5 rounded-lg shrink-0 border border-line ${
+            isAuto ? 'bg-ok-soft text-ok' : 'bg-warn-soft text-warn'
+          }`}
+        >
+          {isAuto ? <RefreshCw className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
+        </div>
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
+                isAuto ? 'bg-ok-soft text-ok' : 'bg-warn-soft text-warn'
+              }`}
+            >
+              {isAuto ? 'Auto-updated' : 'Manual update'}
+            </span>
+            <span className="text-xs font-semibold text-ink">
+              {updatedLabel}: <span className="font-mono tabular-nums text-ink">{lastUpdated}</span>
+            </span>
+            <span className="text-xs text-ink-3 hidden sm:inline">·</span>
+            <span className="text-xs text-ink-3">
+              Source period: <span className="font-mono tabular-nums text-ink">{sourceVintage}</span>
+            </span>
+          </div>
+          <div className="text-xs text-ink-3">
+            Source: <span className="font-mono tabular-nums text-ink">{sanitizedSource}</span>
+          </div>
+        </div>
       </div>
     );
   }

@@ -1,13 +1,7 @@
-// LabCard — mirrors the ER tab HospitalCard design for community labs.
+// LabCard — mirrors the ER tab FacilityRow design for community labs.
 
 import React from 'react';
-import {
-  MapPin,
-  Clock,
-  Compass,
-  Navigation,
-  ChevronRight,
-} from 'lucide-react';
+import { MapPin, Clock, Compass, Navigation, ChevronRight } from 'lucide-react';
 import { cn, formatMinutesToHm } from '../lib/utils';
 
 export interface LabCardData {
@@ -51,14 +45,6 @@ function unavailableWaitLabel(lab: LabCardData): string {
   return 'Unavailable';
 }
 
-function waitColorClass(lab: LabCardData): string {
-  if (isLabWaitUnavailable(lab)) return 'text-slate-500';
-  const wait = lab.waitTimeMin as number;
-  if (wait > 45) return 'text-red-400';
-  if (wait > 30) return 'text-amber-400';
-  if (wait > 15) return 'text-blue-400';
-  return 'text-emerald-400';
-}
 
 export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCardProps): React.ReactElement {
   const isUnavailable = isLabWaitUnavailable(lab);
@@ -66,6 +52,13 @@ export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCard
   const isClosed = lab.waitTimeMin === 'Closed';
   const waitTime = typeof lab.waitTimeMin === 'number' ? lab.waitTimeMin : 0;
   const hasDrive = lab.distance !== undefined && lab.driveMins !== undefined;
+  let waitTone = 'text-ink-3';
+  if (!isUnavailable && typeof lab.waitTimeMin === 'number') {
+    if (lab.waitTimeMin > 45) waitTone = 'text-crit';
+    else if (lab.waitTimeMin > 30) waitTone = 'text-warn';
+    else if (lab.waitTimeMin > 15) waitTone = 'text-accent';
+    else waitTone = 'text-ok';
+  }
 
   return (
     <div
@@ -81,52 +74,51 @@ export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCard
         }
       }}
       className={cn(
-        'text-left bg-slate-900/40 p-4 rounded-2xl border transition-colors flex items-center justify-between group cursor-pointer w-full gap-4 focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+        'group flex w-full cursor-pointer items-center justify-between gap-4 rounded-xl border p-4 text-left transition-colors focus:outline-none',
         selected
-          ? 'border-blue-500 bg-blue-950/25 ring-4 ring-blue-500/15 shadow-xl shadow-blue-950/40'
+          ? 'border-accent bg-accent-soft ring-2 ring-accent/30'
           : isUnavailable
-            ? 'border-slate-800/40 bg-slate-900/10 opacity-60 hover:opacity-85'
-            : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/60',
+            ? 'border-line bg-surface opacity-70 hover:bg-paper'
+            : 'border-line bg-surface hover:bg-paper',
       )}
     >
-      <div className="space-y-1.5 flex-1 min-w-0">
-        <h3 className="font-extrabold text-sm sm:text-base text-slate-100 group-hover:text-blue-400 transition-colors break-words">
+      <div className="min-w-0 flex-1 space-y-1.5">
+        <h3 className="break-words text-sm font-semibold text-ink">
           {lab.name}
         </h3>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 font-medium">
-          <span className="flex items-center gap-1 shrink-0">
-            <MapPin className="w-3.5 h-3.5 text-slate-500" />
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+          <span className="flex shrink-0 items-center gap-1">
+            <MapPin className="h-3.5 w-3.5 text-ink-3" aria-hidden />
             {lab.city}
           </span>
-          <span className="w-1 h-1 bg-slate-700 rounded-full" />
+          <span className="text-ink-3" aria-hidden>•</span>
           <span className="truncate">{lab.region}</span>
-          <span className="w-1 h-1 bg-slate-700 rounded-full" />
-          <span className="text-[10px] font-mono text-slate-500 uppercase">{lab.code}</span>
+          <span className="text-ink-3" aria-hidden>•</span>
+          <span className="font-mono">{lab.code}</span>
         </div>
 
-        {/* Navigation Directions & Proximity Display */}
-        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
           <a
             href={`https://maps.google.com/?daddr=${encodeURIComponent(lab.name + ' ' + (lab.address || ''))}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 text-[10px] font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md hover:bg-blue-500/20 hover:border-blue-500/40 transition-all shrink-0 cursor-pointer"
+            className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-line-2 bg-surface px-2 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent-soft"
             title="Get driving directions in Google Maps"
           >
-            <Navigation className="w-3 h-3" />
+            <Navigation className="h-3 w-3" aria-hidden />
             <span>Directions</span>
           </a>
 
           {hasDrive && (
             <>
-              <div className="flex items-center gap-1 text-[10px] font-extrabold text-slate-400 bg-slate-500/10 border border-slate-500/20 px-2 py-0.5 rounded-md shrink-0">
-                <Compass className="w-3 h-3 animate-spin-slow" />
+              <div className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-line-2 bg-surface px-2 py-1.5 text-xs font-medium text-ink-2">
+                <Compass className="h-3 w-3 text-ink-3" aria-hidden />
                 <span>{lab.distance} km away</span>
               </div>
               {!isUnavailable && lab.driveMins !== undefined && (
-                <div className="flex items-center gap-1 text-[10px] font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md shrink-0">
-                  <Clock className="w-3 h-3" />
+                <div className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-line-2 bg-surface px-2 py-1.5 text-xs font-medium text-ink-2">
+                  <Clock className="h-3 w-3 text-ink-3" aria-hidden />
                   <span>~{formatMinutesToHm(lab.driveMins)} drive</span>
                 </div>
               )}
@@ -134,66 +126,68 @@ export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCard
           )}
 
           {lab.walkInAvailable && !isUnavailable && !isAppointmentsOnly && (
-            <span className="text-[9px] font-extrabold bg-slate-500/10 text-slate-300 border border-slate-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
+            <span className="inline-flex shrink-0 items-center rounded-full bg-neutral-chip px-2 py-0.5 text-xs font-medium text-ink-2">
               Walk-In
             </span>
           )}
           {(lab.appointmentRequired || isAppointmentsOnly) && (
-            <span className="text-[9px] font-extrabold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
+            <span className="inline-flex shrink-0 items-center rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent-strong">
               Appt Req
             </span>
           )}
           {isClosed && (
-            <span className="text-[9px] font-extrabold bg-red-500/10 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
+            <span className="inline-flex shrink-0 items-center rounded-full bg-crit-soft px-2 py-0.5 text-xs font-medium text-crit">
               Closed
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex shrink-0 items-center gap-4">
         <div className="text-right">
           {hasDrive && !isUnavailable ? (
             sortBy === 'raw-wait' ? (
               <div className="flex flex-col items-end select-none">
-                {/* Stacked Math Formula with Drive & Net as helpers */}
-                <div className="flex flex-col items-end text-[10px] font-mono text-slate-400 leading-none space-y-1 pb-1 mb-1.5 border-b border-slate-800/60 w-24">
-                  <div className="flex justify-between w-full">
-                    <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider">Drive:</span>
-                    <span className="font-bold text-slate-300">~{formatMinutesToHm(lab.driveMins || 0)}</span>
+                <div className="mb-1.5 flex w-full flex-col items-end space-y-1 border-b border-line pb-1.5">
+                  <div className="flex w-full justify-between gap-4">
+                    <span className="text-xs text-ink-3">Drive</span>
+                    <span className="font-mono text-xs tabular-nums text-ink-2">
+                      ~{formatMinutesToHm(lab.driveMins || 0)}
+                    </span>
                   </div>
-                  <div className="flex justify-between w-full">
-                    <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider">Net:</span>
-                    <span className="font-bold text-slate-300">{formatMinutesToHm((lab.driveMins || 0) + waitTime)}</span>
+                  <div className="flex w-full justify-between gap-4">
+                    <span className="text-xs text-ink-3">Net</span>
+                    <span className="font-mono text-xs tabular-nums text-ink-2">
+                      {formatMinutesToHm((lab.driveMins || 0) + waitTime)}
+                    </span>
                   </div>
                 </div>
-
-                {/* Primary spotlight is Wait Time */}
                 <div className="flex flex-col items-end">
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Wait Time</span>
-                  <p className={cn('text-xl sm:text-2xl font-black tracking-tight leading-none font-sans', waitColorClass(lab))}>
+                  <span className="mb-0.5 text-xs text-ink-3">Wait Time</span>
+                  <p className={cn('font-mono text-xl tabular-nums leading-none', waitTone)}>
                     {formatMinutesToHm(waitTime)}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="flex flex-col items-end select-none">
-                {/* Stacked Math Formula with Wait & Drive */}
-                <div className="flex flex-col items-end text-[10px] font-mono text-slate-400 leading-none space-y-1 pb-1 mb-1.5 border-b border-slate-800/60 w-24">
-                  <div className="flex justify-between w-full">
-                    <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider">Wait:</span>
-                    <span className="font-bold text-slate-300">{formatMinutesToHm(waitTime)}</span>
+                <div className="mb-1.5 flex w-full flex-col items-end space-y-1 border-b border-line pb-1.5">
+                  <div className="flex w-full justify-between gap-4">
+                    <span className="text-xs text-ink-3">Wait</span>
+                    <span className="font-mono text-xs tabular-nums text-ink-2">
+                      {formatMinutesToHm(waitTime)}
+                    </span>
                   </div>
-                  <div className="flex justify-between w-full">
-                    <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider">Drive:</span>
-                    <span className="font-bold text-slate-300">+{formatMinutesToHm(lab.driveMins || 0)}</span>
+                  <div className="flex w-full justify-between gap-4">
+                    <span className="text-xs text-ink-3">Drive</span>
+                    <span className="font-mono text-xs tabular-nums text-ink-2">
+                      +{formatMinutesToHm(lab.driveMins || 0)}
+                    </span>
                   </div>
                 </div>
-
-                {/* Primary spotlight is Net Time */}
                 <div className="flex flex-col items-end">
-                  <span className="text-[8px] font-black text-cyan-400/90 uppercase tracking-widest leading-none mb-1">Net Time</span>
-                  <p className="text-xl sm:text-2xl font-black tracking-tight text-cyan-200 leading-none font-sans">
+                  <span className="mb-0.5 text-xs text-ink-3">Net Time</span>
+                  <p className={cn('font-mono text-xl tabular-nums leading-none', waitTone)}>
                     {formatMinutesToHm((lab.driveMins || 0) + waitTime)}
                   </p>
                 </div>
@@ -201,17 +195,17 @@ export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCard
             )
           ) : (
             <>
-              <p className={cn('text-lg sm:text-xl font-black tracking-tight leading-none', isUnavailable ? 'text-slate-500' : waitColorClass(lab))}>
+              <p className={cn('font-mono text-xl tabular-nums leading-none', waitTone)}>
                 {isUnavailable ? unavailableWaitLabel(lab) : formatMinutesToHm(waitTime)}
               </p>
-              {!isUnavailable && <p className="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mt-1">Wait Time</p>}
+              {!isUnavailable && <p className="mt-0.5 text-xs text-ink-3">Wait Time</p>}
             </>
           )}
         </div>
         <ChevronRight
           className={cn(
-            'w-5 h-5 transition-transform duration-300',
-            selected ? 'translate-x-1 text-blue-400' : 'text-slate-600 group-hover:text-slate-400',
+            'h-5 w-5 transition-transform duration-300',
+            selected ? 'translate-x-1 text-accent' : 'text-ink-3 group-hover:text-accent',
           )}
         />
       </div>
