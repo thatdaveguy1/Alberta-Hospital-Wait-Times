@@ -42,6 +42,13 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/** Pin palette — aligned with the app's semantic status tokens (hex needed for Leaflet HTML strings). */
+const STATUS_PIN_COLORS: Record<Hospital['status'], string> = {
+  Green: '#0f7b4d',
+  Yellow: '#b45309',
+  Red: '#b42318',
+};
+
 export function MapComponent({
   hospitals,
   userLocation,
@@ -111,8 +118,8 @@ export function MapComponent({
       attributionControl: true,
     }).setView([centerLat, centerLng], initialZoom);
 
-    // Add clean, dark OpenStreetMap style layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // Light CARTO Positron base — calm canvas for the wait-band pins.
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       maxZoom: 20,
@@ -142,16 +149,14 @@ export function MapComponent({
     });
 
     // Create custom CSS/HTML DivIcon for hospitals
-    const createHospitalIcon = (status: string, isSelected: boolean) => {
-      let color = '#10b981'; // Green
-      if (status === 'Red') color = '#ef4444';
-      else if (status === 'Yellow') color = '#f59e0b';
+    const createHospitalIcon = (status: Hospital['status'], isSelected: boolean) => {
+      const color = STATUS_PIN_COLORS[status] ?? STATUS_PIN_COLORS.Green;
 
       return L.divIcon({
         html: `
           <div class="relative flex items-center justify-center cursor-pointer" style="width: 24px; height: 24px;">
             ${isSelected ? `<span class="absolute inline-flex h-6 w-6 animate-ping rounded-full opacity-60" style="background-color: ${color}"></span>` : ''}
-            <span class="relative inline-flex rounded-full h-3.5 w-3.5 border-2 border-[#090d16] shadow-md transition-all duration-300" style="background-color: ${color}; transform: ${isSelected ? 'scale(1.25)' : 'scale(1)'}"></span>
+            <span class="relative inline-flex rounded-full h-3.5 w-3.5 border-2 border-white shadow-md transition-all duration-300" style="background-color: ${color}; transform: ${isSelected ? 'scale(1.25)' : 'scale(1)'}"></span>
           </div>
         `,
         className: 'custom-leaflet-icon',
@@ -176,10 +181,10 @@ export function MapComponent({
         return `${remainingMins}m`;
       };
 
-      const statusColors = {
-        Green: 'text-emerald-400',
-        Yellow: 'text-amber-400',
-        Red: 'text-red-400'
+      const statusColors: Record<Hospital['status'], string> = {
+        Green: 'text-ok',
+        Yellow: 'text-warn',
+        Red: 'text-crit'
       };
       
       const statusLabels = {
@@ -193,40 +198,40 @@ export function MapComponent({
       if (sortBy === 'raw-wait') {
         if (hasDrive) {
           bottomRow = `
-            <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-slate-800/60 text-[10px] text-slate-400">
-              <span class="font-black ${statusColors[h.status]}">Wait: ${formatMinutesToHm(h.waitTime)}</span>
-              <span class="text-slate-600">•</span>
+            <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-line text-[10px] text-ink-3">
+              <span class="font-bold ${statusColors[h.status]}">Wait: ${formatMinutesToHm(h.waitTime)}</span>
+              <span class="text-line-2">•</span>
               <span>Drive: ~${formatMinutesToHm(h.driveMins || 0)}</span>
-              <span class="text-slate-600">•</span>
-              <span class="font-medium text-cyan-500">Net: ${formatMinutesToHm((h.driveMins || 0) + h.waitTime)}</span>
+              <span class="text-line-2">•</span>
+              <span class="font-medium text-accent">Net: ${formatMinutesToHm((h.driveMins || 0) + h.waitTime)}</span>
             </div>
           `;
         } else {
           bottomRow = `
-            <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-slate-800/60">
-              <span class="font-black ${statusColors[h.status]}">Wait: ${formatMinutesToHm(h.waitTime)}</span>
-              <span class="text-slate-600">•</span>
-              <span class="font-bold text-slate-400">${statusLabels[h.status]}</span>
+            <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-line">
+              <span class="font-bold ${statusColors[h.status]}">Wait: ${formatMinutesToHm(h.waitTime)}</span>
+              <span class="text-line-2">•</span>
+              <span class="font-medium text-ink-3">${statusLabels[h.status]}</span>
             </div>
           `;
         }
       } else {
         if (hasDrive) {
           bottomRow = `
-            <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-slate-800/60 text-[10px] text-slate-400">
-              <span class="font-black text-cyan-400">Net: ${formatMinutesToHm((h.driveMins || 0) + h.waitTime)}</span>
-              <span class="text-slate-600">•</span>
+            <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-line text-[10px] text-ink-3">
+              <span class="font-bold text-accent">Net: ${formatMinutesToHm((h.driveMins || 0) + h.waitTime)}</span>
+              <span class="text-line-2">•</span>
               <span>Wait: ${formatMinutesToHm(h.waitTime)}</span>
-              <span class="text-slate-600">•</span>
+              <span class="text-line-2">•</span>
               <span>Drive: ~${formatMinutesToHm(h.driveMins || 0)}</span>
             </div>
           `;
         } else {
           bottomRow = `
-            <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-slate-800/60">
-              <span class="font-black text-cyan-400">Wait: ${formatMinutesToHm(h.waitTime)}</span>
-              <span class="text-slate-600">•</span>
-              <span class="font-bold ${statusColors[h.status]}">${statusLabels[h.status]}</span>
+            <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-line">
+              <span class="font-bold text-accent">Wait: ${formatMinutesToHm(h.waitTime)}</span>
+              <span class="text-line-2">•</span>
+              <span class="font-medium ${statusColors[h.status]}">${statusLabels[h.status]}</span>
             </div>
           `;
         }
@@ -234,8 +239,8 @@ export function MapComponent({
 
       const tooltipContent = `
         <div class="text-[11px] font-sans leading-relaxed select-none">
-          <p class="font-extrabold text-white text-[12px] leading-tight mb-0.5">${h.name}</p>
-          <p class="text-slate-400 font-medium">${h.city}</p>
+          <p class="font-bold text-ink text-[12px] leading-tight mb-0.5">${h.name}</p>
+          <p class="text-ink-3 font-medium">${h.city}</p>
           ${bottomRow}
         </div>
       `;
@@ -295,7 +300,7 @@ export function MapComponent({
       const userIcon = L.divIcon({
         html: `
           <div class="relative flex items-center justify-center" style="width: 32px; height: 32px;">
-            <span class="relative inline-flex rounded-full h-4.5 w-4.5 bg-blue-500 border-2 border-white shadow-lg flex items-center justify-center">
+            <span class="relative inline-flex rounded-full h-4.5 w-4.5 bg-accent border-2 border-white shadow-lg flex items-center justify-center">
               <svg class="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(45deg);">
                 <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
               </svg>

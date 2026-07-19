@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Activity,
+  AlertTriangle,
   Compass,
   Filter,
   Map as MapIcon,
@@ -10,10 +11,8 @@ import {
   Maximize2,
   Minimize2,
   Navigation,
-  Phone,
   RefreshCw,
   Search,
-  Sparkles,
   TrendingUp,
   X,
 } from 'lucide-react';
@@ -30,6 +29,7 @@ import {
 } from 'recharts';
 import { MapComponent } from './MapComponent';
 import { DashboardHeader } from './DashboardHeader';
+import { WaitBandChip } from './WaitBandChip';
 import type { DataMetadataMap } from './DataTimestamp';
 import { calculateDistance, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
 import {
@@ -43,9 +43,10 @@ import {
   directionsUrl,
   enrichHospital,
   mapsPlaceUrl,
+  shortHospitalName,
   type CareType,
   type EnrichedHospital,
-  waitBandLabel,
+  type WaitBand,
 } from '../lib/erFacility';
 import { cn, formatMinutesToHm } from '../lib/utils';
 import { formatRelativeTime, useSyncStatus } from '../hooks/useSyncStatus';
@@ -58,26 +59,25 @@ type CareFilter = 'all' | CareType;
 type MaxPeak = { waitTime: number; hospitalName: string; timestamp: string } | null;
 type MaxStats = { max24h: MaxPeak; max7d: MaxPeak; max30d: MaxPeak };
 
-const LOCATION_SKIP_KEY = 'alberta_hospital_location_prompt_dismissed';
 /** Bump when verifying LAN deploy — shown in the decision bar. */
-const ER_UI_BUILD = '2026-07-16-map-fill';
+const ER_UI_BUILD = '2026-07-19-clinical-ledger';
 const POLL_MS = 60_000;
+/** Feed older than this triggers the stale-data banner. */
+const STALE_AFTER_MS = 20 * 60_000;
 
-const waitTone: Record<string, string> = {
-  low: 'text-emerald-300',
-  moderate: 'text-amber-300',
-  high: 'text-rose-300',
-  closed: 'text-slate-400',
-  unavailable: 'text-slate-500',
+const bandTextTone: Record<WaitBand, string> = {
+  low: 'text-ok',
+  moderate: 'text-warn',
+  high: 'text-crit',
+  closed: 'text-ink-3',
+  unavailable: 'text-ink-3',
 };
 
-const waitSurface: Record<string, string> = {
-  low: 'bg-emerald-500/10 border-emerald-500/25 text-emerald-300',
-  moderate: 'bg-amber-500/10 border-amber-500/25 text-amber-300',
-  high: 'bg-rose-500/10 border-rose-500/25 text-rose-300',
-  closed: 'bg-slate-800/70 border-slate-700 text-slate-400',
-  unavailable: 'bg-slate-900 border-slate-800 text-slate-500',
-};
+/* Recharts props can't consume CSS vars — chart literals live here only. */
+const CHART_GRID = '#e3e7ee';
+const CHART_TICK = '#64748b';
+const CHART_ACCENT = '#0b5cad';
+const CHART_REF = '#94a3b8';
 
 function normalizeTrendRange(range: string) {
   return range === '30D' ? '30d' : range;
@@ -125,17 +125,16 @@ function formatAvgWaitDisplay(minutes: number, validCount: number): string {
   return formatMinutesToHm(minutes);
 }
 
-function shortHospitalName(name: string): string {
-  return name
-    .replace('Community Hospital', '')
-    .replace('General Hospital', '')
-    .replace('Health Centre', '')
-    .replace('Regional Hospital', '')
-    .replace('Regional Health Centre', '')
-    .trim();
+export interface ErWaitDashboardProps {
+  /** Set by the app shell when another surface requests a specific facility. */
+  requestedFacilityId?: string | null;
+  onRequestedFacilityHandled?: () => void;
 }
 
-export default function ErWaitDashboard() {
+export default function ErWaitDashboard({
+  requestedFacilityId = null,
+  onRequestedFacilityHandled,
+}: ErWaitDashboardProps = {}) {
   const { syncStatus } = useSyncStatus();
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true);
@@ -151,7 +150,7 @@ export default function ErWaitDashboard() {
   const userPickedHospitalRef = useRef(false);
   const [trends, setTrends] = useState<WaitTimeSnapshot[]>([]);
   const [loadingTrends, setLoadingTrends] = useState(false);
-  const [zoneTrends, setZoneTrends] = useState<any[]>([]);
+  const [zoneTrends, setZoneTrends] = useState<Array<Record<string, string | number>>>([]);
   const [zoneRange, setZoneRange] = useState('24h');
   const [hospitalRange, setHospitalRange] = useState('24h');
   const [maxStats, setMaxStats] = useState<MaxStats | null>(null);
@@ -166,10 +165,6 @@ export default function ErWaitDashboard() {
   const [geocodingError, setGeocodingError] = useState('');
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [osrmData, setOsrmData] = useState<Record<string, { durationMins: number; distanceKm: number }>>({});
-  const [locationNudgeDismissed, setLocationNudgeDismissed] = useState(
-    () => typeof window !== 'undefined' && localStorage.getItem(LOCATION_SKIP_KEY) === '1',
-  );
-
 
   const fetchHospitals = useCallback(async (opts?: { quiet?: boolean }) => {
     if (!opts?.quiet) setLoading(true);
@@ -304,9 +299,7 @@ export default function ErWaitDashboard() {
       window.location.hostname !== '127.0.0.1';
 
     if (insecure || !navigator.geolocation) {
-      setGeocodingError(
-        geoErrorMessage(null, insecure || !navigator.geolocation),
-      );
+      setGeocodingError(geoErrorMessage(null, insecure || !navigator.geolocation));
       setGpsRefused(true);
       setLoadingGeo(false);
       setLocationPanelOpen(true);
@@ -444,13 +437,6 @@ export default function ErWaitDashboard() {
     localStorage.removeItem('alberta_hospital_user_location');
   };
 
-  const dismissLocationNudge = () => {
-    localStorage.setItem(LOCATION_SKIP_KEY, '1');
-    setLocationNudgeDismissed(true);
-    setLocationPanelOpen(false);
-    setGeocodingError('');
-  };
-
   // Bootstrap data + location (no blocking modal)
   useEffect(() => {
     fetchHospitals();
@@ -558,6 +544,16 @@ export default function ErWaitDashboard() {
   useEffect(() => {
     if (selectedHospitalId) fetchTrends(selectedHospitalId, hospitalRange);
   }, [selectedHospitalId, hospitalRange, fetchTrends]);
+
+  // External facility requests (app shell: command palette, deep links).
+  useEffect(() => {
+    if (!requestedFacilityId || hospitals.length === 0) return;
+    userPickedHospitalRef.current = true;
+    setViewMode('me');
+    setSelectedHospitalId(requestedFacilityId);
+    setSheetOpen(true);
+    onRequestedFacilityHandled?.();
+  }, [requestedFacilityId, hospitals.length, onRequestedFacilityHandled]);
 
   const processed = useMemo(() => {
     return hospitals.map((h) => {
@@ -718,12 +714,11 @@ export default function ErWaitDashboard() {
     return 'Update time unknown';
   }, [lastUpdated, loading, clockMin]);
 
-  const nextFresh = useMemo(() => {
+  const isStaleData = useMemo(() => {
     void clockMin;
-    if (nextUpdate == null) return 'every ~10m';
-    const mins = Math.max(0, Math.round((new Date(nextUpdate).getTime() - Date.now()) / 60_000));
-    return mins <= 0 ? 'refreshing soon' : `next ~${mins}m`;
-  }, [nextUpdate, clockMin]);
+    if (lastUpdated == null) return false;
+    return Date.now() - new Date(lastUpdated).getTime() > STALE_AFTER_MS;
+  }, [lastUpdated, clockMin]);
 
   // Always plot every facility with coords so city framing can show peers.
   const mapHospitals = useMemo(
@@ -752,6 +747,9 @@ export default function ErWaitDashboard() {
     [lastUpdated],
   );
 
+  const topPick = topThree[0] ?? null;
+  const runnerUp = topThree[1] ?? null;
+
   return (
     <div className="space-y-4">
       <DashboardHeader
@@ -760,59 +758,68 @@ export default function ErWaitDashboard() {
         description="Find the fastest path from where you are to a doctor — drive time plus AHS queue estimates (refreshed every ~10 min)."
         metadata={headerMetadata}
         arrayKey="ER_WAIT_TIMES"
+        variant="light"
       />
 
       {fetchError && (
-        <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm flex items-center gap-2">
-          <span>⚠️ Unable to refresh live ER wait times. Showing last received data.</span>
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-warn" aria-hidden />
+          <span>Unable to refresh live ER wait times. Showing last received data.</span>
+        </div>
+      )}
+
+      {isStaleData && (
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-warn" aria-hidden />
+          <span>ER data may be stale — last update {formatRelativeTime(lastUpdated)}.</span>
         </div>
       )}
 
       {/* Decision bar */}
-      <div className="sticky top-[4.25rem] z-20 -mx-1 px-1">
-        <div className="rounded-2xl border border-white/8 bg-[#0a1224]/95 backdrop-blur-xl shadow-xl shadow-black/30">
+      <div className="sticky top-16 z-20">
+        <div className="rounded-xl border border-line bg-surface shadow-sm">
           <div className="flex flex-col gap-3 p-3 sm:p-3.5">
-            <div className="flex flex-wrap items-center gap-2 justify-between">
-              <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setLocationPanelOpen((v) => !v)}
                   className={cn(
-                    'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer',
+                    'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
                     userLocation
-                      ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-100 hover:bg-cyan-500/15'
-                      : 'border-slate-700 bg-slate-900/80 text-slate-300 hover:border-slate-500',
+                      ? 'border-line bg-surface text-ink-2 hover:border-line-2'
+                      : 'border-line bg-accent-soft text-accent-strong hover:bg-accent-soft/70',
                   )}
                 >
-                  <MapPin className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate max-w-[12rem] sm:max-w-[16rem]">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  <span className="max-w-[12rem] truncate sm:max-w-[16rem]">
                     {loadingGeo
                       ? 'Finding you…'
                       : userLocation
                         ? `Near ${userLocation.city}`
                         : 'Set location'}
                   </span>
-                  <span className="text-[10px] uppercase tracking-wider opacity-70">
-                    {userLocation ? 'Change' : 'Optional'}
-                  </span>
+                  <span className="text-ink-3">{userLocation ? 'Change' : ''}</span>
                 </button>
 
-                <div className="inline-flex rounded-full border border-slate-800 bg-slate-950 p-0.5">
+                <div className="inline-flex rounded-lg border border-line bg-paper p-0.5" role="tablist" aria-label="View">
                   {(
                     [
-                      ['me', 'For me'],
-                      ['system', 'Province'],
+                      ['me', 'Near you'],
+                      ['system', 'Provincial picture'],
                     ] as const
                   ).map(([id, label]) => (
                     <button
                       key={id}
                       type="button"
+                      role="tab"
+                      aria-selected={viewMode === id}
                       onClick={() => setViewMode(id)}
                       className={cn(
-                        'px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer',
+                        'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer',
                         viewMode === id
-                          ? 'bg-white text-slate-950 shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200',
+                          ? 'bg-accent text-white'
+                          : 'text-ink-2 hover:text-ink',
                       )}
                     >
                       {label}
@@ -821,25 +828,101 @@ export default function ErWaitDashboard() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-[11px] text-slate-400 tabular-nums">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-300 font-semibold">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" aria-hidden />
+              <div className="flex items-center gap-2 text-xs text-ink-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-ok-soft px-2.5 py-1 font-medium text-ok">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" aria-hidden />
                   {freshness}
                 </span>
-                <span className="text-slate-600 font-mono text-[9px] shrink-0" title="UI bundle id">
+                <span className="shrink-0 font-mono text-[10px] text-ink-3" title="UI bundle id">
                   · {ER_UI_BUILD}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-start gap-2 rounded-xl border border-amber-500/15 bg-amber-500/[0.06] px-3 py-2 text-[11px] leading-relaxed text-amber-100/90">
-              <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-              <p>
-                <span className="font-bold text-amber-200">Life-threatening?</span> Call{' '}
-                <span className="font-black text-white">911</span> — do not use this page to choose a hospital.
-                Estimates are unofficial AHS queue guidance only.
+            {viewMode === 'me' && userLocation && topPick && (
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-3">
+                <div className="min-w-0">
+                  <p className="text-xs text-ink-3">Fastest for you now</p>
+                  <p className="truncate text-lg font-semibold text-ink sm:text-xl">
+                    {shortHospitalName(topPick.name)}
+                  </p>
+                  <p className="text-xs text-ink-3">
+                    {topPick.city} · {careTypeLabel(topPick.careType)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <p className="font-mono text-3xl tabular-nums text-ink">
+                    {formatMinutesToHm(topPick.effectiveWaitMinutes ?? 0)}
+                  </p>
+                  <div className="space-y-1">
+                    <WaitBandChip band={topPick.waitBand} />
+                    {topPick.driveMins != null && (
+                      <p className="text-xs tabular-nums text-ink-3">
+                        + {formatMinutesToHm(topPick.driveMins)} drive
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="ml-auto flex items-center gap-3">
+                  {runnerUp && (
+                    <p className="hidden text-xs text-ink-3 md:block">
+                      Next best:{' '}
+                      <span className="font-medium text-ink-2">
+                        {shortHospitalName(runnerUp.name)} ·{' '}
+                        {formatMinutesToHm(
+                          (runnerUp.effectiveWaitMinutes ?? 0) +
+                            (userLocation && runnerUp.driveMins != null ? runnerUp.driveMins : 0),
+                        )}
+                      </span>
+                    </p>
+                  )}
+                  <a
+                    href={directionsUrl(topPick)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-strong"
+                  >
+                    <Navigation className="h-4 w-4" aria-hidden />
+                    Directions
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {viewMode === 'me' && userLocation && !topPick && !loading && (
+              <p className="border-t border-line pt-3 text-sm text-ink-2">
+                No open facilities with live waits near you right now.
               </p>
-            </div>
+            )}
+
+            {viewMode === 'me' && !userLocation && (
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-ink">Set your location to find the fastest ER</p>
+                  <p className="mt-0.5 text-xs text-ink-3">
+                    Combines drive time with live queue estimates. Stored only in this browser.
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    onClick={requestGPSLocation}
+                    disabled={loadingGeo}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent-strong disabled:opacity-60 cursor-pointer"
+                  >
+                    <Compass className={cn('h-3.5 w-3.5', loadingGeo && 'animate-spin')} aria-hidden />
+                    {loadingGeo ? 'Detecting…' : 'Use my location'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLocationPanelOpen(true)}
+                    className="rounded-lg border border-line-2 bg-surface px-3.5 py-2 text-xs font-semibold text-ink transition-colors hover:bg-paper cursor-pointer"
+                  >
+                    Enter city or postal code
+                  </button>
+                </div>
+              </div>
+            )}
 
             <AnimatePresence initial={false}>
               {locationPanelOpen && (
@@ -849,18 +932,18 @@ export default function ErWaitDashboard() {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 space-y-3">
+                  <div className="space-y-3 rounded-lg border border-line bg-paper p-3.5">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="text-xs font-semibold text-slate-200 leading-snug pr-2">
+                      <p className="pr-2 text-xs font-medium leading-snug text-ink-2">
                         Location ranks sites by drive + wait. Stored only in this browser.
                       </p>
                       <button
                         type="button"
                         onClick={() => setLocationPanelOpen(false)}
-                        className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-slate-800 cursor-pointer shrink-0"
+                        className="shrink-0 rounded-md p-1.5 text-ink-3 transition-colors hover:bg-neutral-chip hover:text-ink cursor-pointer"
                         aria-label="Close location panel"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="h-4 w-4" aria-hidden />
                       </button>
                     </div>
 
@@ -869,16 +952,16 @@ export default function ErWaitDashboard() {
                         type="button"
                         onClick={requestGPSLocation}
                         disabled={loadingGeo}
-                        className="w-full h-11 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-500/15 disabled:opacity-50 cursor-pointer"
+                        className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-accent text-xs font-semibold text-white transition-colors hover:bg-accent-strong disabled:opacity-60 cursor-pointer"
                       >
-                        <Compass className={cn('w-4 h-4', loadingGeo && 'animate-spin')} />
+                        <Compass className={cn('h-4 w-4', loadingGeo && 'animate-spin')} aria-hidden />
                         {loadingGeo ? 'Detecting…' : 'Use current location'}
                       </button>
                       {userLocation && (
                         <button
                           type="button"
                           onClick={clearLocation}
-                          className="w-full h-10 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 text-xs font-bold hover:border-slate-500 cursor-pointer"
+                          className="h-9 w-full rounded-lg border border-line-2 bg-surface text-xs font-semibold text-ink-2 transition-colors hover:bg-paper cursor-pointer"
                         >
                           Clear location ({userLocation.city})
                         </button>
@@ -886,34 +969,32 @@ export default function ErWaitDashboard() {
                     </div>
 
                     <div className="relative flex items-center justify-center py-0.5">
-                      <div className="absolute inset-x-0 top-1/2 border-t border-slate-800" />
-                      <span className="relative px-2 bg-slate-950/70 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                        or enter a place
-                      </span>
+                      <div className="absolute inset-x-0 top-1/2 border-t border-line" />
+                      <span className="relative bg-paper px-2 text-xs text-ink-3">or enter a place</span>
                     </div>
 
                     <form onSubmit={handleAddressSubmit} className="space-y-2">
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                        <MapPin className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-3" aria-hidden />
                         <input
                           value={addressInput}
                           onChange={(e) => setAddressInput(e.target.value)}
                           placeholder="City or postal code (e.g. St. Albert, T8N)"
-                          className="w-full h-11 pl-9 pr-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"
+                          className="h-10 w-full rounded-lg border border-line bg-surface pl-9 pr-3 text-sm text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none"
                         />
                       </div>
                       <button
                         type="submit"
                         disabled={isGeocoding || !addressInput.trim()}
-                        className="w-full h-11 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold disabled:opacity-50 cursor-pointer"
+                        className="h-10 w-full rounded-lg bg-accent text-xs font-semibold text-white transition-colors hover:bg-accent-strong disabled:opacity-60 cursor-pointer"
                       >
                         {isGeocoding ? 'Looking up…' : 'Set location'}
                       </button>
                     </form>
 
-                    {geocodingError && <p className="text-[11px] text-rose-300 leading-snug">{geocodingError}</p>}
+                    {geocodingError && <p className="text-xs leading-snug text-crit">{geocodingError}</p>}
                     {gpsRefused && !userLocation && (
-                      <p className="text-[11px] text-slate-500 leading-snug">
+                      <p className="text-xs leading-snug text-ink-3">
                         GPS blocked or unavailable — a city or postal code works just as well.
                       </p>
                     )}
@@ -921,126 +1002,98 @@ export default function ErWaitDashboard() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            <p className="border-t border-line pt-2.5 text-xs text-ink-3">
+              In a life-threatening emergency, call{' '}
+              <strong className="font-semibold text-ink">911</strong> — estimates are unofficial AHS
+              queue guidance.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Soft location nudge — never modal */}
-      {!userLocation && !locationNudgeDismissed && !locationPanelOpen && viewMode === 'me' && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/[0.07] px-4 py-3">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-cyan-50">Want the fastest option near you?</p>
-            <p className="text-[11px] text-cyan-100/70 mt-0.5">
-              Add a location to combine drive time with live waits. You can browse without it.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setLocationPanelOpen(true)}
-              className="h-9 px-3 rounded-xl bg-cyan-500 text-slate-950 text-xs font-black cursor-pointer"
-            >
-              Add location
-            </button>
-            <button
-              type="button"
-              onClick={dismissLocationNudge}
-              className="h-9 px-3 rounded-xl border border-slate-700 text-slate-400 text-xs font-bold hover:text-slate-200 cursor-pointer"
-            >
-              Not now
-            </button>
-          </div>
-        </div>
-      )}
-
       {viewMode === 'me' ? (
         <>
-          {/* Top 3 hero */}
+          {/* Top 3 */}
           <section className="space-y-3">
             <div className="flex items-end justify-between gap-3">
               <div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-cyan-300" />
-                  <h3 className="text-sm font-black tracking-tight text-white">
-                    {userLocation ? 'Fastest path to a doctor' : 'Shortest live waits'}
-                  </h3>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <h3 className="text-sm font-semibold text-ink">
+                  {userLocation ? 'Fastest path to a doctor' : 'Shortest live waits'}
+                </h3>
+                <p className="mt-0.5 text-xs text-ink-3">
                   {userLocation
                     ? 'Ranked by drive time + current queue estimate within ~150 km.'
                     : 'Set a location to include driving time in the ranking.'}
                 </p>
               </div>
-              <span className="text-[10px] font-mono text-slate-500 hidden sm:inline">
+              <span className="hidden font-mono text-xs tabular-nums text-ink-3 sm:inline">
                 {openSites.length} open · {pressure.closed} closed
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               {loading &&
                 Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-36 rounded-2xl border border-slate-800 bg-slate-900/40 animate-pulse" />
+                  <div key={i} className="h-36 animate-pulse rounded-xl border border-line bg-neutral-chip" />
                 ))}
               {!loading && topThree.length === 0 && (
-                <div className="md:col-span-3 rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 px-4 py-8 text-center text-sm text-slate-500">
+                <div className="rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3 md:col-span-3">
                   No open facilities match the current filters.
                 </div>
               )}
               {topThree.map((h, i) => {
                 const wait = h.effectiveWaitMinutes ?? 0;
-                const total =
-                  userLocation && h.driveMins != null ? wait + h.driveMins : wait;
+                const total = userLocation && h.driveMins != null ? wait + h.driveMins : wait;
                 return (
                   <button
                     key={h.id}
                     type="button"
                     onClick={() => selectHospital(h)}
                     className={cn(
-                      'text-left rounded-2xl border p-4 transition-all cursor-pointer group',
+                      'group rounded-xl border p-4 text-left transition-colors cursor-pointer',
                       i === 0
-                        ? 'border-cyan-400/40 bg-gradient-to-br from-cyan-500/15 via-slate-900/80 to-slate-950 shadow-lg shadow-cyan-950/30'
-                        : 'border-slate-800 bg-slate-900/50 hover:border-slate-600',
-                      selected?.id === h.id && 'ring-2 ring-cyan-400/30',
+                        ? 'border-accent bg-accent-soft'
+                        : 'border-line bg-surface hover:border-line-2',
+                      selected?.id === h.id && 'ring-2 ring-accent/30',
                     )}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="mb-3 flex items-start justify-between gap-2">
                       <span
                         className={cn(
-                          'text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full',
-                          i === 0 ? 'bg-cyan-400 text-slate-950' : 'bg-slate-800 text-slate-400',
+                          'rounded-full px-2 py-0.5 text-xs font-medium',
+                          i === 0 ? 'bg-accent text-white' : 'bg-neutral-chip text-ink-3',
                         )}
                       >
                         {i === 0 ? 'Best option' : `Option ${i + 1}`}
                       </span>
-                      <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border', waitSurface[h.waitBand])}>
-                        {waitBandLabel(h.waitBand)}
-                      </span>
+                      <WaitBandChip band={h.waitBand} />
                     </div>
-                    <h4 className="text-sm font-bold text-white leading-snug group-hover:text-cyan-100">
+                    <h4 className="text-sm font-semibold leading-snug text-ink group-hover:text-accent">
                       {h.name}
                     </h4>
-                    <p className="text-[11px] text-slate-500 mt-1">
+                    <p className="mt-0.5 text-xs text-ink-3">
                       {h.city} · {careTypeLabel(h.careType)}
                     </p>
                     <div className="mt-4 flex items-end justify-between gap-2">
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                        <p className="text-xs text-ink-3">
                           {userLocation && h.driveMins != null ? 'Drive + wait' : 'Wait'}
                         </p>
-                        <p className="text-2xl font-black tracking-tight text-white tabular-nums">
+                        <p className="font-mono text-2xl tabular-nums text-ink">
                           {formatMinutesToHm(total)}
                         </p>
                       </div>
-                      <div className="text-right text-[11px] text-slate-400 font-mono space-y-0.5">
+                      <div className="space-y-0.5 text-right font-mono text-xs tabular-nums text-ink-3">
                         <p>Wait {formatMinutesToHm(wait)}</p>
                         {userLocation && h.driveMins != null && (
                           <p>Drive {formatMinutesToHm(h.driveMins)}</p>
                         )}
-                        {h.distance != null && <p className="text-slate-500">{h.distance} km</p>}
+                        {h.distance != null && <p>{h.distance} km</p>}
                       </div>
                     </div>
                     {(h.careType === 'pediatric-emergency' || h.ageMinYears != null) && (
-                      <p className="mt-3 text-[10px] font-semibold text-violet-300/90">{h.servesLabel}</p>
+                      <p className="mt-3 text-xs font-medium text-ink-2">{h.servesLabel}</p>
                     )}
                   </button>
                 );
@@ -1048,10 +1101,10 @@ export default function ErWaitDashboard() {
             </div>
           </section>
 
-          {/* Map + sheet — stretch equal height on desktop so map fills left column */}
+          {/* Map + sheet */}
           <section
             className={cn(
-              'grid gap-3 items-stretch',
+              'grid items-stretch gap-3',
               isMapFullscreen
                 ? ''
                 : 'grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)] xl:min-h-[520px]',
@@ -1059,19 +1112,19 @@ export default function ErWaitDashboard() {
           >
             <div
               className={cn(
-                'rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden flex flex-col w-full min-h-0',
+                'flex min-h-0 w-full flex-col overflow-hidden rounded-xl border border-line bg-surface',
                 !isMapFullscreen && 'xl:h-full',
-                isMapFullscreen && 'fixed inset-0 z-[9999] rounded-none bg-slate-950 p-3 sm:p-5',
+                isMapFullscreen && 'fixed inset-0 z-[9999] rounded-none bg-paper p-3 sm:p-5',
               )}
             >
-              <div className="flex items-center justify-between gap-2 px-3.5 py-3 border-b border-slate-800/80">
-                <div className="flex items-center gap-2 min-w-0">
-                  <MapIcon className="w-4 h-4 text-cyan-300 shrink-0" />
+              <div className="flex items-center justify-between gap-2 border-b border-line px-3.5 py-2.5">
+                <div className="flex min-w-0 items-center gap-2">
+                  <MapIcon className="h-4 w-4 shrink-0 text-ink-3" aria-hidden />
                   <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-white truncate">
+                    <h3 className="truncate text-sm font-semibold text-ink">
                       {isMapFullscreen ? 'Map — fullscreen' : 'Map'}
                     </h3>
-                    <p className="text-[10px] text-slate-500 hidden sm:block">
+                    <p className="hidden text-xs text-ink-3 sm:block">
                       Pins coloured by queue. Tap a site for details.
                     </p>
                   </div>
@@ -1079,15 +1132,15 @@ export default function ErWaitDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsMapFullscreen((v) => !v)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-[10px] font-bold text-slate-300 hover:text-white cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-2.5 py-1.5 text-xs font-semibold text-ink-2 transition-colors hover:bg-paper cursor-pointer"
                 >
                   {isMapFullscreen ? (
                     <>
-                      <Minimize2 className="w-3.5 h-3.5" /> Exit
+                      <Minimize2 className="h-3.5 w-3.5" aria-hidden /> Exit
                     </>
                   ) : (
                     <>
-                      <Maximize2 className="w-3.5 h-3.5" /> Fullscreen
+                      <Maximize2 className="h-3.5 w-3.5" aria-hidden /> Fullscreen
                     </>
                   )}
                 </button>
@@ -1101,15 +1154,15 @@ export default function ErWaitDashboard() {
                   sortBy={sortBy}
                 />
                 {!isMapFullscreen && (
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[500] flex items-center justify-between gap-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent">
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[500] flex items-center justify-between gap-2 border-t border-line bg-surface/90 px-3 py-1.5 text-xs font-medium text-ink-3">
                     <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400" /> Quieter
+                      <span className="h-2 w-2 rounded-full bg-ok" aria-hidden /> Quieter
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-amber-400" /> Busy
+                      <span className="h-2 w-2 rounded-full bg-warn" aria-hidden /> Busy
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-rose-400" /> Very busy
+                      <span className="h-2 w-2 rounded-full bg-crit" aria-hidden /> Very busy
                     </span>
                   </div>
                 )}
@@ -1133,21 +1186,22 @@ export default function ErWaitDashboard() {
 
           {/* Filters + ranked list */}
           <section className="space-y-3">
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-3 sm:p-3.5 space-y-3">
-              <div className="flex flex-col lg:flex-row gap-2.5">
+            <div className="space-y-2.5 rounded-xl border border-line bg-surface p-3">
+              <div className="flex flex-col gap-2 lg:flex-row">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3" aria-hidden />
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search facility or city…"
-                    className="w-full h-10 pl-10 pr-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/40"
+                    className="h-10 w-full rounded-lg border border-line bg-surface pl-10 pr-3 text-sm text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none"
                   />
                 </div>
                 <select
                   value={selectedRegion}
                   onChange={(e) => setSelectedRegion(e.target.value)}
-                  className="h-10 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-200 px-3 cursor-pointer"
+                  className="h-10 cursor-pointer rounded-lg border border-line bg-surface px-3 text-sm text-ink focus:border-accent focus:outline-none"
+                  aria-label="Zone"
                 >
                   {regions.map((r) => (
                     <option key={r} value={r}>
@@ -1158,7 +1212,8 @@ export default function ErWaitDashboard() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortKey)}
-                  className="h-10 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-200 px-3 cursor-pointer"
+                  className="h-10 cursor-pointer rounded-lg border border-line bg-surface px-3 text-sm text-ink focus:border-accent focus:outline-none"
+                  aria-label="Sort order"
                 >
                   <option value="net-wait">
                     {userLocation ? 'Sort: drive + wait' : 'Sort: wait time'}
@@ -1169,8 +1224,8 @@ export default function ErWaitDashboard() {
               </div>
 
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-slate-500 font-bold mr-1">
-                  <Filter className="w-3 h-3" /> Type
+                <span className="mr-1 inline-flex items-center gap-1 text-xs font-medium text-ink-3">
+                  <Filter className="h-3 w-3" aria-hidden /> Type
                 </span>
                 {(
                   [
@@ -1185,10 +1240,10 @@ export default function ErWaitDashboard() {
                     type="button"
                     onClick={() => setCareFilter(id)}
                     className={cn(
-                      'h-7 px-2.5 rounded-full text-[11px] font-bold border transition-colors cursor-pointer',
+                      'h-7 rounded-full border px-2.5 text-xs font-medium transition-colors cursor-pointer',
                       careFilter === id
-                        ? 'bg-white text-slate-950 border-white'
-                        : 'border-slate-700 text-slate-400 hover:text-slate-200',
+                        ? 'border-accent bg-accent text-white'
+                        : 'border-line-2 text-ink-2 hover:bg-paper',
                     )}
                   >
                     {label}
@@ -1197,11 +1252,12 @@ export default function ErWaitDashboard() {
                 <button
                   type="button"
                   onClick={() => setOpenOnly((v) => !v)}
+                  aria-pressed={openOnly}
                   className={cn(
-                    'h-7 px-2.5 rounded-full text-[11px] font-bold border transition-colors cursor-pointer ml-1',
+                    'ml-1 h-7 rounded-full border px-2.5 text-xs font-medium transition-colors cursor-pointer',
                     openOnly
-                      ? 'bg-emerald-400 text-slate-950 border-emerald-300'
-                      : 'border-slate-700 text-slate-400 hover:text-slate-200',
+                      ? 'border-ok bg-ok text-white'
+                      : 'border-line-2 text-ink-2 hover:bg-paper',
                   )}
                 >
                   Open now
@@ -1210,21 +1266,21 @@ export default function ErWaitDashboard() {
             </div>
 
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
+              <h3 className="text-xs font-semibold text-ink-3">
                 Ranked facilities ({ranked.length})
               </h3>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-xs text-ink-3">
                 {userLocation ? 'Includes estimated drive time' : 'Raw queue order — add location for drive + wait'}
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
               {loading &&
                 Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-20 rounded-2xl border border-slate-800 bg-slate-900/30 animate-pulse" />
+                  <div key={i} className="h-[72px] animate-pulse bg-neutral-chip/40" />
                 ))}
               {!loading && ranked.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-slate-800 py-12 text-center text-slate-500 text-sm">
+                <div className="py-12 text-center text-sm text-ink-3">
                   No facilities match those filters.
                 </div>
               )}
@@ -1260,6 +1316,7 @@ export default function ErWaitDashboard() {
     </div>
   );
 }
+
 type FacilityRowProps = {
   hospital: EnrichedHospital;
   rank: number;
@@ -1281,8 +1338,11 @@ function FacilityRow({
 }: FacilityRowProps) {
   const wait = h.effectiveWaitMinutes;
   const showNet = hasLocation && h.driveMins != null && wait != null && sortBy !== 'raw-wait';
-  const primary =
-    showNet ? formatMinutesToHm(wait + h.driveMins!) : wait != null ? formatMinutesToHm(wait) : waitBandLabel(h.waitBand);
+  const primary = showNet
+    ? formatMinutesToHm(wait + h.driveMins!)
+    : wait != null
+      ? formatMinutesToHm(wait)
+      : null;
 
   return (
     <div
@@ -1296,42 +1356,42 @@ function FacilityRow({
         }
       }}
       className={cn(
-        'w-full text-left rounded-2xl border px-3.5 py-3 flex items-center gap-3 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500/40',
+        'flex w-full cursor-pointer items-center gap-3 px-3.5 py-3 text-left transition-colors focus:outline-none focus-visible:bg-accent-soft',
         selected
-          ? 'border-cyan-400/40 bg-cyan-500/10'
+          ? 'bg-accent-soft'
           : h.openState === 'closed' || wait === null
-            ? 'border-slate-800/60 bg-slate-950/40 opacity-80 hover:opacity-100'
-            : 'border-slate-800 bg-slate-900/40 hover:border-slate-600',
+            ? 'opacity-70 hover:bg-paper hover:opacity-100'
+            : 'hover:bg-paper',
       )}
     >
-      <div className="w-7 shrink-0 text-center">
-        <span className="text-[11px] font-mono text-slate-500">{rank}</span>
+      <div className="w-6 shrink-0 text-center">
+        <span className="font-mono text-xs tabular-nums text-ink-3">{rank}</span>
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <h4 className="text-sm font-bold text-white truncate">{h.name}</h4>
-          <span className="text-[10px] font-semibold text-slate-500">{careTypeLabel(h.careType)}</span>
+        <div className="flex flex-wrap items-center gap-x-1.5">
+          <h4 className="truncate text-sm font-semibold text-ink">{h.name}</h4>
+          <span className="text-xs text-ink-3">{careTypeLabel(h.careType)}</span>
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-ink-3">
           <span>
             {h.city}
             {h.distance != null ? ` · ${h.distance} km` : ''}
           </span>
-          <span className={cn('px-1.5 py-0.5 rounded-md border text-[10px] font-bold', waitSurface[h.waitBand])}>
-            {waitBandLabel(h.waitBand)}
-          </span>
+          <WaitBandChip band={h.waitBand} />
           {(h.careType === 'pediatric-emergency' || h.ageMinYears != null) && (
-            <span className="text-violet-300/90 font-semibold">{h.servesLabel}</span>
+            <span className="font-medium text-ink-2">{h.servesLabel}</span>
           )}
         </div>
       </div>
       <div className="shrink-0 text-right">
-        <p className={cn('text-lg font-black tabular-nums tracking-tight', waitTone[h.waitBand])}>{primary}</p>
-        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-0.5">
+        <p className={cn('font-mono text-lg tabular-nums', bandTextTone[h.waitBand])}>
+          {primary ?? h.waitBand === 'closed' ? (primary ?? 'Closed') : primary}
+        </p>
+        <p className="mt-0.5 text-xs text-ink-3">
           {showNet ? 'Drive + wait' : wait != null ? 'Wait' : h.openState === 'closed' ? 'Closed' : 'No data'}
         </p>
         {showNet && wait != null && (
-          <p className="text-[10px] font-mono text-slate-500 mt-0.5">
+          <p className="mt-0.5 font-mono text-xs tabular-nums text-ink-3">
             {formatMinutesToHm(wait)} + {formatMinutesToHm(h.driveMins!)}
           </p>
         )}
@@ -1341,9 +1401,9 @@ function FacilityRow({
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
-        className="hidden sm:inline-flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-[10px] font-bold text-cyan-300 hover:border-cyan-500/40 cursor-pointer"
+        className="hidden shrink-0 items-center gap-1 rounded-lg border border-line-2 bg-surface px-2 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent-soft sm:inline-flex"
       >
-        <Navigation className="w-3 h-3" /> Go
+        <Navigation className="h-3 w-3" aria-hidden /> Go
       </a>
     </div>
   );
@@ -1368,18 +1428,18 @@ function FacilityWaitTrendBlock({
   };
 }) {
   return (
-    <div className="er-trend-panel rounded-xl border border-cyan-500/20 bg-slate-950/60 p-3">
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <h4 className="text-[10px] font-bold uppercase tracking-widest text-cyan-400/90">Wait trend</h4>
-        <div className="flex rounded-lg border border-slate-800 bg-slate-950 p-0.5">
+    <div className="er-trend-panel rounded-lg border border-line bg-paper p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h4 className="text-xs font-semibold text-ink-2">Wait trend</h4>
+        <div className="flex rounded-lg border border-line bg-surface p-0.5">
           {['24h', '7d', '30D'].map((r) => (
             <button
               key={r}
               type="button"
               onClick={() => setHospitalRange(r)}
               className={cn(
-                'px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider cursor-pointer',
-                hospitalRange === r ? 'bg-cyan-600 text-white' : 'text-slate-500 hover:text-slate-300',
+                'cursor-pointer rounded-md px-2 py-0.5 text-xs font-medium transition-colors',
+                hospitalRange === r ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink',
               )}
             >
               {r}
@@ -1387,26 +1447,26 @@ function FacilityWaitTrendBlock({
           ))}
         </div>
       </div>
-      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500 mb-2">
+      <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-3">
         {facilityTrendStats.avg != null && (
           <span>
             Avg ({trendRangeLabel(facilityTrendStats.rangeKey)}):{' '}
-            <span className="text-slate-300 font-mono font-bold">{formatMinutesToHm(facilityTrendStats.avg)}</span>
+            <span className="font-mono tabular-nums text-ink">{formatMinutesToHm(facilityTrendStats.avg)}</span>
           </span>
         )}
         {facilityTrendStats.busiest && (
           <span>
             Busiest hour:{' '}
-            <span className="text-slate-300 font-mono font-bold">
+            <span className="font-mono tabular-nums text-ink">
               {facilityTrendStats.busiest.hourLabel} (~{formatMinutesToHm(facilityTrendStats.busiest.avgWaitMinutes)})
             </span>
           </span>
         )}
       </div>
-      <div className="h-[120px] w-full rounded-lg border border-slate-800 bg-slate-950/80 p-1">
+      <div className="h-[120px] w-full rounded-lg border border-line bg-surface p-1">
         {loadingTrends ? (
-          <div className="h-full flex items-center justify-center">
-            <RefreshCw className="w-4 h-4 text-cyan-500/50 animate-spin" />
+          <div className="flex h-full items-center justify-center">
+            <RefreshCw className="h-4 w-4 animate-spin text-ink-3" aria-hidden />
           </div>
         ) : trends.length > 0 ? (
           <>
@@ -1414,33 +1474,33 @@ function FacilityWaitTrendBlock({
               <AreaChart data={trends} margin={{ top: 4, right: 4, left: 0, bottom: 1 }}>
                 <defs>
                   <linearGradient id="erFacilityWait" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.05} />
+                    <stop offset="5%" stopColor={CHART_ACCENT} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={CHART_ACCENT} stopOpacity={0.03} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID} />
                 <XAxis
                   dataKey="timestamp"
                   tickFormatter={(tick) => formatChartXAxis(tick, hospitalRange)}
-                  stroke="#334155"
-                  tick={{ fill: '#64748b', fontSize: 9 }}
+                  stroke={CHART_GRID}
+                  tick={{ fill: CHART_TICK, fontSize: 9 }}
                 />
                 <YAxis
                   width={36}
                   domain={facilityTrendStats.yDomain}
-                  stroke="#334155"
-                  tick={{ fill: '#64748b', fontSize: 9 }}
+                  stroke={CHART_GRID}
+                  tick={{ fill: CHART_TICK, fontSize: 9 }}
                   tickFormatter={(v) => formatMinutesToHm(Number(v))}
                 />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
                     return (
-                      <div className="chart-tooltip text-[10px] !p-2">
-                        <p className="chart-tooltip-value !text-cyan-300">
+                      <div className="chart-tooltip !p-2 text-xs">
+                        <p className="chart-tooltip-value">
                           {formatMinutesToHm(Number(payload[0].value))}
                         </p>
-                        <p className="text-[8px] text-slate-500 font-mono mt-0.5">
+                        <p className="mt-0.5 font-mono text-[10px] text-ink-3">
                           {format(new Date(payload[0].payload.timestamp), 'MMM d, HH:mm')}
                         </p>
                       </div>
@@ -1450,32 +1510,33 @@ function FacilityWaitTrendBlock({
                 {facilityTrendStats.avg != null && (
                   <ReferenceLine
                     y={facilityTrendStats.avg}
-                    stroke="#64748b"
+                    stroke={CHART_REF}
                     strokeDasharray="4 4"
-                    label={{ value: 'Avg', position: 'insideTopRight', fill: '#94a3b8', fontSize: 8 }}
+                    label={{ value: 'Avg', position: 'insideTopRight', fill: CHART_TICK, fontSize: 8 }}
                   />
                 )}
                 <Area
                   type="monotone"
                   dataKey="waitTime"
-                  stroke="#22d3ee"
+                  stroke={CHART_ACCENT}
                   strokeWidth={2}
                   fill="url(#erFacilityWait)"
-                  dot={trends.length <= 12 ? { r: 3, fill: '#22d3ee', strokeWidth: 0 } : false}
+                  dot={trends.length <= 12 ? { r: 3, fill: CHART_ACCENT, strokeWidth: 0 } : false}
                   activeDot={{ r: 4 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
             {trends.length < 6 && (
-              <p className="text-[9px] text-slate-500 text-center pt-1">
-                {trends.length} sample{trends.length === 1 ? '' : 's'} — tap <strong className="text-cyan-500">30D</strong> for full history.
+              <p className="pt-1 text-center text-[10px] text-ink-3">
+                {trends.length} sample{trends.length === 1 ? '' : 's'} — tap{' '}
+                <strong className="text-accent">30D</strong> for full history.
               </p>
             )}
           </>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-slate-600">
-            <TrendingUp className="w-4 h-4 mb-1" />
-            <p className="text-[10px]">No trend samples yet</p>
+          <div className="flex h-full flex-col items-center justify-center text-ink-3">
+            <TrendingUp className="mb-1 h-4 w-4" aria-hidden />
+            <p className="text-xs">No trend samples yet</p>
           </div>
         )}
       </div>
@@ -1511,67 +1572,58 @@ function FacilitySheet({
 }) {
   if (!h) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 p-8 text-center text-slate-500 text-sm">
+      <div className="rounded-xl border border-dashed border-line-2 bg-surface p-8 text-center text-sm text-ink-3">
         Select a facility on the map or list.
       </div>
     );
   }
 
   const wait = h.effectiveWaitMinutes;
-  const net =
-    userLocation && h.driveMins != null && wait != null ? wait + h.driveMins : null;
+  const net = userLocation && h.driveMins != null && wait != null ? wait + h.driveMins : null;
 
   return (
     <div
       className={cn(
-        'rounded-2xl border border-slate-800 bg-slate-900/50 overflow-hidden flex flex-col xl:h-full min-h-0',
+        'flex min-h-0 flex-col overflow-hidden rounded-xl border border-line bg-surface xl:h-full',
         !open && 'opacity-80',
       )}
     >
-      <div className="flex items-start justify-between gap-2 px-4 py-3 border-b border-slate-800/80">
+      <div className="flex items-start justify-between gap-2 border-b border-line px-4 py-3">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5 mb-1">
-            <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border', waitSurface[h.waitBand])}>
-              {waitBandLabel(h.waitBand)}
-            </span>
-            <span className="text-[10px] font-semibold text-slate-500">{careTypeLabel(h.careType)}</span>
+          <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+            <WaitBandChip band={h.waitBand} />
+            <span className="text-xs text-ink-3">{careTypeLabel(h.careType)}</span>
           </div>
-          <h3 className="text-base font-black text-white leading-snug">{h.name}</h3>
-          <p className="text-[11px] text-slate-500 mt-0.5">
+          <h3 className="text-base font-semibold leading-snug text-ink">{h.name}</h3>
+          <p className="mt-0.5 text-xs text-ink-3">
             {h.city}, {h.region}
           </p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="p-1.5 rounded-lg text-slate-500 hover:text-white xl:hidden cursor-pointer"
+          className="rounded-lg p-1.5 text-ink-3 transition-colors hover:bg-neutral-chip hover:text-ink xl:hidden cursor-pointer"
           aria-label="Collapse details"
         >
-          <X className="w-4 h-4" />
+          <X className="h-4 w-4" aria-hidden />
         </button>
       </div>
 
-      <div className="p-4 space-y-4 flex-1">
+      <div className="flex-1 space-y-4 p-4">
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Current wait</p>
-            <p className={cn('text-2xl font-black tabular-nums mt-1', waitTone[h.waitBand])}>
+          <div className="rounded-lg border border-line bg-paper p-3">
+            <p className="text-xs text-ink-3">Current wait</p>
+            <p className={cn('mt-1 font-mono text-2xl tabular-nums', bandTextTone[h.waitBand])}>
               {wait != null ? formatMinutesToHm(wait) : '—'}
             </p>
-            <p className="text-[10px] text-slate-500 mt-1">Registration → doctor (AHS)</p>
+            <p className="mt-1 text-xs text-ink-3">Registration → doctor (AHS)</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
-              {net != null ? 'Drive + wait' : 'Distance'}
+          <div className="rounded-lg border border-line bg-paper p-3">
+            <p className="text-xs text-ink-3">{net != null ? 'Drive + wait' : 'Distance'}</p>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-ink">
+              {net != null ? formatMinutesToHm(net) : h.distance != null ? `${h.distance} km` : '—'}
             </p>
-            <p className="text-2xl font-black tabular-nums mt-1 text-cyan-200">
-              {net != null
-                ? formatMinutesToHm(net)
-                : h.distance != null
-                  ? `${h.distance} km`
-                  : '—'}
-            </p>
-            <p className="text-[10px] text-slate-500 mt-1">
+            <p className="mt-1 text-xs text-ink-3">
               {h.driveMins != null
                 ? `~${formatMinutesToHm(h.driveMins)} drive`
                 : userLocation
@@ -1590,25 +1642,23 @@ function FacilitySheet({
         />
 
         <div className="flex flex-wrap gap-1.5">
-          <span className="text-[11px] font-semibold text-slate-300 bg-slate-800/80 border border-slate-700 rounded-lg px-2 py-1">
+          <span className="rounded-full bg-neutral-chip px-2.5 py-1 text-xs font-medium text-ink-2">
             {h.servesLabel}
           </span>
           {h.openState === 'closed' && (
-            <span className="text-[11px] font-semibold text-slate-300 bg-slate-800/80 border border-slate-700 rounded-lg px-2 py-1">
+            <span className="rounded-full bg-neutral-chip px-2.5 py-1 text-xs font-medium text-ink-3">
               Closed now
             </span>
           )}
           {h.openState === 'open' && (
-            <span className="text-[11px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1">
-              Open
-            </span>
+            <span className="rounded-full bg-ok-soft px-2.5 py-1 text-xs font-medium text-ok">Open</span>
           )}
         </div>
 
         {h.hoursSummary && (
-          <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Hours / notes</p>
-            <p className="text-[12px] text-slate-300 leading-relaxed whitespace-pre-line">{h.hoursSummary}</p>
+          <div className="rounded-lg border border-line bg-paper p-3">
+            <p className="mb-1 text-xs font-semibold text-ink-2">Hours / notes</p>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-ink-2">{h.hoursSummary}</p>
           </div>
         )}
 
@@ -1617,24 +1667,21 @@ function FacilitySheet({
             href={mapsPlaceUrl(h)}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-start gap-2 text-[12px] text-slate-400 hover:text-cyan-300"
+            className="flex items-start gap-2 text-sm text-ink-2 transition-colors hover:text-accent"
           >
-            <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             <span>{h.address}</span>
           </a>
         )}
 
-        <div className="flex gap-2">
-          <a
-            href={directionsUrl(h)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 h-10 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-black inline-flex items-center justify-center gap-1.5"
-          >
-            <Navigation className="w-3.5 h-3.5" /> Directions
-          </a>
-        </div>
-
+        <a
+          href={directionsUrl(h)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-accent text-sm font-semibold text-white transition-colors hover:bg-accent-strong"
+        >
+          <Navigation className="h-4 w-4" aria-hidden /> Directions
+        </a>
       </div>
     </div>
   );
@@ -1661,7 +1708,7 @@ function SystemMode({
     restAvg: number;
   };
   maxStats: MaxStats | null;
-  zoneTrends: any[];
+  zoneTrends: Array<Record<string, string | number>>;
   zoneRange: string;
   setZoneRange: (r: string) => void;
   openSites: EnrichedHospital[];
@@ -1674,7 +1721,7 @@ function SystemMode({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           {
             label: 'Typical open-ER wait',
@@ -1697,17 +1744,17 @@ function SystemMode({
             hint: 'Excluded from averages',
           },
         ].map((card) => (
-          <div key={card.label} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{card.label}</p>
-            <p className="text-2xl font-black text-white mt-1 tabular-nums">{card.value}</p>
-            <p className="text-[11px] text-slate-500 mt-1">{card.hint}</p>
+          <div key={card.label} className="rounded-xl border border-line bg-surface p-4">
+            <p className="text-xs text-ink-3">{card.label}</p>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-ink">{card.value}</p>
+            <p className="mt-1 text-xs text-ink-3">{card.hint}</p>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-3">Zone averages</p>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <div className="rounded-xl border border-line bg-surface p-4">
+          <p className="mb-3 text-xs font-semibold text-ink-2">Zone averages</p>
           <div className="space-y-2">
             {[
               ['Edmonton', pressure.edmontonAvg],
@@ -1715,8 +1762,8 @@ function SystemMode({
               ['Rest of Alberta', pressure.restAvg],
             ].map(([label, value]) => (
               <div key={label as string} className="flex items-center justify-between text-sm">
-                <span className="text-slate-400">{label}</span>
-                <span className="font-mono font-bold text-white">
+                <span className="text-ink-2">{label}</span>
+                <span className="font-mono tabular-nums text-ink">
                   {formatAvgWaitDisplay(value as number, pressure.open)}
                 </span>
               </div>
@@ -1724,10 +1771,8 @@ function SystemMode({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 lg:col-span-2">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-3">
-            Recorded peaks
-          </p>
+        <div className="rounded-xl border border-line bg-surface p-4 lg:col-span-2">
+          <p className="mb-3 text-xs font-semibold text-ink-2">Recorded peaks</p>
           <div className="grid grid-cols-3 gap-2">
             {(
               [
@@ -1736,12 +1781,12 @@ function SystemMode({
                 ['30d', maxStats?.max30d],
               ] as const
             ).map(([label, peak]) => (
-              <div key={label} className="rounded-xl border border-slate-800 bg-slate-950/50 p-3 text-center">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{label}</p>
-                <p className="text-lg font-black text-rose-300 tabular-nums mt-1">
+              <div key={label} className="rounded-lg border border-line bg-paper p-3 text-center">
+                <p className="text-xs text-ink-3">{label}</p>
+                <p className="mt-1 font-mono text-lg tabular-nums text-crit">
                   {peak ? formatMinutesToHm(peak.waitTime) : '—'}
                 </p>
-                <p className="text-[10px] text-slate-500 mt-1 truncate" title={peak?.hospitalName}>
+                <p className="mt-1 truncate text-xs text-ink-3" title={peak?.hospitalName}>
                   {peak ? shortHospitalName(peak.hospitalName) : 'No data'}
                 </p>
               </div>
@@ -1750,21 +1795,21 @@ function SystemMode({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-3.5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+      <div className="rounded-xl border border-line bg-surface p-3.5">
+        <div className="mb-3 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-cyan-300" />
-            <h3 className="text-sm font-bold text-white">Zone queue trends</h3>
+            <TrendingUp className="h-4 w-4 text-ink-3" aria-hidden />
+            <h3 className="text-sm font-semibold text-ink">Zone queue trends</h3>
           </div>
-          <div className="flex rounded-lg border border-slate-800 bg-slate-950 p-0.5 self-start">
+          <div className="flex self-start rounded-lg border border-line bg-paper p-0.5">
             {['24h', '7d', '30D'].map((r) => (
               <button
                 key={r}
                 type="button"
                 onClick={() => setZoneRange(r)}
                 className={cn(
-                  'px-2.5 py-1 text-[10px] font-bold rounded-md uppercase tracking-wider cursor-pointer',
-                  zoneRange === r ? 'bg-cyan-600 text-white' : 'text-slate-500 hover:text-slate-300',
+                  'cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+                  zoneRange === r ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink',
                 )}
               >
                 {r}
@@ -1786,25 +1831,25 @@ function SystemMode({
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID} />
                 <XAxis
                   dataKey="timestamp"
                   tickFormatter={(tick) => formatChartXAxis(tick, zoneRange)}
-                  stroke="#475569"
-                  tick={{ fill: '#94a3b8', fontSize: 10 }}
+                  stroke={CHART_GRID}
+                  tick={{ fill: CHART_TICK, fontSize: 10 }}
                 />
-                <YAxis stroke="#475569" tick={{ fill: '#94a3b8', fontSize: 10 }} unit="m" />
+                <YAxis stroke={CHART_GRID} tick={{ fill: CHART_TICK, fontSize: 10 }} unit="m" />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
                     return (
-                      <div className="chart-tooltip space-y-1.5 text-xs max-w-xs">
+                      <div className="chart-tooltip max-w-xs space-y-1.5 text-xs">
                         <p className="chart-tooltip-title">
                           {format(new Date(payload[0].payload.timestamp), 'MMM d, h:mm a')}
                         </p>
-                        {payload.map((series: any) => (
+                        {payload.map((series: { name?: string; color?: string; value?: number | string }) => (
                           <div key={series.name} className="chart-tooltip-row">
-                            <span style={{ color: series.color || '#cbd5e1' }} className="chart-tooltip-label">
+                            <span style={{ color: series.color || '#39465c' }} className="chart-tooltip-label">
                               {series.name}:
                             </span>
                             <span className="chart-tooltip-value">
@@ -1821,45 +1866,45 @@ function SystemMode({
                 <Area type="monotone" name="Central Zone" dataKey="Central Zone" stroke="#f59e0b" strokeWidth={2} fill="none" />
                 <Area type="monotone" name="South Zone" dataKey="South Zone" stroke="#ec4899" strokeWidth={2} fill="none" />
                 <Area type="monotone" name="North Zone" dataKey="North Zone" stroke="#8b5cf6" strokeWidth={2} fill="none" />
-                <Area type="monotone" name="Provincial Avg" dataKey="Provincial Avg" stroke="#cbd5e1" strokeDasharray="5 5" strokeWidth={2} fill="none" />
+                <Area type="monotone" name="Provincial Avg" dataKey="Provincial Avg" stroke="#475569" strokeDasharray="5 5" strokeWidth={2} fill="none" />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 10, paddingTop: 8 }} />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex items-center justify-center text-slate-500 text-sm gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin text-emerald-500" />
+            <div className="flex h-full items-center justify-center gap-2 text-sm text-ink-3">
+              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden />
               Compiling zone trends…
             </div>
           )}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-3.5">
-        <h3 className="text-sm font-bold text-white mb-3">Longest open queues right now</h3>
-        <div className="space-y-2">
+      <div className="rounded-xl border border-line bg-surface p-3.5">
+        <h3 className="mb-3 text-sm font-semibold text-ink">Longest open queues right now</h3>
+        <div className="divide-y divide-line rounded-lg border border-line">
           {rising.map((h) => (
             <button
               key={h.id}
               type="button"
               onClick={() => onSelect(h)}
-              className="w-full flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2.5 text-left hover:border-slate-600 cursor-pointer"
+              className="flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors hover:bg-paper"
             >
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-white truncate">{h.name}</p>
-                <p className="text-[11px] text-slate-500">
+                <p className="truncate text-sm font-semibold text-ink">{h.name}</p>
+                <p className="text-xs text-ink-3">
                   {h.city} · {careTypeLabel(h.careType)}
                 </p>
               </div>
-              <span className={cn('text-base font-black tabular-nums', waitTone[h.waitBand])}>
+              <span className={cn('font-mono text-base tabular-nums', bandTextTone[h.waitBand])}>
                 {formatMinutesToHm(h.effectiveWaitMinutes ?? 0)}
               </span>
             </button>
           ))}
           {rising.length === 0 && (
-            <p className="text-sm text-slate-500 py-4 text-center">No open sites with live waits.</p>
+            <p className="py-4 text-center text-sm text-ink-3">No open sites with live waits.</p>
           )}
         </div>
-        <p className="text-[11px] text-slate-600 mt-3">
+        <p className="mt-3 text-xs text-ink-3">
           Tracking {processed.length} emergency & urgent-care sites · closed and unavailable excluded from averages
         </p>
       </div>

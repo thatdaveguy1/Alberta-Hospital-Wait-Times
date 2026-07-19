@@ -1,53 +1,121 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* Clinical Ledger design system — light-first.
+ * Type: IBM Plex Sans (UI) + IBM Plex Mono (data/provenance).
+ * Color: restrained — tinted neutrals + one accent blue; semantic status
+ * hues (ok/warn/crit) are the only other color and always carry a text label.
+ * Elevation: hairline borders are the default container; shadows are reserved
+ * for sticky bars and overlays.
+ */
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-sans/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+@import '@fontsource/ibm-plex-mono/600.css';
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Surfaces & ink */
+  --color-paper: oklch(0.978 0.003 240);     /* page background */
+  --color-surface: oklch(1 0 0);             /* panels */
+  --color-ink: oklch(0.27 0.025 255);        /* primary text */
+  --color-ink-2: oklch(0.4 0.03 255);        /* secondary text */
+  --color-ink-3: oklch(0.47 0.025 255);      /* meta text — AA on paper */
+  --color-line: oklch(0.91 0.005 240);       /* hairlines */
+  --color-line-2: oklch(0.83 0.008 240);     /* strong borders */
+
+  /* Single accent — deep clinical blue */
+  --color-accent: oklch(0.45 0.11 252);
+  --color-accent-strong: oklch(0.39 0.11 252);
+  --color-accent-soft: oklch(0.95 0.02 250);
+
+  /* Semantic status — meaning, not decoration */
+  --color-ok: oklch(0.47 0.1 155);
+  --color-ok-soft: oklch(0.94 0.03 155);
+  --color-warn: oklch(0.47 0.1 75);
+  --color-warn-soft: oklch(0.95 0.035 90);
+  --color-crit: oklch(0.47 0.15 25);
+  --color-crit-soft: oklch(0.945 0.025 25);
+  --color-neutral-chip: oklch(0.94 0.005 240);
 }
 
 @layer base {
+  html,
   body {
-    @apply font-sans;
+    overflow-x: clip;
+  }
+
+  body {
+    @apply font-sans bg-paper text-ink antialiased;
+  }
+
+  ::selection {
+    background: var(--color-accent-soft);
+    color: var(--color-accent-strong);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-/* Custom Leaflet Tooltip dark styles */
+/* ---------------------------------------------------------------------------
+ * Leaflet (light)
+ * ------------------------------------------------------------------------- */
 .custom-leaflet-tooltip {
-  background: #090d16 !important;
-  border: 1px solid #1e293b !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
-  color: #f1f5f9 !important;
-  border-radius: 0.75rem !important;
+  background: #ffffff !important;
+  border: 1px solid var(--color-line-2) !important;
+  box-shadow: 0 8px 16px -6px rgb(23 32 46 / 0.18) !important;
+  color: var(--color-ink) !important;
+  border-radius: 0.5rem !important;
   padding: 0.5rem 0.75rem !important;
-  font-family: "Inter", ui-sans-serif, system-ui, sans-serif !important;
+  font-family: var(--font-sans) !important;
 }
 
 .leaflet-tooltip-top.custom-leaflet-tooltip::before {
-  border-top-color: #1e293b !important;
+  border-top-color: var(--color-line-2) !important;
 }
 .leaflet-tooltip-bottom.custom-leaflet-tooltip::before {
-  border-bottom-color: #1e293b !important;
+  border-bottom-color: var(--color-line-2) !important;
 }
 .leaflet-tooltip-left.custom-leaflet-tooltip::before {
-  border-left-color: #1e293b !important;
+  border-left-color: var(--color-line-2) !important;
 }
 .leaflet-tooltip-right.custom-leaflet-tooltip::before {
-  border-right-color: #1e293b !important;
+  border-right-color: var(--color-line-2) !important;
 }
 
-/* Custom Leaflet Attribution dark styles */
 .leaflet-container .leaflet-control-attribution {
-  background: rgba(9, 13, 22, 0.85) !important;
-  border-top-left-radius: 0.5rem !important;
-  border-left: 1px solid rgba(30, 41, 59, 0.5) !important;
-  border-top: 1px solid rgba(30, 41, 59, 0.5) !important;
-  color: #94a3b8 !important;
-  font-family: "Inter", ui-sans-serif, system-ui, sans-serif !important;
+  background: rgb(255 255 255 / 0.88) !important;
+  border-top-left-radius: 0.375rem !important;
+  color: var(--color-ink-3) !important;
+  font-family: var(--font-sans) !important;
   font-size: 9px !important;
 }
 
 .leaflet-container .leaflet-control-attribution a {
-  color: #3b82f6 !important;
+  color: var(--color-accent) !important;
   text-decoration: none !important;
 }
 
@@ -63,7 +131,7 @@
   flex: 1 1 auto;
   min-height: 280px;
   overflow: hidden;
-  background: #020617;
+  background: #e9edf2;
 }
 @media (min-width: 640px) {
   .er-map-slot {
@@ -88,99 +156,95 @@
 }
 .er-map-slot .leaflet-container {
   width: 100% !important;
-  height: 100% !important;
-  background: #020617;
+  height: 100%;
+  background: #e9edf2;
 }
 .er-trend-panel {
   min-height: 148px;
 }
 
-/* Standardized Chart Tooltip styles across all charts (both Recharts and custom tooltips) */
+/* ---------------------------------------------------------------------------
+ * Chart tooltips (shared by every dashboard; light card floats over any chart)
+ * ------------------------------------------------------------------------- */
 .recharts-tooltip-wrapper {
   z-index: 1000 !important;
 }
 
 .recharts-default-tooltip,
 .chart-tooltip {
-  background-color: rgba(9, 13, 22, 0.95) !important;
-  border: 1px solid rgba(59, 130, 246, 0.25) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4) !important;
-  border-radius: 1rem !important;
-  padding: 0.75rem 1rem !important;
-  font-family: "Inter", ui-sans-serif, system-ui, sans-serif !important;
-  backdrop-filter: blur(12px) !important;
-  color: #cbd5e1 !important;
+  background-color: rgb(255 255 255 / 0.98) !important;
+  border: 1px solid var(--color-line-2) !important;
+  box-shadow: 0 12px 24px -10px rgb(23 32 46 / 0.25) !important;
+  border-radius: 0.5rem !important;
+  padding: 0.625rem 0.875rem !important;
+  font-family: var(--font-sans) !important;
+  color: var(--color-ink-2) !important;
 }
 
-/* Custom Tooltip subelements */
 .chart-tooltip-title {
-  color: #ffffff !important;
-  font-weight: 800 !important;
-  font-size: 0.85rem !important;
-  margin-bottom: 0.5rem !important;
+  color: var(--color-ink) !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  margin-bottom: 0.4rem !important;
   letter-spacing: -0.01em !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  padding-bottom: 0.35rem !important;
+  border-bottom: 1px solid var(--color-line) !important;
+  padding-bottom: 0.3rem !important;
   text-transform: none !important;
 }
 
 .chart-tooltip-subtitle {
-  color: #94a3b8 !important;
+  color: var(--color-ink-3) !important;
   font-size: 0.65rem !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-  margin-top: -0.25rem !important;
-  margin-bottom: 0.5rem !important;
+  font-weight: 600 !important;
+  margin-top: -0.2rem !important;
+  margin-bottom: 0.4rem !important;
 }
 
 .chart-tooltip-row {
   display: flex !important;
   justify-content: space-between !important;
-  gap: 1.5rem !important;
+  gap: 1.25rem !important;
   font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  padding: 0.15rem 0 !important;
+  font-weight: 500 !important;
+  padding: 0.12rem 0 !important;
 }
 
 .chart-tooltip-label {
-  color: #94a3b8 !important;
+  color: var(--color-ink-3) !important;
   font-weight: 500 !important;
 }
 
 .chart-tooltip-value {
-  font-family: monospace !important;
-  font-weight: 700 !important;
-  color: #ffffff !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  color: var(--color-ink) !important;
 }
 
-/* Default Recharts Tooltip inner classes overrides */
+/* Default Recharts tooltip inner-class overrides */
 .recharts-tooltip-label {
-  color: #ffffff !important;
-  font-weight: 800 !important;
-  font-size: 0.85rem !important;
-  margin-bottom: 0.5rem !important;
-  letter-spacing: -0.01em !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  padding-bottom: 0.35rem !important;
+  color: var(--color-ink) !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  margin-bottom: 0.4rem !important;
+  border-bottom: 1px solid var(--color-line) !important;
+  padding-bottom: 0.3rem !important;
 }
 
 .recharts-tooltip-item {
-  color: #cbd5e1 !important;
+  color: var(--color-ink-2) !important;
   font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  padding: 0.15rem 0 !important;
+  font-weight: 500 !important;
+  padding: 0.12rem 0 !important;
 }
 
 .recharts-tooltip-item-name {
-  color: #94a3b8 !important;
+  color: var(--color-ink-3) !important;
   font-weight: 500 !important;
 }
 
 .recharts-tooltip-item-value {
-  font-family: monospace !important;
-  font-weight: 700 !important;
-  color: #ffffff !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  color: var(--color-ink) !important;
   margin-left: 0.25rem !important;
 }
-

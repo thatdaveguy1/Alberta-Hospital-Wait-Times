@@ -177,6 +177,17 @@ export function netMinutes(hospital: Pick<Hospital, 'waitTime' | 'driveMins'> & 
   return wait + hospital.driveMins;
 }
 
+/** Short display name — strips common institutional suffixes. */
+export function shortHospitalName(name: string): string {
+  return name
+    .replace('Community Hospital', '')
+    .replace('General Hospital', '')
+    .replace('Health Centre', '')
+    .replace('Regional Hospital', '')
+    .replace('Regional Health Centre', '')
+    .trim();
+}
+
 export function directionsUrl(hospital: Hospital): string {
   const q = encodeURIComponent(`${hospital.name} ${hospital.address || hospital.city || 'Alberta'}`);
   return `https://maps.google.com/?daddr=${q}`;
