@@ -89,14 +89,12 @@ export default function App() {
           />
         ) : activeView === 'diagnostics' ? (
           <DiagnosticDashboard />
+        ) : activeView === 'disruptions' ? (
+          <ServiceDisruptionsDashboard />
         ) : (
-          /* Legacy wrapper: keeps remaining not-yet-redesigned dashboards readable
-             inside the light shell until each gets its own pass. */
           <div className="rounded-2xl border border-slate-800 bg-[#070b19] p-4 text-slate-100 sm:p-6">
             {activeView === 'surgical-waits' ? (
               <SurgicalDashboard />
-            ) : activeView === 'disruptions' ? (
-              <ServiceDisruptionsDashboard />
             ) : activeView === 'system-flow' ? (
               <SystemFlowDashboard />
             ) : activeView === 'primary-care' ? (
