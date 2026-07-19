@@ -141,11 +141,11 @@ export default function WorkforceDashboard() {
     if (!physicianZoneData) return [];
     const d = physicianZoneData;
     return [
-      { name: 'Family Medicine', value: d.familyMedicine, color: '#10b981' },
-      { name: 'Medical Specialties', value: d.medicalSpecialties, color: '#3b82f6' },
-      { name: 'Surgical Specialties', value: d.surgicalSpecialties, color: '#ec4899' },
-      { name: 'Laboratory', value: d.laboratorySpecialties, color: '#6366f1' },
-      { name: 'Psychiatry', value: d.psychiatry, color: '#f59e0b' }
+      { name: 'Family Medicine', value: d.familyMedicine, color: 'oklch(0.78 0.12 155)' },
+      { name: 'Medical Specialties', value: d.medicalSpecialties, color: 'oklch(0.68 0.13 252)' },
+      { name: 'Surgical Specialties', value: d.surgicalSpecialties, color: 'oklch(0.7 0.15 350)' },
+      { name: 'Laboratory', value: d.laboratorySpecialties, color: 'oklch(0.6 0.12 270)' },
+      { name: 'Psychiatry', value: d.psychiatry, color: 'oklch(0.82 0.12 85)' }
     ].filter(s => typeof s.value === 'number' && s.value > 0);
   }, [physicianZoneData]);
 
@@ -284,8 +284,8 @@ export default function WorkforceDashboard() {
         return {
           label: 'Nursing & Health Care Aide Supply',
           description: 'Active permit counts by nursing profession from CIHI & CRNA/CLPAUA registers. Rising permit counts alongside persistent vacancy rates indicate supply growth is being outpaced by demand.',
-          colorClass: 'text-blue-400',
-          strokeColor: '#3b82f6',
+          colorClass: 'text-accent',
+          strokeColor: 'oklch(0.68 0.13 252)',
           gradientId: 'colorNursingSupplyTrend',
           icon: Activity
         };
@@ -295,8 +295,8 @@ export default function WorkforceDashboard() {
           description: useCihiJobVacancy
             ? 'CIHI health workforce vacancy counts by provider type (annual, Alberta). Declining counts from 2024 peaks signal modest labour-market easing.'
             : 'StatsCan JVWS quarterly open vacancy counts and offered hourly wages in the Health Care & Social Assistance sector. Declining counts from 2024 peaks signal modest labour-market easing.',
-          colorClass: 'text-amber-500',
-          strokeColor: '#f59e0b',
+          colorClass: 'text-warn',
+          strokeColor: 'oklch(0.82 0.12 85)',
           gradientId: 'colorJobVacancyTrend',
           icon: Briefcase
         };
@@ -363,15 +363,15 @@ export default function WorkforceDashboard() {
     };
   }, [selectedTrend, vacancyChartData]);
 
-  if (isLoading) return <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">Loading...</div>;
+  if (isLoading) return <div className="flex items-center justify-center h-full min-h-[400px] text-ink-2 text-sm">Loading...</div>;
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
-        <AlertTriangle className="w-6 h-6 text-amber-400" />
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-ink-2 text-sm gap-3">
+        <AlertTriangle className="w-6 h-6 text-warn" />
         <span>Failed to load workforce data: {error}</span>
         <button
           onClick={refresh}
-          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+          className="px-3 py-1.5 rounded-lg bg-surface border border-line text-xs font-bold text-ink hover:border-line-2 flex items-center gap-1.5 cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Retry
@@ -389,16 +389,25 @@ export default function WorkforceDashboard() {
         description="Monitor physician register counts, nurse supply trends, and job vacancies."
         metadata={metadata}
         arrayKey="PHYSICIAN_SPECIALTY_ZONE"
-      />
+        variant="light"
+      >
+        <button
+          onClick={() => !isLoading && refresh()}
+          disabled={isLoading}
+          className="self-start md:self-auto rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-paper disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </DashboardHeader>
 
       {/* Navigation Sub-Tabs */}
-      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+      <div className="border-b border-line flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
         <button
           onClick={() => setActiveSubTab('physicians')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'physicians'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-accent text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -406,10 +415,10 @@ export default function WorkforceDashboard() {
         </button>
         <button
           onClick={() => setActiveSubTab('nursing')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'nursing'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-accent text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <Activity className="w-4 h-4" />
@@ -417,10 +426,10 @@ export default function WorkforceDashboard() {
         </button>
         <button
           onClick={() => setActiveSubTab('allied')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'allied'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-accent text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -428,10 +437,10 @@ export default function WorkforceDashboard() {
         </button>
         <button
           onClick={() => setActiveSubTab('retirement')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'retirement'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-accent text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <Clock className="w-4 h-4" />
@@ -439,10 +448,10 @@ export default function WorkforceDashboard() {
         </button>
         <button
           onClick={() => setActiveSubTab('vacancies')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'vacancies'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-accent text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <TrendingUp className="w-4 h-4" />
@@ -452,19 +461,19 @@ export default function WorkforceDashboard() {
 
       {/* High-Level Overview Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#090e21] border border-slate-800/80 p-4 rounded-xl flex items-center justify-between">
+        <div className="bg-surface border border-line p-4 rounded-xl flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Active Registered Physicians</span>
-            <div className="text-lg sm:text-2xl font-black text-white">
+            <span className="text-[10px] text-ink-2 font-semibold">Active Registered Physicians</span>
+            <div className="text-lg sm:text-2xl font-semibold text-ink">
               {aggregateStats.totalPhysicians != null
                 ? aggregateStats.totalPhysicians.toLocaleString()
                 : '—'}
             </div>
-            <span className="text-[9px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5">
+            <span className="text-[9px] text-ink-3 font-bold flex items-center gap-1 mt-1.5">
               CPSA full register snapshot
             </span>
           </div>
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 hidden sm:block">
+          <div className="p-2.5 rounded-xl bg-ok-soft text-ok hidden sm:block">
             <Stethoscope className="w-5 h-5" />
           </div>
         </div>
@@ -479,29 +488,29 @@ export default function WorkforceDashboard() {
               setSelectedTrend(selectedTrend === 'nursingSupply' ? null : 'nursingSupply');
             }
           }}
-          className={`bg-[#090e21] border p-4 rounded-xl flex items-center justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+          className={`bg-surface border p-4 rounded-xl flex items-center justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] ${
             selectedTrend === 'nursingSupply'
-              ? 'border-blue-500 ring-1 ring-blue-500/30 shadow-blue-500/5'
-              : 'border-slate-800/80 hover:border-blue-500/30'
+              ? 'border-accent'
+              : 'border-line hover:border-accent/30'
           }`}
         >
           <div className="space-y-1">
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Active RN Permits</span>
-            <div className="text-lg sm:text-2xl font-black text-white">
+            <span className="text-[10px] text-ink-2 font-semibold">Active RN Permits</span>
+            <div className="text-lg sm:text-2xl font-semibold text-ink">
               {aggregateStats.totalRNs != null ? aggregateStats.totalRNs.toLocaleString() : '—'}
             </div>
-            <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+            <p className="text-[10px] text-ok font-bold flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />
               {typeof rnGrowthPct === 'number' && Number.isFinite(rnGrowthPct)
                 ? `${rnGrowthPct > 0 ? '+' : ''}${rnGrowthPct.toFixed(1)}% Registered Growth`
                 : 'Growth unavailable'}
             </p>
-            <span className="text-[9px] text-slate-500 group-hover:text-blue-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+            <span className="text-[9px] text-ink-3 group-hover:text-accent font-bold flex items-center gap-1 mt-1.5 transition-colors">
               <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
               {selectedTrend === 'nursingSupply' ? 'Active: Hide Trend' : 'Click to View Trend'}
             </span>
           </div>
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 hidden sm:block group-hover:scale-110 transition-transform duration-300">
+          <div className="p-2.5 rounded-xl bg-accent-soft text-accent hidden sm:block group-hover:scale-110 transition-transform duration-300">
             <Users className="w-5 h-5" />
           </div>
         </div>
@@ -516,51 +525,51 @@ export default function WorkforceDashboard() {
               setSelectedTrend(selectedTrend === 'jobVacancies' ? null : 'jobVacancies');
             }
           }}
-          className={`bg-[#090e21] border p-4 rounded-xl flex items-center justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+          className={`bg-surface border p-4 rounded-xl flex items-center justify-between relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] ${
             selectedTrend === 'jobVacancies'
-              ? 'border-amber-500 ring-1 ring-amber-500/30 shadow-amber-500/5'
-              : 'border-slate-800/80 hover:border-amber-500/30'
+              ? 'border-warn'
+              : 'border-line hover:border-warn/30'
           }`}
         >
           <div className="space-y-1">
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Health Care Vacancies</span>
-            <div className="text-lg sm:text-2xl font-black text-white">
+            <span className="text-[10px] text-ink-2 font-semibold">Health Care Vacancies</span>
+            <div className="text-lg sm:text-2xl font-semibold text-ink">
               {aggregateStats.activeVacancies != null
                 ? aggregateStats.activeVacancies.toLocaleString()
                 : '—'}
             </div>
-            <p className="text-[10px] text-amber-500 font-bold flex items-center gap-1">
+            <p className="text-[10px] text-warn font-bold flex items-center gap-1">
               <TrendingDown className="w-3 h-3" />
               {healthJobVacancySeries.length > 0
                 ? `${vacancyChangePct.toFixed(1)}% vs 2024 Peaks`
                 : 'Vacancy series unavailable'}
             </p>
-            <span className="text-[9px] text-slate-500 group-hover:text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
+            <span className="text-[9px] text-ink-3 group-hover:text-warn font-bold flex items-center gap-1 mt-1.5 transition-colors">
               <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
               {selectedTrend === 'jobVacancies' ? 'Active: Hide Trend' : 'Click to View Trend'}
             </span>
           </div>
-          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 hidden sm:block group-hover:scale-110 transition-transform duration-300">
+          <div className="p-2.5 rounded-xl bg-warn-soft text-warn hidden sm:block group-hover:scale-110 transition-transform duration-300">
             <Briefcase className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-[#090e21] border border-slate-800/80 p-4 rounded-xl flex items-center justify-between">
+        <div className="bg-surface border border-line p-4 rounded-xl flex items-center justify-between">
           <div className="space-y-1">
-            <div className="text-lg sm:text-2xl font-black text-white">
+            <div className="text-lg sm:text-2xl font-semibold text-ink">
               {WORKFORCE_AGE_PROFILE.length > 0
                 ? `${physicianRetirementRatio.toFixed(1)}%`
                 : '—'}
             </div>
-            <p className="text-[10px] text-red-400 font-bold flex items-center gap-1">
-              <ShieldAlert className="w-3 h-3 text-red-400" />
+            <p className="text-[10px] text-crit font-bold flex items-center gap-1">
+              <ShieldAlert className="w-3 h-3 text-crit" />
               {WORKFORCE_AGE_PROFILE.length > 0 ? 'Physicians Over Age 55' : 'Age profile unavailable'}
             </p>
-            <span className="text-[9px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5">
+            <span className="text-[9px] text-ink-3 font-bold flex items-center gap-1 mt-1.5">
               Snapshot only — no time series
             </span>
           </div>
-          <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 hidden sm:block">
+          <div className="p-2.5 rounded-xl bg-crit-soft text-crit hidden sm:block">
             <Clock className="w-5 h-5" />
           </div>
         </div>
@@ -577,11 +586,11 @@ export default function WorkforceDashboard() {
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="p-6 rounded-2xl bg-[#090e21] border border-slate-800 space-y-6 shadow-xl relative">
+            <div className="p-6 rounded-xl bg-surface border border-line space-y-6 relative">
               {/* Close Button */}
               <button
                 onClick={() => setSelectedTrend(null)}
-                className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                className="absolute top-4 right-4 p-1.5 rounded-lg bg-paper border border-line hover:border-line-2 text-ink-2 hover:text-ink transition-colors cursor-pointer"
                 title="Close panel"
               >
                 <X className="w-4 h-4" />
@@ -590,36 +599,36 @@ export default function WorkforceDashboard() {
               {/* Title and description */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
                 <div className="space-y-1">
-                  <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                  <h3 className="text-sm font-semibold flex items-center gap-2 text-ink">
                     {React.createElement(selectedTrendDetails.icon, {
                       className: `w-4 h-4 ${selectedTrendDetails.colorClass}`
                     })}
                     <span>{selectedTrendDetails.label} Historical Trend Explorer</span>
                   </h3>
-                  <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                  <p className="text-xs text-ink-2 max-w-3xl leading-relaxed">
                     {selectedTrendDetails.description}
                   </p>
                 </div>
               </div>
 
               {/* Stats highlights */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-paper border border-line">
                 <div className="space-y-1 text-center sm:text-left">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline</span>
-                  <span className="text-xl font-black text-slate-300 font-mono">{selectedTrendStats.baseline}</span>
+                  <span className="text-[10px] font-bold text-ink-3 block">Baseline</span>
+                  <span className="text-xl font-semibold text-ink font-mono">{selectedTrendStats.baseline}</span>
                 </div>
                 <div className="space-y-1 text-center sm:text-left">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Latest</span>
-                  <span className="text-xl font-black text-white font-mono">{selectedTrendStats.latest}</span>
+                  <span className="text-[10px] font-bold text-ink-3 block">Latest</span>
+                  <span className="text-xl font-semibold text-ink font-mono">{selectedTrendStats.latest}</span>
                 </div>
                 <div className="space-y-1 text-center sm:text-left">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Series Peak</span>
-                  <span className={`text-xl font-black font-mono ${selectedTrendDetails.colorClass}`}>{selectedTrendStats.peak}</span>
+                  <span className="text-[10px] font-bold text-ink-3 block">Series Peak</span>
+                  <span className={`text-xl font-semibold font-mono ${selectedTrendDetails.colorClass}`}>{selectedTrendStats.peak}</span>
                 </div>
                 <div className="space-y-1 text-center sm:text-left">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
-                  <span className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
-                    selectedTrendStats.isIncrease ? 'text-amber-500' : 'text-emerald-500'
+                  <span className="text-[10px] font-bold text-ink-3 block">Overall Shift</span>
+                  <span className={`text-xl font-semibold font-mono flex items-center justify-center sm:justify-start gap-1 ${
+                    selectedTrendStats.isIncrease ? 'text-warn' : 'text-ok'
                   }`}>
                     {selectedTrendStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
                     <span>{selectedTrendStats.delta} ({selectedTrendStats.pctChange})</span>
@@ -634,35 +643,35 @@ export default function WorkforceDashboard() {
                     <AreaChart data={nursingChartData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorNursingRNTrend" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0}/>
                         </linearGradient>
                         <linearGradient id="colorNursingLPNTrend" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="oklch(0.78 0.12 155)" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="oklch(0.78 0.12 155)" stopOpacity={0}/>
                         </linearGradient>
                         <linearGradient id="colorNursingHCATrend" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0}/>
                         </linearGradient>
                         <linearGradient id="colorNursingNPTrend" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="oklch(0.6 0.12 270)" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="oklch(0.6 0.12 270)" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                      <XAxis dataKey="year" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
-                      <YAxis stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                      <XAxis dataKey="year" stroke="oklch(0.62 0.02 255)" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                      <YAxis stroke="oklch(0.62 0.02 255)" style={{ fontSize: 10, fontFamily: 'monospace' }} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
-                        labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                        contentStyle={{ backgroundColor: 'oklch(0.16 0.02 255)', borderColor: 'oklch(0.28 0.02 255)', borderRadius: 8 }}
+                        labelStyle={{ fontWeight: 600, color: 'oklch(0.96 0.008 255)', fontSize: 11 }}
                         itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
                       />
-                      <Area type="monotone" dataKey="RN" name="Registered Nurses" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingRNTrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
-                      <Area type="monotone" dataKey="LPN" name="Licensed Practical Nurses" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingLPNTrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
-                      <Area type="monotone" dataKey="HCA" name="Health Care Aides" stroke="#f59e0b" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingHCATrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
+                      <Area type="monotone" dataKey="RN" name="Registered Nurses" stroke="oklch(0.68 0.13 252)" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingRNTrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
+                      <Area type="monotone" dataKey="LPN" name="Licensed Practical Nurses" stroke="oklch(0.78 0.12 155)" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingLPNTrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
+                      <Area type="monotone" dataKey="HCA" name="Health Care Aides" stroke="oklch(0.82 0.12 85)" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingHCATrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
                       {nursingChartHasNp && (
-                        <Area type="monotone" dataKey="NP" name="Nurse Practitioners" stroke="#8b5cf6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingNPTrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
+                        <Area type="monotone" dataKey="NP" name="Nurse Practitioners" stroke="oklch(0.6 0.12 270)" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNursingNPTrend)" dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
                       )}
                       <Legend wrapperStyle={{ fontSize: 10 }} />
                     </AreaChart>
@@ -674,20 +683,20 @@ export default function WorkforceDashboard() {
                           <stop offset="95%" stopColor={selectedTrendDetails.strokeColor} stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                      <XAxis dataKey="quarter" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
-                      <YAxis yAxisId="left" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                      <XAxis dataKey="quarter" stroke="oklch(0.62 0.02 255)" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                      <YAxis yAxisId="left" stroke="oklch(0.62 0.02 255)" style={{ fontSize: 10, fontFamily: 'monospace' }} />
                       {vacancyChartHasWage && (
-                        <YAxis yAxisId="right" orientation="right" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                        <YAxis yAxisId="right" orientation="right" stroke="oklch(0.62 0.02 255)" style={{ fontSize: 10, fontFamily: 'monospace' }} />
                       )}
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
-                        labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
+                        contentStyle={{ backgroundColor: 'oklch(0.16 0.02 255)', borderColor: 'oklch(0.28 0.02 255)', borderRadius: 8 }}
+                        labelStyle={{ fontWeight: 600, color: 'oklch(0.96 0.008 255)', fontSize: 11 }}
                         itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
                       />
                       <Area yAxisId="left" type="monotone" dataKey="vacanciesCount" name="Open Vacancies" stroke={selectedTrendDetails.strokeColor} strokeWidth={2.5} fillOpacity={1} fill={`url(#${selectedTrendDetails.gradientId})`} dot={{ r: 4, strokeWidth: 1 }} isAnimationActive={false} />
                       {vacancyChartHasWage && (
-                        <Area yAxisId="right" type="monotone" dataKey="avgOfferedHourlyWage" name="Avg Offered Wage ($/Hr)" stroke="#10b981" strokeWidth={2.5} fillOpacity={0} dot={{ r: 3, strokeWidth: 1 }} isAnimationActive={false} />
+                        <Area yAxisId="right" type="monotone" dataKey="avgOfferedHourlyWage" name="Avg Offered Wage ($/Hr)" stroke="oklch(0.78 0.12 155)" strokeWidth={2.5} fillOpacity={0} dot={{ r: 3, strokeWidth: 1 }} isAnimationActive={false} />
                       )}
                       <Legend wrapperStyle={{ fontSize: 10 }} />
                     </AreaChart>
@@ -703,25 +712,25 @@ export default function WorkforceDashboard() {
       {activeSubTab === 'physicians' && (
         <div className="space-y-6">
           {PHYSICIAN_SPECIALTY_ZONE.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl text-sm text-slate-400">
+            <div className="bg-surface border border-line p-6 rounded-xl text-sm text-ink-2">
               No measured CPSA physician register data is available. Specialty and zone breakdowns are not shown when upstream scrape yields no headline total.
             </div>
           ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Zone Specialty Breakdown Selector */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+            <div className="bg-surface border border-line p-5 rounded-xl space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Geographic Profile Selector</h3>
-                  <p className="text-[10px] text-slate-500">
+                  <h3 className="text-xs font-semibold text-ink-2">Geographic Profile Selector</h3>
+                  <p className="text-[10px] text-ink-3">
                     {hasSpecialtyBreakdown
                       ? 'Analyze specialties inside local health authorities'
                       : 'Alberta headline register only (zone/specialty breakdown not measured)'}
                   </p>
-                <DataTimestamp compact metadata={metadata} arrayKey="PHYSICIAN_SPECIALTY_ZONE" />
+                <DataTimestamp compact variant="light" metadata={metadata} arrayKey="PHYSICIAN_SPECIALTY_ZONE" />
                 </div>
-                <Building className="w-4 h-4 text-blue-500" />
+                <Building className="w-4 h-4 text-accent" />
               </div>
 
               <div className="grid grid-cols-1 gap-1">
@@ -731,14 +740,14 @@ export default function WorkforceDashboard() {
                     onClick={() => setSelectedZone(zone.zone)}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs transition-all text-left ${
                       selectedZone === zone.zone
-                        ? 'bg-blue-600 text-white font-bold'
-                        : 'bg-slate-950/40 text-slate-400 hover:text-slate-200 border border-slate-850'
+                        ? 'bg-accent text-ink font-bold'
+                        : 'bg-paper text-ink-2 hover:text-ink border border-line'
                     }`}
                   >
                     <span>{zone.zone}</span>
                     <div className="flex items-center gap-1">
                       <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
-                        selectedZone === zone.zone ? 'bg-blue-700 text-white' : 'bg-slate-900 text-slate-400'
+                        selectedZone === zone.zone ? 'bg-accent-strong text-ink' : 'bg-surface text-ink-2'
                       }`}>
                         {zone.totalActive} MDs
                       </span>
@@ -748,57 +757,57 @@ export default function WorkforceDashboard() {
               </div>
 
               {/* MD per 100k card — only when measured rate present */}
-              <div className="bg-slate-950/80 p-4 border border-slate-800 rounded-xl space-y-2">
-                <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest">Zone Physician Density</span>
+              <div className="bg-paper p-4 border border-line rounded-xl space-y-2">
+                <span className="text-[9px] text-ink-3 font-semibold">Zone Physician Density</span>
                 {physicianZoneData && physicianZoneData.ratePer100k > 0 ? (
                   <>
                     <div className="flex items-baseline justify-between">
-                      <div className="text-2xl font-black text-white">{physicianZoneData.ratePer100k}</div>
-                      <span className="text-xs text-slate-400">MDs per 100k Pop</span>
+                      <div className="text-2xl font-semibold text-ink">{physicianZoneData.ratePer100k}</div>
+                      <span className="text-xs text-ink-2">MDs per 100k Pop</span>
                     </div>
-                    <div className="w-full bg-slate-850 h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-paper h-1.5 rounded-full overflow-hidden">
                       <div
-                        className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                        className="bg-ok h-full rounded-full transition-all duration-500"
                         style={{ width: `${albertaRatePer100k > 0 ? Math.min(100, (physicianZoneData.ratePer100k / albertaRatePer100k) * 100) : 0}%` }}
                       />
                     </div>
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-ink-2">
                       {physicianZoneData.zone === 'Alberta'
                         ? 'Provincial average healthcare density benchmark.'
                         : 'Zone density relative to Alberta rollup when measured.'}
                     </p>
                   </>
                 ) : (
-                  <p className="text-[11px] text-slate-500">Density not available — zone populations or counts are not measured for this row.</p>
+                  <p className="text-[11px] text-ink-3">Density not available — zone populations or counts are not measured for this row.</p>
                 )}
               </div>
             </div>
 
             {/* Specialty Share Pie/Bar Visualizer */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
+            <div className="bg-surface border border-line p-5 rounded-xl lg:col-span-2 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Specialty Distribution Profile</h3>
-                  <p className="text-[10px] text-slate-500">
+                  <h3 className="text-xs font-semibold text-ink-2">Specialty Distribution Profile</h3>
+                  <p className="text-[10px] text-ink-3">
                     {hasSpecialtyBreakdown
                       ? <>Composition of active clinical workforce in <strong>{selectedZone}</strong></>
                       : 'Specialty mix not published as scrapable CPSA HTML — headline total only'}
                   </p>
                 </div>
-                <span className="text-[9px] bg-blue-600/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
+                <span className="text-[9px] bg-neutral-chip text-ink-2 px-2 py-0.5 rounded-full font-bold uppercase">
                   Source: CPSA Quarterly Statistics
                 </span>
               </div>
 
               {!hasSpecialtyBreakdown || !physicianZoneData ? (
-                <div className="p-6 rounded-xl bg-slate-950/60 border border-slate-850 text-sm text-slate-400 space-y-2">
+                <div className="p-6 rounded-xl bg-paper border border-line text-sm text-ink-2 space-y-2">
                   <p>
                     Fully registered physicians (Alberta):{' '}
-                    <strong className="text-white">
+                    <strong className="text-ink">
                       {(physicianZoneData?.totalActive ?? aggregateStats.totalPhysicians)?.toLocaleString() ?? '—'}
                     </strong>
                   </p>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-ink-3">
                     Zone and specialty breakdowns are omitted because CPSA Power BI embeds are not parseable as measured HTML, and proportional synthesis is disabled.
                   </p>
                 </div>
@@ -809,14 +818,14 @@ export default function WorkforceDashboard() {
                     const denom = physicianZoneData.totalActive;
                     const pct = denom > 0 ? ((slice.value / denom) * 100).toFixed(1) : '—';
                     return (
-                      <div key={slice.name} className="p-2.5 bg-slate-950/40 rounded-lg border border-slate-850 flex items-center justify-between gap-2">
+                      <div key={slice.name} className="p-2.5 bg-paper rounded-lg border border-line flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: slice.color }} />
-                          <span className="text-xs text-slate-400 font-medium truncate max-w-[110px]">{slice.name}</span>
+                          <span className="text-xs text-ink-2 font-medium truncate max-w-[110px]">{slice.name}</span>
                         </div>
                         <div className="text-right">
-                          <span className="text-xs font-bold text-white block">{slice.value}</span>
-                          <span className="text-[9px] text-slate-500 block">{pct}%</span>
+                          <span className="text-xs font-bold text-ink block">{slice.value}</span>
+                          <span className="text-[9px] text-ink-3 block">{pct}%</span>
                         </div>
                       </div>
                     );
@@ -830,12 +839,12 @@ export default function WorkforceDashboard() {
                       layout="vertical"
                       margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
-                      <XAxis type="number" stroke="#64748b" fontSize={10} />
-                      <YAxis dataKey="name" type="category" stroke="#64748b" fontSize={9} width={100} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" horizontal={false} />
+                      <XAxis type="number" stroke="oklch(0.62 0.02 255)" fontSize={10} />
+                      <YAxis dataKey="name" type="category" stroke="oklch(0.62 0.02 255)" fontSize={9} width={100} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}
-                        labelClassName="text-slate-200 font-bold text-xs"
+                        contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', borderColor: 'oklch(0.28 0.02 255)' }}
+                        labelClassName="text-ink font-bold text-xs"
                       />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]} isAnimationActive={false}>
                         {zonePieData.map((entry, index) => (
@@ -859,18 +868,18 @@ export default function WorkforceDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Nursing growth trends chart */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
+            <div className="bg-surface border border-line p-5 rounded-xl lg:col-span-2 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Permit Growth & Demand Tracker</h3>
-                  <p className="text-[10px] text-slate-500">
+                  <h3 className="text-xs font-semibold text-ink-2">Permit Growth & Demand Tracker</h3>
+                  <p className="text-[10px] text-ink-3">
                     Active licensed practice permit expansion
                     {latestNursingYear ? ` (through ${latestNursingYear})` : ''}
                   </p>
-                <DataTimestamp compact metadata={metadata} arrayKey={nursingSupplyMetadataKey} />
+                <DataTimestamp compact variant="light" metadata={metadata} arrayKey={nursingSupplyMetadataKey} />
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] bg-blue-600/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
+                  <span className="text-[9px] bg-neutral-chip text-ink-2 px-2 py-0.5 rounded-full font-bold uppercase">
                     {useCihiNursing ? 'Source: CIHI Health Workforce Quick Stats' : 'No measured CIHI nursing rows'}
                   </span>
                 </div>
@@ -878,7 +887,7 @@ export default function WorkforceDashboard() {
 
               {/* Chart */}
               {nursingChartData.length === 0 ? (
-                <p className="text-sm text-slate-500">Nursing permit series unavailable until CIHI workforce arrays are successfully refreshed.</p>
+                <p className="text-sm text-ink-3">Nursing permit series unavailable until CIHI workforce arrays are successfully refreshed.</p>
               ) : (
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -886,16 +895,16 @@ export default function WorkforceDashboard() {
                     data={nursingChartData}
                     margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
-                    <YAxis stroke="#64748b" fontSize={9} />
-                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                    <XAxis dataKey="year" stroke="oklch(0.62 0.02 255)" fontSize={10} />
+                    <YAxis stroke="oklch(0.62 0.02 255)" fontSize={9} />
+                    <Tooltip contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', borderColor: 'oklch(0.28 0.02 255)' }} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <Bar dataKey="RN" name="Registered Nurses (RN)" fill="#3b82f6" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                    <Bar dataKey="LPN" name="Licensed Practical Nurses (LPN)" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                    <Bar dataKey="HCA" name="Health Care Aides (HCA)" fill="#ec4899" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                    <Bar dataKey="RN" name="Registered Nurses (RN)" fill="oklch(0.68 0.13 252)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                    <Bar dataKey="LPN" name="Licensed Practical Nurses (LPN)" fill="oklch(0.78 0.12 155)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                    <Bar dataKey="HCA" name="Health Care Aides (HCA)" fill="oklch(0.7 0.15 350)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
                     {nursingChartHasNp && (
-                    <Bar dataKey="NP" name="Nurse Practitioners (NP)" fill="#8b5cf6" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                    <Bar dataKey="NP" name="Nurse Practitioners (NP)" fill="oklch(0.6 0.12 270)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
                     )}
                   </BarChart>
                 </ResponsiveContainer>
@@ -904,40 +913,40 @@ export default function WorkforceDashboard() {
             </div>
 
             {/* Quick Metrics Cards */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4 flex flex-col justify-between">
+            <div className="bg-surface border border-line p-5 rounded-xl space-y-4 flex flex-col justify-between">
               <div>
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Nursing Capacity Diagnostics</h3>
-                <p className="text-[10px] text-slate-500">
+                <h3 className="text-xs font-semibold text-ink-2">Nursing Capacity Diagnostics</h3>
+                <p className="text-[10px] text-ink-3">
                   {latestNursingYear ? `${latestNursingYear} ` : ''}Active Registry benchmarks and allocation profiles
                 </p>
               </div>
 
               <div className="space-y-3">
                 {selectedNursingProfession.length === 0 ? (
-                  <p className="text-[11px] text-slate-500">No CIHI nursing supply rows available for the latest year.</p>
+                  <p className="text-[11px] text-ink-3">No CIHI nursing supply rows available for the latest year.</p>
                 ) : selectedNursingProfession.map(prof => (
-                  <div key={prof.profession} className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-2">
+                  <div key={prof.profession} className="p-3 bg-paper rounded-xl border border-line space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-white">{prof.profession}</span>
-                      <span className="text-xs font-mono font-bold text-blue-400">{prof.activePermits.toLocaleString()}</span>
+                      <span className="text-xs font-semibold text-ink">{prof.profession}</span>
+                      <span className="text-xs font-mono font-bold text-accent">{prof.activePermits.toLocaleString()}</span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-mono">
-                      <div className="bg-slate-900/60 p-1.5 rounded">
-                        <span className="text-slate-500 block text-[8px]">VACANCY RATE</span>
-                        <span className="font-bold text-red-400">
+                      <div className="bg-paper p-1.5 rounded">
+                        <span className="text-ink-3 block text-[8px]">VACANCY RATE</span>
+                        <span className="font-bold text-crit">
                           {typeof prof.vacancyRatePct === 'number' ? `${prof.vacancyRatePct}%` : '—'}
                         </span>
                       </div>
-                      <div className="bg-slate-900/60 p-1.5 rounded">
-                        <span className="text-slate-500 block text-[8px]">DIRECT CARE</span>
-                        <span className="font-bold text-emerald-400">
+                      <div className="bg-paper p-1.5 rounded">
+                        <span className="text-ink-3 block text-[8px]">DIRECT CARE</span>
+                        <span className="font-bold text-ok">
                           {typeof prof.directCarePct === 'number' ? `${prof.directCarePct}%` : '—'}
                         </span>
                       </div>
-                      <div className="bg-slate-900/60 p-1.5 rounded">
-                        <span className="text-slate-500 block text-[8px]">RURAL FOCUS</span>
-                        <span className="font-bold text-indigo-400">
+                      <div className="bg-paper p-1.5 rounded">
+                        <span className="text-ink-3 block text-[8px]">RURAL FOCUS</span>
+                        <span className="font-bold text-accent">
                           {typeof prof.ruralRemotePct === 'number' ? `${prof.ruralRemotePct}%` : '—'}
                         </span>
                       </div>
@@ -953,22 +962,22 @@ export default function WorkforceDashboard() {
       {/* SUBTAB 3: Allied Health Supply — CIHI measured only */}
       {activeSubTab === 'allied' && (
         <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+          <div className="bg-surface border border-line p-5 rounded-xl space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Allied Health Professional Benchmarking</h3>
-                <p className="text-[10px] text-slate-500">Active staffing densities per 100,000 population: Alberta vs National Canadian Average</p>
-                <DataTimestamp compact metadata={metadata} arrayKey={alliedSupplyMetadataKey} />
+                <h3 className="text-xs font-semibold text-ink-2">Allied Health Professional Benchmarking</h3>
+                <p className="text-[10px] text-ink-3">Active staffing densities per 100,000 population: Alberta vs National Canadian Average</p>
+                <DataTimestamp compact variant="light" metadata={metadata} arrayKey={alliedSupplyMetadataKey} />
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
+                <span className="text-[9px] bg-neutral-chip text-ink-2 px-2 py-0.5 rounded-full font-bold uppercase">
                   {useCihiAllied ? 'Source: CIHI Health Workforce Quick Stats' : 'No measured CIHI allied rows'}
                 </span>
               </div>
             </div>
 
             {ALLIED_HEALTH_SUPPLY.length === 0 ? (
-              <p className="text-sm text-slate-500">Allied health supply is unavailable until CIHI workforce arrays are successfully refreshed.</p>
+              <p className="text-sm text-ink-3">Allied health supply is unavailable until CIHI workforce arrays are successfully refreshed.</p>
             ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {ALLIED_HEALTH_SUPPLY.map(allied => {
@@ -985,57 +994,57 @@ export default function WorkforceDashboard() {
                     : null;
 
                 return (
-                  <div key={allied.profession} className="bg-slate-950/60 border border-slate-850 p-4 rounded-xl space-y-3">
+                  <div key={allied.profession} className="bg-paper border border-line p-4 rounded-xl space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h4 className="text-sm font-black text-white">{allied.profession}</h4>
-                        <span className="text-[10px] font-mono text-slate-400">
+                        <h4 className="text-sm font-semibold text-ink">{allied.profession}</h4>
+                        <span className="text-[10px] font-mono text-ink-2">
                           Total Alberta count: <strong>{allied.albertaCount?.toLocaleString() ?? '—'}</strong>
                         </span>
                       </div>
                       {diff != null ? (
-                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                        matchesAvg ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'
+                      <span className={`text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full ${
+                        matchesAvg ? 'bg-ok/15 text-ok' : 'bg-crit/15 text-crit'
                       }`}>
                         {matchesAvg ? `+${diff.toFixed(1)} vs National` : `${diff.toFixed(1)} vs National`}
                       </span>
                       ) : (
-                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-500">Rate N/A</span>
+                        <span className="text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full bg-neutral-chip text-ink-3">Rate N/A</span>
                       )}
                     </div>
 
                     <div className="space-y-2 pt-1">
                       <div className="space-y-1">
-                        <div className="flex justify-between text-[9px] text-slate-500">
+                        <div className="flex justify-between text-[9px] text-ink-3">
                           <span>Alberta Density (per 100k)</span>
-                          <span className="font-bold text-white">{typeof abRate === 'number' ? abRate : '—'}</span>
+                          <span className="font-bold text-ink">{typeof abRate === 'number' ? abRate : '—'}</span>
                         </div>
-                        <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-blue-500 h-full rounded-full" style={{ width: `${typeof abRate === 'number' ? (abRate / alliedMaxRate) * 100 : 0}%` }} />
+                        <div className="w-full bg-paper h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-accent h-full rounded-full" style={{ width: `${typeof abRate === 'number' ? (abRate / alliedMaxRate) * 100 : 0}%` }} />
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="flex justify-between text-[9px] text-slate-500">
+                        <div className="flex justify-between text-[9px] text-ink-3">
                           <span>Canada Benchmark</span>
-                          <span className="font-bold text-slate-400">{typeof caRate === 'number' ? caRate : '—'}</span>
+                          <span className="font-bold text-ink-2">{typeof caRate === 'number' ? caRate : '—'}</span>
                         </div>
-                        <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-slate-700 h-full rounded-full" style={{ width: `${typeof caRate === 'number' ? (caRate / alliedMaxRate) * 100 : 0}%` }} />
+                        <div className="w-full bg-paper h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-ink-3 h-full rounded-full" style={{ width: `${typeof caRate === 'number' ? (caRate / alliedMaxRate) * 100 : 0}%` }} />
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-900 text-[10px]">
-                      <span className="text-slate-500">CIHI vacancy count</span>
-                      <span className="font-bold text-amber-500 flex items-center gap-1">
+                    <div className="flex items-center justify-between pt-2 border-t border-line text-[10px]">
+                      <span className="text-ink-3">CIHI vacancy count</span>
+                      <span className="font-bold text-warn flex items-center gap-1">
                         {vacancy != null ? (
                           <>
-                            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                            <span className="w-1.5 h-1.5 bg-warn rounded-full"></span>
                             {vacancy} vacancies
                           </>
                         ) : (
-                          <span className="text-slate-500">—</span>
+                          <span className="text-ink-3">—</span>
                         )}
                       </span>
                     </div>
@@ -1051,30 +1060,30 @@ export default function WorkforceDashboard() {
       {/* SUBTAB 4: Age & Retirement Risk Profile — CIHI measured only */}
       {activeSubTab === 'retirement' && (
         <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+          <div className="bg-surface border border-line p-5 rounded-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Retirement Cliff & Demographics Analyzer</h3>
-                <p className="text-[10px] text-slate-500">Evaluating potential staffing supply flight via aging practitioner profiles</p>
-                <DataTimestamp compact metadata={metadata} arrayKey={ageProfileMetadataKey} />
+                <h3 className="text-xs font-semibold text-ink-2">Active Retirement Cliff & Demographics Analyzer</h3>
+                <p className="text-[10px] text-ink-3">Evaluating potential staffing supply flight via aging practitioner profiles</p>
+                <DataTimestamp compact variant="light" metadata={metadata} arrayKey={ageProfileMetadataKey} />
               </div>
 
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-slate-500" />
+                  <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-ink-3" />
                   <input
                     type="text"
                     placeholder="Search professions..."
                     value={searchProfession}
                     onChange={(e) => setSearchProfession(e.target.value)}
-                    className="bg-slate-950 border border-slate-850 rounded-lg pl-8 pr-3 py-1 text-xs text-white placeholder-slate-500 focus:outline-none"
+                    className="bg-paper border border-line rounded-lg pl-8 pr-3 py-1 text-xs text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none"
                   />
                 </div>
 
                 <select
                   value={selectedRiskLevel}
                   onChange={(e) => setSelectedRiskLevel(e.target.value)}
-                  className="bg-slate-950 border border-slate-850 rounded-lg px-2 py-1 text-xs text-slate-300 focus:outline-none"
+                  className="bg-paper border border-line rounded-lg px-2 py-1 text-xs text-ink focus:border-accent focus:outline-none"
                 >
                   <option value="All">All Risks</option>
                   <option value="Critical">Critical</option>
@@ -1086,7 +1095,7 @@ export default function WorkforceDashboard() {
             </div>
 
             {filteredRetirementProfiles.length === 0 ? (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-3">
                 {WORKFORCE_AGE_PROFILE.length === 0
                   ? 'Workforce age profiles are unavailable until CIHI arrays are successfully refreshed.'
                   : 'No profiles match the current filters.'}
@@ -1097,24 +1106,24 @@ export default function WorkforceDashboard() {
                 const over55 = profile.age55to64Pct + profile.over65Pct;
 
                 return (
-                  <div key={profile.professionGroup} className="bg-slate-950/60 border border-slate-850 p-4 rounded-xl space-y-4">
+                  <div key={profile.professionGroup} className="bg-paper border border-line p-4 rounded-xl space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-sm font-black text-white">{profile.professionGroup}</h4>
-                        <span className="text-[9px] text-slate-500">Age demographic breakdown</span>
+                        <h4 className="text-sm font-semibold text-ink">{profile.professionGroup}</h4>
+                        <span className="text-[9px] text-ink-3">Age demographic breakdown</span>
                       </div>
 
                       <div className="text-right">
-                        <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                        <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${
                           profile.retirementRiskLevel === 'Critical'
-                            ? 'bg-red-500/15 text-red-400 border border-red-500/20'
+                            ? 'bg-crit/15 text-crit border border-line'
                             : profile.retirementRiskLevel === 'High'
-                            ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
-                            : 'bg-blue-500/15 text-blue-400 border border-blue-500/20'
+                            ? 'bg-warn/15 text-warn border border-warn/20'
+                            : 'bg-accent/15 text-accent border border-accent/20'
                         }`}>
                           {profile.retirementRiskLevel} RISK
                         </span>
-                        <p className="text-[9px] text-slate-400 mt-1">
+                        <p className="text-[9px] text-ink-2 mt-1">
                           <strong>{over55.toFixed(1)}%</strong> Over 55
                         </p>
                       </div>
@@ -1122,42 +1131,42 @@ export default function WorkforceDashboard() {
 
                     <div className="space-y-2">
                       <div className="space-y-1">
-                        <div className="flex justify-between text-[10px] text-slate-500">
+                        <div className="flex justify-between text-[10px] text-ink-3">
                           <span>Under Age 35 (Early-career)</span>
-                          <span className="font-bold text-emerald-400">{profile.under35Pct}%</span>
+                          <span className="font-bold text-ok">{profile.under35Pct}%</span>
                         </div>
-                        <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-emerald-400 h-full rounded-full" style={{ width: `${profile.under35Pct}%` }} />
+                        <div className="w-full bg-paper h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-ok h-full rounded-full" style={{ width: `${profile.under35Pct}%` }} />
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="flex justify-between text-[10px] text-slate-500">
+                        <div className="flex justify-between text-[10px] text-ink-3">
                           <span>Ages 35 to 54 (Mid-career core)</span>
-                          <span className="font-bold text-blue-400">{profile.age35to54Pct}%</span>
+                          <span className="font-bold text-accent">{profile.age35to54Pct}%</span>
                         </div>
-                        <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-blue-500 h-full rounded-full" style={{ width: `${profile.age35to54Pct}%` }} />
+                        <div className="w-full bg-paper h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-accent h-full rounded-full" style={{ width: `${profile.age35to54Pct}%` }} />
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="flex justify-between text-[10px] text-slate-500">
+                        <div className="flex justify-between text-[10px] text-ink-3">
                           <span>Ages 55 to 64 (Imminent Retirement Cliff)</span>
-                          <span className="font-bold text-amber-500">{profile.age55to64Pct}%</span>
+                          <span className="font-bold text-warn">{profile.age55to64Pct}%</span>
                         </div>
-                        <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-amber-500 h-full rounded-full" style={{ width: `${profile.age55to64Pct}%` }} />
+                        <div className="w-full bg-paper h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-warn h-full rounded-full" style={{ width: `${profile.age55to64Pct}%` }} />
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="flex justify-between text-[10px] text-slate-500">
+                        <div className="flex justify-between text-[10px] text-ink-3">
                           <span>Ages 65+ (Active Post-Retirement Practice)</span>
-                          <span className="font-bold text-red-500">{profile.over65Pct}%</span>
+                          <span className="font-bold text-crit">{profile.over65Pct}%</span>
                         </div>
-                        <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-red-500 h-full rounded-full" style={{ width: `${profile.over65Pct}%` }} />
+                        <div className="w-full bg-paper h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-crit h-full rounded-full" style={{ width: `${profile.over65Pct}%` }} />
                         </div>
                       </div>
                     </div>
@@ -1173,28 +1182,28 @@ export default function WorkforceDashboard() {
       {/* SUBTAB 5: Vacancy trends — measured series only; no illustrative claims */}
       {activeSubTab === 'vacancies' && (
         <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+          <div className="bg-surface border border-line p-5 rounded-xl space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                <h3 className="text-xs font-semibold text-ink-2">
                   {useCihiJobVacancy ? 'CIHI Health Workforce Vacancy Trends' : 'StatsCan Job Vacancy Trends'}
                 </h3>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-ink-3">
                   {useCihiJobVacancy
                     ? 'Annual vacancy counts by health provider type (Alberta)'
                     : vacancyChartHasWage
                       ? 'Unadjusted quarterly vacancy counts and offered hourly wages (Alberta)'
                       : 'Unadjusted quarterly vacancy counts (Alberta) — offered wage not in this StatCan table'}
                 </p>
-                <DataTimestamp compact metadata={metadata} arrayKey={jobVacancyMetadataKey} />
+                <DataTimestamp compact variant="light" metadata={metadata} arrayKey={jobVacancyMetadataKey} />
               </div>
-              <span className="text-[9px] bg-blue-600/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
+              <span className="text-[9px] bg-neutral-chip text-ink-2 px-2 py-0.5 rounded-full font-bold uppercase">
                 {useCihiJobVacancy ? 'Source: CIHI Health Workforce Quick Stats' : 'Source: StatCan Table 14-10-0371-01'}
               </span>
             </div>
 
             {vacancyChartData.length === 0 ? (
-              <p className="text-sm text-slate-500">No measured job-vacancy rows are available from CIHI or StatsCan for this domain.</p>
+              <p className="text-sm text-ink-3">No measured job-vacancy rows are available from CIHI or StatsCan for this domain.</p>
             ) : (
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -1202,17 +1211,17 @@ export default function WorkforceDashboard() {
                     data={vacancyChartData}
                     margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="quarter" stroke="#64748b" fontSize={10} />
-                    <YAxis yAxisId="left" stroke="#3b82f6" fontSize={9} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                    <XAxis dataKey="quarter" stroke="oklch(0.62 0.02 255)" fontSize={10} />
+                    <YAxis yAxisId="left" stroke="oklch(0.68 0.13 252)" fontSize={9} />
                     {vacancyChartHasWage && (
-                      <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={9} />
+                      <YAxis yAxisId="right" orientation="right" stroke="oklch(0.78 0.12 155)" fontSize={9} />
                     )}
-                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                    <Tooltip contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', borderColor: 'oklch(0.28 0.02 255)' }} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <Line yAxisId="left" type="monotone" dataKey="vacanciesCount" name="Open Vacancies (Count)" stroke="#3b82f6" strokeWidth={2.5} activeDot={{ r: 6 }} isAnimationActive={false} />
+                    <Line yAxisId="left" type="monotone" dataKey="vacanciesCount" name="Open Vacancies (Count)" stroke="oklch(0.68 0.13 252)" strokeWidth={2.5} activeDot={{ r: 6 }} isAnimationActive={false} />
                     {vacancyChartHasWage && (
-                      <Line yAxisId="right" type="monotone" dataKey="avgOfferedHourlyWage" name="Avg Offered Wage ($/Hr)" stroke="#10b981" strokeWidth={2.5} isAnimationActive={false} />
+                      <Line yAxisId="right" type="monotone" dataKey="avgOfferedHourlyWage" name="Avg Offered Wage ($/Hr)" stroke="oklch(0.78 0.12 155)" strokeWidth={2.5} isAnimationActive={false} />
                     )}
                   </LineChart>
                 </ResponsiveContainer>

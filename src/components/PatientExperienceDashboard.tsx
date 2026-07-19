@@ -88,6 +88,18 @@ function isProvinceTerritoryLevel(row: Record<string, unknown>): boolean {
   return level.includes('province');
 }
 
+const CHART_GRID = 'oklch(0.28 0.02 255)';
+const CHART_TICK = 'oklch(0.62 0.02 255)';
+const CHART_ACCENT = 'oklch(0.68 0.13 252)';
+const CHART_WARN = 'oklch(0.82 0.12 85)';
+const CHART_OK = 'oklch(0.78 0.12 155)';
+
+const tooltipStyle = {
+  backgroundColor: 'oklch(0.2 0.022 255)',
+  border: '1px solid oklch(0.28 0.02 255)',
+  borderRadius: '8px',
+};
+
 export default function PatientExperienceDashboard() {
   const { data, metadata, isLoading, error, refresh } = useDomainData<PatientExperienceData>(
     'patient-experience',
@@ -147,21 +159,28 @@ export default function PatientExperienceDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
-        Loading patient experience data...
+      <div className="space-y-4">
+        <div className="animate-pulse rounded-xl border border-line bg-surface p-4">
+          <div className="h-4 w-1/3 rounded bg-neutral-chip" />
+          <div className="mt-3 h-3 w-1/2 rounded bg-neutral-chip" />
+        </div>
+        <div className="animate-pulse rounded-xl border border-line bg-surface p-4">
+          <div className="h-48 rounded bg-neutral-chip" />
+        </div>
       </div>
     );
   }
+
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
-        <AlertTriangle className="w-6 h-6 text-amber-400" />
-        <span>Failed to load patient experience data: {error}</span>
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3 rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center">
+        <AlertTriangle className="h-8 w-8 text-warn" />
+        <p className="text-sm text-ink-2">Failed to load patient experience data: {error}</p>
         <button
           onClick={refresh}
-          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-paper"
         >
-          <RefreshCw className="w-3.5 h-3.5" />
+          <RefreshCw className="h-3.5 w-3.5" />
           Retry
         </button>
       </div>
@@ -169,69 +188,81 @@ export default function PatientExperienceDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <DashboardHeader
         icon={Users}
         title="Patient Experience & Care Quality"
         description="Verified specialist access waits, HQCA inpatient ratings, and CIHI readmission rates."
         metadata={metadata ?? undefined}
         arrayKey={headerArrayKey}
-      />
+        variant="light"
+      >
+        <button
+          onClick={refresh}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-paper"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Refresh
+        </button>
+      </DashboardHeader>
 
-      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+      <div className="inline-flex w-fit rounded-lg border border-line bg-paper p-0.5">
         <button
           onClick={() => setActiveSubTab('voice')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
             activeSubTab === 'voice'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'bg-accent text-white'
+              : 'text-ink-2 hover:text-ink'
           }`}
         >
-          <Users className="w-4 h-4" />
-          <span>Specialist Access</span>
+          <Users className="h-4 w-4" />
+          <span>Specialist access</span>
         </button>
         <button
           onClick={() => setActiveSubTab('inpatient')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
             activeSubTab === 'inpatient'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'bg-accent text-white'
+              : 'text-ink-2 hover:text-ink'
           }`}
         >
-          <Building2 className="w-4 h-4" />
-          <span>Inpatient Surveys</span>
+          <Building2 className="h-4 w-4" />
+          <span>Inpatient surveys</span>
         </button>
         <button
           onClick={() => setActiveSubTab('safety')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
             activeSubTab === 'safety'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'bg-accent text-white'
+              : 'text-ink-2 hover:text-ink'
           }`}
         >
-          <ShieldAlert className="w-4 h-4" />
-          <span>Clinical Safety</span>
+          <ShieldAlert className="h-4 w-4" />
+          <span>Clinical safety</span>
         </button>
       </div>
 
       {activeSubTab === 'voice' && (
-        <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="PATIENT_VOICE_BY_SETTING" />
+        <div className="space-y-4">
+          <DataTimestamp
+            compact
+            variant="light"
+            metadata={metadata ?? undefined}
+            arrayKey="PATIENT_VOICE_BY_SETTING"
+          />
           {specialistChartData.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 p-8 rounded-xl text-center">
-              <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-              <p className="text-slate-400 text-xs">
-                No verified specialist access wait data is available.
-              </p>
+            <div className="rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3">
+              <AlertTriangle className="mx-auto mb-2 h-6 w-6 text-warn" />
+              No verified specialist access wait data is available.
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div className="rounded-xl border border-line bg-surface p-5 lg:col-span-2 space-y-4">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Specialist Median Wait Times
+                  <h3 className="text-sm font-semibold text-ink">
+                    Specialist median wait times
                   </h3>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="text-xs text-ink-3">
                     GoodCaring median waits in weeks by specialty field (Alberta)
                   </p>
                 </div>
@@ -241,10 +272,10 @@ export default function PatientExperienceDashboard() {
                       data={specialistChartData}
                       margin={{ top: 10, right: 10, left: 10, bottom: 40 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
                       <XAxis
                         dataKey="metric"
-                        stroke="#64748b"
+                        stroke={CHART_TICK}
                         fontSize={9}
                         interval={0}
                         angle={-30}
@@ -259,20 +290,22 @@ export default function PatientExperienceDashboard() {
                           value: 'Weeks',
                           angle: -90,
                           position: 'insideLeft',
-                          fill: '#64748b',
+                          fill: CHART_TICK,
                           fontSize: 10,
                         }}
-                        stroke="#64748b"
+                        stroke={CHART_TICK}
                         fontSize={9}
                       />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}
+                        contentStyle={tooltipStyle}
+                        itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                        labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
                         formatter={(value: number) => [`${value} weeks`, 'Median wait']}
                       />
                       <Bar
                         dataKey="waitWeeks"
                         name="Median wait (weeks)"
-                        fill="#06b6d4"
+                        fill={CHART_ACCENT}
                         radius={[4, 4, 0, 0]}
                       />
                     </BarChart>
@@ -280,27 +313,25 @@ export default function PatientExperienceDashboard() {
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3 max-h-[28rem] overflow-y-auto">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  Specialty Waits
-                </h3>
+              <div className="rounded-xl border border-line bg-surface p-5 space-y-3 max-h-[28rem] overflow-y-auto">
+                <h3 className="text-sm font-semibold text-ink">Specialty waits</h3>
                 {specialistChartData.map((row) => (
                   <div
                     key={row.metric}
-                    className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl flex items-center justify-between gap-3"
+                    className="rounded-xl border border-line bg-paper p-3 flex items-center justify-between gap-3"
                   >
                     <div>
-                      <span className="text-xs font-bold text-white block">{row.metric}</span>
-                      <p className="text-[10px] text-slate-500">{row.year}</p>
+                      <span className="block text-xs font-medium text-ink">{row.metric}</span>
+                      <p className="text-[10px] text-ink-3">{row.year}</p>
                     </div>
-                    <span className="text-lg font-black text-cyan-400 shrink-0">
+                    <span className="shrink-0 text-lg font-semibold font-mono tabular-nums text-accent">
                       {row.waitWeeks}
-                      <span className="text-[10px] font-bold text-slate-400 ml-1">wks</span>
+                      <span className="ml-1 text-xs font-medium text-ink-3">wks</span>
                     </span>
                   </div>
                 ))}
-                <div className="pt-2 border-t border-slate-850 text-[10px] text-slate-400 flex items-start gap-1.5 leading-relaxed">
-                  <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-1.5 border-t border-line pt-2 text-[10px] text-ink-3 leading-relaxed">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                   <span>
                     Values are median specialist referral waits in weeks. Percent-style satisfaction
                     scores are not shown on this tab.
@@ -313,27 +344,26 @@ export default function PatientExperienceDashboard() {
       )}
 
       {activeSubTab === 'inpatient' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <DataTimestamp
             compact
+            variant="light"
             metadata={metadata ?? undefined}
             arrayKey="INPATIENT_EXPERIENCE_TRENDS_HQCA"
           />
           {!hasHqcaInpatient ? (
-            <div className="bg-slate-900 border border-slate-800 p-8 rounded-xl text-center">
-              <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-              <p className="text-slate-400 text-xs">
-                No verified HQCA inpatient experience ratings are available.
-              </p>
+            <div className="rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3">
+              <AlertTriangle className="mx-auto mb-2 h-6 w-6 text-warn" />
+              No verified HQCA inpatient experience ratings are available.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-xl border border-line bg-surface p-5 md:col-span-2 lg:col-span-2 space-y-4">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Inpatient Care Experience Trends (HQCA FOCUS)
+                  <h3 className="text-sm font-semibold text-ink">
+                    Inpatient care experience trends (HQCA FOCUS)
                   </h3>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="text-xs text-ink-3">
                     Overall excellent hospital rating (9–10) from HQCA FOCUS
                   </p>
                 </div>
@@ -343,27 +373,31 @@ export default function PatientExperienceDashboard() {
                       data={inpatientRatingsFromHqca}
                       margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                      <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
+                      <XAxis dataKey="year" stroke={CHART_TICK} fontSize={10} />
                       <YAxis
                         label={{
                           value: 'Excellent %',
                           angle: -90,
                           position: 'insideLeft',
-                          fill: '#64748b',
+                          fill: CHART_TICK,
                           fontSize: 10,
                         }}
-                        stroke="#64748b"
+                        stroke={CHART_TICK}
                         fontSize={9}
                         domain={[40, 80]}
                       />
-                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                      <Tooltip
+                        contentStyle={tooltipStyle}
+                        itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                        labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
+                      />
                       <Legend wrapperStyle={{ fontSize: 10 }} />
                       <Line
                         type="monotone"
                         dataKey="overallExcellentRating"
                         name="Excellent rating (9–10)"
-                        stroke="#06b6d4"
+                        stroke={CHART_ACCENT}
                         strokeWidth={2.5}
                         activeDot={{ r: 6 }}
                       />
@@ -372,38 +406,32 @@ export default function PatientExperienceDashboard() {
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  Hospital Stay Ratings
-                </h3>
-                <div className="space-y-3">
-                  {inpatientRatingsFromHqca.map((item) => (
-                    <div
-                      key={item.year}
-                      className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl flex items-center justify-between"
-                    >
-                      <div>
-                        <span className="text-xs font-bold text-white">{item.year}</span>
-                        <p className="text-[10px] text-slate-400">
-                          Excellent hospital rating (9 or 10 / 10)
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <span
-                          className={`text-lg font-black ${
-                            item.overallExcellentRating > 65
-                              ? 'text-emerald-400'
-                              : item.overallExcellentRating > 60
-                                ? 'text-cyan-400'
-                                : 'text-rose-400'
-                          }`}
-                        >
-                          {item.overallExcellentRating}%
-                        </span>
-                      </div>
+              <div className="rounded-xl border border-line bg-surface p-5 space-y-3 md:col-span-2 lg:col-span-1">
+                <h3 className="text-sm font-semibold text-ink">Hospital stay ratings</h3>
+                {inpatientRatingsFromHqca.map((item) => (
+                  <div
+                    key={item.year}
+                    className="rounded-xl border border-line bg-paper p-3 flex items-center justify-between"
+                  >
+                    <div>
+                      <span className="block text-xs font-semibold text-ink">{item.year}</span>
+                      <p className="text-[10px] text-ink-3">Excellent hospital rating (9 or 10 / 10)</p>
                     </div>
-                  ))}
-                </div>
+                    <div className="text-right">
+                      <span
+                        className={`text-lg font-semibold font-mono tabular-nums ${
+                          item.overallExcellentRating > 65
+                            ? 'text-ok'
+                            : item.overallExcellentRating > 60
+                              ? 'text-warn'
+                              : 'text-crit'
+                        }`}
+                      >
+                        {item.overallExcellentRating}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -411,27 +439,26 @@ export default function PatientExperienceDashboard() {
       )}
 
       {activeSubTab === 'safety' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <DataTimestamp
             compact
+            variant="light"
             metadata={metadata ?? undefined}
             arrayKey="CIHI_ALL_READMISSION_RATES"
           />
           {readmissionChartData.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 p-8 rounded-xl text-center">
-              <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-              <p className="text-slate-400 text-xs">
-                No verified CIHI Alberta all-patient readmission rates are available.
-              </p>
+            <div className="rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3">
+              <AlertTriangle className="mx-auto mb-2 h-6 w-6 text-warn" />
+              No verified CIHI Alberta all-patient readmission rates are available.
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div className="rounded-xl border border-line bg-surface p-5 lg:col-span-2 space-y-4">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                    CIHI All-Patient Hospital Readmissions
+                  <h3 className="text-sm font-semibold text-ink">
+                    CIHI all-patient hospital readmissions
                   </h3>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="text-xs text-ink-3">
                     Alberta province/territory risk-adjusted rate by fiscal year
                   </p>
                 </div>
@@ -441,26 +468,30 @@ export default function PatientExperienceDashboard() {
                       data={readmissionChartData}
                       margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                      <XAxis dataKey="timeFrame" stroke="#64748b" fontSize={10} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
+                      <XAxis dataKey="timeFrame" stroke={CHART_TICK} fontSize={10} />
                       <YAxis
                         label={{
                           value: 'Risk-adjusted %',
                           angle: -90,
                           position: 'insideLeft',
-                          fill: '#64748b',
+                          fill: CHART_TICK,
                           fontSize: 10,
                         }}
-                        stroke="#64748b"
+                        stroke={CHART_TICK}
                         fontSize={9}
                       />
-                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                      <Tooltip
+                        contentStyle={tooltipStyle}
+                        itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                        labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
+                      />
                       <Legend wrapperStyle={{ fontSize: 10 }} />
                       <Line
                         type="monotone"
                         dataKey="riskAdjustedRate"
                         name="Risk-adjusted readmission rate"
-                        stroke="#f59e0b"
+                        stroke={CHART_WARN}
                         strokeWidth={2.5}
                         activeDot={{ r: 6 }}
                       />
@@ -469,23 +500,21 @@ export default function PatientExperienceDashboard() {
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  Alberta Trend Points
-                </h3>
+              <div className="rounded-xl border border-line bg-surface p-5 space-y-3">
+                <h3 className="text-sm font-semibold text-ink">Alberta trend points</h3>
                 {readmissionChartData.map((row) => (
                   <div
                     key={row.timeFrame}
-                    className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl flex items-center justify-between"
+                    className="rounded-xl border border-line bg-paper p-3 flex items-center justify-between"
                   >
-                    <span className="text-xs font-bold text-white">{row.timeFrame}</span>
-                    <span className="text-lg font-black text-amber-400">
+                    <span className="text-xs font-semibold text-ink">{row.timeFrame}</span>
+                    <span className="text-lg font-semibold font-mono tabular-nums text-warn">
                       {row.riskAdjustedRate}%
                     </span>
                   </div>
                 ))}
-                <div className="pt-2 border-t border-slate-850 text-[10px] text-slate-400 flex items-start gap-1.5 leading-relaxed">
-                  <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-1.5 border-t border-line pt-2 text-[10px] text-ink-3 leading-relaxed">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                   <span>
                     Source: CIHI all-patients readmitted indicator at province/territory reporting
                     level for Alberta.

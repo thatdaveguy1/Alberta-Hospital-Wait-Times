@@ -599,19 +599,24 @@ export default function RegionalInequityDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
-        Loading regional inequity data...
+      <div className="space-y-3">
+        <div className="animate-pulse rounded-xl border border-line bg-surface p-4">
+          <div className="mb-3 h-4 w-1/3 rounded bg-neutral-chip" />
+          <div className="h-3 w-3/4 rounded bg-neutral-chip" />
+        </div>
       </div>
     );
   }
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
-        <AlertTriangle className="w-6 h-6 text-amber-400" />
-        <span>Failed to load regional inequity data: {error}</span>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-warn" aria-hidden />
+          <span>Failed to load regional inequity data: {error}</span>
+        </div>
         <button
           onClick={refresh}
-          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+          className="rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-paper flex items-center gap-1.5 cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Retry
@@ -630,8 +635,9 @@ export default function RegionalInequityDashboard() {
           description="Open Alberta LGA community profiles only. Travel/access and unpublished income fields stay empty until a verified upstream exists."
           metadata={metadata ?? undefined}
           arrayKey="COMMUNITY_NEED_PROFILES"
+        variant="light"
         />
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl text-sm text-slate-400">
+        <div className="rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3">
           No verified community-need, chronic-disease, or ED-reliance rows are available. Values are not estimated.
         </div>
       </div>
@@ -645,16 +651,17 @@ export default function RegionalInequityDashboard() {
         description="Analyze geographic disparities, chronic disease burden, and care travel patterns."
         metadata={metadata ?? undefined}
         arrayKey="COMMUNITY_NEED_PROFILES"
+        variant="light"
       />
 
       {/* Primary Sub-Tab Navigation */}
-      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+      <div className="flex flex-wrap items-center gap-1 rounded-lg border border-line bg-paper p-0.5">
         <button
           onClick={() => setActiveSubTab('lga-needs')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'lga-needs'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-blue-500 text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -662,10 +669,10 @@ export default function RegionalInequityDashboard() {
         </button>
         <button
           onClick={() => setActiveSubTab('disease-burden')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'disease-burden'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-blue-500 text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <TrendingUp className="w-4 h-4" />
@@ -673,10 +680,10 @@ export default function RegionalInequityDashboard() {
         </button>
         <button
           onClick={() => setActiveSubTab('ed-reliance')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'ed-reliance'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-blue-500 text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <Activity className="w-4 h-4" />
@@ -685,10 +692,10 @@ export default function RegionalInequityDashboard() {
         {hasTravelAccessData && (
         <button
           onClick={() => setActiveSubTab('access-travel')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'access-travel'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-blue-500 text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <MapPin className="w-4 h-4" />
@@ -697,10 +704,10 @@ export default function RegionalInequityDashboard() {
         )}
         <button
           onClick={() => setActiveSubTab('compare-matrix')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'compare-matrix'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-blue-500 text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -708,10 +715,10 @@ export default function RegionalInequityDashboard() {
         </button>
         <button
           onClick={() => setActiveSubTab('data-explorer')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer flex items-center gap-2 ${
             activeSubTab === 'data-explorer'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'border-blue-500 text-accent bg-accent-soft'
+              : 'border-transparent text-ink-2 hover:text-ink hover:border-line-2'
           }`}
         >
           <Search className="w-4 h-4" />
@@ -721,55 +728,55 @@ export default function RegionalInequityDashboard() {
 
       {/* Subtab-specific context (Cycle of Disparity only on Community Profile) */}
       {activeSubTab === 'lga-needs' && (
-      <div id="ri-narrative-callout" className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
+      <div id="ri-narrative-callout" className="bg-surface border border-line p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 ">
         <div className="space-y-1 flex-1">
-          <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-            <ShieldAlert className="w-4.5 h-4.5 text-rose-400" />
+          <h4 className="text-xs font-semibold text-ink   flex items-center gap-2">
+            <ShieldAlert className="w-4.5 h-4.5 text-crit" />
             <span>Community socioeconomic profile</span>
           </h4>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
+          <p className="text-[11px] text-ink-2 leading-relaxed">
             <strong>Cycle of disparity:</strong> Deprivation and primary-care attachment gaps in this LGA shape downstream ED reliance and travel-for-care burdens shown in other subtabs.
           </p>
         </div>
-        <span className="text-[10px] bg-rose-500/10 border border-rose-500/25 text-rose-400 px-3 py-1.5 rounded-lg font-mono font-bold tracking-widest shrink-0 self-start md:self-center">
+        <span className="text-[10px] bg-crit-soft border border-crit text-crit px-3 py-1.5 rounded-lg font-mono font-semibold  shrink-0 self-start md:self-center">
           LGA PROFILE
         </span>
       </div>
       )}
       {activeSubTab === 'disease-burden' && (
-      <div id="ri-narrative-callout" className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
+      <div id="ri-narrative-callout" className="bg-surface border border-line p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 ">
         <div className="space-y-1 flex-1">
-          <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-            <HeartPulse className="w-4.5 h-4.5 text-orange-400" />
+          <h4 className="text-xs font-semibold text-ink   flex items-center gap-2">
+            <HeartPulse className="w-4.5 h-4.5 text-warn" />
             <span>Chronic disease burden</span>
           </h4>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
+          <p className="text-[11px] text-ink-2 leading-relaxed">
             Prevalence and outcome metrics for the selected LGA — diabetes, COPD, hypertension, infant mortality, and life expectancy vs provincial benchmarks.
           </p>
         </div>
       </div>
       )}
       {activeSubTab === 'ed-reliance' && (
-      <div id="ri-narrative-callout" className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
+      <div id="ri-narrative-callout" className="bg-surface border border-line p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 ">
         <div className="space-y-1 flex-1">
-          <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-            <Activity className="w-4.5 h-4.5 text-amber-400" />
+          <h4 className="text-xs font-semibold text-ink   flex items-center gap-2">
+            <Activity className="w-4.5 h-4.5 text-warn" />
             <span>Emergency department reliance</span>
           </h4>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
+          <p className="text-[11px] text-ink-2 leading-relaxed">
             Low-acuity CTAS 4–5 visits and after-hours ED use often signal primary-care access gaps rather than true emergencies.
           </p>
         </div>
       </div>
       )}
       {activeSubTab === 'access-travel' && (
-      <div id="ri-narrative-callout" className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
+      <div id="ri-narrative-callout" className="bg-surface border border-line p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 ">
         <div className="space-y-1 flex-1">
-          <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-            <Compass className="w-4.5 h-4.5 text-cyan-400" />
+          <h4 className="text-xs font-semibold text-ink   flex items-center gap-2">
+            <Compass className="w-4.5 h-4.5 text-accent" />
             <span>Travel and local access</span>
           </h4>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
+          <p className="text-[11px] text-ink-2 leading-relaxed">
             Share of care delivered outside the home LGA, typical travel distance, and leakage of staffed beds to regional hubs.
           </p>
         </div>
@@ -779,20 +786,20 @@ export default function RegionalInequityDashboard() {
       <div className={`grid gap-6 ${showLgaSidebar ? 'grid-cols-1 xl:grid-cols-4' : 'grid-cols-1'}`}>
         
         {showLgaSidebar && (
-        <div className="bg-[#0b1226] border border-slate-800 rounded-2xl p-5 space-y-4 xl:col-span-1 shadow-md">
+        <div className="bg-surface border border-line rounded-xl p-5 space-y-4 xl:col-span-1 ">
           <div>
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">LGA Selection Navigator</h3>
-            <p className="text-[10px] text-slate-500 mt-0.5">Select a representative local geographic area to focus</p>
+            <h3 className="text-xs font-semibold text-ink-2  ">LGA Selection Navigator</h3>
+            <p className="text-[10px] text-ink-3 mt-0.5">Select a representative local geographic area to focus</p>
           </div>
 
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-500" />
+            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-ink-3" />
             <input
               type="text"
               placeholder="Search LGA or Zone..."
               value={lgaSearch}
               onChange={(e) => setLgaSearch(e.target.value)}
-              className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors font-medium"
+              className="w-full bg-paper border border-line rounded-lg pl-9 pr-3 py-2 text-xs text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none transition-colors font-medium"
             />
           </div>
 
@@ -803,50 +810,50 @@ export default function RegionalInequityDashboard() {
                 onClick={() => setSelectedLgaDetail(lga.lgaName)}
                 className={`w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between cursor-pointer ${
                   selectedLgaDetail === lga.lgaName
-                    ? 'bg-rose-500/10 border-rose-500/35 text-white'
-                    : 'bg-slate-950/40 border-slate-800/40 text-slate-400 hover:border-slate-800 hover:text-slate-200 hover:bg-slate-950/80'
+                    ? 'bg-crit-soft border-rose-500/35 text-ink'
+                    : 'bg-paper border-line text-ink-2 hover:border-line hover:text-ink hover:bg-paper'
                 }`}
               >
                 <div className="space-y-0.5 min-w-0 pr-2">
-                  <div className="font-bold flex items-center gap-1.5 truncate">
-                    <MapPin className={`w-3.5 h-3.5 shrink-0 ${selectedLgaDetail === lga.lgaName ? 'text-rose-400' : 'text-slate-500'}`} />
+                  <div className="font-semibold flex items-center gap-1.5 truncate">
+                    <MapPin className={`w-3.5 h-3.5 shrink-0 ${selectedLgaDetail === lga.lgaName ? 'text-accent' : 'text-ink-3'}`} />
                     <span className="truncate">{lga.lgaName}</span>
                   </div>
-                  <div className="text-[10px] text-slate-500 font-medium">
+                  <div className="text-[10px] text-ink-3 font-medium">
                     {lga.zone} • {lga.type}
                   </div>
                 </div>
-                <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${selectedLgaDetail === lga.lgaName ? 'text-rose-400 translate-x-1' : 'text-slate-600'}`} />
+                <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${selectedLgaDetail === lga.lgaName ? 'text-accent translate-x-1' : 'text-ink-3'}`} />
               </button>
             ))}
           </div>
 
           {/* Quick Stats of Selected LGA */}
-          <div className="pt-4 border-t border-slate-800/80 space-y-3">
+          <div className="pt-4 border-t border-line space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider">LGA Identity Profile</h4>
-              <span className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-[9px] font-bold rounded-md text-slate-400">
+              <h4 className="text-[10px] font-semibold  text-ink-2 ">LGA Identity Profile</h4>
+              <span className="px-2 py-0.5 bg-surface border border-line text-[9px] font-semibold rounded-md text-ink-2">
                 LGA ID
               </span>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60 text-center">
-                <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider">Deprivation Index</span>
-                <span className={`text-sm font-black block mt-0.5 ${selectedLgaNeed.deprivationIndex >= 4 ? 'text-rose-400' : selectedLgaNeed.deprivationIndex === 3 ? 'text-orange-400' : 'text-emerald-400'}`}>
+              <div className="bg-paper p-2.5 rounded-xl border border-line text-center">
+                <span className="text-[8px] text-ink-3 block  font-semibold ">Deprivation Index</span>
+                <span className={`text-sm font-semibold block mt-0.5 ${selectedLgaNeed.deprivationIndex >= 4 ? 'text-crit' : selectedLgaNeed.deprivationIndex === 3 ? 'text-warn' : 'text-ok'}`}>
                   {selectedLgaNeed.deprivationIndex} / 5
                 </span>
-                <span className="text-[8px] text-slate-500 block font-medium mt-0.5">
+                <span className="text-[8px] text-ink-3 block font-medium mt-0.5">
                   {selectedLgaNeed.deprivationIndex >= 4 ? 'Highly Deprived' : selectedLgaNeed.deprivationIndex === 3 ? 'Moderate' : 'Highly Affluent'}
                 </span>
               </div>
 
-              <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60 text-center">
-                <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider">Median Income</span>
-                <span className="text-sm font-black text-white block mt-0.5">
+              <div className="bg-paper p-2.5 rounded-xl border border-line text-center">
+                <span className="text-[8px] text-ink-3 block  font-semibold ">Median Income</span>
+                <span className="text-sm font-semibold text-ink block mt-0.5">
                   {selectedLgaNeed.medianHouseholdIncome > 0 ? `$${selectedLgaNeed.medianHouseholdIncome.toLocaleString()}` : '—'}
                 </span>
-                <span className="text-[8px] text-slate-500 block font-medium mt-0.5">
+                <span className="text-[8px] text-ink-3 block font-medium mt-0.5">
                   {hasMetric(selectedLgaNeed.medianHouseholdIncome)
                     ? (hasMetric(PROVINCIAL_BENCHMARKS.medianHouseholdIncome)
                       ? (selectedLgaNeed.medianHouseholdIncome < PROVINCIAL_BENCHMARKS.medianHouseholdIncome ? 'Below loaded-LGA mean' : 'At/above loaded-LGA mean')
@@ -867,43 +874,43 @@ export default function RegionalInequityDashboard() {
             <div id="ri-needs-view" className="space-y-6 animate-fadeIn">
               {/* Primary Care Needs Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Rostered Family Physicians</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Rostered Family Physicians</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-rose-400">
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-crit">
                       {formatMetric(selectedLgaNeed.physiciansPer100k, { digits: 1 })}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">per 100k</span>
+                    <span className="text-[10px] text-ink-3 font-medium">per 100k</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
+                  <p className="text-[10px] text-ink-3 pt-2 border-t border-line font-medium leading-relaxed">
                     {hasMetric(selectedLgaNeed.physiciansPer100k) && hasMetric(PROVINCIAL_BENCHMARKS.physiciansPer100k)
-                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.physiciansPer100k.toFixed(1)} per 100k</strong>.</>
+                      ? <>Mean of loaded LGAs: <strong className="text-ink">{PROVINCIAL_BENCHMARKS.physiciansPer100k.toFixed(1)} per 100k</strong>.</>
                       : 'No hardcoded provincial standard is shown; missing upstream values render as N/A.'}
                   </p>
                 </div>
 
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Primary Care Outside LGA</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Primary Care Outside LGA</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-orange-400">
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-warn">
                       {formatMetric(selectedLgaNeed.claimsOutsideLgaPct, { digits: 1, suffix: '%' })}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">outward claims</span>
+                    <span className="text-[10px] text-ink-3 font-medium">outward claims</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
+                  <p className="text-[10px] text-ink-3 pt-2 border-t border-line font-medium leading-relaxed">
                     Residents rostered or treated outside boundaries. Higher values signify local primary access failure.
                   </p>
                 </div>
 
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Preventable ACSC Admissions</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Preventable ACSC Admissions</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-500">
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-warn">
                       {formatMetric(selectedLgaNeed.acscRatePer100k, { digits: 1 })}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">per 100k</span>
+                    <span className="text-[10px] text-ink-3 font-medium">per 100k</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
+                  <p className="text-[10px] text-ink-3 pt-2 border-t border-line font-medium leading-relaxed">
                     Ambulatory Care Sensitive Conditions. High rates mean family medicine gaps are pushing patients to hospital beds.
                   </p>
                 </div>
@@ -911,10 +918,10 @@ export default function RegionalInequityDashboard() {
 
               {/* Comparative Charts */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 shadow-md">
+                <div className="bg-surface border border-line p-5 rounded-xl space-y-4 ">
                   <div>
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Socioeconomic Deprivation vs. ACSC Rate</h3>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Correlating poverty level (CIMD score) with avoidable clinical hospitalizations</p>
+                    <h3 className="text-xs font-semibold text-ink-2  ">Socioeconomic Deprivation vs. ACSC Rate</h3>
+                    <p className="text-[10px] text-ink-3 mt-0.5">Correlating poverty level (CIMD score) with avoidable clinical hospitalizations</p>
                   </div>
 
                   <div className="h-64">
@@ -925,28 +932,28 @@ export default function RegionalInequityDashboard() {
                       >
                         <defs>
                           <linearGradient id="acscGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0.4}/>
+                            <stop offset="5%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0.4}/>
                           </linearGradient>
                           <linearGradient id="physGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0.4}/>
+                            <stop offset="5%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0.4}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
-                        <YAxis yAxisId="left" stroke="#ef4444" fontSize={9} tickLine={false} width={50} label={{ value: 'ACSC Hospitalization Rate', angle: -90, position: 'insideLeft', fill: '#ef4444', fontSize: 10, fontWeight: 'bold', offset: 0 }} />
-                        <YAxis yAxisId="right" orientation="right" stroke="#6366f1" fontSize={9} tickLine={false} width={50} label={{ value: 'Physicians per 100k', angle: 90, position: 'insideRight', fill: '#6366f1', fontSize: 10, fontWeight: 'bold', offset: 0 }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                        <XAxis dataKey="lgaName" stroke="oklch(0.62 0.02 255)" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
+                        <YAxis yAxisId="left" stroke="oklch(0.75 0.14 25)" fontSize={9} tickLine={false} width={50} label={{ value: 'ACSC Hospitalization Rate', angle: -90, position: 'insideLeft', fill: 'oklch(0.75 0.14 25)', fontSize: 10, fontWeight: 'bold', offset: 0 }} />
+                        <YAxis yAxisId="right" orientation="right" stroke="oklch(0.68 0.13 252)" fontSize={9} tickLine={false} width={50} label={{ value: 'Physicians per 100k', angle: 90, position: 'insideRight', fill: 'oklch(0.68 0.13 252)', fontSize: 10, fontWeight: 'bold', offset: 0 }} />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#090e21', borderColor: '#1e293b', borderRadius: '12px' }} 
-                          labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                          contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', border: '1px solid oklch(0.28 0.02 255)', borderRadius: '8px' }} itemStyle={{ color: 'oklch(0.96 0.008 255)' }} 
+                          labelStyle={{ color: 'oklch(0.78 0.015 255)', fontWeight: 'bold' }}
                         />
                         <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
                         <Bar yAxisId="left" dataKey="acscRatePer100k" name="Preventable Hosp. Rate" fill="url(#acscGrad)" radius={[4, 4, 0, 0]}>
                           {zoneNeeds.map((entry, index) => (
                             <Cell 
                               key={`cell-acsc-${index}`} 
-                              fill={entry.lgaName === selectedLgaDetail ? '#f43f5e' : 'url(#acscGrad)'} 
+                              fill={entry.lgaName === selectedLgaDetail ? 'oklch(0.75 0.14 25)' : 'url(#acscGrad)'} 
                             />
                           ))}
                         </Bar>
@@ -954,7 +961,7 @@ export default function RegionalInequityDashboard() {
                           {zoneNeeds.map((entry, index) => (
                             <Cell 
                               key={`cell-phys-${index}`} 
-                              fill={entry.lgaName === selectedLgaDetail ? '#3b82f6' : 'url(#physGrad)'} 
+                              fill={entry.lgaName === selectedLgaDetail ? 'oklch(0.68 0.13 252)' : 'url(#physGrad)'} 
                             />
                           ))}
                         </Bar>
@@ -963,44 +970,44 @@ export default function RegionalInequityDashboard() {
                   </div>
                 </div>
 
-                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 flex flex-col justify-between shadow-md">
+                <div className="bg-surface border border-line p-5 rounded-xl space-y-4 flex flex-col justify-between ">
                   <div className="space-y-1">
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest font-sans">Socio-Demographic Disparity Audit</h3>
-                    <p className="text-[10px] text-slate-500">Selected LGA metrics from upstream rows; comparisons use means of non-zero loaded LGAs only</p>
+                    <h3 className="text-xs font-semibold text-ink-2   font-sans">Socio-Demographic Disparity Audit</h3>
+                    <p className="text-[10px] text-ink-3">Selected LGA metrics from upstream rows; comparisons use means of non-zero loaded LGAs only</p>
                   </div>
 
                   <div className="space-y-4 flex-1 justify-center flex flex-col">
                     <div>
-                      <div className="flex justify-between text-xs font-bold mb-1">
-                        <span className="text-slate-400">High School Graduation Rate:</span>
-                        <span className="text-white font-mono">{selectedLgaNeed.highSchoolGradPct > 0 ? `${selectedLgaNeed.highSchoolGradPct}%` : '—'}</span>
+                      <div className="flex justify-between text-xs font-semibold mb-1">
+                        <span className="text-ink-2">High School Graduation Rate:</span>
+                        <span className="text-ink font-mono">{selectedLgaNeed.highSchoolGradPct > 0 ? `${selectedLgaNeed.highSchoolGradPct}%` : '—'}</span>
                       </div>
-                      <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                        <div className="bg-rose-500 h-full rounded-full transition-all duration-500" style={{ width: `${selectedLgaNeed.highSchoolGradPct > 0 ? selectedLgaNeed.highSchoolGradPct : 0}%` }} />
+                      <div className="w-full bg-paper h-2.5 rounded-full overflow-hidden border border-line">
+                        <div className="bg-crit h-full rounded-full transition-all duration-500" style={{ width: `${selectedLgaNeed.highSchoolGradPct > 0 ? selectedLgaNeed.highSchoolGradPct : 0}%` }} />
                       </div>
-                      <p className="text-[10px] text-slate-500 mt-1">{hasMetric(selectedLgaNeed.highSchoolGradPct) ? 'Upstream high school graduation rate for this LGA.' : 'High school graduation is unavailable for this LGA; not estimated.'}</p>
+                      <p className="text-[10px] text-ink-3 mt-1">{hasMetric(selectedLgaNeed.highSchoolGradPct) ? 'Upstream high school graduation rate for this LGA.' : 'High school graduation is unavailable for this LGA; not estimated.'}</p>
                     </div>
 
                     <div>
-                      <div className="flex justify-between text-xs font-bold mb-1">
-                        <span className="text-slate-400">Rostered Outside Local Geographic Area:</span>
-                        <span className="text-orange-400 font-mono">{selectedLgaNeed.claimsOutsideLgaPct > 0 ? `${selectedLgaNeed.claimsOutsideLgaPct}%` : '—'}</span>
+                      <div className="flex justify-between text-xs font-semibold mb-1">
+                        <span className="text-ink-2">Rostered Outside Local Geographic Area:</span>
+                        <span className="text-warn font-mono">{selectedLgaNeed.claimsOutsideLgaPct > 0 ? `${selectedLgaNeed.claimsOutsideLgaPct}%` : '—'}</span>
                       </div>
-                      <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                        <div className="bg-orange-500 h-full rounded-full transition-all duration-500" style={{ width: `${selectedLgaNeed.claimsOutsideLgaPct > 0 ? selectedLgaNeed.claimsOutsideLgaPct : 0}%` }} />
+                      <div className="w-full bg-paper h-2.5 rounded-full overflow-hidden border border-line">
+                        <div className="bg-warn h-full rounded-full transition-all duration-500" style={{ width: `${selectedLgaNeed.claimsOutsideLgaPct > 0 ? selectedLgaNeed.claimsOutsideLgaPct : 0}%` }} />
                       </div>
-                      <p className="text-[10px] text-slate-500 mt-1">Reflects a localized shortage of accepting practices, forcing outward travel.</p>
+                      <p className="text-[10px] text-ink-3 mt-1">Reflects a localized shortage of accepting practices, forcing outward travel.</p>
                     </div>
                   </div>
 
                   {/* Programmatic, fully dynamic Equity Insight block */}
-                  <div className="pt-4 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2.5 leading-relaxed bg-slate-950/40 p-3 rounded-xl border border-slate-850">
-                    <Info className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <div className="pt-4 border-t border-line text-[11px] text-ink-2 flex items-start gap-2.5 leading-relaxed bg-paper p-3 rounded-xl border border-line">
+                    <Info className="w-4 h-4 text-crit shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                      <span className="font-bold text-white text-xs block">Case Study: {dynamicEquityCaseStudy.title}</span>
+                      <span className="font-semibold text-ink text-xs block">Case Study: {dynamicEquityCaseStudy.title}</span>
                       <p>{dynamicEquityCaseStudy.summary}</p>
-                      <p className="text-slate-500 mt-1">{dynamicEquityCaseStudy.infrastructure}</p>
-                      <p className="text-slate-500 mt-1">{dynamicEquityCaseStudy.downstreamEffect}</p>
+                      <p className="text-ink-3 mt-1">{dynamicEquityCaseStudy.infrastructure}</p>
+                      <p className="text-ink-3 mt-1">{dynamicEquityCaseStudy.downstreamEffect}</p>
                     </div>
                   </div>
                 </div>
@@ -1011,50 +1018,50 @@ export default function RegionalInequityDashboard() {
           {/* SUBTAB 2: Chronic Disease Burden */}
           {activeSubTab === 'disease-burden' && (
             <div id="ri-diseases-view" className="space-y-6 animate-fadeIn">
-              <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="CHRONIC_DISEASE_BURDEN" />
+              <DataTimestamp compact variant="light" metadata={metadata ?? undefined} arrayKey="CHRONIC_DISEASE_BURDEN" />
               {/* Outcome Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Life Expectancy</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Life Expectancy</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-rose-400">
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-crit">
                       {formatMetric(selectedLgaDisease.lifeExpectancyYears, { digits: 1 })}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">years</span>
+                    <span className="text-[10px] text-ink-3 font-medium">years</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
+                  <p className="text-[10px] text-ink-3 pt-2 border-t border-line font-medium leading-relaxed">
                     {hasMetric(selectedLgaDisease.lifeExpectancyYears) && hasMetric(PROVINCIAL_BENCHMARKS.lifeExpectancyYears)
-                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.lifeExpectancyYears.toFixed(1)} years</strong>.</>
+                      ? <>Mean of loaded LGAs: <strong className="text-ink">{PROVINCIAL_BENCHMARKS.lifeExpectancyYears.toFixed(1)} years</strong>.</>
                       : 'No hardcoded provincial life-expectancy average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
 
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Infant Mortality Rate</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Infant Mortality Rate</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-orange-400">
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-warn">
                       {formatMetric(selectedLgaDisease.infantMortalityPer1000, { digits: 1 })}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">per 1,000 births</span>
+                    <span className="text-[10px] text-ink-3 font-medium">per 1,000 births</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
+                  <p className="text-[10px] text-ink-3 pt-2 border-t border-line font-medium leading-relaxed">
                     {hasMetric(selectedLgaDisease.infantMortalityPer1000) && hasMetric(PROVINCIAL_BENCHMARKS.infantMortalityPer1000)
-                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.infantMortalityPer1000.toFixed(1)}</strong>.</>
+                      ? <>Mean of loaded LGAs: <strong className="text-ink">{PROVINCIAL_BENCHMARKS.infantMortalityPer1000.toFixed(1)}</strong>.</>
                       : 'Infant mortality is unavailable for this LGA; not estimated against a hardcoded provincial target.'}
                   </p>
                 </div>
 
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Diabetes Prevalence</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Diabetes Prevalence</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-500">
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-warn">
                       {formatMetric(selectedLgaDisease.diabetesPrevalencePct, { digits: 1, suffix: '%' })}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">of population</span>
+                    <span className="text-[10px] text-ink-3 font-medium">of population</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
+                  <p className="text-[10px] text-ink-3 pt-2 border-t border-line font-medium leading-relaxed">
                     {hasMetric(selectedLgaDisease.diabetesPrevalencePct) && hasMetric(PROVINCIAL_BENCHMARKS.diabetesPrevalencePct)
-                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.diabetesPrevalencePct.toFixed(1)}%</strong>.</>
+                      ? <>Mean of loaded LGAs: <strong className="text-ink">{PROVINCIAL_BENCHMARKS.diabetesPrevalencePct.toFixed(1)}%</strong>.</>
                       : 'No hardcoded provincial diabetes average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
@@ -1062,8 +1069,8 @@ export default function RegionalInequityDashboard() {
 
               {/* Disease charts */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 shadow-md">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Chronic Disease Prevalence Comparison (%)</h3>
+                <div className="bg-surface border border-line p-5 rounded-xl space-y-4 ">
+                  <h3 className="text-xs font-semibold text-ink-2  ">Chronic Disease Prevalence Comparison (%)</h3>
                   
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -1073,31 +1080,31 @@ export default function RegionalInequityDashboard() {
                       >
                         <defs>
                           <linearGradient id="dbGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0.4}/>
+                            <stop offset="5%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0.4}/>
                           </linearGradient>
                           <linearGradient id="copdGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#ec4899" stopOpacity={0.4}/>
+                            <stop offset="5%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0.4}/>
                           </linearGradient>
                           <linearGradient id="hypGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.4}/>
+                            <stop offset="5%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0.4}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
-                        <YAxis domain={[0, 35]} label={{ value: 'Prevalence %', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} stroke="#64748b" fontSize={9} width={45} tickLine={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                        <XAxis dataKey="lgaName" stroke="oklch(0.62 0.02 255)" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
+                        <YAxis domain={[0, 35]} label={{ value: 'Prevalence %', angle: -90, position: 'insideLeft', fill: 'oklch(0.62 0.02 255)', fontSize: 10, fontWeight: 'bold' }} stroke="oklch(0.62 0.02 255)" fontSize={9} width={45} tickLine={false} />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#090e21', borderColor: '#1e293b', borderRadius: '12px' }}
-                          labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                          contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', border: '1px solid oklch(0.28 0.02 255)', borderRadius: '8px' }} itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                          labelStyle={{ color: 'oklch(0.78 0.015 255)', fontWeight: 'bold' }}
                         />
                         <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
                         <Bar dataKey="diabetesPrevalencePct" name="Diabetes (%)" fill="url(#dbGrad)" radius={[4, 4, 0, 0]}>
                           {zoneChronic.map((entry, index) => (
                             <Cell 
                               key={`cell-db-${index}`} 
-                              fill={entry.lgaName === selectedLgaDetail ? '#f43f5e' : 'url(#dbGrad)'} 
+                              fill={entry.lgaName === selectedLgaDetail ? 'oklch(0.75 0.14 25)' : 'url(#dbGrad)'} 
                             />
                           ))}
                         </Bar>
@@ -1105,7 +1112,7 @@ export default function RegionalInequityDashboard() {
                           {zoneChronic.map((entry, index) => (
                             <Cell 
                               key={`cell-copd-${index}`} 
-                              fill={entry.lgaName === selectedLgaDetail ? '#ec4899' : 'url(#copdGrad)'} 
+                              fill={entry.lgaName === selectedLgaDetail ? 'oklch(0.75 0.14 25)' : 'url(#copdGrad)'} 
                             />
                           ))}
                         </Bar>
@@ -1113,7 +1120,7 @@ export default function RegionalInequityDashboard() {
                           {zoneChronic.map((entry, index) => (
                             <Cell 
                               key={`cell-hyp-${index}`} 
-                              fill={entry.lgaName === selectedLgaDetail ? '#f59e0b' : 'url(#hypGrad)'} 
+                              fill={entry.lgaName === selectedLgaDetail ? 'oklch(0.82 0.12 85)' : 'url(#hypGrad)'} 
                             />
                           ))}
                         </Bar>
@@ -1122,25 +1129,25 @@ export default function RegionalInequityDashboard() {
                   </div>
                 </div>
 
-                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 flex flex-col justify-between shadow-md">
+                <div className="bg-surface border border-line p-5 rounded-xl space-y-4 flex flex-col justify-between ">
                   <div className="space-y-1">
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Regional Disease Burden Analytics</h3>
-                    <p className="text-[10px] text-slate-500">Maternal, child and life outcomes index for selected LGA</p>
+                    <h3 className="text-xs font-semibold text-ink-2  ">Regional Disease Burden Analytics</h3>
+                    <p className="text-[10px] text-ink-3">Maternal, child and life outcomes index for selected LGA</p>
                   </div>
 
                   <div className="space-y-3.5 flex-1 justify-center flex flex-col">
-                    <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
-                      <span className="text-[9px] text-rose-400 font-mono font-bold uppercase tracking-wider block">Life Expectancy Inequity</span>
-                      <p className="text-xs text-white font-extrabold mt-1">LGA Life Expectancy: {selectedLgaDisease.lifeExpectancyYears > 0 ? `${selectedLgaDisease.lifeExpectancyYears.toFixed(1)} Years` : '—'}</p>
-                      <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
+                    <div className="p-3.5 bg-paper border border-line rounded-xl">
+                      <span className="text-[9px] text-crit font-mono font-semibold   block">Life Expectancy Inequity</span>
+                      <p className="text-xs text-ink font-semibold mt-1">LGA Life Expectancy: {selectedLgaDisease.lifeExpectancyYears > 0 ? `${selectedLgaDisease.lifeExpectancyYears.toFixed(1)} Years` : '—'}</p>
+                      <p className="text-[11px] text-ink-2 leading-relaxed mt-1">
                         {dynamicChronicDiseaseInsight.expectancy}
                       </p>
                     </div>
 
-                    <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
-                      <span className="text-[9px] text-amber-500 font-mono font-bold uppercase tracking-wider block">Chronic Risk Burden Multipliers</span>
-                      <p className="text-xs text-white font-extrabold mt-1">COPD: {selectedLgaDisease.copdPrevalencePct > 0 ? `${selectedLgaDisease.copdPrevalencePct.toFixed(1)}%` : '—'} | Diabetes: {selectedLgaDisease.diabetesPrevalencePct > 0 ? `${selectedLgaDisease.diabetesPrevalencePct.toFixed(1)}%` : '—'}</p>
-                      <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
+                    <div className="p-3.5 bg-paper border border-line rounded-xl">
+                      <span className="text-[9px] text-warn font-mono font-semibold   block">Chronic Risk Burden Multipliers</span>
+                      <p className="text-xs text-ink font-semibold mt-1">COPD: {selectedLgaDisease.copdPrevalencePct > 0 ? `${selectedLgaDisease.copdPrevalencePct.toFixed(1)}%` : '—'} | Diabetes: {selectedLgaDisease.diabetesPrevalencePct > 0 ? `${selectedLgaDisease.diabetesPrevalencePct.toFixed(1)}%` : '—'}</p>
+                      <p className="text-[11px] text-ink-2 leading-relaxed mt-1">
                         {dynamicChronicDiseaseInsight.burdenMultiplier}
                       </p>
                     </div>
@@ -1153,50 +1160,50 @@ export default function RegionalInequityDashboard() {
           {/* SUBTAB 3: ER Reliance Index */}
           {activeSubTab === 'ed-reliance' && (
             <div id="ri-ed-view" className="space-y-6 animate-fadeIn">
-              <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="ED_RELIANCE_METRICS" />
+              <DataTimestamp compact variant="light" metadata={metadata ?? undefined} arrayKey="ED_RELIANCE_METRICS" />
               {/* ED metrics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">ED Visits per 1,000 residents</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">ED Visits per 1,000 residents</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-rose-400">
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-crit">
                       {formatMetric(selectedLgaEd.totalEdVisitsPer1000, { digits: 1 })}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">visits</span>
+                    <span className="text-[10px] text-ink-3 font-medium">visits</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
+                  <p className="text-[10px] text-ink-3 pt-2 border-t border-line font-medium leading-relaxed">
                     {hasMetric(selectedLgaEd.totalEdVisitsPer1000) && hasMetric(PROVINCIAL_BENCHMARKS.totalEdVisitsPer1000)
-                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.totalEdVisitsPer1000.toFixed(1)} visits</strong>.</>
+                      ? <>Mean of loaded LGAs: <strong className="text-ink">{PROVINCIAL_BENCHMARKS.totalEdVisitsPer1000.toFixed(1)} visits</strong>.</>
                       : 'No hardcoded provincial ED visit average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
 
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Low Acuity CTAS 4/5 Rate</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Low Acuity CTAS 4/5 Rate</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-orange-400">
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-warn">
                       {formatMetric(selectedLgaEd.lowAcuityCtas45Pct, { digits: 1, suffix: '%' })}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">low acuity</span>
+                    <span className="text-[10px] text-ink-3 font-medium">low acuity</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
+                  <p className="text-[10px] text-ink-3 pt-2 border-t border-line font-medium leading-relaxed">
                     {hasMetric(selectedLgaEd.lowAcuityCtas45Pct) && hasMetric(PROVINCIAL_BENCHMARKS.lowAcuityCtas45Pct)
-                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.lowAcuityCtas45Pct.toFixed(1)}%</strong>.</>
+                      ? <>Mean of loaded LGAs: <strong className="text-ink">{PROVINCIAL_BENCHMARKS.lowAcuityCtas45Pct.toFixed(1)}%</strong>.</>
                       : 'No hardcoded provincial low-acuity average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
 
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Mental Health ED Visits</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Mental Health ED Visits</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-500">
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-warn">
                       {formatMetric(selectedLgaEd.moodAnxietyEdRatePer100k, { digits: 1 })}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">per 100k</span>
+                    <span className="text-[10px] text-ink-3 font-medium">per 100k</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-medium leading-relaxed">
+                  <p className="text-[10px] text-ink-3 pt-2 border-t border-line font-medium leading-relaxed">
                     {hasMetric(selectedLgaEd.moodAnxietyEdRatePer100k) && hasMetric(PROVINCIAL_BENCHMARKS.moodAnxietyEdRatePer100k)
-                      ? <>Mean of loaded LGAs: <strong className="text-slate-300">{PROVINCIAL_BENCHMARKS.moodAnxietyEdRatePer100k.toFixed(1)} per 100k</strong>.</>
+                      ? <>Mean of loaded LGAs: <strong className="text-ink">{PROVINCIAL_BENCHMARKS.moodAnxietyEdRatePer100k.toFixed(1)} per 100k</strong>.</>
                       : 'No hardcoded provincial mental-health ED average is shown; zero/missing values render as N/A.'}
                   </p>
                 </div>
@@ -1204,8 +1211,8 @@ export default function RegionalInequityDashboard() {
 
               {/* ED charts */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 shadow-md">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Total ED Visits vs. Low Acuity CTAS 4/5 (%)</h3>
+                <div className="bg-surface border border-line p-5 rounded-xl space-y-4 ">
+                  <h3 className="text-xs font-semibold text-ink-2  ">Total ED Visits vs. Low Acuity CTAS 4/5 (%)</h3>
                   
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -1215,49 +1222,49 @@ export default function RegionalInequityDashboard() {
                       >
                         <defs>
                           <linearGradient id="colorEd" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#ec4899" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#ec4899" stopOpacity={0.05}/>
+                            <stop offset="5%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0.05}/>
                           </linearGradient>
                           <linearGradient id="colorCtas" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0.05}/>
+                            <stop offset="5%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0.05}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
-                        <YAxis yAxisId="left" stroke="#ec4899" fontSize={9} tickLine={false} width={50} label={{ value: 'ED Visits per 1000', angle: -90, position: 'insideLeft', fill: '#ec4899', fontSize: 10, fontWeight: 'bold', offset: 0 }} />
-                        <YAxis yAxisId="right" orientation="right" stroke="#6366f1" fontSize={9} tickLine={false} width={50} label={{ value: 'CTAS 4/5 %', angle: 90, position: 'insideRight', fill: '#6366f1', fontSize: 10, fontWeight: 'bold', offset: 0 }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                        <XAxis dataKey="lgaName" stroke="oklch(0.62 0.02 255)" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
+                        <YAxis yAxisId="left" stroke="oklch(0.75 0.14 25)" fontSize={9} tickLine={false} width={50} label={{ value: 'ED Visits per 1000', angle: -90, position: 'insideLeft', fill: 'oklch(0.75 0.14 25)', fontSize: 10, fontWeight: 'bold', offset: 0 }} />
+                        <YAxis yAxisId="right" orientation="right" stroke="oklch(0.68 0.13 252)" fontSize={9} tickLine={false} width={50} label={{ value: 'CTAS 4/5 %', angle: 90, position: 'insideRight', fill: 'oklch(0.68 0.13 252)', fontSize: 10, fontWeight: 'bold', offset: 0 }} />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#090e21', borderColor: '#1e293b', borderRadius: '12px' }}
-                          labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                          contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', border: '1px solid oklch(0.28 0.02 255)', borderRadius: '8px' }} itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                          labelStyle={{ color: 'oklch(0.78 0.015 255)', fontWeight: 'bold' }}
                         />
                         <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                        <Area yAxisId="left" type="monotone" dataKey="totalEdVisitsPer1000" name="ED Visits (per 1,000)" stroke="#ec4899" strokeWidth={2} fillOpacity={1} fill="url(#colorEd)" />
-                        <Area yAxisId="right" type="monotone" dataKey="lowAcuityCtas45Pct" name="Low Acuity CTAS 4/5 (%)" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorCtas)" />
+                        <Area yAxisId="left" type="monotone" dataKey="totalEdVisitsPer1000" name="ED Visits (per 1,000)" stroke="oklch(0.75 0.14 25)" strokeWidth={2} fillOpacity={1} fill="url(#colorEd)" />
+                        <Area yAxisId="right" type="monotone" dataKey="lowAcuityCtas45Pct" name="Low Acuity CTAS 4/5 (%)" stroke="oklch(0.68 0.13 252)" strokeWidth={2} fillOpacity={1} fill="url(#colorCtas)" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
-                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 flex flex-col justify-between shadow-md">
+                <div className="bg-surface border border-line p-5 rounded-xl space-y-4 flex flex-col justify-between ">
                   <div className="space-y-1">
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Primary Care Substitution Signal</h3>
-                    <p className="text-[10px] text-slate-500">Assessing how missing clinics force residents into acute trauma centers</p>
+                    <h3 className="text-xs font-semibold text-ink-2  ">Primary Care Substitution Signal</h3>
+                    <p className="text-[10px] text-ink-3">Assessing how missing clinics force residents into acute trauma centers</p>
                   </div>
 
                   <div className="space-y-3.5 flex-1 justify-center flex flex-col">
-                    <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
-                      <span className="text-[9px] text-rose-400 font-mono font-bold uppercase block tracking-wider">Low-Acuity Congestion Impact</span>
-                      <p className="text-xs text-white font-extrabold mt-1">LGA Rate: {formatMetric(selectedLgaEd.lowAcuityCtas45Pct, { digits: 1, suffix: '% of ED presentations' })}</p>
-                      <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
+                    <div className="p-3.5 bg-paper border border-line rounded-xl">
+                      <span className="text-[9px] text-crit font-mono font-semibold  block ">Low-Acuity Congestion Impact</span>
+                      <p className="text-xs text-ink font-semibold mt-1">LGA Rate: {formatMetric(selectedLgaEd.lowAcuityCtas45Pct, { digits: 1, suffix: '% of ED presentations' })}</p>
+                      <p className="text-[11px] text-ink-2 leading-relaxed mt-1">
                         {dynamicEdRelianceInsight.reliance}
                       </p>
                     </div>
 
-                    <div className="p-3.5 bg-slate-950/40 border border-slate-850 rounded-xl">
-                      <span className="text-[9px] text-amber-500 font-mono font-bold uppercase block tracking-wider">After-Hours Care Access Deficit</span>
-                      <p className="text-xs text-white font-extrabold mt-1">After-Hours Percentage: {formatMetric(selectedLgaEd.afterHoursEdPct, { digits: 1, suffix: '%' })}</p>
-                      <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
+                    <div className="p-3.5 bg-paper border border-line rounded-xl">
+                      <span className="text-[9px] text-warn font-mono font-semibold  block ">After-Hours Care Access Deficit</span>
+                      <p className="text-xs text-ink font-semibold mt-1">After-Hours Percentage: {formatMetric(selectedLgaEd.afterHoursEdPct, { digits: 1, suffix: '%' })}</p>
+                      <p className="text-[11px] text-ink-2 leading-relaxed mt-1">
                         {dynamicEdRelianceInsight.substitution}
                       </p>
                     </div>
@@ -1271,65 +1278,65 @@ export default function RegionalInequityDashboard() {
           {activeSubTab === 'access-travel' && (
             <div id="ri-travel-view" className="space-y-6 animate-fadeIn">
               {!hasTravelAccessData ? (
-                <div className="bg-[#0b1226] border border-slate-800 p-6 rounded-2xl text-sm text-slate-400">
+                <div className="bg-surface border border-line p-6 rounded-xl text-sm text-ink-2">
                   Travel-for-care and service-access metrics are unavailable. No public LGA feed is wired; values are not estimated.
                 </div>
               ) : (
                 <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Clinics per 10k population</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Clinics per 10k population</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-rose-400">{selectedLgaAccess == null ? '—' : selectedLgaAccess.facilitiesPer10k}</span>
-                    <span className="text-[10px] text-slate-500 font-medium">clinics</span>
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-crit">{selectedLgaAccess == null ? '—' : selectedLgaAccess.facilitiesPer10k}</span>
+                    <span className="text-[10px] text-ink-3 font-medium">clinics</span>
                   </div>
                 </div>
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Distance to Nearest ED</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Distance to Nearest ED</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-orange-400">{selectedLgaAccess == null ? '—' : selectedLgaAccess.distanceToNearestEdKm}</span>
-                    <span className="text-[10px] text-slate-500 font-medium">km</span>
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-warn">{selectedLgaAccess == null ? '—' : selectedLgaAccess.distanceToNearestEdKm}</span>
+                    <span className="text-[10px] text-ink-3 font-medium">km</span>
                   </div>
                 </div>
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Distance to Nearest Imaging</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Distance to Nearest Imaging</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-indigo-400">{selectedLgaAccess == null ? '—' : selectedLgaAccess.distanceToNearestImagingKm}</span>
-                    <span className="text-[10px] text-slate-500 font-medium">km</span>
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-accent">{selectedLgaAccess == null ? '—' : selectedLgaAccess.distanceToNearestImagingKm}</span>
+                    <span className="text-[10px] text-ink-3 font-medium">km</span>
                   </div>
                 </div>
-                <div className="bg-[#0b1226] border border-slate-800 p-4 rounded-2xl space-y-1 shadow-md">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Accepting Roster practices</span>
+                <div className="bg-surface border border-line p-4 rounded-xl space-y-1 ">
+                  <span className="text-[10px] text-ink-2   font-semibold block">Accepting Roster practices</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-500">{selectedLgaAccess == null ? '—' : selectedLgaAccess.providersAcceptingPatients}</span>
-                    <span className="text-[10px] text-slate-500 font-medium">clinics</span>
+                    <span className="text-2xl font-mono tabular-nums font-semibold text-warn">{selectedLgaAccess == null ? '—' : selectedLgaAccess.providersAcceptingPatients}</span>
+                    <span className="text-[10px] text-ink-3 font-medium">clinics</span>
                   </div>
                 </div>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 shadow-md">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Travel & Care Outside LGA (%)</h3>
+                <div className="bg-surface border border-line p-5 rounded-xl space-y-4 ">
+                  <h3 className="text-xs font-semibold text-ink-2  ">Travel & Care Outside LGA (%)</h3>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={zoneTravel} margin={{ top: 10, right: 10, left: 25, bottom: 35 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="lgaName" stroke="#64748b" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
-                        <YAxis stroke="#64748b" fontSize={9} width={45} tickLine={false} />
-                        <Tooltip contentStyle={{ backgroundColor: '#090e21', borderColor: '#1e293b', borderRadius: '12px' }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                        <XAxis dataKey="lgaName" stroke="oklch(0.62 0.02 255)" fontSize={8} tickLine={false} angle={-45} textAnchor="end" height={80} interval={0} />
+                        <YAxis stroke="oklch(0.62 0.02 255)" fontSize={9} width={45} tickLine={false} />
+                        <Tooltip contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', border: '1px solid oklch(0.28 0.02 255)', borderRadius: '8px' }} itemStyle={{ color: 'oklch(0.96 0.008 255)' }} />
                         <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                        <Bar dataKey="careDeliveredOutsideLgaPct" name="Outward Care Travel (%)" fill="#ec4899" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="localBedLeakagePct" name="Inpatient Care Leakage (%)" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="careDeliveredOutsideLgaPct" name="Outward Care Travel (%)" fill="oklch(0.75 0.14 25)" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="localBedLeakagePct" name="Inpatient Care Leakage (%)" fill="oklch(0.68 0.13 252)" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-                <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl space-y-4 shadow-md">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Geographic Access</h3>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                <div className="bg-surface border border-line p-5 rounded-xl space-y-4 ">
+                  <h3 className="text-xs font-semibold text-ink-2  ">Geographic Access</h3>
+                  <p className="text-[11px] text-ink-2 leading-relaxed">
                     Avg travel: {selectedLgaTravel == null ? '—' : `${selectedLgaTravel.avgTravelDistanceKm} km`}
                     {selectedLgaTravel?.topDestinationFacility ? ` → ${selectedLgaTravel.topDestinationFacility}` : ''}
                   </p>
-                  <p className="text-xs text-white font-extrabold">
+                  <p className="text-xs text-ink font-semibold">
                     Bed Leakage: {selectedLgaTravel == null ? '—' : `${selectedLgaTravel.localBedLeakagePct}%`}
                   </p>
                 </div>
@@ -1342,22 +1349,22 @@ export default function RegionalInequityDashboard() {
           {/* SUBTAB 5: Compare LGAs (Radar & Side-by-side Matrix) */}
           {activeSubTab === 'compare-matrix' && (
             <div id="ri-compare-view" className="space-y-6 animate-fadeIn">
-              <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl shadow-md space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+              <div className="bg-surface border border-line p-5 rounded-xl  space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4">
                   <div>
-                    <h2 className="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                      <ArrowRightLeft className="w-4 h-4 text-blue-400" />
+                    <h2 className="text-sm font-semibold text-ink   flex items-center gap-2">
+                      <ArrowRightLeft className="w-4 h-4 text-accent" />
                       <span>Interactive Health Equity Comparison</span>
                     </h2>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Compare details of the selected LGA with another LGA or the Provincial Average</p>
+                    <p className="text-[10px] text-ink-3 mt-0.5">Compare details of the selected LGA with another LGA or the Provincial Average</p>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-400 font-black uppercase">Compare With:</span>
+                    <span className="text-[10px] text-ink-2 font-semibold ">Compare With:</span>
                     <select
                       value={comparisonTarget}
                       onChange={(e) => setComparisonTarget(e.target.value)}
-                      className="bg-slate-950 border border-slate-800 text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500 transition-colors font-semibold"
+                      className="bg-paper border border-line rounded-lg text-xs text-ink px-3 py-1.5 focus:border-accent focus:outline-none transition-colors font-medium"
                     >
                       <option value="Provincial Average">Provincial Average Baseline</option>
                       {COMMUNITY_NEED_PROFILES.map((lga) => (
@@ -1371,21 +1378,21 @@ export default function RegionalInequityDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Radar Comparative chart */}
-                  <div className="bg-slate-950/40 border border-slate-850 p-4 rounded-xl space-y-4 flex flex-col justify-between">
+                  <div className="bg-paper border border-line p-4 rounded-xl space-y-4 flex flex-col justify-between">
                     <div className="text-center">
-                      <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Health Equity Dimensions Profile</h3>
-                      <p className="text-[9px] text-slate-500 mt-0.5">Normalized score indices (0-100, where 100 represents the optimal equity benchmark)</p>
+                      <h3 className="text-xs font-semibold text-ink-2  ">Health Equity Dimensions Profile</h3>
+                      <p className="text-[9px] text-ink-3 mt-0.5">Normalized score indices (0-100, where 100 represents the optimal equity benchmark)</p>
                     </div>
 
                     <div className="h-64 flex items-center justify-center">
                       <ResponsiveContainer width="100%" height="100%">
                         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}>
-                          <PolarGrid stroke="#1e293b" />
-                          <PolarAngleAxis dataKey="subject" stroke="#64748b" fontSize={9} />
-                          <PolarRadiusAxis stroke="#334155" angle={30} domain={[0, 100]} fontSize={8} />
-                          <Radar name={selectedLgaDetail} dataKey={selectedLgaDetail} stroke="#ef4444" fill="#ef4444" fillOpacity={0.25} />
-                          <Radar name={comparisonTarget} dataKey={comparisonTarget} stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} />
-                          <Tooltip contentStyle={{ backgroundColor: '#090e21', borderColor: '#1e293b', borderRadius: '12px' }} />
+                          <PolarGrid stroke="oklch(0.28 0.02 255)" />
+                          <PolarAngleAxis dataKey="subject" stroke="oklch(0.62 0.02 255)" fontSize={9} />
+                          <PolarRadiusAxis stroke="oklch(0.28 0.02 255)" angle={30} domain={[0, 100]} fontSize={8} />
+                          <Radar name={selectedLgaDetail} dataKey={selectedLgaDetail} stroke="oklch(0.75 0.14 25)" fill="oklch(0.75 0.14 25)" fillOpacity={0.25} />
+                          <Radar name={comparisonTarget} dataKey={comparisonTarget} stroke="oklch(0.68 0.13 252)" fill="oklch(0.68 0.13 252)" fillOpacity={0.25} />
+                          <Tooltip contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', border: '1px solid oklch(0.28 0.02 255)', borderRadius: '8px' }} itemStyle={{ color: 'oklch(0.96 0.008 255)' }} />
                           <Legend wrapperStyle={{ fontSize: 9 }} />
                         </RadarChart>
                       </ResponsiveContainer>
@@ -1395,31 +1402,31 @@ export default function RegionalInequityDashboard() {
                   {/* Comparative Matrix table */}
                   <div className="space-y-3">
                     <div className="text-center sm:text-left">
-                      <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Detailed Variance Matrix</h3>
-                      <p className="text-[10px] text-slate-500 mt-0.5">Comparing core markers against target benchmarks</p>
+                      <h3 className="text-xs font-semibold text-ink-2  ">Detailed Variance Matrix</h3>
+                      <p className="text-[10px] text-ink-3 mt-0.5">Comparing core markers against target benchmarks</p>
                     </div>
 
-                    <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/50">
+                    <div className="overflow-x-auto rounded-xl border border-line bg-paper">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
-                          <tr className="bg-slate-900/80 border-b border-slate-800 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                          <tr className="bg-surface border-b border-line text-[10px] font-semibold text-ink-2  ">
                             <th className="p-3">Core Performance Metric</th>
-                            <th className="p-3 text-rose-400">{selectedLgaDetail.split(' ')[0]}...</th>
-                            <th className="p-3 text-blue-400">{comparisonTarget.split(' ')[0]}...</th>
+                            <th className="p-3 text-crit">{selectedLgaDetail.split(' ')[0]}...</th>
+                            <th className="p-3 text-accent">{comparisonTarget.split(' ')[0]}...</th>
                             <th className="p-3 text-center">Variance</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/60 font-medium">
                           {/* Row 1 */}
                           <tr>
-                            <td className="p-3 text-slate-300">Physicians per 100k</td>
-                            <td className="p-3 text-white font-mono">{selectedFullData.physiciansPer100k ? Number(selectedFullData.physiciansPer100k).toFixed(1) : '—'}</td>
-                            <td className="p-3 text-slate-400 font-mono">{comparisonFullData.physiciansPer100k ? Number(comparisonFullData.physiciansPer100k).toFixed(1) : '—'}</td>
+                            <td className="p-3 text-ink">Physicians per 100k</td>
+                            <td className="p-3 text-ink font-mono">{selectedFullData.physiciansPer100k ? Number(selectedFullData.physiciansPer100k).toFixed(1) : '—'}</td>
+                            <td className="p-3 text-ink-2 font-mono">{comparisonFullData.physiciansPer100k ? Number(comparisonFullData.physiciansPer100k).toFixed(1) : '—'}</td>
                             <td className="p-3 text-center font-mono">
                               {(() => {
                                 const diff = selectedFullData.physiciansPer100k - comparisonFullData.physiciansPer100k;
                                 return (
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${diff >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${diff >= 0 ? 'bg-ok-soft text-ok' : 'bg-crit-soft text-crit'}`}>
                                     {diff >= 0 ? '+' : ''}{diff.toFixed(1)}
                                   </span>
                                 );
@@ -1428,15 +1435,15 @@ export default function RegionalInequityDashboard() {
                           </tr>
                           {/* Row 2 */}
                           <tr>
-                            <td className="p-3 text-slate-300">Claims Outside LGA %</td>
-                            <td className="p-3 text-white font-mono">{selectedFullData.claimsOutsideLgaPct}%</td>
-                            <td className="p-3 text-slate-400 font-mono">{comparisonFullData.claimsOutsideLgaPct}%</td>
+                            <td className="p-3 text-ink">Claims Outside LGA %</td>
+                            <td className="p-3 text-ink font-mono">{selectedFullData.claimsOutsideLgaPct}%</td>
+                            <td className="p-3 text-ink-2 font-mono">{comparisonFullData.claimsOutsideLgaPct}%</td>
                             <td className="p-3 text-center font-mono">
                               {(() => {
                                 const diff = selectedFullData.claimsOutsideLgaPct - comparisonFullData.claimsOutsideLgaPct;
                                 // For outward claims, lower is better
                                 return (
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${diff <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${diff <= 0 ? 'bg-ok-soft text-ok' : 'bg-crit-soft text-crit'}`}>
                                     {diff >= 0 ? '+' : ''}{diff.toFixed(1)}%
                                   </span>
                                 );
@@ -1445,15 +1452,15 @@ export default function RegionalInequityDashboard() {
                           </tr>
                           {/* Row 3 */}
                           <tr>
-                            <td className="p-3 text-slate-300">Preventable ACSC admissions</td>
-                            <td className="p-3 text-white font-mono">{selectedFullData.acscRatePer100k}</td>
-                            <td className="p-3 text-slate-400 font-mono">{comparisonFullData.acscRatePer100k}</td>
+                            <td className="p-3 text-ink">Preventable ACSC admissions</td>
+                            <td className="p-3 text-ink font-mono">{selectedFullData.acscRatePer100k}</td>
+                            <td className="p-3 text-ink-2 font-mono">{comparisonFullData.acscRatePer100k}</td>
                             <td className="p-3 text-center font-mono">
                               {(() => {
                                 const diff = selectedFullData.acscRatePer100k - comparisonFullData.acscRatePer100k;
                                 // For admissions, lower is better
                                 return (
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${diff <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${diff <= 0 ? 'bg-ok-soft text-ok' : 'bg-crit-soft text-crit'}`}>
                                     {diff >= 0 ? '+' : ''}{diff}
                                   </span>
                                 );
@@ -1462,14 +1469,14 @@ export default function RegionalInequityDashboard() {
                           </tr>
                           {/* Row 4 */}
                           <tr>
-                            <td className="p-3 text-slate-300">Life Expectancy (years)</td>
-                            <td className="p-3 text-white font-mono">{selectedFullData.lifeExpectancyYears}</td>
-                            <td className="p-3 text-slate-400 font-mono">{comparisonFullData.lifeExpectancyYears}</td>
+                            <td className="p-3 text-ink">Life Expectancy (years)</td>
+                            <td className="p-3 text-ink font-mono">{selectedFullData.lifeExpectancyYears}</td>
+                            <td className="p-3 text-ink-2 font-mono">{comparisonFullData.lifeExpectancyYears}</td>
                             <td className="p-3 text-center font-mono">
                               {(() => {
                                 const diff = selectedFullData.lifeExpectancyYears - comparisonFullData.lifeExpectancyYears;
                                 return (
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${diff >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${diff >= 0 ? 'bg-ok-soft text-ok' : 'bg-crit-soft text-crit'}`}>
                                     {diff >= 0 ? '+' : ''}{diff.toFixed(1)}
                                   </span>
                                 );
@@ -1478,15 +1485,15 @@ export default function RegionalInequityDashboard() {
                           </tr>
                           {/* Row 5 */}
                           <tr>
-                            <td className="p-3 text-slate-300">Total ED Visits / 1,000</td>
-                            <td className="p-3 text-white font-mono">{selectedFullData.totalEdVisitsPer1000}</td>
-                            <td className="p-3 text-slate-400 font-mono">{comparisonFullData.totalEdVisitsPer1000}</td>
+                            <td className="p-3 text-ink">Total ED Visits / 1,000</td>
+                            <td className="p-3 text-ink font-mono">{selectedFullData.totalEdVisitsPer1000}</td>
+                            <td className="p-3 text-ink-2 font-mono">{comparisonFullData.totalEdVisitsPer1000}</td>
                             <td className="p-3 text-center font-mono">
                               {(() => {
                                 const diff = selectedFullData.totalEdVisitsPer1000 - comparisonFullData.totalEdVisitsPer1000;
                                 // For ED visits, lower is better
                                 return (
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${diff <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${diff <= 0 ? 'bg-ok-soft text-ok' : 'bg-crit-soft text-crit'}`}>
                                     {diff >= 0 ? '+' : ''}{diff}
                                   </span>
                                 );
@@ -1495,18 +1502,18 @@ export default function RegionalInequityDashboard() {
                           </tr>
                           {/* Row 6 */}
                           <tr>
-                            <td className="p-3 text-slate-300">Providers accepting rosters</td>
-                            <td className="p-3 text-white font-mono">{(selectedFullData as { providersAcceptingPatients?: number | null }).providersAcceptingPatients == null ? '—' : (selectedFullData as { providersAcceptingPatients: number }).providersAcceptingPatients}</td>
-                            <td className="p-3 text-slate-400 font-mono">{(comparisonFullData as { providersAcceptingPatients?: number | null }).providersAcceptingPatients == null ? '—' : (comparisonFullData as { providersAcceptingPatients: number }).providersAcceptingPatients}</td>
+                            <td className="p-3 text-ink">Providers accepting rosters</td>
+                            <td className="p-3 text-ink font-mono">{(selectedFullData as { providersAcceptingPatients?: number | null }).providersAcceptingPatients == null ? '—' : (selectedFullData as { providersAcceptingPatients: number }).providersAcceptingPatients}</td>
+                            <td className="p-3 text-ink-2 font-mono">{(comparisonFullData as { providersAcceptingPatients?: number | null }).providersAcceptingPatients == null ? '—' : (comparisonFullData as { providersAcceptingPatients: number }).providersAcceptingPatients}</td>
                             <td className="p-3 text-center font-mono">
                               {SERVICE_ACCESS_METRICS.length === 0 ? (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 text-slate-500 border border-slate-800">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-surface text-ink-3 border border-line">
                                   —
                                 </span>
                               ) : (() => {
                                 const diff = selectedFullData.providersAcceptingPatients - comparisonFullData.providersAcceptingPatients;
                                 return (
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${diff >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${diff >= 0 ? 'bg-ok-soft text-ok' : 'bg-crit-soft text-crit'}`}>
                                     {diff >= 0 ? '+' : ''}{diff}
                                   </span>
                                 );
@@ -1525,120 +1532,120 @@ export default function RegionalInequityDashboard() {
           {/* SUBTAB 6: All-Data Spreadsheet Explorer */}
           {activeSubTab === 'data-explorer' && (
             <div id="ri-explorer-view" className="space-y-6 animate-fadeIn">
-              <div className="bg-[#0b1226] border border-slate-800 p-5 rounded-2xl shadow-md space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+              <div className="bg-surface border border-line p-5 rounded-xl  space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4">
                   <div>
-                    <h2 className="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                      <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                    <h2 className="text-sm font-semibold text-ink   flex items-center gap-2">
+                      <FileSpreadsheet className="w-4 h-4 text-ok" />
                       <span>Full Health Equity Diagnostic Matrix</span>
                     </h2>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Surfacing all available primary, secondary, and tertiary health disparity indicators</p>
+                    <p className="text-[10px] text-ink-3 mt-0.5">Surfacing all available primary, secondary, and tertiary health disparity indicators</p>
                   </div>
 
                   {/* Filter Subtabs for the explorer */}
-                  <div className="flex flex-wrap gap-1 bg-slate-950 p-1 rounded-lg border border-slate-850">
+                  <div className="inline-flex flex-wrap gap-1 rounded-lg border border-line bg-paper p-0.5">
                     <button
                       onClick={() => setExplorerCategory('all')}
-                      className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer ${explorerCategory === 'all' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-2 py-1 rounded text-[9px] font-semibold transition-colors cursor-pointer ${explorerCategory === 'all' ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink'}`}
                     >
                       All Columns
                     </button>
                     <button
                       onClick={() => setExplorerCategory('socioeconomics')}
-                      className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer ${explorerCategory === 'socioeconomics' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-2 py-1 rounded text-[9px] font-semibold transition-colors cursor-pointer ${explorerCategory === 'socioeconomics' ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink'}`}
                     >
                       Socioeconomics
                     </button>
                     <button
                       onClick={() => setExplorerCategory('chronic')}
-                      className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer ${explorerCategory === 'chronic' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-2 py-1 rounded text-[9px] font-semibold transition-colors cursor-pointer ${explorerCategory === 'chronic' ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink'}`}
                     >
                       Chronic Diseases
                     </button>
                     <button
                       onClick={() => setExplorerCategory('ed')}
-                      className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer ${explorerCategory === 'ed' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-2 py-1 rounded text-[9px] font-semibold transition-colors cursor-pointer ${explorerCategory === 'ed' ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink'}`}
                     >
                       ER Reliance
                     </button>
                     <button
                       onClick={() => setExplorerCategory('access')}
-                      className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer ${explorerCategory === 'access' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-2 py-1 rounded text-[9px] font-semibold transition-colors cursor-pointer ${explorerCategory === 'access' ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink'}`}
                     >
                       Access & Travel
                     </button>
                   </div>
                 </div>
 
-                <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/40">
+                <div className="overflow-x-auto rounded-xl border border-line bg-paper">
                   <table className="w-full text-left border-collapse text-xs whitespace-nowrap">
                     <thead>
-                      <tr className="bg-slate-900 border-b border-slate-800 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                        <th className="p-3 sticky left-0 bg-slate-900 cursor-pointer hover:bg-slate-850 transition-colors" onClick={() => handleSort('lgaName')}>
+                      <tr className="bg-surface border-b border-line text-[9px] font-semibold text-ink-2  ">
+                        <th className="p-3 sticky left-0 bg-surface cursor-pointer hover:bg-paper transition-colors" onClick={() => handleSort('lgaName')}>
                           LGA Name {sortKey === 'lgaName' ? (sortAsc ? '▲' : '▼') : ''}
                         </th>
                         
                         {(explorerCategory === 'all' || explorerCategory === 'socioeconomics') && (
                           <>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors" onClick={() => handleSort('zone')}>Zone {sortKey === 'zone' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors" onClick={() => handleSort('type')}>Type {sortKey === 'type' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-center" onClick={() => handleSort('deprivationIndex')}>Deprivation {sortKey === 'deprivationIndex' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('medianHouseholdIncome')}>Median Income {sortKey === 'medianHouseholdIncome' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('highSchoolGradPct')}>HS Grad % {sortKey === 'highSchoolGradPct' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors" onClick={() => handleSort('zone')}>Zone {sortKey === 'zone' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors" onClick={() => handleSort('type')}>Type {sortKey === 'type' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-center" onClick={() => handleSort('deprivationIndex')}>Deprivation {sortKey === 'deprivationIndex' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('medianHouseholdIncome')}>Median Income {sortKey === 'medianHouseholdIncome' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('highSchoolGradPct')}>HS Grad % {sortKey === 'highSchoolGradPct' ? (sortAsc ? '▲' : '▼') : ''}</th>
                           </>
                         )}
 
                         {(explorerCategory === 'all' || explorerCategory === 'chronic') && (
                           <>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('lifeExpectancyYears')}>Life Exp. {sortKey === 'lifeExpectancyYears' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('infantMortalityPer1000')}>Infant Mort. {sortKey === 'infantMortalityPer1000' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('diabetesPrevalencePct')}>Diabetes % {sortKey === 'diabetesPrevalencePct' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('copdPrevalencePct')}>COPD % {sortKey === 'copdPrevalencePct' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('hypertensionPrevalencePct')}>Hypertens. % {sortKey === 'hypertensionPrevalencePct' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('lifeExpectancyYears')}>Life Exp. {sortKey === 'lifeExpectancyYears' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('infantMortalityPer1000')}>Infant Mort. {sortKey === 'infantMortalityPer1000' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('diabetesPrevalencePct')}>Diabetes % {sortKey === 'diabetesPrevalencePct' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('copdPrevalencePct')}>COPD % {sortKey === 'copdPrevalencePct' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('hypertensionPrevalencePct')}>Hypertens. % {sortKey === 'hypertensionPrevalencePct' ? (sortAsc ? '▲' : '▼') : ''}</th>
                           </>
                         )}
 
                         {(explorerCategory === 'all' || explorerCategory === 'ed') && (
                           <>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('totalEdVisitsPer1000')}>ED Visits/1k {sortKey === 'totalEdVisitsPer1000' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('lowAcuityCtas45Pct')}>CTAS 4/5 % {sortKey === 'lowAcuityCtas45Pct' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('afterHoursEdPct')}>After-Hrs % {sortKey === 'afterHoursEdPct' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('moodAnxietyEdRatePer100k')}>Mental Health ED {sortKey === 'moodAnxietyEdRatePer100k' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('totalEdVisitsPer1000')}>ED Visits/1k {sortKey === 'totalEdVisitsPer1000' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('lowAcuityCtas45Pct')}>CTAS 4/5 % {sortKey === 'lowAcuityCtas45Pct' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('afterHoursEdPct')}>After-Hrs % {sortKey === 'afterHoursEdPct' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('moodAnxietyEdRatePer100k')}>Mental Health ED {sortKey === 'moodAnxietyEdRatePer100k' ? (sortAsc ? '▲' : '▼') : ''}</th>
                           </>
                         )}
 
                         {(explorerCategory === 'all' || explorerCategory === 'access') && (
                           <>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('physiciansPer100k')}>Physicians/100k {sortKey === 'physiciansPer100k' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('claimsOutsideLgaPct')}>Outward Care % {sortKey === 'claimsOutsideLgaPct' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('acscRatePer100k')}>ACSC Rate/100k {sortKey === 'acscRatePer100k' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('facilitiesPer10k')}>Clinics/10k {sortKey === 'facilitiesPer10k' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('distanceToNearestEdKm')}>ED Dist. (km) {sortKey === 'distanceToNearestEdKm' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('distanceToNearestImagingKm')}>Imaging Dist. (km) {sortKey === 'distanceToNearestImagingKm' ? (sortAsc ? '▲' : '▼') : ''}</th>
-                            <th className="p-3 cursor-pointer hover:bg-slate-850 transition-colors text-right" onClick={() => handleSort('providersAcceptingPatients')}>Accepting Practices {sortKey === 'providersAcceptingPatients' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('physiciansPer100k')}>Physicians/100k {sortKey === 'physiciansPer100k' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('claimsOutsideLgaPct')}>Outward Care % {sortKey === 'claimsOutsideLgaPct' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('acscRatePer100k')}>ACSC Rate/100k {sortKey === 'acscRatePer100k' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('facilitiesPer10k')}>Clinics/10k {sortKey === 'facilitiesPer10k' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('distanceToNearestEdKm')}>ED Dist. (km) {sortKey === 'distanceToNearestEdKm' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('distanceToNearestImagingKm')}>Imaging Dist. (km) {sortKey === 'distanceToNearestImagingKm' ? (sortAsc ? '▲' : '▼') : ''}</th>
+                            <th className="p-3 cursor-pointer hover:bg-paper transition-colors text-right" onClick={() => handleSort('providersAcceptingPatients')}>Accepting Practices {sortKey === 'providersAcceptingPatients' ? (sortAsc ? '▲' : '▼') : ''}</th>
                           </>
                         )}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/50 font-mono font-medium text-slate-300">
+                    <tbody className="divide-y divide-line font-mono font-medium text-ink">
                       {sortedExplorerData.map((lga, idx) => (
-                        <tr key={idx} className={`hover:bg-slate-900/40 transition-colors ${selectedLgaDetail === lga.lgaName ? 'bg-rose-500/5 border-l-2 border-l-rose-500' : ''}`}>
-                          <td className="p-3 sticky left-0 bg-[#090e21] font-sans font-bold text-white max-w-[180px] truncate">
+                        <tr key={idx} className={`hover:bg-paper transition-colors ${selectedLgaDetail === lga.lgaName ? 'bg-accent-soft border-l-2 border-l-accent' : ''}`}>
+                          <td className="p-3 sticky left-0 bg-surface font-sans font-semibold text-ink max-w-[180px] truncate">
                             {lga.lgaName}
                           </td>
                           
                           {(explorerCategory === 'all' || explorerCategory === 'socioeconomics') && (
                             <>
-                              <td className="p-3 font-sans text-slate-400">{lga.zone}</td>
-                              <td className="p-3 font-sans text-slate-400">{lga.type}</td>
+                              <td className="p-3 font-sans text-ink-2">{lga.zone}</td>
+                              <td className="p-3 font-sans text-ink-2">{lga.type}</td>
                               <td className="p-3 text-center">
                                 {lga.deprivationIndex ? (
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lga.deprivationIndex >= 4 ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${lga.deprivationIndex >= 4 ? 'bg-crit-soft text-crit' : 'bg-ok-soft text-ok'}`}>
                                     {lga.deprivationIndex} / 5
                                   </span>
                                 ) : '—'}
                               </td>
-                              <td className="p-3 text-right text-slate-100">
+                              <td className="p-3 text-right text-ink">
                                 {lga.medianHouseholdIncome ? `$${lga.medianHouseholdIncome.toLocaleString()}` : '—'}
                               </td>
                               <td className="p-3 text-right">
@@ -1649,10 +1656,10 @@ export default function RegionalInequityDashboard() {
 
                           {(explorerCategory === 'all' || explorerCategory === 'chronic') && (
                             <>
-                              <td className="p-3 text-right text-slate-100">
+                              <td className="p-3 text-right text-ink">
                                 {lga.lifeExpectancyYears ? `${lga.lifeExpectancyYears} yrs` : '—'}
                               </td>
-                              <td className="p-3 text-right text-orange-400">
+                              <td className="p-3 text-right text-warn">
                                 {lga.infantMortalityPer1000 ? lga.infantMortalityPer1000 : '—'}
                               </td>
                               <td className="p-3 text-right">
@@ -1669,16 +1676,16 @@ export default function RegionalInequityDashboard() {
 
                           {(explorerCategory === 'all' || explorerCategory === 'ed') && (
                             <>
-                              <td className="p-3 text-right text-slate-100">
+                              <td className="p-3 text-right text-ink">
                                 {lga.totalEdVisitsPer1000 ? lga.totalEdVisitsPer1000 : '—'}
                               </td>
-                              <td className="p-3 text-right text-orange-400">
+                              <td className="p-3 text-right text-warn">
                                 {lga.lowAcuityCtas45Pct ? `${lga.lowAcuityCtas45Pct}%` : '—'}
                               </td>
                               <td className="p-3 text-right">
                                 {lga.afterHoursEdPct ? `${lga.afterHoursEdPct}%` : '—'}
                               </td>
-                              <td className="p-3 text-right text-slate-100">
+                              <td className="p-3 text-right text-ink">
                                 {lga.moodAnxietyEdRatePer100k ? lga.moodAnxietyEdRatePer100k : '—'}
                               </td>
                             </>
@@ -1686,25 +1693,25 @@ export default function RegionalInequityDashboard() {
 
                           {(explorerCategory === 'all' || explorerCategory === 'access') && (
                             <>
-                              <td className="p-3 text-right text-slate-100">
+                              <td className="p-3 text-right text-ink">
                                 {lga.physiciansPer100k ? Number(lga.physiciansPer100k).toFixed(1) : '—'}
                               </td>
                               <td className="p-3 text-right">
                                 {lga.claimsOutsideLgaPct ? `${lga.claimsOutsideLgaPct}%` : '—'}
                               </td>
-                              <td className="p-3 text-right text-slate-100">
+                              <td className="p-3 text-right text-ink">
                                 {lga.acscRatePer100k ? lga.acscRatePer100k : '—'}
                               </td>
-                              <td className="p-3 text-right text-slate-400">
+                              <td className="p-3 text-right text-ink-2">
                                 {(lga as { facilitiesPer10k?: number | null }).facilitiesPer10k == null ? '—' : (lga as { facilitiesPer10k: number }).facilitiesPer10k}
                               </td>
-                              <td className="p-3 text-right text-orange-400">
+                              <td className="p-3 text-right text-warn">
                                 {(lga as { distanceToNearestEdKm?: number | null }).distanceToNearestEdKm == null ? '—' : `${(lga as { distanceToNearestEdKm: number }).distanceToNearestEdKm} km`}
                               </td>
-                              <td className="p-3 text-right text-orange-400">
+                              <td className="p-3 text-right text-warn">
                                 {(lga as { distanceToNearestImagingKm?: number | null }).distanceToNearestImagingKm == null ? '—' : `${(lga as { distanceToNearestImagingKm: number }).distanceToNearestImagingKm} km`}
                               </td>
-                              <td className="p-3 text-right text-slate-100">
+                              <td className="p-3 text-right text-ink">
                                 {(lga as { providersAcceptingPatients?: number | null }).providersAcceptingPatients == null ? '—' : (lga as { providersAcceptingPatients: number }).providersAcceptingPatients}
                               </td>
                             </>
@@ -1715,8 +1722,8 @@ export default function RegionalInequityDashboard() {
                   </table>
                 </div>
 
-                <div className="text-[10px] text-slate-500 font-sans flex items-center gap-1.5 justify-center sm:justify-start">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                <div className="text-[10px] text-ink-3 font-sans flex items-center gap-1.5 justify-center sm:justify-start">
+                  <CheckCircle className="w-3.5 h-3.5 text-ok" />
                   <span>Interactive grid supports sorting by clicking any column header. Highlighted row indicates the selected focus LGA.</span>
                 </div>
               </div>

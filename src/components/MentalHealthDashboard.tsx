@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Brain,
@@ -76,6 +76,17 @@ function isSubstanceHarmsComplete(rows: SubstanceHarmTrend[]): boolean {
       typeof r.albertaRatePer100k === 'number',
   );
 }
+
+const CHART_GRID = 'oklch(0.28 0.02 255)';
+const CHART_TICK = 'oklch(0.62 0.02 255)';
+
+const tooltipStyle = {
+  backgroundColor: 'oklch(0.2 0.022 255)',
+  border: '1px solid oklch(0.28 0.02 255)',
+  borderRadius: '8px',
+};
+const tooltipItemStyle = { color: 'oklch(0.96 0.008 255)' };
+const tooltipLabelStyle = { color: 'oklch(0.78 0.015 255)' };
 
 export default function MentalHealthDashboard() {
   const [selectedHarmKpi, setSelectedHarmKpi] = useState<
@@ -161,33 +172,39 @@ export default function MentalHealthDashboard() {
     switch (selectedHarmKpi) {
       case 'apparentDeaths':
         return {
-          label: 'Alberta Apparent Toxicity Deaths',
+          label: 'Alberta apparent toxicity deaths',
           description:
             'Annual apparent toxicity deaths across Alberta from the Alberta Substance Use Surveillance System (complete All Substances rows only).',
-          colorClass: 'text-rose-500',
-          strokeColor: '#e11d48',
+          valueClass: 'text-crit',
+          activeBorderClass: 'border-crit',
+          activeBgClass: 'bg-crit-soft',
+          strokeColor: 'oklch(0.75 0.14 25)',
           gradientId: 'colorDeathsTrend',
           unit: '',
           icon: AlertTriangle,
         };
       case 'emsOverdoseResponses':
         return {
-          label: 'EMS Suspected Overdose Dispatches',
+          label: 'EMS suspected overdose dispatches',
           description:
             'Annual EMS dispatches for suspected opioid and substance overdoses across Alberta (complete source-backed rows only).',
-          colorClass: 'text-violet-400',
-          strokeColor: '#8b5cf6',
+          valueClass: 'text-warn',
+          activeBorderClass: 'border-warn',
+          activeBgClass: 'bg-warn-soft',
+          strokeColor: 'oklch(0.82 0.12 85)',
           gradientId: 'colorEmsTrend',
           unit: '',
           icon: PhoneCall,
         };
       case 'hospitalizations':
         return {
-          label: 'Poisoning Hospital Admissions',
+          label: 'Poisoning hospital admissions',
           description:
             'Toxic substance poisonings and accidental overdoses requiring inpatient hospitalization (complete source-backed rows only).',
-          colorClass: 'text-emerald-400',
-          strokeColor: '#10b981',
+          valueClass: 'text-accent',
+          activeBorderClass: 'border-accent',
+          activeBgClass: 'bg-accent-soft',
+          strokeColor: 'oklch(0.68 0.13 252)',
           gradientId: 'colorHospTrend',
           unit: '',
           icon: Activity,
@@ -271,31 +288,51 @@ export default function MentalHealthDashboard() {
 
   const getBedStatusStyle = (status: string) => {
     const lower = status.toLowerCase();
-    if (lower === 'available') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-    if (lower === 'almost full') return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-    if (lower === 'full') return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-    if (lower.includes('planned')) return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-    if (lower.includes('operational')) return 'bg-slate-700/30 text-slate-300 border-slate-600/30';
-    return 'bg-slate-900 text-slate-400 border-slate-800';
+    if (lower === 'available') return 'bg-ok-soft text-ok border-ok';
+    if (lower === 'almost full') return 'bg-warn-soft text-warn border-warn';
+    if (lower === 'full') return 'bg-crit-soft text-crit border-crit';
+    if (lower.includes('planned')) return 'bg-neutral-chip text-ink-2 border-line-2';
+    if (lower.includes('operational')) return 'bg-neutral-chip text-ink-2 border-line-2';
+    return 'bg-neutral-chip text-ink-2 border-line-2';
   };
+
+  const tabs: { key: MentalHealthSubTab; label: string; icon: React.ElementType }[] = [
+    { key: 'substance-harms', label: 'Substance harms', icon: TrendingUp },
+    { key: 'addiction-beds', label: 'Addiction beds', icon: Layers },
+    { key: 'mh-readmissions', label: 'MH readmissions', icon: Activity },
+    { key: 'helplines', label: 'Crisis helplines', icon: Clock },
+  ];
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
-        Loading mental health data...
+      <div className="space-y-4">
+        <div className="animate-pulse rounded-xl border border-line bg-surface p-4">
+          <div className="h-4 w-1/3 rounded bg-neutral-chip" />
+          <div className="mt-2 h-3 w-2/3 rounded bg-neutral-chip" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-line bg-surface p-4">
+              <div className="h-3 w-1/2 rounded bg-neutral-chip" />
+              <div className="mt-2 h-8 w-1/3 rounded bg-neutral-chip" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
+
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
-        <AlertTriangle className="w-6 h-6 text-amber-400" />
+      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-line bg-surface px-4 py-12 text-sm text-ink-2">
+        <AlertTriangle className="h-6 w-6 text-warn" />
         <span>Failed to load mental health data: {error}</span>
         <button
           onClick={refresh}
-          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+          disabled={isLoading}
+          className="flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-paper disabled:opacity-50"
         >
-          <RefreshCw className="w-3.5 h-3.5" />
+          <RefreshCw className="h-3.5 w-3.5" />
           Retry
         </button>
       </div>
@@ -306,69 +343,57 @@ export default function MentalHealthDashboard() {
     <div className="space-y-6">
       <DashboardHeader
         icon={Brain}
-        title="Mental Health & Addictions"
+        title="Mental health & addictions"
         description="Track substance use harms, treatment bed capacity, CIHI MH readmissions, and helpline directories."
-        metadata={metadata}
+        metadata={metadata ?? undefined}
         arrayKey={substanceHarmsComplete ? 'SUBSTANCE_HARM_TRENDS' : 'ADDICTION_BED_CAPACITIES'}
-      />
+        variant="light"
+      >
+        <button
+          onClick={() => !isLoading && refresh()}
+          disabled={isLoading}
+          className="self-start md:self-auto rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-paper disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {isLoading ? 'Refreshing…' : 'Refresh'}
+        </button>
+      </DashboardHeader>
 
-      <div className="sticky top-16 z-20 bg-[#070b19]/95 backdrop-blur-sm border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar -mx-1 px-1">
-        <button
-          onClick={() => setActiveSubTab('substance-harms')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            effectiveSubTab === 'substance-harms'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <TrendingUp className="w-4 h-4" />
-          <span>Substance Harms</span>
-        </button>
-        <button
-          onClick={() => setActiveSubTab('addiction-beds')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            effectiveSubTab === 'addiction-beds'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <Layers className="w-4 h-4" />
-          <span>Addiction Beds</span>
-        </button>
-        <button
-          onClick={() => setActiveSubTab('mh-readmissions')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            effectiveSubTab === 'mh-readmissions'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <Activity className="w-4 h-4" />
-          <span>MH Readmissions</span>
-        </button>
-        <button
-          onClick={() => setActiveSubTab('helplines')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            effectiveSubTab === 'helplines'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
-        >
-          <Clock className="w-4 h-4" />
-          <span>Crisis Helplines</span>
-        </button>
+      <div className="sticky top-16 z-20 bg-paper border-b border-line flex items-center overflow-x-auto gap-2 pb-px no-scrollbar -mx-1 px-1">
+        {tabs.map((t) => {
+          const active = effectiveSubTab === t.key;
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.key}
+              onClick={() => setActiveSubTab(t.key)}
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-all shrink-0 cursor-pointer ${
+                active
+                  ? 'border-accent text-accent'
+                  : 'border-transparent text-ink-3 hover:text-ink'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              <span>{t.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* SUBTAB: Substance Harms */}
       {effectiveSubTab === 'substance-harms' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata} arrayKey="SUBSTANCE_HARM_TRENDS" />
+          <DataTimestamp
+            compact
+            variant="light"
+            metadata={metadata ?? undefined}
+            arrayKey="SUBSTANCE_HARM_TRENDS"
+          />
 
           {!substanceHarmsComplete ? (
-            <div className="bg-slate-900 border border-slate-800 p-8 rounded-xl text-center space-y-3">
-              <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto" />
-              <h3 className="text-sm font-bold text-white">Substance harm trends unavailable</h3>
-              <p className="text-xs text-slate-400 max-w-xl mx-auto leading-relaxed">
+            <div className="rounded-xl border border-line bg-surface p-8 text-center space-y-3">
+              <AlertTriangle className="h-8 w-8 text-warn mx-auto" />
+              <h3 className="text-sm font-semibold text-ink">Substance harm trends unavailable</h3>
+              <p className="text-xs text-ink-2 max-w-xl mx-auto leading-relaxed">
                 Data unavailable until the Alberta Substance Use Surveillance pipeline produces complete
                 source-backed rows (apparent deaths, EMS overdose responses, hospitalizations, and Alberta
                 rate for All Substances). Partial single-substance subsets are not shown as province-wide
@@ -390,34 +415,34 @@ export default function MentalHealthDashboard() {
                       setSelectedHarmKpi(selectedHarmKpi === 'apparentDeaths' ? null : 'apparentDeaths');
                     }
                   }}
-                  className={`bg-slate-900 border p-4 rounded-xl space-y-1 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                  className={`rounded-xl border p-4 space-y-1 relative overflow-hidden group cursor-pointer transition-all select-none ${
                     selectedHarmKpi === 'apparentDeaths'
-                      ? 'border-rose-500/50 ring-1 ring-rose-500/30 shadow-rose-500/5'
-                      : 'border-slate-800 hover:border-rose-500/30'
+                      ? 'border-crit bg-crit-soft'
+                      : 'border-line bg-surface hover:bg-paper hover:border-line-2'
                   }`}
                 >
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">
-                    Alberta Apparent Toxicity Deaths
+                  <span className="text-[10px] font-medium text-ink-3 block">
+                    Alberta apparent toxicity deaths
                     {substanceHarmStats.latest?.year ? ` (${substanceHarmStats.latest.year})` : ''}
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-rose-500">
+                    <span className="text-3xl font-semibold font-mono tabular-nums text-crit">
                       {substanceHarmStats.latest?.apparentDeaths != null
                         ? substanceHarmStats.latest.apparentDeaths.toLocaleString()
                         : 'N/A'}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">deaths</span>
+                    <span className="text-xs text-ink-2 font-mono">deaths</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
+                  <p className="text-[10px] text-ink-2 pt-1 border-t border-line">
                     {substanceHarmStats.peak &&
                     substanceHarmStats.latest &&
                     substanceHarmStats.peak.year !== substanceHarmStats.latest.year
                       ? `Period peak year in source series: ${substanceHarmStats.peak.year} (${substanceHarmStats.peak.apparentDeaths.toLocaleString()} deaths).`
                       : 'Latest complete annual apparent toxicity deaths (All Substances).'}
                   </p>
-                  <span className="text-[9px] text-slate-500 group-hover:text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
-                    <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
-                    {selectedHarmKpi === 'apparentDeaths' ? 'Active: Hide Trend' : 'Click to View Trend'}
+                  <span className="text-[9px] text-ink-3 group-hover:text-crit font-medium flex items-center gap-1 mt-1.5 transition-colors">
+                    <BarChart2 className="h-3.5 w-3.5" />
+                    {selectedHarmKpi === 'apparentDeaths' ? 'Active: hide trend' : 'Click to view trend'}
                   </span>
                 </div>
 
@@ -437,32 +462,32 @@ export default function MentalHealthDashboard() {
                       );
                     }
                   }}
-                  className={`bg-slate-900 border p-4 rounded-xl space-y-1 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                  className={`rounded-xl border p-4 space-y-1 relative overflow-hidden group cursor-pointer transition-all select-none ${
                     selectedHarmKpi === 'emsOverdoseResponses'
-                      ? 'border-violet-500/50 ring-1 ring-violet-500/30 shadow-violet-500/5'
-                      : 'border-slate-800 hover:border-violet-500/30'
+                      ? 'border-warn bg-warn-soft'
+                      : 'border-line bg-surface hover:bg-paper hover:border-line-2'
                   }`}
                 >
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">
+                  <span className="text-[10px] font-medium text-ink-3 block">
                     Emergency EMS overdose dispatches
                     {substanceHarmStats.latest?.year ? ` (${substanceHarmStats.latest.year})` : ''}
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-violet-400">
+                    <span className="text-3xl font-semibold font-mono tabular-nums text-warn">
                       {substanceHarmStats.latest?.emsOverdoseResponses != null
                         ? substanceHarmStats.latest.emsOverdoseResponses.toLocaleString()
                         : 'N/A'}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">annual responses</span>
+                    <span className="text-xs text-ink-2 font-mono">annual responses</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
+                  <p className="text-[10px] text-ink-2 pt-1 border-t border-line">
                     Source-backed EMS suspected overdose dispatches for the latest complete year.
                   </p>
-                  <span className="text-[9px] text-slate-500 group-hover:text-violet-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
-                    <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
+                  <span className="text-[9px] text-ink-3 group-hover:text-warn font-medium flex items-center gap-1 mt-1.5 transition-colors">
+                    <BarChart2 className="h-3.5 w-3.5" />
                     {selectedHarmKpi === 'emsOverdoseResponses'
-                      ? 'Active: Hide Trend'
-                      : 'Click to View Trend'}
+                      ? 'Active: hide trend'
+                      : 'Click to view trend'}
                   </span>
                 </div>
 
@@ -480,30 +505,30 @@ export default function MentalHealthDashboard() {
                       );
                     }
                   }}
-                  className={`bg-slate-900 border p-4 rounded-xl space-y-1 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+                  className={`rounded-xl border p-4 space-y-1 relative overflow-hidden group cursor-pointer transition-all select-none ${
                     selectedHarmKpi === 'hospitalizations'
-                      ? 'border-emerald-500/50 ring-1 ring-emerald-500/30 shadow-emerald-500/5'
-                      : 'border-slate-800 hover:border-emerald-500/30'
+                      ? 'border-accent bg-accent-soft'
+                      : 'border-line bg-surface hover:bg-paper hover:border-line-2'
                   }`}
                 >
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">
-                    Poisoning Hospital Admissions
+                  <span className="text-[10px] font-medium text-ink-3 block">
+                    Poisoning hospital admissions
                     {substanceHarmStats.latest?.year ? ` (${substanceHarmStats.latest.year})` : ''}
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-emerald-400">
+                    <span className="text-3xl font-semibold font-mono tabular-nums text-accent">
                       {substanceHarmStats.latest?.hospitalizations != null
                         ? substanceHarmStats.latest.hospitalizations.toLocaleString()
                         : 'N/A'}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">admissions</span>
+                    <span className="text-xs text-ink-2 font-mono">admissions</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
+                  <p className="text-[10px] text-ink-2 pt-1 border-t border-line">
                     Source-backed poisoning hospital admissions for the latest complete year.
                   </p>
-                  <span className="text-[9px] text-slate-500 group-hover:text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-1.5 transition-colors">
-                    <BarChart2 className="w-3.5 h-3.5 animate-pulse" />
-                    {selectedHarmKpi === 'hospitalizations' ? 'Active: Hide Trend' : 'Click to View Trend'}
+                  <span className="text-[9px] text-ink-3 group-hover:text-accent font-medium flex items-center gap-1 mt-1.5 transition-colors">
+                    <BarChart2 className="h-3.5 w-3.5" />
+                    {selectedHarmKpi === 'hospitalizations' ? 'Active: hide trend' : 'Click to view trend'}
                   </span>
                 </div>
               </div>
@@ -518,72 +543,70 @@ export default function MentalHealthDashboard() {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6 shadow-xl relative">
+                    <div className="relative rounded-xl border border-line bg-surface p-5 space-y-4">
                       <button
                         onClick={() => setSelectedHarmKpi(null)}
-                        className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                        className="absolute top-4 right-4 p-1.5 rounded-lg border border-line bg-paper text-ink-2 hover:border-line-2 hover:text-ink transition-colors cursor-pointer"
                         title="Close panel"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="h-4 w-4" />
                       </button>
 
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
                         <div className="space-y-1">
-                          <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                          <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
                             {React.createElement(selectedHarmKpiDetails.icon, {
-                              className: `w-4 h-4 ${selectedHarmKpiDetails.colorClass}`,
+                              className: `h-4 w-4 ${selectedHarmKpiDetails.valueClass}`,
                             })}
-                            <span>{selectedHarmKpiDetails.label} Historical Trend Explorer</span>
+                            <span>{selectedHarmKpiDetails.label} historical trend</span>
                           </h3>
-                          <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                          <p className="text-xs text-ink-2 max-w-3xl leading-relaxed">
                             {selectedHarmKpiDetails.description}
                           </p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl border border-line bg-paper">
                         <div className="space-y-1 text-center sm:text-left">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          <span className="text-[10px] font-medium text-ink-3 block">
                             Series start
                           </span>
-                          <span className="text-xl font-black text-slate-300 font-mono">
+                          <span className="text-xl font-semibold text-ink-2 font-mono tabular-nums">
                             {harmKpiStats.baseline}
                             {selectedHarmKpiDetails.unit}
                           </span>
                         </div>
                         <div className="space-y-1 text-center sm:text-left">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                            Latest
-                          </span>
-                          <span className="text-xl font-black text-white font-mono">
+                          <span className="text-[10px] font-medium text-ink-3 block">Latest</span>
+                          <span className="text-xl font-semibold text-ink font-mono tabular-nums">
                             {harmKpiStats.latest}
                             {selectedHarmKpiDetails.unit}
                           </span>
                         </div>
                         <div className="space-y-1 text-center sm:text-left">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                            Period Peak
+                          <span className="text-[10px] font-medium text-ink-3 block">
+                            Period peak
                           </span>
                           <span
-                            className={`text-xl font-black font-mono ${selectedHarmKpiDetails.colorClass}`}
+                            className={`text-xl font-semibold font-mono tabular-nums ${selectedHarmKpiDetails.valueClass}`}
                           >
                             {harmKpiStats.peak}
                             {selectedHarmKpiDetails.unit}
                           </span>
                         </div>
                         <div className="space-y-1 text-center sm:text-left">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                            Overall Shift
+                          <span className="text-[10px] font-medium text-ink-3 block">
+                            Overall shift
                           </span>
                           <span
-                            className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
-                              harmKpiStats.isIncrease ? 'text-rose-500' : 'text-emerald-500'
+                            className={`text-xl font-semibold font-mono tabular-nums flex items-center justify-center sm:justify-start gap-1 ${
+                              harmKpiStats.isIncrease ? 'text-crit' : 'text-ok'
                             }`}
                           >
                             {harmKpiStats.isIncrease ? (
-                              <TrendingUp className="w-4 h-4 shrink-0" />
+                              <TrendingUp className="h-4 w-4 shrink-0" />
                             ) : (
-                              <TrendingDown className="w-4 h-4 shrink-0" />
+                              <TrendingDown className="h-4 w-4 shrink-0" />
                             )}
                             <span>
                               {harmKpiStats.delta}
@@ -619,19 +642,20 @@ export default function MentalHealthDashboard() {
                                 />
                               </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
                             <XAxis
                               dataKey="year"
-                              stroke="#64748b"
-                              style={{ fontSize: 10, fontFamily: 'monospace' }}
+                              stroke={CHART_TICK}
+                              tick={{ fill: CHART_TICK, fontSize: 10, fontFamily: 'var(--font-mono)' }}
                             />
-                            <YAxis stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
+                            <YAxis
+                              stroke={CHART_TICK}
+                              tick={{ fill: CHART_TICK, fontSize: 10, fontFamily: 'var(--font-mono)' }}
+                            />
                             <Tooltip
-                              contentStyle={{
-                                backgroundColor: '#0f172a',
-                                borderColor: '#1e293b',
-                                borderRadius: 8,
-                              }}
+                              contentStyle={tooltipStyle}
+                              itemStyle={tooltipItemStyle}
+                              labelStyle={tooltipLabelStyle}
                             />
                             <Area
                               type="monotone"
@@ -653,18 +677,18 @@ export default function MentalHealthDashboard() {
               </AnimatePresence>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
+                <div className="rounded-xl border border-line bg-surface p-5 lg:col-span-2 space-y-4">
                   <div>
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                      Substance-Induced Toxicity & Overdose Harms
+                    <h3 className="text-sm font-semibold text-ink">
+                      Substance-induced toxicity & overdose harms
                     </h3>
-                    <p className="text-[10px] text-slate-500">
+                    <p className="text-[10px] text-ink-3">
                       Complete All Substances rows only — not single-substance subsets
                     </p>
                   </div>
 
                   {filteredHarmData.length === 0 ? (
-                    <div className="h-64 flex items-center justify-center text-xs text-slate-500">
+                    <div className="h-64 flex items-center justify-center text-xs text-ink-3">
                       No complete trend points available.
                     </div>
                   ) : (
@@ -676,26 +700,35 @@ export default function MentalHealthDashboard() {
                         >
                           <defs>
                             <linearGradient id="colorDeaths" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#e11d48" stopOpacity={0.2} />
-                              <stop offset="95%" stopColor="#e11d48" stopOpacity={0} />
+                              <stop offset="5%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0.2} />
+                              <stop offset="95%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0} />
                             </linearGradient>
                             <linearGradient id="colorEMS" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.15} />
-                              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                              <stop offset="5%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0.15} />
+                              <stop offset="95%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                          <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
-                          <YAxis stroke="#64748b" fontSize={9} />
+                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
+                          <XAxis
+                            dataKey="year"
+                            stroke={CHART_TICK}
+                            tick={{ fill: CHART_TICK, fontSize: 10 }}
+                          />
+                          <YAxis
+                            stroke={CHART_TICK}
+                            tick={{ fill: CHART_TICK, fontSize: 9 }}
+                          />
                           <Tooltip
-                            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}
+                            contentStyle={tooltipStyle}
+                            itemStyle={tooltipItemStyle}
+                            labelStyle={tooltipLabelStyle}
                           />
                           <Legend wrapperStyle={{ fontSize: 10 }} />
                           <Area
                             type="monotone"
                             dataKey="apparentDeaths"
-                            name="Apparent Toxicity Deaths"
-                            stroke="#e11d48"
+                            name="Apparent toxicity deaths"
+                            stroke="oklch(0.75 0.14 25)"
                             fillOpacity={1}
                             fill="url(#colorDeaths)"
                             strokeWidth={2.5}
@@ -703,8 +736,8 @@ export default function MentalHealthDashboard() {
                           <Area
                             type="monotone"
                             dataKey="emsOverdoseResponses"
-                            name="EMS Suspected Overdose Calls"
-                            stroke="#8b5cf6"
+                            name="EMS suspected overdose calls"
+                            stroke="oklch(0.82 0.12 85)"
                             fillOpacity={1}
                             fill="url(#colorEMS)"
                             strokeWidth={1.5}
@@ -712,8 +745,8 @@ export default function MentalHealthDashboard() {
                           <Line
                             type="monotone"
                             dataKey="hospitalizations"
-                            name="Poisoning Hospital Admissions"
-                            stroke="#10b981"
+                            name="Poisoning hospital admissions"
+                            stroke="oklch(0.68 0.13 252)"
                             strokeWidth={2}
                             dot
                           />
@@ -723,13 +756,11 @@ export default function MentalHealthDashboard() {
                   )}
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+                <div className="rounded-xl border border-line bg-surface p-5 flex flex-col justify-between">
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                        Annual Event Breakdown
-                      </h3>
-                      <p className="text-[10px] text-slate-500">
+                      <h3 className="text-sm font-semibold text-ink">Annual event breakdown</h3>
+                      <p className="text-[10px] text-ink-3">
                         Total recorded events across Alberta by year
                       </p>
                     </div>
@@ -738,28 +769,28 @@ export default function MentalHealthDashboard() {
                       {filteredHarmData.map((item) => (
                         <div
                           key={item.year}
-                          className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl space-y-2"
+                          className="rounded-xl border border-line bg-paper p-3 space-y-2"
                         >
-                          <div className="flex justify-between items-center text-xs font-bold text-white border-b border-slate-850/50 pb-1.5">
+                          <div className="flex justify-between items-center text-xs font-semibold text-ink border-b border-line pb-1.5">
                             <span>Year {item.year}</span>
                           </div>
 
                           <div className="grid grid-cols-3 gap-2 pt-0.5 text-center">
                             <div>
-                              <span className="text-[9px] text-slate-400 block">Deaths</span>
-                              <span className="font-mono text-xs font-black text-rose-500">
+                              <span className="text-[9px] text-ink-3 block">Deaths</span>
+                              <span className="font-mono text-xs font-semibold tabular-nums text-crit">
                                 {item.apparentDeaths.toLocaleString()}
                               </span>
                             </div>
                             <div>
-                              <span className="text-[9px] text-slate-400 block">EMS Calls</span>
-                              <span className="font-mono text-xs font-black text-violet-400">
+                              <span className="text-[9px] text-ink-3 block">EMS calls</span>
+                              <span className="font-mono text-xs font-semibold tabular-nums text-warn">
                                 {item.emsOverdoseResponses.toLocaleString()}
                               </span>
                             </div>
                             <div>
-                              <span className="text-[9px] text-slate-400 block">Admissions</span>
-                              <span className="font-mono text-xs font-black text-emerald-400">
+                              <span className="text-[9px] text-ink-3 block">Admissions</span>
+                              <span className="font-mono text-xs font-semibold tabular-nums text-accent">
                                 {item.hospitalizations.toLocaleString()}
                               </span>
                             </div>
@@ -767,15 +798,15 @@ export default function MentalHealthDashboard() {
                         </div>
                       ))}
                       {filteredHarmData.length === 0 && (
-                        <p className="text-xs text-slate-500">No annual breakdown rows available.</p>
+                        <p className="text-xs text-ink-3">No annual breakdown rows available.</p>
                       )}
                     </div>
                   </div>
 
-                  <p className="text-[10px] text-slate-500 leading-relaxed border-t border-slate-850 pt-3 flex items-start gap-1.5">
-                    <Info className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-ink-2 leading-relaxed border-t border-line pt-3 flex items-start gap-1.5">
+                    <Info className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                     <span>
-                      <strong>Surveillance Notice:</strong> Registry backlogs may update prior years
+                      <strong>Surveillance notice:</strong> Registry backlogs may update prior years
                       retroactively when medical examiner and toxicology findings are finalized.
                     </span>
                   </p>
@@ -789,16 +820,21 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB: Addiction Beds (ABED) */}
       {effectiveSubTab === 'addiction-beds' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata} arrayKey="ADDICTION_BED_CAPACITIES" />
-          <div className="bg-slate-900/60 border border-slate-800/60 p-3 rounded-lg flex items-start gap-2">
-            <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-            <p className="text-[10px] text-slate-400 leading-relaxed">
+          <DataTimestamp
+            compact
+            variant="light"
+            metadata={metadata ?? undefined}
+            arrayKey="ADDICTION_BED_CAPACITIES"
+          />
+          <div className="rounded-xl border border-line bg-surface p-3 flex items-start gap-2 text-xs text-ink-2">
+            <Info className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+            <p className="leading-relaxed">
               Bed availability data is sourced from the{' '}
               <a
                 href="https://findaddictionbeds.alberta.ca/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-purple-400 hover:text-purple-300 underline"
+                className="text-accent hover:underline"
               >
                 Addiction Bed Exploration Dashboard (ABED)
               </a>
@@ -809,7 +845,7 @@ export default function MentalHealthDashboard() {
                 href="https://recoveryaccessalberta.ca/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-purple-400 hover:text-purple-300 underline"
+                className="text-accent hover:underline"
               >
                 Recovery Access Alberta
               </a>
@@ -817,8 +853,8 @@ export default function MentalHealthDashboard() {
             </p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
-            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          <div className="rounded-xl border border-line bg-surface p-4 flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div className="inline-flex flex-wrap gap-2">
               {[
                 'All',
                 'Calgary Corridor',
@@ -830,10 +866,10 @@ export default function MentalHealthDashboard() {
                 <button
                   key={corr}
                   onClick={() => setCorridorFilter(corr)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     corridorFilter === corr
-                      ? 'bg-purple-600 border-purple-500 text-white shadow-sm'
-                      : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'border-accent bg-accent text-white'
+                      : 'border-line-2 bg-surface text-ink-2 hover:bg-paper hover:text-ink'
                   }`}
                 >
                   {corr.replace(' Corridor', '')}
@@ -842,63 +878,55 @@ export default function MentalHealthDashboard() {
             </div>
 
             <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-ink-3" />
               <input
                 type="text"
                 placeholder="Search bed providers or sites..."
                 value={siteSearch}
                 onChange={(e) => setSiteSearch(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                className="w-full bg-paper border border-line rounded-lg pl-9 pr-3 py-2 text-xs text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-900 border border-slate-800 p-5 rounded-xl">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 rounded-xl border border-line bg-surface p-5">
             <div className="space-y-1">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">
-                ABED Active Sites
-              </span>
-              <span className="text-xl font-bold text-white">
+              <span className="text-[9px] font-medium text-ink-3 block">ABED active sites</span>
+              <span className="text-xl font-semibold text-ink">
                 {ADDICTION_BED_CAPACITIES.length > 0
                   ? `${ADDICTION_BED_CAPACITIES.length} registered sites`
                   : 'N/A'}
               </span>
             </div>
             <div className="space-y-1">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">
-                Total Bed Allocation
-              </span>
-              <span className="text-xl font-bold text-white">
+              <span className="text-[9px] font-medium text-ink-3 block">Total bed allocation</span>
+              <span className="text-xl font-semibold text-ink">
                 {ADDICTION_BED_CAPACITIES.length > 0 ? `${bedStats.total} beds` : 'N/A'}
               </span>
             </div>
             <div className="space-y-1">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">
-                Available Beds Today
-              </span>
+              <span className="text-[9px] font-medium text-ink-3 block">Available beds today</span>
               {bedStats.hasLiveData ? (
-                <span className="text-xl font-bold text-emerald-400">
+                <span className="text-xl font-semibold text-ok">
                   {bedStats.available} of {bedStats.total} beds
                 </span>
               ) : (
-                <span className="text-sm font-bold text-amber-400">N/A</span>
+                <span className="text-sm font-semibold text-warn">N/A</span>
               )}
             </div>
             <div className="space-y-1">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">
-                Avg System Bed Occupancy
-              </span>
+              <span className="text-[9px] font-medium text-ink-3 block">Avg system bed occupancy</span>
               {bedStats.hasLiveData ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold text-white">
+                  <span className="text-xl font-semibold text-ink">
                     {bedStats.pctOccupied.toFixed(1)}%
                   </span>
-                  <div className="w-16 bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-850">
-                    <div className="bg-purple-500 h-full" style={{ width: `${bedStats.pctOccupied}%` }} />
+                  <div className="w-16 bg-paper h-1.5 rounded-full overflow-hidden border border-line">
+                    <div className="bg-accent h-full" style={{ width: `${bedStats.pctOccupied}%` }} />
                   </div>
                 </div>
               ) : (
-                <span className="text-sm font-bold text-amber-400">N/A</span>
+                <span className="text-sm font-semibold text-warn">N/A</span>
               )}
             </div>
           </div>
@@ -908,56 +936,56 @@ export default function MentalHealthDashboard() {
               return (
                 <div
                   key={bed.id}
-                  className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-4"
+                  className="rounded-xl border border-line bg-surface p-4 flex flex-col justify-between space-y-4 hover:border-line-2 transition-colors"
                 >
                   <div className="space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <h4 className="text-sm font-bold text-white truncate">{bed.siteName}</h4>
-                        <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                        <h4 className="text-sm font-semibold text-ink truncate">{bed.siteName}</h4>
+                        <p className="text-[10px] text-ink-3 flex items-center gap-1 mt-0.5">
+                          <MapPin className="h-3.5 w-3.5 text-ink-3 shrink-0" />
                           <span className="truncate">{bed.corridor}</span>
                         </p>
                       </div>
 
                       <span
-                        className={`px-2 py-0.5 rounded border text-[10px] font-mono font-bold shrink-0 ${getBedStatusStyle(bed.status)}`}
+                        className={`px-2 py-0.5 rounded border text-[10px] font-mono font-semibold shrink-0 ${getBedStatusStyle(bed.status)}`}
                       >
                         {bed.status}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-slate-850/60">
-                      <div className="bg-slate-950/40 p-2 rounded flex flex-col">
-                        <span className="text-[8px] text-slate-500 uppercase">Care Bed Type</span>
-                        <span className="font-semibold text-slate-300 truncate">{bed.bedType}</span>
+                    <div className="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-line">
+                      <div className="bg-paper p-2 rounded flex flex-col border border-line">
+                        <span className="text-[8px] text-ink-3">Care bed type</span>
+                        <span className="font-medium text-ink-2 truncate">{bed.bedType}</span>
                       </div>
-                      <div className="bg-slate-950/40 p-2 rounded flex flex-col">
-                        <span className="text-[8px] text-slate-500 uppercase">Gender / Age</span>
-                        <span className="font-semibold text-slate-300 truncate">
+                      <div className="bg-paper p-2 rounded flex flex-col border border-line">
+                        <span className="text-[8px] text-ink-3">Gender / age</span>
+                        <span className="font-medium text-ink-2 truncate">
                           {bed.gender} • {bed.bedType === 'Youth Specific' ? 'Youth' : 'Adult'}
                         </span>
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 bg-slate-950/60 p-2 rounded-lg border border-slate-850/60">
+                    <div className="space-y-1.5 bg-paper p-2 rounded-lg border border-line">
                       {bed.availableBeds !== null && bed.availableBeds !== undefined ? (
                         <>
                           <div className="flex items-center justify-between text-[11px]">
-                            <span className="text-slate-400">Available Beds:</span>
-                            <strong className="text-slate-200 font-mono font-black">
+                            <span className="text-ink-2">Available beds:</span>
+                            <strong className="text-ink font-mono font-semibold tabular-nums">
                               {bed.availableBeds} / {bed.totalBeds}
                             </strong>
                           </div>
-                          <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-850">
+                          <div className="w-full bg-surface h-1.5 rounded-full overflow-hidden border border-line">
                             <div
-                              className="bg-emerald-500 h-full"
+                              className="bg-ok h-full"
                               style={{
                                 width: `${Math.min(100, (bed.availableBeds / bed.totalBeds) * 100)}%`,
                               }}
                             />
                           </div>
-                          <p className="text-[9px] text-slate-500">
+                          <p className="text-[9px] text-ink-3">
                             {bed.availableBeds === 0
                               ? 'No vacancies currently reported'
                               : bed.availableBeds / bed.totalBeds < 0.25
@@ -968,22 +996,22 @@ export default function MentalHealthDashboard() {
                       ) : (
                         <>
                           <div className="flex items-center justify-between text-[11px]">
-                            <span className="text-slate-400">Available Beds:</span>
-                            <strong className="text-amber-400 font-mono font-black">N/A</strong>
+                            <span className="text-ink-2">Available beds:</span>
+                            <strong className="text-warn font-mono font-semibold tabular-nums">N/A</strong>
                           </div>
                           <div className="flex items-center justify-between text-[11px]">
-                            <span className="text-slate-400">Total Beds:</span>
-                            <strong className="text-slate-200 font-mono font-black">
+                            <span className="text-ink-2">Total beds:</span>
+                            <strong className="text-ink font-mono font-semibold tabular-nums">
                               {bed.totalBeds} beds
                             </strong>
                           </div>
-                          <p className="text-[9px] text-amber-400/80">
+                          <p className="text-[9px] text-warn">
                             Live availability not currently reported for this site. Check{' '}
                             <a
                               href="https://findaddictionbeds.alberta.ca/"
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="underline hover:text-amber-300"
+                              className="underline hover:text-ink"
                             >
                               ABED
                             </a>{' '}
@@ -994,9 +1022,9 @@ export default function MentalHealthDashboard() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-850/60 text-[10px]">
-                    <span className="text-slate-500 flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
+                  <div className="flex items-center justify-between pt-2 border-t border-line text-[10px]">
+                    <span className="text-ink-3 flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
                       <span>{bed.lastUpdated ?? 'N/A'}</span>
                     </span>
 
@@ -1004,9 +1032,9 @@ export default function MentalHealthDashboard() {
                       href="https://recoveryaccessalberta.ca/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition-all text-center"
+                      className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:bg-accent-strong transition-colors text-center"
                     >
-                      Triage Intake
+                      Triage intake
                     </a>
                   </div>
                 </div>
@@ -1014,9 +1042,9 @@ export default function MentalHealthDashboard() {
             })}
 
             {filteredBeds.length === 0 && (
-              <div className="col-span-full bg-slate-900 border border-slate-800 p-8 text-center rounded-xl">
-                <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                <p className="text-slate-400 text-xs">
+              <div className="col-span-full rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3">
+                <AlertTriangle className="h-8 w-8 text-warn mx-auto mb-2" />
+                <p>
                   {ADDICTION_BED_CAPACITIES.length === 0
                     ? 'Addiction bed capacity data is currently unavailable.'
                     : 'No active treatment or recovery beds matched your search parameters.'}
@@ -1030,14 +1058,19 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB: CIHI MH Readmissions */}
       {effectiveSubTab === 'mh-readmissions' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata} arrayKey="CIHI_MH_READMISSION_RATES" />
+          <DataTimestamp
+            compact
+            variant="light"
+            metadata={metadata ?? undefined}
+            arrayKey="CIHI_MH_READMISSION_RATES"
+          />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
+            <div className="rounded-xl border border-line bg-surface p-5 lg:col-span-2 space-y-4">
               <div>
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  30-Day Readmission for Mental Health and Substance Use
+                <h3 className="text-sm font-semibold text-ink">
+                  30-day readmission for mental health and substance use
                 </h3>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-ink-3">
                   CIHI risk-adjusted rate by fiscal time frame (province-level, Level 1 breakdown: Not
                   applicable)
                 </p>
@@ -1045,8 +1078,8 @@ export default function MentalHealthDashboard() {
 
               {mhReadmissionChart.length === 0 ? (
                 <div className="h-64 flex flex-col items-center justify-center gap-2 text-center px-4">
-                  <AlertTriangle className="w-7 h-7 text-amber-500" />
-                  <p className="text-xs text-slate-400">
+                  <AlertTriangle className="h-7 w-7 text-warn" />
+                  <p className="text-xs text-ink-2">
                     CIHI mental-health readmission rates are currently unavailable for Alberta at
                     province level.
                   </p>
@@ -1058,28 +1091,34 @@ export default function MentalHealthDashboard() {
                       data={mhReadmissionChart}
                       margin={{ top: 10, right: 15, left: 5, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                      <XAxis dataKey="timeFrame" stroke="#64748b" fontSize={9} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
+                      <XAxis
+                        dataKey="timeFrame"
+                        stroke={CHART_TICK}
+                        tick={{ fill: CHART_TICK, fontSize: 9 }}
+                      />
                       <YAxis
                         label={{
                           value: 'Risk-adjusted rate',
                           angle: -90,
                           position: 'insideLeft',
-                          fill: '#64748b',
+                          fill: CHART_TICK,
                           fontSize: 10,
                         }}
-                        stroke="#64748b"
-                        fontSize={9}
+                        stroke={CHART_TICK}
+                        tick={{ fill: CHART_TICK, fontSize: 9 }}
                       />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}
+                        contentStyle={tooltipStyle}
+                        itemStyle={tooltipItemStyle}
+                        labelStyle={tooltipLabelStyle}
                       />
                       <Legend wrapperStyle={{ fontSize: 10 }} />
                       <Line
                         type="monotone"
                         dataKey="albertaRate"
                         name="Alberta risk-adjusted rate"
-                        stroke="#a78bfa"
+                        stroke="oklch(0.68 0.13 252)"
                         strokeWidth={2.5}
                         dot
                         connectNulls
@@ -1089,7 +1128,7 @@ export default function MentalHealthDashboard() {
                           type="monotone"
                           dataKey="canadaRate"
                           name="Canada risk-adjusted rate"
-                          stroke="#64748b"
+                          stroke="oklch(0.62 0.02 255)"
                           strokeWidth={1.5}
                           strokeDasharray="4 4"
                           dot
@@ -1101,43 +1140,41 @@ export default function MentalHealthDashboard() {
                 </div>
               )}
 
-              <p className="text-[10px] text-slate-400">
-                Source: CIHI 30-Day Readmission for Mental Health and Substance Use indicator table.
+              <p className="text-[10px] text-ink-2">
+                Source: CIHI 30-day readmission for mental health and substance use indicator table.
                 Only province/territory rows with Level 1 breakdown &quot;Not applicable&quot; are charted.
               </p>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+            <div className="rounded-xl border border-line bg-surface p-5 flex flex-col justify-between">
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Alberta series points
-                  </h3>
-                  <p className="text-[10px] text-slate-500">Risk-adjusted rate by fiscal time frame</p>
+                  <h3 className="text-sm font-semibold text-ink">Alberta series points</h3>
+                  <p className="text-[10px] text-ink-3">Risk-adjusted rate by fiscal time frame</p>
                 </div>
 
                 <div className="space-y-3 pt-1 max-h-80 overflow-y-auto">
                   {mhReadmissionChart.length === 0 && (
-                    <p className="text-xs text-slate-500">No province-level readmission rows available.</p>
+                    <p className="text-xs text-ink-3">No province-level readmission rows available.</p>
                   )}
                   {mhReadmissionChart.map((item) => (
                     <div
                       key={item.timeFrame}
-                      className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl space-y-1.5"
+                      className="rounded-xl border border-line bg-paper p-3 space-y-1.5"
                     >
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-extrabold">
+                      <span className="text-[10px] text-ink-3 block font-medium">
                         {item.timeFrame}
                       </span>
                       <div className="flex justify-between items-baseline">
-                        <span className="text-lg font-black text-white">
+                        <span className="text-lg font-semibold text-ink font-mono tabular-nums">
                           {item.albertaRate != null ? item.albertaRate.toFixed(1) : 'N/A'}
                         </span>
-                        <span className="text-[10px] text-purple-400 font-mono font-bold">AB rate</span>
+                        <span className="text-[10px] text-accent font-mono font-medium">AB rate</span>
                       </div>
                       {item.canadaRate != null && (
-                        <div className="flex justify-between text-[9px] text-slate-400">
+                        <div className="flex justify-between text-[9px] text-ink-2">
                           <span>Canada comparator</span>
-                          <span className="font-mono">{item.canadaRate.toFixed(1)}</span>
+                          <span className="font-mono tabular-nums">{item.canadaRate.toFixed(1)}</span>
                         </div>
                       )}
                     </div>
@@ -1145,8 +1182,8 @@ export default function MentalHealthDashboard() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-850 text-[10px] text-slate-500 flex items-start gap-1.5">
-                <ShieldAlert className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+              <div className="pt-3 border-t border-line text-[10px] text-ink-2 flex items-start gap-1.5">
+                <ShieldAlert className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                 <p>
                   Values are risk-adjusted rates from CIHI. Missing Canada comparators are omitted when
                   not present in the domain payload.
@@ -1160,21 +1197,24 @@ export default function MentalHealthDashboard() {
       {/* SUBTAB: Helplines */}
       {effectiveSubTab === 'helplines' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata} arrayKey="SUPPORT_HELPLINES" />
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+          <DataTimestamp
+            compact
+            variant="light"
+            metadata={metadata ?? undefined}
+            arrayKey="SUPPORT_HELPLINES"
+          />
+          <div className="rounded-xl border border-line bg-surface p-5 space-y-4">
             <div>
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                Crisis Helplines & Navigation Pathways
-              </h3>
-              <p className="text-[10px] text-slate-500">
+              <h3 className="text-sm font-semibold text-ink">Crisis helplines & navigation pathways</h3>
+              <p className="text-[10px] text-ink-3">
                 Immediate, toll-free mental health support services available to Alberta residents
               </p>
             </div>
 
             {SUPPORT_HELPLINES.length === 0 ? (
-              <div className="p-8 text-center space-y-2">
-                <AlertTriangle className="w-7 h-7 text-amber-500 mx-auto" />
-                <p className="text-xs text-slate-400">
+              <div className="rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center space-y-2">
+                <AlertTriangle className="h-7 w-7 text-warn mx-auto" />
+                <p className="text-xs text-ink-2">
                   Crisis helpline directory is currently unavailable from upstream sources.
                 </p>
               </div>
@@ -1183,26 +1223,26 @@ export default function MentalHealthDashboard() {
                 {SUPPORT_HELPLINES.map((hl, idx) => (
                   <div
                     key={idx}
-                    className="bg-slate-950 border border-slate-850 p-4 rounded-xl flex flex-col justify-between space-y-3 hover:border-purple-500/40 transition-all"
+                    className="rounded-xl border border-line bg-paper p-4 flex flex-col justify-between space-y-3 hover:border-line-2 transition-colors"
                   >
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                          <PhoneCall className="w-4 h-4 text-purple-400" />
+                        <h4 className="text-sm font-semibold text-ink flex items-center gap-1.5">
+                          <PhoneCall className="h-4 w-4 text-accent" />
                           <span>{hl.name}</span>
                         </h4>
-                        <span className="text-[9px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
+                        <span className="text-[9px] bg-neutral-chip text-ink-2 border border-line px-2 py-0.5 rounded-full font-medium">
                           {hl.availability}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 leading-relaxed">{hl.description}</p>
+                      <p className="text-xs text-ink-2 leading-relaxed">{hl.description}</p>
                     </div>
 
-                    <div className="flex justify-between items-center pt-2 border-t border-slate-900 text-[10px]">
-                      <span className="text-slate-500 font-mono font-medium">{hl.scope}</span>
+                    <div className="flex justify-between items-center pt-2 border-t border-line text-[10px]">
+                      <span className="text-ink-3 font-mono tabular-nums font-medium">{hl.scope}</span>
                       <a
                         href={`tel:${hl.number.replace(/\s+/g, '')}`}
-                        className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-md transition-all flex items-center gap-1"
+                        className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:bg-accent-strong transition-colors flex items-center gap-1"
                       >
                         <span>Call {hl.number}</span>
                       </a>

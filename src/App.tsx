@@ -91,33 +91,33 @@ export default function App() {
           <DiagnosticDashboard />
         ) : activeView === 'disruptions' ? (
           <ServiceDisruptionsDashboard />
+        ) : activeView === 'surgical-waits' ? (
+          <SurgicalDashboard />
+        ) : activeView === 'system-flow' ? (
+          <SystemFlowDashboard />
+        ) : activeView === 'primary-care' ? (
+          <PrimaryCareDashboard />
+        ) : activeView === 'workforce' ? (
+          <WorkforceDashboard />
+        ) : activeView === 'cancer' ? (
+          <CancerDashboard />
+        ) : activeView === 'mental-health' ? (
+          <MentalHealthDashboard />
+        ) : activeView === 'long-term-care' ? (
+          <ContinuingCareDashboard />
+        ) : activeView === 'patient-experience' ? (
+          <PatientExperienceDashboard />
+        ) : activeView === 'public-health' ? (
+          <PublicHealthDashboard />
+        ) : activeView === 'regional-inequity' ? (
+          <RegionalInequityDashboard />
+        ) : activeView === 'health-spending' ? (
+          <SpendingDashboard />
+        ) : activeView === 'virtual-care' ? (
+          <VirtualCareDashboard />
         ) : (
-          <div className="rounded-2xl border border-slate-800 bg-[#070b19] p-4 text-slate-100 sm:p-6">
-            {activeView === 'surgical-waits' ? (
-              <SurgicalDashboard />
-            ) : activeView === 'system-flow' ? (
-              <SystemFlowDashboard />
-            ) : activeView === 'primary-care' ? (
-              <PrimaryCareDashboard />
-            ) : activeView === 'workforce' ? (
-              <WorkforceDashboard />
-            ) : activeView === 'cancer' ? (
-              <CancerDashboard />
-            ) : activeView === 'mental-health' ? (
-              <MentalHealthDashboard />
-            ) : activeView === 'long-term-care' ? (
-              <ContinuingCareDashboard />
-            ) : activeView === 'patient-experience' ? (
-              <PatientExperienceDashboard />
-            ) : activeView === 'public-health' ? (
-              <PublicHealthDashboard />
-            ) : activeView === 'regional-inequity' ? (
-              <RegionalInequityDashboard />
-            ) : activeView === 'health-spending' ? (
-              <SpendingDashboard />
-            ) : (
-              <VirtualCareDashboard />
-            )}
+          <div className="rounded-xl border border-line bg-surface p-4 text-sm text-ink-2">
+            Unknown dashboard: {activeView}
           </div>
         )}
       </main>

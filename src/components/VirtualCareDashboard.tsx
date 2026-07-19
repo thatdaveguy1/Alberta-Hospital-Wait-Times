@@ -32,23 +32,40 @@ export default function VirtualCareDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
-        Loading virtual care data...
+      <div className="space-y-4">
+        <div className="animate-pulse rounded-xl border border-line bg-surface p-4">
+          <div className="h-4 w-1/3 rounded bg-neutral-chip mb-3" />
+          <div className="h-3 w-1/2 rounded bg-neutral-chip" />
+        </div>
+        <div className="animate-pulse rounded-xl border border-line bg-surface p-4">
+          <div className="h-8 w-full rounded bg-neutral-chip" />
+        </div>
       </div>
     );
   }
+
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
-        <AlertTriangle className="w-6 h-6 text-amber-400" />
-        <span>Failed to load virtual care data: {error}</span>
-        <button
-          onClick={refresh}
-          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Retry
-        </button>
+      <div className="space-y-4">
+        <DashboardHeader
+          icon={PhoneCall}
+          title="Virtual Care & 811 Navigation"
+          description="Health Link volumes only when scraped from a verified AHS publication. Cohort study, diversion proxies, and adjacent-helpline estimates are not shown."
+          metadata={metadata ?? undefined}
+          arrayKey="HEALTH_LINK_VOLUMES"
+          variant="light"
+        />
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-warn" aria-hidden />
+          <span className="flex-1">Failed to load virtual care data: {error}</span>
+          <button
+            onClick={refresh}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-paper cursor-pointer"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -61,20 +78,21 @@ export default function VirtualCareDashboard() {
         description="Health Link volumes only when scraped from a verified AHS publication. Cohort study, diversion proxies, and adjacent-helpline estimates are not shown."
         metadata={metadata ?? undefined}
         arrayKey="HEALTH_LINK_VOLUMES"
+        variant="light"
       />
 
       {!volumesAreAuto ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-3">
+        <div className="rounded-xl border border-line bg-surface p-6">
           <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+            <Info className="mt-0.5 h-5 w-5 shrink-0 text-ink-2" />
             <div className="space-y-2">
-              <h3 className="text-sm font-bold text-white">No verified virtual-care metrics available</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <h3 className="text-sm font-semibold text-ink">No verified virtual-care metrics available</h3>
+              <p className="text-xs leading-relaxed text-ink-2">
                 The virtual-care pipeline verifies PubMed PMID 40465166 and scans AHS news for Health Link volume announcements.
                 It does not re-derive Virtual MD cohort percentages, EMS diversion splits, or adjacent helpline volumes.
                 Those manual study/proxy panels were removed so the dashboard never presents fabricated or one-time estimates as live data.
               </p>
-              <p className="text-[11px] text-slate-500 font-mono">
+              <p className="font-mono text-[11px] text-ink-3">
                 Status: waiting for an AHS fiscal-year volume publication that the fetcher can map to HEALTH_LINK_VOLUMES.
               </p>
             </div>
@@ -82,32 +100,37 @@ export default function VirtualCareDashboard() {
         </div>
       ) : (
         <div className="space-y-4">
-          <DataTimestamp compact metadata={metadata ?? undefined} arrayKey="HEALTH_LINK_VOLUMES" />
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <DataTimestamp
+            compact
+            variant="light"
+            metadata={metadata ?? undefined}
+            arrayKey="HEALTH_LINK_VOLUMES"
+          />
+          <div className="overflow-hidden rounded-xl border border-line bg-surface">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider">
+              <thead className="bg-paper text-ink-2">
                 <tr>
-                  <th className="p-3 font-bold">Fiscal year</th>
-                  <th className="p-3 font-bold text-right">Clinical inbound</th>
-                  <th className="p-3 font-bold text-right">Non-clinical inbound</th>
-                  <th className="p-3 font-bold text-right">Clinical outbound</th>
-                  <th className="p-3 font-bold text-right">PADIS</th>
+                  <th className="p-3 font-medium">Fiscal year</th>
+                  <th className="p-3 text-right font-medium">Clinical inbound</th>
+                  <th className="p-3 text-right font-medium">Non-clinical inbound</th>
+                  <th className="p-3 text-right font-medium">Clinical outbound</th>
+                  <th className="p-3 text-right font-medium">PADIS</th>
                 </tr>
               </thead>
               <tbody>
                 {volumes.map((row) => (
-                  <tr key={row.fiscalYear} className="border-t border-slate-800">
-                    <td className="p-3 text-white font-mono font-bold">{row.fiscalYear}</td>
-                    <td className="p-3 text-right text-emerald-400 font-mono">
+                  <tr key={row.fiscalYear} className="border-t border-line">
+                    <td className="p-3 font-mono font-semibold text-ink">{row.fiscalYear}</td>
+                    <td className="p-3 text-right font-mono tabular-nums text-ok">
                       {row.clinicalReceived > 0 ? row.clinicalReceived.toLocaleString() : '—'}
                     </td>
-                    <td className="p-3 text-right text-slate-300 font-mono">
+                    <td className="p-3 text-right font-mono tabular-nums text-ink">
                       {row.nonClinicalReceived > 0 ? row.nonClinicalReceived.toLocaleString() : '—'}
                     </td>
-                    <td className="p-3 text-right text-slate-300 font-mono">
+                    <td className="p-3 text-right font-mono tabular-nums text-ink">
                       {row.clinicalOutbound > 0 ? row.clinicalOutbound.toLocaleString() : '—'}
                     </td>
-                    <td className="p-3 text-right text-pink-400 font-mono">
+                    <td className="p-3 text-right font-mono tabular-nums text-accent">
                       {row.padisCalls > 0 ? row.padisCalls.toLocaleString() : '—'}
                     </td>
                   </tr>

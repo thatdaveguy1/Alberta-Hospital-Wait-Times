@@ -14,7 +14,7 @@ import {
   ShieldAlert,
   Building2,
   BarChart2,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -26,12 +26,12 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend
+  Legend,
 } from 'recharts';
 import type {
   PlacementMetric,
   ResidentOutcomeQuality,
-  CareFacilityCompliance
+  CareFacilityCompliance,
 } from '../continuingCareData';
 import * as continuingCareData from '../continuingCareData';
 import { DataTimestamp } from './DataTimestamp';
@@ -165,9 +165,9 @@ export default function ContinuingCareDashboard() {
           label: 'Average Placement within 30 Days',
           description:
             'Historical trend of patients placed into continuing care facilities within 30 days of their clinical assessment (Calgary and Edmonton Zone average). Target is 60% or higher.',
-          colorClass: 'text-emerald-400',
-          bgClass: 'bg-emerald-500/10',
-          strokeColor: '#10b981',
+          colorClass: 'text-ok',
+          bgClass: 'bg-ok-soft',
+          strokeColor: 'oklch(0.65 0.12 155)',
           gradientId: 'colorPlacementTrend',
           unit: '%',
           icon: CheckCircle2,
@@ -177,9 +177,9 @@ export default function ContinuingCareDashboard() {
           label: 'Median Wait Days to Placement',
           description:
             'Historical trend of median (P50) wait times (days) from assessment to continuing care admission (Calgary and Edmonton Zone average). Lower is better.',
-          colorClass: 'text-blue-400',
-          bgClass: 'bg-blue-500/10',
-          strokeColor: '#3b82f6',
+          colorClass: 'text-accent',
+          bgClass: 'bg-accent-soft',
+          strokeColor: 'oklch(0.68 0.13 252)',
           gradientId: 'colorWaitTrend',
           unit: ' Days',
           icon: Clock,
@@ -273,21 +273,34 @@ export default function ContinuingCareDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400 text-sm">
-        Loading continuing care data...
+      <div className="space-y-4 p-4">
+        <div className="animate-pulse rounded-xl border border-line bg-surface p-4">
+          <div className="h-4 w-1/3 rounded bg-neutral-chip" />
+          <div className="mt-2 h-3 w-1/2 rounded bg-neutral-chip" />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-line bg-surface p-4">
+              <div className="h-3 w-1/2 rounded bg-neutral-chip" />
+              <div className="mt-2 h-8 w-1/3 rounded bg-neutral-chip" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
+
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-400 text-sm gap-3">
-        <AlertTriangle className="w-6 h-6 text-amber-400" />
-        <span>Failed to load continuing care data: {error}</span>
+      <div className="space-y-4 p-4">
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-warn" aria-hidden />
+          <span>Failed to load continuing care data: {error}</span>
+        </div>
         <button
           onClick={() => refresh()}
-          className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 hover:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-strong"
         >
-          <RefreshCw className="w-3.5 h-3.5" />
           Retry
         </button>
       </div>
@@ -295,7 +308,7 @@ export default function ContinuingCareDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4">
       {/* Header */}
       <DashboardHeader
         icon={Building2}
@@ -303,16 +316,25 @@ export default function ContinuingCareDashboard() {
         description="Monitor facility placement timelines, quality outcomes, and standards compliance."
         metadata={metadata}
         arrayKey="CONTINUING_CARE_PLACEMENT_STATS"
-      />
+        variant="light"
+      >
+        <button
+          onClick={() => refresh()}
+          disabled={isLoading}
+          className="self-start rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-paper disabled:opacity-50 md:self-auto"
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </DashboardHeader>
 
       {/* Sub-Tab Navigation — placement | resident-quality | compliance only */}
-      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+      <div className="inline-flex rounded-lg border border-line bg-paper p-0.5">
         <button
           onClick={() => setActiveSubTab('placement')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`rounded-md px-4 py-2 text-xs font-medium transition-colors flex items-center gap-2 ${
             activeSubTab === 'placement'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'bg-accent text-white'
+              : 'text-ink-2 hover:text-ink'
           }`}
         >
           <Activity className="w-4 h-4" />
@@ -320,10 +342,10 @@ export default function ContinuingCareDashboard() {
         </button>
         <button
           onClick={() => setActiveSubTab('resident-quality')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`rounded-md px-4 py-2 text-xs font-medium transition-colors flex items-center gap-2 ${
             activeSubTab === 'resident-quality'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'bg-accent text-white'
+              : 'text-ink-2 hover:text-ink'
           }`}
         >
           <ShieldAlert className="w-4 h-4" />
@@ -331,10 +353,10 @@ export default function ContinuingCareDashboard() {
         </button>
         <button
           onClick={() => setActiveSubTab('compliance')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+          className={`rounded-md px-4 py-2 text-xs font-medium transition-colors flex items-center gap-2 ${
             activeSubTab === 'compliance'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'bg-accent text-white'
+              : 'text-ink-2 hover:text-ink'
           }`}
         >
           <Building2 className="w-4 h-4" />
@@ -346,13 +368,13 @@ export default function ContinuingCareDashboard() {
       {activeSubTab === 'placement' && (
         <div className="space-y-6">
           {placementStats.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-sm gap-3">
-              <AlertTriangle className="w-6 h-6 text-amber-500" />
+            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3">
+              <AlertTriangle className="h-6 w-6 text-warn" />
               <span>No placement timeline data available</span>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div
                   tabIndex={0}
                   onClick={() =>
@@ -368,26 +390,26 @@ export default function ContinuingCareDashboard() {
                       );
                     }
                   }}
-                  className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 cursor-pointer transition-all hover:border-emerald-500/50 ${
+                  className={`cursor-pointer space-y-1 rounded-xl border bg-surface p-4 text-left transition-all hover:border-line-2 ${
                     selectedKpi === 'pctPlacedWithin30Days'
-                      ? 'border-emerald-500 ring-1 ring-emerald-500/30 font-medium'
-                      : 'border-slate-800'
+                      ? 'border-ok bg-ok-soft'
+                      : 'border-line'
                   }`}
                 >
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">
+                  <span className="block text-xs font-medium text-ink-3">
                     Avg Placement Within 30 Days
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-emerald-400">
+                    <span className="text-3xl font-semibold font-mono tabular-nums text-ok">
                       {formatOptional(placementKpis.within30, { suffix: '%', empty: '—' })}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">Target: 60%+</span>
+                    <span className="text-xs font-medium font-mono text-ink-2">Target: 60%+</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
+                  <p className="border-t border-line pt-1 text-xs text-ink-2">
                     Share of assessed patients placed into continuing care within 30 days
                     {placementKpis.labelYear ? ` (${placementKpis.labelYear})` : ''}.
                   </p>
-                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-emerald-400/80 group-hover:text-emerald-400 transition-colors">
+                  <div className="flex items-center gap-1 pt-1.5 text-[10px] font-medium text-ok transition-colors">
                     <BarChart2 className="w-3 h-3" />
                     <span>
                       {selectedKpi === 'pctPlacedWithin30Days'
@@ -410,33 +432,33 @@ export default function ContinuingCareDashboard() {
                       setSelectedKpi(selectedKpi === 'daysWaitingP50' ? null : 'daysWaitingP50');
                     }
                   }}
-                  className={`bg-slate-900 border text-left p-4 rounded-xl space-y-1 transition-all ${
+                  className={`space-y-1 rounded-xl border bg-surface p-4 text-left transition-all ${
                     hasWaitDayData
-                      ? `cursor-pointer hover:border-blue-500/50 ${
+                      ? `cursor-pointer hover:border-line-2 ${
                           selectedKpi === 'daysWaitingP50'
-                            ? 'border-blue-500 ring-1 ring-blue-500/30'
-                            : 'border-slate-800'
+                            ? 'border-accent bg-accent-soft'
+                            : 'border-line'
                         }`
-                      : 'border-slate-800 opacity-90'
+                      : 'border-line opacity-90'
                   }`}
                 >
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">
+                  <span className="block text-xs font-medium text-ink-3">
                     Median Wait Days (Calgary & Edmonton)
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-white">
+                    <span className="text-3xl font-semibold font-mono tabular-nums text-ink">
                       {placementKpis.waitP50 === null
                         ? 'N/A'
                         : `${placementKpis.waitP50.toFixed(0)} days`}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">P50 benchmark</span>
+                    <span className="text-xs font-medium font-mono text-ink-2">P50 benchmark</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
+                  <p className="border-t border-line pt-1 text-xs text-ink-2">
                     {hasWaitDayData
                       ? 'Median days from assessment to continuing care admission when wait data is reported.'
                       : 'Wait-day values are not available in the current upstream feed.'}
                   </p>
-                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-blue-400/80">
+                  <div className="flex items-center gap-1 pt-1.5 text-[10px] font-medium text-accent">
                     <BarChart2 className="w-3 h-3" />
                     <span>
                       {!hasWaitDayData
@@ -448,21 +470,21 @@ export default function ContinuingCareDashboard() {
                   </div>
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold block">
+                <div className="space-y-1 rounded-xl border border-line bg-surface p-4">
+                  <span className="block text-xs font-medium text-ink-3">
                     Preferred Option Placement Rate
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-teal-400">
+                    <span className="text-3xl font-semibold font-mono tabular-nums text-ok">
                       {formatOptional(placementKpis.preferred, { suffix: '%', empty: '—' })}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">Target: 70%+</span>
+                    <span className="text-xs font-medium font-mono text-ink-2">Target: 70%+</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-850">
+                  <p className="border-t border-line pt-1 text-xs text-ink-2">
                     Share of placements into the resident&apos;s preferred living option
                     {placementKpis.labelYear ? ` (${placementKpis.labelYear})` : ''}.
                   </p>
-                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-slate-500">
+                  <div className="flex items-center gap-1 pt-1.5 text-[10px] font-medium text-ink-3">
                     <span>No Trend Data Available</span>
                   </div>
                 </div>
@@ -479,65 +501,65 @@ export default function ContinuingCareDashboard() {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="bg-slate-950/80 border border-slate-850 p-4 sm:p-5 rounded-2xl space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800/60">
+                    <div className="space-y-4 rounded-xl border border-line bg-surface p-4 sm:p-5">
+                      <div className="flex flex-col justify-between gap-4 border-b border-line pb-3 sm:flex-row sm:items-center">
                         <div className="space-y-1">
-                          <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                          <h3 className="flex items-center gap-2 text-sm font-semibold text-ink">
                             {React.createElement(selectedKpiDetails.icon, {
-                              className: `w-4 h-4 ${selectedKpiDetails.colorClass}`,
+                              className: `h-4 w-4 ${selectedKpiDetails.colorClass}`,
                             })}
                             <span>{selectedKpiDetails.label} Historical Trend Explorer</span>
                           </h3>
-                          <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                          <p className="max-w-3xl text-xs leading-relaxed text-ink-2">
                             {selectedKpiDetails.description}
                           </p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+                      <div className="grid grid-cols-2 gap-3 rounded-xl border border-line bg-paper p-3 sm:grid-cols-4">
                         <div className="space-y-1 text-center sm:text-left">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          <span className="block text-xs font-medium text-ink-3">
                             Baseline (2021)
                           </span>
-                          <span className="text-xl font-black text-slate-300 font-mono">
+                          <span className="text-xl font-semibold font-mono tabular-nums text-ink">
                             {kpiStats.baseline}
                             {kpiStats.baseline !== 'N/A' ? selectedKpiDetails.unit : ''}
                           </span>
                         </div>
                         <div className="space-y-1 text-center sm:text-left">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          <span className="block text-xs font-medium text-ink-3">
                             Current (2025)
                           </span>
-                          <span className="text-xl font-black text-white font-mono">
+                          <span className="text-xl font-semibold font-mono tabular-nums text-ink">
                             {kpiStats.latest}
                             {kpiStats.latest !== 'N/A' ? selectedKpiDetails.unit : ''}
                           </span>
                         </div>
                         <div className="space-y-1 text-center sm:text-left">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          <span className="block text-xs font-medium text-ink-3">
                             Peak
                           </span>
                           <span
-                            className={`text-xl font-black font-mono ${selectedKpiDetails.colorClass}`}
+                            className={`text-xl font-semibold font-mono tabular-nums ${selectedKpiDetails.colorClass}`}
                           >
                             {kpiStats.peak}
                             {kpiStats.peak !== 'N/A' ? selectedKpiDetails.unit : ''}
                           </span>
                         </div>
                         <div className="space-y-1 text-center sm:text-left">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          <span className="block text-xs font-medium text-ink-3">
                             Overall Shift
                           </span>
                           {kpiStats.hasDelta ? (
                             <span
-                              className={`text-xs font-extrabold flex items-center justify-center sm:justify-start gap-1 ${
-                                kpiStats.isIncrease ? 'text-rose-400' : 'text-emerald-400'
+                              className={`flex items-center justify-center gap-1 text-xs font-semibold sm:justify-start ${
+                                kpiStats.isIncrease ? 'text-crit' : 'text-ok'
                               }`}
                             >
                               {kpiStats.isIncrease ? (
-                                <TrendingUp className="w-4 h-4 shrink-0" />
+                                <TrendingUp className="h-4 w-4 shrink-0" />
                               ) : (
-                                <TrendingDown className="w-4 h-4 shrink-0" />
+                                <TrendingDown className="h-4 w-4 shrink-0" />
                               )}
                               <span>
                                 {kpiStats.delta}
@@ -545,7 +567,7 @@ export default function ContinuingCareDashboard() {
                               </span>
                             </span>
                           ) : (
-                            <span className="text-xs font-extrabold text-slate-500">N/A</span>
+                            <span className="text-xs font-semibold text-ink-3">N/A</span>
                           )}
                         </div>
                       </div>
@@ -576,15 +598,17 @@ export default function ContinuingCareDashboard() {
                                 />
                               </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
-                            <YAxis stroke="#64748b" fontSize={10} unit={selectedKpiDetails.unit} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                            <XAxis dataKey="year" stroke="oklch(0.62 0.02 255)" fontSize={10} />
+                            <YAxis stroke="oklch(0.62 0.02 255)" fontSize={10} unit={selectedKpiDetails.unit} />
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: '#0f172a',
-                                borderColor: '#1e293b',
-                                fontSize: 11,
+                                backgroundColor: 'oklch(0.2 0.022 255)',
+                                border: '1px solid oklch(0.28 0.02 255)',
+                                borderRadius: '8px',
                               }}
+                              itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                              labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
                             />
                             <Area
                               type="monotone"
@@ -606,15 +630,15 @@ export default function ContinuingCareDashboard() {
                 )}
               </AnimatePresence>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Placement Chart */}
-                <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-4 rounded-xl border border-line bg-surface p-5 lg:col-span-2">
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                     <div>
-                      <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      <h3 className="text-sm font-semibold text-ink-2">
                         Wait times & Placement Timelines
                       </h3>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-xs text-ink-3">
                         Tracking median (P50) and 90th percentile (P90) wait times from assessment
                         to placement
                       </p>
@@ -624,7 +648,7 @@ export default function ContinuingCareDashboard() {
                       <select
                         value={selectedZone}
                         onChange={(e) => setSelectedZone(e.target.value)}
-                        className="bg-slate-950 text-xs border border-slate-800 rounded px-2.5 py-1 text-slate-300 focus:outline-none focus:border-emerald-500"
+                        className="rounded-lg border border-line bg-paper px-2.5 py-1 text-xs text-ink focus:border-accent focus:outline-none"
                       >
                         <option value="All">All zones</option>
                         {placementZones.map((zone) => (
@@ -637,8 +661,8 @@ export default function ContinuingCareDashboard() {
                   </div>
 
                   {!hasWaitDayData ? (
-                    <div className="h-64 flex flex-col items-center justify-center gap-2 text-slate-500 text-sm">
-                      <AlertTriangle className="w-5 h-5 text-amber-500" />
+                    <div className="flex h-64 flex-col items-center justify-center gap-2 text-sm text-ink-3">
+                      <AlertTriangle className="h-5 w-5 text-warn" />
                       <span>No wait-day values reported for the selected data.</span>
                     </div>
                   ) : (
@@ -650,36 +674,42 @@ export default function ContinuingCareDashboard() {
                         >
                           <defs>
                             <linearGradient id="colorP90" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#ef4444" stopOpacity={0.15} />
-                              <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                              <stop offset="5%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0.15} />
+                              <stop offset="95%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0} />
                             </linearGradient>
                             <linearGradient id="colorP50" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-                              <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                              <stop offset="5%" stopColor="oklch(0.65 0.12 155)" stopOpacity={0.15} />
+                              <stop offset="95%" stopColor="oklch(0.65 0.12 155)" stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                          <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                          <XAxis dataKey="year" stroke="oklch(0.62 0.02 255)" fontSize={10} />
                           <YAxis
                             label={{
                               value: 'Days',
                               angle: -90,
                               position: 'insideLeft',
-                              fill: '#64748b',
+                              fill: 'oklch(0.62 0.02 255)',
                               fontSize: 10,
                             }}
-                            stroke="#64748b"
+                            stroke="oklch(0.62 0.02 255)"
                             fontSize={9}
                           />
                           <Tooltip
-                            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}
+                            contentStyle={{
+                              backgroundColor: 'oklch(0.2 0.022 255)',
+                              border: '1px solid oklch(0.28 0.02 255)',
+                              borderRadius: '8px',
+                            }}
+                            itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                            labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
                           />
                           <Legend wrapperStyle={{ fontSize: 10 }} />
                           <Area
                             type="monotone"
                             dataKey="daysWaitingP90"
                             name="90th Percentile Wait (Days)"
-                            stroke="#ef4444"
+                            stroke="oklch(0.75 0.14 25)"
                             fillOpacity={1}
                             fill="url(#colorP90)"
                             strokeWidth={2}
@@ -689,7 +719,7 @@ export default function ContinuingCareDashboard() {
                             type="monotone"
                             dataKey="daysWaitingP50"
                             name="Median Wait (Days)"
-                            stroke="#10b981"
+                            stroke="oklch(0.65 0.12 155)"
                             fillOpacity={1}
                             fill="url(#colorP50)"
                             strokeWidth={2.5}
@@ -702,32 +732,32 @@ export default function ContinuingCareDashboard() {
                 </div>
 
                 {/* Core indicators summary */}
-                <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4 flex flex-col justify-between">
+                <div className="flex flex-col justify-between rounded-xl border border-line bg-surface p-5 space-y-4">
                   <div>
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                    <h3 className="text-sm font-semibold text-ink-2">
                       Flow & Preferred Options
                     </h3>
-                    <p className="text-[10px] text-slate-500">
+                    <p className="text-xs text-ink-3">
                       Evaluating percent placed into preferred facilities
                     </p>
                   </div>
 
                   <div className="space-y-4">
                     {filteredPlacementData.length === 0 ? (
-                      <div className="text-xs text-slate-500 p-3 bg-slate-950/40 border border-slate-850 rounded-xl">
+                      <div className="rounded-xl border border-line bg-paper p-3 text-xs text-ink-3">
                         No placement rows match the selected zone.
                       </div>
                     ) : (
                       filteredPlacementData.map((item, idx) => (
                         <div
                           key={idx}
-                          className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl space-y-2.5"
+                          className="space-y-2.5 rounded-xl border border-line bg-paper p-3"
                         >
-                          <div className="flex justify-between items-center text-xs font-bold text-white">
+                          <div className="flex items-center justify-between text-xs font-medium text-ink">
                             <span>
                               {item.zone} ({item.year})
                             </span>
-                            <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono">
+                            <span className="rounded border border-line bg-ok-soft px-1.5 py-0.5 font-mono text-xs text-ok">
                               P50:{' '}
                               {item.daysWaitingP50 === null || item.daysWaitingP50 === undefined
                                 ? 'N/A'
@@ -736,17 +766,17 @@ export default function ContinuingCareDashboard() {
                           </div>
 
                           <div className="space-y-1.5">
-                            <div className="flex justify-between text-[10px] text-slate-400">
+                            <div className="flex justify-between text-xs text-ink-2">
                               <span>Placed in 30 days:</span>
-                              <span className="font-semibold text-slate-200">
+                              <span className="font-medium text-ink">
                                 {typeof item.pctPlacedWithin30Days === 'number'
                                   ? `${item.pctPlacedWithin30Days}%`
                                   : 'N/A'}
                               </span>
                             </div>
-                            <div className="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
+                            <div className="h-1 w-full overflow-hidden rounded-full bg-surface">
                               <div
-                                className="bg-emerald-500 h-full"
+                                className="h-full bg-ok"
                                 style={{
                                   width: `${
                                     typeof item.pctPlacedWithin30Days === 'number'
@@ -757,17 +787,17 @@ export default function ContinuingCareDashboard() {
                               />
                             </div>
 
-                            <div className="flex justify-between text-[10px] text-slate-400">
+                            <div className="flex justify-between text-xs text-ink-2">
                               <span>Preferred option met:</span>
-                              <span className="font-semibold text-slate-200">
+                              <span className="font-medium text-ink">
                                 {typeof item.pctPlacedPreferredOption === 'number'
                                   ? `${item.pctPlacedPreferredOption}%`
                                   : 'N/A'}
                               </span>
                             </div>
-                            <div className="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
+                            <div className="h-1 w-full overflow-hidden rounded-full bg-surface">
                               <div
-                                className="bg-teal-500 h-full"
+                                className="h-full bg-accent"
                                 style={{
                                   width: `${
                                     typeof item.pctPlacedPreferredOption === 'number'
@@ -783,8 +813,8 @@ export default function ContinuingCareDashboard() {
                     )}
                   </div>
 
-                  <div className="pt-3 border-t border-slate-850 text-[10px] text-slate-500 flex items-start gap-1.5">
-                    <Info className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-1.5 border-t border-line pt-3 text-xs text-ink-3">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-ok" />
                     <span>
                       Placement percentages come from HQCA FOCUS continuing-care placement
                       statistics. Wait days show N/A when the upstream series does not report them.
@@ -800,20 +830,20 @@ export default function ContinuingCareDashboard() {
       {/* SUBTAB 2: Resident quality outcomes (CIHI LTC Indicators) */}
       {activeSubTab === 'resident-quality' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata} arrayKey="RESIDENT_QUALITY_OUTCOMES" />
+          <DataTimestamp compact variant="light" metadata={metadata} arrayKey="RESIDENT_QUALITY_OUTCOMES" />
           {qualityOutcomes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-sm gap-3">
-              <AlertTriangle className="w-6 h-6 text-amber-500" />
+            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3">
+              <AlertTriangle className="h-6 w-6 text-warn" />
               <span>No resident quality outcome data available</span>
             </div>
           ) : (
             <>
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
+              <div className="flex flex-col justify-between gap-3 rounded-xl border border-line bg-surface p-4 md:flex-row md:items-center">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  <h3 className="text-sm font-semibold text-ink-2">
                     CIHI Clinical Care Quality Indicators
                   </h3>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="text-xs text-ink-3">
                     Comparative safety and effectiveness outcomes across Alberta facilities
                   </p>
                 </div>
@@ -822,7 +852,7 @@ export default function ContinuingCareDashboard() {
                   <select
                     value={qualityMetricSelected}
                     onChange={(e) => setQualityMetricSelected(e.target.value)}
-                    className="bg-slate-950 text-xs border border-slate-800 rounded px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-emerald-500"
+                    className="rounded-lg border border-line bg-paper px-2.5 py-1.5 text-xs text-ink focus:border-accent focus:outline-none"
                   >
                     <option value="All">All Quality Indicators</option>
                     {availableQualityMetrics.map((metric) => (
@@ -834,16 +864,16 @@ export default function ContinuingCareDashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Outcomes Chart */}
-                <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase">
+                <div className="space-y-4 rounded-xl border border-line bg-surface p-5 lg:col-span-2">
+                  <h4 className="text-sm font-semibold text-ink-2">
                     Long-Term Resident Quality Prevalence (%)
                   </h4>
 
                   {filteredQualityData.length === 0 ? (
-                    <div className="h-64 flex flex-col items-center justify-center gap-2 text-slate-500 text-sm">
-                      <AlertTriangle className="w-5 h-5 text-amber-500" />
+                    <div className="flex h-64 flex-col items-center justify-center gap-2 text-sm text-ink-3">
+                      <AlertTriangle className="h-5 w-5 text-warn" />
                       <span>No quality rows match the selected metric.</span>
                     </div>
                   ) : (
@@ -853,33 +883,39 @@ export default function ContinuingCareDashboard() {
                           data={filteredQualityData}
                           margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
                         >
-                          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                          <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                          <XAxis dataKey="year" stroke="oklch(0.62 0.02 255)" fontSize={10} />
                           <YAxis
                             label={{
                               value: 'Rate %',
                               angle: -90,
                               position: 'insideLeft',
-                              fill: '#64748b',
+                              fill: 'oklch(0.62 0.02 255)',
                               fontSize: 10,
                             }}
-                            stroke="#64748b"
+                            stroke="oklch(0.62 0.02 255)"
                             fontSize={9}
                           />
                           <Tooltip
-                            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}
+                            contentStyle={{
+                              backgroundColor: 'oklch(0.2 0.022 255)',
+                              border: '1px solid oklch(0.28 0.02 255)',
+                              borderRadius: '8px',
+                            }}
+                            itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                            labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
                           />
                           <Legend wrapperStyle={{ fontSize: 10 }} />
                           <Bar
                             dataKey="albertaRatePct"
                             name="Alberta Prevalence Rate"
-                            fill="#10b981"
+                            fill="oklch(0.65 0.12 155)"
                             radius={[4, 4, 0, 0]}
                           />
                           <Bar
                             dataKey="canadaRatePct"
                             name="Canadian National Average"
-                            fill="#475569"
+                            fill="oklch(0.62 0.02 255)"
                             radius={[4, 4, 0, 0]}
                           />
                         </BarChart>
@@ -889,31 +925,31 @@ export default function ContinuingCareDashboard() {
                 </div>
 
                 {/* Quality Summary list */}
-                <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase">
+                <div className="space-y-4 rounded-xl border border-line bg-surface p-5">
+                  <h4 className="text-sm font-semibold text-ink-2">
                     Quality Benchmarks Breakdown
                   </h4>
 
                   <div className="space-y-3.5">
                     {filteredQualityData.length === 0 ? (
-                      <div className="text-xs text-slate-500 p-3 bg-slate-950/40 border border-slate-850 rounded-xl">
+                      <div className="rounded-xl border border-line bg-paper p-3 text-xs text-ink-3">
                         No quality metrics to display.
                       </div>
                     ) : (
                       filteredQualityData.map((item, idx) => (
                         <div
                           key={idx}
-                          className="p-4 bg-slate-950/40 border border-slate-850 rounded-xl space-y-2"
+                          className="space-y-2 rounded-xl border border-line bg-paper p-4"
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-black text-white">{item.metric}</span>
-                            <Award className="w-4.5 h-4.5 text-emerald-400 shrink-0" />
+                            <span className="text-xs font-semibold text-ink">{item.metric}</span>
+                            <Award className="h-4 w-4 shrink-0 text-ok" />
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400">
+                          <div className="grid grid-cols-2 gap-2 text-xs text-ink-2">
                             <div>
                               <span>Alberta ({item.year}):</span>
-                              <p className="text-lg font-bold text-emerald-400">
+                              <p className="text-lg font-semibold text-ok">
                                 {typeof item.albertaRatePct === 'number'
                                   ? `${item.albertaRatePct}%`
                                   : 'N/A'}
@@ -921,7 +957,7 @@ export default function ContinuingCareDashboard() {
                             </div>
                             <div>
                               <span>Canada ({item.year}):</span>
-                              <p className="text-lg font-bold text-slate-400">
+                              <p className="text-lg font-semibold text-ink-2">
                                 {typeof item.canadaRatePct === 'number'
                                   ? `${item.canadaRatePct}%`
                                   : 'N/A'}
@@ -929,7 +965,7 @@ export default function ContinuingCareDashboard() {
                             </div>
                           </div>
                           {item.directionIsLowerBetter && (
-                            <div className="text-[9px] text-slate-500 italic">
+                            <div className="text-[10px] italic text-ink-3">
                               Lower rates represent safer care plans for this indicator.
                             </div>
                           )}
@@ -947,25 +983,25 @@ export default function ContinuingCareDashboard() {
       {/* SUBTAB 3: Compliance Registry (Open Alberta) */}
       {activeSubTab === 'compliance' && (
         <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata} arrayKey="CONTINUING_CARE_COMPLIANCE" />
+          <DataTimestamp compact variant="light" metadata={metadata} arrayKey="CONTINUING_CARE_COMPLIANCE" />
           {!data?.CONTINUING_CARE_COMPLIANCE || data.CONTINUING_CARE_COMPLIANCE.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-sm gap-3">
-              <AlertTriangle className="w-6 h-6 text-amber-500" />
+            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3">
+              <AlertTriangle className="h-6 w-6 text-warn" />
               <span>No compliance data available</span>
             </div>
           ) : (
             <>
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
-                <div className="flex flex-wrap gap-2 w-full md:w-auto">
+              <div className="flex flex-col justify-between gap-3 rounded-xl border border-line bg-surface p-4 md:flex-row md:items-center">
+                <div className="flex flex-wrap gap-2">
                   {['All', 'AHS', 'Covenant Health', 'Private/Contracted', 'Non-Profit'].map(
                     (operator) => (
                       <button
                         key={operator}
                         onClick={() => setOperatorFilter(operator)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                        className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
                           operatorFilter === operator
-                            ? 'bg-emerald-600 border-emerald-500 text-white shadow-sm'
-                            : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:text-slate-200'
+                            ? 'border-accent bg-accent text-white'
+                            : 'border-line-2 text-ink-2 hover:bg-paper'
                         }`}
                       >
                         {operator}
@@ -975,68 +1011,68 @@ export default function ContinuingCareDashboard() {
                 </div>
 
                 <div className="relative w-full md:w-72">
-                  <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-ink-3" />
                   <input
                     type="text"
                     placeholder="Search facility, city, or zone..."
                     value={complianceSearch}
                     onChange={(e) => setComplianceSearch(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full rounded-lg border border-line bg-paper py-2 pl-9 pr-3 text-xs text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-900 border border-slate-800 p-5 rounded-xl">
+              <div className="grid grid-cols-1 gap-4 rounded-xl border border-line bg-surface p-5 md:grid-cols-4">
                 <div className="space-y-1">
-                  <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">
+                  <span className="block text-xs font-medium text-ink-3">
                     Monitored Facilities
                   </span>
-                  <span className="text-xl font-bold text-white">
+                  <span className="text-xl font-semibold text-ink">
                     {aggregateStats.totalFacilities} sites audited
                   </span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">
+                  <span className="block text-xs font-medium text-ink-3">
                     Accommodation Standards Pass
                   </span>
-                  <span className="text-xl font-bold text-emerald-400">
+                  <span className="text-xl font-semibold text-ok">
                     {aggregateStats.complianceRate === null
                       ? 'N/A'
                       : `${aggregateStats.complianceRate.toFixed(1)}% compliant`}
                   </span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">
+                  <span className="block text-xs font-medium text-ink-3">
                     Total standards violations
                   </span>
-                  <span className="text-xl font-bold text-rose-400">
+                  <span className="text-xl font-semibold text-crit">
                     {aggregateStats.totalViolations} violations found
                   </span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] text-slate-500 uppercase tracking-wider font-extrabold block">
+                  <span className="block text-xs font-medium text-ink-3">
                     Auditing schedule
                   </span>
-                  <span className="text-sm font-bold text-slate-300">
+                  <span className="text-sm font-semibold text-ink">
                     Quarterly (Alberta Open Government data)
                   </span>
                 </div>
               </div>
 
               {/* Compliance List Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {filteredCompliance.map((fac) => {
                   return (
                     <div
                       key={fac.id}
-                      className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-4"
+                      className="flex flex-col justify-between rounded-xl border border-line bg-surface p-4 space-y-4"
                     >
                       <div className="space-y-2.5">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <h4 className="text-sm font-bold text-white truncate">{fac.name}</h4>
-                            <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
-                              <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                            <h4 className="truncate text-sm font-semibold text-ink">{fac.name}</h4>
+                            <p className="mt-0.5 flex items-center gap-1 text-xs text-ink-3">
+                              <MapPin className="h-3.5 w-3.5 shrink-0" />
                               <span className="truncate">
                                 {fac.city}
                                 {fac.zone ? ` · ${fac.zone}` : ', Alberta'}
@@ -1045,52 +1081,52 @@ export default function ContinuingCareDashboard() {
                           </div>
 
                           <span
-                            className={`px-2.5 py-0.5 rounded border text-[10px] font-mono font-bold shrink-0 ${
+                            className={`shrink-0 rounded border px-2.5 py-0.5 font-mono text-[10px] font-medium ${
                               fac.standardsCompliant
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                ? 'border-line bg-ok-soft text-ok'
+                                : 'border-line bg-crit-soft text-crit'
                             }`}
                           >
-                            {fac.standardsCompliant ? 'COMPLIANT' : 'VIOLATION'}
+                            {fac.standardsCompliant ? 'Compliant' : 'Violation'}
                           </span>
                         </div>
 
-                        <div className="space-y-2 text-[10px] bg-slate-950/60 p-3 rounded-lg border border-slate-850">
+                        <div className="space-y-2 rounded-lg border border-line bg-paper p-3 text-xs">
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Facility Type:</span>
-                            <span className="font-semibold text-slate-300 truncate">{fac.type}</span>
+                            <span className="text-ink-3">Facility Type:</span>
+                            <span className="truncate font-medium text-ink">{fac.type}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Operator:</span>
-                            <span className="font-semibold text-slate-300">{fac.operator}</span>
+                            <span className="text-ink-3">Operator:</span>
+                            <span className="font-medium text-ink">{fac.operator}</span>
                           </div>
                           {fac.zone && (
                             <div className="flex justify-between">
-                              <span className="text-slate-500">Zone:</span>
-                              <span className="font-semibold text-slate-300">{fac.zone}</span>
+                              <span className="text-ink-3">Zone:</span>
+                              <span className="font-medium text-ink">{fac.zone}</span>
                             </div>
                           )}
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Inspection:</span>
-                            <span className="font-semibold text-slate-400">
+                            <span className="text-ink-3">Inspection:</span>
+                            <span className="font-medium text-ink-2">
                               {fac.lastInspectionDate}
                             </span>
                           </div>
                         </div>
 
                         {!fac.standardsCompliant && fac.majorViolationsDesc && (
-                          <div className="bg-rose-950/30 border border-rose-500/20 rounded p-2.5 flex items-start gap-1.5">
-                            <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                            <p className="text-[10px] text-rose-300 font-medium leading-normal">
+                          <div className="flex items-start gap-1.5 rounded-lg border border-line bg-crit-soft p-2.5">
+                            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-crit" />
+                            <p className="text-[10px] font-medium leading-normal text-crit">
                               {fac.majorViolationsDesc}
                             </p>
                           </div>
                         )}
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-850/60 text-[10px]">
-                        <span className="text-slate-500 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
+                      <div className="flex items-center justify-between border-t border-line pt-2 text-[10px]">
+                        <span className="flex items-center gap-1 text-ink-3">
+                          <Clock className="h-3.5 w-3.5" />
                           <span>{fac.violationsCount} infractions logged</span>
                         </span>
 
@@ -1098,7 +1134,7 @@ export default function ContinuingCareDashboard() {
                           href="https://standardsandlicensing.alberta.ca"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-bold px-3 py-1.5 rounded-lg bg-emerald-650 hover:bg-emerald-600 text-white transition-all text-center"
+                          className="rounded-lg bg-accent px-3 py-1.5 text-center text-xs font-semibold text-white transition-colors hover:bg-accent-strong"
                         >
                           Verify Status
                         </a>
@@ -1108,37 +1144,37 @@ export default function ContinuingCareDashboard() {
                 })}
 
                 {filteredCompliance.length === 0 && (
-                  <div className="col-span-full bg-slate-900 border border-slate-800 p-8 text-center rounded-xl">
-                    <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                    <p className="text-slate-400 text-xs">
+                  <div className="col-span-full rounded-xl border border-line bg-surface p-8 text-center">
+                    <AlertTriangle className="mx-auto mb-2 h-8 w-8 text-warn" />
+                    <p className="text-xs text-ink-3">
                       No audited facilities matched your search parameters.
                     </p>
                   </div>
                 )}
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-start gap-2.5 text-[10px] text-slate-400 leading-relaxed">
-                <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 rounded-xl border border-line bg-surface p-4 text-xs leading-relaxed text-ink-2">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                 <p>
                   Data source:{' '}
                   <a
                     href="https://open.alberta.ca/dataset/2003f13d-33ad-4d3f-865d-0d9488ace84d"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 hover:underline"
+                    className="text-accent hover:underline"
                   >
                     Alberta Open Government — Continuing Care Accommodation Standards compliance
                     reporting
                   </a>{' '}
                   (OGL-A licensed, updated quarterly). Each facility is aggregated from per-visit
                   monitoring records dating back to April 2013;{' '}
-                  <strong className="text-slate-300">violationsCount</strong> reflects only
+                  <strong className="text-ink">violationsCount</strong> reflects only
                   open/unresolved non-compliances. For real-time inspection results, search the{' '}
                   <a
                     href="https://standardsandlicensing.alberta.ca"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 hover:underline"
+                    className="text-accent hover:underline"
                   >
                     standardsandlicensing.alberta.ca
                   </a>{' '}
