@@ -1114,6 +1114,13 @@ export default function ErWaitDashboard({
                 );
               })}
             </div>
+
+            <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-warn" aria-hidden />
+              <p className="truncate sm:whitespace-normal">
+                Estimates are guidance only. For medical emergencies, please dial <strong className="font-semibold text-ink">911</strong> immediately or head directly to the nearest emergency facility.
+              </p>
+            </div>
           </section>
 
           {/* Map + sheet */}
