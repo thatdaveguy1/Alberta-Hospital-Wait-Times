@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Clock,
   MapPin,
+  Map as MapIcon,
+  Maximize2,
+  Minimize2,
   Search,
   AlertTriangle,
   AlertCircle,
@@ -17,6 +20,7 @@ import {
   TrendingDown,
   X
 } from 'lucide-react';
+import { MapComponent } from './MapComponent';
 import { 
   ResponsiveContainer, 
   Line, 
@@ -81,6 +85,7 @@ export default function DiagnosticDashboard() {
   const [facilitySearch, setFacilitySearch] = useState<string>('');
   const [selectedModality, setSelectedModality] = useState<'CT Scan' | 'MRI Scan'>('MRI Scan');
   const [selectedLabId, setSelectedLabId] = useState<string | null>(null);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   // Interactive KPI selected state for historical trend panel
   const [selectedKpi, setSelectedKpi] = useState<'CT Scan' | 'MRI Scan' | null>(null);
   // Lab wait trends — provincial average and per-lab historical snapshots
@@ -392,6 +397,37 @@ export default function DiagnosticDashboard() {
 
     return groups;
   }, [processedLabs, sortBy, driveEnabled]);
+
+  // Map pins — Hospital shape for MapComponent (status mirrors LabCard wait bands)
+  const mapLabs = useMemo(() => {
+    return processedLabs
+      .filter((lab) => lab.latitude != null && lab.longitude != null)
+      .map((lab) => {
+        const unavailable = isLabWaitUnavailable(lab);
+        const waitTime = typeof lab.waitTimeMin === 'number' ? lab.waitTimeMin : 0;
+        let status: 'Green' | 'Yellow' | 'Red' = 'Green';
+        if (!unavailable) {
+          if (waitTime > 45) status = 'Red';
+          else if (waitTime > 30) status = 'Yellow';
+        }
+        return {
+          id: lab.id,
+          name: lab.name,
+          status,
+          latitude: lab.latitude,
+          longitude: lab.longitude,
+          city: lab.city,
+          waitTime,
+          ...(lab.distance !== undefined ? { distance: lab.distance } : {}),
+          ...(lab.driveMins !== undefined ? { driveMins: lab.driveMins } : {}),
+        };
+      });
+  }, [processedLabs]);
+
+  const selectedMapLab = useMemo(
+    () => mapLabs.find((lab) => lab.id === selectedLabId) ?? null,
+    [mapLabs, selectedLabId],
+  );
 
   // Top 3 optimal lab recommendations by net time (Alberta drive pins only)
   const calculatedShortestWaitList = useMemo(() => {
@@ -904,6 +940,65 @@ export default function DiagnosticDashboard() {
                 <p>No trend data yet. Lab wait snapshots are collected every 60 minutes — check back shortly.</p>
               </div>
             )}
+          </div>
+
+          {/* Labs map — same fullscreen pattern as ER */}
+          <div
+            className={cn(
+              'flex min-h-0 w-full flex-col overflow-hidden rounded-xl border border-line bg-surface',
+              isMapFullscreen && 'fixed inset-0 z-[9999] rounded-none bg-paper p-3 sm:p-5',
+            )}
+          >
+            <div className="flex items-center justify-between gap-2 border-b border-line px-3.5 py-2.5">
+              <div className="flex min-w-0 items-center gap-2">
+                <MapIcon className="h-4 w-4 shrink-0 text-ink-3" aria-hidden />
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-semibold text-ink">
+                    {isMapFullscreen ? 'Map — fullscreen' : 'Map'}
+                  </h3>
+                  <p className="hidden text-xs text-ink-3 sm:block">
+                    Pins coloured by queue. Tap a site for details.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMapFullscreen((v) => !v)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-2.5 py-1.5 text-xs font-semibold text-ink-2 transition-colors hover:bg-paper cursor-pointer"
+              >
+                {isMapFullscreen ? (
+                  <>
+                    <Minimize2 className="h-3.5 w-3.5" aria-hidden /> Exit
+                  </>
+                ) : (
+                  <>
+                    <Maximize2 className="h-3.5 w-3.5" aria-hidden /> Fullscreen
+                  </>
+                )}
+              </button>
+            </div>
+            <div className={cn('er-map-slot', isMapFullscreen && 'er-map-slot--fullscreen')}>
+              <MapComponent
+                hospitals={mapLabs}
+                userLocation={userLocation}
+                selectedHospital={selectedMapLab}
+                setSelectedHospital={(h) => setSelectedLabId(h.id)}
+                sortBy={sortBy}
+              />
+              {!isMapFullscreen && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[500] flex items-center justify-between gap-2 border-t border-line bg-surface/90 px-3 py-1.5 text-xs font-medium text-ink-3">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-ok" aria-hidden /> Quieter
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-warn" aria-hidden /> Busy
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-crit" aria-hidden /> Very busy
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Search and Filters — mirrors ER tab */}

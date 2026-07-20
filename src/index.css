@@ -184,8 +184,10 @@ html.light {
   flex: 1 1 auto !important;
 }
 .er-map-slot .leaflet-container {
+  position: absolute;
+  inset: 0;
   width: 100% !important;
-  height: 100%;
+  height: 100% !important;
   background: var(--color-map-slot);
 }
 .er-trend-panel {

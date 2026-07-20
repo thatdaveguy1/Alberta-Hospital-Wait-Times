@@ -98,7 +98,7 @@ export function MapComponent({
     if (coords.length === 0) return;
     map.invalidateSize();
     if (coords.length === 1) {
-      map.setView(coords[0], opts?.maxZoom ?? 12, {
+      map.setView(coords[0], opts?.maxZoom ?? 10, {
         animate: opts?.animate ?? true,
         duration: 0.55,
       });
@@ -107,7 +107,7 @@ export function MapComponent({
     const bounds = L.latLngBounds(coords);
     map.fitBounds(bounds, {
       padding: opts?.padding ?? [36, 36],
-      maxZoom: opts?.maxZoom ?? 12,
+      maxZoom: opts?.maxZoom ?? 10,
       animate: opts?.animate ?? true,
       duration: 0.55,
     });
@@ -120,7 +120,7 @@ export function MapComponent({
     // Start denser than provincial overview — hospitals effect will fitBounds to pins.
     const centerLat = userLocation?.lat || 51.05;
     const centerLng = userLocation?.lng || -114.07;
-    const initialZoom = userLocation ? 10 : 9;
+    const initialZoom = userLocation ? 8 : 7;
 
     const map = L.map(mapContainerRef.current, {
       zoomControl: true,
@@ -155,6 +155,19 @@ export function MapComponent({
     return () => {
       window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange);
       tileLayerRef.current = null;
+      // Drop marker refs so a remount does not "update" markers bound to the destroyed map
+      // (labs often mount with a full pin list already loaded — ER usually starts empty).
+      for (const id of Object.keys(markersRef.current)) {
+        try { markersRef.current[id].remove(); } catch { /* map already gone */ }
+      }
+      markersRef.current = {};
+      if (userMarkerRef.current) {
+        try { userMarkerRef.current.remove(); } catch { /* map already gone */ }
+        userMarkerRef.current = null;
+      }
+      framedLocationKeyRef.current = null;
+      lastSelectionFrameKeyRef.current = null;
+      didInitialHospitalFrameRef.current = false;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -317,7 +330,7 @@ export function MapComponent({
     // Don't fight selection framing — selection effect will pack to city cluster.
     if (selectedHospital?.latitude != null) return;
     didInitialHospitalFrameRef.current = true;
-    frameToCoords(map, coords, { maxZoom: 6.5, padding: [24, 24], animate: false });
+    frameToCoords(map, coords, { maxZoom: 4.5, padding: [24, 24], animate: false });
   }, [hospitals, userLocation, selectedHospital]);
 
   // Sync user marker; frame map only when the user location actually changes.
@@ -375,11 +388,11 @@ export function MapComponent({
 
       if (nearbyCoords.length > 0) {
         frameToCoords(map, [...nearbyCoords, [userLocation.lat, userLocation.lng]], {
-          maxZoom: 12,
+          maxZoom: 10,
           padding: [40, 40],
         });
       } else {
-        frameToCoords(map, [[userLocation.lat, userLocation.lng]], { maxZoom: 12 });
+        frameToCoords(map, [[userLocation.lat, userLocation.lng]], { maxZoom: 10 });
       }
 
       window.setTimeout(() => {
@@ -475,19 +488,19 @@ export function MapComponent({
         mapRef.current.invalidateSize();
         mapRef.current.fitBounds(bounds, {
           padding: [28, 28],
-          maxZoom: 12,
+          maxZoom: 10,
           animate: true,
           duration: 0.5,
         });
       } else {
-        frameToCoords(mapRef.current, coords, { maxZoom: 13, padding: [24, 24] });
+        frameToCoords(mapRef.current, coords, { maxZoom: 11, padding: [24, 24] });
       }
       window.setTimeout(() => mapRef.current?.invalidateSize(), 250);
     });
   }, [selectedHospital, hospitals]);
   return (
-    <div className="w-full h-full relative">
-      <div ref={mapContainerRef} className="w-full h-full z-0" />
+    <div className="absolute inset-0">
+      <div ref={mapContainerRef} className="h-full w-full z-0" />
     </div>
   );
 }
