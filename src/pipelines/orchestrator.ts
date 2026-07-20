@@ -12,12 +12,11 @@ import { run as aplLabWaitTimesRun } from './aplLabWaitTimesFetcher';
 
 // Tier 2: HTML scrapers
 import { run as abjhiRun } from './abjhiScraper';
-import { run as ahsCancerCentresRun } from './ahsCancerCentresScraper';
 
 // Tier 3: File download+parse
 import { run as cihiRun } from './cihiDownloader';
 import { run as fraserRun } from './fraserDownloader';
-import { run as cihiWaitTimesRun, runCancer as cihiWaitTimesCancerRun, runSurgical as cihiWaitTimesSurgicalRun } from './cihiWaitTimesDownloader';
+import { run as cihiWaitTimesRun, runSurgical as cihiWaitTimesSurgicalRun } from './cihiWaitTimesDownloader';
 import { run as primaryCareRun } from './primaryCareFetcher';
 import { run as albertaFindAProviderRun } from './albertaFindAProviderScraper';
 import { run as openAlbertaInequityRun, runPrimaryCare as openAlbertaInequityPrimaryCareRun } from './openAlbertaInequityFetcher';
@@ -83,12 +82,10 @@ const PIPELINES: Pipeline[] = [
   // Power BI scraper runs as child process (Puppeteer needs ESM + headless Chrome).
   { name: 'powerbi-scraper', domain: 'surgical', run: runPowerBIScraper },
   { name: 'abjhi', domain: 'surgical', run: abjhiRun },
-  { name: 'ahs-cancer-centres', domain: 'cancer', run: ahsCancerCentresRun },
 
   // Tier 3: File download+parse (XLSX/CSV/ZIP)
   { name: 'cihi-nhex', domain: 'spending', run: cihiRun },
   { name: 'cihi-wait-times', domain: 'diagnostic', run: cihiWaitTimesRun },
-  { name: 'cihi-wait-times-cancer', domain: 'cancer', run: cihiWaitTimesCancerRun },
   { name: 'cihi-wait-times-surgical', domain: 'surgical', run: cihiWaitTimesSurgicalRun },
   { name: 'primary-care', domain: 'primary-care', run: primaryCareRun },
   { name: 'alberta-find-a-provider', domain: 'primary-care', run: albertaFindAProviderRun },

@@ -7,7 +7,6 @@ import {
   Stethoscope,
   FlaskConical,
   Coins,
-  Ribbon,
   Shield,
   TrendingUp,
   Compass,
@@ -103,17 +102,6 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     updateFrequency: 'Annual surveys',
   },
   {
-    id: 'cancer',
-    title: 'Cancer Care',
-    shortName: 'Cancer Care',
-    category: 'prevention-surveillance',
-    description: 'Cancer surgery and radiation wait times, plus treatment centre locations.',
-    icon: Ribbon,
-    badge: 'ONCOLOGY',
-    source: 'Cancer Care Alberta & CIHI priority procedure waits',
-    updateFrequency: 'Q1 2026 Release',
-  },
-  {
     id: 'public-health',
     title: 'Public Health & Outbreaks',
     shortName: 'Public Health',
@@ -195,13 +183,6 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
     sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'APL QMe REST API & CIHI Diagnostic Imaging',
     domain: 'diagnostic'
-  },
-  'cancer': {
-    updateType: 'mixed',
-    interval: 'daily sync · per-array provenance',
-    sourceVintage: 'Per-array (see dashboard timestamps)',
-    source: 'CIHI priority procedure waits & Cancer Care Alberta centres',
-    domain: 'cancer'
   },
   'public-health': {
     updateType: 'mixed',

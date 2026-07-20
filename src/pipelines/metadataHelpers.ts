@@ -144,9 +144,6 @@ export function mergeDataMetadata(
  * absent from this list.
  */
 export const WITHHELD_PAYLOAD_KEYS = [
-  // cancer
-  'CANCER_BURDEN_STATS',
-  'CANCER_SCREENING_RATES',
   // continuing care
   'HOME_CARE_EXPERIENCE',
   // diagnostic estimated panels

@@ -37,8 +37,8 @@
       "status": "success",
       "recordsFetched": 152,
       "recordsWritten": 152,
-      "durationMs": 83,
-      "timestamp": "2026-07-20T10:58:04.629Z"
+      "durationMs": 137,
+      "timestamp": "2026-07-20T11:58:04.661Z"
     },
     {
       "domain": "surgical",
@@ -59,15 +59,6 @@
       "timestamp": "2026-07-19T12:00:57.771Z"
     },
     {
-      "domain": "cancer",
-      "pipeline": "ahsCancerCentresScraper",
-      "status": "partial",
-      "recordsFetched": 17,
-      "recordsWritten": 0,
-      "durationMs": 2576,
-      "timestamp": "2026-07-19T12:01:16.168Z"
-    },
-    {
       "domain": "spending",
       "pipeline": "cihiDownloader",
       "status": "success",
@@ -84,15 +75,6 @@
       "recordsWritten": 16,
       "durationMs": 4185,
       "timestamp": "2026-07-19T12:01:43.665Z"
-    },
-    {
-      "domain": "cancer",
-      "pipeline": "cihiWaitTimesDownloader",
-      "status": "success",
-      "recordsFetched": 81,
-      "recordsWritten": 81,
-      "durationMs": 5,
-      "timestamp": "2026-07-19T12:01:48.853Z"
     },
     {
       "domain": "surgical",
@@ -192,12 +174,12 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 114,
-      "timestamp": "2026-07-20T11:48:04.893Z"
+      "durationMs": 71,
+      "timestamp": "2026-07-20T11:58:04.890Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-20T11:48:04.893Z",
-  "erWaitTimesNextUpdate": "2026-07-20T11:58:05.008Z",
-  "labWaitsLastUpdate": "2026-07-20T10:58:04.629Z",
-  "labWaitsNextUpdate": "2026-07-20T11:58:04.713Z"
+  "erWaitTimesLastUpdate": "2026-07-20T11:58:04.890Z",
+  "erWaitTimesNextUpdate": "2026-07-20T12:08:04.963Z",
+  "labWaitsLastUpdate": "2026-07-20T11:58:04.661Z",
+  "labWaitsNextUpdate": "2026-07-20T12:58:04.798Z"
 }

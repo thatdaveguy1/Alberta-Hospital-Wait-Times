@@ -31,7 +31,6 @@ export function sanitizeSource(source: string): string {
   const map: Record<string, string> = {
     albertaFindAProviderScraper: 'Alberta Find a Provider',
     albertaRespiratoryVirusScraper: 'Alberta Respiratory Virus Dashboard',
-    ahsCancerCentresScraper: 'AHS Cancer Centres',
     abjhiScraper: 'ABJHI',
     aplLabWaitTimesFetcher: 'APL QMe Lab Waits',
     cihiDownloader: 'CIHI',

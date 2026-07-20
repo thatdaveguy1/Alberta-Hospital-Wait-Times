@@ -1,13 +1,12 @@
 // CIHI Priority Procedures Wait Times Fetcher
-// Fetches wait times for priority procedures (including cancer surgeries,
-// joint replacements, diagnostic imaging) from CIHI's comprehensive
-// 2008-2025 data tables XLSX.
+// Fetches wait times for priority procedures (joint replacements, diagnostic
+// imaging, and other non-cancer procedures) from CIHI's comprehensive
+// 2008-2025 data tables XLSX. Cancer-indicator rows are dropped.
 //
 // Source:
 //   https://www.cihi.ca/sites/default/files/document/wait-times-priority-procedures-in-canada-2008-2025-data-tables-en.xlsx
 //
 // Writes to:
-//   - data-cancer.json: CIHI_CANCER_WAIT_TIMES
 //   - data-surgical.json: CIHI_PRIORITY_PROCEDURE_WAITS
 //   - data-diagnostic.json: CIHI_DIAGNOSTIC_WAIT_TIMES
 
@@ -23,7 +22,6 @@ import {
 } from './metadataHelpers';
 import type { SyncResult } from './types';
 
-const CANCER_FILE = path.join(process.cwd(), 'data-cancer.json');
 const SURGICAL_FILE = path.join(process.cwd(), 'data-surgical.json');
 const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
 
@@ -57,11 +55,11 @@ interface WaitTimeRecord {
   result: string;
 }
 
-// Classify an indicator into a domain
-function classifyIndicator(indicator: string): 'cancer' | 'surgical' | 'diagnostic' {
+// Classify an indicator into a domain. Cancer / screening indicators are skipped.
+function classifyIndicator(indicator: string): 'surgical' | 'diagnostic' | null {
   const lower = indicator.toLowerCase();
   if (lower.includes('cancer') || lower.includes('mammog') || lower.includes('screen')) {
-    return 'cancer';
+    return null;
   }
   if (lower.includes('mri') || lower.includes('ct') || lower.includes('imaging') || lower.includes('ultrasound')) {
     return 'diagnostic';
@@ -150,10 +148,10 @@ export async function run(): Promise<SyncResult> {
       }
     }
 
-    // Parse rows, filter to Alberta
-    const cancerRecords: WaitTimeRecord[] = [];
+    // Parse rows, filter to Alberta (drop cancer / screening indicators)
     const surgicalRecords: WaitTimeRecord[] = [];
     const diagnosticRecords: WaitTimeRecord[] = [];
+    let skippedCancer = 0;
 
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
@@ -181,14 +179,17 @@ export async function run(): Promise<SyncResult> {
       };
 
       const domain = classifyIndicator(indicator);
-      if (domain === 'cancer') cancerRecords.push(waitRecord);
-      else if (domain === 'diagnostic') diagnosticRecords.push(waitRecord);
+      if (domain === null) {
+        skippedCancer += 1;
+        continue;
+      }
+      if (domain === 'diagnostic') diagnosticRecords.push(waitRecord);
       else surgicalRecords.push(waitRecord);
     }
 
-    console.log(`[CihiWaitTimesPriority] Alberta records: cancer=${cancerRecords.length}, surgical=${surgicalRecords.length}, diagnostic=${diagnosticRecords.length}`);
+    console.log(`[CihiWaitTimesPriority] Alberta records: surgical=${surgicalRecords.length}, diagnostic=${diagnosticRecords.length}, skippedCancer=${skippedCancer}`);
 
-    const totalRecords = cancerRecords.length + surgicalRecords.length + diagnosticRecords.length;
+    const totalRecords = surgicalRecords.length + diagnosticRecords.length;
     if (totalRecords === 0) {
       console.warn('[CihiWaitTimesPriority] No Alberta records found');
       return {
@@ -203,30 +204,7 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // Write to domain files
-    if (cancerRecords.length > 0) {
-      const existing = loadJsonFile(CANCER_FILE);
-      const ownedMetadata: DataMetadata = {
-        CIHI_CANCER_WAIT_TIMES: buildMetadataEntry({
-          updateType: 'auto',
-          source: 'CIHI Wait Times Priority Procedures in Canada',
-          sourceVintage: '2008–2025',
-          lastUpdated: timestamp,
-        }),
-      };
-      const merged = {
-        ...existing,
-        CIHI_CANCER_WAIT_TIMES: cancerRecords,
-        _dataMetadata: mergeDataMetadata(
-          existing._dataMetadata as DataMetadata | undefined,
-          ownedMetadata,
-        ),
-      };
-      applyWithheldPayloadGuard(merged);
-      fs.writeFileSync(CANCER_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
-      console.log(`[CihiWaitTimesPriority] Wrote ${cancerRecords.length} cancer records to data-cancer.json`);
-    }
-
+    // Write to domain files (surgical + diagnostic only)
     if (surgicalRecords.length > 0) {
       const existing = loadJsonFile(SURGICAL_FILE);
       const ownedMetadata: DataMetadata = {

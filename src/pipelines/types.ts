@@ -37,7 +37,6 @@ export const DOMAINS = [
   'disruptions',
   'surgical',
   'diagnostic',
-  'cancer',
   'primary-care',
   'public-health',
   'regional-inequity',

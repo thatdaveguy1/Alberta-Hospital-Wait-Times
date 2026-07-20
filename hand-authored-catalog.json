@@ -187,28 +187,6 @@
     "notes": "Alberta Health publishes priority-tier compliance % for CT/MRI in performance reports. Scrape the performance-report tables."
   },
   {
-    "tab": "Cancer",
-    "array": "CANCER_BURDEN_STATS",
-    "records": 6,
-    "description": "Cancer burden by type: projected cases/deaths 2026, crude & age-standardized incidence/mortality rates, 5-yr relative survival %.",
-    "source_exists": true,
-    "source_name": "Alberta Cancer Registry / CancerControl Alberta + StatsCan cancer projections",
-    "source_url": "https://www.albertahealthservices.ca/cancer/Page14313.aspx",
-    "automation": "MEDIUM",
-    "notes": "Alberta Cancer Registry annual report publishes incidence/mortality/survival by cancer type. StatsCan provides national projections. Parse the annual PDF/Excel tables."
-  },
-  {
-    "tab": "Cancer",
-    "array": "CANCER_SCREENING_RATES",
-    "records": 6,
-    "description": "Cancer screening rates by zone: breast, cervical, colorectal screening %, lung screening enrollment count.",
-    "source_exists": true,
-    "source_name": "Alberta Health Screening Program reports / HQCA",
-    "source_url": "https://www.alberta.ca/cancer-screening-programs",
-    "automation": "MEDIUM",
-    "notes": "Alberta Health publishes screening participation rates by zone for breast/cervical/colorectal programs in periodic reports. Scrape the program reports."
-  },
-  {
     "tab": "Public Health",
     "array": "RESPIRATORY_VIRUS_SURVEILLANCE",
     "records": 8,

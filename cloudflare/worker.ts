@@ -35,7 +35,7 @@ app.use('*', cors({
 
 // Domain whitelist — must match the local server whitelist
 const DOMAIN_WHITELIST = new Set([
-  'er-waittimes', 'disruptions', 'surgical', 'diagnostic', 'cancer',
+  'er-waittimes', 'disruptions', 'surgical', 'diagnostic',
   'primary-care',
   'public-health', 'regional-inequity', 'spending',
   'sync-status',
