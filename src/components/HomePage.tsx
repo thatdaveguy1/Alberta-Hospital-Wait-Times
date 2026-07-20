@@ -28,6 +28,7 @@ import {
   saveLocation,
   type UserLocation,
 } from '../lib/geo';
+import { isLabWaitUnavailable, type LabWaitFields } from '../lib/labWait';
 import { formatMinutesToHm } from '../lib/utils';
 import { formatRelativeTime } from '../hooks/useSyncStatus';
 import { WaitBandChip } from './WaitBandChip';
@@ -65,17 +66,10 @@ function median(sortedNums: number[]): number | null {
     : sortedNums[mid];
 }
 
-function isLabWaitUnavailable(lab: Pick<LabLocationWait, 'waitTimeMin' | 'walkInAvailable'>): boolean {
-  if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') return true;
-  if (typeof lab.waitTimeMin === 'number') {
-    return lab.waitTimeMin === 0 && !lab.walkInAvailable;
-  }
-  return true;
-}
-
-function labWaitBand(lab: Pick<LabLocationWait, 'waitTimeMin' | 'walkInAvailable'>): WaitBand {
+function labWaitBand(lab: LabWaitFields): WaitBand {
   if (lab.waitTimeMin === 'Closed') return 'closed';
-  if (isLabWaitUnavailable(lab)) return 'unavailable';
+  // Not Available (and Appointments Only / non-queue zeros) → unavailable, never closed.
+  if (lab.waitTimeMin === 'Not Available' || isLabWaitUnavailable(lab)) return 'unavailable';
   const mins = lab.waitTimeMin as number;
   if (mins > 45) return 'high';
   if (mins > 30) return 'moderate';

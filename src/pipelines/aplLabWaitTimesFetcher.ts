@@ -18,14 +18,16 @@ import {
   mergeDataMetadata,
   type DataMetadata,
 } from './metadataHelpers';
+import { parseAplWaitTime } from '../lib/labWait';
 import type { SyncResult } from './types';
 const APL_API_URL = 'https://qmeapi.albertaprecisionlabs.ca/api/location';
 const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
 const LAB_SNAPSHOTS_FILE = path.join(process.cwd(), 'data-lab-snapshots.json');
 
 // Snapshot shape for historical lab wait trends — numeric waits only.
-// Sentinel values ('Appointments Only' / 'Closed') are NOT logged so trend
-// charts stay purely numeric, mirroring the ER fetcher's waitTime >= 0 guard.
+// Sentinel values ('Appointments Only' / 'Closed' / 'Not Available') are NOT
+// logged so trend charts stay purely numeric, mirroring the ER fetcher's
+// waitTime >= 0 guard.
 export interface LabWaitSnapshot {
   labId: string;
   waitTime: number;
@@ -70,34 +72,6 @@ interface AplSite {
   Latitude: string;
   Longitude: string;
   SaveMyPlace: boolean;
-}
-
-// Parse the WaitTime string into a number of minutes or a sentinel string.
-// Handles: "Closed", "Appointments Only", "45 min", "1 hr 30 min", "2 hr", bare numbers.
-function parseWaitTime(waitStr: string): number | 'Appointments Only' | 'Closed' {
-  if (!waitStr || typeof waitStr !== 'string') return 'Closed';
-
-  const lower = waitStr.toLowerCase().trim();
-
-  if (lower === 'closed' || lower === '' || lower === 'n/a') return 'Closed';
-  if (lower.includes('appointment')) return 'Appointments Only';
-
-  let totalMins = 0;
-  const hrMatch = lower.match(/(\d+)\s*hr/);
-  const minMatch = lower.match(/(\d+)\s*min/);
-
-  if (hrMatch) totalMins += parseInt(hrMatch[1], 10) * 60;
-  if (minMatch) totalMins += parseInt(minMatch[1], 10);
-
-  if (hrMatch || minMatch) return totalMins;
-
-  // Bare number — try to parse directly
-  const bareNum = parseInt(lower.replace(/[^0-9]/g, ''), 10);
-  if (!isNaN(bareNum) && bareNum > 0) return bareNum;
-
-  // Unknown format — safe default
-  console.warn(`[AplLabWaitTimesFetcher] Unknown WaitTime format: "${waitStr}" — defaulting to Closed`);
-  return 'Closed';
 }
 
 // Derive walkInAvailable and appointmentRequired from the API's free-text fields.
@@ -148,7 +122,7 @@ export async function run(): Promise<SyncResult> {
       address: site.Address,
       city: site.City,
       region: site.Region as 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'South Zone' | 'North Zone',
-      waitTimeMin: parseWaitTime(site.WaitTime),
+      waitTimeMin: parseAplWaitTime(site.WaitTime),
       saveMyPlaceAvailable: site.SaveMyPlace,
       appointmentRequired: deriveAppointmentRequired(site),
       walkInAvailable: deriveWalkIn(site),
@@ -200,7 +174,7 @@ export async function run(): Promise<SyncResult> {
     fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(existingData, null, 2), 'utf8');
     console.log(`[AplLabWaitTimesFetcher] Wrote ${labLocations.length} lab locations to data-diagnostic.json`);
     // Append numeric-only wait snapshots for historical trend charting.
-    // Sentinel values ('Appointments Only' / 'Closed') are skipped so trends stay numeric.
+    // Sentinel values ('Appointments Only' / 'Closed' / 'Not Available') are skipped.
     for (const lab of labLocations) {
       if (typeof lab.waitTimeMin === 'number' && lab.waitTimeMin >= 0) {
         currentLabSnapshots.push({

@@ -2,6 +2,8 @@
 // Compiled from Alberta Precision Labs (APL) QMe JSON operational data, 
 // CIHI CT/MRI wait-time indicators, Alberta Wait Times Reporting, and AHS Implementation Plans.
 
+import type { LabWaitValue } from './lib/labWait';
+
 export interface LabLocationWait {
   id: string;
   name: string;
@@ -9,7 +11,7 @@ export interface LabLocationWait {
   address: string;
   city: string;
   region: 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'South Zone' | 'North Zone';
-  waitTimeMin: number | 'Appointments Only' | 'Closed';
+  waitTimeMin: LabWaitValue;
   saveMyPlaceAvailable: boolean;
   appointmentRequired: boolean;
   walkInAvailable: boolean;

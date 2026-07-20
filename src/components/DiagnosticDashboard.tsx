@@ -57,6 +57,11 @@ import {
   LocationUnavailableModal,
   useLocationUnavailableModal,
 } from './LocationUnavailableModal';
+import {
+  isLabWaitUnavailable,
+  labWaitUnavailableDetail,
+  unavailableWaitLabel,
+} from '../lib/labWait';
 import { cn, formatMinutesToHm } from '../lib/utils';
 import { LabCard, type LabCardData } from './LabCard';
 
@@ -196,31 +201,11 @@ export default function DiagnosticDashboard() {
     refresh();
     setRefreshing(false);
   };
-  const isLabWaitUnavailable = (lab: LabLocationWait): boolean => {
-    if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') return true;
-    if (typeof lab.waitTimeMin === 'number') {
-      return lab.waitTimeMin === 0 && !lab.walkInAvailable;
-    }
-    return true;
-  };
-
-  const unavailableWaitLabel = (lab: LabLocationWait): string => {
-    if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') {
-      return lab.waitTimeMin;
-    }
-    if (typeof lab.waitTimeMin === 'number' && lab.waitTimeMin === 0 && !lab.walkInAvailable) {
-      return 'Closed';
-    }
-    return 'Unavailable';
-  };
-
   const getLabStatus = (lab: LabLocationWait): { label: string; detail: string } => {
     if (isLabWaitUnavailable(lab)) {
       return {
         label: unavailableWaitLabel(lab),
-        detail: lab.waitTimeMin === 'Appointments Only'
-          ? 'Appointment-only site; no walk-in wait estimate'
-          : 'Lab is closed or has no open walk-in hours right now',
+        detail: labWaitUnavailableDetail(lab),
       };
     }
     return { label: formatMinutesToHm(lab.waitTimeMin as number), detail: 'Live wait from APL QMe' };
@@ -1124,7 +1109,7 @@ export default function DiagnosticDashboard() {
                       <span>{processedLabs.find(l => l.id === selectedLabId)?.name ?? selectedLabId} — Wait Time Trend</span>
                     </h3>
                     <p className="text-xs text-ink-2 max-w-3xl leading-relaxed">
-                      Historical wait time for this lab site, sampled every 60 minutes from live APL QMe API data. Only numeric wait times are charted; 'Appointments Only' and 'Closed' states are excluded.
+                      Historical wait time for this lab site, sampled every 60 minutes from live APL QMe API data. Only numeric wait times are charted; 'Appointments Only', 'Closed', and 'Not Available' states are excluded.
                     </p>
                   </div>
 

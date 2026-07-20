@@ -2,6 +2,11 @@
 
 import React from 'react';
 import { MapPin, Clock, Compass, Navigation, ChevronRight } from 'lucide-react';
+import {
+  isLabWaitUnavailable,
+  unavailableWaitLabel,
+  type LabWaitValue,
+} from '../lib/labWait';
 import { cn, formatMinutesToHm } from '../lib/utils';
 
 export interface LabCardData {
@@ -12,7 +17,7 @@ export interface LabCardData {
   address?: string;
   distance?: number;
   driveMins?: number;
-  waitTimeMin: number | 'Appointments Only' | 'Closed';
+  waitTimeMin: LabWaitValue;
   code: string;
   walkInAvailable: boolean;
   appointmentRequired: boolean;
@@ -27,29 +32,11 @@ interface LabCardProps {
   key?: React.Key;
 }
 
-function isLabWaitUnavailable(lab: LabCardData): boolean {
-  if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') return true;
-  if (typeof lab.waitTimeMin === 'number') {
-    return lab.waitTimeMin === 0 && !lab.walkInAvailable;
-  }
-  return true;
-}
-
-function unavailableWaitLabel(lab: LabCardData): string {
-  if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') {
-    return lab.waitTimeMin;
-  }
-  if (typeof lab.waitTimeMin === 'number' && lab.waitTimeMin === 0 && !lab.walkInAvailable) {
-    return 'Closed';
-  }
-  return 'Unavailable';
-}
-
-
 export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCardProps): React.ReactElement {
   const isUnavailable = isLabWaitUnavailable(lab);
   const isAppointmentsOnly = lab.waitTimeMin === 'Appointments Only';
   const isClosed = lab.waitTimeMin === 'Closed';
+  const isNotAvailable = lab.waitTimeMin === 'Not Available';
   const waitTime = typeof lab.waitTimeMin === 'number' ? lab.waitTimeMin : 0;
   const hasDrive = lab.distance !== undefined && lab.driveMins !== undefined;
   let waitTone = 'text-ink-3';
@@ -138,6 +125,11 @@ export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCard
           {isClosed && (
             <span className="inline-flex shrink-0 items-center rounded-full bg-crit-soft px-2 py-0.5 text-xs font-medium text-crit">
               Closed
+            </span>
+          )}
+          {isNotAvailable && (
+            <span className="inline-flex shrink-0 items-center rounded-full bg-neutral-chip px-2 py-0.5 text-xs font-medium text-ink-2">
+              Not Available
             </span>
           )}
         </div>
