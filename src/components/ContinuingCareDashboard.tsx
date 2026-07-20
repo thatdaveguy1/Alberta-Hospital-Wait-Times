@@ -1,12 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   MapPin,
   AlertTriangle,
-  TrendingUp,
-  TrendingDown,
-  CheckCircle2,
   Info,
   Activity,
   Award,
@@ -18,8 +14,8 @@ import {
 } from 'lucide-react';
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   BarChart,
   Bar,
   XAxis,
@@ -27,6 +23,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  ReferenceLine,
 } from 'recharts';
 import type {
   PlacementMetric,
@@ -44,7 +41,16 @@ type ContinuingCareData = {
   CONTINUING_CARE_COMPLIANCE: CareFacilityCompliance[];
 };
 
-type PlacementKpiKey = 'daysWaitingP50' | 'pctPlacedWithin30Days';
+type PlacementKpiKey = 'pctPlacedWithin30Days' | 'pctPlacedPreferredOption';
+
+const PLACEMENT_ZONE_COLORS: Record<string, string> = {
+  Alberta: 'oklch(0.45 0.02 255)',
+  'Calgary Zone': 'oklch(0.68 0.13 252)',
+  'Edmonton Zone': 'oklch(0.65 0.12 155)',
+  'Central Zone': 'oklch(0.7 0.14 85)',
+  'South Zone': 'oklch(0.7 0.15 350)',
+  'North Zone': 'oklch(0.6 0.12 270)',
+};
 
 function avgNumeric(values: Array<number | null | undefined>): number | null {
   const nums = values.filter((v): v is number => typeof v === 'number' && !isNaN(v));
@@ -58,15 +64,32 @@ function formatOptional(value: number | null, opts: { digits?: number; suffix?: 
   return `${value.toFixed(digits)}${suffix}`;
 }
 
+function pivotPlacementMetric(
+  rows: Array<{ year: string; zone: string; pctPlacedWithin30Days: number; pctPlacedPreferredOption: number }>,
+  metric: 'pctPlacedWithin30Days' | 'pctPlacedPreferredOption',
+  years: string[],
+  zones: string[],
+): Array<Record<string, string | number | null>> {
+  return years.map((year) => {
+    const point: Record<string, string | number | null> = { year };
+    for (const zone of zones) {
+      const row = rows.find((r) => r.year === year && r.zone === zone);
+      const val = row?.[metric];
+      point[zone] = typeof val === 'number' && !Number.isNaN(val) ? val : null;
+    }
+    return point;
+  });
+}
+
 export default function ContinuingCareDashboard() {
   const { data, metadata, isLoading, error, refresh } = useDomainData<ContinuingCareData>('continuing-care', continuingCareData);
   const [activeSubTab, setActiveSubTab] = useState<'placement' | 'resident-quality' | 'compliance'>('placement');
 
-  // Interactive KPI selected state for historical trend panel
-  const [selectedKpi, setSelectedKpi] = useState<PlacementKpiKey | null>(null);
+  // Focus highlight for which placement KPI/chart is emphasized (both charts always visible)
+  const [selectedKpi, setSelectedKpi] = useState<PlacementKpiKey | null>('pctPlacedWithin30Days');
 
-  // Normalize placement stats: treat daysWaitingP50/P90 == 0 as missing (null) so the chart
-  // does not draw a misleading flat line across years without real wait-time data.
+  // Normalize placement stats: treat daysWaitingP50/P90 == 0 as missing (null) so we never
+  // invent wait-day trends from zero placeholders.
   const placementStats = useMemo(() => {
     return (data?.CONTINUING_CARE_PLACEMENT_STATS ?? []).map((r) => ({
       ...r,
@@ -74,18 +97,6 @@ export default function ContinuingCareDashboard() {
       daysWaitingP90: r.daysWaitingP90 === 0 || r.daysWaitingP90 === undefined ? null : r.daysWaitingP90,
     }));
   }, [data]);
-
-  const hasWaitDayData = useMemo(
-    () => placementStats.some((r) => r.daysWaitingP50 != null || r.daysWaitingP90 != null),
-    [placementStats]
-  );
-
-  // Drop daysWaitingP50 selection when no non-null wait values exist
-  useEffect(() => {
-    if (!hasWaitDayData && selectedKpi === 'daysWaitingP50') {
-      setSelectedKpi(null);
-    }
-  }, [hasWaitDayData, selectedKpi]);
 
   const qualityOutcomes = useMemo(
     () => data?.RESIDENT_QUALITY_OUTCOMES ?? [],
@@ -110,110 +121,6 @@ export default function ContinuingCareDashboard() {
       setQualityMetricSelected('All');
     }
   }, [availableQualityMetrics, qualityMetricSelected]);
-
-  const kpiStats = useMemo(() => {
-    if (!selectedKpi) return null;
-    if (selectedKpi === 'daysWaitingP50' && !hasWaitDayData) return null;
-
-    const yearlyData = ['2021', '2023', '2025'].map((y) => {
-      const records = placementStats.filter(
-        (r) => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone')
-      );
-      return avgNumeric(records.map((r) => r[selectedKpi]));
-    });
-
-    const present = yearlyData.filter((v): v is number => v !== null);
-    if (present.length === 0) return null;
-
-    const baseline = yearlyData[0];
-    const latest = yearlyData[yearlyData.length - 1];
-    const peak = Math.max(...present);
-    const rawDelta =
-      baseline !== null && latest !== null ? latest - baseline : null;
-    const pctChange =
-      baseline !== null && baseline !== 0 && rawDelta !== null
-        ? (rawDelta / baseline) * 100
-        : null;
-
-    return {
-      baseline: formatOptional(baseline),
-      latest: formatOptional(latest),
-      peak: formatOptional(peak),
-      delta:
-        rawDelta === null
-          ? 'N/A'
-          : rawDelta > 0
-            ? `+${rawDelta.toFixed(1)}`
-            : rawDelta.toFixed(1),
-      pctChange:
-        pctChange === null
-          ? 'N/A'
-          : pctChange > 0
-            ? `+${pctChange.toFixed(1)}%`
-            : `${pctChange.toFixed(1)}%`,
-      isIncrease: rawDelta !== null ? rawDelta > 0 : false,
-      hasDelta: rawDelta !== null,
-    };
-  }, [selectedKpi, placementStats, hasWaitDayData]);
-
-  const selectedKpiDetails = useMemo(() => {
-    if (!selectedKpi) return null;
-    if (selectedKpi === 'daysWaitingP50' && !hasWaitDayData) return null;
-    switch (selectedKpi) {
-      case 'pctPlacedWithin30Days':
-        return {
-          label: 'Average Placement within 30 Days',
-          description:
-            'Historical trend of patients placed into continuing care facilities within 30 days of their clinical assessment (Calgary and Edmonton Zone average). Target is 60% or higher.',
-          colorClass: 'text-ok',
-          bgClass: 'bg-ok-soft',
-          strokeColor: 'oklch(0.65 0.12 155)',
-          gradientId: 'colorPlacementTrend',
-          unit: '%',
-          icon: CheckCircle2,
-        };
-      case 'daysWaitingP50':
-        return {
-          label: 'Median Wait Days to Placement',
-          description:
-            'Historical trend of median (P50) wait times (days) from assessment to continuing care admission (Calgary and Edmonton Zone average). Lower is better.',
-          colorClass: 'text-accent',
-          bgClass: 'bg-accent-soft',
-          strokeColor: 'oklch(0.68 0.13 252)',
-          gradientId: 'colorWaitTrend',
-          unit: ' Days',
-          icon: Clock,
-        };
-      default:
-        return null;
-    }
-  }, [selectedKpi, hasWaitDayData]);
-
-  const trendData = useMemo(() => {
-    if (!selectedKpi) return [];
-    if (selectedKpi === 'daysWaitingP50' && !hasWaitDayData) return [];
-    return ['2021', '2023', '2025'].map((y) => {
-      const records = placementStats.filter(
-        (r) => r.year === y && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone')
-      );
-      const val = avgNumeric(records.map((r) => r[selectedKpi]));
-      // null (not 0) when no real values — chart leaves a gap rather than fabricating zero
-      return { year: y, value: val };
-    });
-  }, [selectedKpi, placementStats, hasWaitDayData]);
-
-  const hasTrendPoints = useMemo(
-    () => trendData.some((d) => d.value !== null),
-    [trendData]
-  );
-
-  // Filter Placement Metrics by Zone
-  const filteredPlacementData = useMemo(() => {
-    if (selectedZone === 'All') {
-      return placementStats;
-    }
-    return placementStats.filter((p) => p.zone === selectedZone);
-  }, [selectedZone, placementStats]);
 
   // Filter Quality Metrics — only metrics present in upstream data
   const filteredQualityData = useMemo(() => {
@@ -243,33 +150,71 @@ export default function ContinuingCareDashboard() {
     return { totalFacilities, complianceRate, totalViolations };
   }, [data]);
 
-  const placementKpis = useMemo(() => {
-    const records2025 = placementStats.filter(
-      (r) => r.year === '2025' && (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone')
-    );
-    // Fall back to latest year present if 2025 rows are absent
-    const years = Array.from(new Set(placementStats.map((r) => r.year))).sort();
-    const latestYear = years[years.length - 1];
-    const records =
-      records2025.length > 0
-        ? records2025
-        : placementStats.filter(
-            (r) =>
-              r.year === latestYear &&
-              (r.zone === 'Calgary Zone' || r.zone === 'Edmonton Zone')
-          );
-
-    return {
-      within30: avgNumeric(records.map((r) => r.pctPlacedWithin30Days)),
-      preferred: avgNumeric(records.map((r) => r.pctPlacedPreferredOption)),
-      waitP50: avgNumeric(records.map((r) => r.daysWaitingP50)),
-      labelYear: records2025.length > 0 ? '2025' : latestYear ?? null,
-    };
+  const placementYears = useMemo(() => {
+    return Array.from(new Set(placementStats.map((r) => r.year))).sort();
   }, [placementStats]);
 
   const placementZones = useMemo(() => {
     return Array.from(new Set(placementStats.map((p) => p.zone))).sort();
   }, [placementStats]);
+
+  const placementChartZones = useMemo(() => {
+    if (selectedZone === 'All') return placementZones;
+    return placementZones.filter((z) => z === selectedZone);
+  }, [selectedZone, placementZones]);
+
+  const placementTrendWithin30 = useMemo(
+    () => pivotPlacementMetric(placementStats, 'pctPlacedWithin30Days', placementYears, placementZones),
+    [placementStats, placementYears, placementZones]
+  );
+
+  const placementTrendPreferred = useMemo(
+    () => pivotPlacementMetric(placementStats, 'pctPlacedPreferredOption', placementYears, placementZones),
+    [placementStats, placementYears, placementZones]
+  );
+
+  const latestYearPlacementByZone = useMemo(() => {
+    const latestYear = placementYears[placementYears.length - 1];
+    if (!latestYear) return [] as Array<{ zone: string; within30: number | null; preferred: number | null }>;
+    return placementZones.map((zone) => {
+      const row = placementStats.find((r) => r.year === latestYear && r.zone === zone);
+      return {
+        zone,
+        within30: typeof row?.pctPlacedWithin30Days === 'number' ? row.pctPlacedWithin30Days : null,
+        preferred: typeof row?.pctPlacedPreferredOption === 'number' ? row.pctPlacedPreferredOption : null,
+      };
+    });
+  }, [placementStats, placementYears, placementZones]);
+
+  const placementKpis = useMemo(() => {
+    const years = placementYears;
+    const latestYear = years[years.length - 1] ?? null;
+
+    // Prefer Alberta latest-year row for headline KPIs; else fall back to latest year available
+    const albertaLatest = latestYear
+      ? placementStats.find((r) => r.year === latestYear && r.zone === 'Alberta')
+      : undefined;
+
+    if (albertaLatest) {
+      return {
+        within30: typeof albertaLatest.pctPlacedWithin30Days === 'number' ? albertaLatest.pctPlacedWithin30Days : null,
+        preferred: typeof albertaLatest.pctPlacedPreferredOption === 'number' ? albertaLatest.pctPlacedPreferredOption : null,
+        waitP50: albertaLatest.daysWaitingP50 ?? null,
+        labelYear: latestYear,
+        labelZone: 'Alberta' as const,
+      };
+    }
+
+    // No Alberta row — average whatever zones exist for the latest year
+    const latestRows = latestYear ? placementStats.filter((r) => r.year === latestYear) : [];
+    return {
+      within30: avgNumeric(latestRows.map((r) => r.pctPlacedWithin30Days)),
+      preferred: avgNumeric(latestRows.map((r) => r.pctPlacedPreferredOption)),
+      waitP50: avgNumeric(latestRows.map((r) => r.daysWaitingP50)),
+      labelYear: latestYear,
+      labelZone: null as string | null,
+    };
+  }, [placementStats, placementYears]);
 
   if (isLoading) {
     return (
@@ -377,17 +322,11 @@ export default function ContinuingCareDashboard() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div
                   tabIndex={0}
-                  onClick={() =>
-                    setSelectedKpi(
-                      selectedKpi === 'pctPlacedWithin30Days' ? null : 'pctPlacedWithin30Days'
-                    )
-                  }
+                  onClick={() => setSelectedKpi('pctPlacedWithin30Days')}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      setSelectedKpi(
-                        selectedKpi === 'pctPlacedWithin30Days' ? null : 'pctPlacedWithin30Days'
-                      );
+                      setSelectedKpi('pctPlacedWithin30Days');
                     }
                   }}
                   className={`cursor-pointer space-y-1 rounded-xl border bg-surface p-4 text-left transition-all hover:border-line-2 ${
@@ -406,73 +345,34 @@ export default function ContinuingCareDashboard() {
                     <span className="text-xs font-medium font-mono text-ink-2">Target: 60%+</span>
                   </div>
                   <p className="border-t border-line pt-1 text-xs text-ink-2">
-                    Share of assessed patients placed into continuing care within 30 days
+                    Alberta share placed into continuing care within 30 days
                     {placementKpis.labelYear ? ` (${placementKpis.labelYear})` : ''}.
                   </p>
-                  <div className="flex items-center gap-1 pt-1.5 text-[10px] font-medium text-ok transition-colors">
+                  <div className="flex items-center gap-1 pt-1.5 text-[10px] font-medium text-ok">
                     <BarChart2 className="w-3 h-3" />
                     <span>
-                      {selectedKpi === 'pctPlacedWithin30Days'
-                        ? 'Active: Hide Trend'
-                        : 'Click to View Trend'}
+                      {selectedKpi === 'pctPlacedWithin30Days' ? 'Focused trend' : 'Click to focus trend'}
                     </span>
                   </div>
                 </div>
 
                 <div
-                  tabIndex={hasWaitDayData ? 0 : undefined}
-                  onClick={() => {
-                    if (!hasWaitDayData) return;
-                    setSelectedKpi(selectedKpi === 'daysWaitingP50' ? null : 'daysWaitingP50');
-                  }}
+                  tabIndex={0}
+                  onClick={() => setSelectedKpi('pctPlacedPreferredOption')}
                   onKeyDown={(e) => {
-                    if (!hasWaitDayData) return;
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      setSelectedKpi(selectedKpi === 'daysWaitingP50' ? null : 'daysWaitingP50');
+                      setSelectedKpi('pctPlacedPreferredOption');
                     }
                   }}
-                  className={`space-y-1 rounded-xl border bg-surface p-4 text-left transition-all ${
-                    hasWaitDayData
-                      ? `cursor-pointer hover:border-line-2 ${
-                          selectedKpi === 'daysWaitingP50'
-                            ? 'border-accent bg-accent-soft'
-                            : 'border-line'
-                        }`
-                      : 'border-line opacity-90'
+                  className={`cursor-pointer space-y-1 rounded-xl border bg-surface p-4 text-left transition-all hover:border-line-2 ${
+                    selectedKpi === 'pctPlacedPreferredOption'
+                      ? 'border-accent bg-accent-soft'
+                      : 'border-line'
                   }`}
                 >
                   <span className="block text-xs font-medium text-ink-3">
-                    Median Wait Days (Calgary & Edmonton)
-                  </span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-semibold font-mono tabular-nums text-ink">
-                      {placementKpis.waitP50 === null
-                        ? 'N/A'
-                        : `${placementKpis.waitP50.toFixed(0)} days`}
-                    </span>
-                    <span className="text-xs font-medium font-mono text-ink-2">P50 benchmark</span>
-                  </div>
-                  <p className="border-t border-line pt-1 text-xs text-ink-2">
-                    {hasWaitDayData
-                      ? 'Median days from assessment to continuing care admission when wait data is reported.'
-                      : 'Wait-day values are not available in the current upstream feed.'}
-                  </p>
-                  <div className="flex items-center gap-1 pt-1.5 text-[10px] font-medium text-accent">
-                    <BarChart2 className="w-3 h-3" />
-                    <span>
-                      {!hasWaitDayData
-                        ? 'No trend data'
-                        : selectedKpi === 'daysWaitingP50'
-                          ? 'Active: Hide Trend'
-                          : 'Click to View Trend'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-1 rounded-xl border border-line bg-surface p-4">
-                  <span className="block text-xs font-medium text-ink-3">
-                    Preferred Option Placement Rate
+                    Preferred Option Rate
                   </span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-semibold font-mono tabular-nums text-ok">
@@ -481,347 +381,227 @@ export default function ContinuingCareDashboard() {
                     <span className="text-xs font-medium font-mono text-ink-2">Target: 70%+</span>
                   </div>
                   <p className="border-t border-line pt-1 text-xs text-ink-2">
-                    Share of placements into the resident&apos;s preferred living option
+                    Alberta share of placements into the resident&apos;s preferred living option
                     {placementKpis.labelYear ? ` (${placementKpis.labelYear})` : ''}.
                   </p>
-                  <div className="flex items-center gap-1 pt-1.5 text-[10px] font-medium text-ink-3">
-                    <span>No Trend Data Available</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trend Panel */}
-              <AnimatePresence mode="wait">
-                {selectedKpi && selectedKpiDetails && kpiStats && hasTrendPoints && (
-                  <motion.div
-                    key={`kpi-trend-${selectedKpi}`}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="space-y-4 rounded-xl border border-line bg-surface p-4 sm:p-5">
-                      <div className="flex flex-col justify-between gap-4 border-b border-line pb-3 sm:flex-row sm:items-center">
-                        <div className="space-y-1">
-                          <h3 className="flex items-center gap-2 text-sm font-semibold text-ink">
-                            {React.createElement(selectedKpiDetails.icon, {
-                              className: `h-4 w-4 ${selectedKpiDetails.colorClass}`,
-                            })}
-                            <span>{selectedKpiDetails.label} Historical Trend Explorer</span>
-                          </h3>
-                          <p className="max-w-3xl text-xs leading-relaxed text-ink-2">
-                            {selectedKpiDetails.description}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3 rounded-xl border border-line bg-paper p-3 sm:grid-cols-4">
-                        <div className="space-y-1 text-center sm:text-left">
-                          <span className="block text-xs font-medium text-ink-3">
-                            Baseline (2021)
-                          </span>
-                          <span className="text-xl font-semibold font-mono tabular-nums text-ink">
-                            {kpiStats.baseline}
-                            {kpiStats.baseline !== 'N/A' ? selectedKpiDetails.unit : ''}
-                          </span>
-                        </div>
-                        <div className="space-y-1 text-center sm:text-left">
-                          <span className="block text-xs font-medium text-ink-3">
-                            Current (2025)
-                          </span>
-                          <span className="text-xl font-semibold font-mono tabular-nums text-ink">
-                            {kpiStats.latest}
-                            {kpiStats.latest !== 'N/A' ? selectedKpiDetails.unit : ''}
-                          </span>
-                        </div>
-                        <div className="space-y-1 text-center sm:text-left">
-                          <span className="block text-xs font-medium text-ink-3">
-                            Peak
-                          </span>
-                          <span
-                            className={`text-xl font-semibold font-mono tabular-nums ${selectedKpiDetails.colorClass}`}
-                          >
-                            {kpiStats.peak}
-                            {kpiStats.peak !== 'N/A' ? selectedKpiDetails.unit : ''}
-                          </span>
-                        </div>
-                        <div className="space-y-1 text-center sm:text-left">
-                          <span className="block text-xs font-medium text-ink-3">
-                            Overall Shift
-                          </span>
-                          {kpiStats.hasDelta ? (
-                            <span
-                              className={`flex items-center justify-center gap-1 text-xs font-semibold sm:justify-start ${
-                                kpiStats.isIncrease ? 'text-crit' : 'text-ok'
-                              }`}
-                            >
-                              {kpiStats.isIncrease ? (
-                                <TrendingUp className="h-4 w-4 shrink-0" />
-                              ) : (
-                                <TrendingDown className="h-4 w-4 shrink-0" />
-                              )}
-                              <span>
-                                {kpiStats.delta}
-                                {selectedKpiDetails.unit} ({kpiStats.pctChange})
-                              </span>
-                            </span>
-                          ) : (
-                            <span className="text-xs font-semibold text-ink-3">N/A</span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="h-60 mt-3 pt-3">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart
-                            data={trendData}
-                            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                          >
-                            <defs>
-                              <linearGradient
-                                id={selectedKpiDetails.gradientId}
-                                x1="0"
-                                y1="0"
-                                x2="0"
-                                y2="1"
-                              >
-                                <stop
-                                  offset="5%"
-                                  stopColor={selectedKpiDetails.strokeColor}
-                                  stopOpacity={0.2}
-                                />
-                                <stop
-                                  offset="95%"
-                                  stopColor={selectedKpiDetails.strokeColor}
-                                  stopOpacity={0}
-                                />
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
-                            <XAxis dataKey="year" stroke="oklch(0.62 0.02 255)" fontSize={10} />
-                            <YAxis stroke="oklch(0.62 0.02 255)" fontSize={10} unit={selectedKpiDetails.unit} />
-                            <Tooltip
-                              contentStyle={{
-                                backgroundColor: 'oklch(0.2 0.022 255)',
-                                border: '1px solid oklch(0.28 0.02 255)',
-                                borderRadius: '8px',
-                              }}
-                              itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
-                              labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
-                            />
-                            <Area
-                              type="monotone"
-                              dataKey="value"
-                              name={selectedKpiDetails.label}
-                              stroke={selectedKpiDetails.strokeColor}
-                              strokeWidth={2.5}
-                              fillOpacity={1}
-                              fill={`url(#${selectedKpiDetails.gradientId})`}
-                              dot={{ r: 4, strokeWidth: 1 }}
-                              connectNulls={false}
-                              isAnimationActive={false}
-                            />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                {/* Placement Chart */}
-                <div className="space-y-4 rounded-xl border border-line bg-surface p-5 lg:col-span-2">
-                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                    <div>
-                      <h3 className="text-sm font-semibold text-ink-2">
-                        Wait times & Placement Timelines
-                      </h3>
-                      <p className="text-xs text-ink-3">
-                        Tracking median (P50) and 90th percentile (P90) wait times from assessment
-                        to placement
-                      </p>
-                    </div>
-
-                    <div className="relative">
-                      <select
-                        value={selectedZone}
-                        onChange={(e) => setSelectedZone(e.target.value)}
-                        className="rounded-lg border border-line bg-paper px-2.5 py-1 text-xs text-ink focus:border-accent focus:outline-none"
-                      >
-                        <option value="All">All zones</option>
-                        {placementZones.map((zone) => (
-                          <option key={zone} value={zone}>
-                            {zone}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  {!hasWaitDayData ? (
-                    <div className="flex h-64 flex-col items-center justify-center gap-2 text-sm text-ink-3">
-                      <AlertTriangle className="h-5 w-5 text-warn" />
-                      <span>No wait-day values reported for the selected data.</span>
-                    </div>
-                  ) : (
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart
-                          data={filteredPlacementData}
-                          margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-                        >
-                          <defs>
-                            <linearGradient id="colorP90" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0.15} />
-                              <stop offset="95%" stopColor="oklch(0.75 0.14 25)" stopOpacity={0} />
-                            </linearGradient>
-                            <linearGradient id="colorP50" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="oklch(0.65 0.12 155)" stopOpacity={0.15} />
-                              <stop offset="95%" stopColor="oklch(0.65 0.12 155)" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
-                          <XAxis dataKey="year" stroke="oklch(0.62 0.02 255)" fontSize={10} />
-                          <YAxis
-                            label={{
-                              value: 'Days',
-                              angle: -90,
-                              position: 'insideLeft',
-                              fill: 'oklch(0.62 0.02 255)',
-                              fontSize: 10,
-                            }}
-                            stroke="oklch(0.62 0.02 255)"
-                            fontSize={9}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: 'oklch(0.2 0.022 255)',
-                              border: '1px solid oklch(0.28 0.02 255)',
-                              borderRadius: '8px',
-                            }}
-                            itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
-                            labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
-                          />
-                          <Legend wrapperStyle={{ fontSize: 10 }} />
-                          <Area
-                            type="monotone"
-                            dataKey="daysWaitingP90"
-                            name="90th Percentile Wait (Days)"
-                            stroke="oklch(0.75 0.14 25)"
-                            fillOpacity={1}
-                            fill="url(#colorP90)"
-                            strokeWidth={2}
-                            connectNulls={false}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="daysWaitingP50"
-                            name="Median Wait (Days)"
-                            stroke="oklch(0.65 0.12 155)"
-                            fillOpacity={1}
-                            fill="url(#colorP50)"
-                            strokeWidth={2.5}
-                            connectNulls={false}
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
-                </div>
-
-                {/* Core indicators summary */}
-                <div className="flex flex-col justify-between rounded-xl border border-line bg-surface p-5 space-y-4">
-                  <div>
-                    <h3 className="text-sm font-semibold text-ink-2">
-                      Flow & Preferred Options
-                    </h3>
-                    <p className="text-xs text-ink-3">
-                      Evaluating percent placed into preferred facilities
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    {filteredPlacementData.length === 0 ? (
-                      <div className="rounded-xl border border-line bg-paper p-3 text-xs text-ink-3">
-                        No placement rows match the selected zone.
-                      </div>
-                    ) : (
-                      filteredPlacementData.map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="space-y-2.5 rounded-xl border border-line bg-paper p-3"
-                        >
-                          <div className="flex items-center justify-between text-xs font-medium text-ink">
-                            <span>
-                              {item.zone} ({item.year})
-                            </span>
-                            <span className="rounded border border-line bg-ok-soft px-1.5 py-0.5 font-mono text-xs text-ok">
-                              P50:{' '}
-                              {item.daysWaitingP50 === null || item.daysWaitingP50 === undefined
-                                ? 'N/A'
-                                : `${item.daysWaitingP50}d`}
-                            </span>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <div className="flex justify-between text-xs text-ink-2">
-                              <span>Placed in 30 days:</span>
-                              <span className="font-medium text-ink">
-                                {typeof item.pctPlacedWithin30Days === 'number'
-                                  ? `${item.pctPlacedWithin30Days}%`
-                                  : 'N/A'}
-                              </span>
-                            </div>
-                            <div className="h-1 w-full overflow-hidden rounded-full bg-surface">
-                              <div
-                                className="h-full bg-ok"
-                                style={{
-                                  width: `${
-                                    typeof item.pctPlacedWithin30Days === 'number'
-                                      ? Math.min(Math.max(item.pctPlacedWithin30Days, 0), 100)
-                                      : 0
-                                  }%`,
-                                }}
-                              />
-                            </div>
-
-                            <div className="flex justify-between text-xs text-ink-2">
-                              <span>Preferred option met:</span>
-                              <span className="font-medium text-ink">
-                                {typeof item.pctPlacedPreferredOption === 'number'
-                                  ? `${item.pctPlacedPreferredOption}%`
-                                  : 'N/A'}
-                              </span>
-                            </div>
-                            <div className="h-1 w-full overflow-hidden rounded-full bg-surface">
-                              <div
-                                className="h-full bg-accent"
-                                style={{
-                                  width: `${
-                                    typeof item.pctPlacedPreferredOption === 'number'
-                                      ? Math.min(Math.max(item.pctPlacedPreferredOption, 0), 100)
-                                      : 0
-                                  }%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div className="flex items-start gap-1.5 border-t border-line pt-3 text-xs text-ink-3">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-ok" />
+                  <div className="flex items-center gap-1 pt-1.5 text-[10px] font-medium text-accent">
+                    <BarChart2 className="w-3 h-3" />
                     <span>
-                      Placement percentages come from HQCA FOCUS continuing-care placement
-                      statistics. Wait days show N/A when the upstream series does not report them.
+                      {selectedKpi === 'pctPlacedPreferredOption' ? 'Focused trend' : 'Click to focus trend'}
                     </span>
                   </div>
                 </div>
+
+                <div className="space-y-1 rounded-xl border border-line bg-surface p-4 text-left opacity-90">
+                  <span className="block text-xs font-medium text-ink-3">
+                    Median Wait Days
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-semibold font-mono tabular-nums text-ink">
+                      {placementKpis.waitP50 === null
+                        ? 'N/A'
+                        : `${placementKpis.waitP50.toFixed(0)} days`}
+                    </span>
+                    <span className="text-xs font-medium font-mono text-ink-2">P50</span>
+                  </div>
+                  <p className="border-t border-line pt-1 text-xs text-ink-2">
+                    Upstream wait-day series is not reported in the current feed — no wait trend is shown.
+                  </p>
+                </div>
               </div>
+
+              <div className="flex flex-col justify-between gap-3 rounded-xl border border-line bg-surface p-4 sm:flex-row sm:items-center">
+                <div>
+                  <h3 className="text-sm font-semibold text-ink-2">Placement trends by year</h3>
+                  <p className="text-xs text-ink-3">
+                    Year-over-year rates{placementYears.length ? ` (${placementYears[0]}–${placementYears[placementYears.length - 1]})` : ''}. Filter by zone to isolate a series.
+                  </p>
+                </div>
+                <select
+                  value={selectedZone}
+                  onChange={(e) => setSelectedZone(e.target.value)}
+                  className="rounded-lg border border-line bg-paper px-2.5 py-1 text-xs text-ink focus:border-accent focus:outline-none"
+                  aria-label="Filter placement charts by zone"
+                >
+                  <option value="All">All zones</option>
+                  {placementZones.map((zone) => (
+                    <option key={zone} value={zone}>
+                      {zone}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div
+                className={`space-y-3 rounded-xl border bg-surface p-5 transition-colors ${
+                  selectedKpi === 'pctPlacedWithin30Days' ? 'border-ok' : 'border-line'
+                }`}
+              >
+                <div>
+                  <h3 className="text-sm font-semibold text-ink-2">% placed within 30 days</h3>
+                  <p className="text-xs text-ink-3">Target 60%+. {selectedZone === 'All' ? 'One series per zone.' : selectedZone}</p>
+                </div>
+                {placementTrendWithin30.length === 0 || placementChartZones.length === 0 ? (
+                  <div className="flex h-64 items-center justify-center text-sm text-ink-3">No placement trend rows.</div>
+                ) : (
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={placementTrendWithin30} margin={{ top: 10, right: 16, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                        <XAxis dataKey="year" stroke="oklch(0.62 0.02 255)" fontSize={10} />
+                        <YAxis
+                          domain={[0, 100]}
+                          stroke="oklch(0.62 0.02 255)"
+                          fontSize={9}
+                          tickFormatter={(v) => `${v}%`}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'oklch(0.2 0.022 255)',
+                            border: '1px solid oklch(0.28 0.02 255)',
+                            borderRadius: '8px',
+                          }}
+                          itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                          labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
+                          formatter={(value: number | string) =>
+                            typeof value === 'number' ? [`${value.toFixed(1)}%`, ''] : [value, '']
+                          }
+                        />
+                        <Legend wrapperStyle={{ fontSize: 10 }} />
+                        <ReferenceLine
+                          y={60}
+                          stroke="oklch(0.65 0.12 155)"
+                          strokeDasharray="4 4"
+                          label={{ value: '60% target', position: 'insideTopRight', fill: 'oklch(0.62 0.02 255)', fontSize: 10 }}
+                        />
+                        {placementChartZones.map((zone) => (
+                          <Line
+                            key={zone}
+                            type="monotone"
+                            dataKey={zone}
+                            name={zone}
+                            stroke={PLACEMENT_ZONE_COLORS[zone] ?? 'oklch(0.55 0.08 255)'}
+                            strokeWidth={selectedZone === 'All' && zone === 'Alberta' ? 2.75 : 2}
+                            dot={{ r: 3, strokeWidth: 1 }}
+                            connectNulls={false}
+                            isAnimationActive={false}
+                          />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+
+              <div
+                className={`space-y-3 rounded-xl border bg-surface p-5 transition-colors ${
+                  selectedKpi === 'pctPlacedPreferredOption' ? 'border-accent' : 'border-line'
+                }`}
+              >
+                <div>
+                  <h3 className="text-sm font-semibold text-ink-2">% preferred option met</h3>
+                  <p className="text-xs text-ink-3">Target 70%+. {selectedZone === 'All' ? 'One series per zone.' : selectedZone}</p>
+                </div>
+                {placementTrendPreferred.length === 0 || placementChartZones.length === 0 ? (
+                  <div className="flex h-64 items-center justify-center text-sm text-ink-3">No preferred-option trend rows.</div>
+                ) : (
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={placementTrendPreferred} margin={{ top: 10, right: 16, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                        <XAxis dataKey="year" stroke="oklch(0.62 0.02 255)" fontSize={10} />
+                        <YAxis
+                          domain={[0, 100]}
+                          stroke="oklch(0.62 0.02 255)"
+                          fontSize={9}
+                          tickFormatter={(v) => `${v}%`}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'oklch(0.2 0.022 255)',
+                            border: '1px solid oklch(0.28 0.02 255)',
+                            borderRadius: '8px',
+                          }}
+                          itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                          labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
+                          formatter={(value: number | string) =>
+                            typeof value === 'number' ? [`${value.toFixed(1)}%`, ''] : [value, '']
+                          }
+                        />
+                        <Legend wrapperStyle={{ fontSize: 10 }} />
+                        <ReferenceLine
+                          y={70}
+                          stroke="oklch(0.68 0.13 252)"
+                          strokeDasharray="4 4"
+                          label={{ value: '70% target', position: 'insideTopRight', fill: 'oklch(0.62 0.02 255)', fontSize: 10 }}
+                        />
+                        {placementChartZones.map((zone) => (
+                          <Line
+                            key={zone}
+                            type="monotone"
+                            dataKey={zone}
+                            name={zone}
+                            stroke={PLACEMENT_ZONE_COLORS[zone] ?? 'oklch(0.55 0.08 255)'}
+                            strokeWidth={selectedZone === 'All' && zone === 'Alberta' ? 2.75 : 2}
+                            dot={{ r: 3, strokeWidth: 1 }}
+                            connectNulls={false}
+                            isAnimationActive={false}
+                          />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+
+              {latestYearPlacementByZone.length > 0 && (
+                <div className="space-y-3 rounded-xl border border-line bg-surface p-5">
+                  <div>
+                    <h3 className="text-sm font-semibold text-ink-2">
+                      Latest-year zone comparison
+                      {placementYears.length ? ` (${placementYears[placementYears.length - 1]})` : ''}
+                    </h3>
+                    <p className="text-xs text-ink-3">
+                      Within-30 and preferred-option rates by zone for the most recent reporting year.
+                    </p>
+                  </div>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={latestYearPlacementByZone}
+                        margin={{ top: 10, right: 16, left: 0, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                        <XAxis dataKey="zone" stroke="oklch(0.62 0.02 255)" fontSize={9} interval={0} angle={-18} textAnchor="end" height={56} />
+                        <YAxis
+                          domain={[0, 100]}
+                          stroke="oklch(0.62 0.02 255)"
+                          fontSize={9}
+                          tickFormatter={(v) => `${v}%`}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'oklch(0.2 0.022 255)',
+                            border: '1px solid oklch(0.28 0.02 255)',
+                            borderRadius: '8px',
+                          }}
+                          itemStyle={{ color: 'oklch(0.96 0.008 255)' }}
+                          labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
+                          formatter={(value: number | string) =>
+                            typeof value === 'number' ? [`${value.toFixed(1)}%`, ''] : [value, '']
+                          }
+                        />
+                        <Legend wrapperStyle={{ fontSize: 10 }} />
+                        <Bar dataKey="within30" name="Within 30 days" fill="oklch(0.65 0.12 155)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                        <Bar dataKey="preferred" name="Preferred option" fill="oklch(0.68 0.13 252)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <p className="border-t border-line pt-3 text-xs text-ink-3">
+                    Wait days are not charted — the upstream HQCA FOCUS feed does not report wait-day values for these years.
+                  </p>
+                </div>
+              )}
             </>
           )}
         </div>
