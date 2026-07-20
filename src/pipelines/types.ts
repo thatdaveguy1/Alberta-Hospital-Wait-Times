@@ -45,7 +45,6 @@ export const DOMAINS = [
   'regional-inequity',
   'spending',
   'system-flow',
-  'virtual-care',
   'workforce',
 ] as const;
 

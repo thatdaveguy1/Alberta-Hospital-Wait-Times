@@ -38,7 +38,6 @@ Scheduler (launchd)
 | `albertaFindAProviderScraper.ts` | Scraper | primary-care | 24 hr |
 | `hqcaContinuingCareScraper.ts` | Scraper | continuing-care | 24 hr |
 | `openAlbertaInequityFetcher.ts` | API | regional-inequity | 24 hr |
-| `virtualCareFetcher.ts` | API | virtual-care | 24 hr |
 | `powerbiScraper.ts` | Scraper | surgical | 24 hr |
 | `pushClient.ts` | Push | all | after each pipeline |
 | `scheduler.ts` | Orchestrator | all | 10 min + 24 hr |

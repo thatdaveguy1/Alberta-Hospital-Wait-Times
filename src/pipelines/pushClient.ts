@@ -209,7 +209,6 @@ export async function pushAllToCloudflare(): Promise<PushResult[]> {
     'regional-inequity',
     'spending',
     'system-flow',
-    'virtual-care',
     'workforce',
   ];
 

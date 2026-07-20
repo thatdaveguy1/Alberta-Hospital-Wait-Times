@@ -213,16 +213,6 @@
       "error": "No matching LGAs between COMMUNITY_NEED_PROFILES and existing LGA_COMMUNITY_NEEDS"
     },
     {
-      "domain": "virtual-care",
-      "pipeline": "virtualCareFetcher",
-      "status": "skipped",
-      "recordsFetched": 1,
-      "recordsWritten": 0,
-      "durationMs": 4753,
-      "error": "Verified PMID 40465166: \"Health system utilization following medical advice from Alberta's Virtual MD: a descriptive analysis.\" (CJEM, 2025 Dec) \u2014 DOI: 10.1007/s43678-025-00928-z | No new Health Link volume announcements found on AHS news listing. | No metric arrays written (fail-closed).",
-      "timestamp": "2026-07-19T12:03:34.395Z"
-    },
-    {
       "domain": "spending",
       "pipeline": "fraserDownloader",
       "status": "skipped",
@@ -283,12 +273,12 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 62,
-      "timestamp": "2026-07-20T00:28:18.772Z"
+      "durationMs": 113,
+      "timestamp": "2026-07-20T00:38:18.776Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-20T00:28:18.772Z",
-  "erWaitTimesNextUpdate": "2026-07-20T00:38:18.834Z",
+  "erWaitTimesLastUpdate": "2026-07-20T00:38:18.776Z",
+  "erWaitTimesNextUpdate": "2026-07-20T00:48:18.892Z",
   "labWaitsLastUpdate": "2026-07-19T23:48:18.683Z",
   "labWaitsNextUpdate": "2026-07-20T00:48:18.750Z"
 }

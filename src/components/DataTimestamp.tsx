@@ -57,7 +57,6 @@ export function sanitizeSource(source: string): string {
     powerbiScraper: 'AHS Power BI',
     primaryCareFetcher: 'Primary Care',
     statscanFetcher: 'Statistics Canada',
-    virtualCareFetcher: 'Virtual Care',
   };
 
   const normalized = source.trim();

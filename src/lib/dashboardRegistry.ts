@@ -11,7 +11,6 @@ import {
   Home,
   HeartHandshake,
   Coins,
-  Phone,
   Ribbon,
   Shield,
   TrendingUp,
@@ -150,17 +149,6 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     badge: 'FOCUS SURVEY',
     source: 'HQCA FOCUS, GoodCaring & CIHI CPES-IC',
     updateFrequency: 'Quarterly Release',
-  },
-  {
-    id: 'virtual-care',
-    title: 'Virtual Care & 811 Access',
-    shortName: 'Virtual Care',
-    category: 'community-care',
-    description: 'Verified Health Link 811 call volumes when available (other virtual-care cohorts withheld).',
-    icon: Phone,
-    badge: 'VIRTUAL CARE',
-    source: 'AHS Quick Facts',
-    updateFrequency: 'Per-array / when verified',
   },
   {
     id: 'cancer',
@@ -310,12 +298,5 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
     sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'CIHI Spending Trends & physician payment tables',
     domain: 'spending'
-  },
-  'virtual-care': {
-    updateType: 'mixed',
-    interval: 'daily sync · per-array provenance',
-    sourceVintage: 'Per-array (see dashboard timestamps)',
-    source: 'AHS Quick Facts (Health Link when verified)',
-    domain: 'virtual-care'
   }
 };

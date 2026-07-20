@@ -28,7 +28,6 @@ import { run as primaryCareRun } from './primaryCareFetcher';
 import { run as albertaFindAProviderRun } from './albertaFindAProviderScraper';
 import { run as hqcaContinuingCareRun } from './hqcaContinuingCareFetcher';
 import { run as openAlbertaInequityRun, runPrimaryCare as openAlbertaInequityPrimaryCareRun } from './openAlbertaInequityFetcher';
-import { run as virtualCareRun } from './virtualCareFetcher';
 import { run as openAlbertaBillingRun } from './openAlbertaBillingFetcher';
 import { run as hqcaFocusRun } from './hqcaFocusScraper';
 import { run as albertaRvdRun } from './albertaRespiratoryVirusScraper';
@@ -112,7 +111,6 @@ const PIPELINES: Pipeline[] = [
   { name: 'continuing-care-compliance', domain: 'continuing-care', run: continuingCareComplianceRun },
   { name: 'open-alberta-inequity', domain: 'regional-inequity', run: openAlbertaInequityRun },
   { name: 'open-alberta-inequity-primary-care', domain: 'primary-care', run: openAlbertaInequityPrimaryCareRun },
-  { name: 'virtual-care', domain: 'virtual-care', run: virtualCareRun },
   { name: 'fraser', domain: 'spending', run: fraserRun },
   { name: 'open-alberta-billing', domain: 'spending', run: openAlbertaBillingRun },
   { name: 'hqca-focus', domain: 'patient-experience', run: hqcaFocusRun },

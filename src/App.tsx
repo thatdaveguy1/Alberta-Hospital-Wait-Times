@@ -17,7 +17,6 @@ import PatientExperienceDashboard from './components/PatientExperienceDashboard'
 import PublicHealthDashboard from './components/PublicHealthDashboard';
 import RegionalInequityDashboard from './components/RegionalInequityDashboard';
 import SpendingDashboard from './components/SpendingDashboard';
-import VirtualCareDashboard from './components/VirtualCareDashboard';
 import {
   DASHBOARDS,
   TAB_METADATA_MAP,
@@ -110,8 +109,6 @@ export default function App() {
           <RegionalInequityDashboard />
         ) : activeView === 'health-spending' ? (
           <SpendingDashboard />
-        ) : activeView === 'virtual-care' ? (
-          <VirtualCareDashboard />
         ) : (
           <div className="rounded-xl border border-line bg-surface p-4 text-sm text-ink-2">
             Unknown dashboard: {activeView}

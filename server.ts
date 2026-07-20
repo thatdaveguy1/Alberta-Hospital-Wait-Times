@@ -560,7 +560,6 @@ async function startServer() {
       'public-health': 'data-public-health.json',
       'regional-inequity': 'data-regional-inequity.json',
       'spending': 'data-spending.json',
-      'virtual-care': 'data-virtual-care.json',
     };
     const filename = domainMap[req.params.domain];
     if (!filename) {
