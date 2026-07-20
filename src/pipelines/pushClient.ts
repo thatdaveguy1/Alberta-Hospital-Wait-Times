@@ -203,7 +203,6 @@ export async function pushAllToCloudflare(): Promise<PushResult[]> {
     'diagnostic',
     'cancer',
     'continuing-care',
-    'mental-health',
     'patient-experience',
     'primary-care',
     'public-health',

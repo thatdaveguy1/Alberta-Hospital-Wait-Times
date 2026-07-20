@@ -30,11 +30,9 @@ import { run as hqcaContinuingCareRun } from './hqcaContinuingCareFetcher';
 import { run as openAlbertaInequityRun, runPrimaryCare as openAlbertaInequityPrimaryCareRun } from './openAlbertaInequityFetcher';
 import { run as virtualCareRun } from './virtualCareFetcher';
 import { run as openAlbertaBillingRun } from './openAlbertaBillingFetcher';
-import { run as alberta211Run } from './alberta211Scraper';
 import { run as hqcaFocusRun } from './hqcaFocusScraper';
 import { run as albertaRvdRun } from './albertaRespiratoryVirusScraper';
 import { run as cihiWorkforceRun } from './cihiWorkforceFetcher';
-import { run as albertaSubstanceUseRun } from './albertaSubstanceUseScraper';
 import { run as cihiMhSafetyRun } from './cihiMhSafetyFetcher';
 import { run as cihiWaitTimesPriorityRun } from './cihiWaitTimesPriorityFetcher';
 import { run as continuingCareComplianceRun } from './continuingCareComplianceFetcher';
@@ -117,12 +115,10 @@ const PIPELINES: Pipeline[] = [
   { name: 'virtual-care', domain: 'virtual-care', run: virtualCareRun },
   { name: 'fraser', domain: 'spending', run: fraserRun },
   { name: 'open-alberta-billing', domain: 'spending', run: openAlbertaBillingRun },
-  { name: 'alberta-211', domain: 'mental-health', run: alberta211Run },
   { name: 'hqca-focus', domain: 'patient-experience', run: hqcaFocusRun },
   { name: 'alberta-rvd', domain: 'public-health', run: albertaRvdRun },
   { name: 'cihi-workforce', domain: 'workforce', run: cihiWorkforceRun },
-  { name: 'cihi-mh-safety', domain: 'mental-health', run: cihiMhSafetyRun },
-  { name: 'alberta-substance-use', domain: 'mental-health', run: albertaSubstanceUseRun },
+  { name: 'cihi-mh-safety', domain: 'patient-experience', run: cihiMhSafetyRun },
   { name: 'cihi-wait-times-priority', domain: 'surgical', run: cihiWaitTimesPriorityRun },
 ];
 

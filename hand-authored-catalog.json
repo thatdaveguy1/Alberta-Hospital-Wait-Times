@@ -36,9 +36,9 @@
     "tab": "Surgical",
     "array": "STATSCAN_SATISFACTION_STATS",
     "records": 1,
-    "description": "Object (not array): StatsCan 2024 specialist-access satisfaction survey summary — satisfied/unsatisfied %, wait-segment distribution, life-affected %.",
+    "description": "Object (not array): StatsCan 2024 specialist-access satisfaction survey summary \u2014 satisfied/unsatisfied %, wait-segment distribution, life-affected %.",
     "source_exists": true,
-    "source_name": "Statistics Canada — Canadian Community Health Survey (CCHS), 'Waiting for a specialist'",
+    "source_name": "Statistics Canada \u2014 Canadian Community Health Survey (CCHS), 'Waiting for a specialist'",
     "source_url": "https://www150.statcan.gc.ca/n1/pub/82-625-x/82-625-x2024001-eng.htm",
     "automation": "MEDIUM",
     "notes": "StatsCan releases this as tables (Web Data Service / CSV). Released annually as a static object; fetch the table and map fields. Marked as object rather than array in the file."
@@ -49,7 +49,7 @@
     "records": 6,
     "description": "Fraser Institute median wait weeks by specialty: GP-to-consult, consult-to-surgery, total.",
     "source_exists": true,
-    "source_name": "Fraser Institute — Waiting Your Turn (annual report)",
+    "source_name": "Fraser Institute \u2014 Waiting Your Turn (annual report)",
     "source_url": "https://www.fraserinstitute.org/studies/waiting-your-turn-wait-times-for-health-care-in-canada",
     "automation": "HARD",
     "notes": "Annual PDF report. The existing fraser pipeline is 403-blocked; the report series has been intermittent. Requires PDF parsing and is brittle. No structured feed."
@@ -71,7 +71,7 @@
     "records": 8,
     "description": "Wait-time experience by demographic dimension (age / sex / income): % waiting under 1m, 1-3m, 3-6m, over 6m, satisfied %, life-affected %.",
     "source_exists": true,
-    "source_name": "Statistics Canada — CCHS wait-time demographic tables",
+    "source_name": "Statistics Canada \u2014 CCHS wait-time demographic tables",
     "source_url": "https://www150.statcan.gc.ca/n1/pub/82-625-x/82-625-x2024001-eng.htm",
     "automation": "MEDIUM",
     "notes": "StatsCan tables by age/sex/income. Available via Web Data Service (CSV/JSON). Requires mapping demographic dimensions to the array schema."
@@ -96,7 +96,7 @@
     "source_name": "AHS Power BI + CPSA registry",
     "source_url": "https://research.cpsa.ca/registry-search",
     "automation": "MEDIUM",
-    "notes": "Wait/volume from Power BI (powerbi-scraper), identity from CPSA. patient_satisfaction, experience_years, avg_surgery_time are not publicly reported per physician — those stay manual."
+    "notes": "Wait/volume from Power BI (powerbi-scraper), identity from CPSA. patient_satisfaction, experience_years, avg_surgery_time are not publicly reported per physician \u2014 those stay manual."
   },
   {
     "tab": "System Flow",
@@ -137,7 +137,7 @@
     "records": 5,
     "description": "Minor-condition ED visits per 1000 grouped by continuity-of-care level, with descriptive text.",
     "source_exists": true,
-    "source_name": "HQCA FOCUS on Healthcare — Continuity of Care",
+    "source_name": "HQCA FOCUS on Healthcare \u2014 Continuity of Care",
     "source_url": "https://focus.hqca.ca/",
     "automation": "MEDIUM",
     "notes": "HQCA FOCUS dashboard publishes continuity vs ED-use indicators. Dashboard is interactive (no clean API); scrape the rendered JSON or annual PDF report."
@@ -170,10 +170,10 @@
     "records": 5,
     "description": "Age distribution by profession group (under-35 / 35-54 / 55-64 / over-65 %) and retirement-risk level.",
     "source_exists": true,
-    "source_name": "CIHI Health Workforce — age distribution",
+    "source_name": "CIHI Health Workforce \u2014 age distribution",
     "source_url": "https://www.cihi.ca/en/health-workforce",
     "automation": "MEDIUM",
-    "notes": "CIHI Health Workforce DB publishes age-group distribution by profession/province. retirementRiskLevel is a derived label — compute from over-55 + over-65 shares."
+    "notes": "CIHI Health Workforce DB publishes age-group distribution by profession/province. retirementRiskLevel is a derived label \u2014 compute from over-55 + over-65 shares."
   },
   {
     "tab": "Workforce",
@@ -228,7 +228,7 @@
     "source_name": "AHS Diagnostic Imaging wait-time Power BI / CIHI",
     "source_url": "https://www.albertahealthservices.ca/info/Page8195.aspx",
     "automation": "MEDIUM",
-    "notes": "AHS publishes imaging wait times by facility (Power BI / performance pages). Extend cihi-wait-times or add an AHS imaging scraper for facility-level p50/p90. scannerUtilizationPct not publicly reported — stays manual."
+    "notes": "AHS publishes imaging wait times by facility (Power BI / performance pages). Extend cihi-wait-times or add an AHS imaging scraper for facility-level p50/p90. scannerUtilizationPct not publicly reported \u2014 stays manual."
   },
   {
     "tab": "Diagnostic",
@@ -264,61 +264,6 @@
     "notes": "Alberta Health publishes screening participation rates by zone for breast/cervical/colorectal programs in periodic reports. Scrape the program reports."
   },
   {
-    "tab": "Mental Health",
-    "array": "SUBSTANCE_HARM_TRENDS",
-    "records": 8,
-    "description": "Yearly substance-harm trends: substance type, apparent deaths, hospitalizations, EMS overdose responses, Alberta & Canada rate/100k.",
-    "source_exists": true,
-    "source_name": "Alberta Substance Use Surveillance System (ASUSS)",
-    "source_url": "https://www.alberta.ca/substance-use-surveillance-data",
-    "automation": "MEDIUM",
-    "notes": "ASUSS is an interactive dashboard (deaths monthly, EMS weekly). No clean CSV API; scrape the dashboard's underlying JSON endpoints. Canada comparison from PHAC opioid/stimulant dashboard."
-  },
-  {
-    "tab": "Mental Health",
-    "array": "ADDICTION_BED_CAPACITIES",
-    "records": 7,
-    "description": "Addiction/recovery bed sites: site name, corridor, bed type, gender, total/available beds, status, last-updated.",
-    "source_exists": true,
-    "source_name": "Alberta.ca Addiction Treatment Services directory / Recovery Alberta",
-    "source_url": "https://www.alberta.ca/addiction-treatment-services",
-    "automation": "MEDIUM",
-    "notes": "Alberta publishes a treatment-services directory with bed counts. Live available-bed count is NOT publicly reported in real time (file shows 'static'); total-bed capacity is scrapeable."
-  },
-  {
-    "tab": "Mental Health",
-    "array": "COMMUNITY_MH_WAITS",
-    "records": 6,
-    "description": "Community mental-health wait times by year/age group: Alberta median & p90 wait days, Canada median, unmet-need %.",
-    "source_exists": true,
-    "source_name": "CIHI — Wait Times for Community Mental Health Counselling",
-    "source_url": "https://www.cihi.ca/en/wait-times-for-community-mental-health-counselling-in-canada",
-    "automation": "MEDIUM",
-    "notes": "CIHI publishes provincial median/p90 wait for community MH counselling by age group. Downloadable tables; map to schema."
-  },
-  {
-    "tab": "Mental Health",
-    "array": "HOSPITAL_MHSU_BURDEN",
-    "records": 6,
-    "description": "Hospital mental-health/substance-use burden by year: repeat MHSU hospitalizations (30-day) rate, Alberta vs Canada %, annual count.",
-    "source_exists": true,
-    "source_name": "CIHI — Mental Health hospitalizations indicators",
-    "source_url": "https://www.cihi.ca/en/mental-health-and-substance-use-hospitalizations",
-    "automation": "MEDIUM",
-    "notes": "CIHI publishes repeat-hospitalization and MHSU hospitalization indicators by province. Structured tables available."
-  },
-  {
-    "tab": "Mental Health",
-    "array": "SUPPORT_HELPLINES",
-    "records": 10,
-    "description": "Mental-health/addiction helpline directory: name, number, availability, scope, description.",
-    "source_exists": true,
-    "source_name": "211 Alberta directory / Alberta Health Mental Health Helpline",
-    "source_url": "https://ab.211.ca/",
-    "automation": "EASY",
-    "notes": "211 Alberta provides a searchable directory of helplines (with phone, hours, scope). Scrape or use 211 API to refresh the directory."
-  },
-  {
     "tab": "Continuing Care",
     "array": "HOME_CARE_EXPERIENCE",
     "records": 6,
@@ -335,7 +280,7 @@
     "records": 6,
     "description": "Continuing-care facility compliance: name, type, operator, city/zone, last inspection date, compliant flag, violations count, major-violations desc. (ahs-asi scraper yields no structured rows.)",
     "source_exists": true,
-    "source_name": "Alberta Standards & Licensing — Continuing Care public registry",
+    "source_name": "Alberta Standards & Licensing \u2014 Continuing Care public registry",
     "source_url": "https://standardsandlicensing.alberta.ca",
     "automation": "MEDIUM",
     "notes": "Real public source is standardsandlicensing.alberta.ca (NOT the AHS ASI page the current ahs-asi pipeline targets). Retarget the scraper at this government registry, which lists inspection dates and findings per facility."
@@ -454,7 +399,7 @@
     "tab": "Public Health",
     "array": "OUTBREAK_PROTOCOLS",
     "records": 1,
-    "description": "Object (not array): outbreak-management protocols by setting (acute care, continuing care, etc.) — trigger thresholds, isolation, antiviral post-exposure, reporting.",
+    "description": "Object (not array): outbreak-management protocols by setting (acute care, continuing care, etc.) \u2014 trigger thresholds, isolation, antiviral post-exposure, reporting.",
     "source_exists": true,
     "source_name": "AHS Infection Prevention & Control outbreak guidelines",
     "source_url": "https://www.albertahealthservices.ca/info/Page6362.aspx",
@@ -500,7 +445,7 @@
     "records": 6,
     "description": "Physician billing by specialty group: physician count, total payments $M, average gross payment, services per patient.",
     "source_exists": true,
-    "source_name": "Alberta Health — AHCIP Statistical Reports (Open Alberta)",
+    "source_name": "Alberta Health \u2014 AHCIP Statistical Reports (Open Alberta)",
     "source_url": "https://open.alberta.ca/opendata?tags=Physician+Billing",
     "automation": "EASY",
     "notes": "Alberta Health publishes AHCIP physician-billing statistical reports by specialty on Open Alberta (CSV/Excel). Direct download; map specialty groups."
@@ -558,6 +503,6 @@
     "source_name": "211 Alberta directory",
     "source_url": "https://ab.211.ca/",
     "automation": "EASY",
-    "notes": "211 Alberta lists helplines with hours/scope. Annual-call volumes are not in the directory (published sporadically in annual reports) — directory fields automatable, call-volume field manual."
+    "notes": "211 Alberta lists helplines with hours/scope. Annual-call volumes are not in the directory (published sporadically in annual reports) \u2014 directory fields automatable, call-volume field manual."
   }
 ]

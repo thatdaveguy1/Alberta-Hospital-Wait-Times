@@ -555,7 +555,6 @@ async function startServer() {
       'surgical': 'data-surgical.json',
       'system-flow': 'data-system-flow.json',
       'diagnostic': 'data-diagnostic.json',
-      'mental-health': 'data-mental-health.json',
       'continuing-care': 'data-continuing-care.json',
       'patient-experience': 'data-patient-experience.json',
       'public-health': 'data-public-health.json',

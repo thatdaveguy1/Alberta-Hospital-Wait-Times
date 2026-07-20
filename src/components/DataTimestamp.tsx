@@ -31,8 +31,6 @@ export function sanitizeSource(source: string): string {
   const map: Record<string, string> = {
     goodcaringScraper: 'GoodCaring.ca',
     ahsAsiScraper: 'AHS ASI',
-    albertaSubstanceUseScraper: 'Alberta Substance Use Surveillance',
-    alberta211Scraper: 'Alberta 211',
     albertaFindAProviderScraper: 'Alberta Find a Provider',
     albertaRespiratoryVirusScraper: 'Alberta Respiratory Virus Dashboard',
     ahsCancerCentresScraper: 'AHS Cancer Centres',
@@ -41,7 +39,7 @@ export function sanitizeSource(source: string): string {
     abjhiScraper: 'ABJHI',
     aplLabWaitTimesFetcher: 'APL QMe Lab Waits',
     cihiDownloader: 'CIHI',
-    cihiMhSafetyFetcher: 'CIHI Mental Health & Safety',
+    cihiMhSafetyFetcher: 'CIHI Clinical Safety Indicators',
     cihiNationalCapacity: 'CIHI National Capacity',
     cihiWaitTimesDownloader: 'CIHI Wait Times',
     cihiWaitTimesPriorityFetcher: 'CIHI Priority Wait Times',

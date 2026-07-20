@@ -1,7 +1,7 @@
 {
   "status": "partial_success",
-  "lastSyncTimestamp": "2026-07-18T12:19:56.473Z",
-  "nextSyncTimestamp": "2026-07-19T12:19:56.473Z",
+  "lastSyncTimestamp": "2026-07-19T12:05:06.901Z",
+  "nextSyncTimestamp": "2026-07-20T12:05:06.901Z",
   "results": [
     {
       "domain": "disruptions",
@@ -9,26 +9,26 @@
       "status": "success",
       "recordsFetched": 24,
       "recordsWritten": 33,
-      "durationMs": 2504,
-      "timestamp": "2026-07-18T12:00:39.959Z"
+      "durationMs": 646,
+      "timestamp": "2026-07-19T12:00:05.233Z"
     },
     {
       "domain": "workforce",
       "pipeline": "statscanFetcher",
       "status": "success",
-      "recordsFetched": 8,
-      "recordsWritten": 8,
-      "durationMs": 3334,
-      "timestamp": "2026-07-18T12:00:42.472Z"
+      "recordsFetched": 14,
+      "recordsWritten": 14,
+      "durationMs": 2469,
+      "timestamp": "2026-07-19T12:00:05.880Z"
     },
     {
       "domain": "public-health",
       "pipeline": "phacFetcher",
       "status": "success",
       "recordsFetched": 40,
-      "recordsWritten": 10,
-      "durationMs": 6585,
-      "timestamp": "2026-07-18T12:00:46.874Z"
+      "recordsWritten": 8,
+      "durationMs": 3129,
+      "timestamp": "2026-07-19T12:00:09.352Z"
     },
     {
       "domain": "spending",
@@ -36,9 +36,9 @@
       "status": "skipped",
       "recordsFetched": 100,
       "recordsWritten": 100,
-      "durationMs": 5018,
+      "durationMs": 2552,
       "error": "Structured resources found (54) but none mapped to existing domain shapes; catalog written for manual review",
-      "timestamp": "2026-07-18T12:00:54.699Z"
+      "timestamp": "2026-07-19T12:00:13.484Z"
     },
     {
       "domain": "diagnostic",
@@ -46,28 +46,26 @@
       "status": "success",
       "recordsFetched": 152,
       "recordsWritten": 152,
-      "durationMs": 3424,
-      "timestamp": "2026-07-18T17:11:10.821Z"
+      "durationMs": 67,
+      "timestamp": "2026-07-19T23:48:18.683Z"
     },
     {
       "domain": "surgical",
       "pipeline": "powerbiScraper",
-      "status": "failed",
-      "recordsFetched": 0,
-      "recordsWritten": 0,
-      "durationMs": 125837,
-      "error": "spawnSync npx ETIMEDOUT",
-      "timestamp": "2026-07-18T12:03:07.755Z"
+      "status": "success",
+      "recordsFetched": 119,
+      "recordsWritten": 119,
+      "durationMs": 38601,
+      "timestamp": "2026-07-19T12:00:19.285Z"
     },
     {
       "domain": "surgical",
       "pipeline": "abjhiScraper",
-      "status": "failed",
-      "recordsFetched": 0,
-      "recordsWritten": 0,
-      "durationMs": 7338,
-      "error": "Expected 2 tab sections (consult + surgery), found 0",
-      "timestamp": "2026-07-18T12:03:18.680Z"
+      "status": "success",
+      "recordsFetched": 25,
+      "recordsWritten": 25,
+      "durationMs": 861,
+      "timestamp": "2026-07-19T12:00:57.771Z"
     },
     {
       "domain": "continuing-care",
@@ -75,8 +73,8 @@
       "status": "success",
       "recordsFetched": 78,
       "recordsWritten": 78,
-      "durationMs": 19622,
-      "timestamp": "2026-07-18T12:03:20.380Z"
+      "durationMs": 4524,
+      "timestamp": "2026-07-19T12:00:59.635Z"
     },
     {
       "domain": "system-flow",
@@ -84,8 +82,8 @@
       "status": "success",
       "recordsFetched": 38,
       "recordsWritten": 48,
-      "durationMs": 3770,
-      "timestamp": "2026-07-18T12:03:41.944Z"
+      "durationMs": 28,
+      "timestamp": "2026-07-19T12:01:05.159Z"
     },
     {
       "domain": "system-flow",
@@ -93,8 +91,8 @@
       "status": "success",
       "recordsFetched": 10,
       "recordsWritten": 10,
-      "durationMs": 11377,
-      "timestamp": "2026-07-18T12:03:49.368Z"
+      "durationMs": 2154,
+      "timestamp": "2026-07-19T12:01:06.188Z"
     },
     {
       "domain": "workforce",
@@ -102,8 +100,8 @@
       "status": "success",
       "recordsFetched": 1,
       "recordsWritten": 1,
-      "durationMs": 7934,
-      "timestamp": "2026-07-18T12:04:02.127Z"
+      "durationMs": 2126,
+      "timestamp": "2026-07-19T12:01:09.344Z"
     },
     {
       "domain": "patient-experience",
@@ -111,8 +109,8 @@
       "status": "success",
       "recordsFetched": 12,
       "recordsWritten": 12,
-      "durationMs": 4300,
-      "timestamp": "2026-07-18T12:04:11.174Z"
+      "durationMs": 2694,
+      "timestamp": "2026-07-19T12:01:12.471Z"
     },
     {
       "domain": "cancer",
@@ -120,8 +118,8 @@
       "status": "partial",
       "recordsFetched": 17,
       "recordsWritten": 0,
-      "durationMs": 7408,
-      "timestamp": "2026-07-18T12:04:17.879Z"
+      "durationMs": 2576,
+      "timestamp": "2026-07-19T12:01:16.168Z"
     },
     {
       "domain": "spending",
@@ -129,8 +127,8 @@
       "status": "success",
       "recordsFetched": 73,
       "recordsWritten": 73,
-      "durationMs": 632098,
-      "timestamp": "2026-07-18T12:04:26.372Z"
+      "durationMs": 22915,
+      "timestamp": "2026-07-19T12:01:19.747Z"
     },
     {
       "domain": "diagnostic",
@@ -138,8 +136,8 @@
       "status": "success",
       "recordsFetched": 16,
       "recordsWritten": 16,
-      "durationMs": 3513,
-      "timestamp": "2026-07-18T12:14:59.487Z"
+      "durationMs": 4185,
+      "timestamp": "2026-07-19T12:01:43.665Z"
     },
     {
       "domain": "cancer",
@@ -147,8 +145,8 @@
       "status": "success",
       "recordsFetched": 81,
       "recordsWritten": 81,
-      "durationMs": 110,
-      "timestamp": "2026-07-18T12:15:04.059Z"
+      "durationMs": 5,
+      "timestamp": "2026-07-19T12:01:48.853Z"
     },
     {
       "domain": "surgical",
@@ -156,8 +154,8 @@
       "status": "success",
       "recordsFetched": 96,
       "recordsWritten": 96,
-      "durationMs": 13,
-      "timestamp": "2026-07-18T12:15:05.171Z"
+      "durationMs": 12,
+      "timestamp": "2026-07-19T12:01:49.859Z"
     },
     {
       "domain": "primary-care",
@@ -165,8 +163,8 @@
       "status": "success",
       "recordsFetched": 59,
       "recordsWritten": 59,
-      "durationMs": 123850,
-      "timestamp": "2026-07-18T12:15:06.186Z"
+      "durationMs": 41038,
+      "timestamp": "2026-07-19T12:01:50.871Z"
     },
     {
       "domain": "primary-care",
@@ -174,8 +172,8 @@
       "status": "success",
       "recordsFetched": 2230,
       "recordsWritten": 2313,
-      "durationMs": 43852,
-      "timestamp": "2026-07-18T12:17:11.046Z"
+      "durationMs": 42806,
+      "timestamp": "2026-07-19T12:02:32.913Z"
     },
     {
       "domain": "continuing-care",
@@ -183,8 +181,8 @@
       "status": "success",
       "recordsFetched": 35,
       "recordsWritten": 35,
-      "durationMs": 7715,
-      "timestamp": "2026-07-18T12:17:55.958Z"
+      "durationMs": 5209,
+      "timestamp": "2026-07-19T12:03:16.721Z"
     },
     {
       "domain": "continuing-care",
@@ -192,17 +190,17 @@
       "status": "success",
       "recordsFetched": 958,
       "recordsWritten": 958,
-      "durationMs": 4861,
-      "timestamp": "2026-07-18T12:18:04.721Z"
+      "durationMs": 1802,
+      "timestamp": "2026-07-19T12:03:22.933Z"
     },
     {
       "domain": "regional-inequity",
       "pipeline": "openAlbertaInequityFetcher",
       "status": "success",
-      "recordsFetched": 396,
-      "recordsWritten": 396,
-      "durationMs": 7409,
-      "timestamp": "2026-07-18T12:18:10.583Z"
+      "recordsFetched": 418,
+      "recordsWritten": 418,
+      "durationMs": 6640,
+      "timestamp": "2026-07-19T12:03:25.738Z"
     },
     {
       "domain": "primary-care",
@@ -210,8 +208,8 @@
       "status": "skipped",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 189,
-      "timestamp": "2026-07-18T12:18:19.006Z",
+      "durationMs": 11,
+      "timestamp": "2026-07-19T12:03:33.381Z",
       "error": "No matching LGAs between COMMUNITY_NEED_PROFILES and existing LGA_COMMUNITY_NEEDS"
     },
     {
@@ -220,9 +218,9 @@
       "status": "skipped",
       "recordsFetched": 1,
       "recordsWritten": 0,
-      "durationMs": 4476,
-      "error": "Verified PMID 40465166: \"Health system utilization following medical advice from Alberta's Virtual MD: a descriptive analysis.\" (CJEM, 2025 Dec) — DOI: 10.1007/s43678-025-00928-z | No new Health Link volume announcements found on AHS news listing. | No metric arrays written (fail-closed).",
-      "timestamp": "2026-07-18T12:18:20.202Z"
+      "durationMs": 4753,
+      "error": "Verified PMID 40465166: \"Health system utilization following medical advice from Alberta's Virtual MD: a descriptive analysis.\" (CJEM, 2025 Dec) \u2014 DOI: 10.1007/s43678-025-00928-z | No new Health Link volume announcements found on AHS news listing. | No metric arrays written (fail-closed).",
+      "timestamp": "2026-07-19T12:03:34.395Z"
     },
     {
       "domain": "spending",
@@ -230,9 +228,9 @@
       "status": "skipped",
       "recordsFetched": 0,
       "recordsWritten": 0,
-      "durationMs": 408,
-      "error": "Fraser Institute blocks automated access (403) — relying on CIHI/Open Alberta for spending data",
-      "timestamp": "2026-07-18T12:18:26.090Z"
+      "durationMs": 129,
+      "error": "Fraser Institute blocks automated access (403) \u2014 relying on CIHI/Open Alberta for spending data",
+      "timestamp": "2026-07-19T12:03:40.279Z"
     },
     {
       "domain": "spending",
@@ -240,18 +238,8 @@
       "status": "success",
       "recordsFetched": 20,
       "recordsWritten": 20,
-      "durationMs": 2941,
-      "timestamp": "2026-07-18T12:18:27.105Z"
-    },
-    {
-      "domain": "mental-health",
-      "pipeline": "alberta211Scraper",
-      "status": "skipped",
-      "recordsFetched": 0,
-      "recordsWritten": 0,
-      "durationMs": 18516,
-      "timestamp": "2026-07-18T12:18:31.048Z",
-      "error": "211 API returned no records (Cloudflare verification or empty search)"
+      "durationMs": 2798,
+      "timestamp": "2026-07-19T12:03:41.280Z"
     },
     {
       "domain": "patient-experience",
@@ -259,17 +247,17 @@
       "status": "success",
       "recordsFetched": 568,
       "recordsWritten": 568,
-      "durationMs": 8475,
-      "timestamp": "2026-07-18T12:18:50.588Z"
+      "durationMs": 8415,
+      "timestamp": "2026-07-19T12:04:03.430Z"
     },
     {
       "domain": "public-health",
       "pipeline": "albertaRespiratoryVirusScraper",
       "status": "success",
-      "recordsFetched": 476,
-      "recordsWritten": 476,
-      "durationMs": 7993,
-      "timestamp": "2026-07-18T12:19:00.121Z"
+      "recordsFetched": 448,
+      "recordsWritten": 446,
+      "durationMs": 7840,
+      "timestamp": "2026-07-19T12:04:12.847Z"
     },
     {
       "domain": "workforce",
@@ -277,27 +265,8 @@
       "status": "success",
       "recordsFetched": 600,
       "recordsWritten": 600,
-      "durationMs": 3764,
-      "timestamp": "2026-07-18T12:19:09.160Z"
-    },
-    {
-      "domain": "mental-health",
-      "pipeline": "cihiMhSafetyFetcher",
-      "status": "success",
-      "recordsFetched": 2187,
-      "recordsWritten": 2187,
-      "durationMs": 25007,
-      "timestamp": "2026-07-18T12:19:13.925Z"
-    },
-    {
-      "domain": "mental-health",
-      "pipeline": "albertaSubstanceUseScraper",
-      "status": "skipped",
-      "recordsFetched": 0,
-      "recordsWritten": 0,
-      "durationMs": 11637,
-      "timestamp": "2026-07-18T12:19:39.941Z",
-      "error": "PDF text extraction returned empty (pdftotext may not be installed)"
+      "durationMs": 2846,
+      "timestamp": "2026-07-19T12:04:21.688Z"
     },
     {
       "domain": "surgical",
@@ -305,8 +274,8 @@
       "status": "success",
       "recordsFetched": 1828,
       "recordsWritten": 1828,
-      "durationMs": 3892,
-      "timestamp": "2026-07-18T12:19:52.580Z"
+      "durationMs": 2785,
+      "timestamp": "2026-07-19T12:05:04.116Z"
     },
     {
       "domain": "er-waittimes",
@@ -314,12 +283,12 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 73,
-      "timestamp": "2026-07-18T17:41:11.650Z"
+      "durationMs": 62,
+      "timestamp": "2026-07-20T00:28:18.772Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-18T17:41:11.650Z",
-  "erWaitTimesNextUpdate": "2026-07-18T17:51:11.723Z",
-  "labWaitsLastUpdate": "2026-07-18T17:11:10.821Z",
-  "labWaitsNextUpdate": "2026-07-18T18:11:14.247Z"
+  "erWaitTimesLastUpdate": "2026-07-20T00:28:18.772Z",
+  "erWaitTimesNextUpdate": "2026-07-20T00:38:18.834Z",
+  "labWaitsLastUpdate": "2026-07-19T23:48:18.683Z",
+  "labWaitsNextUpdate": "2026-07-20T00:48:18.750Z"
 }

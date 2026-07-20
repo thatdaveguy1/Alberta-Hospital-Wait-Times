@@ -1,14 +1,10 @@
-// CIHI Mental Health & Clinical Safety Fetcher
-// Fetches mental health and clinical safety indicators from CIHI's
-// indicator library data tables.
+// CIHI Clinical Safety & Indicator Fetcher
+// Fetches clinical safety and related CIHI indicator library data tables
+// for patient-experience, system-flow, spending, surgical, and primary-care.
 //
-// Sources:
-//   - 30-Day Readmission for Mental Health and Substance Use:
-//     https://www.cihi.ca/sites/default/files/document/data-file/803-30-day-readmission-for-mental-health-and-substance-use-data-table-en.xlsx
-//
-// Writes to:
-//   - data-mental-health.json: CIHI_MH_READMISSION_RATES
-//   - data-patient-experience.json: CIHI_CLINICAL_SAFETY_INDICATORS
+// Writes to domain JSON files such as data-patient-experience.json,
+// data-system-flow.json, data-spending.json, data-surgical.json, and
+// data-primary-care.json. No longer writes mental-health domain data.
 
 import axios from 'axios';
 import fs from 'fs';
@@ -22,7 +18,6 @@ import {
   type DataMetadata,
 } from './metadataHelpers';
 
-const MENTAL_HEALTH_FILE = path.join(process.cwd(), 'data-mental-health.json');
 const PATIENT_EXPERIENCE_FILE = path.join(process.cwd(), 'data-patient-experience.json');
 const SYSTEM_FLOW_FILE = path.join(process.cwd(), 'data-system-flow.json');
 const SPENDING_FILE = path.join(process.cwd(), 'data-spending.json');
@@ -35,11 +30,6 @@ const USER_AGENT =
 
 // CIHI indicator data table URLs
 const INDICATOR_URLS: { url: string; domain: string; key: string }[] = [
-  {
-    url: 'https://www.cihi.ca/sites/default/files/document/data-file/803-30-day-readmission-for-mental-health-and-substance-use-data-table-en.xlsx',
-    domain: 'mental-health',
-    key: 'CIHI_MH_READMISSION_RATES',
-  },
   {
     url: 'https://www.cihi.ca/sites/default/files/document/data-file/827-all-patients-readmitted-to-hospital-data-table-en.xlsx',
     domain: 'patient-experience',
@@ -123,15 +113,6 @@ const DOMAIN_METADATA_BUILDERS: Record<
         source: 'CIHI indicator XLSX (811 ED wait time for physician initial assessment)',
         sourceVintage: deriveCiHiTimeFrameRange(records || []),
         verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
-        lastUpdated: ts,
-      }),
-  },
-  'mental-health': {
-    CIHI_MH_READMISSION_RATES: (ts, records) =>
-      buildMetadataEntry({
-        updateType: 'auto',
-        source: 'CIHI 30-day mental-health readmission data table',
-        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         lastUpdated: ts,
       }),
   },
@@ -364,7 +345,7 @@ export async function run(): Promise<SyncResult> {
     if (totalRecords === 0) {
       console.warn('[CihiMhSafety] No records extracted — leaving data files unchanged.');
       return {
-        domain: 'mental-health',
+        domain: 'patient-experience',
         pipeline: 'cihiMhSafetyFetcher',
         status: 'skipped',
         recordsFetched: 0,
@@ -377,7 +358,6 @@ export async function run(): Promise<SyncResult> {
 
     // Write updates to domain-specific files
     const domainFiles: Record<string, string> = {
-      'mental-health': MENTAL_HEALTH_FILE,
       'patient-experience': PATIENT_EXPERIENCE_FILE,
       'system-flow': SYSTEM_FLOW_FILE,
       'spending': SPENDING_FILE,
@@ -422,7 +402,7 @@ export async function run(): Promise<SyncResult> {
       `[CihiMhSafety] Complete. fetched=${totalRecords} written=${totalRecords} in ${Date.now() - startTime}ms`,
     );
     return {
-      domain: 'mental-health',
+      domain: 'patient-experience',
       pipeline: 'cihiMhSafetyFetcher',
       status: 'success',
       recordsFetched: totalRecords,
@@ -434,7 +414,7 @@ export async function run(): Promise<SyncResult> {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.error('[CihiMhSafety] FAILED:', errorMsg);
     return {
-      domain: 'mental-health',
+      domain: 'patient-experience',
       pipeline: 'cihiMhSafetyFetcher',
       status: 'failed',
       recordsFetched: 0,

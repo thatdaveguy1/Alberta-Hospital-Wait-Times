@@ -22,7 +22,7 @@ Scheduler (launchd)
 | `erWaitTimesFetcher.ts` | API | er-waittimes | 10 min |
 | `disruptionsScraper.ts` | Scraper | disruptions | 24 hr |
 | `statscanFetcher.ts` | API | workforce, spending | 24 hr |
-| `phacFetcher.ts` | API | public-health, mental-health | 24 hr |
+| `phacFetcher.ts` | API | public-health | 24 hr |
 | `openAlbertaFetcher.ts` | API | spending | 24 hr |
 | `waittimesAlbertaScraper.ts` | Scraper | surgical | 24 hr |
 | `abjhiScraper.ts` | Scraper | surgical | 24 hr |

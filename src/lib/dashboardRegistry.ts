@@ -8,7 +8,6 @@ import {
   Stethoscope,
   Users,
   FlaskConical,
-  Brain,
   Home,
   HeartHandshake,
   Coins,
@@ -186,17 +185,6 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     updateFrequency: 'Weekly Updates',
   },
   {
-    id: 'mental-health',
-    title: 'Mental Health & Addictions',
-    shortName: 'Mental Health',
-    category: 'prevention-surveillance',
-    description: 'ABED recovery beds, crisis helplines, and measured CIHI mental-health readmission indicators.',
-    icon: Brain,
-    badge: 'MHSU SYSTEM',
-    source: 'ABED Registry & CIHI indicators',
-    updateFrequency: 'Daily updates',
-  },
-  {
     id: 'regional-inequity',
     title: 'Regional Health Inequity',
     shortName: 'Health Inequity',
@@ -212,7 +200,7 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     title: 'Health Spending & Productivity',
     shortName: 'Health Spending',
     category: 'equity-outcomes',
-    description: 'Measured CIHI health spending trends and physician clinical payments.',
+    description: 'Province-compare NHEX spending, Alberta fiscal detail, and physician clinical payments.',
     icon: Coins,
     badge: 'VALUE AUDIT',
     source: 'CIHI Spending Trends & AHCIP Supplement',
@@ -287,13 +275,6 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
     sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'CIHI priority procedure waits & Cancer Care Alberta centres',
     domain: 'cancer'
-  },
-  'mental-health': {
-    updateType: 'mixed',
-    interval: 'daily sync · per-array provenance',
-    sourceVintage: 'Per-array (see dashboard timestamps)',
-    source: 'ABED Registry & CIHI mental-health indicators',
-    domain: 'mental-health'
   },
   'long-term-care': {
     updateType: 'mixed',
