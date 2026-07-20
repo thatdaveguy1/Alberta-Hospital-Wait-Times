@@ -1,3 +1,10 @@
+## Session: 2026-07-20 (Home near-you — reject far IP drive times)
+
+### Lesson: Drive-inclusive "near you" lists must refuse out-of-province pins
+- **Mistake:** IP fallback accepted Seattle (Cloudflare edge / non-Alberta networks) and haversine drive estimates then showed ~500 min / 700 km "near you" lab rows under South + Calgary.
+- **Solution:** Reject IP (and saved non-GPS) pins outside a coarse Alberta bbox; require nearest facility ≤ `NEAR_YOU_MAX_KM` (150) before ranking/showing drive times; empty-state asks for Alberta GPS/city instead of inventing drives.
+- **Prevention:** Any UI that multiplies wait with drive must hard-cap candidate distance and refuse IP outside the service geography.
+
 ## Session: 2026-07-20 (Home fastest-ER list — GPS/IP + zone scope)
 
 ### Lesson: Near-you lists must scope by AHS zone, not province-wide wait alone

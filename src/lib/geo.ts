@@ -51,6 +51,43 @@ type Locatable = {
   longitude?: number;
 };
 
+/** Max road-ish distance for home "near you" lists that include drive time. */
+export const NEAR_YOU_MAX_KM = 150;
+
+/**
+ * Coarse Alberta bounding box (with a little border slack).
+ * Used to reject IP locations outside the province before inventing drive times.
+ */
+export function isRoughlyInAlberta(lat: number, lng: number): boolean {
+  return lat >= 48.9 && lat <= 60.1 && lng >= -120.1 && lng <= -109.9;
+}
+
+/** Distance to the nearest geocoded facility, or null if none. */
+export function nearestFacilityKm(
+  lat: number,
+  lng: number,
+  facilities: Locatable[],
+): number | null {
+  let best: number | null = null;
+  for (const f of facilities) {
+    if (f.latitude == null || f.longitude == null) continue;
+    const d = calculateDistance(lat, lng, f.latitude, f.longitude);
+    if (best === null || d < best) best = d;
+  }
+  return best;
+}
+
+/** True when the user is close enough for drive-inclusive near-you ranking. */
+export function locationIsNearCare(
+  lat: number,
+  lng: number,
+  facilities: Locatable[],
+  maxKm: number = NEAR_YOU_MAX_KM,
+): boolean {
+  const nearest = nearestFacilityKm(lat, lng, facilities);
+  return nearest !== null && nearest <= maxKm;
+}
+
 /**
  * Rank AHS zones by distance from the user to the nearest facility in each zone.
  * Zones with no geocoded facilities are omitted.
@@ -181,6 +218,9 @@ export async function fetchIpLocation(): Promise<UserLocation | null> {
     if (!res.ok) return null;
     const data = await res.json();
     if (typeof data?.lat !== 'number' || typeof data?.lng !== 'number') return null;
+    // IP outside Alberta is useless for drive-inclusive "near you" lists
+    // (e.g. Seattle edge → 500+ minute drives to Calgary labs).
+    if (!isRoughlyInAlberta(data.lat, data.lng)) return null;
     return {
       lat: data.lat,
       lng: data.lng,

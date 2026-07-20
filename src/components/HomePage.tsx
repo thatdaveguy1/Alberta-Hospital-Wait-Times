@@ -19,7 +19,10 @@ import {
 import {
   calculateDistance,
   clearSavedLocation,
+  isRoughlyInAlberta,
   loadSavedLocation,
+  locationIsNearCare,
+  NEAR_YOU_MAX_KM,
   nearestZonesForUser,
   resolveLocationGpsThenIp,
   saveLocation,
@@ -130,10 +133,32 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   const [loading, setLoading] = useState(true);
   const [labsLoading, setLabsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
-  const [location, setLocation] = useState<UserLocation | null>(() => loadSavedLocation());
+  const [location, setLocation] = useState<UserLocation | null>(() => {
+    const saved = loadSavedLocation();
+    if (!saved) return null;
+    const usable =
+      saved.source === 'gps' ||
+      saved.source === 'manual' ||
+      saved.isGPS ||
+      isRoughlyInAlberta(saved.lat, saved.lng);
+    if (!usable) {
+      clearSavedLocation();
+      return null;
+    }
+    return saved;
+  });
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoError, setGeoError] = useState('');
-  const [locatingBootstrap, setLocatingBootstrap] = useState(() => !loadSavedLocation());
+  const [locatingBootstrap, setLocatingBootstrap] = useState(() => {
+    const saved = loadSavedLocation();
+    if (!saved) return true;
+    return !(
+      saved.source === 'gps' ||
+      saved.source === 'manual' ||
+      saved.isGPS ||
+      isRoughlyInAlberta(saved.lat, saved.lng)
+    );
+  });
   const [osrmData, setOsrmData] = useState<OsrmMap>({});
   const [labOsrmData, setLabOsrmData] = useState<OsrmMap>({});
   const [directoryQuery, setDirectoryQuery] = useState('');
@@ -163,13 +188,22 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   useEffect(load, []);
 
-  // Auto-resolve location: saved → GPS → IP fallback.
+  // Auto-resolve location: saved → GPS → Alberta IP fallback.
+  // Discard out-of-province saved IP pins (e.g. Seattle) — they invent absurd drive times.
   useEffect(() => {
     const saved = loadSavedLocation();
     if (saved) {
-      setLocation(saved);
-      setLocatingBootstrap(false);
-      return;
+      const usable =
+        saved.source === 'gps' ||
+        saved.source === 'manual' ||
+        saved.isGPS ||
+        isRoughlyInAlberta(saved.lat, saved.lng);
+      if (usable) {
+        setLocation(saved);
+        setLocatingBootstrap(false);
+        return;
+      }
+      clearSavedLocation();
     }
     let cancelled = false;
     setLocatingBootstrap(true);
@@ -195,6 +229,17 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   const activeLabZones = useMemo(() => {
     if (!location || labs.length === 0) return [] as string[];
     return nearestZonesForUser(location.lat, location.lng, labs);
+  }, [location, labs]);
+
+  // Drive-inclusive near-you lists only when the pin is within NEAR_YOU_MAX_KM of care.
+  const erLocationNear = useMemo(() => {
+    if (!location || hospitals.length === 0) return false;
+    return locationIsNearCare(location.lat, location.lng, hospitals);
+  }, [location, hospitals]);
+
+  const labLocationNear = useMemo(() => {
+    if (!location || labs.length === 0) return false;
+    return locationIsNearCare(location.lat, location.lng, labs);
   }, [location, labs]);
 
   // OSRM drive times for ER facilities in the active zone(s).
@@ -263,7 +308,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   );
 
   const topPicks = useMemo<ScoredFacility[]>(() => {
-    if (!location || activeZones.length === 0) return [];
+    if (!location || !erLocationNear || activeZones.length === 0) return [];
     const zoneSet = new Set(activeZones);
     return enriched
       .filter((h) => zoneSet.has(h.region))
@@ -274,32 +319,30 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             ? calculateDistance(location.lat, location.lng, h.latitude, h.longitude)
             : undefined;
         const wait = h.effectiveWaitMinutes;
-        if (wait === null) return null;
-        const driveMins =
-          drive?.durationMins ??
-          (haversineKm != null ? estimateDriveMins(haversineKm) : undefined);
-        const distance =
-          drive?.distanceKm ?? (haversineKm != null ? roundKm(haversineKm) : undefined);
+        if (wait === null || haversineKm == null || haversineKm > NEAR_YOU_MAX_KM) return null;
+        const driveMins = drive?.durationMins ?? estimateDriveMins(haversineKm);
+        const distance = drive?.distanceKm ?? roundKm(haversineKm);
         return {
           ...h,
           distance,
           driveMins,
-          netScore: wait + (driveMins ?? 0),
+          netScore: wait + driveMins,
         };
       })
       .filter((h): h is ScoredFacility => h !== null)
       .sort((a, b) => a.netScore - b.netScore)
       .slice(0, 3);
-  }, [enriched, location, osrmData, activeZones]);
+  }, [enriched, location, osrmData, activeZones, erLocationNear]);
 
   const topLabPicks = useMemo<ScoredLab[]>(() => {
-    if (!location || activeLabZones.length === 0) return [];
+    if (!location || !labLocationNear || activeLabZones.length === 0) return [];
     const zoneSet = new Set(activeLabZones);
     return labs
       .filter((l) => zoneSet.has(l.region) && !isLabWaitUnavailable(l))
       .map((l) => {
         const drive = labOsrmData[l.id];
         const haversineKm = calculateDistance(location.lat, location.lng, l.latitude, l.longitude);
+        if (haversineKm > NEAR_YOU_MAX_KM) return null;
         const wait = l.waitTimeMin as number;
         const driveMins = drive?.durationMins ?? estimateDriveMins(haversineKm);
         return {
@@ -310,9 +353,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           waitBand: labWaitBand(l),
         };
       })
+      .filter((l): l is ScoredLab => l !== null)
       .sort((a, b) => a.netScore - b.netScore)
       .slice(0, 3);
-  }, [labs, location, labOsrmData, activeLabZones]);
+  }, [labs, location, labOsrmData, activeLabZones, labLocationNear]);
 
   const requestLocation = async () => {
     setGeoBusy(true);
@@ -515,7 +559,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           {location && (
             <p className="text-xs text-ink-3">
               Near <span className="font-medium text-ink-2">{location.city}</span>
-              {zoneLabel ? ` · ${zoneLabel}` : ''}
+              {erLocationNear && zoneLabel ? ` · ${zoneLabel}` : ''}
               {locationSourceHint ? ` · ${locationSourceHint}` : ''}
               {' · '}
               <button
@@ -554,6 +598,14 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             {[0, 1, 2].map((i) => (
               <div key={i} className="h-14 animate-pulse rounded-lg bg-neutral-chip" />
             ))}
+          </div>
+        ) : !erLocationNear ? (
+          <div className="mt-3">
+            <p className="text-sm text-ink-2">
+              {location.city} is too far for local drive times. Allow GPS in Alberta, or open the
+              full ER page to pick a city.
+            </p>
+            <FullErCta />
           </div>
         ) : topPicks.length === 0 ? (
           <div className="mt-3">
@@ -610,7 +662,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           {location && (
             <p className="text-xs text-ink-3">
               Near <span className="font-medium text-ink-2">{location.city}</span>
-              {labZoneLabel ? ` · ${labZoneLabel}` : ''}
+              {labLocationNear && labZoneLabel ? ` · ${labZoneLabel}` : ''}
               {locationSourceHint ? ` · ${locationSourceHint}` : ''}
               {' · '}
               <button
@@ -649,6 +701,14 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             {[0, 1, 2].map((i) => (
               <div key={i} className="h-14 animate-pulse rounded-lg bg-neutral-chip" />
             ))}
+          </div>
+        ) : !labLocationNear ? (
+          <div className="mt-3">
+            <p className="text-sm text-ink-2">
+              {location.city} is too far for local drive times. Allow GPS in Alberta, or open the
+              full labs page to pick a city.
+            </p>
+            <FullLabCta />
           </div>
         ) : topLabPicks.length === 0 ? (
           <div className="mt-3">

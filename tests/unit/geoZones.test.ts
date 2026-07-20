@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isRoughlyInAlberta,
+  locationIsNearCare,
+  nearestFacilityKm,
   nearestZonesForUser,
+  NEAR_YOU_MAX_KM,
   rankZonesByProximity,
   URBAN_ZONES,
 } from '../../src/lib/geo';
@@ -50,5 +54,26 @@ describe('nearestZonesForUser', () => {
       { region: 'Ghost Zone' },
     ]);
     expect(ranked.map((z) => z.region)).toEqual(['Calgary Zone']);
+  });
+});
+
+
+describe('near-you distance gates', () => {
+  it('accepts Alberta coordinates and rejects Seattle', () => {
+    expect(isRoughlyInAlberta(53.55, -113.49)).toBe(true);
+    expect(isRoughlyInAlberta(51.05, -114.07)).toBe(true);
+    expect(isRoughlyInAlberta(47.61, -122.33)).toBe(false); // Seattle
+  });
+
+  it('treats Seattle as too far for drive-inclusive near-you lists', () => {
+    const nearest = nearestFacilityKm(47.61, -122.33, facilities);
+    expect(nearest).not.toBeNull();
+    expect(nearest!).toBeGreaterThan(NEAR_YOU_MAX_KM);
+    expect(locationIsNearCare(47.61, -122.33, facilities)).toBe(false);
+  });
+
+  it('treats Edmonton as near care', () => {
+    expect(locationIsNearCare(53.55, -113.49, facilities)).toBe(true);
+    expect(nearestFacilityKm(53.55, -113.49, facilities)!).toBeLessThanOrEqual(NEAR_YOU_MAX_KM);
   });
 });
