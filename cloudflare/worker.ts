@@ -87,6 +87,26 @@ app.get('/api/health', (c) => {
   });
 });
 
+// --- IP geolocation (Cloudflare request.cf) — GPS fallback for home "near you" ---
+app.get('/api/geo/ip', (c) => {
+  const cf = c.req.raw.cf as
+    | { latitude?: string | number; longitude?: string | number; city?: string; region?: string; country?: string }
+    | undefined;
+  const lat = cf?.latitude != null ? Number(cf.latitude) : NaN;
+  const lng = cf?.longitude != null ? Number(cf.longitude) : NaN;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return c.json({ error: 'ip_geo_unavailable' }, 404);
+  }
+  return c.json({
+    lat,
+    lng,
+    city: cf?.city || 'Your area',
+    region: cf?.region || 'Alberta',
+    countryCode: cf?.country,
+    source: 'ip',
+  });
+});
+
 // --- ER Wait Times ---
 app.get('/api/hospitals', async (c) => {
   const data = await c.env.DATA_KV.get('data-er-waittimes');

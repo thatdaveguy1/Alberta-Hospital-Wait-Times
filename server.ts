@@ -283,6 +283,46 @@ async function startServer() {
     }
   });
 
+  // Coarse IP geolocation — fallback when browser GPS is unavailable.
+  app.get('/api/geo/ip', async (req, res) => {
+    try {
+      const forwarded = req.headers['x-forwarded-for'];
+      const rawIp =
+        (typeof forwarded === 'string' ? forwarded.split(',')[0]?.trim() : undefined) ||
+        req.socket.remoteAddress ||
+        '';
+      const isLocal =
+        !rawIp ||
+        rawIp === '::1' ||
+        rawIp === '127.0.0.1' ||
+        rawIp.startsWith('::ffff:127.') ||
+        rawIp.startsWith('10.') ||
+        rawIp.startsWith('192.168.') ||
+        rawIp.startsWith('172.');
+
+      const lookupUrl = isLocal
+        ? 'http://ip-api.com/json/?fields=status,message,city,regionName,lat,lon,countryCode'
+        : `http://ip-api.com/json/${encodeURIComponent(rawIp)}?fields=status,message,city,regionName,lat,lon,countryCode`;
+
+      const response = await axios.get(lookupUrl, { timeout: 5000 });
+      const data = response.data;
+      if (!data || data.status !== 'success' || typeof data.lat !== 'number' || typeof data.lon !== 'number') {
+        return res.status(404).json({ error: 'ip_geo_unavailable' });
+      }
+      return res.json({
+        lat: data.lat,
+        lng: data.lon,
+        city: data.city || 'Your area',
+        region: data.regionName || 'Alberta',
+        countryCode: data.countryCode,
+        source: 'ip',
+      });
+    } catch (err: any) {
+      console.warn('[Server] IP geolocation failed:', err.message || err);
+      return res.status(502).json({ error: 'ip_geo_failed' });
+    }
+  });
+
   // Helper to determine cutoff timestamp for ranges
   function getRangeCutoff(range: string): number {
     const now = Date.now();

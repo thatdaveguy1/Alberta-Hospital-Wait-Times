@@ -2,7 +2,7 @@
 // right now, the fastest path to care near you, active disruptions, and a
 // data-first directory of every module.
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowRight, Navigation, Search } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Map, Navigation, Search } from 'lucide-react';
 import {
   CATEGORIES,
   CATEGORY_TITLE_BY_ID,
@@ -15,7 +15,15 @@ import {
   shortHospitalName,
   type EnrichedHospital,
 } from '../lib/erFacility';
-import { calculateDistance, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
+import {
+  calculateDistance,
+  clearSavedLocation,
+  loadSavedLocation,
+  nearestZonesForUser,
+  resolveLocationGpsThenIp,
+  saveLocation,
+  type UserLocation,
+} from '../lib/geo';
 import { formatMinutesToHm } from '../lib/utils';
 import { formatRelativeTime } from '../hooks/useSyncStatus';
 import { WaitBandChip } from './WaitBandChip';
@@ -30,14 +38,6 @@ type ScoredFacility = EnrichedHospital & {
   driveMins?: number;
   netScore: number;
 };
-
-function toTitleCase(str: string): string {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w))
-    .join(' ');
-}
 
 function median(sortedNums: number[]): number | null {
   if (sortedNums.length === 0) return null;
@@ -55,6 +55,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   const [location, setLocation] = useState<UserLocation | null>(() => loadSavedLocation());
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoError, setGeoError] = useState('');
+  const [locatingBootstrap, setLocatingBootstrap] = useState(() => !loadSavedLocation());
   const [osrmData, setOsrmData] = useState<Record<string, { durationMins: number; distanceKm: number }>>({});
   const [directoryQuery, setDirectoryQuery] = useState('');
 
@@ -74,18 +75,49 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   useEffect(load, []);
 
-  // OSRM drive times for facilities within 100km — same mechanism as the ER tab.
+  // Auto-resolve location: saved → GPS → IP fallback.
   useEffect(() => {
-    if (!location || hospitals.length === 0) {
+    const saved = loadSavedLocation();
+    if (saved) {
+      setLocation(saved);
+      setLocatingBootstrap(false);
+      return;
+    }
+    let cancelled = false;
+    setLocatingBootstrap(true);
+    (async () => {
+      const loc = await resolveLocationGpsThenIp();
+      if (cancelled) return;
+      if (loc) {
+        setLocation(loc);
+        saveLocation(loc);
+      }
+      setLocatingBootstrap(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const activeZones = useMemo(() => {
+    if (!location || hospitals.length === 0) return [] as string[];
+    return nearestZonesForUser(location.lat, location.lng, hospitals);
+  }, [location, hospitals]);
+
+  // OSRM drive times for facilities in the active zone(s) — same mechanism as the ER tab.
+  useEffect(() => {
+    if (!location || hospitals.length === 0 || activeZones.length === 0) {
       setOsrmData({});
       return;
     }
     let cancelled = false;
+    const zoneSet = new Set(activeZones);
     const run = async () => {
       const results: Record<string, { durationMins: number; distanceKm: number }> = {};
       const nearby = hospitals.filter((h) => {
+        if (!zoneSet.has(h.region)) return false;
         if (h.latitude == null || h.longitude == null) return false;
-        return calculateDistance(location.lat, location.lng, h.latitude, h.longitude) <= 100;
+        return calculateDistance(location.lat, location.lng, h.latitude, h.longitude) <= 150;
       });
       await Promise.all(
         nearby.map(async (h) => {
@@ -111,7 +143,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     return () => {
       cancelled = true;
     };
-  }, [location, hospitals]);
+  }, [location, hospitals, activeZones]);
 
   const enriched = useMemo(() => hospitals.map(enrichHospital), [hospitals]);
 
@@ -145,8 +177,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   );
 
   const topPicks = useMemo<ScoredFacility[]>(() => {
-    if (!location) return [];
+    if (!location || activeZones.length === 0) return [];
+    const zoneSet = new Set(activeZones);
     return enriched
+      .filter((h) => zoneSet.has(h.region))
       .map((h) => {
         const drive = osrmData[h.id];
         const distance =
@@ -165,46 +199,26 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       .filter((h): h is ScoredFacility => h !== null)
       .sort((a, b) => a.netScore - b.netScore)
       .slice(0, 3);
-  }, [enriched, location, osrmData]);
+  }, [enriched, location, osrmData, activeZones]);
 
-  const requestGps = () => {
-    if (!('geolocation' in navigator)) {
-      setGeoError('Geolocation is not available in this browser. Use the ER page to enter a city instead.');
-      return;
-    }
+  const requestLocation = async () => {
     setGeoBusy(true);
     setGeoError('');
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        let city = 'Your location';
-        let region = 'Alberta';
-        try {
-          const res = await fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data?.city) city = toTitleCase(String(data.city));
-            if (data?.region) region = data.region;
-          }
-        } catch {
-          // City label is cosmetic; coordinates still work.
-        }
-        const loc: UserLocation = { lat, lng, city, region, isGPS: true };
-        setLocation(loc);
-        saveLocation(loc);
-        setGeoBusy(false);
-      },
-      () => {
-        setGeoBusy(false);
-        setGeoError('Location unavailable. Check permission, or browse all ERs and enter a city there.');
-      },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 },
+    const loc = await resolveLocationGpsThenIp();
+    if (loc) {
+      setLocation(loc);
+      saveLocation(loc);
+      setGeoBusy(false);
+      return;
+    }
+    setGeoBusy(false);
+    setGeoError(
+      'Couldn’t detect your location. Allow GPS, or open the full ER page to enter a city.',
     );
   };
 
   const clearLocation = () => {
-    localStorage.removeItem('alberta_hospital_user_location');
+    clearSavedLocation();
     setLocation(null);
     setOsrmData({});
   };
@@ -224,6 +238,41 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   );
 
   const medianLabel = pulse.median === null ? '—' : formatMinutesToHm(pulse.median);
+  const locationSourceHint =
+    location?.source === 'ip'
+      ? 'approx. from network'
+      : location?.isGPS || location?.source === 'gps'
+        ? 'GPS'
+        : null;
+  const zoneLabel =
+    activeZones.length === 0
+      ? null
+      : activeZones.length === 1
+        ? activeZones[0].replace(/ Zone$/, '')
+        : activeZones.map((z) => z.replace(/ Zone$/, '')).join(' + ');
+
+  const FullErCta = ({ compact = false }: { compact?: boolean }) => (
+    <button
+      type="button"
+      onClick={() => onNavigate('er-waits')}
+      className={
+        compact
+          ? 'mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent-soft px-4 py-3 text-left transition-colors hover:bg-accent hover:text-white cursor-pointer group'
+          : 'mt-4 flex w-full items-center justify-between gap-4 rounded-xl bg-accent px-5 py-4 text-left text-white shadow-sm transition-colors hover:bg-accent-strong cursor-pointer'
+      }
+    >
+      <span className="min-w-0">
+        <span className={`flex items-center gap-2 ${compact ? 'text-sm font-semibold text-accent group-hover:text-white' : 'text-base font-semibold'}`}>
+          <Map className="h-5 w-5 shrink-0" aria-hidden />
+          Open the full ER wait times page
+        </span>
+        <span className={`mt-0.5 block text-xs ${compact ? 'text-ink-2 group-hover:text-white/80' : 'text-white/80'}`}>
+          Map, every Alberta site, drive times, and trends
+        </span>
+      </span>
+      <ArrowRight className={`h-5 w-5 shrink-0 ${compact ? 'text-accent group-hover:text-white' : ''}`} aria-hidden />
+    </button>
+  );
 
   return (
     <div className="space-y-6">
@@ -308,7 +357,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <h2 className="text-base font-semibold text-ink">Find the fastest ER near you</h2>
           {location && (
             <p className="text-xs text-ink-3">
-              Near <span className="font-medium text-ink-2">{location.city}</span> ·{' '}
+              Near <span className="font-medium text-ink-2">{location.city}</span>
+              {zoneLabel ? ` · ${zoneLabel}` : ''}
+              {locationSourceHint ? ` · ${locationSourceHint}` : ''}
+              {' · '}
               <button
                 type="button"
                 onClick={clearLocation}
@@ -320,26 +372,24 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           )}
         </div>
 
-        {!location ? (
+        {!location && locatingBootstrap ? (
+          <div className="mt-3 space-y-2">
+            <div className="h-14 animate-pulse rounded-lg bg-neutral-chip" />
+            <div className="h-14 animate-pulse rounded-lg bg-neutral-chip" />
+            <p className="text-xs text-ink-3">Finding hospitals near you…</p>
+          </div>
+        ) : !location ? (
           <div className="mt-3">
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <button
-                type="button"
-                onClick={requestGps}
-                disabled={geoBusy}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-strong disabled:opacity-60 cursor-pointer"
-              >
-                <Navigation className="h-4 w-4" aria-hidden />
-                {geoBusy ? 'Locating…' : 'Use my location'}
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigate('er-waits')}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-line-2 bg-surface px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-paper cursor-pointer"
-              >
-                Browse all ER wait times
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={requestLocation}
+              disabled={geoBusy}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-4 text-base font-semibold text-white transition-colors hover:bg-accent-strong disabled:opacity-60 cursor-pointer"
+            >
+              <Navigation className="h-5 w-5" aria-hidden />
+              {geoBusy ? 'Locating…' : 'Use my location'}
+            </button>
+            <FullErCta compact />
             {geoError && <p className="mt-2 text-xs text-ink-3">{geoError}</p>}
           </div>
         ) : loading ? (
@@ -350,49 +400,49 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           </div>
         ) : topPicks.length === 0 ? (
           <div className="mt-3">
-            <p className="text-sm text-ink-2">No live waits near {location.city} right now.</p>
-            <button
-              type="button"
-              onClick={() => onNavigate('er-waits')}
-              className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent-strong cursor-pointer"
-            >
-              See the full provincial list <ArrowRight className="h-4 w-4" aria-hidden />
-            </button>
+            <p className="text-sm text-ink-2">
+              No live waits near {location.city}
+              {zoneLabel ? ` (${zoneLabel})` : ''} right now.
+            </p>
+            <FullErCta />
           </div>
         ) : (
-          <ol className="mt-3 divide-y divide-line">
-            {topPicks.map((h, i) => (
-              <li key={h.id}>
-                <button
-                  type="button"
-                  onClick={() => onNavigate('er-waits')}
-                  className="group flex w-full items-center gap-3 py-3 text-left cursor-pointer"
-                >
-                  <span className="w-5 shrink-0 text-center font-mono text-xs tabular-nums text-ink-3">
-                    {i + 1}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold text-ink group-hover:text-accent">
-                      {shortHospitalName(h.name)}
+          <>
+            <ol className="mt-3 divide-y divide-line">
+              {topPicks.map((h, i) => (
+                <li key={h.id}>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('er-waits')}
+                    className="group flex w-full items-center gap-3 py-3 text-left cursor-pointer"
+                  >
+                    <span className="w-5 shrink-0 text-center font-mono text-xs tabular-nums text-ink-3">
+                      {i + 1}
                     </span>
-                    <span className="block text-xs text-ink-3">
-                      {h.driveMins != null
-                        ? `${h.driveMins} min drive${h.distance != null ? ` · ${h.distance} km` : ''}`
-                        : h.city}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-ink group-hover:text-accent">
+                        {shortHospitalName(h.name)}
+                      </span>
+                      <span className="block text-xs text-ink-3">
+                        {h.driveMins != null
+                          ? `${h.driveMins} min drive${h.distance != null ? ` · ${h.distance} km` : ''}`
+                          : h.city}
+                      </span>
                     </span>
-                  </span>
-                  <span className="shrink-0 font-mono text-lg tabular-nums text-ink">
-                    {h.effectiveWaitMinutes != null ? formatMinutesToHm(h.effectiveWaitMinutes) : '—'}
-                  </span>
-                  <WaitBandChip band={h.waitBand} className="hidden sm:inline-flex" />
-                  <ArrowRight
-                    className="h-4 w-4 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
-                    aria-hidden
-                  />
-                </button>
-              </li>
-            ))}
-          </ol>
+                    <span className="shrink-0 font-mono text-lg tabular-nums text-ink">
+                      {h.effectiveWaitMinutes != null ? formatMinutesToHm(h.effectiveWaitMinutes) : '—'}
+                    </span>
+                    <WaitBandChip band={h.waitBand} className="hidden sm:inline-flex" />
+                    <ArrowRight
+                      className="h-4 w-4 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
+                      aria-hidden
+                    />
+                  </button>
+                </li>
+              ))}
+            </ol>
+            <FullErCta />
+          </>
         )}
       </section>
 

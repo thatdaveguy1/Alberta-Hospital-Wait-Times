@@ -1,3 +1,10 @@
+## Session: 2026-07-20 (Home fastest-ER list — GPS/IP + zone scope)
+
+### Lesson: Near-you lists must scope by AHS zone, not province-wide wait alone
+- **Mistake:** The home "Find the fastest ER near you" top-3 ranked every Alberta facility by wait (+ drive when available). Quiet sites in distant zones (Medicine Hat, Grande Prairie) outranked local hospitals when drive times were missing or location was coarse.
+- **Solution:** Resolve location GPS-first with `/api/geo/ip` fallback; filter candidates with `nearestZonesForUser` (1 zone for Calgary/Edmonton metros, 2 zones for rural). Added a full-width CTA to the ER page.
+- **Prevention:** Any "near you" ranking must constrain by zone (or hard distance) before sorting on wait/net time.
+
 ## Session: 2026-07-09 (Surgical Waitlists — procedure comparison fix)
 
 ### Lesson: Procedure comparison dropdown keys must match lookup fields
