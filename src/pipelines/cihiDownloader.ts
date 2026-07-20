@@ -13,6 +13,8 @@
 //   ALBERTA_USE_OF_FUNDS           — from series-d1 Alberta sheet (amounts + shares)
 //   ALBERTA_ACTIVITY_VOLUME_TREND  — NHEX Alberta total spending by year only
 //                                    (unsupported volume fields left empty/null)
+//   PROVINCIAL_SPENDING_TREND      — multi-year province × year per-capita series (O.1)
+//   PROVINCIAL_USE_OF_FUNDS        — latest-year public UOF mix by province (O.1)
 
 import AdmZip from 'adm-zip';
 import axios from 'axios';
@@ -24,6 +26,8 @@ import { applyWithheldPayloadGuard, buildMetadataEntry, mergeDataMetadata, type 
 import type {
   ActivityVolumeTrend,
   NationalSpendingCompare,
+  ProvincialSpendingTrend,
+  ProvincialUseOfFunds,
   SpendingByUseOfFunds,
 } from '../spendingData';
 import {
@@ -377,6 +381,148 @@ function extractActivityVolume(
   return records.sort((a, b) => a.fiscalYear.localeCompare(b.fiscalYear));
 }
 
+/** Friendly label for Table O.1 use-of-funds categories (falls back to raw label). */
+function friendlyUof(raw: string): string {
+  const normalized = raw.replace(/\s+/g, ' ').trim();
+  return USE_OF_FUNDS_MAP[normalized] ?? normalized;
+}
+
+/**
+ * Multi-year provincial per-capita trends from Table O.1.
+ * Public + private combined for Total / Hospitals / Physicians / Drugs.
+ */
+function extractProvincialSpendingTrend(tableRows: TableO1Row[]): ProvincialSpendingTrend[] {
+  if (tableRows.length === 0) return [];
+
+  // province -> year -> uof -> { public, private }
+  type SectorVals = { public?: number; private?: number };
+  const nest = new Map<string, Map<string, Map<string, SectorVals>>>();
+
+  for (const r of tableRows) {
+    if (r.perCapita === undefined) continue;
+    if (r.sector !== SECTOR_PUBLIC && r.sector !== SECTOR_PRIVATE) continue;
+    if (r.useOfFunds !== UOF_TOTAL && r.useOfFunds !== UOF_HOSPITALS && r.useOfFunds !== UOF_PHYSICIANS && r.useOfFunds !== UOF_DRUGS) continue;
+    if (!(PROVINCE_NAMES as readonly string[]).includes(r.province)) continue;
+
+    let byYear = nest.get(r.province);
+    if (!byYear) {
+      byYear = new Map();
+      nest.set(r.province, byYear);
+    }
+    let byUof = byYear.get(r.year);
+    if (!byUof) {
+      byUof = new Map();
+      byYear.set(r.year, byUof);
+    }
+    let vals = byUof.get(r.useOfFunds);
+    if (!vals) {
+      vals = {};
+      byUof.set(r.useOfFunds, vals);
+    }
+    if (r.sector === SECTOR_PUBLIC) vals.public = r.perCapita;
+    else vals.private = r.perCapita;
+  }
+
+  const sumSectors = (vals: SectorVals | undefined): number => {
+    if (!vals) return 0;
+    return (vals.public ?? 0) + (vals.private ?? 0);
+  };
+
+  const records: ProvincialSpendingTrend[] = [];
+  for (const province of PROVINCE_NAMES) {
+    const byYear = nest.get(province);
+    if (!byYear) continue;
+    for (const [year, byUof] of byYear) {
+      const totalVals = byUof.get(UOF_TOTAL);
+      const spendingPerCapita = Math.round(sumSectors(totalVals));
+      if (spendingPerCapita <= 0) continue;
+      const publicPart = totalVals?.public;
+      const privatePart = totalVals?.private;
+      let publicSharePct: number | null = null;
+      if (publicPart !== undefined && (publicPart + (privatePart ?? 0)) > 0) {
+        publicSharePct = Math.round((publicPart / (publicPart + (privatePart ?? 0))) * 1000) / 10;
+      }
+      records.push({
+        province,
+        year,
+        fiscalYear: nhexToFiscal(year),
+        spendingPerCapita,
+        hospitalSpendingPerCapita: Math.round(sumSectors(byUof.get(UOF_HOSPITALS))),
+        physicianSpendingPerCapita: Math.round(sumSectors(byUof.get(UOF_PHYSICIANS))),
+        drugSpendingPerCapita: Math.round(sumSectors(byUof.get(UOF_DRUGS))),
+        publicSharePct,
+      });
+    }
+  }
+
+  return records.sort((a, b) =>
+    a.year === b.year ? a.province.localeCompare(b.province) : a.year.localeCompare(b.year),
+  );
+}
+
+/**
+ * Latest-year public-sector use-of-funds composition by province from Table O.1.
+ * Share is % of that province's public Total current dollars.
+ */
+function extractProvincialUseOfFunds(tableRows: TableO1Row[]): ProvincialUseOfFunds[] {
+  if (tableRows.length === 0) return [];
+  const latestYear = tableRows.reduce((max, r) => (r.year > max ? r.year : max), '0');
+
+  // province -> category -> { dollars, perCapita }
+  const byProv = new Map<string, Map<string, { dollars: number; perCapita: number }>>();
+  const totals = new Map<string, number>();
+
+  for (const r of tableRows) {
+    if (r.year !== latestYear) continue;
+    if (r.sector !== SECTOR_PUBLIC) continue;
+    if (!(PROVINCE_NAMES as readonly string[]).includes(r.province)) continue;
+    if (r.currentDollars === undefined) continue;
+
+    if (r.useOfFunds === UOF_TOTAL) {
+      totals.set(r.province, r.currentDollars);
+      continue;
+    }
+
+    // Skip rollup / subtotal rows — they dominate stacked shares.
+    const rawUof = r.useOfFunds.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (rawUof.includes('sub-total') || rawUof.includes('subtotal') || rawUof === 'total') continue;
+
+    const label = friendlyUof(r.useOfFunds);
+    let cats = byProv.get(r.province);
+    if (!cats) {
+      cats = new Map();
+      byProv.set(r.province, cats);
+    }
+    cats.set(label, {
+      dollars: r.currentDollars,
+      perCapita: r.perCapita ?? 0,
+    });
+  }
+
+  const records: ProvincialUseOfFunds[] = [];
+  for (const province of PROVINCE_NAMES) {
+    const cats = byProv.get(province);
+    const total = totals.get(province);
+    if (!cats || !total || total <= 0) continue;
+    for (const [category, vals] of cats) {
+      if (vals.dollars <= 0) continue;
+      records.push({
+        province,
+        category,
+        amountBillions: Math.round((vals.dollars / 1_000_000_000) * 100) / 100,
+        percentageShare: Math.round((vals.dollars / total) * 1000) / 10,
+        perCapita: Math.round(vals.perCapita),
+      });
+    }
+  }
+
+  return records.sort((a, b) =>
+    a.province === b.province
+      ? b.percentageShare - a.percentageShare
+      : a.province.localeCompare(b.province),
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Series D1 extraction (nhex-series-d1-2025-en.xlsx, Alberta sheet)
 // ---------------------------------------------------------------------------
@@ -619,14 +765,26 @@ export async function run(): Promise<SyncResult> {
       ? (existingData.ALBERTA_ACTIVITY_VOLUME_TREND as ActivityVolumeTrend[])
       : [];
     const activityVolume = extractActivityVolume(tableO1Rows, existingActivityVolume);
+    const provincialTrend = extractProvincialSpendingTrend(tableO1Rows);
+    const provincialUseOfFunds = extractProvincialUseOfFunds(tableO1Rows);
+    console.log(
+      `[CIHIDownloader] Provincial trend: ${provincialTrend.length} rows; provincial UOF: ${provincialUseOfFunds.length} rows.`,
+    );
     const nationalSpendingYear = tableO1Rows.length > 0 ? [...tableO1Rows.map((r) => r.year)].sort().pop() ?? 'unknown' : 'unknown';
     const activityYears = activityVolume.map((r) => r.fiscalYear).sort();
     const activityMinYear = activityYears[0] ?? 'unknown';
     const activityMaxYear = activityYears[activityYears.length - 1] ?? 'unknown';
+    const trendYears = provincialTrend.map((r) => r.year).sort();
+    const trendMinYear = trendYears[0] ?? 'unknown';
+    const trendMaxYear = trendYears[trendYears.length - 1] ?? 'unknown';
     const useOfFundsFiscalYear = useOfFundsYear ? nhexToFiscal(useOfFundsYear) : 'unknown';
 
     const recordsFetched =
-      nationalSpending.length + useOfFunds.length + activityVolume.length;
+      nationalSpending.length +
+      useOfFunds.length +
+      activityVolume.length +
+      provincialTrend.length +
+      provincialUseOfFunds.length;
 
     if (recordsFetched === 0) {
       console.warn(
@@ -669,6 +827,18 @@ export async function run(): Promise<SyncResult> {
         sourceVintage: `Fiscal years ${activityMinYear} to ${activityMaxYear} (NHEX 2025 Table O.1; forecast-marked rows excluded where present; activity/volume fields not sourced)`,
         lastUpdated: timestamp,
       }),
+      PROVINCIAL_SPENDING_TREND: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI NHEX 2025 Table O.1 (public + private per-capita by province/year)',
+        sourceVintage: `Calendar years ${trendMinYear} to ${trendMaxYear} (NHEX 2025 Table O.1 non-forecast rows)`,
+        lastUpdated: timestamp,
+      }),
+      PROVINCIAL_USE_OF_FUNDS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'CIHI NHEX 2025 Table O.1 public-sector use of funds by province',
+        sourceVintage: `${nationalSpendingYear} calendar year (public sector shares of provincial public total)`,
+        lastUpdated: timestamp,
+      }),
     };
     const recordsWritten = mergeAndWrite(
       SPENDING_FILE,
@@ -676,6 +846,8 @@ export async function run(): Promise<SyncResult> {
         NATIONAL_SPENDING_COMPARE: nationalSpending,
         ALBERTA_USE_OF_FUNDS: useOfFunds,
         ALBERTA_ACTIVITY_VOLUME_TREND: activityVolume,
+        PROVINCIAL_SPENDING_TREND: provincialTrend,
+        PROVINCIAL_USE_OF_FUNDS: provincialUseOfFunds,
       },
       ownedMetadata,
     );

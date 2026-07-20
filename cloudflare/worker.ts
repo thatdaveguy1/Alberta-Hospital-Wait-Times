@@ -35,10 +35,10 @@ app.use('*', cors({
 
 // Domain whitelist — must match the local server whitelist
 const DOMAIN_WHITELIST = new Set([
-  'er-waittimes', 'disruptions', 'surgical', 'diagnostic', 'cancer',
-  'continuing-care', 'mental-health', 'patient-experience', 'primary-care',
-  'public-health', 'regional-inequity', 'spending', 'system-flow',
-  'virtual-care', 'workforce', 'sync-status',
+  'er-waittimes', 'disruptions', 'surgical', 'diagnostic',
+  'primary-care',
+  'public-health', 'regional-inequity', 'spending',
+  'sync-status',
   // Snapshot trend domains — written to SNAPSHOTS_KV, not DATA_KV
   'er-trends', 'lab-trends',
 ]);

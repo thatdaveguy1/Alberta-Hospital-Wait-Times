@@ -50,6 +50,27 @@ export interface SpendingByUseOfFunds {
   percentageShare: number;
 }
 
+/** Multi-year provincial per-capita series from NHEX Table O.1 (public + private). */
+export interface ProvincialSpendingTrend {
+  province: string;
+  year: string;                    // NHEX calendar year
+  fiscalYear: string;
+  spendingPerCapita: number;
+  hospitalSpendingPerCapita: number;
+  physicianSpendingPerCapita: number;
+  drugSpendingPerCapita: number;
+  publicSharePct: number | null;   // public total / (public + private total)
+}
+
+/** Latest-year public-sector use-of-funds mix by province from NHEX Table O.1. */
+export interface ProvincialUseOfFunds {
+  province: string;
+  category: string;
+  amountBillions: number;
+  percentageShare: number;
+  perCapita: number;
+}
+
 // ----------------------------------------------------------------------------
 // DATASETS
 // ----------------------------------------------------------------------------
@@ -69,6 +90,12 @@ export const PHYSICIAN_SPECIALTY_BILLING: PhysicianPaymentSpecialty[] = [];
 // 5. Public health-system use of funds (CIHI NHEX Alberta profile)
 export const ALBERTA_USE_OF_FUNDS: SpendingByUseOfFunds[] = [];
 
+// 6. Multi-year provincial per-capita trends (CIHI NHEX Table O.1)
+export const PROVINCIAL_SPENDING_TREND: ProvincialSpendingTrend[] = [];
+
+// 7. Latest-year public use-of-funds composition by province (CIHI NHEX Table O.1)
+export const PROVINCIAL_USE_OF_FUNDS: ProvincialUseOfFunds[] = [];
+
 // Data freshness metadata for each array — used by the DataTimestamp component.
 export const _dataMetadata: Record<string, {
   source: string;
@@ -81,6 +108,8 @@ export const _dataMetadata: Record<string, {
   ALBERTA_ACTIVITY_VOLUME_TREND: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: 'manual' },
   PHYSICIAN_SPECIALTY_BILLING: { source: "Open Alberta AHCIP Statistical Supplement (combined workbook)", sourceVintage: "AHCIP Statistical Supplement — latest release (Tables 2.3, 2.12 A/B/D, 2.14)", lastUpdated: "2026-07-08T04:31:47.021Z", updateType: 'manual', verification: "Physician count, average gross payment, and service counts are joined from AHCIP Statistical Supplement Tables 2.12 A/B/D (latest service year). Total payments sum FFS+BCP+RRNP+MEDR from Table 2.3. servicesPerPatient = services / registered persons, with registered persons derived from Table 2.14 FTE counts. Pathology and Radiology have no Table 2.14 entry, so their servicesPerPatient is null when unavailable. Values below are a hand-curated fallback used only if data-spending.json is absent." },
   ALBERTA_USE_OF_FUNDS: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: 'manual' },
+  PROVINCIAL_SPENDING_TREND: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: 'manual' },
+  PROVINCIAL_USE_OF_FUNDS: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: 'manual' },
   CIHI_RESOURCE_USE_INTENSITY: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: 'manual' },
   CIHI_SPENDING_PER_PERSON: { source: "CIHI National Health Expenditure Trends (NHEX)", sourceVintage: "NHEX 2025 release", lastUpdated: "2026-07-05T15:56:27.339Z", updateType: 'manual' },
 };

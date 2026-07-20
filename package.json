@@ -18,6 +18,8 @@
     "gen:push-secret": "openssl rand -hex 24"
   },
   "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/cors": "^2.8.19",
     "@vitejs/plugin-react": "^5.0.4",

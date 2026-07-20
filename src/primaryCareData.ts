@@ -35,6 +35,8 @@ export interface AcceptingProvider {
     onlineBooking: boolean;
   };
   pcnName?: string;
+  /** Upstream limited-panel note when the clinic accepts only some patients. */
+  limitedPanelMessage?: string | null;
 }
 
 export interface PCNCapacity {

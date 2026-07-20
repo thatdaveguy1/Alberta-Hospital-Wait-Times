@@ -1,10 +1,10 @@
 // Shared helpers for the `_dataMetadata` block written into the domain data
-// JSON files (e.g. data-system-flow.json).
+// JSON files (e.g. data-spending.json).
 //
-// Several pipeline writers (acuteCareScraper, ahsWeeklyEdLosScraper,
-// cihiMhSafetyFetcher) each refresh a different subset of the arrays in
-// data-system-flow.json via read-modify-write. Without coordination, one
-// writer would clobber the `_dataMetadata` entries written by the others.
+// Several pipeline writers (cihiMhSafetyFetcher and sibling domain writers)
+// each refresh a different subset of the arrays in shared domain JSON files
+// via read-modify-write. Without coordination, one writer would clobber the
+// `_dataMetadata` entries written by the others.
 //
 // The shape mirrors `ArrayMetadata` in src/components/DataTimestamp.tsx so the
 // frontend can consume it directly:
@@ -144,9 +144,6 @@ export function mergeDataMetadata(
  * absent from this list.
  */
 export const WITHHELD_PAYLOAD_KEYS = [
-  // cancer
-  'CANCER_BURDEN_STATS',
-  'CANCER_SCREENING_RATES',
   // continuing care
   'HOME_CARE_EXPERIENCE',
   // diagnostic estimated panels
@@ -178,7 +175,7 @@ export const WITHHELD_PAYLOAD_KEYS = [
   'FACILITY_COMPARISONS',
   'STATSCAN_SATISFACTION_STATS',
   'STATSCAN_DEMOGRAPHICS',
-  // system-flow historical estimates (facility identity is rewritten by acuteCare)
+  // historical flow estimates (legacy hand-authored panel)
   'HISTORICAL_FLOW_TIMELINES',
   // virtual care study/proxy panels (HEALTH_LINK_VOLUMES is a real upstream)
   'VIRTUAL_MD_DISPOSITIONS',

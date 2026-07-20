@@ -1,4 +1,4 @@
-// Alberta Public Health, Respiratory Surveillance & Outbreak Datasets (2021 - 2026)
+// Alberta Public Health, Respiratory Surveillance & Outbreak Datasets (RVD/PHAC; history from 2009 influenza seasons / 2021 lab / 2023 RVD WW)
 // Compiled from:
 // - AHS Respiratory Virus Surveillance Dashboard & ProvLab Updates
 // - PHAC Canadian Respiratory Virus Surveillance (FluWatch) & Wastewater Monitoring
@@ -19,11 +19,58 @@ export interface WastewaterSignal {
   zone: 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'North Zone' | 'South Zone';
   populationServed: number;
   covidSignal: number; // Normalized viral load (copies/mL or index)
-  fluASignal?: number; // Only present when a verified upstream trace exists
-  rsvSignal?: number; // Only present when a verified upstream trace exists
+  /** @deprecated Do not populate from PHAC leftovers; RVD snapshot is COVID-only. */
+  fluASignal?: number;
+  /** @deprecated Do not populate from PHAC leftovers; RVD snapshot is COVID-only. */
+  rsvSignal?: number;
   activityLevel: 'Low' | 'Moderate' | 'High' | 'Very High';
   trend: 'Increasing' | 'Stable' | 'Decreasing';
   sampleDate?: string; // Latest actual wastewater collection date (YYYY-MM-DD)
+}
+
+/** Full Alberta RVD wastewater history (COVID normalized load). */
+export interface WastewaterTimeSeriesPoint {
+  site: string;
+  zone: 'Calgary Zone' | 'Edmonton Zone' | 'Central Zone' | 'North Zone' | 'South Zone';
+  sampleDate: string; // YYYY-MM-DD
+  covidSignal: number;
+  source: 'alberta-rvd';
+}
+
+/** PHAC Infobase multi-pathogen wastewater history (separate scale from RVD). */
+export interface PhacWastewaterTimeSeriesPoint {
+  site: string;
+  locationRaw: string;
+  sampleDate: string; // YYYY-MM-DD
+  pathogen: 'covid' | 'fluA' | 'fluB' | 'rsv';
+  viralLoad: number;
+  sevenDayAvg?: number;
+  source: 'phac-wastewater-daily' | 'phac-wastewater-legacy';
+}
+
+export interface RvdRespiratoryCaseCount {
+  virus: string;
+  weekEnding: string; // YYYY-MM-DD
+  count: number;
+}
+
+export interface RvdInfluenzaSeasonCount {
+  season: string; // e.g. '2019-2020'
+  weekEnding: string; // YYYY-MM-DD
+  count: number;
+}
+
+export interface RvdLabTestPositivity {
+  virus: string; // e.g. 'SARS-CoV-2', 'Influenza (All)', 'Respiratory Syncytial Virus'
+  weekEnding: string; // YYYY-MM-DD
+  percentPositive: number;
+  totalTests?: number;
+}
+
+export interface RvdImmunizationDose {
+  season: string;
+  weekEnding: string;
+  doses: number;
 }
 
 export interface ImmunizationCoverage {
@@ -69,9 +116,26 @@ export interface OutbreakGuidelines {
 // Compiled from actual surveillance reports for late-2024 through March 2026 reporting periods.
 export const RESPIRATORY_VIRUS_SURVEILLANCE: RespiratoryVirusMetric[] = [];
 
-// 2. Wastewater Pathogen Signal Monitoring (PHAC & University of Calgary)
-// Signal representing normalized viral load copies relative to local baselines.
+// 2. Wastewater Pathogen Signal Monitoring (Alberta RVD latest snapshot — COVID only)
 export const WASTEWATER_SIGNALS: WastewaterSignal[] = [];
+
+// 2b. Full Alberta RVD wastewater COVID time series (from ~2023-07)
+export const WASTEWATER_TIME_SERIES: WastewaterTimeSeriesPoint[] = [];
+
+// 2c. PHAC Infobase multi-pathogen wastewater time series (separate scale)
+export const PHAC_WASTEWATER_TIME_SERIES: PhacWastewaterTimeSeriesPoint[] = [];
+
+// 2d. Alberta RVD weekly case counts (influenza / RSV / COVID)
+export const RVD_RESPIRATORY_CASE_COUNTS: RvdRespiratoryCaseCount[] = [];
+
+// 2e. Alberta RVD influenza season overlays (2009+)
+export const RVD_INFLUENZA_SEASON_COUNTS: RvdInfluenzaSeasonCount[] = [];
+
+// 2f. Alberta RVD laboratory percent positivity (2021+)
+export const RVD_LAB_TEST_POSITIVITY: RvdLabTestPositivity[] = [];
+
+// 2g. Alberta RVD influenza immunization doses by epi-week
+export const RVD_IMMUNIZATION_DOSES: RvdImmunizationDose[] = [];
 
 // 3. Childhood Immunization Coverage Rates by Age 2 (Open Alberta / Regional Dashboard)
 // Real-world immunization coverage probabilities demonstrating the sub-optimal provincial baseline.
@@ -95,7 +159,11 @@ export const _dataMetadata: Record<string, {
   updateType: "auto" | "manual";
   verification?: string;
 }> = {
-  WASTEWATER_SIGNALS: { source: "phacFetcher (Edmonton only)", sourceVintage: "PHAC / AVD (partial)", lastUpdated: "2026-07-05", updateType: "manual", verification: "PHAC only provides Edmonton wastewater data; other zones must be manually parsed or estimated." },
-  RVD_RESPIRATORY_CASE_COUNTS: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: 'manual' },
-  RVD_IMMUNIZATION_DOSES: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Live data", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: 'manual' },
+  WASTEWATER_SIGNALS: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Alberta RVD wastewater", lastUpdated: "2026-07-05", updateType: "manual" },
+  WASTEWATER_TIME_SERIES: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Alberta RVD wastewater", lastUpdated: "2026-07-05", updateType: "manual" },
+  PHAC_WASTEWATER_TIME_SERIES: { source: "phacFetcher", sourceVintage: "PHAC wastewater_daily", lastUpdated: "2026-07-05", updateType: "manual" },
+  RVD_RESPIRATORY_CASE_COUNTS: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Alberta RVD summary", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: 'manual' },
+  RVD_INFLUENZA_SEASON_COUNTS: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Alberta RVD summary seasons", lastUpdated: "2026-07-05", updateType: "manual" },
+  RVD_LAB_TEST_POSITIVITY: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Alberta RVD laboratory-testing", lastUpdated: "2026-07-05", updateType: "manual" },
+  RVD_IMMUNIZATION_DOSES: { source: "albertaRespiratoryVirusScraper", sourceVintage: "Alberta RVD immunizations", lastUpdated: "2026-07-05T15:57:24.174Z", updateType: 'manual' },
 };

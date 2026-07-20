@@ -46,7 +46,7 @@
       "procedure_name": "Total Hip Arthroplasty",
       "wait_segment": "Decision-to-surgery",
       "metric_name": "% within benchmark",
-      "metric_value": 62,
+      "metric_value": 63,
       "unit": "percent",
       "benchmark_value": "182 days",
       "method_note": "CIHI national standard benchmark match"
@@ -2605,44 +2605,51 @@
   "CIHI_PROVINCIAL_COMPARATORS": [
     {
       "province": "Alberta",
-      "hip_within_benchmark": 0,
-      "knee_within_benchmark": 0,
-      "cataract_within_benchmark": 0,
+      "hip_within_benchmark": 63,
+      "knee_within_benchmark": 53,
+      "cataract_within_benchmark": 66,
       "mri_median_wait_days": 72
     },
     {
       "province": "British Columbia",
-      "hip_within_benchmark": 0,
-      "knee_within_benchmark": 0,
-      "cataract_within_benchmark": 0,
+      "hip_within_benchmark": 64,
+      "knee_within_benchmark": 57,
+      "cataract_within_benchmark": 85,
       "mri_median_wait_days": 89
     },
     {
       "province": "Manitoba",
-      "hip_within_benchmark": 0,
-      "knee_within_benchmark": 0,
-      "cataract_within_benchmark": 0,
+      "hip_within_benchmark": 47,
+      "knee_within_benchmark": 31,
+      "cataract_within_benchmark": 55,
       "mri_median_wait_days": 151
     },
     {
       "province": "Ontario",
-      "hip_within_benchmark": 0,
-      "knee_within_benchmark": 0,
-      "cataract_within_benchmark": 0,
+      "hip_within_benchmark": 84,
+      "knee_within_benchmark": 82,
+      "cataract_within_benchmark": 67,
       "mri_median_wait_days": 47
     },
     {
+      "province": "Quebec",
+      "hip_within_benchmark": 54,
+      "knee_within_benchmark": 42,
+      "cataract_within_benchmark": 65,
+      "mri_median_wait_days": 0
+    },
+    {
       "province": "Saskatchewan",
-      "hip_within_benchmark": 0,
-      "knee_within_benchmark": 0,
-      "cataract_within_benchmark": 0,
+      "hip_within_benchmark": 52,
+      "knee_within_benchmark": 43,
+      "cataract_within_benchmark": 71,
       "mri_median_wait_days": 51
     },
     {
       "province": "National Average",
-      "hip_within_benchmark": 0,
-      "knee_within_benchmark": 0,
-      "cataract_within_benchmark": 0,
+      "hip_within_benchmark": 69,
+      "knee_within_benchmark": 63,
+      "cataract_within_benchmark": 70,
       "mri_median_wait_days": 59
     }
   ],
@@ -2687,7 +2694,7 @@
     {
       "year": "2009",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 26
+      "medianWaitDays": 93
     },
     {
       "year": "2009",
@@ -2712,7 +2719,7 @@
     {
       "year": "2010",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 23
+      "medianWaitDays": 104
     },
     {
       "year": "2010",
@@ -2737,7 +2744,7 @@
     {
       "year": "2011",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 24
+      "medianWaitDays": 101
     },
     {
       "year": "2011",
@@ -2762,7 +2769,7 @@
     {
       "year": "2012",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 24
+      "medianWaitDays": 90
     },
     {
       "year": "2012",
@@ -2782,12 +2789,12 @@
     {
       "year": "2013",
       "procedure": "CT Scan",
-      "medianWaitDays": 20
+      "medianWaitDays": 13
     },
     {
       "year": "2013",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 22
+      "medianWaitDays": 108
     },
     {
       "year": "2013",
@@ -2807,12 +2814,12 @@
     {
       "year": "2014",
       "procedure": "CT Scan",
-      "medianWaitDays": 24
+      "medianWaitDays": 12
     },
     {
       "year": "2014",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 23
+      "medianWaitDays": 90
     },
     {
       "year": "2014",
@@ -2832,12 +2839,12 @@
     {
       "year": "2015",
       "procedure": "CT Scan",
-      "medianWaitDays": 27
+      "medianWaitDays": 17
     },
     {
       "year": "2015",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 22
+      "medianWaitDays": 93
     },
     {
       "year": "2015",
@@ -2862,7 +2869,7 @@
     {
       "year": "2016",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 20
+      "medianWaitDays": 91
     },
     {
       "year": "2016",
@@ -2882,12 +2889,12 @@
     {
       "year": "2017",
       "procedure": "CT Scan",
-      "medianWaitDays": 28
+      "medianWaitDays": 30
     },
     {
       "year": "2017",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 19
+      "medianWaitDays": 121
     },
     {
       "year": "2017",
@@ -2907,12 +2914,12 @@
     {
       "year": "2018",
       "procedure": "CT Scan",
-      "medianWaitDays": 23
+      "medianWaitDays": 21
     },
     {
       "year": "2018",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 17
+      "medianWaitDays": 129
     },
     {
       "year": "2018",
@@ -2932,12 +2939,12 @@
     {
       "year": "2019",
       "procedure": "CT Scan",
-      "medianWaitDays": 24
+      "medianWaitDays": 23
     },
     {
       "year": "2019",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 18
+      "medianWaitDays": 141
     },
     {
       "year": "2019",
@@ -2957,12 +2964,12 @@
     {
       "year": "2020",
       "procedure": "CT Scan",
-      "medianWaitDays": 20
+      "medianWaitDays": 18
     },
     {
       "year": "2020",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 18
+      "medianWaitDays": 187
     },
     {
       "year": "2020",
@@ -2982,12 +2989,12 @@
     {
       "year": "2021",
       "procedure": "CT Scan",
-      "medianWaitDays": 23
+      "medianWaitDays": 8
     },
     {
       "year": "2021",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 20
+      "medianWaitDays": 154
     },
     {
       "year": "2021",
@@ -3007,12 +3014,12 @@
     {
       "year": "2022",
       "procedure": "CT Scan",
-      "medianWaitDays": 25
+      "medianWaitDays": 14
     },
     {
       "year": "2022",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 21
+      "medianWaitDays": 232
     },
     {
       "year": "2022",
@@ -3037,7 +3044,7 @@
     {
       "year": "2023",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 21
+      "medianWaitDays": 140
     },
     {
       "year": "2023",
@@ -3057,12 +3064,12 @@
     {
       "year": "2024",
       "procedure": "CT Scan",
-      "medianWaitDays": 24
+      "medianWaitDays": 34
     },
     {
       "year": "2024",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 21
+      "medianWaitDays": 109
     },
     {
       "year": "2024",
@@ -3082,12 +3089,12 @@
     {
       "year": "2025",
       "procedure": "CT Scan",
-      "medianWaitDays": 26
+      "medianWaitDays": 32
     },
     {
       "year": "2025",
       "procedure": "Hip Replacement",
-      "medianWaitDays": 22
+      "medianWaitDays": 134
     },
     {
       "year": "2025",
@@ -19570,7 +19577,7 @@
     },
     "CIHI_PROVINCIAL_COMPARATORS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T17:42:55.878Z",
+      "lastUpdated": "2026-07-20T12:43:50.832Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
       "sourceVintage": "2025 (CIHI priority-procedure comparator years; annual)"
     },
@@ -19582,7 +19589,7 @@
     },
     "HISTORICAL_WAIT_TRENDS": {
       "updateType": "auto",
-      "lastUpdated": "2026-07-18T17:42:55.878Z",
+      "lastUpdated": "2026-07-20T12:43:50.832Z",
       "source": "CIHI Wait Times Priority Procedures in Canada",
       "sourceVintage": "2008–2025"
     },

@@ -1,47 +1,30 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Building, 
-  Clock, 
-  MapPin, 
-  Search, 
-  AlertTriangle, 
+  Clock,
+  MapPin,
+  Search,
+  AlertTriangle,
   AlertCircle,
-  Info, 
-  ChevronRight,
+  Info,
   Sparkles,
-  Calendar,
   FlaskConical,
   Activity,
   BarChart2,
-  Award,
-  CheckCircle,
-  HelpCircle,
-  FileText,
-  Bookmark,
-  ShieldAlert,
-  Sliders,
   SlidersHorizontal,
   Compass,
-  Navigation,
   TrendingUp,
   TrendingDown,
-  Map,
-  Users,
   X
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
-  LineChart, 
   Line, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  BarChart, 
-  Bar, 
-  Cell,
   AreaChart,
   Area
 } from 'recharts';
@@ -68,6 +51,22 @@ type DiagnosticData = {
 import { calculateDistance, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
 import { cn, formatMinutesToHm } from '../lib/utils';
 import { LabCard, type LabCardData } from './LabCard';
+
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: any[]; label?: any }) {
+  if (!active || !payload?.length) return null;
+  const title = typeof label === 'string' && !isNaN(Date.parse(label)) ? new Date(label).toLocaleString('en-US') : String(label ?? '');
+  return (
+    <div className="chart-tooltip">
+      <p className="chart-tooltip-title">{title}</p>
+      {payload.map((entry, i) => (
+        <div key={i} className="chart-tooltip-row">
+          <span className="chart-tooltip-label">{entry.name}:</span>
+          <span className="chart-tooltip-value">{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function DiagnosticDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<'labs' | 'imaging-waits' | 'facilities' | 'turnaround'>('labs');
@@ -210,6 +209,14 @@ export default function DiagnosticDashboard() {
       };
     }
     return { label: formatMinutesToHm(lab.waitTimeMin as number), detail: 'Live wait from APL QMe' };
+  };
+  const getLabWaitTone = (lab: LabLocationWait): string => {
+    if (isLabWaitUnavailable(lab)) return 'text-ink-3';
+    const wait = lab.waitTimeMin as number;
+    if (wait > 45) return 'text-crit';
+    if (wait > 30) return 'text-warn';
+    if (wait > 15) return 'text-accent';
+    return 'text-ok';
   };
   const formatLabAvgWait = (minutes: number, validCount: number): string => {
     if (validCount === 0) return '—';
@@ -467,8 +474,8 @@ export default function DiagnosticDashboard() {
         return {
           label: 'CT Scan Wait Days (P90)',
           description: 'Historical tracking of Alberta 90th-percentile wait days for CT scans, benchmarked against the Canadian national average. Rising P90 values signal structural wait-list accumulation for lower-priority outpatient imaging.',
-          colorClass: 'text-cyan-400',
-          bgClass: 'bg-cyan-500/10',
+          colorClass: 'text-accent',
+          bgClass: 'bg-accent-soft',
           strokeColor: '#06b6d4',
           gradientId: 'colorCtTrend',
           unit: 'd',
@@ -478,8 +485,8 @@ export default function DiagnosticDashboard() {
         return {
           label: 'MRI Scan Wait Days (P90)',
           description: 'Historical tracking of Alberta 90th-percentile wait days for MRI scans, benchmarked against the Canadian national average. MRI waits are persistently the longest of all modalities and a leading indicator of diagnostic access strain.',
-          colorClass: 'text-indigo-400',
-          bgClass: 'bg-indigo-500/10',
+          colorClass: 'text-accent-strong',
+          bgClass: 'bg-accent-soft',
           strokeColor: '#6366f1',
           gradientId: 'colorMriTrend',
           unit: 'd',
@@ -490,99 +497,112 @@ export default function DiagnosticDashboard() {
     }
   }, [selectedKpi]);
 
-  if (isLoading) return <div className="p-6 text-slate-400">Loading diagnostic data...</div>;
-  if (error) return <div className="p-6 text-red-400">Error: {error}</div>;
+  if (isLoading) return (
+    <div className="space-y-4 p-4">
+      <div className="h-48 animate-pulse rounded-xl border border-line bg-neutral-chip" />
+    </div>
+  );
+  if (error) return (
+    <div className="p-4">
+      <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">
+        <AlertTriangle className="h-4 w-4 shrink-0 text-warn" aria-hidden />
+        <span>Unable to load diagnostics: {error}</span>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <DashboardHeader
-        icon={Activity}
+        icon={FlaskConical}
         title="Diagnostic & Lab Services"
         description="Monitor laboratory wait times and diagnostic imaging benchmark compliance."
         metadata={metadata}
         arrayKey="LAB_LOCATION_WAITS"
+        variant="light"
       >
         <button
           onClick={refreshing ? undefined : refreshData}
           disabled={refreshing}
-          className="self-start md:self-auto px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-slate-700 bg-slate-950 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="self-start md:self-auto rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-paper disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </button>
       </DashboardHeader>
 
       {/* Sub-Tab Navigation */}
-      <div className="border-b border-slate-800/80 flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">
+      <div className="inline-flex rounded-lg border border-line bg-paper p-0.5" role="tablist" aria-label="Diagnostics view">
         <button
           onClick={() => setActiveSubTab('labs')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'labs'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
+          role="tab"
+          aria-selected={activeSubTab === 'labs'}
+          className={cn(
+            'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5',
+            activeSubTab === 'labs' ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink'
+          )}
         >
-          <Activity className="w-4 h-4" />
+          <FlaskConical className="w-3.5 h-3.5" />
           <span>Laboratory Waits</span>
         </button>
         <button
           onClick={() => setActiveSubTab('imaging-waits')}
-          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
-            activeSubTab === 'imaging-waits'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
-          }`}
+          role="tab"
+          aria-selected={activeSubTab === 'imaging-waits'}
+          className={cn(
+            'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5',
+            activeSubTab === 'imaging-waits' ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink'
+          )}
         >
-          <Clock className="w-4 h-4" />
+          <Clock className="w-3.5 h-3.5" />
           <span>Imaging Gaps</span>
         </button>
-
       </div>
 
       {/* SUBTAB 1: Live Lab Waits */}
       {activeSubTab === 'labs' && (
-        <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata ?? {}} arrayKey="LAB_LOCATION_WAITS" />
+        <div className="space-y-4">
+          <DataTimestamp compact variant="light" metadata={metadata ?? {}} arrayKey="LAB_LOCATION_WAITS" />
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Provincial Avg Wait Card Breakdown */}
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between">
+            <div className="bg-surface border border-line p-4 rounded-xl flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
-                    <Clock className="w-4 h-4 text-cyan-400" />
+                  <div className="p-1.5 bg-paper border border-line rounded-lg">
+                    <Clock className="w-4 h-4 text-accent" />
                   </div>
-                  <span className="text-[8px] font-extrabold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                  <span className="text-xs font-medium text-accent-strong bg-accent-soft border border-line px-1.5 py-0.5 rounded-full">
                     Lab State Average
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2 mb-1.5">
-                  <p className="text-2xl font-black text-white tracking-tight leading-none">
+                  <p className="text-2xl font-semibold text-ink tracking-tight leading-none">
                     {formatLabAvgWait(labStats.avgWait, labStats.validLabCount)}
                   </p>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  <p className="text-xs font-medium text-ink-3">
                     Provincial Average Lab Wait
                   </p>
                 </div>
               </div>
               
-              <div className="grid grid-cols-3 gap-2 border-t border-slate-800/80 pt-2.5 mt-1">
-                <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
-                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Edmonton</span>
-                  <span className="text-xs font-black text-emerald-400 font-mono block mt-0.5">
+              <div className="grid grid-cols-3 gap-2 border-t border-line pt-2.5 mt-1">
+                <div className="p-2 bg-paper border border-line rounded-xl text-center min-w-0">
+                  <span className="text-xs font-medium text-ink-3 block">Edmonton</span>
+                  <span className="text-sm font-medium text-ink font-mono tabular-nums block mt-0.5">
                     {formatLabAvgWait(labStats.edmontonAvg, labStats.edmontonLabCount)}
                   </span>
                 </div>
-                <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
-                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Calgary</span>
-                  <span className="text-xs font-black text-blue-400 font-mono block mt-0.5">
+                <div className="p-2 bg-paper border border-line rounded-xl text-center min-w-0">
+                  <span className="text-xs font-medium text-ink-3 block">Calgary</span>
+                  <span className="text-sm font-medium text-ink font-mono tabular-nums block mt-0.5">
                     {formatLabAvgWait(labStats.calgaryAvg, labStats.calgaryLabCount)}
                   </span>
                 </div>
-                <div className="p-2 bg-slate-950/40 border border-slate-800/40 rounded-xl text-center min-w-0">
-                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Rest AB</span>
-                  <span className="text-xs font-black text-indigo-400 font-mono block mt-0.5">
+                <div className="p-2 bg-paper border border-line rounded-xl text-center min-w-0">
+                  <span className="text-xs font-medium text-ink-3 block">Rest AB</span>
+                  <span className="text-sm font-medium text-ink font-mono tabular-nums block mt-0.5">
                     {formatLabAvgWait(labStats.restAvg, labStats.restLabCount)}
                   </span>
                 </div>
@@ -590,73 +610,73 @@ export default function DiagnosticDashboard() {
             </div>
 
             {/* Peak Delay Lab */}
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between">
+            <div className="bg-surface border border-line p-4 rounded-xl flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
-                    <AlertCircle className="w-4 h-4 text-red-400" />
+                  <div className="p-1.5 bg-paper border border-line rounded-lg">
+                    <AlertCircle className="w-4 h-4 text-crit" />
                   </div>
-                  <span className="text-[8px] font-extrabold text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                  <span className="text-xs font-medium text-crit bg-crit-soft border border-line px-1.5 py-0.5 rounded-full">
                     Peak Delay Lab
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2 mb-1.5">
-                  <p className="text-2xl font-black text-white tracking-tight leading-none" title={labStats.maxWaitLab ? getLabStatus(labStats.maxWaitLab).detail : ''}>
+                  <p className={cn('text-2xl font-medium tracking-tight leading-none font-mono tabular-nums', labStats.maxWaitLab ? getLabWaitTone(labStats.maxWaitLab) : 'text-ink-2')} title={labStats.maxWaitLab ? getLabStatus(labStats.maxWaitLab).detail : ''}>
                     {labStats.maxWaitLab ? getLabStatus(labStats.maxWaitLab).label : '—'}
                   </p>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  <p className="text-xs font-medium text-ink-3">
                     Longest Live Wait Time
                   </p>
                 </div>
               </div>
               
-              <div className="border-t border-slate-800/80 pt-2 mt-1">
-                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider block">Site with longest wait</span>
-                <span className="text-xs font-black text-red-400 font-mono block mt-0.5 truncate" title={labStats.maxWaitLab?.name}>
+              <div className="border-t border-line pt-2 mt-1">
+                <span className="text-xs font-medium text-ink-3 block">Site with longest wait</span>
+                <span className="text-xs font-medium text-crit font-mono tabular-nums block mt-0.5 truncate" title={labStats.maxWaitLab?.name}>
                   {labStats.maxWaitLab ? labStats.maxWaitLab.name : '—'}
                 </span>
               </div>
             </div>
 
             {/* Treatment Calculator */}
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col justify-between space-y-3">
+            <div className="bg-surface border border-line p-4 rounded-xl flex flex-col justify-between space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
-                    <Compass className="w-4 h-4 text-blue-400" />
+                  <div className="p-1.5 bg-paper border border-line rounded-lg">
+                    <Compass className="w-4 h-4 text-accent" />
                   </div>
                   {userLocation ? (
-                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
+                    <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
                       userLocation.isGPS
-                        ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                        : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400'
+                        ? 'bg-ok-soft border border-line text-ok'
+                        : 'bg-accent-soft border border-line text-accent-strong'
                     }`}>
                       {userLocation.isGPS ? 'Auto-Detected' : 'Custom'}
                     </span>
                   ) : (
-                    <span className="px-1.5 py-0.5 bg-slate-800 border border-slate-700/60 text-slate-400 rounded text-[8px] font-black uppercase tracking-widest">
+                    <span className="px-1.5 py-0.5 bg-neutral-chip border border-line-2 text-ink-2 rounded-full text-xs font-medium">
                       Inactive
                     </span>
                   )}
                 </div>
 
                 <div className="flex items-baseline gap-2 mb-1.5">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  <h3 className="text-xs font-semibold text-ink-2">
                     Treatment Calculator
                   </h3>
                 </div>
-                <p className="text-[10px] text-slate-400 leading-normal">
+                <p className="text-xs text-ink-2 leading-normal">
                   Combine your driving time with live lab wait times to find the fastest check-in.
                 </p>
               </div>
 
               <div className="space-y-2 mt-1">
                 {userLocation ? (
-                  <div className="p-2 bg-slate-950/60 border border-slate-850 rounded-xl flex items-center justify-between gap-2">
+                  <div className="p-2 bg-paper border border-line rounded-xl flex items-center justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-[8px] text-slate-500 uppercase font-bold">Location Origin</p>
-                      <p className="text-[11px] text-white font-extrabold truncate flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-blue-400 shrink-0" />
+                      <p className="text-xs font-medium text-ink-3">Location Origin</p>
+                      <p className="text-[11px] font-semibold text-ink truncate flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-accent shrink-0" />
                         <span>{userLocation.city}, AB</span>
                       </p>
                     </div>
@@ -665,7 +685,7 @@ export default function DiagnosticDashboard() {
                         setUserLocation(null);
                         localStorage.removeItem('alberta_hospital_user_location');
                       }}
-                      className="px-2 py-1 text-[9px] font-black bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg uppercase tracking-wider hover:bg-red-500/25 transition-all cursor-pointer"
+                      className="px-2 py-1 text-xs font-medium bg-crit-soft border border-line text-crit rounded-lg hover:bg-crit-soft transition-colors cursor-pointer"
                     >
                       Clear
                     </button>
@@ -696,7 +716,7 @@ export default function DiagnosticDashboard() {
                         }
                       }}
                       disabled={loadingGeo}
-                      className="py-1.5 px-2 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                      className="py-1.5 px-2 text-xs font-semibold rounded-lg border border-line bg-paper text-ink-2 hover:bg-neutral-chip hover:text-ink transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Compass className={cn('w-3 h-3', loadingGeo && 'animate-spin')} />
                       <span>{loadingGeo ? '...' : 'Use GPS'}</span>
@@ -705,7 +725,7 @@ export default function DiagnosticDashboard() {
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent('open-location-modal'));
                       }}
-                      className="py-1.5 px-2 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                      className="py-1.5 px-2 text-xs font-semibold rounded-lg border border-line bg-paper text-ink-2 hover:bg-neutral-chip hover:text-ink transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <MapPin className="w-3 h-3" />
                       <span>Manual</span>
@@ -717,7 +737,7 @@ export default function DiagnosticDashboard() {
                   onClick={() => {
                     window.dispatchEvent(new CustomEvent('open-location-modal'));
                   }}
-                  className="w-full py-1.5 px-2 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  className="w-full py-1.5 px-2 text-xs font-semibold rounded-lg border border-line bg-paper text-ink-2 hover:bg-neutral-chip hover:text-ink transition-colors flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <MapPin className="w-3 h-3" />
                   <span>{userLocation ? 'Change Location' : 'Set Location'}</span>
@@ -728,17 +748,17 @@ export default function DiagnosticDashboard() {
 
           {/* Optimal Route Planner — top 3 fastest labs by net time */}
           {calculatedShortestWaitList.length > 0 && (
-            <div className="p-3.5 sm:p-4 bg-[#0b1329] border border-blue-900/30 rounded-2xl shadow-xl relative overflow-hidden">
+            <div className="p-3.5 sm:p-4 bg-surface border border-line rounded-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                <Compass className="w-32 h-32 text-blue-500" />
+                <Compass className="w-32 h-32 text-accent" />
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-2.5">
                 <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-4.5 h-4.5 text-blue-400" />
-                  <h3 className="text-sm font-extrabold text-white tracking-tight">Optimal Route Planner: Shortest Time to Lab</h3>
+                  <Sparkles className="h-4 w-4 text-accent" />
+                  <h3 className="text-sm font-semibold text-ink tracking-tight">Optimal Route Planner: Shortest Time to Lab</h3>
                 </div>
-                <p className="text-[10px] text-slate-400">
+                <p className="text-xs text-ink-2">
                   Live APL lab waits + driving times combined to calculate the fastest path.
                 </p>
               </div>
@@ -751,30 +771,30 @@ export default function DiagnosticDashboard() {
                     className={cn(
                       'p-3 rounded-xl border transition-all flex flex-col justify-between cursor-pointer',
                       i === 0
-                        ? 'bg-blue-950/20 border-blue-500/40 ring-1 ring-blue-500/10'
-                        : 'bg-slate-900/40 border-slate-800 hover:border-slate-700',
+                        ? 'bg-accent-soft border-accent ring-1 ring-accent/10'
+                        : 'bg-paper border-line hover:border-line-2',
                     )}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <span className={cn(
-                          'text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded',
-                          i === 0 ? 'bg-blue-500/20 text-blue-300' : 'bg-slate-800 text-slate-400',
+                          'text-xs font-medium px-1.5 py-0.5 rounded-full',
+                          i === 0 ? 'bg-accent text-white' : 'bg-neutral-chip text-ink-2',
                         )}>
                           {i === 0 ? 'Rank 1: Fastest Lab' : `Rank ${i + 1}`}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-bold font-mono">{lab.distance} km away</span>
+                        <span className="text-xs text-ink-2 font-mono tabular-nums">{lab.distance} km away</span>
                       </div>
-                      <h4 className="text-xs font-extrabold text-white break-words mt-0.5 leading-tight">{lab.name}</h4>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{lab.city}</p>
+                      <h4 className="text-xs font-semibold text-ink break-words mt-0.5 leading-tight">{lab.name}</h4>
+                      <p className="text-xs text-ink-2 mt-0.5">{lab.city}</p>
                     </div>
 
-                    <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between">
+                    <div className="mt-2 pt-1.5 border-t border-line flex items-center justify-between">
                       <div>
-                        <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-none">Est. Total</p>
-                        <p className="text-sm font-black text-white mt-0.5 leading-none">{formatMinutesToHm(lab.totalTime)}</p>
+                        <p className="text-xs font-medium text-ink-3 leading-none">Est. Total</p>
+                        <p className="text-sm font-semibold text-ink mt-0.5 leading-none">{formatMinutesToHm(lab.totalTime)}</p>
                       </div>
-                      <div className="text-right text-[9px] text-slate-400 font-semibold space-y-0.5 leading-none">
+                      <div className="text-right text-xs text-ink-2 font-semibold space-y-0.5 leading-none">
                         <p title={getLabStatus(lab).detail}>Wait: {getLabStatus(lab).label}</p>
                         <p>Drive: {formatMinutesToHm(lab.driveMins || 0)}</p>
                       </div>
@@ -783,33 +803,33 @@ export default function DiagnosticDashboard() {
                 ))}
               </div>
 
-              <div className="p-2 bg-amber-500/5 border border-amber-500/15 rounded-xl text-[9px] text-amber-300/85 leading-normal flex items-center gap-2">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-warn" aria-hidden />
                 <p className="truncate sm:whitespace-normal">
-                  Estimates are guidance only. For medical emergencies, please dial <strong>911</strong> immediately or head directly to the nearest emergency facility.
+                  Estimates are guidance only. For medical emergencies, please dial <strong className="font-semibold text-ink">911</strong> immediately or head directly to the nearest emergency facility.
                 </p>
               </div>
             </div>
           )}
           {/* Provincial Lab Wait Trend Chart */}
-          <div data-testid="provincial-lab-wait-trend" className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+          <div data-testid="provincial-lab-wait-trend" className="rounded-xl border border-line bg-surface p-4 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-xs font-semibold text-ink-2 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-accent" />
                   Provincial Lab Wait Time Trend
                 </h3>
-                <p className="text-[10px] text-slate-500 mt-0.5">
+                <p className="text-xs text-ink-3 mt-0.5">
                   Average wait time across all monitored APL community labs, sampled every 60 minutes.
                 </p>
               </div>
-              <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+              <div className="flex bg-paper p-0.5 rounded-lg border border-line">
                 {(['24h', '7d', '30d'] as const).map(r => (
                   <button
                     key={r}
                     onClick={() => setLabTrendRange(r)}
-                    className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
-                      labTrendRange === r ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'
+                    className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                      labTrendRange === r ? 'bg-accent text-white' : 'text-ink-2 hover:text-ink'
                     }`}
                   >
                     {r}
@@ -819,7 +839,7 @@ export default function DiagnosticDashboard() {
             </div>
 
             {loadingLabTrends ? (
-              <div className="h-64 flex items-center justify-center text-slate-500 text-xs">
+              <div className="h-64 flex items-center justify-center text-ink-3 text-xs">
                 <Activity className="w-4 h-4 animate-pulse mr-2" /> Loading lab wait trends...
               </div>
             ) : labTrends.length > 0 ? (
@@ -828,11 +848,11 @@ export default function DiagnosticDashboard() {
                   <AreaChart data={labTrends} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorLabTrend" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#0b5cad" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#0b5cad" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e3e7ee" />
                     <XAxis
                       dataKey="timestamp"
                       stroke="#64748b"
@@ -849,17 +869,12 @@ export default function DiagnosticDashboard() {
                       style={{ fontSize: 10, fontFamily: 'monospace' }}
                       label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }}
                     />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
-                      labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
-                      itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
-                      labelFormatter={(ts: string) => new Date(ts).toLocaleString('en-US')}
-                    />
+                    <Tooltip content={<ChartTooltip />} />
                     <Area
                       type="monotone"
                       dataKey="waitTime"
                       name="Avg Lab Wait (min)"
-                      stroke="#06b6d4"
+                      stroke="#0b5cad"
                       strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#colorLabTrend)"
@@ -870,21 +885,21 @@ export default function DiagnosticDashboard() {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-64 flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
-                <Clock className="w-6 h-6 text-slate-600" />
+              <div className="h-64 flex flex-col items-center justify-center text-ink-3 text-xs gap-2">
+                <Clock className="w-6 h-6 text-ink-3" />
                 <p>No trend data yet. Lab wait snapshots are collected every 60 minutes — check back shortly.</p>
               </div>
             )}
           </div>
 
           {/* Search and Filters — mirrors ER tab */}
-          <div className="flex flex-col md:flex-row gap-4 bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-md">
+          <div className="flex flex-col md:flex-row gap-3 rounded-xl border border-line bg-surface p-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3" />
               <input
                 type="text"
                 placeholder="Search by facility or city..."
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-2xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className="h-10 w-full rounded-lg border border-line bg-paper pl-9 pr-3 text-sm text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none"
                 value={labSearch}
                 onChange={(e) => setLabSearch(e.target.value)}
               />
@@ -893,7 +908,7 @@ export default function DiagnosticDashboard() {
             <div className="flex flex-col sm:flex-row gap-3 md:shrink-0">
               <div className="relative w-full sm:w-44">
                 <select
-                  className="w-full appearance-none pl-4 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-2xl text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                  className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-line bg-paper pl-3 pr-10 text-sm text-ink focus:border-accent focus:outline-none"
                   value={selectedRegion}
                   onChange={(e) => setSelectedRegion(e.target.value)}
                 >
@@ -901,12 +916,12 @@ export default function DiagnosticDashboard() {
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>
-                <SlidersHorizontal className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                <SlidersHorizontal className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-3 pointer-events-none" />
               </div>
 
               <div className="relative w-full sm:w-48">
                 <select
-                  className="w-full appearance-none pl-4 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-2xl text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                  className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-line bg-paper pl-3 pr-10 text-sm text-ink focus:border-accent focus:outline-none"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as 'net-wait' | 'proximity' | 'raw-wait')}
                 >
@@ -914,16 +929,16 @@ export default function DiagnosticDashboard() {
                   <option value="proximity">Sort: Proximity (Nearest)</option>
                   <option value="raw-wait">Sort: Raw Wait Time</option>
                 </select>
-                <SlidersHorizontal className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                <SlidersHorizontal className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-3 pointer-events-none" />
               </div>
             </div>
           </div>
 
           {/* List Header */}
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Community Labs & Patient Collection Sites ({processedLabs.length})</h2>
-            <span className="text-xs text-slate-400">
-              Sorting: <span className="text-blue-400 font-semibold">
+            <h2 className="text-sm font-semibold text-ink-2">Community Labs & Patient Collection Sites ({processedLabs.length})</h2>
+            <span className="text-xs text-ink-2">
+              Sorting: <span className="text-accent font-semibold">
                 {sortBy === 'net-wait'
                   ? (userLocation ? 'Net Wait (Drive + Wait)' : 'Wait Time (Default Location)')
                   : sortBy === 'proximity'
@@ -938,15 +953,15 @@ export default function DiagnosticDashboard() {
             {groupedLabs.length > 0 ? (
               groupedLabs.map((zone) => (
                 <div key={zone.name} className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div className="flex items-center justify-between border-b border-line pb-2">
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-slate-400" />
-                      <h3 className="font-extrabold text-sm text-slate-200 uppercase tracking-wider">
+                      <MapPin className="w-4 h-4 text-ink-2" />
+                      <h3 className="font-semibold text-sm text-ink">
                         {zone.name}
                       </h3>
                     </div>
                     {userLocation && zone.distance !== 999999 && (
-                      <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[9px] font-bold">
+                      <span className="px-2 py-0.5 bg-accent text-white rounded-full text-xs font-medium">
                         ~{zone.distance} km closest
                       </span>
                     )}
@@ -966,10 +981,10 @@ export default function DiagnosticDashboard() {
                 </div>
               ))
             ) : (
-              <div className="py-16 bg-slate-900/20 border border-dashed border-slate-800 rounded-3xl text-center text-slate-500">
-                <Info className="w-12 h-12 mx-auto mb-4 text-slate-700" />
-                <p className="text-lg font-bold text-slate-300">No labs found</p>
-                <p className="text-sm text-slate-500 mt-1">Try adjusting your search or region filter</p>
+              <div className="rounded-xl border border-dashed border-line-2 bg-surface px-4 py-16 text-center text-sm text-ink-3">
+                <Info className="mx-auto mb-4 h-12 w-12 text-ink-3" />
+                <p className="text-lg font-semibold text-ink">No labs found</p>
+                <p className="mt-1 text-sm text-ink-3">Try adjusting your search or region filter</p>
               </div>
             )}
           </div>
@@ -985,21 +1000,21 @@ export default function DiagnosticDashboard() {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="p-6 rounded-2xl bg-[#090e21] border border-slate-800 space-y-6 shadow-xl relative">
+                <div className="rounded-xl border border-line bg-surface p-6 space-y-6 relative">
                   <button
                     onClick={() => setSelectedLabId(null)}
-                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-paper border border-line hover:border-line-2 text-ink-2 hover:text-ink transition-colors cursor-pointer"
                     title="Close panel"
                   >
                     <X className="w-4 h-4" />
                   </button>
 
                   <div className="space-y-1 pr-8">
-                    <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
-                      <TrendingUp className="w-4 h-4 text-cyan-400" />
+                    <h3 className="text-sm font-semibold flex items-center gap-2 text-ink">
+                      <TrendingUp className="w-4 h-4 text-accent" />
                       <span>{processedLabs.find(l => l.id === selectedLabId)?.name ?? selectedLabId} — Wait Time Trend</span>
                     </h3>
-                    <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                    <p className="text-xs text-ink-2 max-w-3xl leading-relaxed">
                       Historical wait time for this lab site, sampled every 60 minutes from live APL QMe API data. Only numeric wait times are charted; 'Appointments Only' and 'Closed' states are excluded.
                     </p>
                   </div>
@@ -1010,11 +1025,11 @@ export default function DiagnosticDashboard() {
                         <AreaChart data={selectedLabTrends} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                           <defs>
                             <linearGradient id="colorLabSiteTrend" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                              <stop offset="5%" stopColor="#0b5cad" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#0b5cad" stopOpacity={0}/>
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e3e7ee" />
                           <XAxis
                             dataKey="timestamp"
                             stroke="#64748b"
@@ -1031,17 +1046,12 @@ export default function DiagnosticDashboard() {
                             style={{ fontSize: 10, fontFamily: 'monospace' }}
                             label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }}
                           />
-                          <Tooltip
-                            contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
-                            labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
-                            itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
-                            labelFormatter={(ts: string) => new Date(ts).toLocaleString('en-US')}
-                          />
+                          <Tooltip content={<ChartTooltip />} />
                           <Area
                             type="monotone"
                             dataKey="waitTime"
                             name="Wait Time (min)"
-                            stroke="#06b6d4"
+                            stroke="#0b5cad"
                             strokeWidth={2.5}
                             fillOpacity={1}
                             fill="url(#colorLabSiteTrend)"
@@ -1052,8 +1062,8 @@ export default function DiagnosticDashboard() {
                       </ResponsiveContainer>
                     </div>
                   ) : (
-                    <div className="h-64 flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
-                      <Clock className="w-6 h-6 text-slate-600" />
+                    <div className="h-64 flex flex-col items-center justify-center text-ink-3 text-xs gap-2">
+                      <Clock className="w-6 h-6 text-ink-3" />
                       <p>No trend data yet for this lab. Snapshots are collected every 60 minutes — check back shortly.</p>
                     </div>
                   )}
@@ -1066,8 +1076,8 @@ export default function DiagnosticDashboard() {
 
       {/* SUBTAB 2: CT & MRI Public Wait Times */}
       {activeSubTab === 'imaging-waits' && (
-        <div className="space-y-6">
-          <DataTimestamp compact metadata={metadata ?? {}} arrayKey="IMAGING_WAIT_TRENDS" />
+        <div className="space-y-4">
+          <DataTimestamp compact variant="light" metadata={metadata ?? {}} arrayKey="IMAGING_WAIT_TRENDS" />
           {/* Clickable KPI overview cards — toggle historical trend panel */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* CT Scan KPI Card */}
@@ -1082,29 +1092,29 @@ export default function DiagnosticDashboard() {
                   setSelectedKpi(selectedKpi === 'CT Scan' ? null : 'CT Scan');
                 }
               }}
-              className={`p-4 rounded-2xl bg-slate-900 border shadow-lg relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+              className={`p-4 rounded-xl bg-surface border relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover: ${
                 selectedKpi === 'CT Scan'
-                  ? 'border-cyan-500 ring-1 ring-cyan-500/30 shadow-cyan-500/5'
-                  : 'border-slate-800 hover:border-cyan-500/30'
+                  ? 'border-accent ring-1 ring-accent/30 '
+                  : 'border-line hover:border-accent/30'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
-                  <Activity className="w-4 h-4 text-cyan-400" />
+                <div className="p-1.5 bg-paper border border-line rounded-lg">
+                  <Activity className="w-4 h-4 text-accent" />
                 </div>
-                <span className="text-[8px] font-extrabold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                <span className="text-xs font-medium text-accent-strong bg-accent-soft border border-line px-1.5 py-0.5 rounded-full">
                   CT Scan P90
                 </span>
               </div>
               <div className="flex items-baseline gap-2 mb-1.5">
-                <p className="text-2xl font-black text-white tracking-tight leading-none font-mono">
+                <p className="text-2xl font-semibold text-ink tracking-tight leading-none font-mono tabular-nums">
                   {(IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === 'CT Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
                 </p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                <p className="text-xs font-medium text-ink-3">
                   Alberta 90th Percentile Wait (Days)
                 </p>
               </div>
-              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-cyan-400/80 group-hover:text-cyan-400 transition-colors">
+              <div className="pt-1.5 flex items-center gap-1 text-xs font-medium text-accent group-hover:text-accent-strong transition-colors">
                 <BarChart2 className="w-3 h-3" />
                 <span>{selectedKpi === 'CT Scan' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
               </div>
@@ -1122,29 +1132,29 @@ export default function DiagnosticDashboard() {
                   setSelectedKpi(selectedKpi === 'MRI Scan' ? null : 'MRI Scan');
                 }
               }}
-              className={`p-4 rounded-2xl bg-slate-900 border shadow-lg relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover:shadow-xl ${
+              className={`p-4 rounded-xl bg-surface border relative overflow-hidden group cursor-pointer transition-all duration-300 select-none hover:scale-[1.02] hover: ${
                 selectedKpi === 'MRI Scan'
-                  ? 'border-indigo-500 ring-1 ring-indigo-500/30 shadow-indigo-500/5'
-                  : 'border-slate-800 hover:border-indigo-500/30'
+                  ? 'border-accent-strong ring-1 ring-accent/30 '
+                  : 'border-line hover:border-accent/20'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <div className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg">
-                  <Activity className="w-4 h-4 text-indigo-400" />
+                <div className="p-1.5 bg-paper border border-line rounded-lg">
+                  <Activity className="w-4 h-4 text-accent-strong" />
                 </div>
-                <span className="text-[8px] font-extrabold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest">
+                <span className="text-xs font-medium text-accent-strong bg-accent-soft border border-line px-1.5 py-0.5 rounded-full">
                   MRI Scan P90
                 </span>
               </div>
               <div className="flex items-baseline gap-2 mb-1.5">
-                <p className="text-2xl font-black text-white tracking-tight leading-none font-mono">
+                <p className="text-2xl font-semibold text-ink tracking-tight leading-none font-mono tabular-nums">
                   {(IMAGING_WAIT_TRENDS ?? []).filter(t => t.modality === 'MRI Scan').slice(-1)[0]?.albertaP90Days ?? '—'}
                 </p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                <p className="text-xs font-medium text-ink-3">
                   Alberta 90th Percentile Wait (Days)
                 </p>
               </div>
-              <div className="pt-1.5 flex items-center gap-1 text-[8px] font-bold text-indigo-400/80 group-hover:text-indigo-400 transition-colors">
+              <div className="pt-1.5 flex items-center gap-1 text-xs font-medium text-accent-strong group-hover:text-accent transition-colors">
                 <BarChart2 className="w-3 h-3" />
                 <span>{selectedKpi === 'MRI Scan' ? 'Active: Hide Trend' : 'Click to View Trend'}</span>
               </div>
@@ -1162,11 +1172,11 @@ export default function DiagnosticDashboard() {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="p-6 rounded-2xl bg-[#090e21] border border-slate-800 space-y-6 shadow-xl relative">
+                <div className="rounded-xl border border-line bg-surface p-6 space-y-6 relative">
                   {/* Close Button */}
                   <button
                     onClick={() => setSelectedKpi(null)}
-                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    className="absolute top-4 right-4 p-1.5 rounded-lg bg-paper border border-line hover:border-line-2 text-ink-2 hover:text-ink transition-colors cursor-pointer"
                     title="Close panel"
                   >
                     <X className="w-4 h-4" />
@@ -1175,36 +1185,36 @@ export default function DiagnosticDashboard() {
                   {/* Title and description */}
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pr-8">
                     <div className="space-y-1">
-                      <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                      <h3 className="text-sm font-semibold flex items-center gap-2 text-ink">
                         {React.createElement(selectedKpiDetails.icon, {
                           className: `w-4 h-4 ${selectedKpiDetails.colorClass}`
                         })}
                         <span>{selectedKpiDetails.label} Historical Trend Explorer</span>
                       </h3>
-                      <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
+                      <p className="text-xs text-ink-2 max-w-3xl leading-relaxed">
                         {selectedKpiDetails.description}
                       </p>
                     </div>
                   </div>
 
                   {/* Stats highlights */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-900">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-paper border border-line">
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Baseline (2019)</span>
-                      <span className="text-xl font-black text-slate-300 font-mono">{kpiStats.baseline}{selectedKpiDetails.unit}</span>
+                      <span className="text-xs font-medium text-ink-3 block">Baseline (2019)</span>
+                      <span className="text-xl font-medium text-ink-2 font-mono tabular-nums">{kpiStats.baseline}{selectedKpiDetails.unit}</span>
                     </div>
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current (2025)</span>
-                      <span className="text-xl font-black text-white font-mono">{kpiStats.latest}{selectedKpiDetails.unit}</span>
+                      <span className="text-xs font-medium text-ink-3 block">Current (2025)</span>
+                      <span className="text-xl font-medium text-ink font-mono tabular-nums">{kpiStats.latest}{selectedKpiDetails.unit}</span>
                     </div>
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Peak</span>
-                      <span className={`text-xl font-black font-mono ${selectedKpiDetails.colorClass}`}>{kpiStats.peak}{selectedKpiDetails.unit}</span>
+                      <span className="text-xs font-medium text-ink-3 block">Peak</span>
+                      <span className={`text-xl font-medium font-mono tabular-nums ${selectedKpiDetails.colorClass}`}>{kpiStats.peak}{selectedKpiDetails.unit}</span>
                     </div>
                     <div className="space-y-1 text-center sm:text-left">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Overall Shift</span>
-                      <span className={`text-xl font-black font-mono flex items-center justify-center sm:justify-start gap-1 ${
-                        kpiStats.isIncrease ? 'text-rose-500' : 'text-emerald-500'
+                      <span className="text-xs font-medium text-ink-3 block">Overall Shift</span>
+                      <span className={`text-xl font-medium font-mono tabular-nums flex items-center justify-center sm:justify-start gap-1 ${
+                        kpiStats.isIncrease ? 'text-crit' : 'text-ok'
                       }`}>
                         {kpiStats.isIncrease ? <TrendingUp className="w-4 h-4 shrink-0" /> : <TrendingDown className="w-4 h-4 shrink-0" />}
                         <span>{kpiStats.delta}{selectedKpiDetails.unit} ({kpiStats.pctChange})</span>
@@ -1225,18 +1235,14 @@ export default function DiagnosticDashboard() {
                             <stop offset="95%" stopColor={selectedKpiDetails.strokeColor} stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e3e7ee" />
                         <XAxis dataKey="year" stroke="#64748b" style={{ fontSize: 10, fontFamily: 'monospace' }} />
                         <YAxis
                           stroke="#64748b"
                           style={{ fontSize: 10, fontFamily: 'monospace' }}
                           domain={['auto', 'auto']}
                         />
-                        <Tooltip
-                          contentStyle={{ backgroundColor: '#050814', borderColor: '#1e293b', borderRadius: 8 }}
-                          labelStyle={{ fontWeight: 'black', color: '#fff', fontSize: 11 }}
-                          itemStyle={{ fontSize: 11, fontFamily: 'monospace' }}
-                        />
+                        <Tooltip content={<ChartTooltip />} />
                         <Area
                           type="monotone"
                           dataKey="albertaP90Days"
@@ -1258,22 +1264,22 @@ export default function DiagnosticDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* National Wait Trends Comparison Chart */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl lg:col-span-2 space-y-4">
+            <div className="bg-surface border border-line p-5 rounded-xl lg:col-span-2 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">CIHI CT & MRI Diagnostic Wait Days</h3>
-                  <p className="text-[10px] text-slate-500">Comparing Alberta (P50 and P90 percentile days) against Canadian averages (2018 - 2025)</p>
+                  <h3 className="text-xs font-semibold text-ink-2">CIHI CT & MRI Diagnostic Wait Days</h3>
+                  <p className="text-xs text-ink-3">Comparing Alberta (P50 and P90 percentile days) against Canadian averages (2018 - 2025)</p>
                 </div>
 
-                <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+                <div className="flex bg-paper p-0.5 rounded-lg border border-line">
                   {(['CT Scan', 'MRI Scan'] as const).map(m => (
                     <button
                       key={m}
                       onClick={() => setSelectedModality(m)}
-                      className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
+                      className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
                         selectedModality === m 
-                          ? 'bg-cyan-600 text-white' 
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-accent text-white' 
+                          : 'text-ink-2 hover:text-ink'
                       }`}
                     >
                       {m}
@@ -1291,67 +1297,67 @@ export default function DiagnosticDashboard() {
                   >
                     <defs>
                       <linearGradient id="colorAlberta" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#0b5cad" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="#0b5cad" stopOpacity={0}/>
                       </linearGradient>
                       <linearGradient id="colorCanada" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#64748b" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="#64748b" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e3e7ee" />
                     <XAxis dataKey="year" stroke="#64748b" fontSize={10} />
                     <YAxis label={{ value: 'Wait Days', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} stroke="#64748b" fontSize={9} />
-                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                    <Tooltip content={<ChartTooltip />} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <Area type="monotone" dataKey="albertaP90Days" name="Alberta 90th Percentile (Days)" stroke="#06b6d4" fillOpacity={1} fill="url(#colorAlberta)" strokeWidth={2.5} />
-                    <Area type="monotone" dataKey="canadaP90Days" name="Canada 90th Percentile (Days)" stroke="#6366f1" fillOpacity={1} fill="url(#colorCanada)" strokeWidth={1.5} strokeDasharray="5 5" />
-                    <Line type="monotone" dataKey="albertaP50Days" name="Alberta Median (Days)" stroke="#06b6d4" strokeWidth={1.5} dot />
-                    <Line type="monotone" dataKey="canadaP50Days" name="Canada Median (Days)" stroke="#6366f1" strokeWidth={1} strokeDasharray="3 3" dot />
+                    <Area type="monotone" dataKey="albertaP90Days" name="Alberta 90th Percentile (Days)" stroke="#0b5cad" fillOpacity={1} fill="url(#colorAlberta)" strokeWidth={2.5} />
+                    <Area type="monotone" dataKey="canadaP90Days" name="Canada 90th Percentile (Days)" stroke="#64748b" fillOpacity={1} fill="url(#colorCanada)" strokeWidth={1.5} strokeDasharray="5 5" />
+                    <Line type="monotone" dataKey="albertaP50Days" name="Alberta Median (Days)" stroke="#0b5cad" strokeWidth={1.5} dot />
+                    <Line type="monotone" dataKey="canadaP50Days" name="Canada Median (Days)" stroke="#64748b" strokeWidth={1} strokeDasharray="3 3" dot />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
 
-              <p className="text-[10px] text-slate-400">
+              <p className="text-xs text-ink-2">
                 💡 <strong>90th Percentile (P90):</strong> The number of days in which 90% of patients received their scan. High gaps between Median (P50) and P90 reflect structural wait-list accumulation for lower-priority outpatients.
               </p>
             </div>
 
             {/* Target compliance and CAR targets */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4 flex flex-col justify-between">
+            <div className="bg-surface border border-line p-5 rounded-xl space-y-4 flex flex-col justify-between">
               <div>
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">National CAR Performance Targets</h3>
-                <p className="text-[10px] text-slate-500">Alberta wait-time compliance relative to Canadian Association of Radiologists standards</p>
+                <h3 className="text-xs font-semibold text-ink-2">National CAR Performance Targets</h3>
+                <p className="text-xs text-ink-3">Alberta wait-time compliance relative to Canadian Association of Radiologists standards</p>
               </div>
 
               <div className="space-y-3">
                 {(PRIORITY_TARGET_COMPLIANCE ?? []).length === 0 ? (
-                  <p className="text-[11px] text-slate-400 leading-relaxed p-3 bg-slate-950/40 border border-slate-850 rounded-xl">
+                  <p className="text-[11px] text-ink-2 leading-relaxed p-3 bg-paper border border-line rounded-xl">
                     Priority target compliance is not shown. Prior values were unconfirmed estimates without a verified published report.
                   </p>
                 ) : (
                   (PRIORITY_TARGET_COMPLIANCE ?? []).map(item => (
-                  <div key={item.priority} className="p-3 bg-slate-950/40 rounded-xl border border-slate-850 space-y-2">
+                  <div key={item.priority} className="p-3 bg-paper rounded-xl border border-line space-y-2">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h4 className="text-xs font-bold text-white">{item.priority}</h4>
-                        <span className="text-[9px] text-slate-500 block">Target maximum: <strong>{item.targetLimitText}</strong></span>
+                        <h4 className="text-xs font-semibold text-ink">{item.priority}</h4>
+                        <span className="text-xs text-ink-3 block">Target maximum: <strong>{item.targetLimitText}</strong></span>
                       </div>
                     </div>
                     <div className="space-y-1.5 pt-1">
-                      <div className="flex justify-between text-[9px]">
-                        <span className="text-slate-400">CT Compliance</span>
-                        <span className={`font-mono font-bold ${item.albertaCtCompliancePct >= 90 ? 'text-emerald-400' : 'text-amber-500'}`}>{item.albertaCtCompliancePct}%</span>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-ink-2">CT Compliance</span>
+                        <span className={`font-mono tabular-nums font-medium ${item.albertaCtCompliancePct >= 90 ? 'text-ok' : 'text-warn'}`}>{item.albertaCtCompliancePct}%</span>
                       </div>
-                      <div className="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
-                        <div className="bg-cyan-500 h-full rounded-full" style={{ width: `${item.albertaCtCompliancePct}%` }} />
+                      <div className="w-full bg-neutral-chip h-1 rounded-full overflow-hidden">
+                        <div className="bg-accent h-full rounded-full" style={{ width: `${item.albertaCtCompliancePct}%` }} />
                       </div>
-                      <div className="flex justify-between text-[9px] pt-1">
-                        <span className="text-slate-400">MRI Compliance</span>
-                        <span className={`font-mono font-bold ${item.albertaMriCompliancePct >= 90 ? 'text-emerald-400' : 'text-amber-500'}`}>{item.albertaMriCompliancePct}%</span>
+                      <div className="flex justify-between text-xs pt-1">
+                        <span className="text-ink-2">MRI Compliance</span>
+                        <span className={`font-mono tabular-nums font-medium ${item.albertaMriCompliancePct >= 90 ? 'text-ok' : 'text-warn'}`}>{item.albertaMriCompliancePct}%</span>
                       </div>
-                      <div className="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
-                        <div className="bg-indigo-500 h-full rounded-full" style={{ width: `${item.albertaMriCompliancePct}%` }} />
+                      <div className="w-full bg-neutral-chip h-1 rounded-full overflow-hidden">
+                        <div className="bg-accent-strong h-full rounded-full" style={{ width: `${item.albertaMriCompliancePct}%` }} />
                       </div>
                     </div>
                   </div>

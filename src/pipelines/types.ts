@@ -37,17 +37,10 @@ export const DOMAINS = [
   'disruptions',
   'surgical',
   'diagnostic',
-  'cancer',
-  'continuing-care',
-  'mental-health',
-  'patient-experience',
   'primary-care',
   'public-health',
   'regional-inequity',
   'spending',
-  'system-flow',
-  'virtual-care',
-  'workforce',
 ] as const;
 
 export type Domain = typeof DOMAINS[number];

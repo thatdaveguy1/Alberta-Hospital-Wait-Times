@@ -201,17 +201,10 @@ export async function pushAllToCloudflare(): Promise<PushResult[]> {
     'disruptions',
     'surgical',
     'diagnostic',
-    'cancer',
-    'continuing-care',
-    'mental-health',
-    'patient-experience',
     'primary-care',
     'public-health',
     'regional-inequity',
     'spending',
-    'system-flow',
-    'virtual-care',
-    'workforce',
   ];
 
   const results: PushResult[] = [];

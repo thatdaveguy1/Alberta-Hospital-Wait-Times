@@ -1,8 +1,8 @@
 // CIHI Wait Times Priority Procedures Downloader & Parser
 // Downloads the CIHI "Wait Times for Priority Procedures in Canada" data-tables
 // XLSX workbook, parses it with SheetJS (xlsx), and merges the extracted records
-// into data-diagnostic.json (CT/MRI wait trends) and data-cancer.json (cancer
-// surgery wait trends + radiation therapy compliance).
+// into data-diagnostic.json (CT/MRI wait trends) and data-surgical.json
+// (provincial comparators + historical wait trends).
 //
 // The workbook is a single long-format 'Table 1' worksheet with columns:
 //   Reporting level | Province | Region | Indicator | Metric | Data year |
@@ -10,13 +10,13 @@
 // We filter by Indicator / Metric / Province, pivot the long-format rows into
 // the wide shapes consumed by the dashboard, and merge into the existing JSON
 // files (preserving all other arrays). All failures are caught and returned as
-// SyncResult — run() / runCancer() never throw.
+// SyncResult — run() / runSurgical() never throw.
 //
 // Two exports are provided so the orchestrator can register one pipeline per
 // domain while only downloading + parsing the workbook once per process:
-//   - run()       -> domain 'diagnostic' (writes IMAGING_WAIT_TRENDS)
-//   - runCancer() -> domain 'cancer'      (writes CANCER_SURGERY_WAIT_TRENDS +
-//                                           RADIATION_THERAPY_WAIT_TRENDS)
+//   - run()         -> domain 'diagnostic' (writes IMAGING_WAIT_TRENDS)
+//   - runSurgical() -> domain 'surgical'   (writes CIHI_PROVINCIAL_COMPARATORS +
+//                                           HISTORICAL_WAIT_TRENDS)
 
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -30,36 +30,18 @@ import {
   type DataMetadata,
 } from './metadataHelpers';
 import type { ImagingWaitTrend } from '../diagnosticData';
-import type {
-  CancerSurgeryWaitTrend,
-  RadiationTherapyCompliance,
-} from '../cancerData';
 
 const XLSX_URL =
   'https://www.cihi.ca/sites/default/files/document/wait-times-priority-procedures-in-canada-2008-2025-data-tables-en.xlsx';
 const LANDING_URL = 'https://www.cihi.ca/en/wait-times-in-canada-2026';
 const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
 const SURGICAL_FILE = path.join(process.cwd(), 'data-surgical.json');
-const CANCER_FILE = path.join(process.cwd(), 'data-cancer.json');
 const RATE_LIMIT_MS = 2000;
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 const IMAGING_INDICATORS: Record<string, true> = { 'CT Scan': true, 'MRI Scan': true };
 const IMAGING_METRICS: Record<string, true> = { '50th percentile': true, '90th percentile': true };
-const SURGERY_INDICATOR_TO_TYPE: Record<string, CancerSurgeryWaitTrend['cancerType']> = {
-  'Bladder Cancer Surgery': 'Bladder',
-  'Breast Cancer Surgery': 'Breast',
-  'Colorectal Cancer Surgery': 'Colorectal',
-  'Lung Cancer Surgery': 'Lung',
-  'Prostate Cancer Surgery': 'Prostate',
-};
-const SURGERY_METRICS: Record<string, true> = {
-  '50th percentile': true,
-  '90th percentile': true,
-  Volume: true,
-};
-const RADIATION_INDICATOR = 'Radiation Therapy';
 const PROVINCES: Record<string, true> = { Alberta: true, Canada: true };
 
 function asString(value: unknown): string | undefined {
@@ -98,14 +80,12 @@ function deriveYearRange(years: (string | undefined)[]): string {
 
 interface ParsedWorkbook {
   imaging: ImagingWaitTrend[];
-  cancerSurgery: CancerSurgeryWaitTrend[];
-  radiation: RadiationTherapyCompliance[];
   provincialComparators: ProvincialComparator[];
   comparatorYears: string[];
   historicalWaitTrends: HistoricalWaitTrend[];
 }
 
-// Module-level cache so run() and runCancer() share a single download + parse
+// Module-level cache so run() and runSurgical() share a single download + parse
 // per process. Reset on failure so a retry re-fetches.
 let cachedParse: ParsedWorkbook | null = null;
 
@@ -154,6 +134,8 @@ interface ColumnMap {
   metric: number;
   year: number;
   result: number;
+  /** Present only when the sheet has a Reporting level column. */
+  reportingLevel?: number;
 }
 
 function buildColumnMap(header: unknown[]): ColumnMap | null {
@@ -166,19 +148,97 @@ function buildColumnMap(header: unknown[]): ColumnMap | null {
   const metric = find(['metric']);
   const year = find(['year']);
   const result = find(['result']);
+  const reportingLevelIdx = find(['reporting', 'level']);
 
   if (province < 0 || indicator < 0 || metric < 0 || year < 0 || result < 0) {
     return null;
   }
-  return { province, indicator, metric, year, result };
+  const map: ColumnMap = { province, indicator, metric, year, result };
+  if (reportingLevelIdx >= 0) map.reportingLevel = reportingLevelIdx;
+  return map;
 }
 
 interface LongRow {
   province: string;
   indicator: string;
   metric: string;
+  /** Raw data-year cell — not collapsed via normaliseYear (keeps 2019FY / 2019Q3Q4 distinct). */
   year: string;
   result: number;
+  /**
+   * Set only when the sheet has a Reporting level column (empty cell → '').
+   * Absent entirely when the column is missing so builders can keep province-only behaviour.
+   */
+  reportingLevel?: string;
+}
+
+const CALENDAR_YEAR_RE = /^\d{4}$/;
+
+function isCalendarYear(year: string): boolean {
+  return CALENDAR_YEAR_RE.test(year);
+}
+
+/** Values containing "provincial" or "province" (e.g. Provincial, Province/territory). */
+function isProvincialReportingLevel(level: string): boolean {
+  const lower = level.toLowerCase();
+  return lower.includes('provincial') || lower.includes('province');
+}
+
+/** True when extract captured a Reporting level column on the sheet. */
+function sheetHasReportingLevel(rows: LongRow[]): boolean {
+  return rows.some((r) => r.reportingLevel !== undefined);
+}
+
+function isProvincialRow(row: LongRow, reportingLevelAvailable: boolean): boolean {
+  if (!reportingLevelAvailable) return true;
+  return isProvincialReportingLevel(row.reportingLevel ?? '');
+}
+
+/** Comparator geographies: provinces must be provincial; Canada/national rows are national-level. */
+function isComparatorGeographyRow(row: LongRow, reportingLevelAvailable: boolean): boolean {
+  if (!reportingLevelAvailable) return true;
+  if (row.province === 'Canada') {
+    const lower = (row.reportingLevel ?? '').toLowerCase();
+    return (
+      lower.includes('canada') ||
+      lower.includes('national') ||
+      lower.length === 0 ||
+      isProvincialReportingLevel(row.reportingLevel ?? '')
+    );
+  }
+  return isProvincialReportingLevel(row.reportingLevel ?? '');
+}
+
+function isWithinBenchmarkMetric(metric: string): boolean {
+  const lower = metric.toLowerCase();
+  return (
+    lower.includes('% meeting benchmark') ||
+    lower.includes('meeting benchmark') ||
+    lower.includes('% within benchmark') ||
+    lower.includes('within benchmark')
+  );
+}
+
+function isMedianMetric(metric: string): boolean {
+  const lower = metric.toLowerCase();
+  return lower.includes('50th percentile') || lower.includes('median');
+}
+
+/** Exact / full CIHI indicator labels — avoids bare "ct"/"hip" substring hazards. */
+const HISTORICAL_PROCEDURES: { match: string; label: string }[] = [
+  { match: 'Hip Replacement', label: 'Hip Replacement' },
+  { match: 'Knee Replacement', label: 'Knee Replacement' },
+  { match: 'Cataract Surgery', label: 'Cataract Surgery' },
+  { match: 'MRI Scan', label: 'MRI Scan' },
+  { match: 'CT Scan', label: 'CT Scan' },
+];
+
+function matchHistoricalProcedure(indicator: string): string | undefined {
+  const lower = indicator.trim().toLowerCase();
+  for (const { match, label } of HISTORICAL_PROCEDURES) {
+    if (lower === match.toLowerCase()) return label;
+  }
+  return undefined;
 }
 
 function extractLongRows(workbook: XLSX.WorkBook): LongRow[] {
@@ -211,16 +271,22 @@ function extractLongRows(workbook: XLSX.WorkBook): LongRow[] {
   if (!map) return [];
 
   const out: LongRow[] = [];
+  const hasReportingLevelCol = map.reportingLevel !== undefined;
   for (let i = headerIdx + 1; i < rows.length; i++) {
     const row = rows[i];
     if (!row || row.length === 0) continue;
     const province = asString(row[map.province]);
     const indicator = asString(row[map.indicator]);
     const metric = asString(row[map.metric]);
-    const year = normaliseYear(row[map.year]);
+    // Preserve the raw year string so FY/Q3Q4 rows are not collapsed into calendar keys.
+    const year = asString(row[map.year]);
     const result = asNumber(row[map.result]);
     if (!province || !indicator || !metric || !year || result === undefined) continue;
-    out.push({ province, indicator, metric, year, result });
+    const longRow: LongRow = { province, indicator, metric, year, result };
+    if (hasReportingLevelCol) {
+      longRow.reportingLevel = asString(row[map.reportingLevel!]) ?? '';
+    }
+    out.push(longRow);
   }
   return out;
 }
@@ -240,8 +306,11 @@ function buildImagingTrends(rows: LongRow[]): ImagingWaitTrend[] {
     if (!(r.indicator in IMAGING_INDICATORS)) continue;
     if (!(r.metric in IMAGING_METRICS)) continue;
     if (!(r.province in PROVINCES)) continue;
+    // Imaging trends still collapse fiscal-style labels (e.g. 2023-24 → 2023).
+    const year = normaliseYear(r.year);
+    if (!year) continue;
 
-    const key = `${r.year}|${r.indicator}`;
+    const key = `${year}|${r.indicator}`;
     let acc = accMap.get(key);
     if (!acc) {
       acc = { modality: r.indicator as 'CT Scan' | 'MRI Scan' };
@@ -283,132 +352,6 @@ function buildImagingTrends(rows: LongRow[]): ImagingWaitTrend[] {
   return out;
 }
 
-// Pivot long-format cancer-surgery rows into CANCER_SURGERY_WAIT_TRENDS.
-function buildCancerSurgeryTrends(rows: LongRow[]): CancerSurgeryWaitTrend[] {
-  interface Acc {
-    cancerType: CancerSurgeryWaitTrend['cancerType'];
-    albertaP50?: number;
-    albertaP90?: number;
-    canadaP50?: number;
-    canadaP90?: number;
-    albertaVolume?: number;
-    canadaVolume?: number;
-  }
-  const accMap = new Map<string, Acc>();
-
-  for (const r of rows) {
-    const cancerType = SURGERY_INDICATOR_TO_TYPE[r.indicator];
-    if (!cancerType) continue;
-    if (!(r.metric in SURGERY_METRICS)) continue;
-    if (!(r.province in PROVINCES)) continue;
-
-    const key = `${r.year}|${cancerType}`;
-    let acc = accMap.get(key);
-    if (!acc) {
-      acc = { cancerType };
-      accMap.set(key, acc);
-    }
-    if (r.metric === 'Volume') {
-      if (r.province === 'Alberta') acc.albertaVolume = r.result;
-      else if (r.province === 'Canada') acc.canadaVolume = r.result;
-    } else {
-      const isP50 = r.metric === '50th percentile';
-      if (r.province === 'Alberta') {
-        if (isP50) acc.albertaP50 = r.result;
-        else acc.albertaP90 = r.result;
-      } else if (r.province === 'Canada') {
-        if (isP50) acc.canadaP50 = r.result;
-        else acc.canadaP90 = r.result;
-      }
-    }
-  }
-
-  const out: CancerSurgeryWaitTrend[] = [];
-  for (const [key, acc] of accMap) {
-    const year = key.split('|')[0];
-    // Wait-day percentiles are required; volume falls back to Alberta then Canada.
-    if (
-      acc.albertaP50 === undefined ||
-      acc.albertaP90 === undefined ||
-      acc.canadaP50 === undefined ||
-      acc.canadaP90 === undefined
-    ) {
-      continue;
-    }
-    const completedVolume = acc.albertaVolume ?? acc.canadaVolume ?? 0;
-    out.push({
-      year,
-      cancerType: acc.cancerType,
-      albertaP50Days: acc.albertaP50,
-      albertaP90Days: acc.albertaP90,
-      canadaP50Days: acc.canadaP50,
-      canadaP90Days: acc.canadaP90,
-      completedVolume,
-    });
-  }
-  out.sort((a, b) =>
-    a.year === b.year
-      ? a.cancerType.localeCompare(b.cancerType)
-      : a.year.localeCompare(b.year),
-  );
-  return out;
-}
-
-// Pivot long-format radiation-therapy rows into RADIATION_THERAPY_WAIT_TRENDS.
-function buildRadiationTrends(rows: LongRow[]): RadiationTherapyCompliance[] {
-  interface Acc {
-    albertaP50?: number;
-    albertaP90?: number;
-    albertaPct?: number;
-    canadaPct?: number;
-  }
-  const accMap = new Map<string, Acc>();
-
-  for (const r of rows) {
-    if (r.indicator !== RADIATION_INDICATOR) continue;
-    const metricNorm = r.metric.toLowerCase().includes('benchmark')
-      ? 'benchmark'
-      : r.metric;
-    if (metricNorm !== 'benchmark' && !(r.metric in IMAGING_METRICS)) continue;
-    if (!(r.province in PROVINCES)) continue;
-
-    let acc = accMap.get(r.year);
-    if (!acc) {
-      acc = {};
-      accMap.set(r.year, acc);
-    }
-    if (metricNorm === 'benchmark') {
-      if (r.province === 'Alberta') acc.albertaPct = r.result;
-      else if (r.province === 'Canada') acc.canadaPct = r.result;
-    } else if (r.metric === '50th percentile') {
-      if (r.province === 'Alberta') acc.albertaP50 = r.result;
-    } else if (r.metric === '90th percentile') {
-      if (r.province === 'Alberta') acc.albertaP90 = r.result;
-    }
-  }
-
-  const out: RadiationTherapyCompliance[] = [];
-  for (const [year, acc] of accMap) {
-    if (
-      acc.albertaPct === undefined ||
-      acc.canadaPct === undefined ||
-      acc.albertaP50 === undefined ||
-      acc.albertaP90 === undefined
-    ) {
-      continue;
-    }
-    out.push({
-      year,
-      albertaPctWithinBenchmark: acc.albertaPct,
-      canadaPctWithinBenchmark: acc.canadaPct,
-      albertaP50WaitDays: acc.albertaP50,
-      albertaP90WaitDays: acc.albertaP90,
-    });
-  }
-  out.sort((a, b) => a.year.localeCompare(b.year));
-  return out;
-}
-
 // Provincial comparators: hip/knee/cataract within-benchmark % + MRI median wait days
 interface ProvincialComparator {
   province: string;
@@ -423,20 +366,44 @@ const PROVINCE_COMPARATOR_NAMES: Record<string, true> = {
   'Manitoba': true, 'Ontario': true, 'Quebec': true, 'Canada': true,
 };
 function buildProvincialComparators(rows: LongRow[]): { comparators: ProvincialComparator[]; comparatorYears: string[] } {
-  const accMap = new Map<string, { hip?: number; hipYear?: string; knee?: number; kneeYear?: string; cataract?: number; cataractYear?: string; mri?: number; mriYear?: string }>();
+  type Acc = {
+    hip?: number; hipYear?: string;
+    knee?: number; kneeYear?: string;
+    cataract?: number; cataractYear?: string;
+    mri?: number; mriYear?: string;
+  };
+  const accMap = new Map<string, Acc>();
+  const reportingLevelAvailable = sheetHasReportingLevel(rows);
+
+  const takeLatest = (
+    acc: Acc,
+    valueKey: 'hip' | 'knee' | 'cataract' | 'mri',
+    yearKey: 'hipYear' | 'kneeYear' | 'cataractYear' | 'mriYear',
+    row: LongRow,
+  ): void => {
+    const prevYear = acc[yearKey];
+    if (prevYear !== undefined && row.year <= prevYear) return;
+    acc[valueKey] = row.result;
+    acc[yearKey] = row.year;
+  };
+
   for (const row of rows) {
     if (!PROVINCE_COMPARATOR_NAMES[row.province]) continue;
-    const isWithinBenchmark = row.metric.includes('% within benchmark') || row.metric.includes('within benchmark');
-    const isMedian = row.metric.includes('50th percentile') || row.metric.includes('median');
-    if (!isWithinBenchmark && !isMedian) continue;
+    if (!isComparatorGeographyRow(row, reportingLevelAvailable)) continue;
+    if (!isCalendarYear(row.year)) continue; // ignore 2019FY / 2019Q3Q4 etc.
+
+    const withinBenchmark = isWithinBenchmarkMetric(row.metric);
+    const median = isMedianMetric(row.metric);
+    if (!withinBenchmark && !median) continue;
 
     let acc = accMap.get(row.province);
     if (!acc) { acc = {}; accMap.set(row.province, acc); }
 
-    if (row.indicator.toLowerCase().includes('hip') && isWithinBenchmark) { acc.hip = row.result; acc.hipYear = row.year; }
-    else if (row.indicator.toLowerCase().includes('knee') && isWithinBenchmark) { acc.knee = row.result; acc.kneeYear = row.year; }
-    else if (row.indicator.toLowerCase().includes('cataract') && isWithinBenchmark) { acc.cataract = row.result; acc.cataractYear = row.year; }
-    else if (row.indicator.toLowerCase().includes('mri') && isMedian) { acc.mri = row.result; acc.mriYear = row.year; }
+    const indicator = row.indicator.trim().toLowerCase();
+    if (indicator === 'hip replacement' && withinBenchmark) takeLatest(acc, 'hip', 'hipYear', row);
+    else if (indicator === 'knee replacement' && withinBenchmark) takeLatest(acc, 'knee', 'kneeYear', row);
+    else if (indicator === 'cataract surgery' && withinBenchmark) takeLatest(acc, 'cataract', 'cataractYear', row);
+    else if (indicator === 'mri scan' && median) takeLatest(acc, 'mri', 'mriYear', row);
   }
 
   const out: ProvincialComparator[] = [];
@@ -466,28 +433,24 @@ interface HistoricalWaitTrend {
 }
 
 function buildHistoricalWaitTrends(rows: LongRow[]): HistoricalWaitTrend[] {
-  const PROCEDURES: Record<string, string> = {
-    'hip': 'Hip Replacement',
-    'knee': 'Knee Replacement',
-    'cataract': 'Cataract Surgery',
-    'mri': 'MRI Scan',
-    'ct': 'CT Scan',
-  };
   const seen = new Set<string>();
   const out: HistoricalWaitTrend[] = [];
+  const reportingLevelAvailable = sheetHasReportingLevel(rows);
+
   for (const row of rows) {
     if (row.province !== 'Alberta') continue;
-    if (!row.metric.includes('50th percentile') && !row.metric.includes('median')) continue;
-    const indicatorLower = row.indicator.toLowerCase();
-    for (const [key, label] of Object.entries(PROCEDURES)) {
-      if (indicatorLower.includes(key)) {
-        const dedupKey = `${row.year}-${label}`;
-        if (seen.has(dedupKey)) break;
-        seen.add(dedupKey);
-        out.push({ year: row.year, procedure: label, medianWaitDays: row.result });
-        break;
-      }
-    }
+    if (!isProvincialRow(row, reportingLevelAvailable)) continue;
+    if (!isMedianMetric(row.metric)) continue;
+    // Require pure calendar years — do not let FY/Q3Q4 collapse into calendar keys.
+    if (!isCalendarYear(row.year)) continue;
+
+    const label = matchHistoricalProcedure(row.indicator);
+    if (!label) continue;
+
+    const dedupKey = `${row.year}-${label}`;
+    if (seen.has(dedupKey)) continue;
+    seen.add(dedupKey);
+    out.push({ year: row.year, procedure: label, medianWaitDays: row.result });
   }
   out.sort((a, b) => a.year.localeCompare(b.year) || a.procedure.localeCompare(b.procedure));
   return out;
@@ -498,8 +461,6 @@ function parseWorkbook(workbook: XLSX.WorkBook): ParsedWorkbook {
   const { comparators, comparatorYears } = buildProvincialComparators(rows);
   return {
     imaging: buildImagingTrends(rows),
-    cancerSurgery: buildCancerSurgeryTrends(rows),
-    radiation: buildRadiationTrends(rows),
     provincialComparators: comparators,
     comparatorYears,
     historicalWaitTrends: buildHistoricalWaitTrends(rows),
@@ -517,7 +478,7 @@ async function downloadBuffer(url: string): Promise<Buffer> {
 }
 
 // Download (rate-limited) + parse the workbook once, caching the result for the
-// lifetime of the process so run() and runCancer() share a single network call.
+// lifetime of the process so run() and runSurgical() share a single network call.
 async function getParsedWorkbook(): Promise<ParsedWorkbook> {
   if (cachedParse) return cachedParse;
   await new Promise<void>((resolve) => setTimeout(resolve, RATE_LIMIT_MS));
@@ -528,7 +489,7 @@ async function getParsedWorkbook(): Promise<ParsedWorkbook> {
     const parsed = parseWorkbook(workbook);
     cachedParse = parsed;
     console.log(
-      `[CIHIWaitTimes] Parsed: imaging=${parsed.imaging.length} surgery=${parsed.cancerSurgery.length} radiation=${parsed.radiation.length}`,
+      `[CIHIWaitTimes] Parsed: imaging=${parsed.imaging.length} comparators=${parsed.provincialComparators.length} historical=${parsed.historicalWaitTrends.length}`,
     );
     return parsed;
   } finally {
@@ -661,80 +622,6 @@ export async function run(): Promise<SyncResult> {
   }
 }
 
-// Cancer domain: cancer surgery wait trends + radiation therapy compliance.
-export async function runCancer(): Promise<SyncResult> {
-  const startTime = Date.now();
-  const timestamp = new Date().toISOString();
-  console.log('[CIHIWaitTimes] Starting cancer (surgery + radiation) pipeline');
-
-  try {
-    const parsed = await getParsedWorkbook();
-    const recordsFetched = parsed.cancerSurgery.length + parsed.radiation.length;
-    if (recordsFetched === 0) {
-      console.warn('[CIHIWaitTimes] No cancer surgery/radiation rows extracted — leaving data-cancer.json unchanged.');
-      return {
-        domain: 'cancer',
-        pipeline: 'cihiWaitTimesDownloader',
-        status: 'skipped',
-        recordsFetched: 0,
-        recordsWritten: 0,
-        durationMs: Date.now() - startTime,
-        timestamp,
-        error: 'No cancer surgery / radiation therapy rows matched the expected shape',
-      };
-    }
-
-    const recordsWritten = mergeAndWrite(
-      CANCER_FILE,
-      {
-        CANCER_SURGERY_WAIT_TRENDS: parsed.cancerSurgery,
-        RADIATION_THERAPY_WAIT_TRENDS: parsed.radiation,
-      },
-      {
-        CANCER_SURGERY_WAIT_TRENDS: buildMetadataEntry({
-          updateType: 'auto',
-          source: 'CIHI Wait Times Priority Procedures in Canada',
-          sourceVintage: '2013–2025',
-          lastUpdated: timestamp,
-        }),
-        RADIATION_THERAPY_WAIT_TRENDS: buildMetadataEntry({
-          updateType: 'auto',
-          source: 'CIHI Wait Times Priority Procedures in Canada',
-          sourceVintage: '2010–2025',
-          lastUpdated: timestamp,
-        }),
-      },
-    );
-    const status: SyncResult['status'] = recordsWritten > 0 ? 'success' : 'skipped';
-    console.log(
-      `[CIHIWaitTimes] Cancer complete. fetched=${recordsFetched} written=${recordsWritten} in ${Date.now() - startTime}ms`,
-    );
-    return {
-      domain: 'cancer',
-      pipeline: 'cihiWaitTimesDownloader',
-      status,
-      recordsFetched,
-      recordsWritten,
-      durationMs: Date.now() - startTime,
-      timestamp,
-    };
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    console.error('[CIHIWaitTimes] Cancer FAILED:', errorMsg);
-    cachedParse = null;
-    return {
-      domain: 'cancer',
-      pipeline: 'cihiWaitTimesDownloader',
-      status: 'failed',
-      recordsFetched: 0,
-      recordsWritten: 0,
-      durationMs: Date.now() - startTime,
-      error: errorMsg,
-      timestamp: new Date().toISOString(),
-    };
-  }
-}
-
 // Surgical domain: provincial comparators + historical wait trends.
 export async function runSurgical(): Promise<SyncResult> {
   const startTime = Date.now();
@@ -817,11 +704,11 @@ export async function runSurgical(): Promise<SyncResult> {
 // Landing page reference (documented source; not scraped — XLSX URL is stable).
 export const LANDING_PAGE_URL = LANDING_URL;
 
-// CLI entry point: run all domains when invoked directly.
+// CLI entry point: run diagnostic + surgical when invoked directly.
 if (import.meta.url === `file://${process.argv[1]}`) {
-  Promise.all([run(), runCancer(), runSurgical()])
-    .then(([diag, cancer, surgical]) => {
-      console.log('[CIHIWaitTimes] CLI results:', { diagnostic: diag, cancer, surgical });
+  Promise.all([run(), runSurgical()])
+    .then(([diag, surgical]) => {
+      console.log('[CIHIWaitTimes] CLI results:', { diagnostic: diag, surgical });
     })
     .catch((err) => {
       console.error('[CIHIWaitTimes] CLI fatal:', err);

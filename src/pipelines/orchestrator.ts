@@ -6,38 +6,25 @@ import { execFileSync } from 'child_process';
 import type { SyncResult, Pipeline } from './types';
 
 // Tier 1: API fetchers
-import { run as statscanRun } from './statscanFetcher';
 import { run as phacRun } from './phacFetcher';
 import { run as openAlbertaRun } from './openAlbertaFetcher';
 import { run as aplLabWaitTimesRun } from './aplLabWaitTimesFetcher';
 
 // Tier 2: HTML scrapers
 import { run as abjhiRun } from './abjhiScraper';
-import { run as ahsAsiRun } from './ahsAsiScraper';
-import { run as acuteCareRun } from './acuteCareScraper';
-import { run as cpsaRun } from './cpsaScraper';
-import { run as goodcaringRun } from './goodcaringScraper';
-import { run as ahsCancerCentresRun } from './ahsCancerCentresScraper';
-import { run as ahsWeeklyEdLosRun } from './ahsWeeklyEdLosScraper';
 
 // Tier 3: File download+parse
 import { run as cihiRun } from './cihiDownloader';
 import { run as fraserRun } from './fraserDownloader';
-import { run as cihiWaitTimesRun, runCancer as cihiWaitTimesCancerRun, runSurgical as cihiWaitTimesSurgicalRun } from './cihiWaitTimesDownloader';
+import { run as cihiWaitTimesRun, runSurgical as cihiWaitTimesSurgicalRun } from './cihiWaitTimesDownloader';
 import { run as primaryCareRun } from './primaryCareFetcher';
 import { run as albertaFindAProviderRun } from './albertaFindAProviderScraper';
-import { run as hqcaContinuingCareRun } from './hqcaContinuingCareFetcher';
 import { run as openAlbertaInequityRun, runPrimaryCare as openAlbertaInequityPrimaryCareRun } from './openAlbertaInequityFetcher';
-import { run as virtualCareRun } from './virtualCareFetcher';
 import { run as openAlbertaBillingRun } from './openAlbertaBillingFetcher';
-import { run as alberta211Run } from './alberta211Scraper';
 import { run as hqcaFocusRun } from './hqcaFocusScraper';
 import { run as albertaRvdRun } from './albertaRespiratoryVirusScraper';
-import { run as cihiWorkforceRun } from './cihiWorkforceFetcher';
-import { run as albertaSubstanceUseRun } from './albertaSubstanceUseScraper';
 import { run as cihiMhSafetyRun } from './cihiMhSafetyFetcher';
 import { run as cihiWaitTimesPriorityRun } from './cihiWaitTimesPriorityFetcher';
-import { run as continuingCareComplianceRun } from './continuingCareComplianceFetcher';
 
 // Power BI scraper runs as a child process because Puppeteer is ESM-only
 // and the server bundles as CJS. The scraper launches headless Chrome,
@@ -86,7 +73,6 @@ async function runPowerBIScraper(): Promise<SyncResult> {
 // Each pipeline is independent — failure of one doesn't stop others.
 const PIPELINES: Pipeline[] = [
   // Tier 1: API fetchers (most reliable, run first)
-  { name: 'statscan', domain: 'workforce', run: statscanRun },
   { name: 'phac', domain: 'public-health', run: phacRun },
   { name: 'open-alberta', domain: 'spending', run: openAlbertaRun },
   { name: 'apl-lab-waits', domain: 'diagnostic', run: aplLabWaitTimesRun },
@@ -96,33 +82,20 @@ const PIPELINES: Pipeline[] = [
   // Power BI scraper runs as child process (Puppeteer needs ESM + headless Chrome).
   { name: 'powerbi-scraper', domain: 'surgical', run: runPowerBIScraper },
   { name: 'abjhi', domain: 'surgical', run: abjhiRun },
-  { name: 'ahs-asi', domain: 'continuing-care', run: ahsAsiRun },
-  { name: 'acute-care', domain: 'system-flow', run: acuteCareRun },
-  { name: 'ahs-weekly-edlos', domain: 'system-flow', run: ahsWeeklyEdLosRun },
-  { name: 'cpsa', domain: 'workforce', run: cpsaRun },
-  { name: 'goodcaring', domain: 'patient-experience', run: goodcaringRun },
-  { name: 'ahs-cancer-centres', domain: 'cancer', run: ahsCancerCentresRun },
 
   // Tier 3: File download+parse (XLSX/CSV/ZIP)
   { name: 'cihi-nhex', domain: 'spending', run: cihiRun },
   { name: 'cihi-wait-times', domain: 'diagnostic', run: cihiWaitTimesRun },
-  { name: 'cihi-wait-times-cancer', domain: 'cancer', run: cihiWaitTimesCancerRun },
   { name: 'cihi-wait-times-surgical', domain: 'surgical', run: cihiWaitTimesSurgicalRun },
   { name: 'primary-care', domain: 'primary-care', run: primaryCareRun },
   { name: 'alberta-find-a-provider', domain: 'primary-care', run: albertaFindAProviderRun },
-  { name: 'hqca-continuing-care', domain: 'continuing-care', run: hqcaContinuingCareRun },
-  { name: 'continuing-care-compliance', domain: 'continuing-care', run: continuingCareComplianceRun },
   { name: 'open-alberta-inequity', domain: 'regional-inequity', run: openAlbertaInequityRun },
   { name: 'open-alberta-inequity-primary-care', domain: 'primary-care', run: openAlbertaInequityPrimaryCareRun },
-  { name: 'virtual-care', domain: 'virtual-care', run: virtualCareRun },
   { name: 'fraser', domain: 'spending', run: fraserRun },
   { name: 'open-alberta-billing', domain: 'spending', run: openAlbertaBillingRun },
-  { name: 'alberta-211', domain: 'mental-health', run: alberta211Run },
-  { name: 'hqca-focus', domain: 'patient-experience', run: hqcaFocusRun },
+  { name: 'hqca-focus', domain: 'primary-care', run: hqcaFocusRun },
   { name: 'alberta-rvd', domain: 'public-health', run: albertaRvdRun },
-  { name: 'cihi-workforce', domain: 'workforce', run: cihiWorkforceRun },
-  { name: 'cihi-mh-safety', domain: 'mental-health', run: cihiMhSafetyRun },
-  { name: 'alberta-substance-use', domain: 'mental-health', run: albertaSubstanceUseRun },
+  { name: 'cihi-mh-safety', domain: 'spending', run: cihiMhSafetyRun },
   { name: 'cihi-wait-times-priority', domain: 'surgical', run: cihiWaitTimesPriorityRun },
 ];
 

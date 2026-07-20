@@ -549,19 +549,12 @@ async function startServer() {
   // Domain data endpoint — serves data-*.json files for dashboard fetch calls
   app.get('/api/data/:domain', (req, res) => {
     const domainMap: Record<string, string> = {
-      'cancer': 'data-cancer.json',
       'primary-care': 'data-primary-care.json',
-      'workforce': 'data-workforce.json',
       'surgical': 'data-surgical.json',
-      'system-flow': 'data-system-flow.json',
       'diagnostic': 'data-diagnostic.json',
-      'mental-health': 'data-mental-health.json',
-      'continuing-care': 'data-continuing-care.json',
-      'patient-experience': 'data-patient-experience.json',
       'public-health': 'data-public-health.json',
       'regional-inequity': 'data-regional-inequity.json',
       'spending': 'data-spending.json',
-      'virtual-care': 'data-virtual-care.json',
     };
     const filename = domainMap[req.params.domain];
     if (!filename) {
