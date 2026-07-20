@@ -36,9 +36,9 @@
     "tab": "Surgical",
     "array": "STATSCAN_SATISFACTION_STATS",
     "records": 1,
-    "description": "Object (not array): StatsCan 2024 specialist-access satisfaction survey summary — satisfied/unsatisfied %, wait-segment distribution, life-affected %.",
+    "description": "Object (not array): StatsCan 2024 specialist-access satisfaction survey summary \u2014 satisfied/unsatisfied %, wait-segment distribution, life-affected %.",
     "source_exists": true,
-    "source_name": "Statistics Canada — Canadian Community Health Survey (CCHS), 'Waiting for a specialist'",
+    "source_name": "Statistics Canada \u2014 Canadian Community Health Survey (CCHS), 'Waiting for a specialist'",
     "source_url": "https://www150.statcan.gc.ca/n1/pub/82-625-x/82-625-x2024001-eng.htm",
     "automation": "MEDIUM",
     "notes": "StatsCan releases this as tables (Web Data Service / CSV). Released annually as a static object; fetch the table and map fields. Marked as object rather than array in the file."
@@ -49,7 +49,7 @@
     "records": 6,
     "description": "Fraser Institute median wait weeks by specialty: GP-to-consult, consult-to-surgery, total.",
     "source_exists": true,
-    "source_name": "Fraser Institute — Waiting Your Turn (annual report)",
+    "source_name": "Fraser Institute \u2014 Waiting Your Turn (annual report)",
     "source_url": "https://www.fraserinstitute.org/studies/waiting-your-turn-wait-times-for-health-care-in-canada",
     "automation": "HARD",
     "notes": "Annual PDF report. The existing fraser pipeline is 403-blocked; the report series has been intermittent. Requires PDF parsing and is brittle. No structured feed."
@@ -71,7 +71,7 @@
     "records": 8,
     "description": "Wait-time experience by demographic dimension (age / sex / income): % waiting under 1m, 1-3m, 3-6m, over 6m, satisfied %, life-affected %.",
     "source_exists": true,
-    "source_name": "Statistics Canada — CCHS wait-time demographic tables",
+    "source_name": "Statistics Canada \u2014 CCHS wait-time demographic tables",
     "source_url": "https://www150.statcan.gc.ca/n1/pub/82-625-x/82-625-x2024001-eng.htm",
     "automation": "MEDIUM",
     "notes": "StatsCan tables by age/sex/income. Available via Web Data Service (CSV/JSON). Requires mapping demographic dimensions to the array schema."
@@ -96,7 +96,7 @@
     "source_name": "AHS Power BI + CPSA registry",
     "source_url": "https://research.cpsa.ca/registry-search",
     "automation": "MEDIUM",
-    "notes": "Wait/volume from Power BI (powerbi-scraper), identity from CPSA. patient_satisfaction, experience_years, avg_surgery_time are not publicly reported per physician — those stay manual."
+    "notes": "Wait/volume from Power BI (powerbi-scraper), identity from CPSA. patient_satisfaction, experience_years, avg_surgery_time are not publicly reported per physician \u2014 those stay manual."
   },
   {
     "tab": "Primary Care",
@@ -126,7 +126,7 @@
     "records": 5,
     "description": "Minor-condition ED visits per 1000 grouped by continuity-of-care level, with descriptive text.",
     "source_exists": true,
-    "source_name": "HQCA FOCUS on Healthcare — Continuity of Care",
+    "source_name": "HQCA FOCUS on Healthcare \u2014 Continuity of Care",
     "source_url": "https://focus.hqca.ca/",
     "automation": "MEDIUM",
     "notes": "HQCA FOCUS dashboard publishes continuity vs ED-use indicators. Dashboard is interactive (no clean API); scrape the rendered JSON or annual PDF report."
@@ -141,50 +141,6 @@
     "source_url": "https://focus.hqca.ca/",
     "automation": "MEDIUM",
     "notes": "HQCA publishes FOCUS survey results annually (PDF + interactive dashboard). Scrape dashboard JSON or parse PDF for zone-level continuity/satisfaction."
-  },
-  {
-    "tab": "Workforce",
-    "array": "NURSING_SUPPLY_TRENDS",
-    "records": 12,
-    "description": "Yearly nursing supply by profession (RN/LPN/RPN): active permits, growth %, vacancy %, direct-care %, rural/remote %.",
-    "source_exists": true,
-    "source_name": "CIHI Health Workforce Database + Alberta nursing colleges (CARNA, CLPNA, CRPNA)",
-    "source_url": "https://www.cihi.ca/en/health-workforce",
-    "automation": "MEDIUM",
-    "notes": "CIHI Health Workforce provides provincial supply by profession/year. College registries give active-permit counts. Vacancy % comes from StatsCan Job Vacancy data (already used by statscan pipeline). Combine sources."
-  },
-  {
-    "tab": "Workforce",
-    "array": "WORKFORCE_AGE_PROFILE",
-    "records": 5,
-    "description": "Age distribution by profession group (under-35 / 35-54 / 55-64 / over-65 %) and retirement-risk level.",
-    "source_exists": true,
-    "source_name": "CIHI Health Workforce — age distribution",
-    "source_url": "https://www.cihi.ca/en/health-workforce",
-    "automation": "MEDIUM",
-    "notes": "CIHI Health Workforce DB publishes age-group distribution by profession/province. retirementRiskLevel is a derived label — compute from over-55 + over-65 shares."
-  },
-  {
-    "tab": "Workforce",
-    "array": "SPECIALIST_RECRUITMENT_NEEDS",
-    "records": 6,
-    "description": "Per-specialty recruitment forecast: current active, 10-yr forecasted need, planned recruitment seats, gap/shortage risk.",
-    "source_exists": true,
-    "source_name": "Alberta Health Workforce Planning reports / CPSA workforce reports",
-    "source_url": "https://cpsa.ca/physician-workforce/",
-    "automation": "HARD",
-    "notes": "Forecasted 10-yr need and planned recruitment seats are published in Alberta Health / CPSA workforce planning PDFs, not as structured data. Requires PDF parsing; figures update irregularly."
-  },
-  {
-    "tab": "Workforce",
-    "array": "ALLIED_HEALTH_SUPPLY",
-    "records": 5,
-    "description": "Allied health professions: Alberta count, national comparison rate/100k (Alberta vs Canada avg), active vacancy postings.",
-    "source_exists": true,
-    "source_name": "CIHI Health Workforce + provincial college registries + StatsCan job vacancies",
-    "source_url": "https://www.cihi.ca/en/health-workforce",
-    "automation": "MEDIUM",
-    "notes": "CIHI provides per-100k profession counts by province (national comparison). Alberta count from college registries. Vacancy postings from StatsCan job-vacancy survey."
   },
   {
     "tab": "Diagnostic",
@@ -217,7 +173,7 @@
     "source_name": "AHS Diagnostic Imaging wait-time Power BI / CIHI",
     "source_url": "https://www.albertahealthservices.ca/info/Page8195.aspx",
     "automation": "MEDIUM",
-    "notes": "AHS publishes imaging wait times by facility (Power BI / performance pages). Extend cihi-wait-times or add an AHS imaging scraper for facility-level p50/p90. scannerUtilizationPct not publicly reported — stays manual."
+    "notes": "AHS publishes imaging wait times by facility (Power BI / performance pages). Extend cihi-wait-times or add an AHS imaging scraper for facility-level p50/p90. scannerUtilizationPct not publicly reported \u2014 stays manual."
   },
   {
     "tab": "Diagnostic",
@@ -311,7 +267,7 @@
     "tab": "Public Health",
     "array": "OUTBREAK_PROTOCOLS",
     "records": 1,
-    "description": "Object (not array): outbreak-management protocols by setting (acute care, continuing care, etc.) — trigger thresholds, isolation, antiviral post-exposure, reporting.",
+    "description": "Object (not array): outbreak-management protocols by setting (acute care, continuing care, etc.) \u2014 trigger thresholds, isolation, antiviral post-exposure, reporting.",
     "source_exists": true,
     "source_name": "AHS Infection Prevention & Control outbreak guidelines",
     "source_url": "https://www.albertahealthservices.ca/info/Page6362.aspx",
@@ -357,7 +313,7 @@
     "records": 6,
     "description": "Physician billing by specialty group: physician count, total payments $M, average gross payment, services per patient.",
     "source_exists": true,
-    "source_name": "Alberta Health — AHCIP Statistical Reports (Open Alberta)",
+    "source_name": "Alberta Health \u2014 AHCIP Statistical Reports (Open Alberta)",
     "source_url": "https://open.alberta.ca/opendata?tags=Physician+Billing",
     "automation": "EASY",
     "notes": "Alberta Health publishes AHCIP physician-billing statistical reports by specialty on Open Alberta (CSV/Excel). Direct download; map specialty groups."

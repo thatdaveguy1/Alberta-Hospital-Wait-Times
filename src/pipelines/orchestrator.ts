@@ -6,14 +6,12 @@ import { execFileSync } from 'child_process';
 import type { SyncResult, Pipeline } from './types';
 
 // Tier 1: API fetchers
-import { run as statscanRun } from './statscanFetcher';
 import { run as phacRun } from './phacFetcher';
 import { run as openAlbertaRun } from './openAlbertaFetcher';
 import { run as aplLabWaitTimesRun } from './aplLabWaitTimesFetcher';
 
 // Tier 2: HTML scrapers
 import { run as abjhiRun } from './abjhiScraper';
-import { run as cpsaRun } from './cpsaScraper';
 import { run as ahsCancerCentresRun } from './ahsCancerCentresScraper';
 
 // Tier 3: File download+parse
@@ -26,7 +24,6 @@ import { run as openAlbertaInequityRun, runPrimaryCare as openAlbertaInequityPri
 import { run as openAlbertaBillingRun } from './openAlbertaBillingFetcher';
 import { run as hqcaFocusRun } from './hqcaFocusScraper';
 import { run as albertaRvdRun } from './albertaRespiratoryVirusScraper';
-import { run as cihiWorkforceRun } from './cihiWorkforceFetcher';
 import { run as cihiMhSafetyRun } from './cihiMhSafetyFetcher';
 import { run as cihiWaitTimesPriorityRun } from './cihiWaitTimesPriorityFetcher';
 
@@ -77,7 +74,6 @@ async function runPowerBIScraper(): Promise<SyncResult> {
 // Each pipeline is independent — failure of one doesn't stop others.
 const PIPELINES: Pipeline[] = [
   // Tier 1: API fetchers (most reliable, run first)
-  { name: 'statscan', domain: 'workforce', run: statscanRun },
   { name: 'phac', domain: 'public-health', run: phacRun },
   { name: 'open-alberta', domain: 'spending', run: openAlbertaRun },
   { name: 'apl-lab-waits', domain: 'diagnostic', run: aplLabWaitTimesRun },
@@ -87,7 +83,6 @@ const PIPELINES: Pipeline[] = [
   // Power BI scraper runs as child process (Puppeteer needs ESM + headless Chrome).
   { name: 'powerbi-scraper', domain: 'surgical', run: runPowerBIScraper },
   { name: 'abjhi', domain: 'surgical', run: abjhiRun },
-  { name: 'cpsa', domain: 'workforce', run: cpsaRun },
   { name: 'ahs-cancer-centres', domain: 'cancer', run: ahsCancerCentresRun },
 
   // Tier 3: File download+parse (XLSX/CSV/ZIP)
@@ -103,7 +98,6 @@ const PIPELINES: Pipeline[] = [
   { name: 'open-alberta-billing', domain: 'spending', run: openAlbertaBillingRun },
   { name: 'hqca-focus', domain: 'primary-care', run: hqcaFocusRun },
   { name: 'alberta-rvd', domain: 'public-health', run: albertaRvdRun },
-  { name: 'cihi-workforce', domain: 'workforce', run: cihiWorkforceRun },
   { name: 'cihi-mh-safety', domain: 'spending', run: cihiMhSafetyRun },
   { name: 'cihi-wait-times-priority', domain: 'surgical', run: cihiWaitTimesPriorityRun },
 ];

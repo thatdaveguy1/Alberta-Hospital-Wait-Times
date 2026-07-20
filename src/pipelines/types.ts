@@ -42,7 +42,6 @@ export const DOMAINS = [
   'public-health',
   'regional-inequity',
   'spending',
-  'workforce',
 ] as const;
 
 export type Domain = typeof DOMAINS[number];

@@ -5,7 +5,6 @@ import {
   Activity,
   AlertTriangle,
   Stethoscope,
-  Users,
   FlaskConical,
   Coins,
   Ribbon,
@@ -80,17 +79,6 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     badge: 'BACKLOG',
     source: 'AHCIP Surgical Wait Time Registry',
     updateFrequency: 'Monthly stats',
-  },
-  {
-    id: 'workforce',
-    title: 'Health Workforce & Supply',
-    shortName: 'Health Workforce',
-    category: 'system-capacity',
-    description: 'Physician registries, nursing supply indicators, allied health benchmarks, age profiles, and job vacancy trends.',
-    icon: Users,
-    badge: 'NEW CONSOLE',
-    source: 'CIHI, CPSA, CRNA & StatsCan',
-    updateFrequency: 'Quarterly stats',
   },
   {
     id: 'diagnostics',
@@ -200,13 +188,6 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
     sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'CIHI Shared Health Priorities & accepting providers database',
     domain: 'primary-care'
-  },
-  'workforce': {
-    updateType: 'mixed',
-    interval: 'daily sync · per-array provenance',
-    sourceVintage: 'Per-array (see dashboard timestamps)',
-    source: 'CIHI Health Workforce Database & CPSA Registry',
-    domain: 'workforce'
   },
   'diagnostics': {
     updateType: 'mixed',

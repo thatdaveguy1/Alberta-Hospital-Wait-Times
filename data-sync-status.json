@@ -13,15 +13,6 @@
       "timestamp": "2026-07-19T12:00:05.233Z"
     },
     {
-      "domain": "workforce",
-      "pipeline": "statscanFetcher",
-      "status": "success",
-      "recordsFetched": 14,
-      "recordsWritten": 14,
-      "durationMs": 2469,
-      "timestamp": "2026-07-19T12:00:05.880Z"
-    },
-    {
       "domain": "public-health",
       "pipeline": "phacFetcher",
       "status": "success",
@@ -46,8 +37,8 @@
       "status": "success",
       "recordsFetched": 152,
       "recordsWritten": 152,
-      "durationMs": 59,
-      "timestamp": "2026-07-20T01:58:04.618Z"
+      "durationMs": 83,
+      "timestamp": "2026-07-20T10:58:04.629Z"
     },
     {
       "domain": "surgical",
@@ -66,15 +57,6 @@
       "recordsWritten": 25,
       "durationMs": 861,
       "timestamp": "2026-07-19T12:00:57.771Z"
-    },
-    {
-      "domain": "workforce",
-      "pipeline": "cpsaScraper",
-      "status": "success",
-      "recordsFetched": 1,
-      "recordsWritten": 1,
-      "durationMs": 2126,
-      "timestamp": "2026-07-19T12:01:09.344Z"
     },
     {
       "domain": "cancer",
@@ -196,15 +178,6 @@
       "timestamp": "2026-07-19T12:04:12.847Z"
     },
     {
-      "domain": "workforce",
-      "pipeline": "cihiWorkforceFetcher",
-      "status": "success",
-      "recordsFetched": 600,
-      "recordsWritten": 600,
-      "durationMs": 2846,
-      "timestamp": "2026-07-19T12:04:21.688Z"
-    },
-    {
       "domain": "surgical",
       "pipeline": "cihiWaitTimesPriorityFetcher",
       "status": "success",
@@ -219,12 +192,12 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 75,
-      "timestamp": "2026-07-20T01:58:02.998Z"
+      "durationMs": 114,
+      "timestamp": "2026-07-20T11:48:04.893Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-20T01:58:02.998Z",
-  "erWaitTimesNextUpdate": "2026-07-20T02:08:03.074Z",
-  "labWaitsLastUpdate": "2026-07-20T01:58:04.618Z",
-  "labWaitsNextUpdate": "2026-07-20T02:58:04.677Z"
+  "erWaitTimesLastUpdate": "2026-07-20T11:48:04.893Z",
+  "erWaitTimesNextUpdate": "2026-07-20T11:58:05.008Z",
+  "labWaitsLastUpdate": "2026-07-20T10:58:04.629Z",
+  "labWaitsNextUpdate": "2026-07-20T11:58:04.713Z"
 }

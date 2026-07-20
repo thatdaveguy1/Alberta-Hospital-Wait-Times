@@ -38,7 +38,7 @@ const DOMAIN_WHITELIST = new Set([
   'er-waittimes', 'disruptions', 'surgical', 'diagnostic', 'cancer',
   'primary-care',
   'public-health', 'regional-inequity', 'spending',
-  'workforce', 'sync-status',
+  'sync-status',
   // Snapshot trend domains — written to SNAPSHOTS_KV, not DATA_KV
   'er-trends', 'lab-trends',
 ]);

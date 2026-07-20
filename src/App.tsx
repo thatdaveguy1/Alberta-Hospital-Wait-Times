@@ -8,7 +8,6 @@ import ErWaitDashboard from './components/ErWaitDashboard';
 import SurgicalDashboard from './components/SurgicalDashboard';
 import ServiceDisruptionsDashboard from './components/ServiceDisruptionsDashboard';
 import PrimaryCareDashboard from './components/PrimaryCareDashboard';
-import WorkforceDashboard from './components/WorkforceDashboard';
 import DiagnosticDashboard from './components/DiagnosticDashboard';
 import CancerDashboard from './components/CancerDashboard';
 import PublicHealthDashboard from './components/PublicHealthDashboard';
@@ -90,8 +89,6 @@ export default function App() {
           <SurgicalDashboard />
         ) : activeView === 'primary-care' ? (
           <PrimaryCareDashboard />
-        ) : activeView === 'workforce' ? (
-          <WorkforceDashboard />
         ) : activeView === 'cancer' ? (
           <CancerDashboard />
         ) : activeView === 'public-health' ? (

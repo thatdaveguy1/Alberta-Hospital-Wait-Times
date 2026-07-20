@@ -551,7 +551,6 @@ async function startServer() {
     const domainMap: Record<string, string> = {
       'cancer': 'data-cancer.json',
       'primary-care': 'data-primary-care.json',
-      'workforce': 'data-workforce.json',
       'surgical': 'data-surgical.json',
       'diagnostic': 'data-diagnostic.json',
       'public-health': 'data-public-health.json',

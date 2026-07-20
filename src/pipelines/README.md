@@ -8,8 +8,8 @@ All data fetching, scraping, and parsing runs locally on the Mac mini. Results a
 Scheduler (launchd)
   ├── every 10 min: ER wait times fetcher → write local → push to KV
   └── every 24 hr:  Daily orchestrator
-      ├── Tier 1 API fetchers (StatsCan, PHAC, Open Alberta)
-      ├── Tier 2 HTML scrapers (waittimes.alberta.ca, ABJHI, CPSA, etc.)
+      ├── Tier 1 API fetchers (PHAC, Open Alberta)
+      ├── Tier 2 HTML scrapers (waittimes.alberta.ca, ABJHI, etc.)
       ├── Tier 3 File downloaders (CIHI XLSX, Fraser PDF)
       ├── Disruptions scraper
       └── Push all results to Cloudflare KV
@@ -21,12 +21,10 @@ Scheduler (launchd)
 |---|---|---|---|
 | `erWaitTimesFetcher.ts` | API | er-waittimes | 10 min |
 | `disruptionsScraper.ts` | Scraper | disruptions | 24 hr |
-| `statscanFetcher.ts` | API | workforce, spending | 24 hr |
 | `phacFetcher.ts` | API | public-health | 24 hr |
 | `openAlbertaFetcher.ts` | API | spending | 24 hr |
 | `waittimesAlbertaScraper.ts` | Scraper | surgical | 24 hr |
 | `abjhiScraper.ts` | Scraper | surgical | 24 hr |
-| `cpsaScraper.ts` | Scraper | primary-care, workforce | 24 hr |
 | `cihiWaitTimesDownloader.ts` | Download | diagnostic, surgical | 24 hr |
 | `cihiNhexDownloader.ts` | Download | spending | 24 hr |
 | `fraserDownloader.ts` | Download | surgical | 24 hr (skipped — 403 blocked) |

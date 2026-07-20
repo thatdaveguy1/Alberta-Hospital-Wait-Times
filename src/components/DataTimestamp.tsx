@@ -39,8 +39,6 @@ export function sanitizeSource(source: string): string {
     cihiNationalCapacity: 'CIHI National Capacity',
     cihiWaitTimesDownloader: 'CIHI Wait Times',
     cihiWaitTimesPriorityFetcher: 'CIHI Priority Wait Times',
-    cihiWorkforceFetcher: 'CIHI Workforce',
-    cpsaScraper: 'CPSA',
     disruptionsScraper: 'AHS Service Disruptions',
     erWaitTimesFetcher: 'AHS ER Wait Times',
     fraserDownloader: 'Fraser Institute',
@@ -50,7 +48,6 @@ export function sanitizeSource(source: string): string {
     phacFetcher: 'PHAC',
     powerbiScraper: 'AHS Power BI',
     primaryCareFetcher: 'Primary Care',
-    statscanFetcher: 'Statistics Canada',
   };
 
   const normalized = source.trim();
