@@ -4,7 +4,6 @@
 import {
   Activity,
   AlertTriangle,
-  Layers,
   Stethoscope,
   Users,
   FlaskConical,
@@ -71,17 +70,6 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     badge: 'ACTIVE ALERTS',
     source: 'AHS Emergency Advisories',
     updateFrequency: 'Daily scrape (≈24h)',
-  },
-  {
-    id: 'system-flow',
-    title: 'Hospital System Flow',
-    shortName: 'System Flow',
-    category: 'system-capacity',
-    description: 'Inpatient occupancy metrics, emergency admission bottlenecks, and medical discharge delay statistics.',
-    icon: Layers,
-    badge: 'CAPACITY',
-    source: 'HQCA FOCUS & CIHI ED Indicators',
-    updateFrequency: 'Daily updates',
   },
   {
     id: 'surgical-waits',
@@ -210,12 +198,6 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
     interval: 'Every 24 hours',
     sourceVintage: 'Daily AHS Advisories',
     source: 'AHS Emergency Advisories'
-  },
-  'system-flow': {
-    updateType: 'mixed',
-    interval: 'daily sync · per-array provenance',
-    sourceVintage: 'Per-array (see dashboard timestamps)',
-    source: 'HQCA FOCUS, AHS weekly ED LOS, CIHI indicators'
   },
   'surgical-waits': {
     updateType: 'mixed',

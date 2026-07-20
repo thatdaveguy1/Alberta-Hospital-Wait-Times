@@ -14,10 +14,8 @@ import { run as aplLabWaitTimesRun } from './aplLabWaitTimesFetcher';
 // Tier 2: HTML scrapers
 import { run as abjhiRun } from './abjhiScraper';
 import { run as ahsAsiRun } from './ahsAsiScraper';
-import { run as acuteCareRun } from './acuteCareScraper';
 import { run as cpsaRun } from './cpsaScraper';
 import { run as ahsCancerCentresRun } from './ahsCancerCentresScraper';
-import { run as ahsWeeklyEdLosRun } from './ahsWeeklyEdLosScraper';
 
 // Tier 3: File download+parse
 import { run as cihiRun } from './cihiDownloader';
@@ -93,8 +91,6 @@ const PIPELINES: Pipeline[] = [
   { name: 'powerbi-scraper', domain: 'surgical', run: runPowerBIScraper },
   { name: 'abjhi', domain: 'surgical', run: abjhiRun },
   { name: 'ahs-asi', domain: 'continuing-care', run: ahsAsiRun },
-  { name: 'acute-care', domain: 'system-flow', run: acuteCareRun },
-  { name: 'ahs-weekly-edlos', domain: 'system-flow', run: ahsWeeklyEdLosRun },
   { name: 'cpsa', domain: 'workforce', run: cpsaRun },
   { name: 'ahs-cancer-centres', domain: 'cancer', run: ahsCancerCentresRun },
 
@@ -114,7 +110,7 @@ const PIPELINES: Pipeline[] = [
   { name: 'hqca-focus', domain: 'primary-care', run: hqcaFocusRun },
   { name: 'alberta-rvd', domain: 'public-health', run: albertaRvdRun },
   { name: 'cihi-workforce', domain: 'workforce', run: cihiWorkforceRun },
-  { name: 'cihi-mh-safety', domain: 'system-flow', run: cihiMhSafetyRun },
+  { name: 'cihi-mh-safety', domain: 'spending', run: cihiMhSafetyRun },
   { name: 'cihi-wait-times-priority', domain: 'surgical', run: cihiWaitTimesPriorityRun },
 ];
 

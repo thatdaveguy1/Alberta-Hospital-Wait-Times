@@ -553,7 +553,6 @@ async function startServer() {
       'primary-care': 'data-primary-care.json',
       'workforce': 'data-workforce.json',
       'surgical': 'data-surgical.json',
-      'system-flow': 'data-system-flow.json',
       'diagnostic': 'data-diagnostic.json',
       'continuing-care': 'data-continuing-care.json',
       'public-health': 'data-public-health.json',

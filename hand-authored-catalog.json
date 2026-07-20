@@ -99,17 +99,6 @@
     "notes": "Wait/volume from Power BI (powerbi-scraper), identity from CPSA. patient_satisfaction, experience_years, avg_surgery_time are not publicly reported per physician \u2014 those stay manual."
   },
   {
-    "tab": "System Flow",
-    "array": "HISTORICAL_FLOW_TIMELINES",
-    "records": 11,
-    "description": "Quarterly historical ED/flow metrics: occupancy, ALC rate, LWBS rate, p90 bed-wait hours, p90 LOS-admitted hours.",
-    "source_exists": true,
-    "source_name": "AHS Performance Reporting + CIHI ED Visits Indicator",
-    "source_url": "https://www.albertahealthservices.ca/about/Page15934.aspx",
-    "automation": "MEDIUM",
-    "notes": "AHS publishes historical ED flow metrics in quarterly performance reports (Power BI / PDF). CIHI ED Visits indicator provides comparable historical series. Backfill quarterly trend."
-  },
-  {
     "tab": "Primary Care",
     "array": "PCN_CAPACITY",
     "records": 6,

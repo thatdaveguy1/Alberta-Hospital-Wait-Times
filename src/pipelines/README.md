@@ -27,8 +27,6 @@ Scheduler (launchd)
 | `waittimesAlbertaScraper.ts` | Scraper | surgical | 24 hr |
 | `abjhiScraper.ts` | Scraper | surgical | 24 hr |
 | `ahsAsiScraper.ts` | Scraper | continuing-care | 24 hr |
-| `acuteCareScraper.ts` | Scraper | system-flow | 24 hr |
-| `ahsWeeklyEdLosScraper.ts` | Scraper | system-flow | 24 hr |
 | `cpsaScraper.ts` | Scraper | primary-care, workforce | 24 hr |
 | `cihiWaitTimesDownloader.ts` | Download | diagnostic, surgical | 24 hr |
 | `cihiNhexDownloader.ts` | Download | spending | 24 hr |

@@ -77,24 +77,6 @@
       "timestamp": "2026-07-19T12:00:59.635Z"
     },
     {
-      "domain": "system-flow",
-      "pipeline": "acuteCareScraper",
-      "status": "success",
-      "recordsFetched": 38,
-      "recordsWritten": 48,
-      "durationMs": 28,
-      "timestamp": "2026-07-19T12:01:05.159Z"
-    },
-    {
-      "domain": "system-flow",
-      "pipeline": "ahsWeeklyEdLosScraper",
-      "status": "success",
-      "recordsFetched": 10,
-      "recordsWritten": 10,
-      "durationMs": 2154,
-      "timestamp": "2026-07-19T12:01:06.188Z"
-    },
-    {
       "domain": "workforce",
       "pipeline": "cpsaScraper",
       "status": "success",
@@ -210,7 +192,7 @@
       "recordsFetched": 0,
       "recordsWritten": 0,
       "durationMs": 129,
-      "error": "Fraser Institute blocks automated access (403) \u2014 relying on CIHI/Open Alberta for spending data",
+      "error": "Fraser Institute blocks automated access (403) — relying on CIHI/Open Alberta for spending data",
       "timestamp": "2026-07-19T12:03:40.279Z"
     },
     {
@@ -264,12 +246,12 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 56,
-      "timestamp": "2026-07-20T00:48:18.766Z"
+      "durationMs": 88,
+      "timestamp": "2026-07-20T01:38:18.788Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-20T00:48:18.766Z",
-  "erWaitTimesNextUpdate": "2026-07-20T00:58:18.822Z",
+  "erWaitTimesLastUpdate": "2026-07-20T01:38:18.788Z",
+  "erWaitTimesNextUpdate": "2026-07-20T01:48:18.876Z",
   "labWaitsLastUpdate": "2026-07-20T00:48:18.677Z",
   "labWaitsNextUpdate": "2026-07-20T01:48:18.746Z"
 }

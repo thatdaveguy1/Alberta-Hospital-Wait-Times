@@ -37,7 +37,7 @@ app.use('*', cors({
 const DOMAIN_WHITELIST = new Set([
   'er-waittimes', 'disruptions', 'surgical', 'diagnostic', 'cancer',
   'continuing-care', 'primary-care',
-  'public-health', 'regional-inequity', 'spending', 'system-flow',
+  'public-health', 'regional-inequity', 'spending',
   'workforce', 'sync-status',
   // Snapshot trend domains — written to SNAPSHOTS_KV, not DATA_KV
   'er-trends', 'lab-trends',

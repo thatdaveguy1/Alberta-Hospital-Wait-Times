@@ -7,7 +7,6 @@ import HomePage from './components/HomePage';
 import ErWaitDashboard from './components/ErWaitDashboard';
 import SurgicalDashboard from './components/SurgicalDashboard';
 import ServiceDisruptionsDashboard from './components/ServiceDisruptionsDashboard';
-import SystemFlowDashboard from './components/SystemFlowDashboard';
 import PrimaryCareDashboard from './components/PrimaryCareDashboard';
 import WorkforceDashboard from './components/WorkforceDashboard';
 import DiagnosticDashboard from './components/DiagnosticDashboard';
@@ -90,8 +89,6 @@ export default function App() {
           <ServiceDisruptionsDashboard />
         ) : activeView === 'surgical-waits' ? (
           <SurgicalDashboard />
-        ) : activeView === 'system-flow' ? (
-          <SystemFlowDashboard />
         ) : activeView === 'primary-care' ? (
           <PrimaryCareDashboard />
         ) : activeView === 'workforce' ? (

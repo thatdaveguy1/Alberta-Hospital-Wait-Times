@@ -1,9 +1,9 @@
 // CIHI Clinical Safety & Indicator Fetcher
 // Fetches clinical safety and related CIHI indicator library data tables
-// for system-flow, spending, surgical, and primary-care.
+// for spending, surgical, and primary-care.
 //
-// Writes to domain JSON files such as data-system-flow.json,
-// data-spending.json, data-surgical.json, and data-primary-care.json.
+// Writes to domain JSON files such as data-spending.json,
+// data-surgical.json, and data-primary-care.json.
 // No longer writes mental-health domain data.
 
 import axios from 'axios';
@@ -18,7 +18,6 @@ import {
   type DataMetadata,
 } from './metadataHelpers';
 
-const SYSTEM_FLOW_FILE = path.join(process.cwd(), 'data-system-flow.json');
 const SPENDING_FILE = path.join(process.cwd(), 'data-spending.json');
 const SURGICAL_FILE = path.join(process.cwd(), 'data-surgical.json');
 const PRIMARY_CARE_FILE = path.join(process.cwd(), 'data-primary-care.json');
@@ -29,11 +28,6 @@ const USER_AGENT =
 
 // CIHI indicator data table URLs
 const INDICATOR_URLS: { url: string; domain: string; key: string }[] = [
-  {
-    url: 'https://www.cihi.ca/sites/default/files/document/data-file/878-average-acute-occupancy-rate-data-table-en.xlsx',
-    domain: 'system-flow',
-    key: 'CIHI_OCCUPANCY_RATES',
-  },
   {
     url: 'https://www.cihi.ca/sites/default/files/document/data-file/818-average-acute-care-resource-use-intensity-data-table-en.xlsx',
     domain: 'spending',
@@ -59,11 +53,6 @@ const INDICATOR_URLS: { url: string; domain: string; key: string }[] = [
     domain: 'surgical',
     key: 'CIHI_JOINT_REPLACEMENT_WAITS',
   },
-  {
-    url: 'https://www.cihi.ca/sites/default/files/document/data-file/811-emergency-department-wait-time-for-physician-initial-assessment-data-table-en.xlsx',
-    domain: 'system-flow',
-    key: 'CIHI_ED_WAIT_INITIAL_ASSESSMENT',
-  },
 ];
 
 // _dataMetadata entries this writer owns, grouped by domain data file. Only
@@ -79,24 +68,6 @@ const DOMAIN_METADATA_BUILDERS: Record<
         updateType: 'auto',
         source: 'CIHI Shared Health Priorities',
         sourceVintage: deriveCiHiTimeFrameRange(records || []),
-        lastUpdated: ts,
-      }),
-  },
-  'system-flow': {
-    CIHI_OCCUPANCY_RATES: (ts, records) =>
-      buildMetadataEntry({
-        updateType: 'auto',
-        source: 'CIHI indicator XLSX (878 average acute occupancy rate)',
-        sourceVintage: deriveCiHiTimeFrameRange(records || []),
-        verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
-        lastUpdated: ts,
-      }),
-    CIHI_ED_WAIT_INITIAL_ASSESSMENT: (ts, records) =>
-      buildMetadataEntry({
-        updateType: 'auto',
-        source: 'CIHI indicator XLSX (811 ED wait time for physician initial assessment)',
-        sourceVintage: deriveCiHiTimeFrameRange(records || []),
-        verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
         lastUpdated: ts,
       }),
   },
@@ -306,7 +277,7 @@ export async function run(): Promise<SyncResult> {
     if (totalRecords === 0) {
       console.warn('[CihiMhSafety] No records extracted — leaving data files unchanged.');
       return {
-        domain: 'system-flow',
+        domain: 'spending',
         pipeline: 'cihiMhSafetyFetcher',
         status: 'skipped',
         recordsFetched: 0,
@@ -319,7 +290,6 @@ export async function run(): Promise<SyncResult> {
 
     // Write updates to domain-specific files
     const domainFiles: Record<string, string> = {
-      'system-flow': SYSTEM_FLOW_FILE,
       'spending': SPENDING_FILE,
       'surgical': SURGICAL_FILE,
       'primary-care': PRIMARY_CARE_FILE,
@@ -333,7 +303,7 @@ export async function run(): Promise<SyncResult> {
 
       // Refresh _dataMetadata for the owned arrays actually updated this run
       // for any domain this writer stamps, preserving entries owned by sibling
-      // writers (e.g. acuteCareScraper, ahsWeeklyEdLosScraper for system-flow).
+      // writers on the same domain files.
       const domainBuilders = DOMAIN_METADATA_BUILDERS[domain];
       if (domainBuilders) {
         const ownedMetadata: DataMetadata = {};
@@ -361,7 +331,7 @@ export async function run(): Promise<SyncResult> {
       `[CihiMhSafety] Complete. fetched=${totalRecords} written=${totalRecords} in ${Date.now() - startTime}ms`,
     );
     return {
-      domain: 'system-flow',
+      domain: 'spending',
       pipeline: 'cihiMhSafetyFetcher',
       status: 'success',
       recordsFetched: totalRecords,
@@ -373,7 +343,7 @@ export async function run(): Promise<SyncResult> {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.error('[CihiMhSafety] FAILED:', errorMsg);
     return {
-      domain: 'system-flow',
+      domain: 'spending',
       pipeline: 'cihiMhSafetyFetcher',
       status: 'failed',
       recordsFetched: 0,

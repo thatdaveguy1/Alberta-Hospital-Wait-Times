@@ -33,8 +33,6 @@ export function sanitizeSource(source: string): string {
     albertaFindAProviderScraper: 'Alberta Find a Provider',
     albertaRespiratoryVirusScraper: 'Alberta Respiratory Virus Dashboard',
     ahsCancerCentresScraper: 'AHS Cancer Centres',
-    ahsWeeklyEdLosScraper: 'AHS Weekly ED LOS',
-    acuteCareScraper: 'AHS Acute Care',
     abjhiScraper: 'ABJHI',
     aplLabWaitTimesFetcher: 'APL QMe Lab Waits',
     cihiDownloader: 'CIHI',
