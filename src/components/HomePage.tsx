@@ -870,28 +870,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                         </span>
                         <span className="block truncate text-xs text-ink-3">{m.description}</span>
                       </span>
-                      <span className="hidden shrink-0 text-right sm:block">
-                        {m.id === 'er-waits' ? (
-                          <>
-                            <span className="block font-mono text-sm tabular-nums text-ink">
-                              {loading ? '…' : medianLabel}
-                            </span>
-                            <span className="block text-xs text-ink-3">median wait</span>
-                          </>
-                        ) : m.id === 'disruptions' ? (
-                          <>
-                            <span className="block font-mono text-sm tabular-nums text-ink">
-                              {activeDisruptions.length}
-                            </span>
-                            <span className="block text-xs text-ink-3">active</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="block text-xs text-ink-2">{m.updateFrequency}</span>
-                            <span className="block max-w-44 truncate text-xs text-ink-3">{m.source}</span>
-                          </>
-                        )}
-                      </span>
                       <ArrowRight
                         className="h-4 w-4 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
                         aria-hidden
