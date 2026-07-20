@@ -75,6 +75,15 @@ function labWaitBand(lab: Pick<LabLocationWait, 'waitTimeMin' | 'walkInAvailable
   return 'low';
 }
 
+/** Rough drive estimate when OSRM hasn't returned yet (or is out of range). ~85 km/h. */
+function estimateDriveMins(distanceKm: number): number {
+  return Math.round((distanceKm / 85) * 60);
+}
+
+function roundKm(distanceKm: number): number {
+  return parseFloat(distanceKm.toFixed(1));
+}
+
 async function fetchOsrmForSites(
   location: UserLocation,
   sites: Array<{ id: string; latitude?: number | null; longitude?: number | null }>,
@@ -260,17 +269,22 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       .filter((h) => zoneSet.has(h.region))
       .map((h) => {
         const drive = osrmData[h.id];
-        const distance =
+        const haversineKm =
           h.latitude != null && h.longitude != null
             ? calculateDistance(location.lat, location.lng, h.latitude, h.longitude)
             : undefined;
         const wait = h.effectiveWaitMinutes;
         if (wait === null) return null;
+        const driveMins =
+          drive?.durationMins ??
+          (haversineKm != null ? estimateDriveMins(haversineKm) : undefined);
+        const distance =
+          drive?.distanceKm ?? (haversineKm != null ? roundKm(haversineKm) : undefined);
         return {
           ...h,
           distance,
-          driveMins: drive?.durationMins,
-          netScore: wait + (drive?.durationMins ?? 0),
+          driveMins,
+          netScore: wait + (driveMins ?? 0),
         };
       })
       .filter((h): h is ScoredFacility => h !== null)
@@ -285,13 +299,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       .filter((l) => zoneSet.has(l.region) && !isLabWaitUnavailable(l))
       .map((l) => {
         const drive = labOsrmData[l.id];
-        const distance = calculateDistance(location.lat, location.lng, l.latitude, l.longitude);
+        const haversineKm = calculateDistance(location.lat, location.lng, l.latitude, l.longitude);
         const wait = l.waitTimeMin as number;
-        const driveMins =
-          drive?.durationMins ?? Math.round((distance / 85) * 60);
+        const driveMins = drive?.durationMins ?? estimateDriveMins(haversineKm);
         return {
           ...l,
-          distance: drive?.distanceKm ?? distance,
+          distance: drive?.distanceKm ?? roundKm(haversineKm),
           driveMins,
           netScore: wait + driveMins,
           waitBand: labWaitBand(l),
