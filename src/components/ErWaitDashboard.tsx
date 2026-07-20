@@ -862,15 +862,18 @@ export default function ErWaitDashboard({
                 </div>
                 <div className="flex items-center gap-3">
                   <p className="font-mono text-3xl tabular-nums text-ink">
-                    {formatMinutesToHm(topPick.effectiveWaitMinutes ?? 0)}
+                    {formatMinutesToHm(
+                      (topPick.effectiveWaitMinutes ?? 0) +
+                        (driveEnabled && topPick.driveMins != null ? topPick.driveMins : 0),
+                    )}
                   </p>
                   <div className="space-y-1">
                     <WaitBandChip band={topPick.waitBand} />
-                    {topPick.driveMins != null && (
-                      <p className="text-xs tabular-nums text-ink-3">
-                        + {formatMinutesToHm(topPick.driveMins)} drive
-                      </p>
-                    )}
+                    <p className="text-xs tabular-nums text-ink-3">
+                      {driveEnabled && topPick.driveMins != null
+                        ? `Drive + wait · wait ${formatMinutesToHm(topPick.effectiveWaitMinutes ?? 0)}`
+                        : 'Wait'}
+                    </p>
                   </div>
                 </div>
                 <div className="ml-auto flex items-center gap-3">
