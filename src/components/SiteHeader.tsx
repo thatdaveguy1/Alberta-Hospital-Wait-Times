@@ -1,5 +1,5 @@
 // SiteHeader — persistent top navigation for the Clinical Ledger shell.
-// Brand, primary destinations (Home / ER Waits), an "All modules" mega-menu on
+// Brand, primary destinations (Home / ER Waits / Diagnostics & Labs), an "All modules" mega-menu on
 // desktop (full-screen sheet on mobile), a live ER-feed freshness chip, and a
 // ⌘K command palette that jumps to any module or any ER facility.
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -294,6 +294,9 @@ export function SiteHeader({ activeView, onNavigate, onSelectFacility }: SiteHea
             <NavLink active={activeView === 'er-waits'} onClick={() => go('er-waits')}>
               ER Waits
             </NavLink>
+            <NavLink active={activeView === 'diagnostics'} onClick={() => go('diagnostics')}>
+              Diagnostics & Labs
+            </NavLink>
             <button
               type="button"
               onClick={() => setMenuOpen((o) => !o)}
@@ -426,9 +429,16 @@ export function SiteHeader({ activeView, onNavigate, onSelectFacility }: SiteHea
             <button
               type="button"
               onClick={() => go('er-waits')}
-              className="mb-4 flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-semibold text-accent cursor-pointer"
+              className="mb-2 flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-semibold text-accent cursor-pointer"
             >
               ER Waits
+            </button>
+            <button
+              type="button"
+              onClick={() => go('diagnostics')}
+              className="mb-4 flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-semibold text-accent cursor-pointer"
+            >
+              Diagnostics & Labs
             </button>
             {sheetGroups.map((group) => (
               <div key={group.id} className="mb-5">
