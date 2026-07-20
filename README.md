@@ -5,7 +5,7 @@
 - **2026-07-09 — Diagnostics & Lab fix:** live lab stats cards now compute real averages; `LabCard` badges correctly show `Walk-In`, `Closed`, or `Appt Req` based on lab state; `Manual`/`Set Location` buttons open the shared manual location modal; `DataTimestamp` sources are sanitized across all four diagnostics subtabs (`Laboratory Waits`, `Imaging Gaps`, `Diagnostic Sites`, `Lab Turnaround`).
 
 
-A 11-tab dashboard visualizing Alberta's healthcare system performance — ER wait times, surgical waits, diagnostic imaging, primary care, cancer, continuing care, public health, workforce, spending, regional inequity, and service disruptions.
+A 10-tab dashboard visualizing Alberta's healthcare system performance — ER wait times, surgical waits, diagnostic imaging, primary care, cancer, public health, workforce, spending, regional inequity, and service disruptions.
 
 ## Architecture
 

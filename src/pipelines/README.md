@@ -26,14 +26,12 @@ Scheduler (launchd)
 | `openAlbertaFetcher.ts` | API | spending | 24 hr |
 | `waittimesAlbertaScraper.ts` | Scraper | surgical | 24 hr |
 | `abjhiScraper.ts` | Scraper | surgical | 24 hr |
-| `ahsAsiScraper.ts` | Scraper | continuing-care | 24 hr |
 | `cpsaScraper.ts` | Scraper | primary-care, workforce | 24 hr |
 | `cihiWaitTimesDownloader.ts` | Download | diagnostic, surgical | 24 hr |
 | `cihiNhexDownloader.ts` | Download | spending | 24 hr |
 | `fraserDownloader.ts` | Download | surgical | 24 hr (skipped — 403 blocked) |
 | `primaryCareFetcher.ts` | Download | primary-care | 24 hr |
 | `albertaFindAProviderScraper.ts` | Scraper | primary-care | 24 hr |
-| `hqcaContinuingCareScraper.ts` | Scraper | continuing-care | 24 hr |
 | `openAlbertaInequityFetcher.ts` | API | regional-inequity | 24 hr |
 | `powerbiScraper.ts` | Scraper | surgical | 24 hr |
 | `pushClient.ts` | Push | all | after each pipeline |

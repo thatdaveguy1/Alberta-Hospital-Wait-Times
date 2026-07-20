@@ -46,8 +46,8 @@
       "status": "success",
       "recordsFetched": 152,
       "recordsWritten": 152,
-      "durationMs": 68,
-      "timestamp": "2026-07-20T00:48:18.677Z"
+      "durationMs": 59,
+      "timestamp": "2026-07-20T01:58:04.618Z"
     },
     {
       "domain": "surgical",
@@ -66,15 +66,6 @@
       "recordsWritten": 25,
       "durationMs": 861,
       "timestamp": "2026-07-19T12:00:57.771Z"
-    },
-    {
-      "domain": "continuing-care",
-      "pipeline": "ahsAsiScraper",
-      "status": "success",
-      "recordsFetched": 78,
-      "recordsWritten": 78,
-      "durationMs": 4524,
-      "timestamp": "2026-07-19T12:00:59.635Z"
     },
     {
       "domain": "workforce",
@@ -149,24 +140,6 @@
       "timestamp": "2026-07-19T12:02:32.913Z"
     },
     {
-      "domain": "continuing-care",
-      "pipeline": "hqcaContinuingCareFetcher",
-      "status": "success",
-      "recordsFetched": 35,
-      "recordsWritten": 35,
-      "durationMs": 5209,
-      "timestamp": "2026-07-19T12:03:16.721Z"
-    },
-    {
-      "domain": "continuing-care",
-      "pipeline": "continuingCareComplianceFetcher",
-      "status": "success",
-      "recordsFetched": 958,
-      "recordsWritten": 958,
-      "durationMs": 1802,
-      "timestamp": "2026-07-19T12:03:22.933Z"
-    },
-    {
       "domain": "regional-inequity",
       "pipeline": "openAlbertaInequityFetcher",
       "status": "success",
@@ -192,7 +165,7 @@
       "recordsFetched": 0,
       "recordsWritten": 0,
       "durationMs": 129,
-      "error": "Fraser Institute blocks automated access (403) — relying on CIHI/Open Alberta for spending data",
+      "error": "Fraser Institute blocks automated access (403) \u2014 relying on CIHI/Open Alberta for spending data",
       "timestamp": "2026-07-19T12:03:40.279Z"
     },
     {
@@ -246,12 +219,12 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 88,
-      "timestamp": "2026-07-20T01:38:18.788Z"
+      "durationMs": 75,
+      "timestamp": "2026-07-20T01:58:02.998Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-20T01:38:18.788Z",
-  "erWaitTimesNextUpdate": "2026-07-20T01:48:18.876Z",
-  "labWaitsLastUpdate": "2026-07-20T00:48:18.677Z",
-  "labWaitsNextUpdate": "2026-07-20T01:48:18.746Z"
+  "erWaitTimesLastUpdate": "2026-07-20T01:58:02.998Z",
+  "erWaitTimesNextUpdate": "2026-07-20T02:08:03.074Z",
+  "labWaitsLastUpdate": "2026-07-20T01:58:04.618Z",
+  "labWaitsNextUpdate": "2026-07-20T02:58:04.677Z"
 }

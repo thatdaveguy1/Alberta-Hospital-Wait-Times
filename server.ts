@@ -554,7 +554,6 @@ async function startServer() {
       'workforce': 'data-workforce.json',
       'surgical': 'data-surgical.json',
       'diagnostic': 'data-diagnostic.json',
-      'continuing-care': 'data-continuing-care.json',
       'public-health': 'data-public-health.json',
       'regional-inequity': 'data-regional-inequity.json',
       'spending': 'data-spending.json',

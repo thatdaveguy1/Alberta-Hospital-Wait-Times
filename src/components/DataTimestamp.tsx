@@ -29,7 +29,6 @@ interface DataTimestampProps {
 /** Maps internal pipeline IDs and raw source strings to human-readable names so "Scraper" never leaks to the UI. */
 export function sanitizeSource(source: string): string {
   const map: Record<string, string> = {
-    ahsAsiScraper: 'AHS ASI',
     albertaFindAProviderScraper: 'Alberta Find a Provider',
     albertaRespiratoryVirusScraper: 'Alberta Respiratory Virus Dashboard',
     ahsCancerCentresScraper: 'AHS Cancer Centres',
@@ -41,12 +40,10 @@ export function sanitizeSource(source: string): string {
     cihiWaitTimesDownloader: 'CIHI Wait Times',
     cihiWaitTimesPriorityFetcher: 'CIHI Priority Wait Times',
     cihiWorkforceFetcher: 'CIHI Workforce',
-    continuingCareComplianceFetcher: 'Continuing Care Compliance',
     cpsaScraper: 'CPSA',
     disruptionsScraper: 'AHS Service Disruptions',
     erWaitTimesFetcher: 'AHS ER Wait Times',
     fraserDownloader: 'Fraser Institute',
-    hqcaContinuingCareFetcher: 'HQCA Continuing Care',
     hqcaFocusScraper: 'HQCA FOCUS',
     openAlbertaBillingFetcher: 'Open Alberta Billing',
     openAlbertaInequityFetcher: 'Open Alberta Inequity',

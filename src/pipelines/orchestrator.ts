@@ -13,7 +13,6 @@ import { run as aplLabWaitTimesRun } from './aplLabWaitTimesFetcher';
 
 // Tier 2: HTML scrapers
 import { run as abjhiRun } from './abjhiScraper';
-import { run as ahsAsiRun } from './ahsAsiScraper';
 import { run as cpsaRun } from './cpsaScraper';
 import { run as ahsCancerCentresRun } from './ahsCancerCentresScraper';
 
@@ -23,7 +22,6 @@ import { run as fraserRun } from './fraserDownloader';
 import { run as cihiWaitTimesRun, runCancer as cihiWaitTimesCancerRun, runSurgical as cihiWaitTimesSurgicalRun } from './cihiWaitTimesDownloader';
 import { run as primaryCareRun } from './primaryCareFetcher';
 import { run as albertaFindAProviderRun } from './albertaFindAProviderScraper';
-import { run as hqcaContinuingCareRun } from './hqcaContinuingCareFetcher';
 import { run as openAlbertaInequityRun, runPrimaryCare as openAlbertaInequityPrimaryCareRun } from './openAlbertaInequityFetcher';
 import { run as openAlbertaBillingRun } from './openAlbertaBillingFetcher';
 import { run as hqcaFocusRun } from './hqcaFocusScraper';
@@ -31,7 +29,6 @@ import { run as albertaRvdRun } from './albertaRespiratoryVirusScraper';
 import { run as cihiWorkforceRun } from './cihiWorkforceFetcher';
 import { run as cihiMhSafetyRun } from './cihiMhSafetyFetcher';
 import { run as cihiWaitTimesPriorityRun } from './cihiWaitTimesPriorityFetcher';
-import { run as continuingCareComplianceRun } from './continuingCareComplianceFetcher';
 
 // Power BI scraper runs as a child process because Puppeteer is ESM-only
 // and the server bundles as CJS. The scraper launches headless Chrome,
@@ -90,7 +87,6 @@ const PIPELINES: Pipeline[] = [
   // Power BI scraper runs as child process (Puppeteer needs ESM + headless Chrome).
   { name: 'powerbi-scraper', domain: 'surgical', run: runPowerBIScraper },
   { name: 'abjhi', domain: 'surgical', run: abjhiRun },
-  { name: 'ahs-asi', domain: 'continuing-care', run: ahsAsiRun },
   { name: 'cpsa', domain: 'workforce', run: cpsaRun },
   { name: 'ahs-cancer-centres', domain: 'cancer', run: ahsCancerCentresRun },
 
@@ -101,8 +97,6 @@ const PIPELINES: Pipeline[] = [
   { name: 'cihi-wait-times-surgical', domain: 'surgical', run: cihiWaitTimesSurgicalRun },
   { name: 'primary-care', domain: 'primary-care', run: primaryCareRun },
   { name: 'alberta-find-a-provider', domain: 'primary-care', run: albertaFindAProviderRun },
-  { name: 'hqca-continuing-care', domain: 'continuing-care', run: hqcaContinuingCareRun },
-  { name: 'continuing-care-compliance', domain: 'continuing-care', run: continuingCareComplianceRun },
   { name: 'open-alberta-inequity', domain: 'regional-inequity', run: openAlbertaInequityRun },
   { name: 'open-alberta-inequity-primary-care', domain: 'primary-care', run: openAlbertaInequityPrimaryCareRun },
   { name: 'fraser', domain: 'spending', run: fraserRun },

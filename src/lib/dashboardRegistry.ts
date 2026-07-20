@@ -7,7 +7,6 @@ import {
   Stethoscope,
   Users,
   FlaskConical,
-  Home,
   Coins,
   Ribbon,
   Shield,
@@ -116,17 +115,6 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     updateFrequency: 'Annual surveys',
   },
   {
-    id: 'long-term-care',
-    title: 'Long Term Care & Seniors Care',
-    shortName: 'Long Term Care',
-    category: 'community-care',
-    description: 'Placement timelines, measured quality outcomes, and facility compliance registries.',
-    icon: Home,
-    badge: 'CONTINUING CARE',
-    source: 'HQCA FOCUS & CIHI CCRS Registry',
-    updateFrequency: 'Quarterly Audits',
-  },
-  {
     id: 'cancer',
     title: 'Cancer Care',
     shortName: 'Cancer Care',
@@ -233,13 +221,6 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
     sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'CIHI priority procedure waits & Cancer Care Alberta centres',
     domain: 'cancer'
-  },
-  'long-term-care': {
-    updateType: 'mixed',
-    interval: 'daily sync · per-array provenance',
-    sourceVintage: 'Per-array (see dashboard timestamps)',
-    source: 'HQCA FOCUS, CIHI CCRS & continuing-care compliance',
-    domain: 'continuing-care'
   },
   'public-health': {
     updateType: 'mixed',

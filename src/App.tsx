@@ -11,7 +11,6 @@ import PrimaryCareDashboard from './components/PrimaryCareDashboard';
 import WorkforceDashboard from './components/WorkforceDashboard';
 import DiagnosticDashboard from './components/DiagnosticDashboard';
 import CancerDashboard from './components/CancerDashboard';
-import ContinuingCareDashboard from './components/ContinuingCareDashboard';
 import PublicHealthDashboard from './components/PublicHealthDashboard';
 import RegionalInequityDashboard from './components/RegionalInequityDashboard';
 import SpendingDashboard from './components/SpendingDashboard';
@@ -95,8 +94,6 @@ export default function App() {
           <WorkforceDashboard />
         ) : activeView === 'cancer' ? (
           <CancerDashboard />
-        ) : activeView === 'long-term-care' ? (
-          <ContinuingCareDashboard />
         ) : activeView === 'public-health' ? (
           <PublicHealthDashboard />
         ) : activeView === 'regional-inequity' ? (
