@@ -16,7 +16,6 @@ import { run as abjhiRun } from './abjhiScraper';
 import { run as ahsAsiRun } from './ahsAsiScraper';
 import { run as acuteCareRun } from './acuteCareScraper';
 import { run as cpsaRun } from './cpsaScraper';
-import { run as goodcaringRun } from './goodcaringScraper';
 import { run as ahsCancerCentresRun } from './ahsCancerCentresScraper';
 import { run as ahsWeeklyEdLosRun } from './ahsWeeklyEdLosScraper';
 
@@ -97,7 +96,6 @@ const PIPELINES: Pipeline[] = [
   { name: 'acute-care', domain: 'system-flow', run: acuteCareRun },
   { name: 'ahs-weekly-edlos', domain: 'system-flow', run: ahsWeeklyEdLosRun },
   { name: 'cpsa', domain: 'workforce', run: cpsaRun },
-  { name: 'goodcaring', domain: 'patient-experience', run: goodcaringRun },
   { name: 'ahs-cancer-centres', domain: 'cancer', run: ahsCancerCentresRun },
 
   // Tier 3: File download+parse (XLSX/CSV/ZIP)
@@ -113,10 +111,10 @@ const PIPELINES: Pipeline[] = [
   { name: 'open-alberta-inequity-primary-care', domain: 'primary-care', run: openAlbertaInequityPrimaryCareRun },
   { name: 'fraser', domain: 'spending', run: fraserRun },
   { name: 'open-alberta-billing', domain: 'spending', run: openAlbertaBillingRun },
-  { name: 'hqca-focus', domain: 'patient-experience', run: hqcaFocusRun },
+  { name: 'hqca-focus', domain: 'primary-care', run: hqcaFocusRun },
   { name: 'alberta-rvd', domain: 'public-health', run: albertaRvdRun },
   { name: 'cihi-workforce', domain: 'workforce', run: cihiWorkforceRun },
-  { name: 'cihi-mh-safety', domain: 'patient-experience', run: cihiMhSafetyRun },
+  { name: 'cihi-mh-safety', domain: 'system-flow', run: cihiMhSafetyRun },
   { name: 'cihi-wait-times-priority', domain: 'surgical', run: cihiWaitTimesPriorityRun },
 ];
 

@@ -1,10 +1,10 @@
 // CIHI Clinical Safety & Indicator Fetcher
 // Fetches clinical safety and related CIHI indicator library data tables
-// for patient-experience, system-flow, spending, surgical, and primary-care.
+// for system-flow, spending, surgical, and primary-care.
 //
-// Writes to domain JSON files such as data-patient-experience.json,
-// data-system-flow.json, data-spending.json, data-surgical.json, and
-// data-primary-care.json. No longer writes mental-health domain data.
+// Writes to domain JSON files such as data-system-flow.json,
+// data-spending.json, data-surgical.json, and data-primary-care.json.
+// No longer writes mental-health domain data.
 
 import axios from 'axios';
 import fs from 'fs';
@@ -18,7 +18,6 @@ import {
   type DataMetadata,
 } from './metadataHelpers';
 
-const PATIENT_EXPERIENCE_FILE = path.join(process.cwd(), 'data-patient-experience.json');
 const SYSTEM_FLOW_FILE = path.join(process.cwd(), 'data-system-flow.json');
 const SPENDING_FILE = path.join(process.cwd(), 'data-spending.json');
 const SURGICAL_FILE = path.join(process.cwd(), 'data-surgical.json');
@@ -30,16 +29,6 @@ const USER_AGENT =
 
 // CIHI indicator data table URLs
 const INDICATOR_URLS: { url: string; domain: string; key: string }[] = [
-  {
-    url: 'https://www.cihi.ca/sites/default/files/document/data-file/827-all-patients-readmitted-to-hospital-data-table-en.xlsx',
-    domain: 'patient-experience',
-    key: 'CIHI_ALL_READMISSION_RATES',
-  },
-  {
-    url: 'https://www.cihi.ca/sites/default/files/document/data-file/832-ambulatory-care-sensitive-conditions-hospitalizations-data-table-en.xlsx',
-    domain: 'patient-experience',
-    key: 'CIHI_ACSC_HOSPITALIZATIONS',
-  },
   {
     url: 'https://www.cihi.ca/sites/default/files/document/data-file/878-average-acute-occupancy-rate-data-table-en.xlsx',
     domain: 'system-flow',
@@ -59,11 +48,6 @@ const INDICATOR_URLS: { url: string; domain: string; key: string }[] = [
     url: 'https://www.cihi.ca/sites/default/files/document/data-file/884-annual-change-in-surgical-volumes-since-start-of-covid-19-pandemic-data-table-en.xlsx',
     domain: 'surgical',
     key: 'CIHI_SURGICAL_VOLUME_TRENDS',
-  },
-  {
-    url: 'https://www.cihi.ca/sites/default/files/document/data-file/889-canadians-who-were-satisfied-with-the-wait-time-to-see-a-health-provider-data-table-en.xlsx',
-    domain: 'patient-experience',
-    key: 'CIHI_WAIT_TIME_SATISFACTION',
   },
   {
     url: 'https://www.cihi.ca/sites/default/files/document/data-file/888-canadians-with-same-day-or-next-day-access-to-a-health-provider-data-table-en.xlsx',
@@ -113,29 +97,6 @@ const DOMAIN_METADATA_BUILDERS: Record<
         source: 'CIHI indicator XLSX (811 ED wait time for physician initial assessment)',
         sourceVintage: deriveCiHiTimeFrameRange(records || []),
         verification: 'Auto-fetched and parsed from CIHI indicator XLSX data table.',
-        lastUpdated: ts,
-      }),
-  },
-  'patient-experience': {
-    CIHI_ALL_READMISSION_RATES: (ts, records) =>
-      buildMetadataEntry({
-        updateType: 'auto',
-        source: 'CIHI all-patients readmitted data table',
-        sourceVintage: deriveCiHiTimeFrameRange(records || []),
-        lastUpdated: ts,
-      }),
-    CIHI_ACSC_HOSPITALIZATIONS: (ts, records) =>
-      buildMetadataEntry({
-        updateType: 'auto',
-        source: 'CIHI ambulatory-care-sensitive-conditions hospitalizations',
-        sourceVintage: deriveCiHiTimeFrameRange(records || []),
-        lastUpdated: ts,
-      }),
-    CIHI_WAIT_TIME_SATISFACTION: (ts, records) =>
-      buildMetadataEntry({
-        updateType: 'auto',
-        source: 'CIHI wait-time satisfaction data table',
-        sourceVintage: deriveCiHiTimeFrameRange(records || []),
         lastUpdated: ts,
       }),
   },
@@ -345,7 +306,7 @@ export async function run(): Promise<SyncResult> {
     if (totalRecords === 0) {
       console.warn('[CihiMhSafety] No records extracted — leaving data files unchanged.');
       return {
-        domain: 'patient-experience',
+        domain: 'system-flow',
         pipeline: 'cihiMhSafetyFetcher',
         status: 'skipped',
         recordsFetched: 0,
@@ -358,7 +319,6 @@ export async function run(): Promise<SyncResult> {
 
     // Write updates to domain-specific files
     const domainFiles: Record<string, string> = {
-      'patient-experience': PATIENT_EXPERIENCE_FILE,
       'system-flow': SYSTEM_FLOW_FILE,
       'spending': SPENDING_FILE,
       'surgical': SURGICAL_FILE,
@@ -373,8 +333,7 @@ export async function run(): Promise<SyncResult> {
 
       // Refresh _dataMetadata for the owned arrays actually updated this run
       // for any domain this writer stamps, preserving entries owned by sibling
-      // writers (e.g. acuteCareScraper, ahsWeeklyEdLosScraper for system-flow,
-      // goodcaringScraper/hqcaFocusScraper for patient-experience).
+      // writers (e.g. acuteCareScraper, ahsWeeklyEdLosScraper for system-flow).
       const domainBuilders = DOMAIN_METADATA_BUILDERS[domain];
       if (domainBuilders) {
         const ownedMetadata: DataMetadata = {};
@@ -402,7 +361,7 @@ export async function run(): Promise<SyncResult> {
       `[CihiMhSafety] Complete. fetched=${totalRecords} written=${totalRecords} in ${Date.now() - startTime}ms`,
     );
     return {
-      domain: 'patient-experience',
+      domain: 'system-flow',
       pipeline: 'cihiMhSafetyFetcher',
       status: 'success',
       recordsFetched: totalRecords,
@@ -414,7 +373,7 @@ export async function run(): Promise<SyncResult> {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.error('[CihiMhSafety] FAILED:', errorMsg);
     return {
-      domain: 'patient-experience',
+      domain: 'system-flow',
       pipeline: 'cihiMhSafetyFetcher',
       status: 'failed',
       recordsFetched: 0,

@@ -29,7 +29,6 @@ interface DataTimestampProps {
 /** Maps internal pipeline IDs and raw source strings to human-readable names so "Scraper" never leaks to the UI. */
 export function sanitizeSource(source: string): string {
   const map: Record<string, string> = {
-    goodcaringScraper: 'GoodCaring.ca',
     ahsAsiScraper: 'AHS ASI',
     albertaFindAProviderScraper: 'Alberta Find a Provider',
     albertaRespiratoryVirusScraper: 'Alberta Respiratory Virus Dashboard',

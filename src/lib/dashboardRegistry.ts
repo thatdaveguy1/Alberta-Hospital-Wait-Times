@@ -9,7 +9,6 @@ import {
   Users,
   FlaskConical,
   Home,
-  HeartHandshake,
   Coins,
   Ribbon,
   Shield,
@@ -140,17 +139,6 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     updateFrequency: 'Quarterly Audits',
   },
   {
-    id: 'patient-experience',
-    title: 'Patient Experience & Care Quality',
-    shortName: 'Patient Experience',
-    category: 'community-care',
-    description: 'Available HQCA, GoodCaring, and CIHI patient-experience and care-quality measures.',
-    icon: HeartHandshake,
-    badge: 'FOCUS SURVEY',
-    source: 'HQCA FOCUS, GoodCaring & CIHI CPES-IC',
-    updateFrequency: 'Quarterly Release',
-  },
-  {
     id: 'cancer',
     title: 'Cancer Care',
     shortName: 'Cancer Care',
@@ -270,13 +258,6 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
     sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'HQCA FOCUS, CIHI CCRS & continuing-care compliance',
     domain: 'continuing-care'
-  },
-  'patient-experience': {
-    updateType: 'mixed',
-    interval: 'daily sync · per-array provenance',
-    sourceVintage: 'Per-array (see dashboard timestamps)',
-    source: 'HQCA FOCUS, GoodCaring & CIHI CPES-IC',
-    domain: 'patient-experience'
   },
   'public-health': {
     updateType: 'mixed',

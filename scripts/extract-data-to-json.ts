@@ -8,7 +8,6 @@ const modules = [
   { src: 'src/diagnosticData.ts', out: 'data-diagnostic.json', keys: ['LAB_LOCATION_WAITS','TEST_TURNAROUND_METRICS','IMAGING_WAIT_TRENDS','FACILITY_IMAGING_WAITS','PRIORITY_TARGET_COMPLIANCE'] },
   { src: 'src/cancerData.ts', out: 'data-cancer.json', keys: ['CANCER_BURDEN_STATS','CANCER_SCREENING_RATES','CANCER_SURGERY_WAIT_TRENDS','RADIATION_THERAPY_WAIT_TRENDS','ALBERTA_CANCER_CENTRES'] },
   { src: 'src/continuingCareData.ts', out: 'data-continuing-care.json', keys: ['CONTINUING_CARE_PLACEMENT_STATS','RESIDENT_QUALITY_OUTCOMES','HOME_CARE_EXPERIENCE','CONTINUING_CARE_COMPLIANCE'] },
-  { src: 'src/patientExperienceData.ts', out: 'data-patient-experience.json', keys: ['PATIENT_VOICE_BY_SETTING','INPATIENT_EXPERIENCE_TRENDS','ED_EXPERIENCE_TRENDS','CLINICAL_SAFETY_TRENDS','PATIENT_COMPLAINTS'] },
   { src: 'src/primaryCareData.ts', out: 'data-primary-care.json', keys: ['ATTACHMENT_RATES','ACCEPTING_PROVIDERS','PCN_CAPACITY','LGA_COMMUNITY_NEEDS','ED_RELIANCE_BY_CONTINUITY','CONTINUITY_SATISFACTION'] },
   { src: 'src/publicHealthData.ts', out: 'data-public-health.json', keys: ['RESPIRATORY_VIRUS_SURVEILLANCE','WASTEWATER_SIGNALS','CHILDHOOD_IMMUNIZATION_COVERAGE','NOTIFIABLE_DISEASE_INCIDENCE','ENVIRONMENTAL_ADVISORIES','OUTBREAK_PROTOCOLS'] },
   { src: 'src/regionalInequityData.ts', out: 'data-regional-inequity.json', keys: ['COMMUNITY_NEED_PROFILES','CHRONIC_DISEASE_BURDEN','ED_RELIANCE_METRICS','TRAVEL_FOR_CARE','SERVICE_ACCESS_METRICS'] },

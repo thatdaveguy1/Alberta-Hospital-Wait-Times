@@ -39,7 +39,6 @@ export const DOMAINS = [
   'diagnostic',
   'cancer',
   'continuing-care',
-  'patient-experience',
   'primary-care',
   'public-health',
   'regional-inequity',

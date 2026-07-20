@@ -1,6 +1,6 @@
 // HQCA FOCUS on Healthcare Scraper
 // Scrapes the HQCA FOCUS on Healthcare interactive dashboard
-// (https://focus.hqca.ca/) for zone-level patient experience metrics.
+// (https://focus.hqca.ca/) for zone-level primary care metrics.
 //
 // The dashboard is a React app that loads CSV data files from:
 //   https://focus.hqa.ca/wp-content/themes/hcqa-focus/chart-test/data/{category}/{filename}.csv
@@ -10,8 +10,7 @@
 // which contains `reportDataUrl: 'data/{category}/{filename}.csv'`
 //
 // Writes to:
-//   - data-primary-care.json: CONTINUITY_SATISFACTION (from visits_to_one_family_doctor.csv)
-//   - data-patient-experience.json: INPATIENT_EXPERIENCE_TRENDS (from px_overall.csv)
+//   - data-primary-care.json: CONTINUITY_SATISFACTION_HQCA (from visits_to_one_family_doctor.csv)
 
 import axios from 'axios';
 import fs from 'fs';
@@ -25,7 +24,6 @@ import {
 } from './metadataHelpers';
 
 const PRIMARY_CARE_FILE = path.join(process.cwd(), 'data-primary-care.json');
-const PATIENT_EXPERIENCE_FILE = path.join(process.cwd(), 'data-patient-experience.json');
 
 const HQCA_DATA_BASE =
   'https://focus.hqa.ca/wp-content/themes/hcqa-focus/chart-test/data';
@@ -45,9 +43,6 @@ function loadJsonFile(file: string): LoadedJson {
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
 
 // Parse CSV text into rows (simple parser — handles quoted fields)
 function parseCsv(text: string): string[][] {
@@ -149,38 +144,6 @@ function parseContinuitySatisfaction(rows: string[][]): ContinuityRecord[] {
   return records;
 }
 
-// Parse patient experience data from CSV
-// Format: Year,Zone,Rating,Percentage
-interface ExperienceRecord {
-  year: string;
-  zone: string;
-  rating: number;
-  percentage: number;
-}
-
-function parsePatientExperience(rows: string[][]): ExperienceRecord[] {
-  if (rows.length < 2) return [];
-  const headers = rows[0].map((h) => h.trim());
-  const yrIdx = headers.findIndex((h) => h.toLowerCase().includes('year'));
-  const zoneIdx = headers.findIndex((h) => h.toLowerCase() === 'zone');
-  const ratingIdx = headers.findIndex((h) => h.toLowerCase().includes('rating'));
-  const pctIdx = headers.findIndex((h) => h.toLowerCase().includes('percentage') || h.toLowerCase().includes('pct'));
-  if (yrIdx === -1 || zoneIdx === -1 || ratingIdx === -1 || pctIdx === -1) return [];
-
-  const records: ExperienceRecord[] = [];
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row.length < 4) continue;
-    const year = row[yrIdx]?.trim() ?? '';
-    const zone = row[zoneIdx]?.trim() ?? '';
-    const rating = parseInt(row[ratingIdx]?.trim() ?? '0', 10);
-    const percentage = parseFloat(row[pctIdx]?.trim() ?? '0');
-    if (year && Number.isFinite(rating) && Number.isFinite(percentage)) {
-      records.push({ year, zone, rating, percentage });
-    }
-  }
-  return records;
-}
 function deriveContinuitySourceVintage(records: ContinuityRecord[]): string {
   const years = [...new Set(records.map((r) => r.fiscalYear).filter(Boolean))].sort((a, b) => {
     const ay = parseInt(a.split('/')[0], 10) || 0;
@@ -190,19 +153,6 @@ function deriveContinuitySourceVintage(records: ContinuityRecord[]): string {
   if (years.length === 0) return 'HQCA FOCUS primary care continuity survey';
   if (years.length === 1) return `Fiscal year ${years[0]}`;
   return `Fiscal years ${years[0]} to ${years[years.length - 1]}`;
-}
-
-function deriveInpatientSourceVintage(records: ExperienceRecord[]): string {
-  const years = [...new Set(records.map((r) => r.year).filter(Boolean))].sort((a, b) => {
-    const am = a.match(/\d{4}/);
-    const bm = b.match(/\d{4}/);
-    const ay = am ? parseInt(am[0], 10) : 0;
-    const by = bm ? parseInt(bm[0], 10) : 0;
-    return ay - by;
-  });
-  if (years.length === 0) return 'Apr 2021 onward';
-  if (years.length === 1) return years[0];
-  return `${years[0]} to ${years[years.length - 1]}`;
 }
 
 export async function run(): Promise<SyncResult> {
@@ -222,16 +172,7 @@ export async function run(): Promise<SyncResult> {
       totalRecords += continuityRecords.length;
     }
 
-    // 2. Fetch patient experience overall rating
-    const experienceCsv = await fetchCsv('patient_experience', 'px_overall.csv');
-    let experienceRecords: ExperienceRecord[] = [];
-    if (experienceCsv) {
-      experienceRecords = parsePatientExperience(experienceCsv);
-      console.log(`[HqcaFocus] Parsed ${experienceRecords.length} patient experience records`);
-      totalRecords += experienceRecords.length;
-    }
-
-    // 3. Fetch clinic continuity
+    // 2. Fetch clinic continuity
     const clinicCsv = await fetchCsv('pc_measures', 'visits_to_one_clinic.csv');
     let clinicRecords: ContinuityRecord[] = [];
     if (clinicCsv) {
@@ -240,7 +181,7 @@ export async function run(): Promise<SyncResult> {
       totalRecords += clinicRecords.length;
     }
 
-    // 4. Fetch screening tests
+    // 3. Fetch screening tests
     const screeningCsv = await fetchCsv('pc_measures', 'screening_tests.csv');
     let screeningRecords: ContinuityRecord[] = [];
     if (screeningCsv) {
@@ -252,7 +193,7 @@ export async function run(): Promise<SyncResult> {
     if (totalRecords === 0) {
       console.warn('[HqcaFocus] No records extracted — leaving data files unchanged.');
       return {
-        domain: 'patient-experience',
+        domain: 'primary-care',
         pipeline: 'hqcaFocusScraper',
         status: 'skipped',
         recordsFetched: 0,
@@ -264,6 +205,7 @@ export async function run(): Promise<SyncResult> {
     }
 
     // Merge into primary-care file (continuity satisfaction)
+    let recordsWritten = 0;
     if (continuityRecords.length > 0) {
       const existing = loadJsonFile(PRIMARY_CARE_FILE);
       // Convert to the format expected by the dashboard
@@ -291,52 +233,18 @@ export async function run(): Promise<SyncResult> {
       };
       applyWithheldPayloadGuard(merged as Record<string, unknown>);
       fs.writeFileSync(PRIMARY_CARE_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
-    }
-
-    // Merge into patient-experience file
-    if (experienceRecords.length > 0) {
-      const existing = loadJsonFile(PATIENT_EXPERIENCE_FILE);
-      // Convert to the format expected by the dashboard
-      const experienceData = experienceRecords.map((r) => ({
-        year: r.year,
-        zone: r.zone,
-        rating: r.rating,
-        percentage: r.percentage,
-      }));
-      const ownedMetadata: DataMetadata = {
-        INPATIENT_EXPERIENCE_TRENDS_HQCA: buildMetadataEntry({
-          updateType: 'auto',
-          source: 'HQCA FOCUS patient experience CSV',
-          sourceVintage: deriveInpatientSourceVintage(experienceRecords),
-          lastUpdated: timestamp,
-        }),
-      };
-      const merged = {
-        ...existing,
-        INPATIENT_EXPERIENCE_TRENDS_HQCA: experienceData,
-        // Withheld non-HQCA trends must not reappear from existing.
-        INPATIENT_EXPERIENCE_TRENDS: [],
-        ED_EXPERIENCE_TRENDS: [],
-        CLINICAL_SAFETY_TRENDS: [],
-        PATIENT_COMPLAINTS: [],
-        _dataMetadata: mergeDataMetadata(
-          existing._dataMetadata as DataMetadata | undefined,
-          ownedMetadata,
-        ),
-      };
-      applyWithheldPayloadGuard(merged as Record<string, unknown>);
-      fs.writeFileSync(PATIENT_EXPERIENCE_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
+      recordsWritten = satisfactionData.length;
     }
 
     console.log(
-      `[HqcaFocus] Complete. fetched=${totalRecords} written=${totalRecords} in ${Date.now() - startTime}ms`,
+      `[HqcaFocus] Complete. fetched=${totalRecords} written=${recordsWritten} in ${Date.now() - startTime}ms`,
     );
     return {
-      domain: 'patient-experience',
+      domain: 'primary-care',
       pipeline: 'hqcaFocusScraper',
       status: 'success',
       recordsFetched: totalRecords,
-      recordsWritten: totalRecords,
+      recordsWritten,
       durationMs: Date.now() - startTime,
       timestamp,
     };
@@ -344,7 +252,7 @@ export async function run(): Promise<SyncResult> {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.error('[HqcaFocus] FAILED:', errorMsg);
     return {
-      domain: 'patient-experience',
+      domain: 'primary-care',
       pipeline: 'hqcaFocusScraper',
       status: 'failed',
       recordsFetched: 0,

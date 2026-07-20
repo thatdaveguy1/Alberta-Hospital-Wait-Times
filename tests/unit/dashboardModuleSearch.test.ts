@@ -26,13 +26,15 @@ describe('dashboardMatchesSearch', () => {
     expect(dashboardMatchesSearch(diagnosticsTile, 'labs')).toBe(true);
   });
 
-  it('does not search description text (patient experience advocacy diagnostics)', () => {
-    const patientExp = {
-      id: 'patient-experience',
-      title: 'Patient Experience & Care Quality',
-      shortName: 'Patient Experience',
+  it('does not search description text (health spending NHEX physician)', () => {
+    const healthSpending = {
+      id: 'health-spending',
+      title: 'Health Spending & Productivity',
+      shortName: 'Health Spending',
     };
-    expect(dashboardMatchesSearch(patientExp, 'diagnostic')).toBe(false);
+    // description mentions NHEX / physician clinical payments; title/shortName/id do not
+    expect(dashboardMatchesSearch(healthSpending, 'NHEX')).toBe(false);
+    expect(dashboardMatchesSearch(healthSpending, 'physician')).toBe(false);
   });
 });
 

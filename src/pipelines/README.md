@@ -30,7 +30,6 @@ Scheduler (launchd)
 | `acuteCareScraper.ts` | Scraper | system-flow | 24 hr |
 | `ahsWeeklyEdLosScraper.ts` | Scraper | system-flow | 24 hr |
 | `cpsaScraper.ts` | Scraper | primary-care, workforce | 24 hr |
-| `goodcaringScraper.ts` | Scraper | patient-experience | 24 hr |
 | `cihiWaitTimesDownloader.ts` | Download | diagnostic, surgical | 24 hr |
 | `cihiNhexDownloader.ts` | Download | spending | 24 hr |
 | `fraserDownloader.ts` | Download | surgical | 24 hr (skipped — 403 blocked) |

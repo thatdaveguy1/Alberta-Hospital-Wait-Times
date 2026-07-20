@@ -286,61 +286,6 @@
     "notes": "Real public source is standardsandlicensing.alberta.ca (NOT the AHS ASI page the current ahs-asi pipeline targets). Retarget the scraper at this government registry, which lists inspection dates and findings per facility."
   },
   {
-    "tab": "Patient Experience",
-    "array": "PATIENT_VOICE_BY_SETTING (non-Specialist-Access rows)",
-    "records": 12,
-    "description": "Patient-voice metrics for Primary Care, Emergency Dept, and Hospital Inpatient settings (Alberta & Canada rate %, year). The 12 Specialist Access rows are pipeline-fed via goodcaring; the other 12 rows are hand-authored.",
-    "source_exists": true,
-    "source_name": "HQCA FOCUS on Healthcare / patient experience surveys",
-    "source_url": "https://focus.hqca.ca/",
-    "automation": "MEDIUM",
-    "notes": "HQCA FOCUS publishes setting-level patient-experience metrics (Alberta vs Canada). Extend the goodcaring pipeline or add an HQCA FOCUS scraper for the non-Specialist settings."
-  },
-  {
-    "tab": "Patient Experience",
-    "array": "INPATIENT_EXPERIENCE_TRENDS",
-    "records": 3,
-    "description": "Yearly inpatient experience: nurse/doctor communication, pain helpfulness, discharge info, overall-excellent rating %.",
-    "source_exists": true,
-    "source_name": "HQCA Inpatient Experience Survey",
-    "source_url": "https://hqca.ca/surveys/inpatient-experience/",
-    "automation": "MEDIUM",
-    "notes": "HQCA inpatient survey results by year. Annual PDF/Excel; parse tables."
-  },
-  {
-    "tab": "Patient Experience",
-    "array": "ED_EXPERIENCE_TRENDS",
-    "records": 3,
-    "description": "Yearly ED experience: overall communication, staff introduced themselves, pain help, medicine side-effects explained, discharge clarity %.",
-    "source_exists": true,
-    "source_name": "HQCA Emergency Department Patient Experience Survey",
-    "source_url": "https://hqca.ca/surveys/emergency-department-patient-experience/",
-    "automation": "MEDIUM",
-    "notes": "HQCA ED survey results by year. Annual PDF/Excel; parse tables."
-  },
-  {
-    "tab": "Patient Experience",
-    "array": "CLINICAL_SAFETY_TRENDS",
-    "records": 15,
-    "description": "Clinical safety by year/zone: hospital-harm rate, 30-day readmission rate.",
-    "source_exists": true,
-    "source_name": "CIHI Hospital Harm indicator + AHS readmissions",
-    "source_url": "https://www.cihi.ca/en/hospital-harm",
-    "automation": "MEDIUM",
-    "notes": "CIHI Hospital Harm indicator and 30-day readmission measures are published by province/zone. Structured tables available; map year+zone."
-  },
-  {
-    "tab": "Patient Experience",
-    "array": "PATIENT_COMPLAINTS",
-    "records": 4,
-    "description": "Patient-complaint categories: category, percentage share, description, trend.",
-    "source_exists": true,
-    "source_name": "AHS Patient Concerns / Quality Improvement reports",
-    "source_url": "https://www.albertahealthservices.ca/about/Page779.aspx",
-    "automation": "HARD",
-    "notes": "AHS publishes complaint volumes in Quality Improvement annual reports (PDF), but category breakdowns are not consistently structured. Largely manual."
-  },
-  {
     "tab": "Public Health",
     "array": "RESPIRATORY_VIRUS_SURVEILLANCE",
     "records": 8,
