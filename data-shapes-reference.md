@@ -36,11 +36,13 @@
 - SERVICE_ACCESS_METRICS: { lgaName, facilitiesPer10k, distanceToNearestEdKm, distanceToNearestImagingKm, providersAcceptingPatients }
 
 ## 6. Health Spending (data-spending.json)
-- NATIONAL_SPENDING_COMPARE: { province, spendingPerCapita, spendingAsPercentGdp, hospitalSpendingPerCapita, physicianSpendingPerCapita, drugSpendingPerCapita, bedsPer100k, costPerStatCase }
+- NATIONAL_SPENDING_COMPARE: { province, spendingPerCapita, spendingAsPercentGdp, hospitalSpendingPerCapita, physicianSpendingPerCapita, drugSpendingPerCapita, bedsPer100k, costPerStandardStay }
 - ALBERTA_ACTIVITY_VOLUME_TREND: { fiscalYear, totalExpenseBillions, surgeriesCount, ctExamsCount, labTestsMillions, edVisitsMillions, hospitalAdmissions, physiciansCount }
 - HOSPITAL_EFFICIENCY_TREND: { fiscalYear, spendingPerStaffedBed, hospitalizationsPerBed, surgeriesPerBed, hoursWorkedPerBed, standardStayCost }
 - PHYSICIAN_SPECIALTY_BILLING: { specialtyGroup, physicianCount, totalPaymentsMillions, averagePaymentGross, servicesPerPatient }
 - ALBERTA_USE_OF_FUNDS: { category, amountBillions, percentageShare }
+- PROVINCIAL_SPENDING_TREND: { province, year, fiscalYear, spendingPerCapita, hospitalSpendingPerCapita, physicianSpendingPerCapita, drugSpendingPerCapita, publicSharePct }
+- PROVINCIAL_USE_OF_FUNDS: { province, category, amountBillions, percentageShare, perCapita }
 
 ## 7. Virtual Care (data-virtual-care.json)
 - HEALTH_LINK_VOLUMES: { fiscalYear, clinicalReceived, nonClinicalReceived, clinicalOutbound, nonClinicalOutbound, padisCalls }

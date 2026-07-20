@@ -38,7 +38,6 @@ import type {
   ContinuitySatisfactionHqca,
 } from '../primaryCareData';
 import * as primaryCareDataModule from '../primaryCareData';
-import { DataTimestamp } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
 
@@ -92,41 +91,62 @@ function isOverallLifeStage(row: Record<string, unknown>): boolean {
   );
 }
 
-/** Prefer Alberta (then Canada) provincial totals; overall life stage if present, else first total row. */
-function pickCihiSameDayAccess(rows: Record<string, unknown>[]): {
+type SameDayRow = {
   value: number | null;
   year: string;
   place: string;
   lifeStage: string;
-} {
-  if (!rows.length) {
-    return { value: null, year: '', place: '', lifeStage: '' };
-  }
+};
 
-  const pickFrom = (candidates: Record<string, unknown>[]) => {
-    if (!candidates.length) return null;
-    const overall = candidates.find(isOverallLifeStage);
-    const row = overall ?? candidates[0];
-    return {
-      value: parseWeightedPercent(row['Percent (weighted)']),
-      year: rowStr(row, 'Time frame'),
-      place: rowStr(row, 'Place or organization') || rowStr(row, 'Province/Territory'),
-      lifeStage: rowStr(row, 'Life Stage'),
-    };
-  };
+type SameDayAccess = SameDayRow & {
+  adults: SameDayRow | null;
+  children: SameDayRow | null;
+};
+
+/** Prefer Alberta provincial Level-1 totals. Headline prefers Adults; Children kept as secondary. */
+function pickCihiSameDayAccess(rows: Record<string, unknown>[]): SameDayAccess {
+  const empty: SameDayRow = { value: null, year: '', place: '', lifeStage: '' };
+  if (!rows.length) return { ...empty, adults: null, children: null };
+
+  const toRow = (row: Record<string, unknown>): SameDayRow => ({
+    value: parseWeightedPercent(row['Percent (weighted)']),
+    year: rowStr(row, 'Time frame'),
+    place: rowStr(row, 'Place or organization') || rowStr(row, 'Province/Territory'),
+    lifeStage: rowStr(row, 'Life Stage'),
+  });
 
   const albertaTotals = rows.filter((r) => isPlaceMatch(r, 'Alberta') && isLevel1Total(r));
   const canadaTotals = rows.filter((r) => isPlaceMatch(r, 'Canada') && isLevel1Total(r));
+  const pool = albertaTotals.length ? albertaTotals : canadaTotals;
 
-  return (
-    pickFrom(albertaTotals) ??
-    pickFrom(canadaTotals) ?? { value: null, year: '', place: '', lifeStage: '' }
-  );
+  const adults =
+    pool
+      .map(toRow)
+      .find((r) => /adult/i.test(r.lifeStage) && !/youth|child/i.test(r.lifeStage)) ?? null;
+  const children =
+    pool
+      .map(toRow)
+      .find((r) => /child|youth/i.test(r.lifeStage)) ?? null;
+  const overall = pool.map(toRow).find((r) => isOverallLifeStage({ 'Life Stage': r.lifeStage } as Record<string, unknown>)) ?? null;
+
+  const headline = overall ?? adults ?? children ?? (pool[0] ? toRow(pool[0]) : empty);
+  return { ...headline, adults, children };
+}
+
+function sourceChip(
+  metadata: Record<string, { source?: string; sourceVintage?: string }> | undefined,
+  arrayKey: string,
+): string | null {
+  const entry = metadata?.[arrayKey];
+  if (!entry?.source) return null;
+  const source = entry.source.replace(/\s*\(\s*Primary Care Alberta\s*\)/i, '').trim();
+  const vintage = entry.sourceVintage ? String(entry.sourceVintage) : '';
+  return vintage ? `${source} · ${vintage}` : source;
 }
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return 'N/A';
-  return `${value}%`;
+  return `${Number(value).toFixed(1)}%`;
 }
 
 export default function PrimaryCareDashboard() {
@@ -171,23 +191,11 @@ export default function PrimaryCareDashboard() {
   const [filterWalkIn, setFilterWalkIn] = useState(false);
   const [filterAfterHours, setFilterAfterHours] = useState(false);
   const [filterVirtual, setFilterVirtual] = useState(false);
+  const [filterWheelchair, setFilterWheelchair] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [hasClickedBrowseAll, setHasClickedBrowseAll] = useState(false);
-
-  const isFilterActive = useMemo(() => {
-    return (
-      directorySearch.trim().length > 0 ||
-      selectedZoneFilter !== 'All' ||
-      selectedTypeFilter !== 'All' ||
-      filterWalkIn ||
-      filterAfterHours ||
-      filterVirtual
-    );
-  }, [directorySearch, selectedZoneFilter, selectedTypeFilter, filterWalkIn, filterAfterHours, filterVirtual]);
-
   useEffect(() => {
     setCurrentPage(1);
-  }, [directorySearch, selectedZoneFilter, selectedTypeFilter, filterWalkIn, filterAfterHours, filterVirtual]);
+  }, [directorySearch, selectedZoneFilter, selectedTypeFilter, filterWalkIn, filterAfterHours, filterVirtual, filterWheelchair]);
 
   // Filtered Provider Directory logic
   const filteredProviders = useMemo(() => {
@@ -204,10 +212,28 @@ export default function PrimaryCareDashboard() {
       const matchesWalkIn = !filterWalkIn || prov.features.walkIn;
       const matchesAfterHours = !filterAfterHours || prov.features.afterHours;
       const matchesVirtual = !filterVirtual || prov.features.virtualAppointments;
+      const matchesWheelchair = !filterWheelchair || prov.features.wheelchairAccess;
 
-      return matchesSearch && matchesZone && matchesType && matchesWalkIn && matchesAfterHours && matchesVirtual;
+      return (
+        matchesSearch &&
+        matchesZone &&
+        matchesType &&
+        matchesWalkIn &&
+        matchesAfterHours &&
+        matchesVirtual &&
+        matchesWheelchair
+      );
     });
-  }, [directorySearch, selectedZoneFilter, selectedTypeFilter, filterWalkIn, filterAfterHours, filterVirtual, domainData]);
+  }, [
+    directorySearch,
+    selectedZoneFilter,
+    selectedTypeFilter,
+    filterWalkIn,
+    filterAfterHours,
+    filterVirtual,
+    filterWheelchair,
+    domainData,
+  ]);
 
   const PAGE_SIZE = 15;
   const totalPages = useMemo(() => {
@@ -250,6 +276,22 @@ export default function PrimaryCareDashboard() {
       .filter((r) => r.geography === 'Alberta' && r.reporting_year === year)
       .sort((a, b) => b.metric_value - a.metric_value);
   }, [domainData, reportingYear]);
+
+  const chartAttachmentRates = useMemo(() => {
+    const preferred = [
+      'All Residents',
+      'Seniors (65+)',
+      'Adults (18-64)',
+      'Children & Youth (0-17)',
+      'Rural / Remote Areas',
+      'Urban Centres',
+      'Lowest Income Quintile',
+      'Highest Income Quintile',
+    ];
+    const byGroup = new Map(latestAlbertaRates.map((r) => [r.demographic_group, r]));
+    const curated = preferred.map((g) => byGroup.get(g)).filter((r): r is NonNullable<typeof r> => Boolean(r));
+    return curated.length ? curated : latestAlbertaRates;
+  }, [latestAlbertaRates]);
 
   const getRate = (group: string): number | null => {
     const found = latestAlbertaRates.find((r) => r.demographic_group === group)?.metric_value;
@@ -380,6 +422,13 @@ export default function PrimaryCareDashboard() {
   const sameDayLifeStage = cihiSameDay.lifeStage;
   const sameDayIn10 =
     sameDayValue != null ? Math.round((sameDayValue / 10) * 10) / 10 : null;
+  const sameDayAdults = cihiSameDay.adults;
+  const sameDayChildren = cihiSameDay.children;
+  const attachmentSource = sourceChip(metadata, 'ATTACHMENT_RATES');
+  const sameDaySource = sourceChip(metadata, 'CIHI_SAME_DAY_ACCESS');
+  const hqcaSource = sourceChip(metadata, 'CONTINUITY_SATISFACTION_HQCA');
+  const directorySource = sourceChip(metadata, 'ACCEPTING_PROVIDERS');
+  const headerArrayKey = activeSubTab === 'directory' ? 'ACCEPTING_PROVIDERS' : 'ATTACHMENT_RATES';
 
   return (
     <div className="space-y-6">
@@ -387,9 +436,9 @@ export default function PrimaryCareDashboard() {
         variant="light"
         icon={Stethoscope}
         title="Primary Care & Providers"
-        description="Track family medicine attachment rates and locate accepting clinics."
+        description="Family-doctor attachment, access quality, and Alberta Find a Provider accepting listings."
         metadata={metadata}
-        arrayKey="ATTACHMENT_RATES"
+        arrayKey={headerArrayKey}
       >
         <button
           onClick={() => refresh()}
@@ -492,31 +541,35 @@ export default function PrimaryCareDashboard() {
         </div>
 
         {/* Metric 2 — Accepting providers */}
-        <div className="bg-surface border border-line rounded-xl p-4 flex items-start gap-4">
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('directory')}
+          className="w-full text-left bg-surface border border-line rounded-xl p-4 flex items-start gap-4 hover:border-line-2 hover:bg-paper cursor-pointer transition-colors"
+        >
           <div className="p-3 rounded-lg bg-paper border border-line text-ok shrink-0">
             <Stethoscope className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
             <span className="text-ink-3 text-[10px] font-medium block">
-              Accepting Patients (Listed)
+              Accepting New Patients
             </span>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl font-semibold text-ink font-mono tabular-nums">
                 {domainData.ACCEPTING_PROVIDERS.length === 0
                   ? 'N/A'
-                  : `${totalAcceptingCount.toLocaleString()} Providers`}
+                  : totalAcceptingCount.toLocaleString()}
               </span>
               {domainData.ACCEPTING_PROVIDERS.length > 0 && (
-                <span className="text-[10px] text-ok font-medium">Live Directory</span>
+                <span className="text-[10px] text-ok font-medium">listed rows</span>
               )}
             </div>
             <span className="text-[10px] text-ink-2 mt-1 block">
               {domainData.ACCEPTING_PROVIDERS.length === 0
                 ? 'No accepting-provider listings available from the directory feed.'
-                : `Source: Alberta Find a Provider directory · ${domainData.ACCEPTING_PROVIDERS.length} providers province-wide (not attachment statistics)`}
+                : 'Alberta Find a Provider · provider×clinic listings (not unique people)'}
             </span>
           </div>
-        </div>
+        </button>
 
         {/* Metric 3 — CIHI same/next-day access */}
         <button
@@ -529,7 +582,7 @@ export default function PrimaryCareDashboard() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <span className="text-ink-3 text-[10px] font-medium block">
-                Same / Next Day Access
+                Same / Next Day Access · Adults
               </span>
               <span
                 className="p-1.5 bg-paper border border-line rounded-lg text-ink-3 group-hover:text-accent group-hover:border-line-2 transition-colors shrink-0"
@@ -551,8 +604,8 @@ export default function PrimaryCareDashboard() {
             <div className="flex items-center justify-between gap-1 mt-1">
               <span className="text-[10px] text-ink-2 block">
                 {sameDayValue != null
-                  ? `${sameDayIn10} in 10 report same/next-day access${sameDayLifeStage ? ` (${sameDayLifeStage})` : ''}`
-                  : 'Same-day access not available from CIHI_SAME_DAY_ACCESS'}
+                  ? `${sameDayIn10} in 10 adults · CIHI ${sameDayYear || ''}`.trim()
+                  : 'Same-day access not available from CIHI'}
               </span>
               <span className="text-[9px] text-accent font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
                 View Details
@@ -680,10 +733,10 @@ export default function PrimaryCareDashboard() {
                     Primary Care Attachment Rates by Demographic Group
                   </h3>
                   <p className="text-xs text-ink-2">
-                    CIHI Shared Health Priorities — percent of Albertans reporting access to a regular provider
-                    {reportingYear ? ` (${reportingYear})` : ''}
+                    Percent of Albertans with a regular provider
+                    {reportingYear ? ` · ${reportingYear}` : ''}
+                    {attachmentSource ? ` · ${attachmentSource}` : ''}
                   </p>
-                  <DataTimestamp compact variant="light" metadata={metadata} arrayKey="ATTACHMENT_RATES" />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-sm bg-accent"></span>
@@ -700,7 +753,7 @@ export default function PrimaryCareDashboard() {
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={latestAlbertaRates}
+                      data={chartAttachmentRates}
                       layout="vertical"
                       margin={{ top: 25, right: 30, left: 160, bottom: 10 }}
                     >
@@ -727,7 +780,7 @@ export default function PrimaryCareDashboard() {
                         formatter={(v: number) => [`${v}%`, 'Attached Patients']}
                       />
                       <Bar dataKey="metric_value" radius={[0, 4, 4, 0]} maxBarSize={28} isAnimationActive={false}>
-                        {latestAlbertaRates.map((entry, index) => {
+                        {chartAttachmentRates.map((entry, index) => {
                           let barColor = 'oklch(0.68 0.13 252)';
                           if (entry.demographic_group.includes('Lowest')) barColor = 'oklch(0.75 0.14 25)';
                           if (entry.demographic_group.includes('Seniors')) barColor = 'oklch(0.78 0.12 155)';
@@ -760,103 +813,69 @@ export default function PrimaryCareDashboard() {
               )}
             </div>
 
-            {/* Sidebar Analytics — verified HQCA + CIHI only */}
-            <div className="bg-surface border border-line rounded-xl p-5 space-y-6">
+            {/* Sidebar — CIHI same-day + HQCA continuity */}
+            <div className="bg-surface border border-line rounded-xl p-5 space-y-4">
               <div>
-                <h3 className="text-sm font-semibold text-ink mb-1">
-                  Key Quality & Access Indicators
-                </h3>
+                <h3 className="text-sm font-semibold text-ink mb-1">Access quality</h3>
                 <p className="text-xs text-ink-2">
-                  Verified upstream metrics from CIHI same-day access and HQCA FOCUS continuity.
+                  CIHI same/next-day access and HQCA continuity with usual family doctor.
                 </p>
               </div>
 
-              <div className="space-y-4">
-                {/* CIHI Same-day Access indicator */}
-                <div className="p-3 bg-paper border border-line rounded-lg space-y-1.5">
-                  <div className="flex justify-between items-center gap-2">
-                    <span className="text-xs text-ink font-medium">Same/Next Day Doctor Access</span>
-                    <span
-                      className={`text-xs font-mono tabular-nums font-semibold ${
-                        sameDayValue == null ? 'text-ink-3' : 'text-accent'
-                      }`}
-                    >
-                      {formatPct(sameDayValue)}
+              <div className="space-y-3">
+                <div className="p-3 bg-paper border border-line rounded-lg space-y-2">
+                  <div className="flex justify-between items-baseline gap-2">
+                    <span className="text-xs text-ink font-medium">Same / next-day · Adults</span>
+                    <span className={`text-sm font-mono tabular-nums font-semibold ${sameDayAdults?.value == null ? 'text-ink-3' : 'text-accent'}`}>
+                      {formatPct(sameDayAdults?.value ?? sameDayValue)}
                     </span>
                   </div>
-                  {sameDayValue != null ? (
-                    <div className="w-full bg-paper rounded-full h-1.5 overflow-hidden border border-line">
+                  {(sameDayAdults?.value ?? sameDayValue) != null && (
+                    <div className="w-full bg-surface rounded-full h-1.5 overflow-hidden border border-line">
                       <div
                         className="bg-accent h-full rounded-full"
-                        style={{ width: `${Math.min(100, Math.max(0, sameDayValue))}%` }}
+                        style={{ width: `${Math.min(100, Math.max(0, sameDayAdults?.value ?? sameDayValue ?? 0))}%` }}
                       />
                     </div>
-                  ) : (
-                    <div className="w-full bg-paper rounded-full h-1.5 overflow-hidden border border-line">
-                      <div className="bg-ink-3/30 h-full rounded-full w-0" />
+                  )}
+                  {sameDayChildren?.value != null && (
+                    <div className="flex justify-between text-[10px] text-ink-2">
+                      <span>Children &amp; youth</span>
+                      <span className="font-mono tabular-nums font-semibold text-ink">{formatPct(sameDayChildren.value)}</span>
                     </div>
                   )}
-                  <p className="text-[10px] text-ink-2">
-                    {sameDayValue != null
-                      ? `CIHI Shared Health Priorities — ${sameDayLifeStage || 'provincial total'}${
-                          sameDayYear ? ` (${sameDayYear})` : ''
-                        }. Percentage reporting same-day or next-day access to a health provider.`
-                      : 'No CIHI same-day/next-day access row available for Alberta (or Canada comparator).'}
+                  <p className="text-[10px] text-ink-3">
+                    {sameDaySource ?? 'CIHI Shared Health Priorities'}
                   </p>
-                  <div>
-                    <DataTimestamp compact variant="light" metadata={metadata} arrayKey="CIHI_SAME_DAY_ACCESS" />
-                  </div>
                 </div>
-              </div>
 
-              {latestHqcaContinuityByZone.length > 0 ? (
-                <div className="p-3 bg-paper border border-line rounded-lg space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-ink font-medium">Family Doctor Continuity by Zone</span>
-                    <DataTimestamp
-                      compact
-                      variant="light"
-                      metadata={metadata}
-                      arrayKey="CONTINUITY_SATISFACTION_HQCA"
-                    />
+                {latestHqcaContinuityByZone.length > 0 ? (
+                  <div className="p-3 bg-paper border border-line rounded-lg space-y-2">
+                    <span className="text-xs text-ink font-medium block">Continuity by zone</span>
+                    <p className="text-[10px] text-ink-2">
+                      Visits with usual family doctor · {latestHqcaContinuityByZone[0]?.fiscalYear}
+                      {hqcaSource ? ` · ${hqcaSource}` : ''}
+                    </p>
+                    <div className="divide-y divide-line">
+                      {latestHqcaContinuityByZone.map((row) => (
+                        <div
+                          key={`${row.zone}-${row.fiscalYear}`}
+                          className="flex justify-between py-1.5 text-[11px]"
+                        >
+                          <span className="text-ink-2">{row.zone}</span>
+                          <span className="font-mono tabular-nums font-semibold text-accent">
+                            {Number(row.continuityPct).toFixed(1)}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-[10px] text-ink-2">
-                    HQCA FOCUS — percent of visits with the patient&apos;s usual family doctor (
-                    {latestHqcaContinuityByZone[0]?.fiscalYear}).
-                  </p>
-                  <div className="divide-y divide-line max-h-40 overflow-y-auto">
-                    {latestHqcaContinuityByZone.map((row) => (
-                      <div
-                        key={`${row.zone}-${row.fiscalYear}`}
-                        className="flex justify-between py-1.5 text-[11px]"
-                      >
-                        <span className="text-ink-2">{row.zone}</span>
-                        <span className="font-mono tabular-nums font-semibold text-accent">{row.continuityPct}%</span>
-                      </div>
-                    ))}
+                ) : (
+                  <div className="p-3 bg-paper border border-line rounded-lg space-y-1">
+                    <span className="text-xs text-ink font-medium">Continuity by zone</span>
+                    <p className="text-[10px] text-ink-2">HQCA FOCUS continuity is not in the current payload.</p>
                   </div>
-                </div>
-              ) : (
-                <div className="p-3 bg-paper border border-line rounded-lg space-y-1">
-                  <span className="text-xs text-ink font-medium">Family Doctor Continuity by Zone</span>
-                  <p className="text-[10px] text-ink-2">
-                    HQCA FOCUS continuity by zone is not available in the current primary-care payload.
-                  </p>
-                  <DataTimestamp
-                    compact
-                    variant="light"
-                    metadata={metadata}
-                    arrayKey="CONTINUITY_SATISFACTION_HQCA"
-                  />
-                </div>
-              )}
-
-              <div className="pt-2 border-t border-line">
-                <span className="text-[10px] text-accent font-medium block">CPAR Integration Status</span>
-                <p className="text-[10px] text-ink-2 mt-1">
-                  Central Patient Attachment Registry (CPAR) is active to prevent panel conflicts, verifying
-                  explicit clinic-to-patient relationships.
-                </p>
+                )}
               </div>
             </div>
           </div>
@@ -867,12 +886,14 @@ export default function PrimaryCareDashboard() {
         <div className="space-y-6">
           {/* Filters Panel */}
           <div className="bg-surface border border-line rounded-xl p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-line pb-3">
-              <Sliders className="w-4 h-4 text-accent" />
-              <h3 className="text-sm font-semibold text-ink">
-                Search & Filter Clinics Accepting New Patients
-              </h3>
-              <DataTimestamp compact variant="light" metadata={metadata} arrayKey="ACCEPTING_PROVIDERS" />
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
+              <div className="flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-accent" />
+                <h3 className="text-sm font-semibold text-ink">Accepting providers directory</h3>
+              </div>
+              {directorySource && (
+                <span className="text-[10px] text-ink-3">{directorySource}</span>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -926,7 +947,7 @@ export default function PrimaryCareDashboard() {
                     onChange={(e) => setFilterWalkIn(e.target.checked)}
                     className="rounded border-line bg-paper accent-accent focus:outline-none cursor-pointer"
                   />
-                  <span className="text-[10px] text-ink-2 font-medium select-none">Dedicated Walk-In</span>
+                  <span className="text-[10px] text-ink-2 font-medium select-none">Walk-In</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -946,6 +967,15 @@ export default function PrimaryCareDashboard() {
                   />
                   <span className="text-[10px] text-ink-2 font-medium select-none">Virtual Appts</span>
                 </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filterWheelchair}
+                    onChange={(e) => setFilterWheelchair(e.target.checked)}
+                    className="rounded border-line bg-paper accent-accent focus:outline-none cursor-pointer"
+                  />
+                  <span className="text-[10px] text-ink-2 font-medium select-none">Wheelchair</span>
+                </label>
               </div>
             </div>
 
@@ -962,7 +992,7 @@ export default function PrimaryCareDashboard() {
                   setFilterWalkIn(false);
                   setFilterAfterHours(false);
                   setFilterVirtual(false);
-                  setHasClickedBrowseAll(false);
+                  setFilterWheelchair(false);
                   setCurrentPage(1);
                 }}
                 className="text-accent hover:text-accent-strong font-semibold cursor-pointer"
@@ -983,29 +1013,16 @@ export default function PrimaryCareDashboard() {
                 </p>
               </div>
             </div>
-          ) : !isFilterActive && !hasClickedBrowseAll ? (
-            <div className="bg-surface border border-line rounded-xl p-12 text-center space-y-4">
-              <Search className="w-12 h-12 text-accent mx-auto animate-pulse" />
-              <div className="max-w-md mx-auto space-y-2">
-                <h4 className="text-base font-semibold text-ink">Search-First Provider Directory</h4>
-                <p className="text-xs text-ink-2">
-                  Enter a clinic name, physician name, city, or PCN, or use the filters above to locate accepting
-                  family physicians and clinics.
-                </p>
-                <div className="pt-2">
-                  <button
-                    onClick={() => setHasClickedBrowseAll(true)}
-                    className="px-4 py-2 rounded-lg bg-accent text-white font-semibold text-xs transition-colors hover:bg-accent-strong cursor-pointer"
-                  >
-                    Browse All Providers
-                  </button>
-                </div>
-              </div>
-            </div>
           ) : filteredProviders.length > 0 ? (
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedProviders.map((prov) => {
+                  const limitedPanelMessage =
+                    'limitedPanelMessage' in prov &&
+                    typeof (prov as { limitedPanelMessage?: unknown }).limitedPanelMessage === 'string'
+                      ? (prov as { limitedPanelMessage: string }).limitedPanelMessage.trim()
+                      : '';
+
                   return (
                     <div
                       key={prov.id}
@@ -1058,6 +1075,14 @@ export default function PrimaryCareDashboard() {
                       <div className="mt-4 pt-3 space-y-3">
                         {/* Features */}
                         <div className="flex flex-wrap gap-1.5">
+                          {limitedPanelMessage ? (
+                            <span
+                              title={limitedPanelMessage}
+                              className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-warn-soft text-warn border border-line"
+                            >
+                              Limited panel
+                            </span>
+                          ) : null}
                           {prov.features.walkIn && (
                             <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-warn-soft text-warn border border-line">
                               Walk-In

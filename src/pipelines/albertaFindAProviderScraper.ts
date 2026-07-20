@@ -1,7 +1,7 @@
 // Alberta Find a Provider scraper.
 // Fetches real clinic/provider data from the official Primary Care Alberta
-// directory API (albertafindaprovider.ca) and merges accepting-new-patients
-// clinics into data-primary-care.json's ACCEPTING_PROVIDERS array.
+// directory API (albertafindaprovider.ca) and replaces data-primary-care.json's
+// ACCEPTING_PROVIDERS with the fresh accepting-new-patients list (deduped).
 //
 // The API is the same XHR endpoint the public directory map UI calls. It
 // returns clean JSON with no auth required. We paginate through all clinics
@@ -123,10 +123,48 @@ function formatPostalCode(raw: string | null | undefined): string {
   return raw;
 }
 
+function hasService(
+  services: { id: number; name: string }[] | undefined,
+  serviceName: string,
+): boolean {
+  const target = serviceName.toLowerCase();
+  return (services ?? []).some(s => s.name.toLowerCase() === target);
+}
+
+function mapClinicFeatures(clinic: ApiClinic): AcceptingProvider['features'] {
+  const services = clinic.services;
+  const virtualHeuristic = (services ?? []).some(s => {
+    const name = s.name.toLowerCase();
+    return name.includes('virtual') || name.includes('telehealth');
+  });
+
+  return {
+    walkIn:
+      clinic.is_dedicated_walk_in ||
+      clinic.is_access_clinic ||
+      hasService(services, 'Walk-in Services'),
+    afterHours: hasService(services, 'Open After Hours'),
+    virtualAppointments:
+      hasService(services, 'Virtual Appointments') || virtualHeuristic,
+    wheelchairAccess: hasService(services, 'Wheelchair Access'),
+    onlineBooking: hasService(services, 'Clinic offers online booking'),
+  };
+}
+
+function limitedPanelMessageFromClinic(
+  clinic: ApiClinic,
+): string | null | undefined {
+  const trimmed = clinic.limited_panel_message?.trim();
+  if (!trimmed) return undefined;
+  return trimmed;
+}
+
 function mapClinicToProviders(clinic: ApiClinic): AcceptingProvider[] {
   const zone = (clinic.pcn?.zone?.name ?? 'Calgary Zone') as AcceptingProvider['zone'];
   const pcnName = clinic.pcn?.display_name;
   const physicians = clinic.physicians ?? [];
+  const features = mapClinicFeatures(clinic);
+  const limitedPanelMessage = limitedPanelMessageFromClinic(clinic);
 
   // If no physicians listed, create one clinic-level entry
   if (physicians.length === 0) {
@@ -142,16 +180,9 @@ function mapClinicToProviders(clinic: ApiClinic): AcceptingProvider[] {
       phone: formatPhone(clinic.phone_number),
       acceptingNewPatients: true,
       languages: [],
-      features: {
-        walkIn: clinic.is_dedicated_walk_in || clinic.is_access_clinic,
-        afterHours: false,
-        virtualAppointments: (clinic.services ?? []).some(s =>
-          s.name.toLowerCase().includes('virtual') || s.name.toLowerCase().includes('telehealth'),
-        ),
-        wheelchairAccess: false,
-        onlineBooking: false,
-      },
+      features,
       pcnName,
+      ...(limitedPanelMessage !== undefined ? { limitedPanelMessage } : {}),
     }];
   }
 
@@ -169,22 +200,40 @@ function mapClinicToProviders(clinic: ApiClinic): AcceptingProvider[] {
     acceptingNewPatients: true,
     gender: phys.gender === 'm' ? 'Male' : 'Female',
     languages: (phys.languages ?? []).map(l => l.name),
-    features: {
-      walkIn: clinic.is_dedicated_walk_in || clinic.is_access_clinic,
-      afterHours: false,
-      virtualAppointments: (clinic.services ?? []).some(s =>
-        s.name.toLowerCase().includes('virtual') || s.name.toLowerCase().includes('telehealth'),
-      ),
-      wheelchairAccess: false,
-      onlineBooking: Boolean(clinic.website),
-    },
+    features,
     pcnName,
+    ...(limitedPanelMessage !== undefined ? { limitedPanelMessage } : {}),
   }));
 }
 
-// Merge ACCEPTING_PROVIDERS into the existing JSON, preserving genuine upstream
-// keys. Force withheld primary-care residual arrays empty so RMW never
-// reintroduces them. Dedupe by id, preferring freshly fetched rows.
+function providerDedupeKey(provider: AcceptingProvider): string {
+  return [
+    provider.name,
+    provider.clinicName,
+    provider.address,
+    provider.phone,
+    provider.type,
+  ]
+    .map(part => part.trim().toLowerCase())
+    .join('|');
+}
+
+/** Keep first occurrence of each normalized identity from the fresh fetch. */
+function dedupeProviders(providers: AcceptingProvider[]): AcceptingProvider[] {
+  const seen = new Set<string>();
+  const deduped: AcceptingProvider[] = [];
+  for (const provider of providers) {
+    const key = providerDedupeKey(provider);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(provider);
+  }
+  return deduped;
+}
+
+// Replace ACCEPTING_PROVIDERS with the fresh fetch (no merge-retain of absent
+// IDs). Preserve other JSON keys. Force withheld primary-care residual arrays
+// empty so RMW never reintroduces them. Dedupe by normalized identity.
 function mergeAndWrite(file: string, newProviders: AcceptingProvider[]): number {
   const existing = loadJsonFile(file);
   // Force primary-care withheld residual arrays empty so RMW never reintroduces them.
@@ -192,16 +241,8 @@ function mergeAndWrite(file: string, newProviders: AcceptingProvider[]): number 
   existing.ED_RELIANCE_BY_CONTINUITY = [];
   existing.CONTINUITY_SATISFACTION = [];
 
-  const oldProviders = Array.isArray(existing.ACCEPTING_PROVIDERS)
-    ? (existing.ACCEPTING_PROVIDERS as AcceptingProvider[])
-    : [];
-
-  const byId = new Map<string, AcceptingProvider>();
-  for (const p of oldProviders) byId.set(p.id, p);
-  for (const p of newProviders) byId.set(p.id, p); // fresh overwrites old
-
-  const merged = Array.from(byId.values());
-  existing.ACCEPTING_PROVIDERS = merged;
+  const replaced = dedupeProviders(newProviders);
+  existing.ACCEPTING_PROVIDERS = replaced;
 
   const ownedMetadata: DataMetadata = {
     ACCEPTING_PROVIDERS: buildMetadataEntry({
@@ -213,11 +254,12 @@ function mergeAndWrite(file: string, newProviders: AcceptingProvider[]): number 
   existing._dataMetadata = mergeDataMetadata(
     existing._dataMetadata as DataMetadata | undefined,
     ownedMetadata,
+    ['ACCEPTING_PROVIDERS'],
   );
 
   applyWithheldPayloadGuard(existing);
   fs.writeFileSync(file, JSON.stringify(existing, null, 2));
-  return merged.length;
+  return replaced.length;
 }
 
 export async function run(): Promise<SyncResult> {

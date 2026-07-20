@@ -99,7 +99,7 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     icon: Stethoscope,
     badge: 'COMMUNITY',
     source: 'CIHI Shared Health Priorities, HQCA & accepting providers',
-    updateFrequency: 'Annual surveys',
+    updateFrequency: 'Directory: daily · CIHI/HQCA: annual',
   },
   {
     id: 'public-health',

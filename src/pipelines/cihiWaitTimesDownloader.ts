@@ -134,6 +134,8 @@ interface ColumnMap {
   metric: number;
   year: number;
   result: number;
+  /** Present only when the sheet has a Reporting level column. */
+  reportingLevel?: number;
 }
 
 function buildColumnMap(header: unknown[]): ColumnMap | null {
@@ -146,19 +148,97 @@ function buildColumnMap(header: unknown[]): ColumnMap | null {
   const metric = find(['metric']);
   const year = find(['year']);
   const result = find(['result']);
+  const reportingLevelIdx = find(['reporting', 'level']);
 
   if (province < 0 || indicator < 0 || metric < 0 || year < 0 || result < 0) {
     return null;
   }
-  return { province, indicator, metric, year, result };
+  const map: ColumnMap = { province, indicator, metric, year, result };
+  if (reportingLevelIdx >= 0) map.reportingLevel = reportingLevelIdx;
+  return map;
 }
 
 interface LongRow {
   province: string;
   indicator: string;
   metric: string;
+  /** Raw data-year cell — not collapsed via normaliseYear (keeps 2019FY / 2019Q3Q4 distinct). */
   year: string;
   result: number;
+  /**
+   * Set only when the sheet has a Reporting level column (empty cell → '').
+   * Absent entirely when the column is missing so builders can keep province-only behaviour.
+   */
+  reportingLevel?: string;
+}
+
+const CALENDAR_YEAR_RE = /^\d{4}$/;
+
+function isCalendarYear(year: string): boolean {
+  return CALENDAR_YEAR_RE.test(year);
+}
+
+/** Values containing "provincial" or "province" (e.g. Provincial, Province/territory). */
+function isProvincialReportingLevel(level: string): boolean {
+  const lower = level.toLowerCase();
+  return lower.includes('provincial') || lower.includes('province');
+}
+
+/** True when extract captured a Reporting level column on the sheet. */
+function sheetHasReportingLevel(rows: LongRow[]): boolean {
+  return rows.some((r) => r.reportingLevel !== undefined);
+}
+
+function isProvincialRow(row: LongRow, reportingLevelAvailable: boolean): boolean {
+  if (!reportingLevelAvailable) return true;
+  return isProvincialReportingLevel(row.reportingLevel ?? '');
+}
+
+/** Comparator geographies: provinces must be provincial; Canada/national rows are national-level. */
+function isComparatorGeographyRow(row: LongRow, reportingLevelAvailable: boolean): boolean {
+  if (!reportingLevelAvailable) return true;
+  if (row.province === 'Canada') {
+    const lower = (row.reportingLevel ?? '').toLowerCase();
+    return (
+      lower.includes('canada') ||
+      lower.includes('national') ||
+      lower.length === 0 ||
+      isProvincialReportingLevel(row.reportingLevel ?? '')
+    );
+  }
+  return isProvincialReportingLevel(row.reportingLevel ?? '');
+}
+
+function isWithinBenchmarkMetric(metric: string): boolean {
+  const lower = metric.toLowerCase();
+  return (
+    lower.includes('% meeting benchmark') ||
+    lower.includes('meeting benchmark') ||
+    lower.includes('% within benchmark') ||
+    lower.includes('within benchmark')
+  );
+}
+
+function isMedianMetric(metric: string): boolean {
+  const lower = metric.toLowerCase();
+  return lower.includes('50th percentile') || lower.includes('median');
+}
+
+/** Exact / full CIHI indicator labels — avoids bare "ct"/"hip" substring hazards. */
+const HISTORICAL_PROCEDURES: { match: string; label: string }[] = [
+  { match: 'Hip Replacement', label: 'Hip Replacement' },
+  { match: 'Knee Replacement', label: 'Knee Replacement' },
+  { match: 'Cataract Surgery', label: 'Cataract Surgery' },
+  { match: 'MRI Scan', label: 'MRI Scan' },
+  { match: 'CT Scan', label: 'CT Scan' },
+];
+
+function matchHistoricalProcedure(indicator: string): string | undefined {
+  const lower = indicator.trim().toLowerCase();
+  for (const { match, label } of HISTORICAL_PROCEDURES) {
+    if (lower === match.toLowerCase()) return label;
+  }
+  return undefined;
 }
 
 function extractLongRows(workbook: XLSX.WorkBook): LongRow[] {
@@ -191,16 +271,22 @@ function extractLongRows(workbook: XLSX.WorkBook): LongRow[] {
   if (!map) return [];
 
   const out: LongRow[] = [];
+  const hasReportingLevelCol = map.reportingLevel !== undefined;
   for (let i = headerIdx + 1; i < rows.length; i++) {
     const row = rows[i];
     if (!row || row.length === 0) continue;
     const province = asString(row[map.province]);
     const indicator = asString(row[map.indicator]);
     const metric = asString(row[map.metric]);
-    const year = normaliseYear(row[map.year]);
+    // Preserve the raw year string so FY/Q3Q4 rows are not collapsed into calendar keys.
+    const year = asString(row[map.year]);
     const result = asNumber(row[map.result]);
     if (!province || !indicator || !metric || !year || result === undefined) continue;
-    out.push({ province, indicator, metric, year, result });
+    const longRow: LongRow = { province, indicator, metric, year, result };
+    if (hasReportingLevelCol) {
+      longRow.reportingLevel = asString(row[map.reportingLevel!]) ?? '';
+    }
+    out.push(longRow);
   }
   return out;
 }
@@ -220,8 +306,11 @@ function buildImagingTrends(rows: LongRow[]): ImagingWaitTrend[] {
     if (!(r.indicator in IMAGING_INDICATORS)) continue;
     if (!(r.metric in IMAGING_METRICS)) continue;
     if (!(r.province in PROVINCES)) continue;
+    // Imaging trends still collapse fiscal-style labels (e.g. 2023-24 → 2023).
+    const year = normaliseYear(r.year);
+    if (!year) continue;
 
-    const key = `${r.year}|${r.indicator}`;
+    const key = `${year}|${r.indicator}`;
     let acc = accMap.get(key);
     if (!acc) {
       acc = { modality: r.indicator as 'CT Scan' | 'MRI Scan' };
@@ -277,20 +366,44 @@ const PROVINCE_COMPARATOR_NAMES: Record<string, true> = {
   'Manitoba': true, 'Ontario': true, 'Quebec': true, 'Canada': true,
 };
 function buildProvincialComparators(rows: LongRow[]): { comparators: ProvincialComparator[]; comparatorYears: string[] } {
-  const accMap = new Map<string, { hip?: number; hipYear?: string; knee?: number; kneeYear?: string; cataract?: number; cataractYear?: string; mri?: number; mriYear?: string }>();
+  type Acc = {
+    hip?: number; hipYear?: string;
+    knee?: number; kneeYear?: string;
+    cataract?: number; cataractYear?: string;
+    mri?: number; mriYear?: string;
+  };
+  const accMap = new Map<string, Acc>();
+  const reportingLevelAvailable = sheetHasReportingLevel(rows);
+
+  const takeLatest = (
+    acc: Acc,
+    valueKey: 'hip' | 'knee' | 'cataract' | 'mri',
+    yearKey: 'hipYear' | 'kneeYear' | 'cataractYear' | 'mriYear',
+    row: LongRow,
+  ): void => {
+    const prevYear = acc[yearKey];
+    if (prevYear !== undefined && row.year <= prevYear) return;
+    acc[valueKey] = row.result;
+    acc[yearKey] = row.year;
+  };
+
   for (const row of rows) {
     if (!PROVINCE_COMPARATOR_NAMES[row.province]) continue;
-    const isWithinBenchmark = row.metric.includes('% within benchmark') || row.metric.includes('within benchmark');
-    const isMedian = row.metric.includes('50th percentile') || row.metric.includes('median');
-    if (!isWithinBenchmark && !isMedian) continue;
+    if (!isComparatorGeographyRow(row, reportingLevelAvailable)) continue;
+    if (!isCalendarYear(row.year)) continue; // ignore 2019FY / 2019Q3Q4 etc.
+
+    const withinBenchmark = isWithinBenchmarkMetric(row.metric);
+    const median = isMedianMetric(row.metric);
+    if (!withinBenchmark && !median) continue;
 
     let acc = accMap.get(row.province);
     if (!acc) { acc = {}; accMap.set(row.province, acc); }
 
-    if (row.indicator.toLowerCase().includes('hip') && isWithinBenchmark) { acc.hip = row.result; acc.hipYear = row.year; }
-    else if (row.indicator.toLowerCase().includes('knee') && isWithinBenchmark) { acc.knee = row.result; acc.kneeYear = row.year; }
-    else if (row.indicator.toLowerCase().includes('cataract') && isWithinBenchmark) { acc.cataract = row.result; acc.cataractYear = row.year; }
-    else if (row.indicator.toLowerCase().includes('mri') && isMedian) { acc.mri = row.result; acc.mriYear = row.year; }
+    const indicator = row.indicator.trim().toLowerCase();
+    if (indicator === 'hip replacement' && withinBenchmark) takeLatest(acc, 'hip', 'hipYear', row);
+    else if (indicator === 'knee replacement' && withinBenchmark) takeLatest(acc, 'knee', 'kneeYear', row);
+    else if (indicator === 'cataract surgery' && withinBenchmark) takeLatest(acc, 'cataract', 'cataractYear', row);
+    else if (indicator === 'mri scan' && median) takeLatest(acc, 'mri', 'mriYear', row);
   }
 
   const out: ProvincialComparator[] = [];
@@ -320,28 +433,24 @@ interface HistoricalWaitTrend {
 }
 
 function buildHistoricalWaitTrends(rows: LongRow[]): HistoricalWaitTrend[] {
-  const PROCEDURES: Record<string, string> = {
-    'hip': 'Hip Replacement',
-    'knee': 'Knee Replacement',
-    'cataract': 'Cataract Surgery',
-    'mri': 'MRI Scan',
-    'ct': 'CT Scan',
-  };
   const seen = new Set<string>();
   const out: HistoricalWaitTrend[] = [];
+  const reportingLevelAvailable = sheetHasReportingLevel(rows);
+
   for (const row of rows) {
     if (row.province !== 'Alberta') continue;
-    if (!row.metric.includes('50th percentile') && !row.metric.includes('median')) continue;
-    const indicatorLower = row.indicator.toLowerCase();
-    for (const [key, label] of Object.entries(PROCEDURES)) {
-      if (indicatorLower.includes(key)) {
-        const dedupKey = `${row.year}-${label}`;
-        if (seen.has(dedupKey)) break;
-        seen.add(dedupKey);
-        out.push({ year: row.year, procedure: label, medianWaitDays: row.result });
-        break;
-      }
-    }
+    if (!isProvincialRow(row, reportingLevelAvailable)) continue;
+    if (!isMedianMetric(row.metric)) continue;
+    // Require pure calendar years — do not let FY/Q3Q4 collapse into calendar keys.
+    if (!isCalendarYear(row.year)) continue;
+
+    const label = matchHistoricalProcedure(row.indicator);
+    if (!label) continue;
+
+    const dedupKey = `${row.year}-${label}`;
+    if (seen.has(dedupKey)) continue;
+    seen.add(dedupKey);
+    out.push({ year: row.year, procedure: label, medianWaitDays: row.result });
   }
   out.sort((a, b) => a.year.localeCompare(b.year) || a.procedure.localeCompare(b.procedure));
   return out;

@@ -37,8 +37,8 @@
       "status": "success",
       "recordsFetched": 152,
       "recordsWritten": 152,
-      "durationMs": 137,
-      "timestamp": "2026-07-20T11:58:04.661Z"
+      "durationMs": 72,
+      "timestamp": "2026-07-20T15:55:46.395Z"
     },
     {
       "domain": "surgical",
@@ -129,7 +129,7 @@
       "recordsFetched": 0,
       "recordsWritten": 0,
       "durationMs": 129,
-      "error": "Fraser Institute blocks automated access (403) \u2014 relying on CIHI/Open Alberta for spending data",
+      "error": "Fraser Institute blocks automated access (403) — relying on CIHI/Open Alberta for spending data",
       "timestamp": "2026-07-19T12:03:40.279Z"
     },
     {
@@ -174,12 +174,12 @@
       "status": "success",
       "recordsFetched": 29,
       "recordsWritten": 29,
-      "durationMs": 71,
-      "timestamp": "2026-07-20T11:58:04.890Z"
+      "durationMs": 66,
+      "timestamp": "2026-07-20T16:15:46.387Z"
     }
   ],
-  "erWaitTimesLastUpdate": "2026-07-20T11:58:04.890Z",
-  "erWaitTimesNextUpdate": "2026-07-20T12:08:04.963Z",
-  "labWaitsLastUpdate": "2026-07-20T11:58:04.661Z",
-  "labWaitsNextUpdate": "2026-07-20T12:58:04.798Z"
+  "erWaitTimesLastUpdate": "2026-07-20T16:15:46.387Z",
+  "erWaitTimesNextUpdate": "2026-07-20T16:25:46.454Z",
+  "labWaitsLastUpdate": "2026-07-20T15:55:46.395Z",
+  "labWaitsNextUpdate": "2026-07-20T16:55:46.467Z"
 }
