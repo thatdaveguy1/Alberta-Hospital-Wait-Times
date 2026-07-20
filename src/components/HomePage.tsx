@@ -2,7 +2,7 @@
 // right now, the fastest path to care near you, active disruptions, and a
 // data-first directory of every module.
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowRight, Map, Navigation, Search } from 'lucide-react';
+import { AlertTriangle, ArrowRight, FlaskConical, Map, Navigation, Search } from 'lucide-react';
 import {
   CATEGORIES,
   CATEGORY_TITLE_BY_ID,
@@ -14,6 +14,7 @@ import {
   enrichHospital,
   shortHospitalName,
   type EnrichedHospital,
+  type WaitBand,
 } from '../lib/erFacility';
 import {
   calculateDistance,
@@ -27,6 +28,7 @@ import {
 import { formatMinutesToHm } from '../lib/utils';
 import { formatRelativeTime } from '../hooks/useSyncStatus';
 import { WaitBandChip } from './WaitBandChip';
+import type { LabLocationWait } from '../diagnosticData';
 import type { Hospital, ServiceDisruption } from '../types';
 
 interface HomePageProps {
@@ -39,6 +41,15 @@ type ScoredFacility = EnrichedHospital & {
   netScore: number;
 };
 
+type ScoredLab = LabLocationWait & {
+  distance?: number;
+  driveMins?: number;
+  netScore: number;
+  waitBand: WaitBand;
+};
+
+type OsrmMap = Record<string, { durationMins: number; distanceKm: number }>;
+
 function median(sortedNums: number[]): number | null {
   if (sortedNums.length === 0) return null;
   const mid = Math.floor(sortedNums.length / 2);
@@ -47,26 +58,94 @@ function median(sortedNums: number[]): number | null {
     : sortedNums[mid];
 }
 
+function isLabWaitUnavailable(lab: Pick<LabLocationWait, 'waitTimeMin' | 'walkInAvailable'>): boolean {
+  if (lab.waitTimeMin === 'Closed' || lab.waitTimeMin === 'Appointments Only') return true;
+  if (typeof lab.waitTimeMin === 'number') {
+    return lab.waitTimeMin === 0 && !lab.walkInAvailable;
+  }
+  return true;
+}
+
+function labWaitBand(lab: Pick<LabLocationWait, 'waitTimeMin' | 'walkInAvailable'>): WaitBand {
+  if (lab.waitTimeMin === 'Closed') return 'closed';
+  if (isLabWaitUnavailable(lab)) return 'unavailable';
+  const mins = lab.waitTimeMin as number;
+  if (mins > 45) return 'high';
+  if (mins > 30) return 'moderate';
+  return 'low';
+}
+
+async function fetchOsrmForSites(
+  location: UserLocation,
+  sites: Array<{ id: string; latitude?: number | null; longitude?: number | null }>,
+): Promise<OsrmMap> {
+  const results: OsrmMap = {};
+  const candidates = sites
+    .filter(
+      (s): s is { id: string; latitude: number; longitude: number } =>
+        s.latitude != null && s.longitude != null && !Number.isNaN(s.latitude) && !Number.isNaN(s.longitude),
+    )
+    .map((s) => ({
+      ...s,
+      distance: calculateDistance(location.lat, location.lng, s.latitude, s.longitude),
+    }))
+    .filter((s) => s.distance <= 150)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 25);
+
+  await Promise.all(
+    candidates.map(async (s) => {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${location.lng},${location.lat};${s.longitude},${s.latitude}?overview=false`;
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes?.[0]) {
+          results[s.id] = {
+            durationMins: Math.round(data.routes[0].duration / 60),
+            distanceKm: parseFloat((data.routes[0].distance / 1000).toFixed(1)),
+          };
+        }
+      } catch {
+        // Routing is best-effort; rows fall back to posted wait only.
+      }
+    }),
+  );
+  return results;
+}
+
 export default function HomePage({ onNavigate }: HomePageProps) {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [labs, setLabs] = useState<LabLocationWait[]>([]);
   const [disruptions, setDisruptions] = useState<ServiceDisruption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [labsLoading, setLabsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [location, setLocation] = useState<UserLocation | null>(() => loadSavedLocation());
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoError, setGeoError] = useState('');
   const [locatingBootstrap, setLocatingBootstrap] = useState(() => !loadSavedLocation());
-  const [osrmData, setOsrmData] = useState<Record<string, { durationMins: number; distanceKm: number }>>({});
+  const [osrmData, setOsrmData] = useState<OsrmMap>({});
+  const [labOsrmData, setLabOsrmData] = useState<OsrmMap>({});
   const [directoryQuery, setDirectoryQuery] = useState('');
 
   const load = () => {
     setLoading(true);
+    setLabsLoading(true);
     setFetchError(false);
     fetch('/api/hospitals')
       .then((r) => r.json())
       .then((d) => setHospitals(Array.isArray(d) ? (d as Hospital[]) : []))
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
+    fetch('/api/data/diagnostic')
+      .then((r) => r.json())
+      .then((d) => {
+        const rows = Array.isArray(d?.LAB_LOCATION_WAITS) ? (d.LAB_LOCATION_WAITS as LabLocationWait[]) : [];
+        setLabs(rows);
+      })
+      .catch(() => setLabs([]))
+      .finally(() => setLabsLoading(false));
     fetch('/api/disruptions')
       .then((r) => r.json())
       .then((d) => setDisruptions(Array.isArray(d) ? (d as ServiceDisruption[]) : []))
@@ -104,7 +183,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     return nearestZonesForUser(location.lat, location.lng, hospitals);
   }, [location, hospitals]);
 
-  // OSRM drive times for facilities in the active zone(s) — same mechanism as the ER tab.
+  const activeLabZones = useMemo(() => {
+    if (!location || labs.length === 0) return [] as string[];
+    return nearestZonesForUser(location.lat, location.lng, labs);
+  }, [location, labs]);
+
+  // OSRM drive times for ER facilities in the active zone(s).
   useEffect(() => {
     if (!location || hospitals.length === 0 || activeZones.length === 0) {
       setOsrmData({});
@@ -112,38 +196,31 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     }
     let cancelled = false;
     const zoneSet = new Set(activeZones);
-    const run = async () => {
-      const results: Record<string, { durationMins: number; distanceKm: number }> = {};
-      const nearby = hospitals.filter((h) => {
-        if (!zoneSet.has(h.region)) return false;
-        if (h.latitude == null || h.longitude == null) return false;
-        return calculateDistance(location.lat, location.lng, h.latitude, h.longitude) <= 150;
-      });
-      await Promise.all(
-        nearby.map(async (h) => {
-          try {
-            const url = `https://router.project-osrm.org/route/v1/driving/${location.lng},${location.lat};${h.longitude},${h.latitude}?overview=false`;
-            const res = await fetch(url);
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data.code === 'Ok' && data.routes?.[0]) {
-              results[h.id] = {
-                durationMins: Math.round(data.routes[0].duration / 60),
-                distanceKm: parseFloat((data.routes[0].distance / 1000).toFixed(1)),
-              };
-            }
-          } catch {
-            // Routing is best-effort; rows fall back to posted wait only.
-          }
-        }),
-      );
+    const nearby = hospitals.filter((h) => zoneSet.has(h.region));
+    fetchOsrmForSites(location, nearby).then((results) => {
       if (!cancelled) setOsrmData(results);
-    };
-    run();
+    });
     return () => {
       cancelled = true;
     };
   }, [location, hospitals, activeZones]);
+
+  // OSRM drive times for labs in the active lab zone(s).
+  useEffect(() => {
+    if (!location || labs.length === 0 || activeLabZones.length === 0) {
+      setLabOsrmData({});
+      return;
+    }
+    let cancelled = false;
+    const zoneSet = new Set(activeLabZones);
+    const nearby = labs.filter((l) => zoneSet.has(l.region));
+    fetchOsrmForSites(location, nearby).then((results) => {
+      if (!cancelled) setLabOsrmData(results);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [location, labs, activeLabZones]);
 
   const enriched = useMemo(() => hospitals.map(enrichHospital), [hospitals]);
 
@@ -201,6 +278,29 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       .slice(0, 3);
   }, [enriched, location, osrmData, activeZones]);
 
+  const topLabPicks = useMemo<ScoredLab[]>(() => {
+    if (!location || activeLabZones.length === 0) return [];
+    const zoneSet = new Set(activeLabZones);
+    return labs
+      .filter((l) => zoneSet.has(l.region) && !isLabWaitUnavailable(l))
+      .map((l) => {
+        const drive = labOsrmData[l.id];
+        const distance = calculateDistance(location.lat, location.lng, l.latitude, l.longitude);
+        const wait = l.waitTimeMin as number;
+        const driveMins =
+          drive?.durationMins ?? Math.round((distance / 85) * 60);
+        return {
+          ...l,
+          distance: drive?.distanceKm ?? distance,
+          driveMins,
+          netScore: wait + driveMins,
+          waitBand: labWaitBand(l),
+        };
+      })
+      .sort((a, b) => a.netScore - b.netScore)
+      .slice(0, 3);
+  }, [labs, location, labOsrmData, activeLabZones]);
+
   const requestLocation = async () => {
     setGeoBusy(true);
     setGeoError('');
@@ -213,7 +313,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     }
     setGeoBusy(false);
     setGeoError(
-      'Couldn’t detect your location. Allow GPS, or open the full ER page to enter a city.',
+      'Couldn’t detect your location. Allow GPS, or open the full ER / labs page to enter a city.',
     );
   };
 
@@ -221,6 +321,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     clearSavedLocation();
     setLocation(null);
     setOsrmData({});
+    setLabOsrmData({});
   };
 
   const directoryGroups = useMemo(
@@ -250,6 +351,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       : activeZones.length === 1
         ? activeZones[0].replace(/ Zone$/, '')
         : activeZones.map((z) => z.replace(/ Zone$/, '')).join(' + ');
+  const labZoneLabel =
+    activeLabZones.length === 0
+      ? null
+      : activeLabZones.length === 1
+        ? activeLabZones[0].replace(/ Zone$/, '')
+        : activeLabZones.map((z) => z.replace(/ Zone$/, '')).join(' + ');
 
   const FullErCta = ({ compact = false }: { compact?: boolean }) => (
     <button
@@ -262,15 +369,52 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       }
     >
       <span className="min-w-0">
-        <span className={`flex items-center gap-2 ${compact ? 'text-sm font-semibold text-accent group-hover:text-white' : 'text-base font-semibold'}`}>
+        <span
+          className={`flex items-center gap-2 ${compact ? 'text-sm font-semibold text-accent group-hover:text-white' : 'text-base font-semibold'}`}
+        >
           <Map className="h-5 w-5 shrink-0" aria-hidden />
           Open the full ER wait times page
         </span>
-        <span className={`mt-0.5 block text-xs ${compact ? 'text-ink-2 group-hover:text-white/80' : 'text-white/80'}`}>
+        <span
+          className={`mt-0.5 block text-xs ${compact ? 'text-ink-2 group-hover:text-white/80' : 'text-white/80'}`}
+        >
           Map, every Alberta site, drive times, and trends
         </span>
       </span>
-      <ArrowRight className={`h-5 w-5 shrink-0 ${compact ? 'text-accent group-hover:text-white' : ''}`} aria-hidden />
+      <ArrowRight
+        className={`h-5 w-5 shrink-0 ${compact ? 'text-accent group-hover:text-white' : ''}`}
+        aria-hidden
+      />
+    </button>
+  );
+
+  const FullLabCta = ({ compact = false }: { compact?: boolean }) => (
+    <button
+      type="button"
+      onClick={() => onNavigate('diagnostics')}
+      className={
+        compact
+          ? 'mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent-soft px-4 py-3 text-left transition-colors hover:bg-accent hover:text-white cursor-pointer group'
+          : 'mt-4 flex w-full items-center justify-between gap-4 rounded-xl bg-accent px-5 py-4 text-left text-white shadow-sm transition-colors hover:bg-accent-strong cursor-pointer'
+      }
+    >
+      <span className="min-w-0">
+        <span
+          className={`flex items-center gap-2 ${compact ? 'text-sm font-semibold text-accent group-hover:text-white' : 'text-base font-semibold'}`}
+        >
+          <FlaskConical className="h-5 w-5 shrink-0" aria-hidden />
+          Open the full lab wait times page
+        </span>
+        <span
+          className={`mt-0.5 block text-xs ${compact ? 'text-ink-2 group-hover:text-white/80' : 'text-white/80'}`}
+        >
+          Every APL site, Save My Place, imaging waits, and turnaround
+        </span>
+      </span>
+      <ArrowRight
+        className={`h-5 w-5 shrink-0 ${compact ? 'text-accent group-hover:text-white' : ''}`}
+        aria-hidden
+      />
     </button>
   );
 
@@ -351,7 +495,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         )}
       </section>
 
-      {/* 2 · Fastest path */}
+      {/* 2 · Fastest ER */}
       <section className="rounded-xl border border-line bg-surface p-4 sm:p-5" aria-label="Fastest ER near you">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-base font-semibold text-ink">Find the fastest ER near you</h2>
@@ -446,7 +590,102 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         )}
       </section>
 
-      {/* 3 · Active disruptions — rendered only when alerts exist */}
+      {/* 3 · Fastest lab — same GPS → IP + nearest-zone logic as ER */}
+      <section className="rounded-xl border border-line bg-surface p-4 sm:p-5" aria-label="Fastest lab near you">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-base font-semibold text-ink">Find the fastest lab near you</h2>
+          {location && (
+            <p className="text-xs text-ink-3">
+              Near <span className="font-medium text-ink-2">{location.city}</span>
+              {labZoneLabel ? ` · ${labZoneLabel}` : ''}
+              {locationSourceHint ? ` · ${locationSourceHint}` : ''}
+              {' · '}
+              <button
+                type="button"
+                onClick={clearLocation}
+                className="underline underline-offset-2 hover:text-ink cursor-pointer"
+              >
+                change
+              </button>
+            </p>
+          )}
+        </div>
+
+        {!location && locatingBootstrap ? (
+          <div className="mt-3 space-y-2">
+            <div className="h-14 animate-pulse rounded-lg bg-neutral-chip" />
+            <div className="h-14 animate-pulse rounded-lg bg-neutral-chip" />
+            <p className="text-xs text-ink-3">Finding labs near you…</p>
+          </div>
+        ) : !location ? (
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={requestLocation}
+              disabled={geoBusy}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-4 text-base font-semibold text-white transition-colors hover:bg-accent-strong disabled:opacity-60 cursor-pointer"
+            >
+              <Navigation className="h-5 w-5" aria-hidden />
+              {geoBusy ? 'Locating…' : 'Use my location'}
+            </button>
+            <FullLabCta compact />
+            {geoError && <p className="mt-2 text-xs text-ink-3">{geoError}</p>}
+          </div>
+        ) : labsLoading ? (
+          <div className="mt-3 space-y-2">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-14 animate-pulse rounded-lg bg-neutral-chip" />
+            ))}
+          </div>
+        ) : topLabPicks.length === 0 ? (
+          <div className="mt-3">
+            <p className="text-sm text-ink-2">
+              No open walk-in labs near {location.city}
+              {labZoneLabel ? ` (${labZoneLabel})` : ''} right now.
+            </p>
+            <FullLabCta />
+          </div>
+        ) : (
+          <>
+            <ol className="mt-3 divide-y divide-line">
+              {topLabPicks.map((lab, i) => (
+                <li key={lab.id}>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('diagnostics')}
+                    className="group flex w-full items-center gap-3 py-3 text-left cursor-pointer"
+                  >
+                    <span className="w-5 shrink-0 text-center font-mono text-xs tabular-nums text-ink-3">
+                      {i + 1}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-ink group-hover:text-accent">
+                        {lab.name}
+                      </span>
+                      <span className="block text-xs text-ink-3">
+                        {lab.driveMins != null
+                          ? `${lab.driveMins} min drive${lab.distance != null ? ` · ${lab.distance} km` : ''}`
+                          : lab.city}
+                      </span>
+                    </span>
+                    <span className="shrink-0 font-mono text-lg tabular-nums text-ink">
+                      {formatMinutesToHm(lab.waitTimeMin as number)}
+                    </span>
+                    <WaitBandChip band={lab.waitBand} className="hidden sm:inline-flex" />
+                    <ArrowRight
+                      className="h-4 w-4 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
+                      aria-hidden
+                    />
+                  </button>
+                </li>
+              ))}
+            </ol>
+            <FullLabCta />
+          </>
+        )}
+      </section>
+
+      {/* 4 · Active disruptions — rendered only when alerts exist */}
       {activeDisruptions.length > 0 && (
         <section className="rounded-xl border border-line bg-warn-soft p-4 sm:p-5" aria-label="Active service disruptions">
           <div className="flex items-center gap-2">
@@ -474,7 +713,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         </section>
       )}
 
-      {/* 4 · Module directory */}
+      {/* 5 · Module directory */}
       <section aria-label="All data modules">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold text-ink">Explore the data</h2>
@@ -507,7 +746,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                       onClick={() => onNavigate(m.id as DashboardId)}
                       className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-paper cursor-pointer"
                     >
-                      <span className="rounded-lg border border-line bg-surface p-1.5 text-ink-3 group-hover:text-accent" aria-hidden>
+                      <span
+                        className="rounded-lg border border-line bg-surface p-1.5 text-ink-3 group-hover:text-accent"
+                        aria-hidden
+                      >
                         <Icon className="h-4 w-4" />
                       </span>
                       <span className="min-w-0 flex-1">
@@ -551,7 +793,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         )}
       </section>
 
-      {/* 5 · About */}
+      {/* 6 · About */}
       <section className="rounded-xl border border-line bg-surface p-4 sm:p-5" aria-label="About this tracker">
         <h2 className="text-sm font-semibold text-ink">About this tracker</h2>
         <p className="mt-1.5 max-w-prose text-sm text-ink-2">
