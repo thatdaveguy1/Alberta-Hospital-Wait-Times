@@ -48,7 +48,11 @@ type DiagnosticData = {
   PRIORITY_TARGET_COMPLIANCE: PriorityTarget[];
   _dataMetadata?: DataMetadataMap;
 };
-import { calculateDistance, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
+import { calculateDistance, isRoughlyInAlberta, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
+import {
+  LocationUnavailableModal,
+  useLocationUnavailableModal,
+} from './LocationUnavailableModal';
 import { cn, formatMinutesToHm } from '../lib/utils';
 import { LabCard, type LabCardData } from './LabCard';
 
@@ -129,9 +133,15 @@ export default function DiagnosticDashboard() {
     );
   }, []);
 
-  // Fetch OSRM drive times for labs within 100 km of the user
+  const driveEnabled = Boolean(
+    userLocation && isRoughlyInAlberta(userLocation.lat, userLocation.lng),
+  );
+  const { open: locationUnavailableOpen, dismiss: dismissLocationUnavailable } =
+    useLocationUnavailableModal(userLocation);
+
+  // Fetch OSRM drive times for labs within 100 km (Alberta pins only)
   useEffect(() => {
-    if (!userLocation || LAB_LOCATION_WAITS.length === 0) {
+    if (!driveEnabled || !userLocation || LAB_LOCATION_WAITS.length === 0) {
       setOsrmData({});
       return;
     }
@@ -174,7 +184,7 @@ export default function DiagnosticDashboard() {
     };
 
     fetchOSRMTimes();
-  }, [userLocation, LAB_LOCATION_WAITS]);
+  }, [driveEnabled, userLocation, LAB_LOCATION_WAITS]);
 
   const refreshData = () => {
     setRefreshing(true);
@@ -300,7 +310,7 @@ export default function DiagnosticDashboard() {
         let distance: number | undefined = undefined;
         let driveMins: number | undefined = undefined;
 
-        if (userLocation) {
+        if (driveEnabled && userLocation) {
           if (osrmData[lab.id]) {
             distance = osrmData[lab.id].distanceKm;
             driveMins = osrmData[lab.id].durationMins;
@@ -348,7 +358,7 @@ export default function DiagnosticDashboard() {
 
         return (a.waitTimeMin as number) - (b.waitTimeMin as number);
       });
-  }, [LAB_LOCATION_WAITS, selectedRegion, labSearch, userLocation, osrmData, sortBy]);
+  }, [LAB_LOCATION_WAITS, selectedRegion, labSearch, userLocation, osrmData, sortBy, driveEnabled]);
 
   // Group processed labs by zone, sorting zones by proximity (or fastest net wait)
   const groupedLabs = useMemo(() => {
@@ -368,7 +378,7 @@ export default function DiagnosticDashboard() {
     });
 
     groups.sort((a, b) => {
-      if (sortBy === 'net-wait' && userLocation) {
+      if (sortBy === 'net-wait' && driveEnabled) {
         const minNetA = Math.min(
           ...a.labs.map((l) => (isLabWaitUnavailable(l) ? Infinity : (l.driveMins || 0) + (l.waitTimeMin as number))),
         );
@@ -381,10 +391,11 @@ export default function DiagnosticDashboard() {
     });
 
     return groups;
-  }, [processedLabs, sortBy, userLocation]);
+  }, [processedLabs, sortBy, driveEnabled]);
 
-  // Top 3 optimal lab recommendations by net time (mirrors ER route planner)
+  // Top 3 optimal lab recommendations by net time (Alberta drive pins only)
   const calculatedShortestWaitList = useMemo(() => {
+    if (!driveEnabled) return [];
     return processedLabs
       .filter((l) => l.distance !== undefined && l.distance < 150 && !isLabWaitUnavailable(l))
       .map((l) => ({
@@ -393,7 +404,7 @@ export default function DiagnosticDashboard() {
       }))
       .sort((a, b) => a.totalTime - b.totalTime)
       .slice(0, 3);
-  }, [processedLabs]);
+  }, [processedLabs, driveEnabled]);
 
   // Nearby alternative recommendation (high wait vs low wait same region)
   const labRecommendations = useMemo(() => {
@@ -677,7 +688,10 @@ export default function DiagnosticDashboard() {
                       <p className="text-xs font-medium text-ink-3">Location Origin</p>
                       <p className="text-[11px] font-semibold text-ink truncate flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-accent shrink-0" />
-                        <span>{userLocation.city}, AB</span>
+                        <span>
+                          {userLocation.city}
+                          {isRoughlyInAlberta(userLocation.lat, userLocation.lng) ? ', AB' : ''}
+                        </span>
                       </p>
                     </div>
                     <button
@@ -940,9 +954,9 @@ export default function DiagnosticDashboard() {
             <span className="text-xs text-ink-2">
               Sorting: <span className="text-accent font-semibold">
                 {sortBy === 'net-wait'
-                  ? (userLocation ? 'Net Wait (Drive + Wait)' : 'Wait Time (Default Location)')
+                  ? (driveEnabled ? 'Net Wait (Drive + Wait)' : 'Wait Time')
                   : sortBy === 'proximity'
-                    ? (userLocation ? 'Proximity' : 'Proximity (Default Location)')
+                    ? (driveEnabled ? 'Proximity' : 'Proximity (set Alberta location)')
                     : 'Raw Wait Time'}
               </span>
             </span>
@@ -960,7 +974,7 @@ export default function DiagnosticDashboard() {
                         {zone.name}
                       </h3>
                     </div>
-                    {userLocation && zone.distance !== 999999 && (
+                    {driveEnabled && zone.distance !== 999999 && (
                       <span className="px-2 py-0.5 bg-accent text-white rounded-full text-xs font-medium">
                         ~{zone.distance} km closest
                       </span>
@@ -1370,6 +1384,11 @@ export default function DiagnosticDashboard() {
       )}
 
 
+
+      <LocationUnavailableModal
+        open={locationUnavailableOpen}
+        onDismiss={dismissLocationUnavailable}
+      />
     </div>
   );
 }

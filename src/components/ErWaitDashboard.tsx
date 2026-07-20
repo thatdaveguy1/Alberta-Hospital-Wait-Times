@@ -31,7 +31,11 @@ import { MapComponent } from './MapComponent';
 import { DashboardHeader } from './DashboardHeader';
 import { WaitBandChip } from './WaitBandChip';
 import type { DataMetadataMap } from './DataTimestamp';
-import { calculateDistance, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
+import { calculateDistance, isRoughlyInAlberta, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
+import {
+  LocationUnavailableModal,
+  useLocationUnavailableModal,
+} from './LocationUnavailableModal';
 import {
   averageFacilityWaitMinutes,
   busiestHourOfDay,
@@ -498,9 +502,15 @@ export default function ErWaitDashboard({
     if (userLocation) saveLocation(userLocation);
   }, [userLocation]);
 
-  // OSRM for nearby sites
+  const driveEnabled = Boolean(
+    userLocation && isRoughlyInAlberta(userLocation.lat, userLocation.lng),
+  );
+  const { open: locationUnavailableOpen, dismiss: dismissLocationUnavailable } =
+    useLocationUnavailableModal(userLocation);
+
+  // OSRM for nearby sites (Alberta pins only — skip absurd cross-border drives)
   useEffect(() => {
-    if (!userLocation || hospitals.length === 0) {
+    if (!driveEnabled || !userLocation || hospitals.length === 0) {
       setOsrmData({});
       return;
     }
@@ -535,7 +545,7 @@ export default function ErWaitDashboard({
     return () => {
       cancelled = true;
     };
-  }, [userLocation, hospitals]);
+  }, [driveEnabled, userLocation, hospitals]);
 
   useEffect(() => {
     fetchZoneTrends(zoneRange);
@@ -560,7 +570,7 @@ export default function ErWaitDashboard({
       const base = enrichHospital(h);
       let distance: number | undefined;
       let driveMins: number | undefined;
-      if (userLocation && h.latitude != null && h.longitude != null) {
+      if (driveEnabled && userLocation && h.latitude != null && h.longitude != null) {
         if (osrmData[h.id]) {
           distance = osrmData[h.id].distanceKm;
           driveMins = osrmData[h.id].durationMins;
@@ -571,7 +581,7 @@ export default function ErWaitDashboard({
       }
       return { ...base, distance, driveMins };
     });
-  }, [hospitals, userLocation, osrmData]);
+  }, [hospitals, userLocation, osrmData, driveEnabled]);
 
   const regions = useMemo(
     () => ['All', ...Array.from(new Set(processed.map((h) => h.region))).sort()],
@@ -621,18 +631,18 @@ export default function ErWaitDashboard({
   const topThree = useMemo(() => {
     const pool = processed.filter((h) => {
       if (h.effectiveWaitMinutes === null) return false;
-      if (userLocation) return h.distance != null && h.distance < 150;
+      if (driveEnabled) return h.distance != null && h.distance < 150;
       return true;
     });
     return [...pool]
       .sort((a, b) => {
-        if (userLocation && a.driveMins != null && b.driveMins != null) {
+        if (driveEnabled && a.driveMins != null && b.driveMins != null) {
           return a.driveMins + (a.effectiveWaitMinutes ?? 0) - (b.driveMins + (b.effectiveWaitMinutes ?? 0));
         }
         return (a.effectiveWaitMinutes ?? 0) - (b.effectiveWaitMinutes ?? 0);
       })
       .slice(0, 3);
-  }, [processed, userLocation]);
+  }, [processed, driveEnabled]);
 
   const selected = useMemo(
     () => processed.find((h) => h.id === selectedHospitalId) ?? ranked[0] ?? null,
@@ -645,7 +655,7 @@ export default function ErWaitDashboard({
     if (processed.length === 0) return;
     if (userPickedHospitalRef.current) return;
 
-    if (userLocation) {
+    if (driveEnabled) {
       const nearest = [...processed]
         .filter((h) => h.latitude != null && h.longitude != null && h.distance != null)
         .sort((a, b) => (a.distance ?? 1e9) - (b.distance ?? 1e9))[0];
@@ -659,7 +669,7 @@ export default function ErWaitDashboard({
     if (!selectedHospitalId && ranked[0]) {
       setSelectedHospitalId(ranked[0].id);
     }
-  }, [userLocation, processed, selectedHospitalId, ranked]);
+  }, [driveEnabled, processed, selectedHospitalId, ranked]);
 
   const selectHospital = (h: { id: string }) => {
     userPickedHospitalRef.current = true;
@@ -871,7 +881,7 @@ export default function ErWaitDashboard({
                         {shortHospitalName(runnerUp.name)} ·{' '}
                         {formatMinutesToHm(
                           (runnerUp.effectiveWaitMinutes ?? 0) +
-                            (userLocation && runnerUp.driveMins != null ? runnerUp.driveMins : 0),
+                            (driveEnabled && runnerUp.driveMins != null ? runnerUp.driveMins : 0),
                         )}
                       </span>
                     </p>
@@ -1019,12 +1029,14 @@ export default function ErWaitDashboard({
             <div className="flex items-end justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-ink">
-                  {userLocation ? 'Fastest path to a doctor' : 'Shortest live waits'}
+                  {driveEnabled ? 'Fastest path to a doctor' : 'Shortest live waits'}
                 </h3>
                 <p className="mt-0.5 text-xs text-ink-3">
-                  {userLocation
+                  {driveEnabled
                     ? 'Ranked by drive time + current queue estimate within ~150 km.'
-                    : 'Set a location to include driving time in the ranking.'}
+                    : userLocation
+                      ? 'Drive times are Alberta-only — ranked by live wait.'
+                      : 'Set a location to include driving time in the ranking.'}
                 </p>
               </div>
               <span className="hidden font-mono text-xs tabular-nums text-ink-3 sm:inline">
@@ -1044,7 +1056,7 @@ export default function ErWaitDashboard({
               )}
               {topThree.map((h, i) => {
                 const wait = h.effectiveWaitMinutes ?? 0;
-                const total = userLocation && h.driveMins != null ? wait + h.driveMins : wait;
+                const total = driveEnabled && h.driveMins != null ? wait + h.driveMins : wait;
                 return (
                   <button
                     key={h.id}
@@ -1078,7 +1090,7 @@ export default function ErWaitDashboard({
                     <div className="mt-4 flex items-end justify-between gap-2">
                       <div>
                         <p className="text-xs text-ink-3">
-                          {userLocation && h.driveMins != null ? 'Drive + wait' : 'Wait'}
+                          {driveEnabled && h.driveMins != null ? 'Drive + wait' : 'Wait'}
                         </p>
                         <p className="font-mono text-2xl tabular-nums text-ink">
                           {formatMinutesToHm(total)}
@@ -1086,7 +1098,7 @@ export default function ErWaitDashboard({
                       </div>
                       <div className="space-y-0.5 text-right font-mono text-xs tabular-nums text-ink-3">
                         <p>Wait {formatMinutesToHm(wait)}</p>
-                        {userLocation && h.driveMins != null && (
+                        {driveEnabled && h.driveMins != null && (
                           <p>Drive {formatMinutesToHm(h.driveMins)}</p>
                         )}
                         {h.distance != null && <p>{h.distance} km</p>}
@@ -1216,7 +1228,7 @@ export default function ErWaitDashboard({
                   aria-label="Sort order"
                 >
                   <option value="net-wait">
-                    {userLocation ? 'Sort: drive + wait' : 'Sort: wait time'}
+                    {driveEnabled ? 'Sort: drive + wait' : 'Sort: wait time'}
                   </option>
                   <option value="proximity">Sort: nearest</option>
                   <option value="raw-wait">Sort: queue only</option>
@@ -1270,7 +1282,11 @@ export default function ErWaitDashboard({
                 Ranked facilities ({ranked.length})
               </h3>
               <p className="text-xs text-ink-3">
-                {userLocation ? 'Includes estimated drive time' : 'Raw queue order — add location for drive + wait'}
+                {driveEnabled
+                  ? 'Includes estimated drive time'
+                  : userLocation
+                    ? 'Wait order — drive times only in Alberta'
+                    : 'Raw queue order — add location for drive + wait'}
               </p>
             </div>
 
@@ -1291,7 +1307,7 @@ export default function ErWaitDashboard({
                   rank={index + 1}
                   selected={selected?.id === h.id}
                   sortBy={sortBy}
-                  hasLocation={!!userLocation}
+                  hasLocation={!!driveEnabled}
                   onSelect={() => selectHospital(h)}
                 />
               ))}
@@ -1313,6 +1329,10 @@ export default function ErWaitDashboard({
           }}
         />
       )}
+      <LocationUnavailableModal
+        open={locationUnavailableOpen}
+        onDismiss={dismissLocationUnavailable}
+      />
     </div>
   );
 }
@@ -1579,7 +1599,10 @@ function FacilitySheet({
   }
 
   const wait = h.effectiveWaitMinutes;
-  const net = userLocation && h.driveMins != null && wait != null ? wait + h.driveMins : null;
+  const driveOk = Boolean(
+    userLocation && isRoughlyInAlberta(userLocation.lat, userLocation.lng),
+  );
+  const net = driveOk && h.driveMins != null && wait != null ? wait + h.driveMins : null;
 
   return (
     <div
@@ -1626,9 +1649,11 @@ function FacilitySheet({
             <p className="mt-1 text-xs text-ink-3">
               {h.driveMins != null
                 ? `~${formatMinutesToHm(h.driveMins)} drive`
-                : userLocation
+                : driveOk
                   ? 'Routing…'
-                  : 'Set location'}
+                  : userLocation
+                    ? 'Wait only outside Alberta'
+                    : 'Set location'}
             </p>
           </div>
         </div>

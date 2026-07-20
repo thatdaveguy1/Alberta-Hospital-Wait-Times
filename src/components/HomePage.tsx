@@ -19,7 +19,7 @@ import {
 import {
   calculateDistance,
   clearSavedLocation,
-  isRoughlyInAlberta,
+  isDriveLocationUsable,
   loadSavedLocation,
   locationIsNearCare,
   NEAR_YOU_MAX_KM,
@@ -31,6 +31,10 @@ import {
 import { formatMinutesToHm } from '../lib/utils';
 import { formatRelativeTime } from '../hooks/useSyncStatus';
 import { WaitBandChip } from './WaitBandChip';
+import {
+  LocationUnavailableModal,
+  useLocationUnavailableModal,
+} from './LocationUnavailableModal';
 import type { LabLocationWait } from '../diagnosticData';
 import type { Hospital, ServiceDisruption } from '../types';
 
@@ -133,32 +137,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   const [loading, setLoading] = useState(true);
   const [labsLoading, setLabsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
-  const [location, setLocation] = useState<UserLocation | null>(() => {
-    const saved = loadSavedLocation();
-    if (!saved) return null;
-    const usable =
-      saved.source === 'gps' ||
-      saved.source === 'manual' ||
-      saved.isGPS ||
-      isRoughlyInAlberta(saved.lat, saved.lng);
-    if (!usable) {
-      clearSavedLocation();
-      return null;
-    }
-    return saved;
-  });
+  const [location, setLocation] = useState<UserLocation | null>(() => loadSavedLocation());
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoError, setGeoError] = useState('');
-  const [locatingBootstrap, setLocatingBootstrap] = useState(() => {
-    const saved = loadSavedLocation();
-    if (!saved) return true;
-    return !(
-      saved.source === 'gps' ||
-      saved.source === 'manual' ||
-      saved.isGPS ||
-      isRoughlyInAlberta(saved.lat, saved.lng)
-    );
-  });
+  const [locatingBootstrap, setLocatingBootstrap] = useState(() => !loadSavedLocation());
   const [osrmData, setOsrmData] = useState<OsrmMap>({});
   const [labOsrmData, setLabOsrmData] = useState<OsrmMap>({});
   const [directoryQuery, setDirectoryQuery] = useState('');
@@ -188,22 +170,14 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   useEffect(load, []);
 
-  // Auto-resolve location: saved → GPS → Alberta IP fallback.
-  // Discard out-of-province saved IP pins (e.g. Seattle) — they invent absurd drive times.
+  // Auto-resolve location: saved → GPS → IP (including outside Alberta).
+  // Drive math is gated separately via isDriveLocationUsable + locationIsNearCare.
   useEffect(() => {
     const saved = loadSavedLocation();
     if (saved) {
-      const usable =
-        saved.source === 'gps' ||
-        saved.source === 'manual' ||
-        saved.isGPS ||
-        isRoughlyInAlberta(saved.lat, saved.lng);
-      if (usable) {
-        setLocation(saved);
-        setLocatingBootstrap(false);
-        return;
-      }
-      clearSavedLocation();
+      setLocation(saved);
+      setLocatingBootstrap(false);
+      return;
     }
     let cancelled = false;
     setLocatingBootstrap(true);
@@ -242,9 +216,20 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     return locationIsNearCare(location.lat, location.lng, labs);
   }, [location, labs]);
 
+  // Drive-inclusive home lists: Alberta bbox AND near care.
+  const erDriveUsable = Boolean(
+    location && isDriveLocationUsable(location) && erLocationNear && hospitals.length > 0,
+  );
+  const labDriveUsable = Boolean(
+    location && isDriveLocationUsable(location) && labLocationNear && labs.length > 0,
+  );
+
+  const { open: locationUnavailableOpen, dismiss: dismissLocationUnavailable } =
+    useLocationUnavailableModal(location);
+
   // OSRM drive times for ER facilities in the active zone(s).
   useEffect(() => {
-    if (!location || hospitals.length === 0 || activeZones.length === 0) {
+    if (!erDriveUsable || !location || hospitals.length === 0 || activeZones.length === 0) {
       setOsrmData({});
       return;
     }
@@ -257,11 +242,11 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     return () => {
       cancelled = true;
     };
-  }, [location, hospitals, activeZones]);
+  }, [erDriveUsable, location, hospitals, activeZones]);
 
   // OSRM drive times for labs in the active lab zone(s).
   useEffect(() => {
-    if (!location || labs.length === 0 || activeLabZones.length === 0) {
+    if (!labDriveUsable || !location || labs.length === 0 || activeLabZones.length === 0) {
       setLabOsrmData({});
       return;
     }
@@ -274,7 +259,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     return () => {
       cancelled = true;
     };
-  }, [location, labs, activeLabZones]);
+  }, [labDriveUsable, location, labs, activeLabZones]);
 
   const enriched = useMemo(() => hospitals.map(enrichHospital), [hospitals]);
 
@@ -308,55 +293,77 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   );
 
   const topPicks = useMemo<ScoredFacility[]>(() => {
-    if (!location || !erLocationNear || activeZones.length === 0) return [];
-    const zoneSet = new Set(activeZones);
+    if (erDriveUsable && location && activeZones.length > 0) {
+      const zoneSet = new Set(activeZones);
+      return enriched
+        .filter((h) => zoneSet.has(h.region))
+        .map((h) => {
+          const drive = osrmData[h.id];
+          const haversineKm =
+            h.latitude != null && h.longitude != null
+              ? calculateDistance(location.lat, location.lng, h.latitude, h.longitude)
+              : undefined;
+          const wait = h.effectiveWaitMinutes;
+          if (wait === null || haversineKm == null || haversineKm > NEAR_YOU_MAX_KM) return null;
+          const driveMins = drive?.durationMins ?? estimateDriveMins(haversineKm);
+          const distance = drive?.distanceKm ?? roundKm(haversineKm);
+          return {
+            ...h,
+            distance,
+            driveMins,
+            netScore: wait + driveMins,
+          };
+        })
+        .filter((h): h is ScoredFacility => h !== null)
+        .sort((a, b) => a.netScore - b.netScore)
+        .slice(0, 3);
+    }
+
+    // Outside AB, far from care, or no usable drive pin → provincial wait-only top 3.
     return enriched
-      .filter((h) => zoneSet.has(h.region))
-      .map((h) => {
-        const drive = osrmData[h.id];
-        const haversineKm =
-          h.latitude != null && h.longitude != null
-            ? calculateDistance(location.lat, location.lng, h.latitude, h.longitude)
-            : undefined;
-        const wait = h.effectiveWaitMinutes;
-        if (wait === null || haversineKm == null || haversineKm > NEAR_YOU_MAX_KM) return null;
-        const driveMins = drive?.durationMins ?? estimateDriveMins(haversineKm);
-        const distance = drive?.distanceKm ?? roundKm(haversineKm);
-        return {
-          ...h,
-          distance,
-          driveMins,
-          netScore: wait + driveMins,
-        };
-      })
-      .filter((h): h is ScoredFacility => h !== null)
+      .filter((h) => h.effectiveWaitMinutes !== null)
+      .map((h) => ({
+        ...h,
+        netScore: h.effectiveWaitMinutes as number,
+      }))
       .sort((a, b) => a.netScore - b.netScore)
       .slice(0, 3);
-  }, [enriched, location, osrmData, activeZones, erLocationNear]);
+  }, [enriched, location, osrmData, activeZones, erDriveUsable]);
 
   const topLabPicks = useMemo<ScoredLab[]>(() => {
-    if (!location || !labLocationNear || activeLabZones.length === 0) return [];
-    const zoneSet = new Set(activeLabZones);
+    if (labDriveUsable && location && activeLabZones.length > 0) {
+      const zoneSet = new Set(activeLabZones);
+      return labs
+        .filter((l) => zoneSet.has(l.region) && !isLabWaitUnavailable(l))
+        .map((l) => {
+          const drive = labOsrmData[l.id];
+          const haversineKm = calculateDistance(location.lat, location.lng, l.latitude, l.longitude);
+          if (haversineKm > NEAR_YOU_MAX_KM) return null;
+          const wait = l.waitTimeMin as number;
+          const driveMins = drive?.durationMins ?? estimateDriveMins(haversineKm);
+          return {
+            ...l,
+            distance: drive?.distanceKm ?? roundKm(haversineKm),
+            driveMins,
+            netScore: wait + driveMins,
+            waitBand: labWaitBand(l),
+          };
+        })
+        .filter((l): l is ScoredLab => l !== null)
+        .sort((a, b) => a.netScore - b.netScore)
+        .slice(0, 3);
+    }
+
     return labs
-      .filter((l) => zoneSet.has(l.region) && !isLabWaitUnavailable(l))
-      .map((l) => {
-        const drive = labOsrmData[l.id];
-        const haversineKm = calculateDistance(location.lat, location.lng, l.latitude, l.longitude);
-        if (haversineKm > NEAR_YOU_MAX_KM) return null;
-        const wait = l.waitTimeMin as number;
-        const driveMins = drive?.durationMins ?? estimateDriveMins(haversineKm);
-        return {
-          ...l,
-          distance: drive?.distanceKm ?? roundKm(haversineKm),
-          driveMins,
-          netScore: wait + driveMins,
-          waitBand: labWaitBand(l),
-        };
-      })
-      .filter((l): l is ScoredLab => l !== null)
+      .filter((l) => !isLabWaitUnavailable(l))
+      .map((l) => ({
+        ...l,
+        netScore: l.waitTimeMin as number,
+        waitBand: labWaitBand(l),
+      }))
       .sort((a, b) => a.netScore - b.netScore)
       .slice(0, 3);
-  }, [labs, location, labOsrmData, activeLabZones, labLocationNear]);
+  }, [labs, location, labOsrmData, activeLabZones, labDriveUsable]);
 
   const requestLocation = async () => {
     setGeoBusy(true);
@@ -555,11 +562,22 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       {/* 2 · Fastest ER */}
       <section className="rounded-xl border border-line bg-surface p-4 sm:p-5" aria-label="Fastest ER near you">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-base font-semibold text-ink">Find the fastest ER near you</h2>
+          <h2 className="text-base font-semibold text-ink">
+            {erDriveUsable ? 'Find the fastest ER near you' : 'Shortest ER waits in Alberta'}
+          </h2>
           {location && (
             <p className="text-xs text-ink-3">
-              Near <span className="font-medium text-ink-2">{location.city}</span>
-              {erLocationNear && zoneLabel ? ` · ${zoneLabel}` : ''}
+              {erDriveUsable ? (
+                <>
+                  Near <span className="font-medium text-ink-2">{location.city}</span>
+                  {zoneLabel ? ` · ${zoneLabel}` : ''}
+                </>
+              ) : (
+                <>
+                  From <span className="font-medium text-ink-2">{location.city}</span>
+                  {' · wait times only'}
+                </>
+              )}
               {locationSourceHint ? ` · ${locationSourceHint}` : ''}
               {' · '}
               <button
@@ -599,56 +617,62 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <div key={i} className="h-14 animate-pulse rounded-lg bg-neutral-chip" />
             ))}
           </div>
-        ) : !erLocationNear ? (
-          <div className="mt-3">
-            <p className="text-sm text-ink-2">
-              {location.city} is too far for local drive times. Allow GPS in Alberta, or open the
-              full ER page to pick a city.
-            </p>
-            <FullErCta />
-          </div>
         ) : topPicks.length === 0 ? (
           <div className="mt-3">
             <p className="text-sm text-ink-2">
-              No live waits near {location.city}
-              {zoneLabel ? ` (${zoneLabel})` : ''} right now.
+              {erDriveUsable
+                ? `No live waits near ${location.city}${zoneLabel ? ` (${zoneLabel})` : ''} right now.`
+                : 'No live ER waits available right now.'}
             </p>
             <FullErCta />
           </div>
         ) : (
           <>
             <ol className="mt-3 divide-y divide-line">
-              {topPicks.map((h, i) => (
-                <li key={h.id}>
-                  <button
-                    type="button"
-                    onClick={() => onNavigate('er-waits')}
-                    className="group flex w-full items-center gap-3 py-3 text-left cursor-pointer"
-                  >
-                    <span className="w-5 shrink-0 text-center font-mono text-xs tabular-nums text-ink-3">
-                      {i + 1}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold text-ink group-hover:text-accent">
-                        {shortHospitalName(h.name)}
+              {topPicks.map((h, i) => {
+                const wait = h.effectiveWaitMinutes;
+                const showNet = erDriveUsable && h.driveMins != null && wait != null;
+                const headline = showNet
+                  ? formatMinutesToHm(wait + h.driveMins!)
+                  : wait != null
+                    ? formatMinutesToHm(wait)
+                    : '—';
+                return (
+                  <li key={h.id}>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('er-waits')}
+                      className="group flex w-full items-center gap-3 py-3 text-left cursor-pointer"
+                    >
+                      <span className="w-5 shrink-0 text-center font-mono text-xs tabular-nums text-ink-3">
+                        {i + 1}
                       </span>
-                      <span className="block text-xs text-ink-3">
-                        {h.driveMins != null
-                          ? `${h.driveMins} min drive${h.distance != null ? ` · ${h.distance} km` : ''}`
-                          : h.city}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-ink group-hover:text-accent">
+                          {shortHospitalName(h.name)}
+                        </span>
+                        <span className="block text-xs text-ink-3">{h.city}</span>
                       </span>
-                    </span>
-                    <span className="shrink-0 font-mono text-lg tabular-nums text-ink">
-                      {h.effectiveWaitMinutes != null ? formatMinutesToHm(h.effectiveWaitMinutes) : '—'}
-                    </span>
-                    <WaitBandChip band={h.waitBand} className="hidden sm:inline-flex" />
-                    <ArrowRight
-                      className="h-4 w-4 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
-                      aria-hidden
-                    />
-                  </button>
-                </li>
-              ))}
+                      <span className="shrink-0 text-right">
+                        <span className="block font-mono text-lg tabular-nums text-ink">{headline}</span>
+                        <span className="mt-0.5 block text-xs text-ink-3">
+                          {showNet ? 'Drive + wait' : 'Wait'}
+                        </span>
+                        {showNet && wait != null && (
+                          <span className="mt-0.5 block font-mono text-xs tabular-nums text-ink-3">
+                            {formatMinutesToHm(wait)} + {formatMinutesToHm(h.driveMins!)}
+                          </span>
+                        )}
+                      </span>
+                      <WaitBandChip band={h.waitBand} className="hidden sm:inline-flex" />
+                      <ArrowRight
+                        className="h-4 w-4 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
+                        aria-hidden
+                      />
+                    </button>
+                  </li>
+                );
+              })}
             </ol>
             <FullErCta />
           </>
@@ -658,11 +682,22 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       {/* 3 · Fastest lab — same GPS → IP + nearest-zone logic as ER */}
       <section className="rounded-xl border border-line bg-surface p-4 sm:p-5" aria-label="Fastest lab near you">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-base font-semibold text-ink">Find the fastest lab near you</h2>
+          <h2 className="text-base font-semibold text-ink">
+            {labDriveUsable ? 'Find the fastest lab near you' : 'Shortest lab waits in Alberta'}
+          </h2>
           {location && (
             <p className="text-xs text-ink-3">
-              Near <span className="font-medium text-ink-2">{location.city}</span>
-              {labLocationNear && labZoneLabel ? ` · ${labZoneLabel}` : ''}
+              {labDriveUsable ? (
+                <>
+                  Near <span className="font-medium text-ink-2">{location.city}</span>
+                  {labZoneLabel ? ` · ${labZoneLabel}` : ''}
+                </>
+              ) : (
+                <>
+                  From <span className="font-medium text-ink-2">{location.city}</span>
+                  {' · wait times only'}
+                </>
+              )}
               {locationSourceHint ? ` · ${locationSourceHint}` : ''}
               {' · '}
               <button
@@ -702,56 +737,60 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <div key={i} className="h-14 animate-pulse rounded-lg bg-neutral-chip" />
             ))}
           </div>
-        ) : !labLocationNear ? (
-          <div className="mt-3">
-            <p className="text-sm text-ink-2">
-              {location.city} is too far for local drive times. Allow GPS in Alberta, or open the
-              full labs page to pick a city.
-            </p>
-            <FullLabCta />
-          </div>
         ) : topLabPicks.length === 0 ? (
           <div className="mt-3">
             <p className="text-sm text-ink-2">
-              No open walk-in labs near {location.city}
-              {labZoneLabel ? ` (${labZoneLabel})` : ''} right now.
+              {labDriveUsable
+                ? `No open walk-in labs near ${location.city}${labZoneLabel ? ` (${labZoneLabel})` : ''} right now.`
+                : 'No open walk-in lab waits available right now.'}
             </p>
             <FullLabCta />
           </div>
         ) : (
           <>
             <ol className="mt-3 divide-y divide-line">
-              {topLabPicks.map((lab, i) => (
-                <li key={lab.id}>
-                  <button
-                    type="button"
-                    onClick={() => onNavigate('diagnostics')}
-                    className="group flex w-full items-center gap-3 py-3 text-left cursor-pointer"
-                  >
-                    <span className="w-5 shrink-0 text-center font-mono text-xs tabular-nums text-ink-3">
-                      {i + 1}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold text-ink group-hover:text-accent">
-                        {lab.name}
+              {topLabPicks.map((lab, i) => {
+                const wait = lab.waitTimeMin as number;
+                const showNet = labDriveUsable && lab.driveMins != null;
+                const headline = showNet
+                  ? formatMinutesToHm(wait + lab.driveMins!)
+                  : formatMinutesToHm(wait);
+                return (
+                  <li key={lab.id}>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('diagnostics')}
+                      className="group flex w-full items-center gap-3 py-3 text-left cursor-pointer"
+                    >
+                      <span className="w-5 shrink-0 text-center font-mono text-xs tabular-nums text-ink-3">
+                        {i + 1}
                       </span>
-                      <span className="block text-xs text-ink-3">
-                        {lab.driveMins != null
-                          ? `${lab.driveMins} min drive${lab.distance != null ? ` · ${lab.distance} km` : ''}`
-                          : lab.city}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-ink group-hover:text-accent">
+                          {lab.name}
+                        </span>
+                        <span className="block text-xs text-ink-3">{lab.city}</span>
                       </span>
-                    </span>
-                    <span className="shrink-0 font-mono text-lg tabular-nums text-ink">
-                      {formatMinutesToHm(lab.waitTimeMin as number)}
-                    </span>
-                    <WaitBandChip band={lab.waitBand} className="hidden sm:inline-flex" />
-                    <ArrowRight
-                      className="h-4 w-4 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
-                      aria-hidden
-                    />
-                  </button>
-                </li>
-              ))}
+                      <span className="shrink-0 text-right">
+                        <span className="block font-mono text-lg tabular-nums text-ink">{headline}</span>
+                        <span className="mt-0.5 block text-xs text-ink-3">
+                          {showNet ? 'Drive + wait' : 'Wait'}
+                        </span>
+                        {showNet && (
+                          <span className="mt-0.5 block font-mono text-xs tabular-nums text-ink-3">
+                            {formatMinutesToHm(wait)} + {formatMinutesToHm(lab.driveMins!)}
+                          </span>
+                        )}
+                      </span>
+                      <WaitBandChip band={lab.waitBand} className="hidden sm:inline-flex" />
+                      <ArrowRight
+                        className="h-4 w-4 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
+                        aria-hidden
+                      />
+                    </button>
+                  </li>
+                );
+              })}
             </ol>
             <FullLabCta />
           </>
@@ -881,6 +920,11 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <strong className="font-semibold text-ink">911</strong>.
         </p>
       </section>
+
+      <LocationUnavailableModal
+        open={locationUnavailableOpen}
+        onDismiss={dismissLocationUnavailable}
+      />
     </div>
   );
 }

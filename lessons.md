@@ -1,3 +1,10 @@
+## Session: 2026-07-20 (Outside-AB location → wait-only + modal)
+
+### Lesson: Keep far IP pins; gate drive math — don’t null the location
+- **Mistake:** Nulling outside-Alberta IP locations forced empty “Use my location” / “too far” dead ends, while still risking absurd drives if a pin leaked through.
+- **Solution:** Return outside-AB IP pins; add `isDriveLocationUsable` (= Alberta bbox) and require `locationIsNearCare` on Home for net headlines; show wait-only lists + a dismissible Location unavailable modal when outside AB.
+- **Prevention:** Separate “we know where you are” from “drive times are meaningful.” Never invent cross-border drive rankings.
+
 ## Session: 2026-07-20 (Home near-you — reject far IP drive times)
 
 ### Lesson: Drive-inclusive "near you" lists must refuse out-of-province pins

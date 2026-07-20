@@ -56,10 +56,24 @@ export const NEAR_YOU_MAX_KM = 150;
 
 /**
  * Coarse Alberta bounding box (with a little border slack).
- * Used to reject IP locations outside the province before inventing drive times.
+ * Outside-province pins (e.g. Seattle IP) are still returned from geo APIs so
+ * the UI can show wait-only lists + a Location unavailable modal; they must not
+ * feed OSRM / drive-ranked "near you" math.
  */
 export function isRoughlyInAlberta(lat: number, lng: number): boolean {
   return lat >= 48.9 && lat <= 60.1 && lng >= -120.1 && lng <= -109.9;
+}
+
+/**
+ * Whether a resolved pin may be used for drive-time ranking / OSRM.
+ * Drive ranking requires the Alberta bbox. Home near-you lists should also
+ * require `locationIsNearCare` before showing drive-inclusive headlines.
+ */
+export function isDriveLocationUsable(
+  loc: Pick<UserLocation, 'lat' | 'lng'> | null | undefined,
+): boolean {
+  if (!loc) return false;
+  return isRoughlyInAlberta(loc.lat, loc.lng);
 }
 
 /** Distance to the nearest geocoded facility, or null if none. */
@@ -218,14 +232,12 @@ export async function fetchIpLocation(): Promise<UserLocation | null> {
     if (!res.ok) return null;
     const data = await res.json();
     if (typeof data?.lat !== 'number' || typeof data?.lng !== 'number') return null;
-    // IP outside Alberta is useless for drive-inclusive "near you" lists
-    // (e.g. Seattle edge → 500+ minute drives to Calgary labs).
-    if (!isRoughlyInAlberta(data.lat, data.lng)) return null;
+    // Keep outside-Alberta IP pins (callers gate drive math with isDriveLocationUsable).
     return {
       lat: data.lat,
       lng: data.lng,
       city: data.city ? toTitleCase(String(data.city)) : 'Your area',
-      region: data.region ? String(data.region) : 'Alberta',
+      region: data.region ? String(data.region) : undefined,
       isGPS: false,
       source: 'ip',
     };

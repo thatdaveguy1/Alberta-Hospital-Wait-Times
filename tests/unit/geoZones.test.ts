@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isDriveLocationUsable,
   isRoughlyInAlberta,
   locationIsNearCare,
   nearestFacilityKm,
@@ -75,5 +76,22 @@ describe('near-you distance gates', () => {
   it('treats Edmonton as near care', () => {
     expect(locationIsNearCare(53.55, -113.49, facilities)).toBe(true);
     expect(nearestFacilityKm(53.55, -113.49, facilities)!).toBeLessThanOrEqual(NEAR_YOU_MAX_KM);
+  });
+});
+
+describe('isDriveLocationUsable', () => {
+  it('is true only for Alberta bbox pins', () => {
+    expect(isDriveLocationUsable({ lat: 53.55, lng: -113.49 })).toBe(true);
+    expect(isDriveLocationUsable({ lat: 51.05, lng: -114.07 })).toBe(true);
+    expect(isDriveLocationUsable({ lat: 47.61, lng: -122.33 })).toBe(false); // Seattle
+    expect(isDriveLocationUsable(null)).toBe(false);
+    expect(isDriveLocationUsable(undefined)).toBe(false);
+  });
+
+  it('matches isRoughlyInAlberta for outside-AB IP acceptance gating', () => {
+    // Outside-AB IP locations are kept (not nulled); drive usability still fails.
+    const seattle = { lat: 47.61, lng: -122.33 };
+    expect(isRoughlyInAlberta(seattle.lat, seattle.lng)).toBe(false);
+    expect(isDriveLocationUsable(seattle)).toBe(false);
   });
 });
