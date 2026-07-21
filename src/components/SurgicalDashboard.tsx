@@ -9,8 +9,7 @@ import {
   BarChart3, 
   TrendingDown,
   AlertTriangle,
-  BarChart2,
-  RefreshCw
+  BarChart2
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -46,7 +45,7 @@ export default function SurgicalDashboard() {
   
   // Interactive KPI selected state for historical trend panel
   const [selectedKpi, setSelectedKpi] = useState<'hip_replacement_median' | 'knee_replacement_median' | 'cataract_surgery_median' | null>(null);
-  const { data, metadata, isLoading, error, refresh } = useDomainData<SurgicalData>('surgical', surgicalData);
+  const { data, metadata, isLoading, error } = useDomainData<SurgicalData>('surgical', surgicalData);
   const SURGICAL_RECORDS = useMemo(() => {
     return (data?.SURGICAL_RECORDS ?? []).filter(
       r => r.procedure_group !== 'Diagnostic Imaging' &&
@@ -289,13 +288,6 @@ export default function SurgicalDashboard() {
       <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-ink-2 text-sm gap-3">
         <AlertTriangle className="w-6 h-6 text-warn" />
         <span>Failed to load surgical data: {error}</span>
-        <button
-          onClick={refresh}
-          className="px-3 py-1.5 rounded-lg bg-surface border border-line text-xs font-semibold text-ink hover:border-line-2 flex items-center gap-1.5 cursor-pointer"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Retry
-        </button>
       </div>
     );
   }
@@ -311,16 +303,7 @@ export default function SurgicalDashboard() {
         metadata={metadata ?? undefined}
         arrayKey="SURGICAL_RECORDS"
         variant="light"
-      >
-        <button
-          onClick={refresh}
-          disabled={isLoading}
-          className="rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-paper disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          {isLoading ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </DashboardHeader>
+      />
 
       {/* Primary Sub-Tab Navigation */}
       <div className="border-b border-line flex items-center overflow-x-auto gap-2 pb-px no-scrollbar">

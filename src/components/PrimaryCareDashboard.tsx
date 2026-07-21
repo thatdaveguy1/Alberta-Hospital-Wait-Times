@@ -16,7 +16,6 @@ import {
   Sliders,
   BarChart3,
   BarChart2,
-  RefreshCw,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -150,7 +149,7 @@ function formatPct(value: number | null | undefined): string {
 }
 
 export default function PrimaryCareDashboard() {
-  const { data, metadata, isLoading, error, refresh } = useDomainData<PrimaryCareData>(
+  const { data, metadata, isLoading, error } = useDomainData<PrimaryCareData>(
     'primary-care',
     primaryCareDataModule
   );
@@ -399,13 +398,6 @@ export default function PrimaryCareDashboard() {
       <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-ink-2 text-sm gap-3">
         <AlertTriangle className="w-6 h-6 text-warn" />
         <span>Failed to load primary care data: {error}</span>
-        <button
-          onClick={() => refresh()}
-          className="px-3 py-1.5 rounded-lg border border-line bg-surface text-xs font-semibold text-ink hover:bg-paper flex items-center gap-1.5 cursor-pointer"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Retry
-        </button>
       </div>
     );
   }
@@ -439,16 +431,7 @@ export default function PrimaryCareDashboard() {
         description="Family-doctor attachment, access quality, and Alberta Find a Provider accepting listings."
         metadata={metadata}
         arrayKey={headerArrayKey}
-      >
-        <button
-          onClick={() => refresh()}
-          disabled={isLoading}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-paper disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          {isLoading ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </DashboardHeader>
+      />
 
       {/* Sub-tab Navigation */}
       <div className="inline-flex rounded-lg border border-line bg-paper p-0.5">

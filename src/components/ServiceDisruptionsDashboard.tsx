@@ -13,8 +13,7 @@ import {
   SlidersHorizontal,
   Info,
   ExternalLink,
-  BarChart3,
-  RefreshCw
+  BarChart3
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -86,21 +85,6 @@ export default function ServiceDisruptionsDashboard() {
   useEffect(() => {
     fetchDisruptions();
   }, []);
-
-  const handleResolve = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!window.confirm('Are you sure this service disruption has been resolved?')) return;
-    try {
-      const res = await fetch(`/api/disruptions/${id}/resolve`, { method: 'POST' });
-      if (res.ok) {
-        fetchDisruptions();
-      }
-    } catch (err) {
-      console.error('Failed to resolve disruption:', err);
-    }
-  };
-
-
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -193,15 +177,7 @@ export default function ServiceDisruptionsDashboard() {
         metadata={metadata}
         arrayKey="disruptions"
         variant="light"
-      >
-        <button
-          onClick={() => !loading && fetchDisruptions()}
-          disabled={loading}
-          className="self-start md:self-auto rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-paper disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {loading ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </DashboardHeader>
+      />
 
       {error && (
         <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">
@@ -451,15 +427,6 @@ export default function ServiceDisruptionsDashboard() {
                     </span>
 
                     <div className="flex items-center gap-2">
-                      {isActive && (
-                        <button
-                          onClick={(e) => handleResolve(disr.id, e)}
-                          className="px-2.5 py-1 rounded-lg border border-line-2 bg-surface text-xs font-medium text-ink-2 hover:bg-paper transition-colors cursor-pointer"
-                          title="Mark this disruption as resolved"
-                        >
-                          Resolve
-                        </button>
-                      )}
                       {isExpanded ? (
                         <ChevronUp className="w-4 h-4 text-accent" aria-hidden />
                       ) : (

@@ -13,7 +13,6 @@ import {
   BarChart2,
   X,
   AlertTriangle,
-  RefreshCw,
   ArrowRightLeft,
 } from 'lucide-react';
 import {
@@ -175,7 +174,7 @@ const metricValue = (row: NationalSpendingCompare | undefined, key: CompareMetri
 };
 
 export default function SpendingDashboard() {
-  const { data, metadata, isLoading, error, refresh } = useDomainData<SpendingData>('spending', spendingData);
+  const { data, metadata, isLoading, error } = useDomainData<SpendingData>('spending', spendingData);
   const NATIONAL_SPENDING_COMPARE = data?.NATIONAL_SPENDING_COMPARE ?? [];
   const ALBERTA_ACTIVITY_VOLUME_TREND = data?.ALBERTA_ACTIVITY_VOLUME_TREND ?? [];
   const PHYSICIAN_SPECIALTY_BILLING = data?.PHYSICIAN_SPECIALTY_BILLING ?? [];
@@ -416,13 +415,6 @@ export default function SpendingDashboard() {
       <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-ink-2 text-sm gap-3">
         <AlertTriangle className="w-6 h-6 text-warn" />
         <span>Failed to load spending data: {error}</span>
-        <button
-          onClick={refresh}
-          className="rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-paper flex items-center gap-1.5"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Retry
-        </button>
       </div>
     );
   }

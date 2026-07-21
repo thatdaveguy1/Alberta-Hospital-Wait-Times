@@ -3,8 +3,7 @@ import {
   MapPin,
   AlertTriangle,
   FileSpreadsheet,
-  CheckCircle,
-  RefreshCw
+  CheckCircle
 } from 'lucide-react';
 import type {
   CommunityNeedMetric,
@@ -44,7 +43,7 @@ const defaultEd: EDRelianceMetric = {
 
 export default function RegionalInequityDashboard() {
   // Live data fetched from /api/data/regional-inequity — no client-side estimation.
-  const { data, metadata, isLoading, error, refresh } = useDomainData<RegionalInequityData>('regional-inequity', regionalInequityData);
+  const { data, metadata, isLoading, error } = useDomainData<RegionalInequityData>('regional-inequity', regionalInequityData);
 
   // Pass through only upstream-mapped arrays. Never invent claims/income/education/ED/travel/access values.
   const COMMUNITY_NEED_PROFILES = data?.COMMUNITY_NEED_PROFILES ?? [];
@@ -130,13 +129,6 @@ export default function RegionalInequityDashboard() {
           <AlertTriangle className="h-4 w-4 shrink-0 text-warn" aria-hidden />
           <span>Failed to load regional inequity data: {error}</span>
         </div>
-        <button
-          onClick={refresh}
-          className="rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-paper flex items-center gap-1.5 cursor-pointer"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Retry
-        </button>
       </div>
     );
   }
