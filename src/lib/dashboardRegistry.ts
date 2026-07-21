@@ -86,9 +86,9 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     category: 'system-capacity',
     description: 'Community lab waits and CIHI CT/MRI imaging trends.',
     icon: FlaskConical,
-    badge: '60-MIN POLL',
+    badge: '10-MIN POLL',
     source: 'APL QMe & CIHI Diagnostic Imaging',
-    updateFrequency: 'Lab waits: every 60 min · Imaging: annual/manual',
+    updateFrequency: 'Lab waits: every 10 min · Imaging: annual/manual',
   },
   {
     id: 'primary-care',
@@ -179,7 +179,7 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
   },
   'diagnostics': {
     updateType: 'mixed',
-    interval: 'Lab waits: every 60 min · Imaging: annual/manual',
+    interval: 'Lab waits: every 10 min · Imaging: annual/manual',
     sourceVintage: 'Per-array (see dashboard timestamps)',
     source: 'APL QMe REST API & CIHI Diagnostic Imaging',
     domain: 'diagnostic'

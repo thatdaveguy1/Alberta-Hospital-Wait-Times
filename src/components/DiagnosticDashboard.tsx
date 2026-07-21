@@ -855,7 +855,7 @@ export default function DiagnosticDashboard() {
                   Provincial Lab Wait Time Trend
                 </h3>
                 <p className="text-xs text-ink-3 mt-0.5">
-                  Average wait time across all monitored APL community labs, sampled every 60 minutes.
+                  Average wait time across all monitored APL community labs, sampled every 10 minutes.
                 </p>
               </div>
               <div className="flex bg-paper p-0.5 rounded-lg border border-line">
@@ -922,7 +922,7 @@ export default function DiagnosticDashboard() {
             ) : (
               <div className="h-64 flex flex-col items-center justify-center text-ink-3 text-xs gap-2">
                 <Clock className="w-6 h-6 text-ink-3" />
-                <p>No trend data yet. Lab wait snapshots are collected every 60 minutes — check back shortly.</p>
+                <p>No trend data yet. Lab wait snapshots are collected every 10 minutes — check back shortly.</p>
               </div>
             )}
           </div>
@@ -1109,7 +1109,7 @@ export default function DiagnosticDashboard() {
                       <span>{processedLabs.find(l => l.id === selectedLabId)?.name ?? selectedLabId} — Wait Time Trend</span>
                     </h3>
                     <p className="text-xs text-ink-2 max-w-3xl leading-relaxed">
-                      Historical wait time for this lab site, sampled every 60 minutes from live APL QMe API data. Only numeric wait times are charted; 'Appointments Only', 'Closed', and 'Not Available' states are excluded.
+                      Historical wait time for this lab site, sampled every 10 minutes from live APL QMe API data. Only numeric wait times are charted; 'Appointments Only', 'Closed', and 'Not Available' states are excluded.
                     </p>
                   </div>
 
@@ -1158,7 +1158,7 @@ export default function DiagnosticDashboard() {
                   ) : (
                     <div className="h-64 flex flex-col items-center justify-center text-ink-3 text-xs gap-2">
                       <Clock className="w-6 h-6 text-ink-3" />
-                      <p>No trend data yet for this lab. Snapshots are collected every 60 minutes — check back shortly.</p>
+                      <p>No trend data yet for this lab. Snapshots are collected every 10 minutes — check back shortly.</p>
                     </div>
                   )}
                 </div>

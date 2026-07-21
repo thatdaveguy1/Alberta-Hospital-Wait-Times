@@ -1,5 +1,5 @@
 // APL Lab Wait Times Fetcher Pipeline
-// Fetches live lab location wait times from the APL QMe REST API every 60 minutes.
+// Fetches live lab location wait times from the APL QMe REST API every 10 minutes.
 // The API returns 153 community lab locations with real-time WaitTime and SaveMyPlace fields.
 //
 // Endpoint: GET https://qmeapi.albertaprecisionlabs.ca/api/location
@@ -159,7 +159,7 @@ export async function run(): Promise<SyncResult> {
       LAB_LOCATION_WAITS: buildMetadataEntry({
         updateType: 'auto',
         source: 'APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)',
-        sourceVintage: 'Live point-in-time wait estimate, refreshed every 60 minutes',
+        sourceVintage: 'Live point-in-time wait estimate, refreshed every 10 minutes',
         lastUpdated: timestamp,
         verification: 'Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes.',
       }),
@@ -187,7 +187,7 @@ export async function run(): Promise<SyncResult> {
 
     // Retain only last 90 days of lab snapshots.
     // 90 days keeps seasonal trend visibility without unbounded growth.
-    // Scheduler runs every 60 minutes (not 30).
+    // Scheduler runs every 10 minutes (same cadence as ER waits).
     const retentionCutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
     currentLabSnapshots = currentLabSnapshots.filter(s => new Date(s.timestamp).getTime() > retentionCutoff);
 
