@@ -73,6 +73,10 @@ export function recordLabWaitsUpdate(result: SyncResult): void {
 }
 
 export function recordDailySyncResults(results: SyncResult[]): void {
+  // Reload from disk first so a standalone daily-sync CLI process does not
+  // clobber ER/lab timestamps written by the long-running scheduler.
+  loadSyncStatusFromDisk();
+
   const allSuccess = results.every(r => r.status === 'success');
   const anyFailed = results.some(r => r.status === 'failed');
   const anySuccess = results.some(r => r.status === 'success');

@@ -44,6 +44,9 @@ async function runErWaitTimesPipeline(): Promise<void> {
       hospitals: getHospitals(),
       lastUpdated: result.timestamp,
     });
+    // Keep Pages `/api/sync/status` in lockstep — ER data push alone left
+    // erWaitTimesLastUpdate null in KV and the UI showed "Unknown".
+    await pushToCloudflare('sync-status', getSyncStatus());
     // Provincial/zone trend blob — throttle hourly for free-tier KV budget.
     const now = Date.now();
     if (now - lastErTrendsPushMs >= ER_TRENDS_MIN_INTERVAL_MS) {
@@ -70,6 +73,7 @@ async function runLabWaitsPipeline(): Promise<void> {
     } catch (err) {
       console.warn('[Scheduler] Failed to push diagnostic data to Cloudflare:', err);
     }
+    await pushToCloudflare('sync-status', getSyncStatus());
     // Push pre-computed lab trend aggregates to SNAPSHOTS_KV
     await pushLabTrends(getLabSnapshots());
   }
