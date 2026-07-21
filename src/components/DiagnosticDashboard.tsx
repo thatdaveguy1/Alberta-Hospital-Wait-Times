@@ -99,14 +99,13 @@ export default function DiagnosticDashboard() {
   const [loadingLabTrends, setLoadingLabTrends] = useState(false);
   const [labTrendRange, setLabTrendRange] = useState<'24h' | '7d' | '30d'>('24h');
 
-  const { data, metadata, isLoading, error, refresh } = useDomainData<DiagnosticData>('diagnostic', diagnosticDataModule);
+  const { data, metadata, isLoading, error } = useDomainData<DiagnosticData>('diagnostic', diagnosticDataModule);
   const LAB_LOCATION_WAITS = data?.LAB_LOCATION_WAITS ?? [];
   // Hand-authored / unconfirmed diagnostic arrays — fail closed (empty).
   const TEST_TURNAROUND_METRICS: typeof data extends { TEST_TURNAROUND_METRICS: infer T } ? T : never[] = [] as any;
   const IMAGING_WAIT_TRENDS = data?.IMAGING_WAIT_TRENDS ?? [];
   const FACILITY_IMAGING_WAITS: typeof data extends { FACILITY_IMAGING_WAITS: infer T } ? T : never[] = [] as any;
   const PRIORITY_TARGET_COMPLIANCE: typeof data extends { PRIORITY_TARGET_COMPLIANCE: infer T } ? T : never[] = [] as any;
-  const [refreshing, setRefreshing] = useState(false);
 
   // Location + drive-time sorting (mirrors ER tab behaviour)
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -196,11 +195,6 @@ export default function DiagnosticDashboard() {
     fetchOSRMTimes();
   }, [driveEnabled, userLocation, LAB_LOCATION_WAITS]);
 
-  const refreshData = () => {
-    setRefreshing(true);
-    refresh();
-    setRefreshing(false);
-  };
   const getLabStatus = (lab: LabLocationWait): { label: string; detail: string } => {
     if (isLabWaitUnavailable(lab)) {
       return {
@@ -553,15 +547,7 @@ export default function DiagnosticDashboard() {
         metadata={metadata}
         arrayKey="LAB_LOCATION_WAITS"
         variant="light"
-      >
-        <button
-          onClick={refreshing ? undefined : refreshData}
-          disabled={refreshing}
-          className="self-start md:self-auto rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-paper disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {refreshing ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </DashboardHeader>
+      />
 
       {/* Sub-Tab Navigation */}
       <div className="inline-flex rounded-lg border border-line bg-paper p-0.5" role="tablist" aria-label="Diagnostics view">
@@ -594,8 +580,6 @@ export default function DiagnosticDashboard() {
       {/* SUBTAB 1: Live Lab Waits */}
       {activeSubTab === 'labs' && (
         <div className="space-y-4">
-          <DataTimestamp compact variant="light" metadata={metadata ?? {}} arrayKey="LAB_LOCATION_WAITS" />
-
           {/* Stats Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Provincial Avg Wait Card Breakdown */}

@@ -164,9 +164,12 @@ export async function run(): Promise<SyncResult> {
         verification: 'Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes.',
       }),
     };
+    // Live QMe poll always rewrites LAB_LOCATION_WAITS — declare the key so
+    // mergeDataMetadata bumps lastUpdated (otherwise prior Jul stamps stick forever).
     existingData._dataMetadata = mergeDataMetadata(
       existingData._dataMetadata as DataMetadata | undefined,
       ownedMetadata,
+      ['LAB_LOCATION_WAITS'],
     );
 
     // Write back (guard withheld residual arrays before RMW serialize)
