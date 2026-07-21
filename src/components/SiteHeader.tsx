@@ -14,6 +14,7 @@ import { dashboardMatchesSearch } from '../lib/dashboardModuleSearch';
 import { formatRelativeTime, useSyncStatus } from '../hooks/useSyncStatus';
 import { useTheme } from '../hooks/useTheme';
 import { cn } from '../lib/utils';
+import { prefetchCareSeekingPages } from '../lib/pageDataPrefetch';
 import type { Hospital } from '../types';
 
 export type AppView = 'home' | DashboardId;
@@ -33,16 +34,20 @@ const MENU_GROUPS = CATEGORIES.filter((c) => c.id !== 'all').map((cat) => ({
 function NavLink({
   active,
   onClick,
+  onIntent,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  onIntent?: () => void;
   children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      onMouseEnter={onIntent}
+      onFocus={onIntent}
       aria-current={active ? 'page' : undefined}
       className={cn(
         'relative flex h-16 items-center px-3 text-sm transition-colors cursor-pointer',
@@ -291,10 +296,18 @@ export function SiteHeader({ activeView, onNavigate, onSelectFacility }: SiteHea
             <NavLink active={activeView === 'home'} onClick={() => go('home')}>
               Home
             </NavLink>
-            <NavLink active={activeView === 'er-waits'} onClick={() => go('er-waits')}>
+            <NavLink
+              active={activeView === 'er-waits'}
+              onClick={() => go('er-waits')}
+              onIntent={prefetchCareSeekingPages}
+            >
               ER Waits
             </NavLink>
-            <NavLink active={activeView === 'diagnostics'} onClick={() => go('diagnostics')}>
+            <NavLink
+              active={activeView === 'diagnostics'}
+              onClick={() => go('diagnostics')}
+              onIntent={prefetchCareSeekingPages}
+            >
               Diagnostics & Labs
             </NavLink>
             <button
@@ -429,6 +442,8 @@ export function SiteHeader({ activeView, onNavigate, onSelectFacility }: SiteHea
             <button
               type="button"
               onClick={() => go('er-waits')}
+              onMouseEnter={prefetchCareSeekingPages}
+              onFocus={prefetchCareSeekingPages}
               className="mb-2 flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-semibold text-accent cursor-pointer"
             >
               ER Waits
@@ -436,6 +451,8 @@ export function SiteHeader({ activeView, onNavigate, onSelectFacility }: SiteHea
             <button
               type="button"
               onClick={() => go('diagnostics')}
+              onMouseEnter={prefetchCareSeekingPages}
+              onFocus={prefetchCareSeekingPages}
               className="mb-4 flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-semibold text-accent cursor-pointer"
             >
               Diagnostics & Labs

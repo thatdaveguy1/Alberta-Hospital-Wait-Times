@@ -2,6 +2,7 @@
 // module views (legacy dashboards render inside a dark legacy wrapper until
 // they get their own redesign pass), light footer, and the Data Sources modal.
 import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { SiteHeader, type AppView } from './components/SiteHeader';
 import HomePage from './components/HomePage';
 import ErWaitDashboard from './components/ErWaitDashboard';
@@ -19,6 +20,7 @@ import {
 } from './lib/dashboardRegistry';
 import { readDashboardModuleFromUrl } from './lib/dashboardModuleSearch';
 import { cn } from './lib/utils';
+import { prefetchCareSeekingPages } from './lib/pageDataPrefetch';
 
 const MODULE_IDS = DASHBOARDS.map((d) => d.id);
 
@@ -37,6 +39,26 @@ export default function App() {
     if (fromUrl) setActiveView(fromUrl as DashboardId);
   }, []);
 
+  // Warm ER + Labs while the shell is idle so those clicks feel instant.
+  useEffect(() => {
+    let cancelled = false;
+    const run = () => {
+      if (!cancelled) prefetchCareSeekingPages();
+    };
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(run, { timeout: 1800 });
+    } else {
+      timeoutId = setTimeout(run, 400);
+    }
+    return () => {
+      cancelled = true;
+      if (idleId != null) window.cancelIdleCallback?.(idleId);
+      if (timeoutId != null) clearTimeout(timeoutId);
+    };
+  }, []);
+
   useEffect(() => {
     const url = new URL(window.location.href);
     if (activeView === 'home') url.searchParams.delete('module');
@@ -45,9 +67,10 @@ export default function App() {
   }, [activeView]);
 
   const navigate = (view: AppView) => {
+    if (view === 'er-waits' || view === 'diagnostics') prefetchCareSeekingPages();
     setActiveView(view);
     if (view !== 'er-waits') setRequestedFacilityId(null);
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const selectFacility = (facilityId: string) => {
@@ -73,32 +96,42 @@ export default function App() {
       />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        {activeView === 'home' ? (
-          <HomePage onNavigate={navigate} />
-        ) : activeView === 'er-waits' ? (
-          <ErWaitDashboard
-            requestedFacilityId={requestedFacilityId}
-            onRequestedFacilityHandled={() => setRequestedFacilityId(null)}
-          />
-        ) : activeView === 'diagnostics' ? (
-          <DiagnosticDashboard />
-        ) : activeView === 'disruptions' ? (
-          <ServiceDisruptionsDashboard />
-        ) : activeView === 'surgical-waits' ? (
-          <SurgicalDashboard />
-        ) : activeView === 'primary-care' ? (
-          <PrimaryCareDashboard />
-        ) : activeView === 'public-health' ? (
-          <PublicHealthDashboard />
-        ) : activeView === 'regional-inequity' ? (
-          <RegionalInequityDashboard />
-        ) : activeView === 'health-spending' ? (
-          <SpendingDashboard />
-        ) : (
-          <div className="rounded-xl border border-line bg-surface p-4 text-sm text-ink-2">
-            Unknown dashboard: {activeView}
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeView}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {activeView === 'home' ? (
+              <HomePage onNavigate={navigate} />
+            ) : activeView === 'er-waits' ? (
+              <ErWaitDashboard
+                requestedFacilityId={requestedFacilityId}
+                onRequestedFacilityHandled={() => setRequestedFacilityId(null)}
+              />
+            ) : activeView === 'diagnostics' ? (
+              <DiagnosticDashboard />
+            ) : activeView === 'disruptions' ? (
+              <ServiceDisruptionsDashboard />
+            ) : activeView === 'surgical-waits' ? (
+              <SurgicalDashboard />
+            ) : activeView === 'primary-care' ? (
+              <PrimaryCareDashboard />
+            ) : activeView === 'public-health' ? (
+              <PublicHealthDashboard />
+            ) : activeView === 'regional-inequity' ? (
+              <RegionalInequityDashboard />
+            ) : activeView === 'health-spending' ? (
+              <SpendingDashboard />
+            ) : (
+              <div className="rounded-xl border border-line bg-surface p-4 text-sm text-ink-2">
+                Unknown dashboard: {activeView}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <footer id="site-footer" className="mt-12 border-t border-line">

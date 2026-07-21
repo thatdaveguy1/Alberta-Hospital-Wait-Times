@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DataMetadataMap } from '../components/DataTimestamp';
+import { getCachedDomainPayload, setCachedDomainPayload } from '../lib/pageDataPrefetch';
 
 export interface DomainData<T> {
   data: T | null;
@@ -9,20 +10,36 @@ export interface DomainData<T> {
   refresh: () => void;
 }
 
+function splitPayload<T>(payload: { _dataMetadata?: DataMetadataMap } & T): {
+  data: T;
+  metadata: DataMetadataMap | null;
+} {
+  const { _dataMetadata: fetchedMetadata, ...rest } = payload;
+  return {
+    data: rest as T,
+    metadata: fetchedMetadata ?? null,
+  };
+}
+
 /**
  * Fetch domain JSON from `/api/data/:domain`.
  *
  * The optional second argument is accepted only for call-site compatibility with
  * legacy `*Data.ts` modules. It is intentionally ignored: empty or failed
  * upstream payloads must surface as empty/null, never silent seed fallbacks.
+ *
+ * Warm cache hits paint immediately; a background refresh updates quietly.
  */
 export function useDomainData<T = unknown>(
   domain: string,
   _legacySeedIgnored?: Record<string, unknown>
 ): DomainData<T> {
-  const [data, setData] = useState<T | null>(null);
-  const [metadata, setMetadata] = useState<DataMetadataMap | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const cached = getCachedDomainPayload<{ _dataMetadata?: DataMetadataMap } & T>(domain);
+  const initial = cached ? splitPayload(cached) : null;
+
+  const [data, setData] = useState<T | null>(initial?.data ?? null);
+  const [metadata, setMetadata] = useState<DataMetadataMap | null>(initial?.metadata ?? null);
+  const [isLoading, setIsLoading] = useState(!initial);
   const [error, setError] = useState<string | null>(null);
   const [refreshNonce, setRefreshNonce] = useState(0);
 
@@ -30,7 +47,8 @@ export function useDomainData<T = unknown>(
 
   useEffect(() => {
     let cancelled = false;
-    setIsLoading(true);
+    const warm = getCachedDomainPayload(domain) != null;
+    if (!warm) setIsLoading(true);
     setError(null);
 
     fetch(`/api/data/${domain}`)
@@ -40,18 +58,21 @@ export function useDomainData<T = unknown>(
       })
       .then((payload: { _dataMetadata?: DataMetadataMap } & T) => {
         if (cancelled) return;
-        const { _dataMetadata: fetchedMetadata, ...rest } = payload;
+        setCachedDomainPayload(domain, payload);
+        const next = splitPayload(payload);
         // Fail closed: never fill empty arrays or missing keys from hand-authored seeds.
-        setMetadata(fetchedMetadata ?? null);
-        setData(rest as T);
+        setMetadata(next.metadata);
+        setData(next.data);
         setIsLoading(false);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        // Failed fetch → empty surface, no seed substitution.
-        setData(null);
-        setMetadata(null);
-        setError(err instanceof Error ? err.message : `Failed to load ${domain} data`);
+        // Failed fetch → empty surface only when we have nothing cached to show.
+        if (!getCachedDomainPayload(domain)) {
+          setData(null);
+          setMetadata(null);
+          setError(err instanceof Error ? err.message : `Failed to load ${domain} data`);
+        }
         setIsLoading(false);
       });
 

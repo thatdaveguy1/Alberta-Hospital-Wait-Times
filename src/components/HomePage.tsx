@@ -30,6 +30,7 @@ import {
 } from '../lib/geo';
 import { isLabWaitUnavailable, type LabWaitFields } from '../lib/labWait';
 import { formatMinutesToHm } from '../lib/utils';
+import { prefetchCareSeekingPages } from '../lib/pageDataPrefetch';
 import { formatRelativeTime } from '../hooks/useSyncStatus';
 import { WaitBandChip } from './WaitBandChip';
 import {
@@ -420,6 +421,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     <button
       type="button"
       onClick={() => onNavigate('er-waits')}
+      onMouseEnter={prefetchCareSeekingPages}
+      onFocus={prefetchCareSeekingPages}
       className={
         compact
           ? 'mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent-soft px-4 py-3 text-left transition-colors hover:bg-accent hover:text-white cursor-pointer group'
@@ -450,6 +453,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     <button
       type="button"
       onClick={() => onNavigate('diagnostics')}
+      onMouseEnter={prefetchCareSeekingPages}
+      onFocus={prefetchCareSeekingPages}
       className={
         compact
           ? 'mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent-soft px-4 py-3 text-left transition-colors hover:bg-accent hover:text-white cursor-pointer group'

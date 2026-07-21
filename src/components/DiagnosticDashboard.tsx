@@ -523,11 +523,40 @@ export default function DiagnosticDashboard() {
     }
   }, [selectedKpi]);
 
-  if (isLoading) return (
-    <div className="space-y-4 p-4">
-      <div className="h-48 animate-pulse rounded-xl border border-line bg-neutral-chip" />
-    </div>
-  );
+  if (isLoading) {
+    return (
+      <div
+        className="space-y-4"
+        aria-busy="true"
+        aria-label="Loading diagnostic and lab services"
+      >
+        <DashboardHeader
+          icon={FlaskConical}
+          title="Diagnostic & Lab Services"
+          description="Monitor laboratory wait times and diagnostic imaging benchmark compliance."
+          metadata={metadata ?? undefined}
+          arrayKey="LAB_LOCATION_WAITS"
+          variant="light"
+        />
+        <div className="inline-flex h-9 w-64 animate-pulse rounded-lg border border-line bg-neutral-chip" />
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-28 animate-pulse rounded-xl border border-line bg-neutral-chip"
+              style={{ animationDelay: `${i * 60}ms` }}
+            />
+          ))}
+        </div>
+        <div className="h-72 animate-pulse rounded-xl border border-line bg-neutral-chip" />
+        <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-16 animate-pulse bg-neutral-chip/40" style={{ animationDelay: `${i * 40}ms` }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
   if (error) return (
     <div className="p-4">
       <div className="flex items-center gap-2 rounded-xl border border-line bg-warn-soft p-3 text-sm text-ink-2">

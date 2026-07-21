@@ -32,6 +32,7 @@ import { DashboardHeader } from './DashboardHeader';
 import { WaitBandChip } from './WaitBandChip';
 import type { DataMetadataMap } from './DataTimestamp';
 import { calculateDistance, isRoughlyInAlberta, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
+import { getCachedHospitals, setCachedHospitals } from '../lib/pageDataPrefetch';
 import {
   LocationUnavailableModal,
   useLocationUnavailableModal,
@@ -140,8 +141,9 @@ export default function ErWaitDashboard({
   onRequestedFacilityHandled,
 }: ErWaitDashboardProps = {}) {
   const { syncStatus } = useSyncStatus();
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cachedHospitals = getCachedHospitals<Hospital[]>();
+  const [hospitals, setHospitals] = useState<Hospital[]>(() => cachedHospitals ?? []);
+  const [loading, setLoading] = useState(() => !cachedHospitals?.length);
   const [fetchError, setFetchError] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('me');
   const [search, setSearch] = useState('');
@@ -171,11 +173,13 @@ export default function ErWaitDashboard({
   const [osrmData, setOsrmData] = useState<Record<string, { durationMins: number; distanceKm: number }>>({});
 
   const fetchHospitals = useCallback(async (opts?: { quiet?: boolean }) => {
-    if (!opts?.quiet) setLoading(true);
+    const warm = (getCachedHospitals<Hospital[]>()?.length ?? 0) > 0;
+    if (!opts?.quiet && !warm) setLoading(true);
     try {
       const res = await fetch('/api/hospitals');
       const data = await res.json();
       if (Array.isArray(data)) {
+        setCachedHospitals(data);
         setHospitals((prev) => {
           // Skip state churn when the poll returns identical waits (reduces map/list flicker).
           if (
