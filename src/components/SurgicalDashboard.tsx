@@ -9,7 +9,8 @@ import {
   BarChart3, 
   TrendingDown,
   AlertTriangle,
-  BarChart2
+  BarChart2,
+  ExternalLink,
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -259,6 +260,7 @@ export default function SurgicalDashboard() {
         pctOfBench,
         status,
         source: sourceLabel(rec.source_name),
+        sourceUrl: rec.source_url?.startsWith('http') ? rec.source_url : null,
       };
     };
 
@@ -582,7 +584,20 @@ export default function SurgicalDashboard() {
                             )}
                           </td>
                           <td className="py-2.5 px-3 text-right">
-                            <span className="text-[10px] font-semibold text-ink-2">{row.source}</span>
+                            {row.sourceUrl ? (
+                              <a
+                                href={row.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-semibold text-accent hover:text-accent-strong transition-colors"
+                                title={`Open source: ${row.source}`}
+                              >
+                                <span>{row.source}</span>
+                                <ExternalLink className="w-2.5 h-2.5 shrink-0" aria-hidden />
+                              </a>
+                            ) : (
+                              <span className="text-[10px] font-semibold text-ink-2">{row.source}</span>
+                            )}
                           </td>
                         </tr>
                       ))
