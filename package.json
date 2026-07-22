@@ -15,7 +15,8 @@
     "deploy:worker": "cd cloudflare && wrangler deploy",
     "deploy:pages": "npx wrangler pages deploy dist --project-name alberta-hospital-wait-times --branch test --commit-dirty=true",
     "seed:kv": "cd cloudflare && wrangler kv key put --remote",
-    "gen:push-secret": "openssl rand -hex 24"
+    "gen:push-secret": "openssl rand -hex 24",
+    "test:data-health": "tsx --test tests/unit/dataHealth.test.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

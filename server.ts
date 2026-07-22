@@ -136,10 +136,7 @@ async function startServer() {
         if (!Number.isFinite(lastSyncAgeHours)) lastSyncAgeHours = null;
       }
 
-      const syncStale =
-        health.overall === 'down' ||
-        health.checks.includes('daily_sync_soft_stale') ||
-        health.checks.includes('daily_sync_critical');
+      const syncStale = health.overall !== 'ok';
 
       res.status(200).json({
         status: health.overall,

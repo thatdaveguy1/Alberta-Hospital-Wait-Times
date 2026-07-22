@@ -38,7 +38,10 @@ export function recordErWaitTimesUpdate(result: SyncResult): void {
   // Reload from disk first so we don't clobber a standalone daily-sync run that wrote
   // an updated status while the server was running.
   loadSyncStatusFromDisk();
-  currentStatus.erWaitTimesLastUpdate = result.timestamp;
+  // Only advance the "last success" timestamp when the fetch actually succeeds.
+  if (result.status === 'success') {
+    currentStatus.erWaitTimesLastUpdate = result.timestamp;
+  }
   currentStatus.erWaitTimesNextUpdate = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
   // Update or append the result
@@ -57,7 +60,10 @@ export function recordLabWaitsUpdate(result: SyncResult): void {
   // Reload from disk first so we don't clobber a standalone daily-sync run that wrote
   // an updated status while the server was running.
   loadSyncStatusFromDisk();
-  currentStatus.labWaitsLastUpdate = result.timestamp;
+  // Only advance the "last success" timestamp when the fetch actually succeeds.
+  if (result.status === 'success') {
+    currentStatus.labWaitsLastUpdate = result.timestamp;
+  }
   currentStatus.labWaitsNextUpdate = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
   const existingIdx = currentStatus.results.findIndex(

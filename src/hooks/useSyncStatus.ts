@@ -61,7 +61,8 @@ export function useSyncStatus(): UseSyncStatusReturn {
             prev.labWaitsLastUpdate === data.labWaitsLastUpdate &&
             prev.labWaitsNextUpdate === data.labWaitsNextUpdate &&
             prev.lastSyncTimestamp === data.lastSyncTimestamp &&
-            prev.status === data.status
+            prev.status === data.status &&
+            JSON.stringify(prev.results) === JSON.stringify(data.results)
           ) {
             return prev;
           }

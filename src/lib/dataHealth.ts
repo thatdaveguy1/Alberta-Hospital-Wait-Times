@@ -33,6 +33,7 @@ export interface DomainHealth {
   state: DomainHealthState;
   /** True → eligible for the global site banner (option A). */
   critical: boolean;
+  /** Timestamp of the last success, or the last event used to compute age. */
   lastSuccessAt: string | null;
   ageMinutes: number | null;
   softTtlMinutes: number;
@@ -56,6 +57,7 @@ export interface DataHealthSummary {
 export const VIEW_TO_SYNC_DOMAIN: Record<string, string> = {
   'er-waits': 'er-waittimes',
   'urgent-care': 'er-waittimes',
+  'erWaitTimes': 'er-waittimes',
   disruptions: 'disruptions',
   'surgical-waits': 'surgical',
   diagnostics: 'diagnostic',
@@ -104,35 +106,57 @@ const DOMAIN_POLICIES: Record<string, DomainPolicy> = {
 
 const MONITORED_DOMAINS = Object.keys(DOMAIN_POLICIES);
 
+function parseTimestampMs(iso: string): number {
+  const ms = new Date(iso).getTime();
+  return Number.isFinite(ms) ? ms : NaN;
+}
+
 function ageMinutesFrom(iso: string | null | undefined, nowMs: number): number | null {
   if (!iso) return null;
-  const ms = new Date(iso).getTime();
-  if (!Number.isFinite(ms)) return null;
+  const ms = parseTimestampMs(iso);
+  if (Number.isNaN(ms)) return null;
   return Math.max(0, Math.round((nowMs - ms) / 60_000));
 }
 
 function latestResultForDomain(status: SyncStatusLike, domain: string): SyncResultLike | null {
   const matches = status.results.filter((r) => r.domain === domain);
   if (matches.length === 0) return null;
-  return matches.reduce((best, cur) =>
-    new Date(cur.timestamp).getTime() > new Date(best.timestamp).getTime() ? cur : best,
-  );
+  return matches.reduce((best, cur) => {
+    const bestMs = parseTimestampMs(best.timestamp);
+    const curMs = parseTimestampMs(cur.timestamp);
+    if (Number.isNaN(curMs)) return best;
+    if (Number.isNaN(bestMs) || curMs > bestMs) return cur;
+    return best;
+  });
 }
 
-function resolveTimestamp(
+function latestNonFailedResultForDomain(
   status: SyncStatusLike,
   domain: string,
-  policy: DomainPolicy,
-): string | null {
-  for (const key of policy.timestampKeys ?? []) {
-    const value = status[key];
-    if (typeof value === 'string' && value) return value;
-  }
-  const result = latestResultForDomain(status, domain);
-  if (result && (result.status === 'success' || result.status === 'partial' || result.status === 'manual')) {
-    return result.timestamp;
-  }
-  return result?.timestamp ?? status.lastSyncTimestamp;
+): SyncResultLike | null {
+  const matches = status.results.filter((r) => r.domain === domain && r.status !== 'failed');
+  if (matches.length === 0) return null;
+  return matches.reduce((best, cur) => {
+    const bestMs = parseTimestampMs(best.timestamp);
+    const curMs = parseTimestampMs(cur.timestamp);
+    if (Number.isNaN(curMs)) return best;
+    if (Number.isNaN(bestMs) || curMs > bestMs) return cur;
+    return best;
+  });
+}
+
+function hasMoreRecentFailure(
+  status: SyncStatusLike,
+  domain: string,
+  referenceTimestamp: string | null,
+): boolean {
+  const refMs = referenceTimestamp ? parseTimestampMs(referenceTimestamp) : NaN;
+  if (Number.isNaN(refMs)) return true;
+  return status.results.some((r) => {
+    if (r.domain !== domain || r.status !== 'failed') return false;
+    const rMs = parseTimestampMs(r.timestamp);
+    return Number.isFinite(rMs) && rMs > refMs;
+  });
 }
 
 function formatAge(ageMinutes: number): string {
@@ -146,25 +170,36 @@ function formatAge(ageMinutes: number): string {
 function assessDomain(status: SyncStatusLike, domain: string, nowMs: number): DomainHealth {
   const policy = DOMAIN_POLICIES[domain];
   const label = DOMAIN_LABELS[domain] ?? domain;
-  const result = latestResultForDomain(status, domain);
-  const lastSuccessAt = resolveTimestamp(status, domain, policy);
-  const ageMinutes = ageMinutesFrom(lastSuccessAt, nowMs);
+  const latest = latestResultForDomain(status, domain);
+  const latestNonFailed = latestNonFailedResultForDomain(status, domain);
 
-  if (result?.status === 'failed') {
-    return {
-      domain,
-      label,
-      state: 'failed',
-      critical: true,
-      lastSuccessAt,
-      ageMinutes,
-      softTtlMinutes: policy.softTtlMinutes,
-      criticalTtlMinutes: policy.criticalTtlMinutes,
-      message: `${label} feed failed${result.error ? `: ${result.error}` : ''}`,
-    };
+  // Build the strongest success anchor: dedicated domain timestamp (ER/lab) or latest non-failed result.
+  let lastSuccessAt: string | null = null;
+  let successFromTimestampKey = false;
+  for (const key of policy.timestampKeys ?? []) {
+    const value = status[key];
+    if (typeof value === 'string' && value) {
+      lastSuccessAt = value;
+      successFromTimestampKey = true;
+      break;
+    }
   }
 
-  if (!result && !lastSuccessAt) {
+  if (latestNonFailed) {
+    const nonFailedMs = parseTimestampMs(latestNonFailed.timestamp);
+    const currentMs = lastSuccessAt ? parseTimestampMs(lastSuccessAt) : NaN;
+    if (Number.isFinite(nonFailedMs) && (!Number.isFinite(currentMs) || nonFailedMs > currentMs)) {
+      lastSuccessAt = latestNonFailed.timestamp;
+      successFromTimestampKey = false;
+    }
+  }
+
+  // If still no success anchor, the latest event is a failure (or missing).
+  const lastEventAt = lastSuccessAt ?? latest?.timestamp ?? null;
+  const ageMinutes = ageMinutesFrom(lastEventAt, nowMs);
+
+  // No evidence at all for this domain.
+  if (!latest && !lastSuccessAt) {
     return {
       domain,
       label,
@@ -178,22 +213,22 @@ function assessDomain(status: SyncStatusLike, domain: string, nowMs: number): Do
     };
   }
 
-  if (result?.status === 'skipped' || result?.status === 'manual') {
+  // No success anchor at all: every recorded result failed.
+  if (!lastSuccessAt) {
     return {
       domain,
       label,
-      state: result.status === 'manual' ? 'partial' : 'skipped',
-      critical: false,
-      lastSuccessAt,
+      state: 'failed',
+      critical: true,
+      lastSuccessAt: lastEventAt,
       ageMinutes,
       softTtlMinutes: policy.softTtlMinutes,
       criticalTtlMinutes: policy.criticalTtlMinutes,
-      message:
-        result.status === 'manual'
-          ? `${label} is manual / partially automated`
-          : `${label} was skipped in the last sync`,
+      message: `${label} feed failed`,
     };
   }
+
+  const failedAfterSuccess = hasMoreRecentFailure(status, domain, lastSuccessAt);
 
   if (ageMinutes != null && ageMinutes > policy.criticalTtlMinutes) {
     return {
@@ -209,7 +244,23 @@ function assessDomain(status: SyncStatusLike, domain: string, nowMs: number): Do
     };
   }
 
-  if (result?.status === 'partial') {
+  // A failed pipeline ran after our success anchor. If no non-failed result exists at
+  // all, the domain is down; otherwise it is only degraded (secondary pipeline failure).
+  if (failedAfterSuccess && !latestNonFailed) {
+    return {
+      domain,
+      label,
+      state: 'failed',
+      critical: true,
+      lastSuccessAt,
+      ageMinutes,
+      softTtlMinutes: policy.softTtlMinutes,
+      criticalTtlMinutes: policy.criticalTtlMinutes,
+      message: `${label} feed failed`,
+    };
+  }
+
+  if (failedAfterSuccess) {
     return {
       domain,
       label,
@@ -220,6 +271,80 @@ function assessDomain(status: SyncStatusLike, domain: string, nowMs: number): Do
       softTtlMinutes: policy.softTtlMinutes,
       criticalTtlMinutes: policy.criticalTtlMinutes,
       message: `${label} returned a partial update`,
+    };
+  }
+
+  // Timestamp-key success without a matching non-failed result record.
+  if (successFromTimestampKey && (!latestNonFailed || latestNonFailed.timestamp !== lastSuccessAt)) {
+    if (ageMinutes != null && ageMinutes > policy.softTtlMinutes) {
+      return {
+        domain,
+        label,
+        state: 'soft_stale',
+        critical: false,
+        lastSuccessAt,
+        ageMinutes,
+        softTtlMinutes: policy.softTtlMinutes,
+        criticalTtlMinutes: policy.criticalTtlMinutes,
+        message: `${label} may be stale (${formatAge(ageMinutes)})`,
+      };
+    }
+    return {
+      domain,
+      label,
+      state: 'healthy',
+      critical: false,
+      lastSuccessAt,
+      ageMinutes,
+      softTtlMinutes: policy.softTtlMinutes,
+      criticalTtlMinutes: policy.criticalTtlMinutes,
+      message: `${label} is fresh`,
+    };
+  }
+
+  if (!latestNonFailed) {
+    // Should be unreachable because we already handled !lastSuccessAt, but keep safe.
+    return {
+      domain,
+      label,
+      state: 'failed',
+      critical: true,
+      lastSuccessAt,
+      ageMinutes,
+      softTtlMinutes: policy.softTtlMinutes,
+      criticalTtlMinutes: policy.criticalTtlMinutes,
+      message: `${label} feed failed`,
+    };
+  }
+
+  if (latestNonFailed.status === 'partial' || latestNonFailed.status === 'manual') {
+    return {
+      domain,
+      label,
+      state: 'partial',
+      critical: false,
+      lastSuccessAt,
+      ageMinutes,
+      softTtlMinutes: policy.softTtlMinutes,
+      criticalTtlMinutes: policy.criticalTtlMinutes,
+      message:
+        latestNonFailed.status === 'manual'
+          ? `${label} is manual / partially automated`
+          : `${label} returned a partial update`,
+    };
+  }
+
+  if (latestNonFailed.status === 'skipped') {
+    return {
+      domain,
+      label,
+      state: 'skipped',
+      critical: false,
+      lastSuccessAt,
+      ageMinutes,
+      softTtlMinutes: policy.softTtlMinutes,
+      criticalTtlMinutes: policy.criticalTtlMinutes,
+      message: `${label} was skipped in the last sync`,
     };
   }
 
@@ -255,13 +380,21 @@ function buildBannerMessage(criticalIssues: DomainHealth[], syncStatusAvailable:
     return 'Live data status is unreachable. Showing last received data where available.';
   }
   if (criticalIssues.length === 0) return null;
+
   const labels = criticalIssues.slice(0, 3).map((d) => d.label);
   const more = criticalIssues.length > 3 ? ` +${criticalIssues.length - 3} more` : '';
   const joined = labels.join(', ') + more;
+
   const hasFailure = criticalIssues.some((d) => d.state === 'failed');
   if (hasFailure) {
     return `Data refresh is failing for ${joined}. Showing last received data.`;
   }
+
+  const hasNeverRun = criticalIssues.some((d) => d.state === 'never_run');
+  if (hasNeverRun) {
+    return `${joined} ${criticalIssues.length === 1 ? 'has' : 'have'} never completed. Showing last received data where available.`;
+  }
+
   return `Some feeds are critically stale (${joined}). Showing last received data.`;
 }
 
@@ -294,6 +427,7 @@ export function assessDataHealth(
 
   const dailyAge = ageMinutesFrom(syncStatus.lastSyncTimestamp, nowMs);
   const dailyCritical = dailyAge == null || dailyAge > 48 * 60;
+  const dailySoft = dailyAge != null && dailyAge > 26 * 60;
   const checks: string[] = [];
 
   if (syncStatus.lastSyncTimestamp) checks.push('daily_sync_present');
@@ -308,13 +442,10 @@ export function assessDataHealth(
   else if (er?.critical) checks.push('er_feed_critical');
   else checks.push('er_feed_soft_stale');
 
-  const failedCount = domains.filter((d) => d.state === 'failed').length;
   let overall: HealthLevel = 'ok';
-  if (!syncStatus.lastSyncTimestamp || (er?.critical && er.state === 'failed') || failedCount >= 3) {
+  if (!syncStatus.lastSyncTimestamp || criticalIssues.length > 0 || dailyCritical) {
     overall = 'down';
-  } else if (criticalIssues.length > 0 || dailyCritical || syncStatus.status === 'failed') {
-    overall = 'down';
-  } else if (softIssues.length > 0 || syncStatus.status === 'partial_success') {
+  } else if (softIssues.length > 0 || dailySoft) {
     overall = 'degraded';
   }
 

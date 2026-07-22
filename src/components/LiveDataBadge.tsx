@@ -3,8 +3,9 @@
 
 import React from 'react';
 import { Clock, AlertCircle, CheckCircle } from 'lucide-react';
-import { useSyncStatus, formatRelativeTime } from '../hooks/useSyncStatus';
-import { assessDataHealth, getDomainHealth, type DomainHealthState } from '../lib/dataHealth';
+import { formatRelativeTime } from '../hooks/useSyncStatus';
+import { useDataHealth } from '../hooks/useDataHealth';
+import { getDomainHealth, type DomainHealthState } from '../lib/dataHealth';
 
 interface LiveDataBadgeProps {
   domain: string;
@@ -58,7 +59,7 @@ function statusPresentation(state: DomainHealthState | 'unreachable'): {
 }
 
 export function LiveDataBadge({ domain, sourceLabel }: LiveDataBadgeProps): React.ReactElement | null {
-  const { syncStatus, loading } = useSyncStatus();
+  const { syncStatus, loading, health } = useDataHealth();
 
   if (loading && !syncStatus) {
     return (
@@ -69,7 +70,6 @@ export function LiveDataBadge({ domain, sourceLabel }: LiveDataBadgeProps): Reac
     );
   }
 
-  const health = assessDataHealth(syncStatus);
   const resolved = resolveDomain(domain);
   const domainHealth = getDomainHealth(health, resolved);
   const timestamp = domainHealth?.lastSuccessAt ?? null;

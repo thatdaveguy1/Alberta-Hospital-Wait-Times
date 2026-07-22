@@ -11,9 +11,10 @@ import {
   type DashboardId,
 } from '../lib/dashboardRegistry';
 import { dashboardMatchesSearch } from '../lib/dashboardModuleSearch';
-import { formatRelativeTime, useSyncStatus } from '../hooks/useSyncStatus';
+import { formatRelativeTime } from '../hooks/useSyncStatus';
+import { useDataHealth } from '../hooks/useDataHealth';
 import { useTheme } from '../hooks/useTheme';
-import { assessDataHealth, getDomainHealth } from '../lib/dataHealth';
+import { getDomainHealth } from '../lib/dataHealth';
 import { cn } from '../lib/utils';
 import { prefetchCareSeekingPages } from '../lib/pageDataPrefetch';
 import { deriveCareType } from '../lib/erFacility';
@@ -63,11 +64,10 @@ function NavLink({
 }
 
 function FreshnessChip() {
-  const { syncStatus, loading } = useSyncStatus();
+  const { syncStatus, loading, health } = useDataHealth();
   // Avoid an "issue" flash while the first status poll is in flight.
   if (loading && !syncStatus) return null;
 
-  const health = assessDataHealth(syncStatus);
   const er = getDomainHealth(health, 'er-waittimes');
   const ts = er?.lastSuccessAt ?? syncStatus?.erWaitTimesLastUpdate ?? null;
   const relative = ts ? formatRelativeTime(ts) : null;
