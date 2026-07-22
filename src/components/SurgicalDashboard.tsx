@@ -342,6 +342,7 @@ export default function SurgicalDashboard() {
                     : card.procedureName === 'Cataract Extraction & Lens Implant'
                       ? 'cataract_surgery_median'
                       : null;
+              const waitLabel = card.wait != null ? `${card.wait} ${card.unitLabel}` : '—';
               const targetFooter =
                 card.benchmarkLabel
                   ? `CIHI target: ${card.benchmarkLabel}`
