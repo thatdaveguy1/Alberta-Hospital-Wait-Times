@@ -1,8 +1,11 @@
-// Alberta Bone & Joint Health Institute / IIHO (now iiho.ca) Scraper
-// Scrapes https://iiho.ca/wait-times/ for orthopedic hip & knee wait times
-// by geography. Parses hidden HTML tables referenced by geography selects,
-// converts weekly figures to days, merges with existing data-surgical.json,
-// and writes the combined result.
+// Alberta Bone & Joint Health Institute / IIHO (iiho.ca) Scraper
+// Fetches https://iiho.ca/wait-times/ for orthopedic hip & knee wait times
+// by geography. Historically this page exposed hidden HTML tables driven by
+// geography <select>s. As of mid-2026 the public page only has empty selects
+// and unpopulated Google Charts stubs — no parseable metrics. When tables are
+// missing we clear ORTHOPEDIC_SPECIALTY_RECORDS so the UI cannot show stale
+// numbers as current. If IIHO restores tables (or publishes another feed),
+// the existing parsers still apply.
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
@@ -334,7 +337,26 @@ export async function run(): Promise<SyncResult> {
     console.log(`[AbjhiScraper] Parsed ${surgeryMetrics.length} surgery records`);
 
     if (surgeryMetrics.length === 0) {
-      throw new Error('No surgery metrics parsed from ABJHI tables');
+      // Source withdrawn / empty page — fail closed by clearing stale rows.
+      const cleared = clearOrthopedicRecords(
+        timestamp,
+        'IIHO wait-times page has no geography tables or metrics (empty selects / unpopulated charts). Public ABJHI/IIHO hip & knee specialty series is unavailable.',
+      );
+      const durationMs = Date.now() - startTime;
+      console.warn(
+        `[AbjhiScraper] No surgery metrics on page — cleared ${cleared} stale orthopedic rows (${durationMs}ms)`,
+      );
+      return {
+        domain: 'surgical',
+        pipeline: 'abjhiScraper',
+        status: 'skipped',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs,
+        timestamp,
+        error:
+          'IIHO/ABJHI wait-times page no longer publishes parseable geography tables; ORTHOPEDIC_SPECIALTY_RECORDS cleared',
+      };
     }
 
     const latestQuarter = deriveLatestQuarter(surgeryMetrics);
@@ -360,31 +382,15 @@ export async function run(): Promise<SyncResult> {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.error('[AbjhiScraper] FAILED:', errorMsg);
 
-    // Fail closed: do not stamp auto/fresh metadata over stale rows. Mark the
-    // owned array as not refreshed so UI does not claim failed data is live.
+    // Transport/parse crash: clear specialty rows so a half-broken page cannot
+    // leave last quarter's numbers looking current.
     try {
-      if (fs.existsSync(SURGICAL_FILE)) {
-        const existing = JSON.parse(fs.readFileSync(SURGICAL_FILE, 'utf8')) as Record<string, unknown>;
-        const priorMeta = (existing._dataMetadata as DataMetadata | undefined)?.ORTHOPEDIC_SPECIALTY_RECORDS;
-        const ownedMetadata: DataMetadata = {
-          ORTHOPEDIC_SPECIALTY_RECORDS: buildMetadataEntry({
-            updateType: 'manual',
-            source: 'Alberta Bone & Joint Health Institute / IIHO wait times page',
-            sourceVintage: 'Unavailable — ABJHI/IIHO scrape failed; existing rows are stale',
-            // Preserve prior lastUpdated if present so failure does not look like a fresh pull.
-            lastUpdated: priorMeta?.lastUpdated ?? '1970-01-01T00:00:00.000Z',
-            verification: `ABJHI/IIHO scrape failed: ${errorMsg}. Existing orthopedic rows (if any) are not refreshed and must not be treated as current.`,
-          }),
-        };
-        existing._dataMetadata = mergeDataMetadata(
-          existing._dataMetadata as DataMetadata | undefined,
-          ownedMetadata,
-        );
-        applyWithheldPayloadGuard(existing);
-        fs.writeFileSync(SURGICAL_FILE, JSON.stringify(existing, null, 2), 'utf8');
-      }
+      clearOrthopedicRecords(
+        timestamp,
+        `ABJHI/IIHO scrape failed: ${errorMsg}. Orthopedic specialty rows cleared; not treated as current.`,
+      );
     } catch (metaErr) {
-      console.warn('[AbjhiScraper] Could not update failure metadata:', metaErr);
+      console.warn('[AbjhiScraper] Could not clear orthopedic records after failure:', metaErr);
     }
 
     return {
@@ -400,6 +406,47 @@ export async function run(): Promise<SyncResult> {
   }
 }
 
+/** Empty ORTHOPEDIC_SPECIALTY_RECORDS and stamp unavailable metadata. */
+function clearOrthopedicRecords(timestamp: string, verification: string): number {
+  if (!fs.existsSync(SURGICAL_FILE)) return 0;
+  const existing = JSON.parse(fs.readFileSync(SURGICAL_FILE, 'utf8')) as Record<string, unknown>;
+  const prior = Array.isArray(existing.ORTHOPEDIC_SPECIALTY_RECORDS)
+    ? (existing.ORTHOPEDIC_SPECIALTY_RECORDS as unknown[]).length
+    : 0;
+  existing.ORTHOPEDIC_SPECIALTY_RECORDS = [];
+  const ownedMetadata: DataMetadata = {
+    ORTHOPEDIC_SPECIALTY_RECORDS: buildMetadataEntry({
+      updateType: 'manual',
+      source: 'Alberta Bone & Joint Health Institute / IIHO wait times page',
+      sourceVintage: 'Unavailable — IIHO no longer publishes public geography wait-time tables',
+      lastUpdated: timestamp,
+      verification,
+    }),
+  };
+  existing._dataMetadata = mergeDataMetadata(
+    existing._dataMetadata as DataMetadata | undefined,
+    ownedMetadata,
+    ['ORTHOPEDIC_SPECIALTY_RECORDS'],
+  );
+  applyWithheldPayloadGuard(existing);
+  fs.writeFileSync(SURGICAL_FILE, JSON.stringify(existing, null, 2), 'utf8');
+  return prior;
+}
+
 // Re-export for rate-limited orchestration — callers that need to respect
 // the 2-second minimum between requests can await this before calling run().
 export { RATE_LIMIT_MS };
+
+// CLI entry point: tsx src/pipelines/abjhiScraper.ts
+if (import.meta.url === `file://${process.argv[1]}`) {
+  run()
+    .then((result) => {
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.status === 'success' || result.status === 'skipped' ? 0 : 1);
+    })
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+}
+

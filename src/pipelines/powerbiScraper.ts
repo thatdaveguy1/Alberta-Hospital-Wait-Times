@@ -183,10 +183,15 @@ function classifyResponse(data: DsrData): {
     return { volumes };
   }
 
-  // SurgMap_v2 — facility-level data with coordinates + volume (M0).
-  // Power BI also fires Surgery Type–filtered map queries that return the same
-  // sites with M0=0; callers must not let those overwrite real volumes.
-  if (selectStr.includes('SurgMap_v2.SITE')) {
+  // SurgMap_v2 — full All-Surgeries facility map with coordinates + volume.
+  // Require FACILITY_LONGITUDE so we only accept the unfiltered coordinate map
+  // (complete site list, typically ~90). The Surgery Type breakdown query uses
+  // hierarchical G0/X rows without lon/lat and must not feed facility volumes.
+  if (
+    selectStr.includes('SurgMap_v2.SITE') &&
+    selectStr.includes('FACILITY_LONGITUDE') &&
+    !selectStr.includes('Surgery Type')
+  ) {
     const rows = parseDsrRows(data);
     const facilities: FacilityData[] = rows
       .filter((r) => r.G0 && typeof r.G0 === 'string')
@@ -196,8 +201,7 @@ function classifyResponse(data: DsrData): {
           site: String(r.G0),
           longitude: Number(r.M1 ?? 0),
           latitude: Number(r.M2 ?? 0),
-          // Only carry positive M0 so zeroed Surgery Type responses stay empty.
-          volumes: Number.isFinite(volume) && volume > 0 ? [volume] : [],
+          volumes: Number.isFinite(volume) && volume > 0 ? [Math.round(volume)] : [],
         };
       });
     return { facilities };
