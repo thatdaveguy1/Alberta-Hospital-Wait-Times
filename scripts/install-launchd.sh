@@ -39,12 +39,26 @@ done
 
 for label in "${LABELS[@]}"; do
   launchctl bootout "$DOMAIN/$label" 2>/dev/null || true
-  launchctl bootstrap "$DOMAIN" "$AGENTS_DIR/$label.plist"
+  # bootstrap can return I/O error (5) if the agent is mid-transition; retry once.
+  if ! launchctl bootstrap "$DOMAIN" "$AGENTS_DIR/$label.plist" 2>/dev/null; then
+    sleep 1
+    launchctl bootout "$DOMAIN/$label" 2>/dev/null || true
+    if ! launchctl bootstrap "$DOMAIN" "$AGENTS_DIR/$label.plist"; then
+      # Already loaded is acceptable after a race.
+      if launchctl print "$DOMAIN/$label" >/dev/null 2>&1; then
+        echo "Warning: bootstrap raced for $label but agent is loaded" >&2
+      else
+        echo "Error: failed to bootstrap $label" >&2
+        exit 1
+      fi
+    fi
+  fi
+  launchctl enable "$DOMAIN/$label" 2>/dev/null || true
 done
 
 for label in "${LABELS[@]}"; do
   echo "--- launchctl print $DOMAIN/$label ---"
-  launchctl print "$DOMAIN/$label" 2>/dev/null | grep -E '^(state|pid|last exit code|path) =' || launchctl print "$DOMAIN/$label" | head -20
+  launchctl print "$DOMAIN/$label" 2>/dev/null | head -25
 done
 
 launchctl kickstart -k "$DOMAIN/com.davemini.alberta-hospital-wait-times"

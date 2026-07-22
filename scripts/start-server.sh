@@ -30,13 +30,11 @@ port_pid() {
   lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null | head -1 || true
 }
 
+# KeepAlive jobs must stay long-running. Never exit 0 while another listener
+# holds the port — take it over so this launchd process owns the server.
 existing_pid="$(port_pid)"
 if [[ -n "$existing_pid" ]]; then
   cmd="$(ps -p "$existing_pid" -o args= 2>/dev/null || true)"
-  if [[ "$cmd" == *"dist/server.cjs"* ]]; then
-    echo "already running on port $PORT (pid $existing_pid)"
-    exit 0
-  fi
   echo "Port $PORT held by pid $existing_pid — stopping: $cmd" >&2
   kill "$existing_pid" 2>/dev/null || true
   for _ in {1..10}; do
@@ -44,7 +42,13 @@ if [[ -n "$existing_pid" ]]; then
     sleep 0.5
   done
   if [[ -n "$(port_pid)" ]]; then
-    echo "Error: port $PORT still in use after 5s" >&2
+    leftover="$(port_pid)"
+    echo "Force-killing leftover pid $leftover on port $PORT" >&2
+    kill -9 "$leftover" 2>/dev/null || true
+    sleep 0.5
+  fi
+  if [[ -n "$(port_pid)" ]]; then
+    echo "Error: port $PORT still in use after kill" >&2
     exit 1
   fi
 fi
