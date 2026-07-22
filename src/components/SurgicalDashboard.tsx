@@ -12,21 +12,18 @@ import {
   BarChart2,
   ExternalLink,
 } from 'lucide-react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip as RechartsTooltip, 
-  Legend, 
-  ResponsiveContainer, 
-  AreaChart, 
-  Area
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
 } from 'recharts';
 import type {
   SurgicalRecord,
-  JointWaitRecord,
   HistoricalTrend,
 } from '../surgicalData';
 import * as surgicalData from '../surgicalData';
@@ -47,7 +44,6 @@ import { useDomainData } from '../hooks/useDomainData';
 
 type SurgicalData = {
   SURGICAL_RECORDS: SurgicalRecord[];
-  ORTHOPEDIC_SPECIALTY_RECORDS: JointWaitRecord[];
   HISTORICAL_WAIT_TRENDS: HistoricalTrend[];
   _dataMetadata?: DataMetadataMap;
 };
@@ -65,7 +61,7 @@ export default function SurgicalDashboard() {
            !r.procedure_name.includes('CT')
     );
   }, [data]);
-  const ORTHOPEDIC_SPECIALTY_RECORDS = data?.ORTHOPEDIC_SPECIALTY_RECORDS ?? [];
+  // IIHO/ABJHI geography specialty series is no longer published; trends use CIHI only.
   const rawHistoricalTrends = data?.HISTORICAL_WAIT_TRENDS ?? [];
   const HISTORICAL_WAIT_TRENDS = useMemo(() => {
     if (!rawHistoricalTrends || rawHistoricalTrends.length === 0) return [];
@@ -193,7 +189,6 @@ export default function SurgicalDashboard() {
     }
   }, [selectedKpi, historicalTrendYearSpan, historicalTrendYearStart, historicalTrendYearEnd]);
 
-  const [selectedProcedureGroup, setSelectedProcedureGroup] = useState<string>('Hip Replacement');
 
   const overviewProcedureCards = useMemo(() => {
     const specs = [
@@ -274,10 +269,6 @@ export default function SurgicalDashboard() {
     };
   }, [SURGICAL_RECORDS]);
 
-  // Get active joint replacement records
-  const orthopedicData = ORTHOPEDIC_SPECIALTY_RECORDS.filter(
-    item => item.procedure === selectedProcedureGroup
-  );
 
   if (isLoading) {
     return (
@@ -331,7 +322,7 @@ export default function SurgicalDashboard() {
           }`}
         >
           <TrendingUp className="w-4 h-4" />
-          <span>Orthopedics & Historical Trends</span>
+          <span>Historical Trends</span>
         </button>
 
 
@@ -622,154 +613,68 @@ export default function SurgicalDashboard() {
         </div>
       )}
 
-      {/* --- SUB-TAB: ORTHOPEDICS & HISTORICAL TRENDS --- */}
+      {/* --- SUB-TAB: HISTORICAL TRENDS (CIHI) --- */}
       {activeSubTab === 'ortho' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <h3 className="font-semibold text-sm text-ink flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-accent" />
-                Joint Reconstruction Specialty Registry (ABJHI & IIHO Feeds)
-              </h3>
-              <p className="text-xs text-ink-2">
-                Detailed metrics by geography comparing hip and knee replacement wait segments and historical median values.
-              </p>
-              <DataTimestamp compact variant="light" metadata={metadata ?? undefined} arrayKey="ORTHOPEDIC_SPECIALTY_RECORDS" />
-              {ORTHOPEDIC_SPECIALTY_RECORDS.length === 0 && (
-                <p className="text-[11px] text-warn">No current ABJHI orthopedic rows. Failed scrapes are not treated as fresh data.</p>
-              )}
-              {ORTHOPEDIC_SPECIALTY_RECORDS.length > 0 && metadata?.ORTHOPEDIC_SPECIALTY_RECORDS?.updateType === 'manual' && (
-                <p className="text-[11px] text-warn">ABJHI last scrape did not refresh these rows — treat as stale, not live.</p>
-              )}
-            </div>
-
-            {/* Procedure toggle */}
-            <div className="flex items-center gap-1.5 p-1 bg-paper border border-line rounded-xl">
-              <button
-                onClick={() => setSelectedProcedureGroup('Hip Replacement')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold   transition-all cursor-pointer ${
-                  selectedProcedureGroup === 'Hip Replacement'
-                    ? 'bg-accent text-ink '
-                    : 'text-ink-2 hover:text-ink'
-                }`}
-              >
-                Hip replacement
-              </button>
-              <button
-                onClick={() => setSelectedProcedureGroup('Knee Replacement')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold   transition-all cursor-pointer ${
-                  selectedProcedureGroup === 'Knee Replacement'
-                    ? 'bg-accent text-ink '
-                    : 'text-ink-2 hover:text-ink'
-                }`}
-              >
-                Knee replacement
-              </button>
-            </div>
+          <div className="space-y-1">
+            <h3 className="font-semibold text-sm text-ink flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-accent" />
+              Provincial Wait Trends
+            </h3>
+            <p className="text-xs text-ink-2">
+              Long-run median wait times for priority procedures from CIHI. Geography specialty registry data from IIHO/ABJHI is no longer publicly available.
+            </p>
+            <DataTimestamp compact variant="light" metadata={metadata ?? undefined} arrayKey="HISTORICAL_WAIT_TRENDS" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Geo wait times bar chart */}
-            <div className="lg:col-span-2 bg-surface border border-line rounded-xl p-4 sm:p-5 flex flex-col justify-between">
-              <div>
-                <h4 className="font-semibold text-xs text-ink mb-1">
-                  Active Regional Wait Times (90th Percentile)
-                </h4>
-                <p className="text-[10px] text-ink-2 mb-4">
-                  Shows referral-to-consult (Wait 1) and decision-to-surgery (Wait 2) durations in days by Alberta municipality.
-                </p>
-              </div>
-
-              <div className="h-[260px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={orthopedicData}
-                    margin={{ top: 10, right: 10, left: -20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
-                    <XAxis dataKey="geography" tick={{ fill: 'oklch(0.62 0.02 255)', fontSize: 9 }} stroke="oklch(0.28 0.02 255)" />
-                    <YAxis tick={{ fill: 'oklch(0.62 0.02 255)', fontSize: 10 }} stroke="oklch(0.28 0.02 255)" unit="d" />
-                    <RechartsTooltip 
-                      contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', border: '1px solid oklch(0.28 0.02 255)', borderRadius: '8px' }} itemStyle={{ color: 'oklch(0.96 0.008 255)' }} labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: '10px', pt: 10 }} />
-                    <Bar dataKey="consult_wait_days_90th" name="Wait 1: Consult Wait (Days)" fill="oklch(0.68 0.13 252)" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="surgery_wait_days_90th" name="Wait 2: Surgery Wait (Days)" fill="oklch(0.82 0.12 85)" radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Ortho side metrics panel */}
-            <div className="bg-surface border border-line rounded-xl p-4 space-y-4">
-              <div>
-                <span className="text-[9px] text-warn font-semibold">Registry Insights</span>
-                <h4 className="font-semibold text-sm text-ink mt-0.5">Regional Volume Splits</h4>
-                <p className="text-[10px] text-ink-2 leading-normal mt-1">
-                  Orthopedic joint waitlists are highly concentrated in urban medical centers. Secondary private/chartered clinics are contracted to perform day-surgery joint reconstructions.
-                </p>
-              </div>
-
-              <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
-                {orthopedicData.map((record, idx) => (
-                  <div key={idx} className="p-2 bg-paper border border-line rounded-xl flex items-center justify-between text-[11px]">
-                    <div>
-                      <span className="font-semibold text-ink block">{record.geography}</span>
-                      <span className="text-[9px] text-ink-3 font-mono">Completed cases: {record.count_completed}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-accent font-semibold block">{record.longest_10_days} Days</span>
-                      <span className="text-[8.5px] text-ink-3 font-semibold">90% Seen Within</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Historical Trends area chart (filtered from 2009) */}
           <div className="bg-surface border border-line rounded-xl p-4 sm:p-5">
             <div className="space-y-1 mb-5">
               <h4 className="font-semibold text-xs text-ink">
-                Provincial Wait Trends ({historicalTrendYearSpan ?? '2009–present'})
+                Median Wait by Procedure ({historicalTrendYearSpan ?? '2009–present'})
               </h4>
               <p className="text-[10px] text-ink-2">
-                Sourced from <strong>CIHI priority procedure tables</strong>. Traces the median wait time in weeks from {historicalTrendYearStart ?? '2009'} through {historicalTrendYearEnd ?? 'the latest year'}, showing the impact of pandemic delays and subsequent recoveries.
+                Sourced from <strong>CIHI priority procedure tables</strong>. Median wait in weeks from {historicalTrendYearStart ?? '2009'} through {historicalTrendYearEnd ?? 'the latest year'}, including pandemic delays and recovery.
               </p>
             </div>
 
             <div className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={HISTORICAL_WAIT_TRENDS}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 5 }}
-                >
-                  <defs>
-                    <linearGradient id="colorHip" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorKnee" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorCataract" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.78 0.12 155)" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="oklch(0.78 0.12 155)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
-                  <XAxis dataKey="year" tick={{ fill: 'oklch(0.62 0.02 255)', fontSize: 10 }} stroke="oklch(0.28 0.02 255)" />
-                  <YAxis tick={{ fill: 'oklch(0.62 0.02 255)', fontSize: 10 }} stroke="oklch(0.28 0.02 255)" unit="w" />
-                  <RechartsTooltip 
-                    contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', border: '1px solid oklch(0.28 0.02 255)', borderRadius: '8px' }} itemStyle={{ color: 'oklch(0.96 0.008 255)' }} labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '10px', pt: 10 }} />
-                  <Area type="monotone" dataKey="hip_replacement_median" name="Hip Replacement Wait (Wks)" stroke="#3b82f6" fillOpacity={1} fill="url(#colorHip)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="knee_replacement_median" name="Knee Replacement Wait (Wks)" stroke="#a78bfa" fillOpacity={1} fill="url(#colorKnee)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="cataract_surgery_median" name="Cataract Surgery Wait (Wks)" stroke="#10b981" fillOpacity={1} fill="url(#colorCataract)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
+              {HISTORICAL_WAIT_TRENDS.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-[11px] text-ink-2 border border-dashed border-line rounded-xl">
+                  No CIHI historical wait-trend rows loaded.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={HISTORICAL_WAIT_TRENDS}
+                    margin={{ top: 10, right: 10, left: -20, bottom: 5 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorHip" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="oklch(0.68 0.13 252)" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorKnee" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="oklch(0.82 0.12 85)" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorCataract" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.78 0.12 155)" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="oklch(0.78 0.12 155)" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.02 255)" />
+                    <XAxis dataKey="year" tick={{ fill: 'oklch(0.62 0.02 255)', fontSize: 10 }} stroke="oklch(0.28 0.02 255)" />
+                    <YAxis tick={{ fill: 'oklch(0.62 0.02 255)', fontSize: 10 }} stroke="oklch(0.28 0.02 255)" unit="w" />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: 'oklch(0.2 0.022 255)', border: '1px solid oklch(0.28 0.02 255)', borderRadius: '8px' }} itemStyle={{ color: 'oklch(0.96 0.008 255)' }} labelStyle={{ color: 'oklch(0.78 0.015 255)' }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '10px', pt: 10 }} />
+                    <Area type="monotone" dataKey="hip_replacement_median" name="Hip Replacement Wait (Wks)" stroke="#3b82f6" fillOpacity={1} fill="url(#colorHip)" strokeWidth={2} />
+                    <Area type="monotone" dataKey="knee_replacement_median" name="Knee Replacement Wait (Wks)" stroke="#a78bfa" fillOpacity={1} fill="url(#colorKnee)" strokeWidth={2} />
+                    <Area type="monotone" dataKey="cataract_surgery_median" name="Cataract Surgery Wait (Wks)" stroke="#10b981" fillOpacity={1} fill="url(#colorCataract)" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>

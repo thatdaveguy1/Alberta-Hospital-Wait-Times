@@ -185,7 +185,7 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
     updateType: 'mixed',
     interval: 'daily sync · per-array provenance',
     sourceVintage: 'Per-array (see dashboard timestamps)',
-    source: 'AHCIP Surgical Wait Time Registry & ABJHI Orthopedic feeds',
+    source: 'Alberta Health System Dashboard (Power BI) & CIHI priority procedures',
     domain: 'surgical'
   },
   'primary-care': {
