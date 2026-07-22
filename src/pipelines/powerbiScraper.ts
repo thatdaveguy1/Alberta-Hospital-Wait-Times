@@ -183,17 +183,23 @@ function classifyResponse(data: DsrData): {
     return { volumes };
   }
 
-  // SurgMap_v2 — facility-level data with coordinates
+  // SurgMap_v2 — facility-level data with coordinates + volume (M0).
+  // Power BI also fires Surgery Type–filtered map queries that return the same
+  // sites with M0=0; callers must not let those overwrite real volumes.
   if (selectStr.includes('SurgMap_v2.SITE')) {
     const rows = parseDsrRows(data);
     const facilities: FacilityData[] = rows
       .filter((r) => r.G0 && typeof r.G0 === 'string')
-      .map((r) => ({
-        site: String(r.G0),
-        longitude: Number(r.M1 ?? 0),
-        latitude: Number(r.M2 ?? 0),
-        volumes: [],
-      }));
+      .map((r) => {
+        const volume = Number(r.M0 ?? 0);
+        return {
+          site: String(r.G0),
+          longitude: Number(r.M1 ?? 0),
+          latitude: Number(r.M2 ?? 0),
+          // Only carry positive M0 so zeroed Surgery Type responses stay empty.
+          volumes: Number.isFinite(volume) && volume > 0 ? [volume] : [],
+        };
+      });
     return { facilities };
   }
 
@@ -478,13 +484,33 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
     }
   }
 
-  // Facility-level data — deduplicate by site name
+  // Facility-level data — deduplicate by site name. Prefer non-zero volumes so
+  // Surgery Type (or other filtered) map queries cannot zero out M0 totals.
   const facilityMap = new Map<string, FacilityData>();
   for (const f of data.facilities) {
-    if (f.site) facilityMap.set(f.site, f);
+    if (!f.site) continue;
+    const existing = facilityMap.get(f.site);
+    if (!existing) {
+      facilityMap.set(f.site, {
+        site: f.site,
+        longitude: f.longitude,
+        latitude: f.latitude,
+        volumes: [...f.volumes],
+      });
+      continue;
+    }
+    const newVol = f.volumes.reduce((a, b) => a + b, 0);
+    const oldVol = existing.volumes.reduce((a, b) => a + b, 0);
+    if (newVol > 0 && (oldVol === 0 || newVol >= oldVol)) {
+      existing.volumes = [...f.volumes];
+    }
+    if (f.longitude) existing.longitude = f.longitude;
+    if (f.latitude) existing.latitude = f.latitude;
   }
 
   for (const [, f] of facilityMap) {
+    const volume = f.volumes.reduce((a, b) => a + b, 0);
+    if (!(volume > 0)) continue;
     records.push({
       id: `powerbi-facility-${slugify(f.site)}`,
       source_name: 'Alberta Health System Dashboard (Power BI)',
@@ -498,7 +524,7 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
       procedure_name: 'All Surgeries',
       wait_segment: 'Decision-to-surgery',
       metric_name: 'Volume',
-      metric_value: f.volumes.reduce((a, b) => a + b, 0),
+      metric_value: volume,
       unit: 'count',
       method_note: 'Power BI Health System Dashboard — facility-level surgery volume',
     });
@@ -615,9 +641,18 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], pe
   // Force withheld facility panels empty so stale RMW copies cannot survive.
   parsed.SURGICAL_FACILITIES = [];
 
-  // Remove old Power BI records, keep records from other sources
+  // Stale upstream sources superseded by Power BI (waittimes.alberta.ca shut
+  // down Jan 2026; CIHI priority rows here are outdated duplicates).
+  const STALE_SURGICAL_SOURCES = new Set([
+    'Alberta Wait Times Reporting',
+    'CIHI priority procedures',
+  ]);
+
+  // Remove old Power BI records and purge stale sources; keep other sources.
   const otherRecords = (parsed.SURGICAL_RECORDS ?? []).filter(
-    (r) => r.source_name !== 'Alberta Health System Dashboard (Power BI)',
+    (r) =>
+      r.source_name !== 'Alberta Health System Dashboard (Power BI)' &&
+      !STALE_SURGICAL_SOURCES.has(r.source_name),
   );
 
   parsed.SURGICAL_RECORDS = [...otherRecords, ...newRecords];
