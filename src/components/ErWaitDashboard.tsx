@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   Activity,
   AlertTriangle,
+  Cross,
   Compass,
   Filter,
   Map as MapIcon,
@@ -47,8 +48,10 @@ import {
   careTypeLabel,
   directionsUrl,
   enrichHospital,
+  hospitalInCareScope,
   mapsPlaceUrl,
   shortHospitalName,
+  type CareScope,
   type CareType,
   type EnrichedHospital,
   type WaitBand,
@@ -131,12 +134,14 @@ function formatAvgWaitDisplay(minutes: number, validCount: number): string {
 }
 
 export interface ErWaitDashboardProps {
+  scope?: CareScope; // default 'emergency'
   /** Set by the app shell when another surface requests a specific facility. */
   requestedFacilityId?: string | null;
   onRequestedFacilityHandled?: () => void;
 }
 
 export default function ErWaitDashboard({
+  scope = 'emergency',
   requestedFacilityId = null,
   onRequestedFacilityHandled,
 }: ErWaitDashboardProps = {}) {
@@ -569,23 +574,29 @@ export default function ErWaitDashboard({
     onRequestedFacilityHandled?.();
   }, [requestedFacilityId, hospitals.length, onRequestedFacilityHandled]);
 
+  useEffect(() => {
+    if (scope === 'emergency' && careFilter === 'urgent-care') setCareFilter('all');
+  }, [scope, careFilter]);
+
   const processed = useMemo(() => {
-    return hospitals.map((h) => {
-      const base = enrichHospital(h);
-      let distance: number | undefined;
-      let driveMins: number | undefined;
-      if (driveEnabled && userLocation && h.latitude != null && h.longitude != null) {
-        if (osrmData[h.id]) {
-          distance = osrmData[h.id].distanceKm;
-          driveMins = osrmData[h.id].durationMins;
-        } else {
-          distance = calculateDistance(userLocation.lat, userLocation.lng, h.latitude, h.longitude);
-          driveMins = Math.round((distance / 85) * 60);
+    return hospitals
+      .map((h) => {
+        const base = enrichHospital(h);
+        let distance: number | undefined;
+        let driveMins: number | undefined;
+        if (driveEnabled && userLocation && h.latitude != null && h.longitude != null) {
+          if (osrmData[h.id]) {
+            distance = osrmData[h.id].distanceKm;
+            driveMins = osrmData[h.id].durationMins;
+          } else {
+            distance = calculateDistance(userLocation.lat, userLocation.lng, h.latitude, h.longitude);
+            driveMins = Math.round((distance / 85) * 60);
+          }
         }
-      }
-      return { ...base, distance, driveMins };
-    });
-  }, [hospitals, userLocation, osrmData, driveEnabled]);
+        return { ...base, distance, driveMins };
+      })
+      .filter((h) => hospitalInCareScope(h, scope));
+  }, [hospitals, userLocation, osrmData, driveEnabled, scope]);
 
   const regions = useMemo(
     () => ['All', ...Array.from(new Set(processed.map((h) => h.region))).sort()],
@@ -767,9 +778,13 @@ export default function ErWaitDashboard({
   return (
     <div className="space-y-4">
       <DashboardHeader
-        icon={Activity}
-        title="Emergency wait times"
-        description="Find the fastest path from where you are to a doctor — drive time plus AHS queue estimates (refreshed every ~10 min)."
+        icon={scope === 'urgent-care' ? Cross : Activity}
+        title={scope === 'urgent-care' ? 'Urgent care wait times' : 'Emergency wait times'}
+        description={
+          scope === 'urgent-care'
+            ? 'Find the fastest path from where you are to urgent care — drive time plus AHS queue estimates (refreshed every ~10 min). Hours vary by site.'
+            : 'Find the fastest path from where you are to a doctor — drive time plus AHS queue estimates (refreshed every ~10 min).'
+        }
         metadata={headerMetadata}
         arrayKey="ER_WAIT_TIMES"
         variant="light"
@@ -1250,37 +1265,41 @@ export default function ErWaitDashboard({
               </div>
 
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="mr-1 inline-flex items-center gap-1 text-xs font-medium text-ink-3">
-                  <Filter className="h-3 w-3" aria-hidden /> Type
-                </span>
-                {(
-                  [
-                    ['all', 'All'],
-                    ['emergency', 'ER'],
-                    ['urgent-care', 'Urgent care'],
-                    ['pediatric-emergency', 'Pediatric'],
-                  ] as const
-                ).map(([id, label]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setCareFilter(id)}
-                    className={cn(
-                      'h-7 rounded-full border px-2.5 text-xs font-medium transition-colors cursor-pointer',
-                      careFilter === id
-                        ? 'border-accent bg-accent text-white'
-                        : 'border-line-2 text-ink-2 hover:bg-paper',
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
+                {scope !== 'urgent-care' && (
+                  <>
+                    <span className="mr-1 inline-flex items-center gap-1 text-xs font-medium text-ink-3">
+                      <Filter className="h-3 w-3" aria-hidden /> Type
+                    </span>
+                    {(
+                      [
+                        ['all', 'All'],
+                        ['emergency', 'ER'],
+                        ['pediatric-emergency', 'Pediatric'],
+                      ] as const
+                    ).map(([id, label]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setCareFilter(id)}
+                        className={cn(
+                          'h-7 rounded-full border px-2.5 text-xs font-medium transition-colors cursor-pointer',
+                          careFilter === id
+                            ? 'border-accent bg-accent text-white'
+                            : 'border-line-2 text-ink-2 hover:bg-paper',
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </>
+                )}
                 <button
                   type="button"
                   onClick={() => setOpenOnly((v) => !v)}
                   aria-pressed={openOnly}
                   className={cn(
-                    'ml-1 h-7 rounded-full border px-2.5 text-xs font-medium transition-colors cursor-pointer',
+                    'h-7 rounded-full border px-2.5 text-xs font-medium transition-colors cursor-pointer',
+                    scope !== 'urgent-care' && 'ml-1',
                     openOnly
                       ? 'border-ok bg-ok text-white'
                       : 'border-line-2 text-ink-2 hover:bg-paper',
@@ -1330,6 +1349,7 @@ export default function ErWaitDashboard({
         </>
       ) : (
         <SystemMode
+          scope={scope}
           pressure={pressure}
           maxStats={maxStats}
           zoneTrends={zoneTrends}
@@ -1727,6 +1747,7 @@ function FacilitySheet({
 }
 
 function SystemMode({
+  scope,
   pressure,
   maxStats,
   zoneTrends,
@@ -1736,6 +1757,7 @@ function SystemMode({
   processed,
   onSelect,
 }: {
+  scope: CareScope;
   pressure: {
     open: number;
     high: number;
@@ -1763,7 +1785,7 @@ function SystemMode({
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           {
-            label: 'Typical open-ER wait',
+            label: scope === 'urgent-care' ? 'Typical open-site wait' : 'Typical open-ER wait',
             value: formatAvgWaitDisplay(pressure.provincialAvg, pressure.open),
             hint: `${pressure.open} open sites`,
           },
@@ -1775,7 +1797,7 @@ function SystemMode({
           {
             label: 'Closed now',
             value: String(pressure.closed),
-            hint: 'Mostly limited-hour urgent care',
+            hint: scope === 'urgent-care' ? 'Outside published hours' : 'Limited-hour sites only',
           },
           {
             label: 'No live data',
@@ -1944,7 +1966,9 @@ function SystemMode({
           )}
         </div>
         <p className="mt-3 text-xs text-ink-3">
-          Tracking {processed.length} emergency & urgent-care sites · closed and unavailable excluded from averages
+          Tracking {processed.length}{' '}
+          {scope === 'urgent-care' ? 'urgent-care' : 'emergency'} sites · closed and unavailable
+          excluded from averages
         </p>
       </div>
     </div>

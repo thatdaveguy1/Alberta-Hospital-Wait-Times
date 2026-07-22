@@ -40,6 +40,18 @@ describe('dashboardMatchesSearch', () => {
 
 describe('readDashboardModuleFromUrl', () => {
   it('returns null when module param absent', () => {
-    expect(readDashboardModuleFromUrl(['diagnostics', 'er-waits'])).toBeNull();
+    expect(readDashboardModuleFromUrl(['diagnostics', 'er-waits', 'urgent-care'])).toBeNull();
+  });
+
+  it('accepts urgent-care module id from URL', () => {
+    const previous = window.location.search;
+    window.history.replaceState({}, '', '?module=urgent-care');
+    try {
+      expect(readDashboardModuleFromUrl(['diagnostics', 'er-waits', 'urgent-care'])).toBe(
+        'urgent-care',
+      );
+    } finally {
+      window.history.replaceState({}, '', previous || '/');
+    }
   });
 });

@@ -2,7 +2,7 @@
 // right now, the fastest path to care near you, active disruptions, and a
 // data-first directory of every module.
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowRight, FlaskConical, Map, Navigation, Search } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Cross, FlaskConical, Map, Navigation, Search } from 'lucide-react';
 import {
   CATEGORIES,
   CATEGORY_TITLE_BY_ID,
@@ -12,6 +12,7 @@ import {
 import { dashboardMatchesSearch } from '../lib/dashboardModuleSearch';
 import {
   enrichHospital,
+  hospitalInCareScope,
   shortHospitalName,
   type EnrichedHospital,
   type WaitBand,
@@ -230,7 +231,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     }
     let cancelled = false;
     const zoneSet = new Set(activeZones);
-    const nearby = hospitals.filter((h) => zoneSet.has(h.region));
+    const nearby = hospitals.filter(
+      (h) => zoneSet.has(h.region) && hospitalInCareScope(h, 'emergency'),
+    );
     fetchOsrmForSites(location, nearby).then((results) => {
       if (!cancelled) setOsrmData(results);
     });
@@ -257,19 +260,24 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   }, [labDriveUsable, location, labs, activeLabZones]);
 
   const enriched = useMemo(() => hospitals.map(enrichHospital), [hospitals]);
+  // Home ER hero is emergency-only; urgent care has its own tab/CTA.
+  const erEnriched = useMemo(
+    () => enriched.filter((h) => hospitalInCareScope(h, 'emergency')),
+    [enriched],
+  );
 
   const pulse = useMemo(() => {
-    const waits = enriched
+    const waits = erEnriched
       .map((h) => h.effectiveWaitMinutes)
       .filter((w): w is number => w !== null)
       .sort((a, b) => a - b);
     const med = median(waits);
-    const busiest = enriched.reduce<EnrichedHospital | null>((acc, h) => {
+    const busiest = erEnriched.reduce<EnrichedHospital | null>((acc, h) => {
       if (h.effectiveWaitMinutes === null) return acc;
       if (!acc || (acc.effectiveWaitMinutes ?? -1) < h.effectiveWaitMinutes) return h;
       return acc;
     }, null);
-    const latest = hospitals.reduce<string | null>((acc, h) => {
+    const latest = erEnriched.reduce<string | null>((acc, h) => {
       if (!h.updatedAt) return acc;
       return !acc || h.updatedAt > acc ? h.updatedAt : acc;
     }, null);
@@ -277,10 +285,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       median: med,
       busiest,
       reporting: waits.length,
-      total: hospitals.length,
+      total: erEnriched.length,
       latest,
     };
-  }, [enriched, hospitals]);
+  }, [erEnriched]);
 
   const activeDisruptions = useMemo(
     () => disruptions.filter((d) => d.status === 'Active'),
@@ -290,7 +298,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   const topPicks = useMemo<ScoredFacility[]>(() => {
     if (erDriveUsable && location && activeZones.length > 0) {
       const zoneSet = new Set(activeZones);
-      return enriched
+      return erEnriched
         .filter((h) => zoneSet.has(h.region))
         .map((h) => {
           const drive = osrmData[h.id];
@@ -315,7 +323,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     }
 
     // Outside AB, far from care, or no usable drive pin → provincial wait-only top 3.
-    return enriched
+    return erEnriched
       .filter((h) => h.effectiveWaitMinutes !== null)
       .map((h) => ({
         ...h,
@@ -323,7 +331,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       }))
       .sort((a, b) => a.netScore - b.netScore)
       .slice(0, 3);
-  }, [enriched, location, osrmData, activeZones, erDriveUsable]);
+  }, [erEnriched, location, osrmData, activeZones, erDriveUsable]);
 
   const topLabPicks = useMemo<ScoredLab[]>(() => {
     if (labDriveUsable && location && activeLabZones.length > 0) {
@@ -416,6 +424,28 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       : activeLabZones.length === 1
         ? activeLabZones[0].replace(/ Zone$/, '')
         : activeLabZones.map((z) => z.replace(/ Zone$/, '')).join(' + ');
+
+
+  const UrgentCareCta = () => (
+    <button
+      type="button"
+      onClick={() => onNavigate('urgent-care')}
+      onMouseEnter={prefetchCareSeekingPages}
+      onFocus={prefetchCareSeekingPages}
+      className="mt-2 flex w-full items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent-soft px-4 py-2.5 text-left transition-colors hover:bg-accent hover:text-white cursor-pointer group"
+    >
+      <span className="min-w-0">
+        <span className="flex items-center gap-2 text-sm font-semibold text-accent group-hover:text-white">
+          <Cross className="h-4 w-4 shrink-0" aria-hidden />
+          Open urgent care wait times
+        </span>
+        <span className="mt-0.5 block text-xs text-ink-2 group-hover:text-white/80">
+          Five community urgent-care centres across Calgary and area
+        </span>
+      </span>
+      <ArrowRight className="h-4 w-4 shrink-0 text-accent group-hover:text-white" aria-hidden />
+    </button>
+  );
 
   const FullErCta = ({ compact = false }: { compact?: boolean }) => (
     <button
@@ -601,6 +631,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               {geoBusy ? 'Locating…' : 'Use my location'}
             </button>
             <FullErCta compact />
+            <UrgentCareCta />
             {geoError && <p className="mt-2 text-xs text-ink-3">{geoError}</p>}
           </div>
         ) : loading ? (
@@ -617,6 +648,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 : 'No live ER waits available right now.'}
             </p>
             <FullErCta />
+            <UrgentCareCta />
           </div>
         ) : (
           <>
@@ -667,6 +699,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               })}
             </ol>
             <FullErCta />
+            <UrgentCareCta />
           </>
         )}
       </section>
@@ -879,7 +912,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       <section className="rounded-xl border border-line bg-surface p-4 sm:p-5" aria-label="About this tracker">
         <h2 className="text-sm font-semibold text-ink">About this tracker</h2>
         <p className="mt-1.5 max-w-prose text-sm text-ink-2">
-          An independent monitor of Alberta’s health system: live ER and urgent-care waits, plus
+          An independent monitor of Alberta’s health system: live ER waits, urgent-care waits, plus
           verified indicators for surgery, diagnostics, workforce, and community care. Every figure
           is tied to a public source and a timestamp — data sources and update cadences are listed
           in the footer.

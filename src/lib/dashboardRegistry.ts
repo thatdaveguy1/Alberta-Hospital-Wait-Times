@@ -4,6 +4,7 @@
 import {
   Activity,
   AlertTriangle,
+  Cross,
   Stethoscope,
   FlaskConical,
   Coins,
@@ -51,8 +52,19 @@ export const DASHBOARDS: readonly DashboardMeta[] = [
     title: 'ER Wait Times',
     shortName: 'ER waits',
     category: 'acute-urgent',
-    description: 'Live ER & urgent-care waits — fastest path near you, plus provincial pressure.',
+    description: 'Live emergency wait times — fastest path near you, plus provincial pressure.',
     icon: Activity,
+    badge: '10-MIN POLL',
+    source: 'Alberta Health Services Portal',
+    updateFrequency: 'About every 10 minutes',
+  },
+  {
+    id: 'urgent-care',
+    title: 'Urgent Care Wait Times',
+    shortName: 'Urgent care',
+    category: 'acute-urgent',
+    description: 'Live urgent-care waits — fastest path near you, plus open/closed hours.',
+    icon: Cross,
     badge: '10-MIN POLL',
     source: 'Alberta Health Services Portal',
     updateFrequency: 'About every 10 minutes',
@@ -156,6 +168,12 @@ export const TAB_METADATA_MAP: Record<string, TabMetadata> = {
     interval: 'about every 10 mins',
     sourceVintage: 'AHS WaitTimes Feed (~10m poll)',
     source: 'Alberta Health Services Portal'
+  },
+  'urgent-care': {
+    updateType: 'auto',
+    interval: 'about every 10 mins',
+    sourceVintage: 'AHS WaitTimes Feed (~10m poll)',
+    source: 'Alberta Health Services Portal',
   },
   'disruptions': {
     updateType: 'auto',

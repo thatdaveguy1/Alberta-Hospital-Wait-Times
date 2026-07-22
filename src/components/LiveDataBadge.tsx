@@ -35,7 +35,7 @@ export function LiveDataBadge({ domain, sourceLabel }: LiveDataBadgeProps): Reac
 
   const timestamp =
     domainResult?.timestamp ??
-    (domain === 'er-waits' || domain === 'erWaitTimes'
+    (domain === 'er-waits' || domain === 'urgent-care' || domain === 'erWaitTimes'
       ? syncStatus?.erWaitTimesLastUpdate
       : syncStatus?.lastSyncTimestamp) ??
     null;

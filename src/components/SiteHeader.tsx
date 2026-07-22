@@ -1,7 +1,7 @@
 // SiteHeader — persistent top navigation for the Clinical Ledger shell.
-// Brand, primary destinations (Home / ER Waits / Diagnostics & Labs), an "All modules" mega-menu on
+// Brand, primary destinations (Home / ER Waits / Urgent Care / Diagnostics & Labs), an "All modules" mega-menu on
 // desktop (full-screen sheet on mobile), a live ER-feed freshness chip, and a
-// ⌘K command palette that jumps to any module or any ER facility.
+// ⌘K command palette that jumps to any module or any facility.
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Activity, ChevronDown, MapPin, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import {
@@ -15,6 +15,7 @@ import { formatRelativeTime, useSyncStatus } from '../hooks/useSyncStatus';
 import { useTheme } from '../hooks/useTheme';
 import { cn } from '../lib/utils';
 import { prefetchCareSeekingPages } from '../lib/pageDataPrefetch';
+import { deriveCareType } from '../lib/erFacility';
 import type { Hospital } from '../types';
 
 export type AppView = 'home' | DashboardId;
@@ -127,7 +128,7 @@ function CommandPalette({
             kind: 'facility' as const,
             id: h.id,
             label: h.name,
-            hint: h.city || h.region || 'Alberta',
+            hint: `${h.city || h.region || 'Alberta'} · ${deriveCareType(h) === 'urgent-care' ? 'Urgent care' : 'ER'}`,
             wait: h.waitTimeLabel,
           }))
       : [];
@@ -185,7 +186,7 @@ function CommandPalette({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Search modules or ER facilities…"
+            placeholder="Search modules or facilities…"
             className="h-11 w-full bg-transparent text-sm text-ink placeholder:text-ink-3 focus:outline-none"
           />
           <kbd className="hidden sm:block rounded border border-line bg-paper px-1.5 py-0.5 text-[10px] font-medium text-ink-3">
@@ -302,6 +303,13 @@ export function SiteHeader({ activeView, onNavigate, onSelectFacility }: SiteHea
               onIntent={prefetchCareSeekingPages}
             >
               ER Waits
+            </NavLink>
+            <NavLink
+              active={activeView === 'urgent-care'}
+              onClick={() => go('urgent-care')}
+              onIntent={prefetchCareSeekingPages}
+            >
+              Urgent Care
             </NavLink>
             <NavLink
               active={activeView === 'diagnostics'}
@@ -447,6 +455,15 @@ export function SiteHeader({ activeView, onNavigate, onSelectFacility }: SiteHea
               className="mb-2 flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-semibold text-accent cursor-pointer"
             >
               ER Waits
+            </button>
+            <button
+              type="button"
+              onClick={() => go('urgent-care')}
+              onMouseEnter={prefetchCareSeekingPages}
+              onFocus={prefetchCareSeekingPages}
+              className="mb-2 flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-semibold text-accent cursor-pointer"
+            >
+              Urgent Care
             </button>
             <button
               type="button"

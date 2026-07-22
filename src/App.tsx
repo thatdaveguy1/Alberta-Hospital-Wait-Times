@@ -20,7 +20,9 @@ import {
 } from './lib/dashboardRegistry';
 import { readDashboardModuleFromUrl } from './lib/dashboardModuleSearch';
 import { cn } from './lib/utils';
-import { prefetchCareSeekingPages } from './lib/pageDataPrefetch';
+import { deriveCareType, moduleForCareType } from './lib/erFacility';
+import { getCachedHospitals, prefetchCareSeekingPages } from './lib/pageDataPrefetch';
+import type { Hospital } from './types';
 
 const MODULE_IDS = DASHBOARDS.map((d) => d.id);
 
@@ -67,15 +69,20 @@ export default function App() {
   }, [activeView]);
 
   const navigate = (view: AppView) => {
-    if (view === 'er-waits' || view === 'diagnostics') prefetchCareSeekingPages();
+    if (view === 'er-waits' || view === 'urgent-care' || view === 'diagnostics') {
+      prefetchCareSeekingPages();
+    }
     setActiveView(view);
-    if (view !== 'er-waits') setRequestedFacilityId(null);
+    if (view !== 'er-waits' && view !== 'urgent-care') setRequestedFacilityId(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const selectFacility = (facilityId: string) => {
     setRequestedFacilityId(facilityId);
-    setActiveView('er-waits');
+    const hospitals = getCachedHospitals<Hospital[]>() ?? [];
+    const hit = hospitals.find((h) => h.id === facilityId);
+    const moduleId = hit ? moduleForCareType(deriveCareType(hit)) : 'er-waits';
+    setActiveView(moduleId);
     window.scrollTo({ top: 0 });
   };
 
@@ -83,8 +90,10 @@ export default function App() {
   const footerBlurb =
     activeView === 'home'
       ? 'Independent, unofficial tracking of Alberta health system data, tied to public sources and timestamps.'
-      : activeView === 'er-waits'
-        ? 'Data synchronized from Alberta Health Services feeds. Estimated ER wait times refresh about every 10 minutes.'
+      : activeView === 'er-waits' || activeView === 'urgent-care'
+        ? activeView === 'urgent-care'
+          ? 'Data synchronized from Alberta Health Services feeds. Estimated urgent-care wait times refresh about every 10 minutes.'
+          : 'Data synchronized from Alberta Health Services feeds. Estimated ER wait times refresh about every 10 minutes.'
         : `Viewing ${activeDashboard?.title}. Source: ${activeDashboard?.source}. Update cadence: ${activeDashboard?.updateFrequency}.`;
 
   return (
@@ -106,8 +115,9 @@ export default function App() {
           >
             {activeView === 'home' ? (
               <HomePage onNavigate={navigate} />
-            ) : activeView === 'er-waits' ? (
+            ) : activeView === 'er-waits' || activeView === 'urgent-care' ? (
               <ErWaitDashboard
+                scope={activeView === 'urgent-care' ? 'urgent-care' : 'emergency'}
                 requestedFacilityId={requestedFacilityId}
                 onRequestedFacilityHandled={() => setRequestedFacilityId(null)}
               />

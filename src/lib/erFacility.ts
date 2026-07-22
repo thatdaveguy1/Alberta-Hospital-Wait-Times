@@ -44,6 +44,23 @@ export function deriveCareType(hospital: Hospital): CareType {
   return 'emergency';
 }
 
+export type CareScope = 'emergency' | 'urgent-care';
+
+/** Whether a facility belongs on the ER vs urgent-care board. */
+export function hospitalInCareScope(
+  hospital: Hospital | { careType: CareType },
+  scope: CareScope,
+): boolean {
+  const careType =
+    'careType' in hospital ? hospital.careType : deriveCareType(hospital);
+  if (scope === 'urgent-care') return careType === 'urgent-care';
+  return careType !== 'urgent-care';
+}
+
+export function moduleForCareType(careType: CareType): 'er-waits' | 'urgent-care' {
+  return careType === 'urgent-care' ? 'urgent-care' : 'er-waits';
+}
+
 export function deriveOpenState(hospital: Hospital): OpenState {
   const label = (hospital.waitTimeLabel || '').toLowerCase();
   if (label.includes('closed')) return 'closed';

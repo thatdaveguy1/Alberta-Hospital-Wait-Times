@@ -5,7 +5,9 @@ import {
   deriveOpenState,
   effectiveWaitMinutes,
   enrichHospital,
+  hospitalInCareScope,
   isWaitTimeUnavailable,
+  moduleForCareType,
   waitBandFor,
 } from '../../src/lib/erFacility';
 
@@ -80,5 +82,60 @@ describe('erFacility model', () => {
     expect(effectiveWaitMinutes(h)).toBe(326);
     expect(waitBandFor(h)).toBe('high');
     expect(enrichHospital(h).ageMinYears).toBe(15);
+  });
+});
+
+describe('care scope routing', () => {
+  it('includes UC category only on urgent-care scope', () => {
+    const uc = hospital({
+      id: 'cochrane-community-health-centre',
+      name: 'Cochrane Community Health Centre',
+      category: 'Urgent Care',
+    });
+    expect(hospitalInCareScope(uc, 'urgent-care')).toBe(true);
+    expect(hospitalInCareScope(uc, 'emergency')).toBe(false);
+  });
+
+  it('emergency scope includes pediatric and adult ER, excludes UC', () => {
+    const pediatric = hospital({
+      id: 'ach',
+      name: "Alberta Children's Hospital",
+      note: 'Open 24 hours for patients 17 & under',
+    });
+    const adult = hospital({
+      id: 'foothills',
+      name: 'Foothills Medical Centre',
+      note: 'Open 24 hours\nFor patients 15 and older',
+    });
+    const uc = hospital({
+      id: 'sheldon-m-chumir-centre',
+      name: 'Sheldon M. Chumir Centre',
+      category: 'Urgent Care',
+    });
+
+    expect(hospitalInCareScope(pediatric, 'emergency')).toBe(true);
+    expect(hospitalInCareScope(adult, 'emergency')).toBe(true);
+    expect(hospitalInCareScope(uc, 'emergency')).toBe(false);
+  });
+
+  it('maps care types to dashboard modules', () => {
+    expect(moduleForCareType('urgent-care')).toBe('urgent-care');
+    expect(moduleForCareType('emergency')).toBe('er-waits');
+    expect(moduleForCareType('pediatric-emergency')).toBe('er-waits');
+  });
+
+  it('matches known UC IDs on urgent-care scope when category is Urgent Care', () => {
+    const knownUcIds = [
+      'airdrie-community-health-centre',
+      'cochrane-community-health-centre',
+      'okotoks-health-and-wellness-centre',
+      'sheldon-m-chumir-centre',
+      'south-calgary-health-centre',
+    ];
+    for (const id of knownUcIds) {
+      const h = hospital({ id, name: id, category: 'Urgent Care' });
+      expect(hospitalInCareScope(h, 'urgent-care')).toBe(true);
+      expect(hospitalInCareScope(h, 'emergency')).toBe(false);
+    }
   });
 });
