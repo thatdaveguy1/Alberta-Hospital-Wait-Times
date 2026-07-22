@@ -29,6 +29,16 @@ import type {
   HistoricalTrend,
 } from '../surgicalData';
 import * as surgicalData from '../surgicalData';
+import {
+  dedupeLatestMedians,
+  findMatchingP90,
+  parseBenchmarkWeeks,
+  pctOfBenchmark,
+  pickLatestProvincialRecord,
+  toWeeks,
+  unitAbbr,
+  unitDisplayLabel,
+} from '../lib/surgicalWaitSelection';
 import { DataTimestamp, type DataMetadataMap } from './DataTimestamp';
 import { DashboardHeader } from './DashboardHeader';
 import { useDomainData } from '../hooks/useDomainData';
@@ -183,21 +193,6 @@ export default function SurgicalDashboard() {
 
   const [selectedProcedureGroup, setSelectedProcedureGroup] = useState<string>('Hip Replacement');
 
-  const parseBenchmarkWeeks = (benchmark?: string): number | null => {
-    if (!benchmark) return null;
-    const match = benchmark.match(/(\d+(?:\.\d+)?)\s*weeks?/i);
-    return match ? parseFloat(match[1]) : null;
-  };
-
-  const findProvincial90th = (procedureName: string) =>
-    SURGICAL_RECORDS.find(
-      r =>
-        r.procedure_name === procedureName &&
-        r.geography_name === 'Alberta' &&
-        r.metric_name === '90th percentile' &&
-        r.wait_segment === 'Decision-to-surgery',
-    );
-
   const overviewProcedureCards = useMemo(() => {
     const specs = [
       { procedureName: 'Total Hip Arthroplasty', title: 'Total Hip Replacement', iconColor: 'text-accent', pctClass: 'text-warn' },
@@ -206,11 +201,21 @@ export default function SurgicalDashboard() {
       { procedureName: 'Breast Cancer Surgery', title: 'Breast Cancer Surgery', iconColor: 'text-crit', pctClass: 'text-crit', subtitle: 'Breast Cancer 90th percentile' },
     ] as const;
     return specs.map(spec => {
-      const record = findProvincial90th(spec.procedureName);
+      const record = pickLatestProvincialRecord(SURGICAL_RECORDS, spec.procedureName, '90th percentile');
       const wait = record?.metric_value ?? null;
+      const unit = record?.unit ?? 'weeks';
       const target = parseBenchmarkWeeks(record?.benchmark_value);
-      const pctOfTarget = wait != null && target != null && target > 0 ? Math.round((wait / target) * 1000) / 10 : null;
-      return { ...spec, wait, target, pctOfTarget, benchmarkLabel: record?.benchmark_value };
+      const pctOfTarget =
+        wait != null ? pctOfBenchmark(wait, unit, record?.benchmark_value) : null;
+      return {
+        ...spec,
+        wait,
+        unit,
+        unitLabel: unitDisplayLabel(unit),
+        target,
+        pctOfTarget,
+        benchmarkLabel: record?.benchmark_value,
+      };
     });
   }, [SURGICAL_RECORDS]);
   const specialtyWaitPanels = useMemo(() => {
@@ -221,32 +226,23 @@ export default function SurgicalDashboard() {
       return source;
     };
 
-    const provincialMedians = SURGICAL_RECORDS.filter(
-      r => r.geography_type === 'Province' && r.metric_name === 'Median wait',
-    );
+    const provincialMedians = dedupeLatestMedians(SURGICAL_RECORDS);
 
     const buildRow = (rec: SurgicalRecord) => {
-      const p90 = SURGICAL_RECORDS.find(
-        r =>
-          r.procedure_name === rec.procedure_name &&
-          r.metric_name === '90th percentile' &&
-          r.wait_segment === rec.wait_segment &&
-          r.geography_type === 'Province',
-      );
-      const benchWeeks = parseBenchmarkWeeks(rec.benchmark_value);
+      const p90 = findMatchingP90(SURGICAL_RECORDS, rec);
       const median = rec.metric_value > 0 ? rec.metric_value : null;
       const pctOfBench =
-        median != null && benchWeeks != null && benchWeeks > 0
-          ? Math.round((median / benchWeeks) * 1000) / 10
-          : null;
+        median != null ? pctOfBenchmark(median, rec.unit, rec.benchmark_value) : null;
       const status: 'within' | 'over' | 'unknown' =
         pctOfBench == null ? 'unknown' : pctOfBench <= 100 ? 'within' : 'over';
+      const medianWeeks = median != null ? toWeeks(median, rec.unit) : null;
 
       return {
         id: rec.id ?? `${rec.procedure_name}-${rec.wait_segment}`,
         procedure: rec.procedure_name,
         median,
-        unitAbbr: rec.unit === 'days' ? 'days' : 'wks',
+        medianWeeks,
+        unitAbbr: unitAbbr(rec.unit),
         p90: p90 && p90.metric_value > 0 ? p90.metric_value : null,
         benchmark: rec.benchmark_value ?? null,
         pctOfBench,
@@ -258,13 +254,10 @@ export default function SurgicalDashboard() {
     const byLongest = (
       a: ReturnType<typeof buildRow>,
       b: ReturnType<typeof buildRow>,
-    ) => (b.median ?? -1) - (a.median ?? -1);
+    ) => (b.medianWeeks ?? -1) - (a.medianWeeks ?? -1);
 
     return {
-      wait2: provincialMedians
-        .filter(r => r.wait_segment === 'Decision-to-surgery')
-        .map(buildRow)
-        .sort(byLongest),
+      wait2: provincialMedians.map(buildRow).sort(byLongest),
     };
   }, [SURGICAL_RECORDS]);
 
@@ -345,7 +338,7 @@ export default function SurgicalDashboard() {
                     : card.procedureName === 'Cataract Extraction & Lens Implant'
                       ? 'cataract_surgery_median'
                       : null;
-              const waitLabel = card.wait != null ? `${card.wait} Weeks` : '—';
+              const waitLabel = card.wait != null ? `${card.wait} ${card.unitLabel}` : '—';
               const targetFooter =
                 card.target != null
                   ? `National Target: ${card.target} Wks`

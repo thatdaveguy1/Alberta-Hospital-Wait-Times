@@ -21,6 +21,7 @@ Not affiliated with or endorsed by Alberta Health Services. For emergencies, cal
 
 ## Recent Changes
 
+- **2026-07-22 — Urgent Care tab:** primary nav is ER Waits | Urgent Care | Diagnostics & Labs; UC sites (5 feed-backed Calgary-area centres) use the shared wait dashboard with `scope`. Pages production deploys must use `--branch test`.
 - **2026-07-21 — GitHub hygiene:** scrubbed local LAN IP / home-path identifiers from tracked files; Nominatim User-Agent points at this repo instead of a personal email.
 - **2026-07 — ER & Labs UX:** prefetch/warm cache for smoother page transitions; lab freshness stamps; 10-minute lab polling aligned with ER; drive+wait headline; outside-AB location handling; Diagnostics & Labs promoted next to ER in the top bar.
 - **2026-07-09 — Diagnostics & Lab fix:** live lab stats cards compute real averages; `LabCard` badges show `Walk-In`, `Closed`, or `Appt Req`; shared manual location modal; sanitized `DataTimestamp` sources across diagnostics subtabs (`Laboratory Waits`, `Imaging Gaps`, `Diagnostic Sites`, `Lab Turnaround`).
@@ -58,7 +59,7 @@ npm start            # run the built server
 
 ```bash
 npm run deploy:worker   # Cloudflare Worker
-npm run deploy:pages    # frontend → Cloudflare Pages
+npm run deploy:pages    # frontend → Cloudflare Pages (branch test = production)
 npm run seed:kv         # seed KV namespaces
 ```
 

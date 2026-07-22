@@ -892,3 +892,15 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** Even after packing per-facility keys, ER/lab trends still did 8+5 SNAPSHOTS puts every 30 min because aggregates were multi-key and packed raw always changed. Free-tier ~1k writes/day left almost no headroom.
 - **Solution:** One SNAPSHOTS_KV blob per domain (`er-trends`, `lab-trends`); facility/lab raw series stay on the Mac mini; trends/labs cadence hourly; client content-hash skip + durable cooldown file; worker skip-identical on single put.
 - **Prevention:** Budget as `keys × cycles/day` before shipping. Public edge should store precomputed chart blobs, not full time-series history.
+
+## Session: 2026-07-22 (Urgent Care tab + Pages production branch)
+
+### Lesson: Cloudflare Pages production is pinned to branch `test`, not `main`
+- **Mistake:** Deployed a frontend-only Urgent Care tab split with `wrangler pages deploy dist --project-name alberta-hospital-wait-times` (no `--branch`). Wrangler treated the upload as a **Preview** for branch `main`. Production (`alberta-hospital-wait-times.pages.dev`) stayed on an older build because every historical **Production** deployment in this project uses branch **`test`**. Users saw no Urgent Care tab; only `main.alberta-hospital-wait-times.pages.dev` and the deploy preview had the new nav.
+- **Solution:** Redeploy the same `dist/` with `--branch test`, which creates a **Production** deployment and updates the live `pages.dev` hostname. Confirm with `npx wrangler pages deployment list --project-name alberta-hospital-wait-times` that the newest row is Environment=`Production`, Branch=`test`. Hard-refresh or check `index.html` for the new hashed asset (`index-vl_WfK2C.js` etc.) — edge POPs can briefly serve mixed old/new HTML.
+- **Prevention:** Always deploy Pages with `--branch test` for this project (encoded in `npm run deploy:pages`). Never assume `main` is production. After deploy, verify the **production** hostname (not only the deploy preview or `main.*` alias) shows the new nav/assets. Use `npx wrangler` from the repo root (wrangler is not on PATH there; it lives under `cloudflare/node_modules` or via npx). Pass `--commit-dirty=true` when local data JSON refresh files are intentionally uncommitted so deploy does not warn/fail on a dirty tree.
+
+### Lesson: Production branch must match historical deploys, not the git default branch
+- **Mistake:** Assumed pushing to GitHub `main` and deploying without an explicit Pages branch would promote the live site, because the git default branch is `main`.
+- **Solution:** Treat Cloudflare Pages branch routing as an independent production pin. This project’s live site is the latest successful deploy tagged **Production / `test`**.
+- **Prevention:** Before any “ship to production” claim, run `pages deployment list` and open the bare `*.pages.dev` URL (not `main.*`) in a clean browser session.
