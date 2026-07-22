@@ -805,7 +805,7 @@ export default function ErWaitDashboard({
       )}
 
       {/* Decision bar */}
-      <div className="sticky top-16 z-20">
+      <div>
         <div className="rounded-xl border border-line bg-surface shadow-sm">
           <div className="flex flex-col gap-3 p-3 sm:p-3.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -890,7 +890,7 @@ export default function ErWaitDashboard({
                     <WaitBandChip band={topPick.waitBand} />
                     <p className="text-xs tabular-nums text-ink-3">
                       {driveEnabled && topPick.driveMins != null
-                        ? `Drive + wait · wait ${formatMinutesToHm(topPick.effectiveWaitMinutes ?? 0)}`
+                        ? `Drive + wait · ${formatMinutesToHm(topPick.driveMins)} + ${formatMinutesToHm(topPick.effectiveWaitMinutes ?? 0)}`
                         : 'Wait'}
                     </p>
                   </div>
@@ -1119,10 +1119,10 @@ export default function ErWaitDashboard({
                         </p>
                       </div>
                       <div className="space-y-0.5 text-right font-mono text-xs tabular-nums text-ink-3">
-                        <p>Wait {formatMinutesToHm(wait)}</p>
                         {driveEnabled && h.driveMins != null && (
                           <p>Drive {formatMinutesToHm(h.driveMins)}</p>
                         )}
+                        <p>Wait {formatMinutesToHm(wait)}</p>
                         {h.distance != null && <p>{h.distance} km</p>}
                       </div>
                     </div>
@@ -1446,7 +1446,7 @@ function FacilityRow({
         </p>
         {showNet && wait != null && (
           <p className="mt-0.5 font-mono text-xs tabular-nums text-ink-3">
-            {formatMinutesToHm(wait)} + {formatMinutesToHm(h.driveMins!)}
+            {formatMinutesToHm(h.driveMins!)} + {formatMinutesToHm(wait)}
           </p>
         )}
       </div>
@@ -1681,13 +1681,15 @@ function FacilitySheet({
               {net != null ? formatMinutesToHm(net) : h.distance != null ? `${h.distance} km` : '—'}
             </p>
             <p className="mt-1 text-xs text-ink-3">
-              {h.driveMins != null
-                ? `~${formatMinutesToHm(h.driveMins)} drive`
-                : driveOk
-                  ? 'Routing…'
-                  : userLocation
-                    ? 'Wait only outside Alberta'
-                    : 'Set location'}
+              {net != null && h.driveMins != null && wait != null
+                ? `${formatMinutesToHm(h.driveMins)} + ${formatMinutesToHm(wait)}`
+                : h.driveMins != null
+                  ? `~${formatMinutesToHm(h.driveMins)} drive`
+                  : driveOk
+                    ? 'Routing…'
+                    : userLocation
+                      ? 'Wait only outside Alberta'
+                      : 'Set location'}
             </p>
           </div>
         </div>

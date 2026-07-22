@@ -843,8 +843,8 @@ export default function DiagnosticDashboard() {
                         <p className="text-sm font-semibold text-ink mt-0.5 leading-none">{formatMinutesToHm(lab.totalTime)}</p>
                       </div>
                       <div className="text-right text-xs text-ink-2 font-semibold space-y-0.5 leading-none">
-                        <p title={getLabStatus(lab).detail}>Wait: {getLabStatus(lab).label}</p>
                         <p>Drive: {formatMinutesToHm(lab.driveMins || 0)}</p>
+                        <p title={getLabStatus(lab).detail}>Wait: {getLabStatus(lab).label}</p>
                       </div>
                     </div>
                   </div>

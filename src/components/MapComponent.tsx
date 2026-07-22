@@ -263,9 +263,9 @@ export function MapComponent({
             <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-line text-[10px] text-ink-3">
               <span class="font-bold text-accent">Net: ${formatMinutesToHm((h.driveMins || 0) + h.waitTime)}</span>
               <span class="text-line-2">•</span>
-              <span>Wait: ${formatMinutesToHm(h.waitTime)}</span>
-              <span class="text-line-2">•</span>
               <span>Drive: ~${formatMinutesToHm(h.driveMins || 0)}</span>
+              <span class="text-line-2">•</span>
+              <span>Wait: ${formatMinutesToHm(h.waitTime)}</span>
             </div>
           `;
         } else {

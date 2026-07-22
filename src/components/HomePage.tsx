@@ -684,7 +684,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                         </span>
                         {showNet && wait != null && (
                           <span className="mt-0.5 block font-mono text-xs tabular-nums text-ink-3">
-                            {formatMinutesToHm(wait)} + {formatMinutesToHm(h.driveMins!)}
+                            {formatMinutesToHm(h.driveMins!)} + {formatMinutesToHm(wait)}
                           </span>
                         )}
                       </span>
@@ -803,7 +803,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                         </span>
                         {showNet && (
                           <span className="mt-0.5 block font-mono text-xs tabular-nums text-ink-3">
-                            {formatMinutesToHm(wait)} + {formatMinutesToHm(lab.driveMins!)}
+                            {formatMinutesToHm(lab.driveMins!)} + {formatMinutesToHm(wait)}
                           </span>
                         )}
                       </span>

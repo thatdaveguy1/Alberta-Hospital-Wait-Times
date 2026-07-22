@@ -165,15 +165,15 @@ export function LabCard({ lab, onClick, selected, sortBy = 'net-wait' }: LabCard
               <div className="flex flex-col items-end select-none">
                 <div className="mb-1.5 flex w-full flex-col items-end space-y-1 border-b border-line pb-1.5">
                   <div className="flex w-full justify-between gap-4">
-                    <span className="text-xs text-ink-3">Wait</span>
+                    <span className="text-xs text-ink-3">Drive</span>
                     <span className="font-mono text-xs tabular-nums text-ink-2">
-                      {formatMinutesToHm(waitTime)}
+                      {formatMinutesToHm(lab.driveMins || 0)}
                     </span>
                   </div>
                   <div className="flex w-full justify-between gap-4">
-                    <span className="text-xs text-ink-3">Drive</span>
+                    <span className="text-xs text-ink-3">Wait</span>
                     <span className="font-mono text-xs tabular-nums text-ink-2">
-                      +{formatMinutesToHm(lab.driveMins || 0)}
+                      +{formatMinutesToHm(waitTime)}
                     </span>
                   </div>
                 </div>

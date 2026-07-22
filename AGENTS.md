@@ -10,4 +10,5 @@ This file is repo-specific guidance layered on top of the system-wide `~/Desktop
 
 - After any change that affects runtime behavior (scheduler, pipelines, Express routes, server bundle, or env-dependent startup), rebuild if needed and restart the local AlbertaHospitals server yourself. Do not ask the user to restart it.
 - Default local server: port `3004`. Production-style process is typically `node dist/server.cjs` (`npm run build` then `npm start`). Prefer that when `dist/server.cjs` is already what is listening; otherwise use `npm run dev`.
+- Local dev servers must always be LAN-accessible: bind to `0.0.0.0` (not `127.0.0.1` / localhost-only). Other devices on the LAN should reach the app at `http://<host-lan-ip>:3004`. Do not start servers that only listen on loopback.
 - Restart procedure: kill whatever is bound to `:3004` (and the matching AlbertaHospitals `server`/`dist/server.cjs` process), start the server again, then verify with a quick health check (e.g. `curl -sS http://127.0.0.1:3004/` or `/api/sync/status`).
