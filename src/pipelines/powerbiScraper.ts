@@ -109,7 +109,8 @@ function parseDsrHierarchical(dsrData: DsrData): Array<{ group: string; values: 
 
 interface SurgicalWaitData {
   procedureType: string;
-  waitWeeks: number;
+  waitValue: number;
+  measureKind: 'Wait_viz' | 'Wait_viz2';
 }
 
 interface SurgicalVolumeData {
@@ -135,12 +136,28 @@ function classifyResponse(data: DsrData): {
   const selectNames = data.descriptor?.Select?.map((s) => s.Name) ?? [];
   const selectStr = selectNames.join('|');
 
-  // SurgWait_v2 — wait times by procedure type
-  if (selectStr.includes('SurgWait_v2.Type') && selectStr.includes('Wait_viz')) {
+  // SurgWait_v2 — non-cancer wait times in weeks (Wait_viz, exact match)
+  // Wait_viz has format 0.0 (decimal weeks). Three separate queries return
+  // the 10th, 50th (median), and 90th percentile values respectively.
+  if (selectStr.includes('SurgWait_v2.Type') && selectNames.includes('SurgWait_v2.Wait_viz')) {
     const rows = parseDsrRows(data);
     const waitTimes: SurgicalWaitData[] = rows.map((r) => ({
       procedureType: String(r.G0 ?? ''),
-      waitWeeks: Number(r.M0 ?? 0),
+      waitValue: Number(r.M0 ?? 0),
+      measureKind: 'Wait_viz' as const,
+    }));
+    return { waitTimes };
+  }
+
+  // SurgWait_v2 — cancer wait times in days (Wait_viz2)
+  // Wait_viz2 has format 0 (integer days). Three separate queries return
+  // the 10th, 50th (median), and 90th percentile values respectively.
+  if (selectStr.includes('SurgWait_v2.Type') && selectNames.includes('SurgWait_v2.Wait_viz2')) {
+    const rows = parseDsrRows(data);
+    const waitTimes: SurgicalWaitData[] = rows.map((r) => ({
+      procedureType: String(r.G0 ?? ''),
+      waitValue: Number(r.M0 ?? 0),
+      measureKind: 'Wait_viz2' as const,
     }));
     return { waitTimes };
   }
@@ -349,39 +366,61 @@ const PROCEDURE_MAP: Record<string, { group: string; name: string }> = {
   'Prostate cancer': { group: 'Cancer Surgery', name: 'Prostate Cancer Surgery' },
 };
 
+function slugify(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
 function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
   const records: SurgicalRecord[] = [];
   const period = data.periodLabel || 'Latest month';
+  const periodSlug = slugify(period);
   const sourceUrl = 'https://www.alberta.ca/health-system-dashboard';
 
-  // Deduplicate wait times by procedure type (multiple queries return same data)
-  const waitTimeMap = new Map<string, number>();
+  // Collect ALL wait values per procedure type. The Power BI report sends
+  // three separate queries per measure (10th, 50th, 90th percentile) with
+  // identical select names. The previous code deduplicated via Map.set (last
+  // wins), which captured only one percentile and mislabeled it "Median wait".
+  // Now we collect all values, sort them ascending, and assign percentile
+  // labels: lowest = 10th, middle = 50th (median), highest = 90th.
+  const waitValuesByProc = new Map<string, number[]>();
   for (const wt of data.waitTimes) {
-    if (wt.procedureType && wt.waitWeeks > 0) {
-      waitTimeMap.set(wt.procedureType, wt.waitWeeks);
+    if (wt.procedureType && wt.waitValue > 0) {
+      const arr = waitValuesByProc.get(wt.procedureType) ?? [];
+      arr.push(wt.waitValue);
+      waitValuesByProc.set(wt.procedureType, arr);
     }
   }
 
-  // Wait times (median wait in weeks)
-  for (const [procedureType, waitWeeks] of waitTimeMap) {
+  const PERCENTILE_LABELS = ['10th percentile', 'Median wait', '90th percentile'] as const;
+
+  for (const [procedureType, values] of waitValuesByProc) {
     const proc = PROCEDURE_MAP[procedureType];
     if (!proc) continue;
-    records.push({
-      id: `powerbi-${proc.group}-wait-${period}`.replace(/\s+/g, '-').toLowerCase(),
-      source_name: 'Alberta Health System Dashboard (Power BI)',
-      source_url: sourceUrl,
-      reporting_period_start: period,
-      reporting_period_end: period,
-      geography_type: 'Province',
-      geography_name: 'Alberta',
-      procedure_group: proc.group,
-      procedure_name: proc.name,
-      wait_segment: 'Referral-to-treatment',
-      metric_name: 'Median wait',
-      metric_value: waitWeeks,
-      unit: 'weeks',
-      method_note: 'Power BI Health System Dashboard — median wait weeks by procedure type',
-    });
+    const isCancer = proc.group === 'Cancer Surgery';
+    const unit = isCancer ? 'days' : 'weeks';
+    const sorted = [...values].sort((a, b) => a - b);
+
+    // Expect 10th / median / 90th; ignore any unexpected extra values so
+    // metric_name stays within the SurgicalRecord union.
+    for (let i = 0; i < Math.min(sorted.length, PERCENTILE_LABELS.length); i++) {
+      const label = PERCENTILE_LABELS[i];
+      records.push({
+        id: `powerbi-${slugify(proc.name)}-${slugify(label)}-${periodSlug}`,
+        source_name: 'Alberta Health System Dashboard (Power BI)',
+        source_url: sourceUrl,
+        reporting_period_start: period,
+        reporting_period_end: period,
+        geography_type: 'Province',
+        geography_name: 'Alberta',
+        procedure_group: proc.group,
+        procedure_name: proc.name,
+        wait_segment: 'Decision-to-surgery',
+        metric_name: label,
+        metric_value: sorted[i],
+        unit,
+        method_note: `Power BI Health System Dashboard — ${label} RTT (Wait 2, ready-to-treat to surgery) in ${unit}`,
+      });
+    }
   }
 
   // Volumes and % in target — deduplicate by procedure type via Map
@@ -402,7 +441,7 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
 
     if (v.volume > 0) {
       records.push({
-        id: `powerbi-${proc.group}-volume-${period}`.replace(/\s+/g, '-').toLowerCase(),
+        id: `powerbi-${slugify(proc.name)}-volume-${periodSlug}`,
         source_name: 'Alberta Health System Dashboard (Power BI)',
         source_url: sourceUrl,
         reporting_period_start: period,
@@ -411,7 +450,7 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
         geography_name: 'Alberta',
         procedure_group: proc.group,
         procedure_name: proc.name,
-        wait_segment: 'Referral-to-treatment',
+        wait_segment: 'Decision-to-surgery',
         metric_name: 'Volume',
         metric_value: v.volume,
         unit: 'count',
@@ -421,7 +460,7 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
 
     if (v.pctInTarget > 0) {
       records.push({
-        id: `powerbi-${proc.group}-pct-target-${period}`.replace(/\s+/g, '-').toLowerCase(),
+        id: `powerbi-${slugify(proc.name)}-pct-target-${periodSlug}`,
         source_name: 'Alberta Health System Dashboard (Power BI)',
         source_url: sourceUrl,
         reporting_period_start: period,
@@ -430,7 +469,7 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
         geography_name: 'Alberta',
         procedure_group: proc.group,
         procedure_name: proc.name,
-        wait_segment: 'Referral-to-treatment',
+        wait_segment: 'Decision-to-surgery',
         metric_name: '% within benchmark',
         metric_value: Math.round(v.pctInTarget * 100),
         unit: 'percent',
@@ -447,7 +486,7 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
 
   for (const [, f] of facilityMap) {
     records.push({
-      id: `powerbi-facility-${f.site}`.replace(/\s+/g, '-').toLowerCase(),
+      id: `powerbi-facility-${slugify(f.site)}`,
       source_name: 'Alberta Health System Dashboard (Power BI)',
       source_url: sourceUrl,
       reporting_period_start: period,
@@ -457,7 +496,7 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
       facility_name: f.site,
       procedure_group: 'All Surgeries',
       procedure_name: 'All Surgeries',
-      wait_segment: 'Referral-to-treatment',
+      wait_segment: 'Decision-to-surgery',
       metric_name: 'Volume',
       metric_value: f.volumes.reduce((a, b) => a + b, 0),
       unit: 'count',

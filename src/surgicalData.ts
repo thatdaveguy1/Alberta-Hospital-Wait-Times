@@ -17,7 +17,7 @@ export interface SurgicalRecord {
   procedure_group: string;
   procedure_name: string;
   wait_segment: 'Referral-to-consult' | 'Decision-to-surgery' | 'Referral-to-treatment';
-  metric_name: 'Median wait' | 'Average wait' | '90th percentile' | '% within benchmark' | 'Volume';
+  metric_name: '10th percentile' | 'Median wait' | 'Average wait' | '90th percentile' | '% within benchmark' | 'Volume';
   metric_value: number;
   unit: 'weeks' | 'days' | 'percent' | 'count';
   benchmark_value?: string;

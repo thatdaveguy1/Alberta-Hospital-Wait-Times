@@ -246,6 +246,7 @@ export default function SurgicalDashboard() {
         id: rec.id ?? `${rec.procedure_name}-${rec.wait_segment}`,
         procedure: rec.procedure_name,
         median,
+        unitAbbr: rec.unit === 'days' ? 'days' : 'wks',
         p90: p90 && p90.metric_value > 0 ? p90.metric_value : null,
         benchmark: rec.benchmark_value ?? null,
         pctOfBench,
@@ -262,10 +263,6 @@ export default function SurgicalDashboard() {
     return {
       wait2: provincialMedians
         .filter(r => r.wait_segment === 'Decision-to-surgery')
-        .map(buildRow)
-        .sort(byLongest),
-      referralToTreatment: provincialMedians
-        .filter(r => r.wait_segment === 'Referral-to-treatment')
         .map(buildRow)
         .sort(byLongest),
     };
@@ -515,31 +512,16 @@ export default function SurgicalDashboard() {
                     Provincial Specialty Wait Times
                   </h3>
                   <p className="text-[11px] text-ink-2 leading-normal max-w-2xl">
-                    Split by pathway segment so Wait 2 (decision-to-surgery) is not mixed with referral-to-treatment medians from Power BI.
+                    Ready-to-Treat to Treatment (RTT, Wait 2) — from when a specialist deems the patient ready for surgery to the surgery date. Non-cancer surgeries in weeks; cancer surgeries in days.
                   </p>
                 </div>
                 <DataTimestamp compact variant="light" metadata={metadata ?? undefined} arrayKey="SURGICAL_RECORDS" />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="rounded-lg border border-line bg-paper px-3 py-2">
-                  <p className="text-[10px] font-semibold text-ink">Wait 2 · Decision to surgery</p>
-                  <p className="text-[10px] text-ink-2 leading-snug mt-0.5">
-                    From signed surgical decision/consent to the procedure date. Median + 90th when published.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-line bg-paper px-3 py-2">
-                  <p className="text-[10px] font-semibold text-ink">Referral to treatment</p>
-                  <p className="text-[10px] text-ink-2 leading-snug mt-0.5">
-                    Power BI pathway median from referral through treatment — not the same as classic Wait 1 consult.
-                  </p>
-                </div>
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <h4 className="text-[11px] font-semibold text-ink">Wait 2 · Decision to Surgery</h4>
+                <h4 className="text-[11px] font-semibold text-ink">Wait 2 · Ready-to-Treat to Surgery</h4>
                 <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wide">
                   {specialtyWaitPanels.wait2.length} procedures
                 </span>
@@ -570,10 +552,10 @@ export default function SurgicalDashboard() {
                             <div className="font-semibold text-ink text-[12px] leading-snug">{row.procedure}</div>
                           </td>
                           <td className="py-2.5 px-3 text-right font-mono tabular-nums font-semibold text-ink whitespace-nowrap">
-                            {row.median != null ? `${row.median.toFixed(1)} wks` : '—'}
+                            {row.median != null ? `${row.median.toFixed(1)} ${row.unitAbbr}` : '—'}
                           </td>
                           <td className="py-2.5 px-3 text-right font-mono tabular-nums text-ink whitespace-nowrap">
-                            {row.p90 != null ? `${row.p90.toFixed(1)} wks` : '—'}
+                            {row.p90 != null ? `${row.p90.toFixed(1)} ${row.unitAbbr}` : '—'}
                           </td>
                           <td className="py-2.5 px-3 text-[11px] text-ink-2 whitespace-nowrap">
                             {row.benchmark ?? '—'}
@@ -605,55 +587,7 @@ export default function SurgicalDashboard() {
                 </table>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h4 className="text-[11px] font-semibold text-ink">Referral to Treatment</h4>
-                  <p className="text-[10px] text-ink-3">
-                    Pathway medians only — 90th percentile and benchmarks are usually unpublished for this segment.
-                  </p>
-                </div>
-                <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wide">
-                  {specialtyWaitPanels.referralToTreatment.length} procedures
-                </span>
-              </div>
-              <div className="overflow-x-auto rounded-xl border border-line">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-paper border-b border-line text-[10px] text-ink-2">
-                      <th className="py-2 px-3 font-semibold">Procedure</th>
-                      <th className="py-2 px-3 text-right font-semibold">Median</th>
-                      <th className="py-2 px-3 text-right font-semibold">Source</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {specialtyWaitPanels.referralToTreatment.length === 0 ? (
-                      <tr>
-                        <td colSpan={3} className="py-6 px-3 text-center text-[11px] text-ink-3">
-                          No provincial referral-to-treatment median rows available.
-                        </td>
-                      </tr>
-                    ) : (
-                      specialtyWaitPanels.referralToTreatment.map(row => (
-                        <tr key={row.id} className="border-b border-line last:border-b-0 hover:bg-paper/70 transition-colors">
-                          <td className="py-2.5 px-3">
-                            <div className="font-semibold text-ink text-[12px] leading-snug">{row.procedure}</div>
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-mono tabular-nums font-semibold text-ink whitespace-nowrap">
-                            {row.median != null ? `${row.median.toFixed(1)} wks` : '—'}
-                          </td>
-                          <td className="py-2.5 px-3 text-right">
-                            <span className="text-[10px] font-semibold text-ink-2">{row.source}</span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            </div>
+          </div>
 
           {/* Estimated surgical facility OR utilization directory removed */}
           <div className="bg-surface border border-line rounded-xl p-4 sm:p-5 space-y-3">
