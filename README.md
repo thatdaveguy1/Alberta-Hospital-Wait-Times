@@ -1,11 +1,14 @@
 # Alberta Hospital Wait Times Dashboard
 
+Unofficial public dashboard for Alberta ER and lab waits, surgical queues, and related health-system indicators. Live site: [alberta-hospital-wait-times.pages.dev](https://alberta-hospital-wait-times.pages.dev).
+
+Eight modules: ER wait times, service disruptions, surgical waits, diagnostic imaging & labs, primary care, public health, regional inequity, and health spending.
+
 ## Recent Changes
 
-- **2026-07-09 — Diagnostics & Lab fix:** live lab stats cards now compute real averages; `LabCard` badges correctly show `Walk-In`, `Closed`, or `Appt Req` based on lab state; `Manual`/`Set Location` buttons open the shared manual location modal; `DataTimestamp` sources are sanitized across all four diagnostics subtabs (`Laboratory Waits`, `Imaging Gaps`, `Diagnostic Sites`, `Lab Turnaround`).
-
-
-A 8-tab dashboard visualizing Alberta's healthcare system performance — ER wait times, surgical waits, diagnostic imaging, primary care, public health, spending, regional inequity, and service disruptions.
+- **2026-07-21 — GitHub hygiene:** scrubbed local LAN IP / home-path identifiers from tracked files; Nominatim User-Agent now points at this repo instead of a personal email.
+- **2026-07 — ER & Labs UX:** prefetch/warm cache for smoother page transitions; lab freshness stamps; 10-minute lab polling aligned with ER; drive+wait headline; outside-AB location handling.
+- **2026-07-09 — Diagnostics & Lab fix:** live lab stats cards compute real averages; `LabCard` badges show `Walk-In`, `Closed`, or `Appt Req`; shared manual location modal; sanitized `DataTimestamp` sources across diagnostics subtabs.
 
 ## Architecture
 
