@@ -194,14 +194,15 @@ export default function SurgicalDashboard() {
     const specs = [
       { procedureName: 'Total Hip Arthroplasty', title: 'Total Hip Replacement', iconColor: 'text-accent', pctClass: 'text-warn' },
       { procedureName: 'Total Knee Arthroplasty', title: 'Total Knee Replacement', iconColor: 'text-accent', pctClass: 'text-warn' },
-      { procedureName: 'Cataract Extraction & Lens Implant', title: 'Cataract Extraction', iconColor: 'text-ok', pctClass: 'text-ok' },
-      { procedureName: 'Breast Cancer Surgery', title: 'Breast Cancer Surgery', iconColor: 'text-crit', pctClass: 'text-crit', subtitle: 'Breast Cancer median wait' },
+      { procedureName: 'Cataract Extraction & Lens Implant', title: 'Cataract Extractions', iconColor: 'text-ok', pctClass: 'text-ok' },
+      { procedureName: 'Breast Cancer Surgery', title: 'Breast Cancer Surgery', iconColor: 'text-crit', pctClass: 'text-crit' },
     ] as const;
     return specs.map(spec => {
       // Headline metric matches the historical trend explorer: median Wait-2.
       // 90th is shown as a secondary label so long-tail waits stay visible.
       const medianRec = pickLatestProvincialRecord(SURGICAL_RECORDS, spec.procedureName, 'Median wait');
       const p90Rec = pickLatestProvincialRecord(SURGICAL_RECORDS, spec.procedureName, '90th percentile');
+      const pctRec = pickLatestProvincialRecord(SURGICAL_RECORDS, spec.procedureName, '% within benchmark');
       const wait = medianRec?.metric_value ?? null;
       const p90 = p90Rec?.metric_value ?? null;
       const unit = medianRec?.unit ?? p90Rec?.unit ?? 'weeks';
@@ -213,6 +214,11 @@ export default function SurgicalDashboard() {
       const target = parseBenchmarkWeeks(benchmarkLabel);
       const pctOfTarget =
         wait != null ? pctOfBenchmark(wait, unit, benchmarkLabel) : null;
+      // Power BI "% completed within recommended time" when a CIHI day target is not published.
+      const pctWithinRecommended =
+        pctRec && pctRec.unit === 'percent' && pctRec.metric_value > 0
+          ? pctRec.metric_value
+          : null;
       return {
         ...spec,
         wait,
@@ -223,6 +229,7 @@ export default function SurgicalDashboard() {
         target,
         pctOfTarget,
         benchmarkLabel,
+        pctWithinRecommended,
       };
     });
   }, [SURGICAL_RECORDS]);
@@ -351,87 +358,90 @@ export default function SurgicalDashboard() {
               const waitLabel = card.wait != null ? `${card.wait} ${card.unitLabel}` : '—';
               const p90Label =
                 card.p90 != null ? `90th: ${card.p90} ${card.unitShort}` : null;
-              const targetFooter =
-                card.benchmarkLabel
-                  ? `CIHI target: ${card.benchmarkLabel}`
-                  : 'Target: not published';
+              const targetFooter = card.benchmarkLabel
+                ? `CIHI target: ${card.benchmarkLabel}`
+                : card.pctWithinRecommended != null
+                  ? 'AHS recommended-time share'
+                  : 'No published day target';
               const pctFooter =
                 card.pctOfTarget != null
-                  ? card.procedureName === 'Cataract Extraction & Lens Implant' && card.pctOfTarget <= 100
-                    ? `${card.pctOfTarget}% (Within Target)`
-                    : `${card.pctOfTarget}% of Target`
-                  : card.procedureName === 'Breast Cancer Surgery'
-                    ? 'High Priority Flow'
+                  ? `${card.pctOfTarget}% of target`
+                  : card.pctWithinRecommended != null
+                    ? `${card.pctWithinRecommended}% within recommended time`
                     : '—';
-
-              if (card.procedureName === 'Breast Cancer Surgery') {
-                return (
-                  <div key={card.procedureName} className="bg-surface border border-line rounded-xl p-4 space-y-2 relative overflow-hidden group">
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-ink-2 font-semibold">Oncology Fast-Track</span>
-                      <Activity className="w-3.5 h-3.5 text-crit" />
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="text-2xl font-semibold text-ink">{waitLabel}</div>
-                      <div className="text-[10px] text-ink-2">{card.subtitle ?? 'Breast Cancer median wait'}</div>
-                      {p90Label && <div className="text-[10px] text-ink-3 font-mono">{p90Label}</div>}
-                    </div>
-                    <div className="pt-2 border-t border-line flex items-center justify-between text-[9px] text-ink-2">
-                      <span>{targetFooter}</span>
-                      <span className="text-crit font-semibold">{pctFooter}</span>
-                    </div>
-                    <div className="pt-1.5 flex items-center gap-1 text-[8px] font-semibold text-ink-3">
-                      <span>No Trend Data Available</span>
-                    </div>
-                  </div>
-                );
-              }
 
               const isActive = trendKey != null && selectedKpi === trendKey;
               const toggle = () => trendKey && setSelectedKpi(isActive ? null : trendKey);
+              const canTrend = trendKey != null;
+              const Icon =
+                card.procedureName === 'Breast Cancer Surgery'
+                  ? Activity
+                  : card.procedureName === 'Cataract Extraction & Lens Implant'
+                    ? Sparkles
+                    : Clock;
+              const iconClass =
+                card.procedureName === 'Breast Cancer Surgery'
+                  ? 'text-crit'
+                  : card.procedureName === 'Cataract Extraction & Lens Implant'
+                    ? 'text-ok'
+                    : 'text-accent';
+              const borderActive =
+                card.procedureName === 'Cataract Extraction & Lens Implant'
+                  ? 'border-ok bg-surface'
+                  : 'border-accent bg-surface';
+              const borderIdle =
+                card.procedureName === 'Cataract Extraction & Lens Implant'
+                  ? 'border-line hover:border-ok'
+                  : 'border-line hover:border-accent';
+              const trendColor =
+                card.procedureName === 'Cataract Extraction & Lens Implant'
+                  ? 'text-ok group-hover:text-ok'
+                  : card.procedureName === 'Breast Cancer Surgery'
+                    ? 'text-ink-3'
+                    : 'text-accent group-hover:text-accent';
 
-              if (card.procedureName === 'Total Hip Arthroplasty') {
-                return (
-                  <div key={card.procedureName} tabIndex={0} onClick={toggle} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
-                    className={`bg-surface border rounded-xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none   ${isActive ? 'border-accent   bg-surface ' : 'border-line hover:border-accent'}`}>
-                    <div className="flex items-center justify-between"><span className="text-[10px] text-ink-2 font-semibold">{card.title}</span><Clock className="w-3.5 h-3.5 text-accent" /></div>
-                    <div className="space-y-0.5">
-                      <div className="text-2xl font-semibold text-ink">{waitLabel}</div>
-                      <div className="text-[10px] text-ink-2">Median Wait Time (Wait 2)</div>
-                      {p90Label && <div className="text-[10px] text-ink-3 font-mono">{p90Label}</div>}
-                    </div>
-                    <div className="pt-2 border-t border-line flex items-center justify-between text-[9px] text-ink-2"><span>{targetFooter}</span><span className={`${card.pctClass} font-semibold`}>{pctFooter}</span></div>
-                    <div className="pt-1.5 flex items-center gap-1 text-[8px] font-semibold text-accent group-hover:text-accent transition-colors"><BarChart2 className="w-3 h-3" /><span>{isActive ? 'Active: Hide Trend' : 'Click to View Trend'}</span></div>
-                  </div>
-                );
-              }
-              if (card.procedureName === 'Total Knee Arthroplasty') {
-                return (
-                  <div key={card.procedureName} tabIndex={0} onClick={toggle} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
-                    className={`bg-surface border rounded-xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none   ${isActive ? 'border-accent   bg-surface ' : 'border-line hover:border-accent'}`}>
-                    <div className="flex items-center justify-between"><span className="text-[10px] text-ink-2 font-semibold">{card.title}</span><Clock className="w-3.5 h-3.5 text-accent" /></div>
-                    <div className="space-y-0.5">
-                      <div className="text-2xl font-semibold text-ink">{waitLabel}</div>
-                      <div className="text-[10px] text-ink-2">Median Wait Time (Wait 2)</div>
-                      {p90Label && <div className="text-[10px] text-ink-3 font-mono">{p90Label}</div>}
-                    </div>
-                    <div className="pt-2 border-t border-line flex items-center justify-between text-[9px] text-ink-2"><span>{targetFooter}</span><span className={`${card.pctClass} font-semibold`}>{pctFooter}</span></div>
-                    <div className="pt-1.5 flex items-center gap-1 text-[8px] font-semibold text-accent group-hover:text-accent transition-colors"><BarChart2 className="w-3 h-3" /><span>{isActive ? 'Active: Hide Trend' : 'Click to View Trend'}</span></div>
-                  </div>
-                );
-              }
               return (
-                <div key={card.procedureName} tabIndex={0} onClick={toggle} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
-                  className={`bg-surface border rounded-xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none   ${isActive ? 'border-ok   bg-surface ' : 'border-line hover:border-ok'}`}>
-                  <div className="flex items-center justify-between"><span className="text-[10px] text-ink-2 font-semibold">Cataract Extractions</span><Sparkles className="w-3.5 h-3.5 text-ok" /></div>
+                <div
+                  key={card.procedureName}
+                  tabIndex={canTrend ? 0 : undefined}
+                  onClick={canTrend ? toggle : undefined}
+                  onKeyDown={
+                    canTrend
+                      ? (e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggle();
+                          }
+                        }
+                      : undefined
+                  }
+                  className={`bg-surface border rounded-xl p-4 space-y-2 relative overflow-hidden group select-none transition-all duration-300 ${
+                    canTrend ? 'cursor-pointer' : ''
+                  } ${isActive ? borderActive : borderIdle}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-ink-2 font-semibold">{card.title}</span>
+                    <Icon className={`w-3.5 h-3.5 ${iconClass}`} />
+                  </div>
                   <div className="space-y-0.5">
                     <div className="text-2xl font-semibold text-ink">{waitLabel}</div>
                     <div className="text-[10px] text-ink-2">Median Wait Time (Wait 2)</div>
                     {p90Label && <div className="text-[10px] text-ink-3 font-mono">{p90Label}</div>}
                   </div>
-                  <div className="pt-2 border-t border-line flex items-center justify-between text-[9px] text-ink-2"><span>{targetFooter}</span><span className={`${card.pctClass} font-semibold`}>{pctFooter}</span></div>
-                  <div className="pt-1.5 flex items-center gap-1 text-[8px] font-semibold text-ok group-hover:text-ok transition-colors"><BarChart2 className="w-3 h-3" /><span>{isActive ? 'Active: Hide Trend' : 'Click to View Trend'}</span></div>
+                  <div className="pt-2 border-t border-line flex items-center justify-between gap-2 text-[9px] text-ink-2">
+                    <span className="min-w-0">{targetFooter}</span>
+                    <span className={`${card.pctClass} font-semibold shrink-0 text-right`}>{pctFooter}</span>
+                  </div>
+                  {canTrend ? (
+                    <div className={`pt-1.5 flex items-center gap-1 text-[8px] font-semibold ${trendColor} transition-colors`}>
+                      <BarChart2 className="w-3 h-3" />
+                      <span>{isActive ? 'Hide historical trend' : 'Show historical trend'}</span>
+                    </div>
+                  ) : (
+                    <div className="pt-1.5 text-[8px] font-semibold text-ink-3">
+                      No CIHI historical series for this procedure
+                    </div>
+                  )}
                 </div>
               );
             })}
