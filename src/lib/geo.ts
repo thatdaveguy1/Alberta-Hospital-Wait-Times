@@ -198,13 +198,38 @@ async function reverseGeocodeCity(
   return { city: 'Your location', region: 'Alberta' };
 }
 
-/** GPS via the browser Geolocation API. Returns null on denial / timeout / insecure context. */
+/**
+ * Max reported horizontal accuracy (meters) we'll treat as a usable GPS pin.
+ * Network / Wi‑Fi / cell fixes often report multi‑km accuracy and commonly
+ * snap rural Alberta users to Calgary — reject those for drive ranking.
+ */
+export const GPS_MAX_ACCURACY_M = 2000;
+
+/** True when the Geolocation API reports a tight-enough fix for drive math. */
+export function isGpsFixPreciseEnough(
+  accuracyMeters: number | null | undefined,
+): boolean {
+  return (
+    typeof accuracyMeters === 'number' &&
+    Number.isFinite(accuracyMeters) &&
+    accuracyMeters > 0 &&
+    accuracyMeters <= GPS_MAX_ACCURACY_M
+  );
+}
+
+/** Options for an explicit / soft GPS request — no stale cached network pins. */
+export const PRECISE_GPS_OPTIONS: PositionOptions = {
+  enableHighAccuracy: true,
+  timeout: 12000,
+  maximumAge: 0,
+};
+
+/**
+ * GPS via the browser Geolocation API.
+ * Returns null on denial / timeout / insecure context / coarse accuracy.
+ */
 export function requestGpsLocation(
-  options: PositionOptions = {
-    enableHighAccuracy: false,
-    timeout: 8000,
-    maximumAge: 120000,
-  },
+  options: PositionOptions = PRECISE_GPS_OPTIONS,
 ): Promise<GeolocationPosition | null> {
   if (typeof navigator === 'undefined' || !('geolocation' in navigator)) {
     return Promise.resolve(null);
@@ -218,7 +243,13 @@ export function requestGpsLocation(
 
   return new Promise((resolve) => {
     navigator.geolocation.getCurrentPosition(
-      (pos) => resolve(pos),
+      (pos) => {
+        if (!isGpsFixPreciseEnough(pos.coords.accuracy)) {
+          resolve(null);
+          return;
+        }
+        resolve(pos);
+      },
       () => resolve(null),
       options,
     );

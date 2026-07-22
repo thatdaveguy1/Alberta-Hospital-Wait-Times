@@ -32,7 +32,15 @@ import { MapComponent } from './MapComponent';
 import { DashboardHeader } from './DashboardHeader';
 import { WaitBandChip } from './WaitBandChip';
 import type { DataMetadataMap } from './DataTimestamp';
-import { calculateDistance, isRoughlyInAlberta, loadSavedLocation, saveLocation, type UserLocation } from '../lib/geo';
+import {
+  calculateDistance,
+  isGpsFixPreciseEnough,
+  isRoughlyInAlberta,
+  loadSavedLocation,
+  PRECISE_GPS_OPTIONS,
+  saveLocation,
+  type UserLocation,
+} from '../lib/geo';
 import { getCachedHospitals, setCachedHospitals } from '../lib/pageDataPrefetch';
 import {
   LocationUnavailableModal,
@@ -319,44 +327,34 @@ export default function ErWaitDashboard({
       return;
     }
 
-    const onSuccess = (pos: GeolocationPosition) => {
-      updateLocationWithCityName(pos.coords.latitude, pos.coords.longitude, true);
-      setGpsRefused(false);
-      setGeocodingError('');
-      setSortBy('net-wait');
-      setLoadingGeo(false);
-      setLocationPanelOpen(false);
-    };
-
-    const tryLowAccuracy = () => {
-      navigator.geolocation.getCurrentPosition(
-        onSuccess,
-        (err) => {
-          console.warn('GPS low-accuracy failed:', err);
-          setGpsRefused(true);
-          setGeocodingError(geoErrorMessage(err, false));
-          setLoadingGeo(false);
-          setLocationPanelOpen(true);
-        },
-        { enableHighAccuracy: false, timeout: 12000, maximumAge: 120000 },
-      );
-    };
-
-    // High accuracy first (GPS); fall back to network location if it times out.
+    // Precise GPS only — do not fall back to network/Wi‑Fi pins (often Calgary for AB).
     navigator.geolocation.getCurrentPosition(
-      onSuccess,
-      (err) => {
-        console.warn('GPS high-accuracy failed, retrying low-accuracy:', err);
-        if (err.code === err.PERMISSION_DENIED) {
+      (pos) => {
+        if (!isGpsFixPreciseEnough(pos.coords.accuracy)) {
+          console.warn('GPS fix too coarse for drive ranking:', pos.coords.accuracy);
           setGpsRefused(true);
-          setGeocodingError(geoErrorMessage(err, false));
+          setGeocodingError(
+            'Location fix was too approximate for drive times. Enter a city or postal code (e.g. Red Deer).',
+          );
           setLoadingGeo(false);
           setLocationPanelOpen(true);
           return;
         }
-        tryLowAccuracy();
+        updateLocationWithCityName(pos.coords.latitude, pos.coords.longitude, true);
+        setGpsRefused(false);
+        setGeocodingError('');
+        setSortBy('net-wait');
+        setLoadingGeo(false);
+        setLocationPanelOpen(false);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
+      (err) => {
+        console.warn('GPS high-accuracy failed:', err);
+        setGpsRefused(true);
+        setGeocodingError(geoErrorMessage(err, false));
+        setLoadingGeo(false);
+        setLocationPanelOpen(true);
+      },
+      PRECISE_GPS_OPTIONS,
     );
   }, [updateLocationWithCityName]);
 
@@ -493,6 +491,11 @@ export default function ErWaitDashboard({
     setLoadingGeo(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        // Soft GPS: only keep tight fixes. Coarse network pins misplace rural users.
+        if (!isGpsFixPreciseEnough(pos.coords.accuracy)) {
+          setLoadingGeo(false);
+          return;
+        }
         updateLocationWithCityName(pos.coords.latitude, pos.coords.longitude, true);
         setSortBy('net-wait');
         setLoadingGeo(false);
@@ -501,7 +504,7 @@ export default function ErWaitDashboard({
         // Silent fail on autoload — user can still press "Use current location".
         setLoadingGeo(false);
       },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 },
+      PRECISE_GPS_OPTIONS,
     );
 
     return () => clearInterval(poll);
