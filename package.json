@@ -13,7 +13,7 @@
     "daily-sync": "tsx src/pipelines/dailySync.ts",
     "push:all": "tsx src/pipelines/pushClient.ts --all",
     "deploy:worker": "cd cloudflare && wrangler deploy",
-    "deploy:pages": "npx wrangler pages deploy dist --project-name alberta-hospital-wait-times --branch test --commit-dirty=true",
+    "deploy:pages": "npx wrangler pages deploy dist --project-name alberta-hospital-wait-times --branch main --commit-dirty=true",
     "seed:kv": "cd cloudflare && wrangler kv key put --remote",
     "gen:push-secret": "openssl rand -hex 24",
     "test:data-health": "tsx --test tests/unit/dataHealth.test.ts",
