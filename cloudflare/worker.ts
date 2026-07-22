@@ -4,6 +4,7 @@
 
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { assessDataHealth, type SyncStatusLike } from '../src/lib/dataHealth';
 
 // Cloudflare Workers environment bindings
 interface Env {
@@ -78,13 +79,70 @@ async function readLabTrendsBlob(kv: KVNamespace): Promise<LabTrendsBlob | null>
 }
 
 
-// --- Health ---
-app.get('/api/health', (c) => {
-  return c.json({
-    status: 'ok',
-    time: new Date().toISOString(),
-    edge: true,
-  });
+// --- Health — always HTTP 200 so uptime scripts can parse the body ---
+app.get('/api/health', async (c) => {
+  try {
+    const raw = await c.env.DATA_KV.get('data-sync-status');
+    let parsed: SyncStatusLike | null = null;
+    if (raw) {
+      parsed = JSON.parse(raw) as SyncStatusLike;
+    }
+    const health = assessDataHealth(parsed);
+
+    const lastSyncTimestamp = health.lastSyncTimestamp;
+    let lastSyncAgeHours: number | null = null;
+    if (lastSyncTimestamp) {
+      const ageMs = Date.now() - new Date(lastSyncTimestamp).getTime();
+      lastSyncAgeHours = Math.round((ageMs / (1000 * 60 * 60)) * 100) / 100;
+      if (!Number.isFinite(lastSyncAgeHours)) lastSyncAgeHours = null;
+    }
+
+    const syncStale =
+      health.overall === 'down' ||
+      health.checks.includes('daily_sync_soft_stale') ||
+      health.checks.includes('daily_sync_critical');
+
+    return c.json({
+      status: health.overall,
+      time: new Date().toISOString(),
+      syncStale,
+      lastSyncAgeHours,
+      lastSyncTimestamp,
+      sync: {
+        overall: health.overall,
+        syncStatusAvailable: health.syncStatusAvailable,
+        status: parsed?.status ?? 'never_run',
+      },
+      domains: health.domains,
+      criticalIssues: health.criticalIssues,
+      softIssues: health.softIssues,
+      bannerMessage: health.bannerMessage,
+      checks: health.checks,
+      edge: true,
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn('[Worker] /api/health failed:', message);
+    const health = assessDataHealth(null);
+    return c.json({
+      status: health.overall,
+      time: new Date().toISOString(),
+      syncStale: true,
+      lastSyncAgeHours: null,
+      lastSyncTimestamp: null,
+      sync: {
+        overall: health.overall,
+        syncStatusAvailable: health.syncStatusAvailable,
+        status: 'never_run',
+      },
+      domains: health.domains,
+      criticalIssues: health.criticalIssues,
+      softIssues: health.softIssues,
+      bannerMessage: health.bannerMessage,
+      checks: health.checks,
+      edge: true,
+    });
+  }
 });
 
 // --- IP geolocation (Cloudflare request.cf) — GPS fallback for home "near you" ---

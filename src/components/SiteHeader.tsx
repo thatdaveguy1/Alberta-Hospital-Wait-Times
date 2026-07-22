@@ -13,6 +13,7 @@ import {
 import { dashboardMatchesSearch } from '../lib/dashboardModuleSearch';
 import { formatRelativeTime, useSyncStatus } from '../hooks/useSyncStatus';
 import { useTheme } from '../hooks/useTheme';
+import { assessDataHealth, getDomainHealth } from '../lib/dataHealth';
 import { cn } from '../lib/utils';
 import { prefetchCareSeekingPages } from '../lib/pageDataPrefetch';
 import { deriveCareType } from '../lib/erFacility';
@@ -62,16 +63,38 @@ function NavLink({
 }
 
 function FreshnessChip() {
-  const { syncStatus } = useSyncStatus();
-  const ts = syncStatus?.erWaitTimesLastUpdate;
-  if (!ts) return null;
+  const { syncStatus, loading } = useSyncStatus();
+  // Avoid an "issue" flash while the first status poll is in flight.
+  if (loading && !syncStatus) return null;
+
+  const health = assessDataHealth(syncStatus);
+  const er = getDomainHealth(health, 'er-waittimes');
+  const ts = er?.lastSuccessAt ?? syncStatus?.erWaitTimesLastUpdate ?? null;
+  const relative = ts ? formatRelativeTime(ts) : null;
+
+  let tone = 'bg-ok-soft text-ok';
+  let label = relative ? `ER feed · ${relative}` : 'ER feed';
+
+  if (!health.syncStatusAvailable || !er) {
+    tone = 'bg-crit-soft text-crit';
+    label = relative ? `ER feed · issue · ${relative}` : 'ER feed · issue';
+  } else if (er.state === 'soft_stale' || er.state === 'partial') {
+    tone = 'bg-warn-soft text-warn';
+    label = relative ? `ER feed · ${relative}` : 'ER feed · issue';
+  } else if (er.state !== 'healthy') {
+    tone = 'bg-crit-soft text-crit';
+    label = relative ? `ER feed · issue · ${relative}` : 'ER feed · issue';
+  } else if (!ts) {
+    return null;
+  }
+
   return (
     <span
-      className="hidden lg:inline-flex items-center gap-1.5 rounded-full bg-ok-soft px-2.5 py-1 text-xs font-medium text-ok whitespace-nowrap"
-      title="ER wait times feed status"
+      className={`hidden lg:inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap ${tone}`}
+      title={er?.message ?? 'ER wait times feed status'}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-      ER feed · {formatRelativeTime(ts)}
+      {label}
     </span>
   );
 }

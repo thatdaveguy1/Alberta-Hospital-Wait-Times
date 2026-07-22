@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 
-interface PipelineResult {
+export interface PipelineResult {
   domain: string;
   pipeline: string;
   status: 'success' | 'failed' | 'partial' | 'skipped';
@@ -14,13 +14,15 @@ interface PipelineResult {
   timestamp: string;
 }
 
-interface SyncStatus {
+export interface SyncStatus {
   status: 'never_run' | 'running' | 'success' | 'partial_success' | 'failed';
   lastSyncTimestamp: string | null;
   nextSyncTimestamp: string | null;
   results: PipelineResult[];
   erWaitTimesLastUpdate: string | null;
   erWaitTimesNextUpdate: string | null;
+  labWaitsLastUpdate: string | null;
+  labWaitsNextUpdate: string | null;
 }
 
 interface UseSyncStatusReturn {
@@ -56,6 +58,8 @@ export function useSyncStatus(): UseSyncStatusReturn {
             prev &&
             prev.erWaitTimesLastUpdate === data.erWaitTimesLastUpdate &&
             prev.erWaitTimesNextUpdate === data.erWaitTimesNextUpdate &&
+            prev.labWaitsLastUpdate === data.labWaitsLastUpdate &&
+            prev.labWaitsNextUpdate === data.labWaitsNextUpdate &&
             prev.lastSyncTimestamp === data.lastSyncTimestamp &&
             prev.status === data.status
           ) {

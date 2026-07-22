@@ -6,6 +6,7 @@ import fs from 'fs';
 import { ServiceDisruption } from './src/types';
 import { startScheduler, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
 import { getSyncStatus, loadSyncStatusFromDisk } from './src/pipelines/syncStatus';
+import { assessDataHealth } from './src/lib/dataHealth';
 
 // Alert Interfaces
 interface EmailAlert {
@@ -120,39 +121,65 @@ async function startServer() {
 
   app.use(express.json());
 
-  // API Routes
+  // API Routes — always HTTP 200 so uptime scripts can parse the body
   app.get('/api/health', (req, res) => {
-    const SYNC_STATUS_FILE = path.join(process.cwd(), 'data-sync-status.json');
-    const STALE_AFTER_HOURS = 26;
-    let syncStale = true;
-    let lastSyncAgeHours: number | null = null;
-    let lastSyncTimestamp: string | null = null;
-
     try {
-      if (fs.existsSync(SYNC_STATUS_FILE)) {
-        const raw = fs.readFileSync(SYNC_STATUS_FILE, 'utf8');
-        const status = JSON.parse(raw) as { lastSyncTimestamp?: string | null };
-        lastSyncTimestamp = status.lastSyncTimestamp ?? null;
-        if (lastSyncTimestamp) {
-          const ageMs = Date.now() - new Date(lastSyncTimestamp).getTime();
-          lastSyncAgeHours = Math.round((ageMs / (1000 * 60 * 60)) * 100) / 100;
-          syncStale = !Number.isFinite(lastSyncAgeHours) || lastSyncAgeHours > STALE_AFTER_HOURS;
-        }
+      loadSyncStatusFromDisk();
+      const status = getSyncStatus();
+      const health = assessDataHealth(status);
+
+      const lastSyncTimestamp = health.lastSyncTimestamp;
+      let lastSyncAgeHours: number | null = null;
+      if (lastSyncTimestamp) {
+        const ageMs = Date.now() - new Date(lastSyncTimestamp).getTime();
+        lastSyncAgeHours = Math.round((ageMs / (1000 * 60 * 60)) * 100) / 100;
+        if (!Number.isFinite(lastSyncAgeHours)) lastSyncAgeHours = null;
       }
+
+      const syncStale =
+        health.overall === 'down' ||
+        health.checks.includes('daily_sync_soft_stale') ||
+        health.checks.includes('daily_sync_critical');
+
+      res.status(200).json({
+        status: health.overall,
+        time: new Date().toISOString(),
+        syncStale,
+        lastSyncAgeHours,
+        lastSyncTimestamp,
+        sync: {
+          overall: health.overall,
+          syncStatusAvailable: health.syncStatusAvailable,
+          status: status.status,
+        },
+        domains: health.domains,
+        criticalIssues: health.criticalIssues,
+        softIssues: health.softIssues,
+        bannerMessage: health.bannerMessage,
+        checks: health.checks,
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      console.warn('[Server] /api/health failed to read data-sync-status.json:', message);
-      syncStale = true;
-      lastSyncAgeHours = null;
+      console.warn('[Server] /api/health failed:', message);
+      const health = assessDataHealth(null);
+      res.status(200).json({
+        status: health.overall,
+        time: new Date().toISOString(),
+        syncStale: true,
+        lastSyncAgeHours: null,
+        lastSyncTimestamp: null,
+        sync: {
+          overall: health.overall,
+          syncStatusAvailable: health.syncStatusAvailable,
+          status: 'never_run',
+        },
+        domains: health.domains,
+        criticalIssues: health.criticalIssues,
+        softIssues: health.softIssues,
+        bannerMessage: health.bannerMessage,
+        checks: health.checks,
+      });
     }
-
-    res.json({
-      status: 'ok',
-      time: new Date().toISOString(),
-      syncStale,
-      lastSyncAgeHours,
-      lastSyncTimestamp,
-    });
   });
 
   app.get('/api/hospitals', (req, res) => {

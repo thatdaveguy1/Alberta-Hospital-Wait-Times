@@ -4,6 +4,8 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { SiteHeader, type AppView } from './components/SiteHeader';
+import { DataHealthBanner } from './components/DataHealthBanner';
+import { DomainHealthNote } from './components/DomainHealthNote';
 import HomePage from './components/HomePage';
 import ErWaitDashboard from './components/ErWaitDashboard';
 import SurgicalDashboard from './components/SurgicalDashboard';
@@ -103,6 +105,7 @@ export default function App() {
         onNavigate={navigate}
         onSelectFacility={selectFacility}
       />
+      <DataHealthBanner />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <AnimatePresence mode="wait">
@@ -113,6 +116,7 @@ export default function App() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
+            {activeView !== 'home' && <DomainHealthNote viewId={activeView} />}
             {activeView === 'home' ? (
               <HomePage onNavigate={navigate} />
             ) : activeView === 'er-waits' || activeView === 'urgent-care' ? (
