@@ -1180,7 +1180,7 @@ export default function ErWaitDashboard({
                   sortBy={sortBy}
                 />
                 {!isMapFullscreen && (
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[500] flex items-center justify-between gap-2 border-t border-line bg-surface/90 px-3 py-1.5 text-xs font-medium text-ink-3">
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-center justify-between gap-2 border-t border-line bg-surface/90 px-3 py-1.5 text-xs font-medium text-ink-3">
                     <span className="flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-ok" aria-hidden /> Quieter
                     </span>
