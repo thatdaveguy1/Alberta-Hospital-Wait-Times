@@ -4,6 +4,8 @@ import type { SurgicalRecord } from '../surgicalData';
 export const PROCEDURE_NAME_ALIASES: Record<string, string[]> = {
   'Cataract Extraction & Lens Implant': ['Cataract Surgery 1st Eye'],
   'Cataract Surgery 1st Eye': ['Cataract Extraction & Lens Implant'],
+  'Coronary Artery Bypass Graft': ['Coronary Artery Bypass Graft (CABG)'],
+  'Coronary Artery Bypass Graft (CABG)': ['Coronary Artery Bypass Graft'],
 };
 
 const MONTH_INDEX: Record<string, number> = {
@@ -47,8 +49,9 @@ export function procedureNameMatches(candidate: string, target: string): boolean
 
 /** Collapse known aliases onto one preferred procedure_name for dedupe keys. */
 export function canonicalProcedureName(name: string): string {
-  // Fixed preferred names for Power BI / AWR spelling drift.
+  // Fixed preferred names for Power BI / registry spelling drift.
   if (name === 'Cataract Surgery 1st Eye') return 'Cataract Extraction & Lens Implant';
+  if (name === 'Coronary Artery Bypass Graft (CABG)') return 'Coronary Artery Bypass Graft';
   return name;
 }
 
@@ -134,6 +137,23 @@ export function findMatchingP90(
     if (!best || isFresher(r, best)) best = r;
   }
   return best;
+}
+
+/** Prefer an explicit benchmark; else inherit from any same-procedure provincial row. */
+export function resolveBenchmarkValue(
+  records: SurgicalRecord[],
+  procedureName: string,
+  preferred?: string,
+): string | undefined {
+  if (preferred) return preferred;
+  let best: SurgicalRecord | undefined;
+  for (const r of records) {
+    if (r.geography_type !== 'Province') continue;
+    if (!r.benchmark_value) continue;
+    if (!procedureNameMatches(r.procedure_name, procedureName)) continue;
+    if (!best || isFresher(r, best)) best = r;
+  }
+  return best?.benchmark_value;
 }
 
 export function pctOfBenchmark(

@@ -35,6 +35,7 @@ import {
   parseBenchmarkWeeks,
   pctOfBenchmark,
   pickLatestProvincialRecord,
+  resolveBenchmarkValue,
   toWeeks,
   unitAbbr,
   unitDisplayLabel,
@@ -204,9 +205,14 @@ export default function SurgicalDashboard() {
       const record = pickLatestProvincialRecord(SURGICAL_RECORDS, spec.procedureName, '90th percentile');
       const wait = record?.metric_value ?? null;
       const unit = record?.unit ?? 'weeks';
-      const target = parseBenchmarkWeeks(record?.benchmark_value);
+      const benchmarkLabel = resolveBenchmarkValue(
+        SURGICAL_RECORDS,
+        spec.procedureName,
+        record?.benchmark_value,
+      );
+      const target = parseBenchmarkWeeks(benchmarkLabel);
       const pctOfTarget =
-        wait != null ? pctOfBenchmark(wait, unit, record?.benchmark_value) : null;
+        wait != null ? pctOfBenchmark(wait, unit, benchmarkLabel) : null;
       return {
         ...spec,
         wait,
@@ -214,7 +220,7 @@ export default function SurgicalDashboard() {
         unitLabel: unitDisplayLabel(unit),
         target,
         pctOfTarget,
-        benchmarkLabel: record?.benchmark_value,
+        benchmarkLabel,
       };
     });
   }, [SURGICAL_RECORDS]);
@@ -231,8 +237,13 @@ export default function SurgicalDashboard() {
     const buildRow = (rec: SurgicalRecord) => {
       const p90 = findMatchingP90(SURGICAL_RECORDS, rec);
       const median = rec.metric_value > 0 ? rec.metric_value : null;
+      const benchmark = resolveBenchmarkValue(
+        SURGICAL_RECORDS,
+        rec.procedure_name,
+        rec.benchmark_value,
+      );
       const pctOfBench =
-        median != null ? pctOfBenchmark(median, rec.unit, rec.benchmark_value) : null;
+        median != null ? pctOfBenchmark(median, rec.unit, benchmark) : null;
       const status: 'within' | 'over' | 'unknown' =
         pctOfBench == null ? 'unknown' : pctOfBench <= 100 ? 'within' : 'over';
       const medianWeeks = median != null ? toWeeks(median, rec.unit) : null;
@@ -244,7 +255,7 @@ export default function SurgicalDashboard() {
         medianWeeks,
         unitAbbr: unitAbbr(rec.unit),
         p90: p90 && p90.metric_value > 0 ? p90.metric_value : null,
-        benchmark: rec.benchmark_value ?? null,
+        benchmark: benchmark ?? null,
         pctOfBench,
         status,
         source: sourceLabel(rec.source_name),

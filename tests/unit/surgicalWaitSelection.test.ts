@@ -7,6 +7,7 @@ import {
   pctOfBenchmark,
   periodEndMs,
   pickLatestProvincialRecord,
+  resolveBenchmarkValue,
   toWeeks,
 } from '../../src/lib/surgicalWaitSelection';
 
@@ -201,5 +202,69 @@ describe('unit-aware benchmark math', () => {
     expect(toWeeks(28, 'days')).toBeCloseTo(4, 5);
     expect(pctOfBenchmark(28, 'days', '4 weeks (28 days)')).toBe(100);
     expect(pctOfBenchmark(51, 'days', '4 weeks (28 days)')).toBeCloseTo(182.1, 1);
+  });
+});
+
+describe('CABG naming + benchmark inheritance', () => {
+  const cabgRows: SurgicalRecord[] = [
+    rec({
+      id: 'cabg-cihi-med',
+      source_name: 'CIHI priority procedures',
+      reporting_period_end: '2025-12-31',
+      procedure_group: 'Cardiology',
+      procedure_name: 'Coronary Artery Bypass Graft (CABG)',
+      metric_name: 'Median wait',
+      metric_value: 1.8,
+      unit: 'weeks',
+      benchmark_value: '26 weeks (Max safety benchmark differs by severity)',
+    }),
+    rec({
+      id: 'cabg-pbi-med',
+      source_name: 'Alberta Health System Dashboard (Power BI)',
+      reporting_period_end: 'April 2026',
+      procedure_group: 'Cardiac Surgery',
+      procedure_name: 'Coronary Artery Bypass Graft',
+      metric_name: 'Median wait',
+      metric_value: 11.75,
+      unit: 'weeks',
+    }),
+    rec({
+      id: 'hip-bench-only',
+      source_name: 'Alberta Wait Times Reporting',
+      reporting_period_end: '2026-03-31',
+      procedure_group: 'Hip Replacement',
+      procedure_name: 'Total Hip Arthroplasty',
+      metric_name: '90th percentile',
+      metric_value: 36.8,
+      unit: 'weeks',
+      benchmark_value: '26 weeks (182 days)',
+    }),
+    rec({
+      id: 'hip-pbi-nobench',
+      source_name: 'Alberta Health System Dashboard (Power BI)',
+      reporting_period_end: 'April 2026',
+      procedure_group: 'Hip Replacement',
+      procedure_name: 'Total Hip Arthroplasty',
+      metric_name: '90th percentile',
+      metric_value: 58.1,
+      unit: 'weeks',
+    }),
+  ];
+
+  it('dedupes CABG aliases to freshest Power BI median', () => {
+    const medians = dedupeLatestMedians(cabgRows);
+    const cabg = medians.find(r => r.procedure_name.includes('Coronary'));
+    expect(medians.filter(r => r.procedure_name.includes('Coronary'))).toHaveLength(1);
+    expect(cabg?.metric_value).toBe(11.75);
+    expect(cabg?.source_name).toContain('Power BI');
+  });
+
+  it('inherits benchmark from older same-procedure row when latest lacks one', () => {
+    const latest = pickLatestProvincialRecord(cabgRows, 'Total Hip Arthroplasty', '90th percentile');
+    expect(latest?.metric_value).toBe(58.1);
+    expect(latest?.benchmark_value).toBeUndefined();
+    expect(resolveBenchmarkValue(cabgRows, 'Total Hip Arthroplasty', latest?.benchmark_value)).toBe(
+      '26 weeks (182 days)',
+    );
   });
 });
