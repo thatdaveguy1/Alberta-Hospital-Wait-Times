@@ -21,10 +21,23 @@ assets/.aistudio/
 *_mid.png
 
 
-# Lab wait snapshots (runtime-generated, grows every 30 min)
+# Runtime data refreshed by local pipelines (live copy stays on disk + KV).
+# Keep hand-authored / static seeds tracked: data-disruption-overrides.json, data-zone-by-city.json
 data-lab-snapshots.json
-# ER wait snapshots (runtime-generated, grows every sync)
 data-snapshots.json
+data-alerts.json
+data-alert-logs.json
+data-daily-sync.json
+data-diagnostic.json
+data-disruptions.json
+data-er-waittimes.json
+data-openalberta-catalog.json
+data-primary-care.json
+data-public-health.json
+data-regional-inequity.json
+data-spending.json
+data-surgical.json
+data-sync-status.json
 
 # Push client local state (cooldown + content hashes)
 .kv-write-cooldown.json

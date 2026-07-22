@@ -91,5 +91,5 @@ server.ts         Express API server
 cloudflare/       Worker + wrangler config
 functions/api/    Pages Function proxy to Worker
 scripts/          Headed audit helpers + data extraction utilities
-data-*.json       Seed / runtime data files (refreshed by pipelines)
+data-*.json       Runtime on disk + KV (gitignored except disruption-overrides + zone-by-city)
 ```
