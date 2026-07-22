@@ -6,6 +6,24 @@ import path from 'path';
 import type { SyncResult, SyncStatus } from './types';
 
 const SYNC_STATUS_FILE = path.join(process.cwd(), 'data-sync-status.json');
+const HISTORY_FILE = path.join(process.cwd(), 'data-sync-history.jsonl');
+const HISTORY_MAX_BYTES = 5 * 1024 * 1024;
+const HISTORY_MAX_LINES = 10_000;
+const HISTORY_RETENTION_DAYS = 90;
+
+export interface SyncHistoryFailure {
+  pipeline: string;
+  status: SyncResult['status'];
+  error?: string;
+}
+
+export interface SyncHistoryEntry {
+  ts: string;
+  kind: 'daily' | 'er' | 'lab';
+  status: string;
+  summary: string;
+  failures: SyncHistoryFailure[];
+}
 
 let currentStatus: SyncStatus = {
   status: 'never_run',
@@ -54,6 +72,9 @@ export function recordErWaitTimesUpdate(result: SyncResult): void {
     currentStatus.results.push(result);
   }
   saveToDisk();
+  if (result.status === 'failed') {
+    appendHistory(buildFastTierSyncHistoryEntry(result, 'er'));
+  }
 }
 
 export function recordLabWaitsUpdate(result: SyncResult): void {
@@ -76,6 +97,9 @@ export function recordLabWaitsUpdate(result: SyncResult): void {
   }
 
   saveToDisk();
+  if (result.status === 'failed') {
+    appendHistory(buildFastTierSyncHistoryEntry(result, 'lab'));
+  }
 }
 
 export function recordDailySyncResults(results: SyncResult[]): void {
@@ -116,6 +140,133 @@ export function recordDailySyncResults(results: SyncResult[]): void {
   currentStatus.results = [...fastTierResults, ...results];
 
   saveToDisk();
+  appendHistory(buildDailySyncHistoryEntry(results, status, currentStatus.lastSyncTimestamp!));
+}
+
+export function buildDailySyncHistoryEntry(
+  results: SyncResult[],
+  status: SyncStatus['status'],
+  ts: string,
+): SyncHistoryEntry {
+  const counts: Record<SyncResult['status'], number> = {
+    success: 0,
+    failed: 0,
+    partial: 0,
+    skipped: 0,
+    manual: 0,
+  };
+  for (const result of results) {
+    counts[result.status]++;
+  }
+
+  const parts: string[] = [];
+  if (counts.success) parts.push(`${counts.success} success`);
+  if (counts.partial) parts.push(`${counts.partial} partial`);
+  if (counts.failed) parts.push(`${counts.failed} failed`);
+  if (counts.skipped) parts.push(`${counts.skipped} skipped`);
+  if (counts.manual) parts.push(`${counts.manual} manual`);
+
+  const failures: SyncHistoryFailure[] = results
+    .filter((result) => result.status !== 'success')
+    .map((result) => ({
+      pipeline: result.pipeline,
+      status: result.status,
+      ...(result.error ? { error: result.error } : {}),
+    }));
+
+  return {
+    ts,
+    kind: 'daily',
+    status,
+    summary: `${results.length} pipelines: ${parts.join(', ')}`,
+    failures,
+  };
+}
+
+export function buildFastTierSyncHistoryEntry(
+  result: SyncResult,
+  kind: 'er' | 'lab',
+  ts: string = result.timestamp,
+): SyncHistoryEntry {
+  return {
+    ts,
+    kind,
+    status: result.status,
+    summary: `${result.pipeline} ${result.status}${result.error ? `: ${result.error}` : ''}`,
+    failures: [
+      {
+        pipeline: result.pipeline,
+        status: result.status,
+        ...(result.error ? { error: result.error } : {}),
+      },
+    ],
+  };
+}
+
+export function appendHistory(entry: SyncHistoryEntry): void {
+  try {
+    fs.appendFileSync(HISTORY_FILE, `${JSON.stringify(entry)}\n`, 'utf8');
+    trimHistoryIfNeeded();
+  } catch (err) {
+    console.error('[SyncStatus] Error appending history:', err);
+  }
+}
+
+export function getSyncHistory(limit = 50): SyncHistoryEntry[] {
+  try {
+    if (!fs.existsSync(HISTORY_FILE)) {
+      return [];
+    }
+
+    const lines = fs.readFileSync(HISTORY_FILE, 'utf8').split('\n').filter((line) => line.trim());
+    const entries: SyncHistoryEntry[] = [];
+
+    for (const line of lines.slice(-limit)) {
+      try {
+        entries.push(JSON.parse(line) as SyncHistoryEntry);
+      } catch {
+        // Skip malformed lines.
+      }
+    }
+
+    return entries;
+  } catch (err) {
+    console.error('[SyncStatus] Error reading history:', err);
+    return [];
+  }
+}
+
+function trimHistoryIfNeeded(): void {
+  try {
+    if (!fs.existsSync(HISTORY_FILE)) {
+      return;
+    }
+
+    const stat = fs.statSync(HISTORY_FILE);
+    const lines = fs.readFileSync(HISTORY_FILE, 'utf8').split('\n').filter((line) => line.trim());
+    if (stat.size <= HISTORY_MAX_BYTES && lines.length <= HISTORY_MAX_LINES) {
+      return;
+    }
+
+    const cutoffMs = Date.now() - HISTORY_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    const kept = lines.filter((line) => {
+      try {
+        const entry = JSON.parse(line) as SyncHistoryEntry;
+        const tsMs = Date.parse(entry.ts);
+        return !Number.isNaN(tsMs) && tsMs >= cutoffMs;
+      } catch {
+        return false;
+      }
+    });
+
+    fs.writeFileSync(
+      HISTORY_FILE,
+      kept.length > 0 ? `${kept.join('\n')}\n` : '',
+      'utf8',
+    );
+  } catch (err) {
+    console.error('[SyncStatus] Error trimming history:', err);
+  }
 }
 
 function saveToDisk(): void {

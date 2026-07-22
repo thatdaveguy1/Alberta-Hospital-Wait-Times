@@ -66,3 +66,43 @@ The Cloudflare Worker (`cloudflare/worker.ts`) is a thin read layer:
 - No scraping, no cron triggers, no business logic
 
 The Mac mini pushes data to KV after each pipeline run. If push fails, local JSON is still correct and the next run will re-push.
+
+## Ops
+
+### LaunchAgents (login session)
+
+Pipelines run under **LaunchAgents** (user login session), not LaunchDaemons. Install or refresh agents with:
+
+```bash
+scripts/install-launchd.sh
+```
+
+| Agent | Role |
+|---|---|
+| Wait-times | KeepAlive — ER + lab fetchers every ~10 min |
+| Daily sync | Calendar — daily sweep at **06:00** |
+| Uptime | Interval — health probe every **10 min** |
+
+### Logs and history files
+
+| Path | Purpose |
+|---|---|
+| `logs/` | LaunchAgent stdout/stderr and pipeline logs |
+| `data-sync-history.jsonl` | Append-only sync run history (daily + failed fast-tier runs) |
+| `logs/uptime.jsonl` | Uptime probe results from the uptime agent |
+
+### Manual verification
+
+- Local health: `npm run health:check` (hits `/api/health` on port 3004 by default)
+- Production edge: curl the deployed Cloudflare Worker `/api/health` URL
+
+### Known non-blocking outcomes
+
+These appear in sync history as partial/skipped/manual — they do **not** block the daily rollup when other pipelines succeed:
+
+| Source | Behavior |
+|---|---|
+| ABJHI | Empty dataset → **skipped** |
+| Fraser | HTTP 403 → **skipped** |
+| Open Alberta | Unmapped rows → **skipped** |
+| PHAC | Unchanged feed → **partial** |

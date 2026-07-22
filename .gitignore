@@ -38,6 +38,10 @@ data-regional-inequity.json
 data-spending.json
 data-surgical.json
 data-sync-status.json
+data-sync-history.jsonl
+
+logs/*
+!logs/.gitkeep
 
 # Push client local state (cooldown + content hashes)
 .kv-write-cooldown.json

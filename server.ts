@@ -5,7 +5,7 @@ import axios from 'axios';
 import fs from 'fs';
 import { ServiceDisruption } from './src/types';
 import { startScheduler, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
-import { getSyncStatus, loadSyncStatusFromDisk } from './src/pipelines/syncStatus';
+import { getSyncHistory, getSyncStatus, loadSyncStatusFromDisk } from './src/pipelines/syncStatus';
 import { assessDataHealth } from './src/lib/dataHealth';
 
 // Alert Interfaces
@@ -263,6 +263,12 @@ async function startServer() {
   app.get('/api/sync/status', (req, res) => {
     loadSyncStatusFromDisk();
     res.json(getSyncStatus());
+  });
+
+  app.get('/api/sync/history', (req, res) => {
+    const rawLimit = parseInt(String(req.query.limit ?? '50'), 10);
+    const limit = Number.isFinite(rawLimit) ? Math.min(200, Math.max(1, rawLimit)) : 50;
+    res.json({ entries: getSyncHistory(limit) });
   });
 
   // On-Demand Trigger to Run Daily Sync

@@ -16,7 +16,9 @@
     "deploy:pages": "npx wrangler pages deploy dist --project-name alberta-hospital-wait-times --branch main --commit-dirty=true",
     "seed:kv": "cd cloudflare && wrangler kv key put --remote",
     "gen:push-secret": "openssl rand -hex 24",
+    "health:check": "node scripts/check-data-health.mjs",
     "test:data-health": "tsx --test tests/unit/dataHealth.test.ts",
+    "test:sync-history": "tsx --test tests/unit/syncHistory.test.ts",
     "test:gps-accuracy": "tsx --test tests/unit/gpsAccuracy.test.ts",
     "repro:gps-spoof": "node scripts/repro-gps-spoof.mjs"
   },
