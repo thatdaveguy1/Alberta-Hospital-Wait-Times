@@ -1073,7 +1073,15 @@ export default function ErWaitDashboard({
                 ))}
               {!loading && topThree.length === 0 && (
                 <div className="rounded-xl border border-dashed border-line-2 bg-surface px-4 py-8 text-center text-sm text-ink-3 md:col-span-3">
-                  No open facilities match the current filters.
+                  {scope === 'urgent-care' ? (
+                    <>
+                      No open tracked urgent care facilities within 150km.
+                      <br />
+                      Note the East Edmonton Urgent Care Clinic does not provide wait times.
+                    </>
+                  ) : (
+                    'No open facilities match the current filters.'
+                  )}
                 </div>
               )}
               {topThree.map((h, i) => {
