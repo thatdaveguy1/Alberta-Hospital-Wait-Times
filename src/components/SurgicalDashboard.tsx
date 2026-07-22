@@ -195,16 +195,20 @@ export default function SurgicalDashboard() {
       { procedureName: 'Total Hip Arthroplasty', title: 'Total Hip Replacement', iconColor: 'text-accent', pctClass: 'text-warn' },
       { procedureName: 'Total Knee Arthroplasty', title: 'Total Knee Replacement', iconColor: 'text-accent', pctClass: 'text-warn' },
       { procedureName: 'Cataract Extraction & Lens Implant', title: 'Cataract Extraction', iconColor: 'text-ok', pctClass: 'text-ok' },
-      { procedureName: 'Breast Cancer Surgery', title: 'Breast Cancer Surgery', iconColor: 'text-crit', pctClass: 'text-crit', subtitle: 'Breast Cancer 90th percentile' },
+      { procedureName: 'Breast Cancer Surgery', title: 'Breast Cancer Surgery', iconColor: 'text-crit', pctClass: 'text-crit', subtitle: 'Breast Cancer median wait' },
     ] as const;
     return specs.map(spec => {
-      const record = pickLatestProvincialRecord(SURGICAL_RECORDS, spec.procedureName, '90th percentile');
-      const wait = record?.metric_value ?? null;
-      const unit = record?.unit ?? 'weeks';
+      // Headline metric matches the historical trend explorer: median Wait-2.
+      // 90th is shown as a secondary label so long-tail waits stay visible.
+      const medianRec = pickLatestProvincialRecord(SURGICAL_RECORDS, spec.procedureName, 'Median wait');
+      const p90Rec = pickLatestProvincialRecord(SURGICAL_RECORDS, spec.procedureName, '90th percentile');
+      const wait = medianRec?.metric_value ?? null;
+      const p90 = p90Rec?.metric_value ?? null;
+      const unit = medianRec?.unit ?? p90Rec?.unit ?? 'weeks';
       const benchmarkLabel = resolveBenchmarkValue(
         SURGICAL_RECORDS,
         spec.procedureName,
-        record?.benchmark_value,
+        medianRec?.benchmark_value ?? p90Rec?.benchmark_value,
       );
       const target = parseBenchmarkWeeks(benchmarkLabel);
       const pctOfTarget =
@@ -212,8 +216,10 @@ export default function SurgicalDashboard() {
       return {
         ...spec,
         wait,
+        p90,
         unit,
         unitLabel: unitDisplayLabel(unit),
+        unitShort: unitAbbr(unit),
         target,
         pctOfTarget,
         benchmarkLabel,
@@ -343,6 +349,8 @@ export default function SurgicalDashboard() {
                       ? 'cataract_surgery_median'
                       : null;
               const waitLabel = card.wait != null ? `${card.wait} ${card.unitLabel}` : '—';
+              const p90Label =
+                card.p90 != null ? `90th: ${card.p90} ${card.unitShort}` : null;
               const targetFooter =
                 card.benchmarkLabel
                   ? `CIHI target: ${card.benchmarkLabel}`
@@ -366,7 +374,8 @@ export default function SurgicalDashboard() {
                     </div>
                     <div className="space-y-0.5">
                       <div className="text-2xl font-semibold text-ink">{waitLabel}</div>
-                      <div className="text-[10px] text-ink-2">{card.subtitle ?? 'Breast Cancer 90th percentile'}</div>
+                      <div className="text-[10px] text-ink-2">{card.subtitle ?? 'Breast Cancer median wait'}</div>
+                      {p90Label && <div className="text-[10px] text-ink-3 font-mono">{p90Label}</div>}
                     </div>
                     <div className="pt-2 border-t border-line flex items-center justify-between text-[9px] text-ink-2">
                       <span>{targetFooter}</span>
@@ -386,9 +395,12 @@ export default function SurgicalDashboard() {
                 return (
                   <div key={card.procedureName} tabIndex={0} onClick={toggle} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                     className={`bg-surface border rounded-xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none   ${isActive ? 'border-accent   bg-surface ' : 'border-line hover:border-accent'}`}>
-                    
                     <div className="flex items-center justify-between"><span className="text-[10px] text-ink-2 font-semibold">{card.title}</span><Clock className="w-3.5 h-3.5 text-accent" /></div>
-                    <div className="space-y-0.5"><div className="text-2xl font-semibold text-ink">{waitLabel}</div><div className="text-[10px] text-ink-2">90th Percentile Wait Time</div></div>
+                    <div className="space-y-0.5">
+                      <div className="text-2xl font-semibold text-ink">{waitLabel}</div>
+                      <div className="text-[10px] text-ink-2">Median Wait Time (Wait 2)</div>
+                      {p90Label && <div className="text-[10px] text-ink-3 font-mono">{p90Label}</div>}
+                    </div>
                     <div className="pt-2 border-t border-line flex items-center justify-between text-[9px] text-ink-2"><span>{targetFooter}</span><span className={`${card.pctClass} font-semibold`}>{pctFooter}</span></div>
                     <div className="pt-1.5 flex items-center gap-1 text-[8px] font-semibold text-accent group-hover:text-accent transition-colors"><BarChart2 className="w-3 h-3" /><span>{isActive ? 'Active: Hide Trend' : 'Click to View Trend'}</span></div>
                   </div>
@@ -398,9 +410,12 @@ export default function SurgicalDashboard() {
                 return (
                   <div key={card.procedureName} tabIndex={0} onClick={toggle} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                     className={`bg-surface border rounded-xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none   ${isActive ? 'border-accent   bg-surface ' : 'border-line hover:border-accent'}`}>
-                    
                     <div className="flex items-center justify-between"><span className="text-[10px] text-ink-2 font-semibold">{card.title}</span><Clock className="w-3.5 h-3.5 text-accent" /></div>
-                    <div className="space-y-0.5"><div className="text-2xl font-semibold text-ink">{waitLabel}</div><div className="text-[10px] text-ink-2">90th Percentile Wait Time</div></div>
+                    <div className="space-y-0.5">
+                      <div className="text-2xl font-semibold text-ink">{waitLabel}</div>
+                      <div className="text-[10px] text-ink-2">Median Wait Time (Wait 2)</div>
+                      {p90Label && <div className="text-[10px] text-ink-3 font-mono">{p90Label}</div>}
+                    </div>
                     <div className="pt-2 border-t border-line flex items-center justify-between text-[9px] text-ink-2"><span>{targetFooter}</span><span className={`${card.pctClass} font-semibold`}>{pctFooter}</span></div>
                     <div className="pt-1.5 flex items-center gap-1 text-[8px] font-semibold text-accent group-hover:text-accent transition-colors"><BarChart2 className="w-3 h-3" /><span>{isActive ? 'Active: Hide Trend' : 'Click to View Trend'}</span></div>
                   </div>
@@ -409,9 +424,12 @@ export default function SurgicalDashboard() {
               return (
                 <div key={card.procedureName} tabIndex={0} onClick={toggle} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                   className={`bg-surface border rounded-xl p-4 space-y-2 relative overflow-hidden group cursor-pointer transition-all duration-300 select-none   ${isActive ? 'border-ok   bg-surface ' : 'border-line hover:border-ok'}`}>
-                  
                   <div className="flex items-center justify-between"><span className="text-[10px] text-ink-2 font-semibold">Cataract Extractions</span><Sparkles className="w-3.5 h-3.5 text-ok" /></div>
-                  <div className="space-y-0.5"><div className="text-2xl font-semibold text-ink">{waitLabel}</div><div className="text-[10px] text-ink-2">90th Percentile Wait Time</div></div>
+                  <div className="space-y-0.5">
+                    <div className="text-2xl font-semibold text-ink">{waitLabel}</div>
+                    <div className="text-[10px] text-ink-2">Median Wait Time (Wait 2)</div>
+                    {p90Label && <div className="text-[10px] text-ink-3 font-mono">{p90Label}</div>}
+                  </div>
                   <div className="pt-2 border-t border-line flex items-center justify-between text-[9px] text-ink-2"><span>{targetFooter}</span><span className={`${card.pctClass} font-semibold`}>{pctFooter}</span></div>
                   <div className="pt-1.5 flex items-center gap-1 text-[8px] font-semibold text-ok group-hover:text-ok transition-colors"><BarChart2 className="w-3 h-3" /><span>{isActive ? 'Active: Hide Trend' : 'Click to View Trend'}</span></div>
                 </div>
