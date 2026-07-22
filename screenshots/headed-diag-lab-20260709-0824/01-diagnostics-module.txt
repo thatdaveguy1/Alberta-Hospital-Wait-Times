@@ -1,0 +1,7 @@
+## Diagnostic & Lab Services
+Monitor laboratory wait times and diagnostic imaging benchmark compliance.
+Auto-updated·Last Update: Jul 9, 2026, 8:23 a.m. MDT·Data Timestamp: Live data·Source: APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)
+Laboratory WaitsImaging GapsDiagnostic SitesLab Turnaround
+Auto-updatedUpdated: Jul 9, 2026, 8:23 a.m. MDT·Source: APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)
+### Provincial Lab Wait Time Trend
+Viewing Diagnostic Imaging + Labs. Source: APL QMe, AHS & CIHI. Update cadence: Lab waits: every 30 min · Imaging/turnaround: annual/manual.
