@@ -17,6 +17,10 @@ import fs from 'fs';
 import path from 'path';
 import puppeteer, { type Browser, type Page, type HTTPResponse } from 'puppeteer';
 import type { SurgicalRecord } from '../surgicalData';
+import {
+  CIHI_PRIORITY_BENCHMARKS,
+  canonicalProcedureName,
+} from '../lib/surgicalWaitSelection';
 import type { SyncResult } from './types';
 import { buildMetadataEntry, mergeDataMetadata, type DataMetadata,
   applyWithheldPayloadGuard } from './metadataHelpers';
@@ -414,6 +418,9 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
     // metric_name stays within the SurgicalRecord union.
     for (let i = 0; i < Math.min(sorted.length, PERCENTILE_LABELS.length); i++) {
       const label = PERCENTILE_LABELS[i];
+      const benchmark =
+        CIHI_PRIORITY_BENCHMARKS[proc.name] ??
+        CIHI_PRIORITY_BENCHMARKS[canonicalProcedureName(proc.name)];
       records.push({
         id: `powerbi-${slugify(proc.name)}-${slugify(label)}-${periodSlug}`,
         source_name: 'Alberta Health System Dashboard (Power BI)',
@@ -428,6 +435,7 @@ function buildSurgicalRecords(data: ScrapedData): SurgicalRecord[] {
         metric_name: label,
         metric_value: sorted[i],
         unit,
+        ...(benchmark ? { benchmark_value: benchmark } : {}),
         method_note: `Power BI Health System Dashboard — ${label} RTT (Wait 2, ready-to-treat to surgery) in ${unit}`,
       });
     }

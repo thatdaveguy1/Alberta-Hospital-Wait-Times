@@ -8,6 +8,26 @@ export const PROCEDURE_NAME_ALIASES: Record<string, string[]> = {
   'Coronary Artery Bypass Graft (CABG)': ['Coronary Artery Bypass Graft'],
 };
 
+/**
+ * Public Wait-2 access targets for priority procedures reported by CIHI and used
+ * in Alberta performance reporting. Only procedures with an established published
+ * national benchmark are listed — ACATS case-level targets and cancer urgency
+ * bands are not single public numbers and must stay blank.
+ *
+ * Source: CIHI priority-procedure wait-time methodology
+ * (hip/knee replacement 182 days; cataract surgery 112 days).
+ */
+export const CIHI_PRIORITY_BENCHMARKS: Record<string, string> = {
+  'Total Hip Arthroplasty': '26 weeks (182 days)',
+  'Total Knee Arthroplasty': '26 weeks (182 days)',
+  'Cataract Extraction & Lens Implant': '16 weeks (112 days)',
+  'Cataract Surgery 1st Eye': '16 weeks (112 days)',
+  // Group-name aliases used by some historical/CIHI rows
+  'Hip Replacement': '26 weeks (182 days)',
+  'Knee Replacement': '26 weeks (182 days)',
+  'Cataract Surgery': '16 weeks (112 days)',
+};
+
 const MONTH_INDEX: Record<string, number> = {
   january: 0,
   february: 1,
@@ -139,7 +159,7 @@ export function findMatchingP90(
   return best;
 }
 
-/** Prefer an explicit benchmark; else inherit from any same-procedure provincial row. */
+/** Prefer an explicit benchmark; else same-procedure row; else CIHI published target. */
 export function resolveBenchmarkValue(
   records: SurgicalRecord[],
   procedureName: string,
@@ -153,7 +173,13 @@ export function resolveBenchmarkValue(
     if (!procedureNameMatches(r.procedure_name, procedureName)) continue;
     if (!best || isFresher(r, best)) best = r;
   }
-  return best?.benchmark_value;
+  if (best?.benchmark_value) return best.benchmark_value;
+  const canon = canonicalProcedureName(procedureName);
+  return (
+    CIHI_PRIORITY_BENCHMARKS[procedureName] ??
+    CIHI_PRIORITY_BENCHMARKS[canon] ??
+    undefined
+  );
 }
 
 export function pctOfBenchmark(

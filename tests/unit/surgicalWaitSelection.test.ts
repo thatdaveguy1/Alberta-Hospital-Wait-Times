@@ -9,6 +9,7 @@ import {
   pickLatestProvincialRecord,
   resolveBenchmarkValue,
   toWeeks,
+  CIHI_PRIORITY_BENCHMARKS,
 } from '../../src/lib/surgicalWaitSelection';
 
 function rec(partial: Partial<SurgicalRecord> & Pick<SurgicalRecord, 'id' | 'procedure_name' | 'metric_name' | 'metric_value' | 'unit' | 'source_name' | 'reporting_period_end'>): SurgicalRecord {
@@ -202,6 +203,49 @@ describe('unit-aware benchmark math', () => {
     expect(toWeeks(28, 'days')).toBeCloseTo(4, 5);
     expect(pctOfBenchmark(28, 'days', '4 weeks (28 days)')).toBe(100);
     expect(pctOfBenchmark(51, 'days', '4 weeks (28 days)')).toBeCloseTo(182.1, 1);
+  });
+});
+
+describe('CIHI published priority benchmarks', () => {
+  it('exposes hip/knee/cataract national Wait-2 targets only', () => {
+    expect(CIHI_PRIORITY_BENCHMARKS['Total Hip Arthroplasty']).toBe('26 weeks (182 days)');
+    expect(CIHI_PRIORITY_BENCHMARKS['Total Knee Arthroplasty']).toBe('26 weeks (182 days)');
+    expect(CIHI_PRIORITY_BENCHMARKS['Cataract Extraction & Lens Implant']).toBe(
+      '16 weeks (112 days)',
+    );
+    expect(CIHI_PRIORITY_BENCHMARKS['Breast Cancer Surgery']).toBeUndefined();
+    expect(CIHI_PRIORITY_BENCHMARKS['Bariatric Surgery']).toBeUndefined();
+    expect(CIHI_PRIORITY_BENCHMARKS['Coronary Artery Bypass Graft']).toBeUndefined();
+  });
+
+  it('falls back to CIHI map when no record carries benchmark_value', () => {
+    const rows = [
+      rec({
+        id: 'hip-only',
+        source_name: 'Alberta Health System Dashboard (Power BI)',
+        reporting_period_end: 'April 2026',
+        procedure_name: 'Total Hip Arthroplasty',
+        metric_name: '90th percentile',
+        metric_value: 58.1,
+        unit: 'weeks',
+      }),
+      rec({
+        id: 'breast-only',
+        source_name: 'Alberta Health System Dashboard (Power BI)',
+        reporting_period_end: 'April 2026',
+        procedure_name: 'Breast Cancer Surgery',
+        metric_name: '90th percentile',
+        metric_value: 51,
+        unit: 'days',
+      }),
+    ];
+    expect(resolveBenchmarkValue(rows, 'Total Hip Arthroplasty')).toBe('26 weeks (182 days)');
+    expect(resolveBenchmarkValue(rows, 'Cataract Surgery 1st Eye')).toBe('16 weeks (112 days)');
+    expect(resolveBenchmarkValue(rows, 'Breast Cancer Surgery')).toBeUndefined();
+    expect(pctOfBenchmark(58.1, 'weeks', resolveBenchmarkValue(rows, 'Total Hip Arthroplasty'))).toBeCloseTo(
+      223.5,
+      1,
+    );
   });
 });
 
