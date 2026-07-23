@@ -58,4 +58,18 @@ if [[ ! -f dist/server.cjs ]]; then
   exit 1
 fi
 
+# Preflight: dist artifact must not be older than 7 days, otherwise an
+# unexpected KeepAlive restart could serve stale code after source drift.
+ARTIFACT_AGE_HOURS="$(node -e '
+  const fs = require("fs");
+  const s = fs.statSync(process.argv[1]);
+  const ageMs = Date.now() - s.mtimeMs;
+  console.log(Math.round(ageMs / (1000 * 60 * 60)));
+' dist/server.cjs 2>/dev/null || echo 9999)"
+
+if [[ "$ARTIFACT_AGE_HOURS" -gt 168 ]]; then
+  echo "Error: dist/server.cjs is ${ARTIFACT_AGE_HOURS}h old — run: npm run build" >&2
+  exit 1
+fi
+
 exec node dist/server.cjs

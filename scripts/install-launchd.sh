@@ -31,6 +31,7 @@ LABELS=(
 
 DOMAIN="gui/$(id -u)"
 AGENTS_DIR="$HOME/Library/LaunchAgents"
+mkdir -p "$AGENTS_DIR"
 
 for plist in "$REPO_ROOT"/launchd/*.plist; do
   cp "$plist" "$AGENTS_DIR/"
