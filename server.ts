@@ -3,9 +3,10 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import axios from 'axios';
 import fs from 'fs';
-import { ServiceDisruption } from './src/types';
-import { startScheduler, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
+import type { ServiceDisruption } from './src/types';
+import { startScheduler, shutdownScheduler, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
 import { getSyncHistory, getSyncStatus, loadSyncStatusFromDisk } from './src/pipelines/syncStatus';
+import { getLastPushOutcomes } from './src/pipelines/pushClient';
 import { assessDataHealth } from './src/lib/dataHealth';
 
 // Alert Interfaces
@@ -138,6 +139,16 @@ async function startServer() {
 
       const syncStale = health.overall !== 'ok';
 
+      const lastPushOutcomes = getLastPushOutcomes();
+      const edgePush = Object.entries(lastPushOutcomes).map(([domain, outcome]) => ({
+        domain,
+        ok: outcome.ok,
+        pushedAt: outcome.pushedAt,
+        attempts: outcome.result.attempts,
+        skipped: outcome.result.skipped ?? false,
+        cooldown: outcome.result.cooldown ?? false,
+      }));
+
       res.status(200).json({
         status: health.overall,
         time: new Date().toISOString(),
@@ -149,6 +160,7 @@ async function startServer() {
           syncStatusAvailable: health.syncStatusAvailable,
           status: status.status,
         },
+        edgePush,
         domains: health.domains,
         criticalIssues: health.criticalIssues,
         softIssues: health.softIssues,
@@ -170,6 +182,7 @@ async function startServer() {
           syncStatusAvailable: health.syncStatusAvailable,
           status: 'never_run',
         },
+        edgePush: [],
         domains: health.domains,
         criticalIssues: health.criticalIssues,
         softIssues: health.softIssues,
@@ -666,7 +679,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running at http://localhost:${PORT}`);
   });
 
@@ -676,6 +689,22 @@ async function startServer() {
   startScheduler().catch(err => {
     console.error('[Server] Failed to start scheduler:', err);
   });
+
+  // Graceful shutdown: stop accepting new work, drain active pipelines, close HTTP server.
+  for (const signal of ['SIGTERM', 'SIGINT'] as NodeJS.Signals[]) {
+    process.on(signal, () => {
+      console.log(`[Server] Received ${signal}, initiating graceful shutdown...`);
+      shutdownScheduler(server)
+        .then(() => {
+          console.log(`[Server] Graceful shutdown complete (${signal}).`);
+          process.exit(0);
+        })
+        .catch((err) => {
+          console.error(`[Server] Graceful shutdown error (${signal}):`, err);
+          process.exit(1);
+        });
+    });
+  }
 }
 
 startServer();

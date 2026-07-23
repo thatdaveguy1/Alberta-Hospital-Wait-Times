@@ -232,9 +232,12 @@ export async function pushErTrends(
   };
   const result = await pushToCloudflare('er-trends', blob);
   if (result.success && result.skipped) {
-    console.log('[TrendsPusher] er-trends blob unchanged or cooldown — not written');
+    const reason = result.cooldown ? 'cooldown' : 'unchanged';
+    console.log(`[TrendsPusher] er-trends blob ${reason} — not written`);
   } else if (result.success) {
     console.log('[TrendsPusher] Pushed er-trends blob to Cloudflare KV');
+  } else {
+    console.warn(`[TrendsPusher] er-trends blob push failed: ${result.error ?? 'unknown'}`);
   }
 }
 
@@ -258,8 +261,11 @@ export async function pushLabTrends(snapshots: LabWaitSnapshot[]): Promise<void>
 
   const result = await pushToCloudflare('lab-trends', blob);
   if (result.success && result.skipped) {
-    console.log('[TrendsPusher] lab-trends blob unchanged or cooldown — not written');
+    const reason = result.cooldown ? 'cooldown' : 'unchanged';
+    console.log(`[TrendsPusher] lab-trends blob ${reason} — not written`);
   } else if (result.success) {
     console.log('[TrendsPusher] Pushed lab-trends blob to Cloudflare KV');
+  } else {
+    console.warn(`[TrendsPusher] lab-trends blob push failed: ${result.error ?? 'unknown'}`);
   }
 }

@@ -128,7 +128,7 @@ async function runPipelineSafely(pipeline: Pipeline): Promise<SyncResult> {
   }
 }
 
-// Run all pipelines and return results.
+// Run all pipelines once and return results.
 // Each pipeline runs sequentially to respect rate limits across sources.
 export async function runAllPipelines(): Promise<SyncResult[]> {
   console.log(`[Orchestrator] Starting ${PIPELINES.length} pipelines...`);
@@ -150,6 +150,41 @@ export async function runAllPipelines(): Promise<SyncResult[]> {
   console.log(`[Orchestrator] Complete: ${successCount} success, ${skippedCount} skipped, ${failedCount} failed`);
 
   return results;
+}
+
+/**
+ * Run all pipelines once, then retry only the failed definitions one more
+ * time. Retries replace the prior failed result by (domain, pipeline).
+ * Success, partial, manual, and skipped results are never retried.
+ * Returns the final result set.
+ */
+export async function runAllPipelinesWithRetry(): Promise<SyncResult[]> {
+  const firstPass = await runAllPipelines();
+
+  const failedDefinitions = firstPass
+    .map((r, index) => ({ r, index }))
+    .filter(({ r }) => r.status === 'failed');
+
+  if (failedDefinitions.length === 0) {
+    return firstPass;
+  }
+
+  console.log(`[Orchestrator] Retrying ${failedDefinitions.length} failed pipeline(s)...`);
+
+  const retryResults = new Map<number, SyncResult>();
+  for (const { r, index } of failedDefinitions) {
+    const pipeline = PIPELINES.find(
+      p => p.name === r.pipeline && p.domain === r.domain,
+    );
+    if (!pipeline) {
+      console.warn(`[Orchestrator] Cannot retry unknown pipeline: ${r.pipeline}`);
+      continue;
+    }
+    const retried = await runPipelineSafely(pipeline);
+    retryResults.set(index, retried);
+  }
+
+  return firstPass.map((r, index) => retryResults.get(index) ?? r);
 }
 
 // Run a single pipeline by name (for manual triggers)
@@ -179,7 +214,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(1);
     });
   } else {
-    runAllPipelines().then(results => {
+    runAllPipelinesWithRetry().then(results => {
       console.log(JSON.stringify(results, null, 2));
       const failed = results.filter(r => r.status === 'failed').length;
       process.exit(failed > 0 ? 1 : 0);

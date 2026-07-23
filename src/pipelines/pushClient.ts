@@ -4,17 +4,49 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import {
+  writeFileAtomicSync,
+  withCollectorLockSync,
+} from '../lib/atomicFile';
 
 const PUSH_SECRET = process.env.PUSH_SECRET ?? '';
 const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL ?? '';
 
-const COOLDOWN_FILE = path.join(process.cwd(), '.kv-write-cooldown.json');
-const HASHES_FILE = path.join(process.cwd(), '.kv-push-hashes.json');
+function cooldownFile(): string {
+  return path.join(process.cwd(), '.kv-write-cooldown.json');
+}
+function hashesFile(): string {
+  return path.join(process.cwd(), '.kv-push-hashes.json');
+}
+function lastPushFile(): string {
+  return path.join(process.cwd(), '.kv-last-push.json');
+}
+
+export interface PushOutcome {
+  domain: string;
+  /** True when the state is the desired end state for this domain, including skipped/cooldown. */
+  ok: boolean;
+  pushedAt: string;
+  result: PushResult;
+  /** Most recent local file hash for this domain, when known. */
+  contentHash?: string | null;
+}
+
+export interface PushResult {
+  domain: string;
+  success: boolean;
+  error?: string;
+  attempts: number;
+  skipped?: boolean;
+  cooldown?: boolean;
+  contentHash?: string | null;
+}
 
 function loadKvWriteCooldownFromDisk(): number {
   try {
-    if (!fs.existsSync(COOLDOWN_FILE)) return 0;
-    const raw = fs.readFileSync(COOLDOWN_FILE, 'utf8');
+    const file = cooldownFile();
+    if (!fs.existsSync(file)) return 0;
+    const raw = fs.readFileSync(file, 'utf8');
     const parsed = JSON.parse(raw) as { untilMs?: number };
     const untilMs = typeof parsed.untilMs === 'number' ? parsed.untilMs : 0;
     if (untilMs <= Date.now()) return 0;
@@ -26,7 +58,7 @@ function loadKvWriteCooldownFromDisk(): number {
 
 function persistKvWriteCooldown(untilMs: number): void {
   try {
-    fs.writeFileSync(COOLDOWN_FILE, JSON.stringify({ untilMs }), 'utf8');
+    writeFileAtomicSync(cooldownFile(), JSON.stringify({ untilMs }, null, 2));
   } catch (err) {
     console.warn(
       `[PushClient] Failed to persist KV cooldown: ${err instanceof Error ? err.message : String(err)}`,
@@ -36,8 +68,9 @@ function persistKvWriteCooldown(untilMs: number): void {
 
 function loadPushHashesFromDisk(): Record<string, string> {
   try {
-    if (!fs.existsSync(HASHES_FILE)) return {};
-    const raw = fs.readFileSync(HASHES_FILE, 'utf8');
+    const file = hashesFile();
+    if (!fs.existsSync(file)) return {};
+    const raw = fs.readFileSync(file, 'utf8');
     const parsed = JSON.parse(raw) as Record<string, string>;
     if (!parsed || typeof parsed !== 'object') return {};
     return parsed;
@@ -48,7 +81,7 @@ function loadPushHashesFromDisk(): Record<string, string> {
 
 function persistPushHashes(hashes: Record<string, string>): void {
   try {
-    fs.writeFileSync(HASHES_FILE, JSON.stringify(hashes), 'utf8');
+    writeFileAtomicSync(hashesFile(), JSON.stringify(hashes, null, 2));
   } catch (err) {
     console.warn(
       `[PushClient] Failed to persist push hashes: ${err instanceof Error ? err.message : String(err)}`,
@@ -56,21 +89,41 @@ function persistPushHashes(hashes: Record<string, string>): void {
   }
 }
 
-
-
-interface PushResult {
-  domain: string;
-  success: boolean;
-  error?: string;
-  attempts: number;
-  skipped?: boolean;
+function loadLastPushOutcomesFromDisk(): Record<string, PushOutcome> {
+  try {
+    const file = lastPushFile();
+    if (!fs.existsSync(file)) return {};
+    const raw = fs.readFileSync(file, 'utf8');
+    const parsed = JSON.parse(raw) as Record<string, PushOutcome>;
+    if (!parsed || typeof parsed !== 'object') return {};
+    return parsed;
+  } catch {
+    return {};
+  }
 }
 
-// Once Cloudflare returns a daily KV put-limit error, stop all pushes until the
-// next UTC day. Retries just thrash logs and waste remaining budget.
-let kvWriteCooldownUntilMs = loadKvWriteCooldownFromDisk();
-let pushContentHashes: Record<string, string> = loadPushHashesFromDisk();
+function persistLastPushOutcome(domain: string, outcome: PushOutcome): void {
+  try {
+    const outcomes = withCollectorLockSync(() => {
+      const all = loadLastPushOutcomesFromDisk();
+      all[domain] = outcome;
+      return all;
+    });
+    writeFileAtomicSync(lastPushFile(), JSON.stringify(outcomes, null, 2));
+  } catch (err) {
+    console.warn(
+      `[PushClient] Failed to persist last push outcome: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
 
+export function getLastPushOutcomes(): Record<string, PushOutcome> {
+  return loadLastPushOutcomesFromDisk();
+}
+
+export function getLastPushOutcome(domain: string): PushOutcome | null {
+  return loadLastPushOutcomesFromDisk()[domain] ?? null;
+}
 
 function nextUtcMidnightMs(fromMs = Date.now()): number {
   const d = new Date(fromMs);
@@ -88,35 +141,75 @@ function isKvQuotaError(status: number, body: string): boolean {
   );
 }
 
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
+function recordOutcome(domain: string, result: PushResult): void {
+  const outcome: PushOutcome = {
+    domain,
+    ok: result.success || Boolean(result.skipped),
+    pushedAt: nowIso(),
+    result,
+    contentHash: result.contentHash ?? null,
+  };
+  persistLastPushOutcome(domain, outcome);
+}
+
 // Push a single domain's data to Cloudflare KV
 export async function pushToCloudflare(domain: string, data: unknown): Promise<PushResult> {
-  if (!CLOUDFLARE_WORKER_URL || !PUSH_SECRET) {
-    // Push not configured — silently skip (local-only mode)
-    return { domain, success: false, attempts: 0, error: 'Push not configured (CLOUDFLARE_WORKER_URL or PUSH_SECRET missing)' };
-  }
+  const body = JSON.stringify(data);
+  const bodyHash = crypto.createHash('sha256').update(body).digest('hex');
 
   const now = Date.now();
+  const kvWriteCooldownUntilMs = loadKvWriteCooldownFromDisk();
+  const pushContentHashes = loadPushHashesFromDisk();
+
+  // Content-hash deduplication takes precedence: no need to write if nothing changed.
+  if (pushContentHashes[domain] === bodyHash) {
+    console.log(`[PushClient] Skipping ${domain} — payload unchanged (content hash match)`);
+    const result: PushResult = {
+      domain,
+      success: true,
+      attempts: 0,
+      skipped: true,
+      contentHash: bodyHash,
+    };
+    recordOutcome(domain, result);
+    return result;
+  }
+
+  // Honor a persisted KV cooldown even when the environment is currently unconfigured,
+  // because a previous configured run may have hit the daily write limit.
   if (now < kvWriteCooldownUntilMs) {
     const mins = Math.ceil((kvWriteCooldownUntilMs - now) / 60000);
     console.log(
       `[PushClient] Skipping ${domain} — KV write cooldown active (~${mins}m left; resumes after UTC midnight)`,
     );
-    return {
+    const result: PushResult = {
+      domain,
+      success: false,
+      attempts: 0,
+      skipped: true,
+      cooldown: true,
+      contentHash: bodyHash,
+      error: `KV write cooldown active (~${mins}m left; resumes after UTC midnight)`,
+    };
+    recordOutcome(domain, result);
+    return result;
+  }
+
+  if (!CLOUDFLARE_WORKER_URL || !PUSH_SECRET) {
+    const result: PushResult = {
       domain,
       success: true,
       attempts: 0,
       skipped: true,
-      error: `KV write cooldown active (~${mins}m left; resumes after UTC midnight)`,
+      contentHash: bodyHash,
+      error: 'Push not configured (CLOUDFLARE_WORKER_URL or PUSH_SECRET missing)',
     };
-  }
-
-
-  const body = JSON.stringify(data);
-
-  const bodyHash = crypto.createHash('sha256').update(body).digest('hex');
-  if (pushContentHashes[domain] === bodyHash) {
-    console.log(`[PushClient] Skipping ${domain} — payload unchanged (content hash match)`);
-    return { domain, success: true, attempts: 0, skipped: true };
+    recordOutcome(domain, result);
+    return result;
   }
 
   const timestamp = Date.now().toString();
@@ -142,56 +235,98 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
       if (response.ok) {
         pushContentHashes[domain] = bodyHash;
         persistPushHashes(pushContentHashes);
+        const result: PushResult = {
+          domain,
+          success: true,
+          attempts: attempt,
+          contentHash: bodyHash,
+        };
+        recordOutcome(domain, result);
         console.log(`[PushClient] Pushed ${domain} to Cloudflare KV (attempt ${attempt})`);
-        return { domain, success: true, attempts: attempt };
+        return result;
       }
 
       const errorText = await response.text();
       console.warn(`[PushClient] Push ${domain} failed (attempt ${attempt}): ${response.status} ${errorText}`);
 
       if (isKvQuotaError(response.status, errorText)) {
-        kvWriteCooldownUntilMs = nextUtcMidnightMs();
-        persistKvWriteCooldown(kvWriteCooldownUntilMs);
+        persistKvWriteCooldown(nextUtcMidnightMs());
         console.error(
-          `[PushClient] Cloudflare KV daily write limit hit — cooling down until ${new Date(kvWriteCooldownUntilMs).toISOString()}`,
+          `[PushClient] Cloudflare KV daily write limit hit — cooling down until ${new Date(nextUtcMidnightMs()).toISOString()}`,
         );
-        return {
+        const result: PushResult = {
           domain,
           success: false,
           attempts: attempt,
+          cooldown: true,
+          contentHash: bodyHash,
           error: `HTTP ${response.status}: ${errorText}`,
         };
+        recordOutcome(domain, result);
+        return result;
       }
 
       // Auth / bad payload — don't thrash retries
       if (response.status === 400 || response.status === 401 || response.status === 404) {
-        return { domain, success: false, attempts: attempt, error: `HTTP ${response.status}: ${errorText}` };
+        const result: PushResult = {
+          domain,
+          success: false,
+          attempts: attempt,
+          contentHash: bodyHash,
+          error: `HTTP ${response.status}: ${errorText}`,
+        };
+        recordOutcome(domain, result);
+        return result;
       }
 
       if (attempt < 3) {
-        const backoffMs = Math.pow(4, attempt - 1) * 1000; // 1s, 4s, 16s
+        const backoffMs = 4 ** (attempt - 1) * 1000; // 1s, 4s, 16s
         const { promise, resolve } = Promise.withResolvers<void>();
         setTimeout(resolve, backoffMs);
         await promise;
       } else {
-        return { domain, success: false, attempts: attempt, error: `HTTP ${response.status}: ${errorText}` };
+        const result: PushResult = {
+          domain,
+          success: false,
+          attempts: attempt,
+          contentHash: bodyHash,
+          error: `HTTP ${response.status}: ${errorText}`,
+        };
+        recordOutcome(domain, result);
+        return result;
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       console.warn(`[PushClient] Push ${domain} error (attempt ${attempt}): ${errorMsg}`);
 
       if (attempt < 3) {
-        const backoffMs = Math.pow(4, attempt - 1) * 1000;
+        const backoffMs = 4 ** (attempt - 1) * 1000;
         const { promise, resolve } = Promise.withResolvers<void>();
         setTimeout(resolve, backoffMs);
         await promise;
       } else {
-        return { domain, success: false, attempts: attempt, error: errorMsg };
+        const result: PushResult = {
+          domain,
+          success: false,
+          attempts: attempt,
+          contentHash: bodyHash,
+          error: errorMsg,
+        };
+        recordOutcome(domain, result);
+        return result;
       }
     }
   }
 
-  return { domain, success: false, attempts: 3, error: 'Max retries exceeded' };
+  const result: PushResult = {
+    domain,
+    success: false,
+    attempts: 3,
+    contentHash: bodyHash,
+    error: 'Max retries exceeded',
+  };
+  recordOutcome(domain, result);
+  return result;
 }
 
 // Push all local JSON data files to Cloudflare KV (one-shot sync)
@@ -214,7 +349,14 @@ export async function pushAllToCloudflare(): Promise<PushResult[]> {
     try {
       if (!fs.existsSync(filePath)) {
         console.warn(`[PushClient] Skipping ${domain} — file not found`);
-        results.push({ domain, success: false, attempts: 0, error: 'File not found' });
+        const result: PushResult = {
+          domain,
+          success: false,
+          attempts: 0,
+          error: 'File not found',
+        };
+        recordOutcome(domain, result);
+        results.push(result);
         continue;
       }
       const data = fs.readFileSync(filePath, 'utf8');
@@ -223,7 +365,14 @@ export async function pushAllToCloudflare(): Promise<PushResult[]> {
       results.push(result);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      results.push({ domain, success: false, attempts: 0, error: errorMsg });
+      const result: PushResult = {
+        domain,
+        success: false,
+        attempts: 0,
+        error: errorMsg,
+      };
+      recordOutcome(domain, result);
+      results.push(result);
     }
   }
 

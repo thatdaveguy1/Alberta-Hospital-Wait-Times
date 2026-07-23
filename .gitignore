@@ -43,6 +43,10 @@ data-sync-history.jsonl
 logs/*
 !logs/.gitkeep
 
-# Push client local state (cooldown + content hashes)
+# Push client local state (cooldown + content hashes + last push outcomes)
 .kv-write-cooldown.json
 .kv-push-hashes.json
+.kv-last-push.json
+
+# Cross-process collector write lock
+.collector-write.lock

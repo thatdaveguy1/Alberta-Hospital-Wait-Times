@@ -3,18 +3,17 @@
 // fresh without the Express server running.
 //
 // Flow:
-//   1. scrapeDisruptions()  → record result (disruptions pushed in bulk at end)
-//   2. runAllPipelines()    → collect Tier 1-4 results (one failure never stops the rest)
+//   1. scrapeDisruptions()  → record result
+//   2. runAllPipelinesWithRetry() → collect Tier 1-4 results and retry any failures once
 //   3. recordDailySyncResults(results) → write data-sync-status.json
 //   4. pushAllToCloudflare() → bulk-push all 15 domain data files to KV
 //   5. push `sync-status` to KV
 //
-// Exits 0 on completion, non-zero on fatal error. A single pipeline failure does
-// NOT abort the run — it is recorded as a failed SyncResult and the script continues.
+// Exits 0 on completion with no remaining failures, 1 if failures remain or a fatal error occurs.
 
 import 'dotenv/config';
 import { scrapeDisruptions } from './disruptionsScraper';
-import { runAllPipelines } from './orchestrator';
+import { runAllPipelinesWithRetry } from './orchestrator';
 import { recordDailySyncResults, getSyncStatus } from './syncStatus';
 import { pushToCloudflare, pushAllToCloudflare } from './pushClient';
 import type { SyncResult } from './types';
@@ -30,9 +29,8 @@ export async function runDailySyncFlow(): Promise<SyncResult[]> {
   const disruptionsResult = await scrapeDisruptions();
   results.push(disruptionsResult);
 
-  // 2. Full orchestrator (Tier 1-4). Each pipeline is error-isolated inside
-  //    runAllPipelines, so one failure won't stop the rest.
-  const orchestratorResults = await runAllPipelines();
+  // 2. Full orchestrator with one retry pass for failed pipelines.
+  const orchestratorResults = await runAllPipelinesWithRetry();
   results.push(...orchestratorResults);
 
   // 3. Persist the rolled-up sync status to disk.
@@ -62,9 +60,12 @@ export async function runDailySyncFlow(): Promise<SyncResult[]> {
 // CLI entry point: tsx src/pipelines/dailySync.ts
 if (import.meta.url === `file://${process.argv[1]}`) {
   runDailySyncFlow()
-    .then(() => {
-      // Exit 0 on completion — individual pipeline failures are recorded in
-      // data-sync-status.json but do not fail the script (the run completed).
+    .then((results) => {
+      const failed = results.filter(r => r.status === 'failed').length;
+      if (failed > 0) {
+        console.error(`[DailySync] ${failed} pipeline(s) failed after retry.`);
+        process.exit(1);
+      }
       process.exit(0);
     })
     .catch(err => {

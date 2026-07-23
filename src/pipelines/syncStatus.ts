@@ -4,6 +4,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult, SyncStatus } from './types';
+import { writeFileAtomicSync } from '../lib/atomicFile';
 
 const SYNC_STATUS_FILE = path.join(process.cwd(), 'data-sync-status.json');
 const HISTORY_FILE = path.join(process.cwd(), 'data-sync-history.jsonl');
@@ -296,7 +297,7 @@ function trimHistoryIfNeeded(): void {
 
 function saveToDisk(): void {
   try {
-    fs.writeFileSync(SYNC_STATUS_FILE, JSON.stringify(currentStatus, null, 2), 'utf8');
+    writeFileAtomicSync(SYNC_STATUS_FILE, JSON.stringify(currentStatus, null, 2));
   } catch (err) {
     console.error('[SyncStatus] Error saving to disk:', err);
   }

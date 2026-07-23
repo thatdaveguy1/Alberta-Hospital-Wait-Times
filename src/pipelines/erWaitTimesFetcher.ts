@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import type { Hospital, WaitTimeSnapshot, ServiceDisruption } from '../types';
 import type { SyncResult } from './types';
+import { writeFileAtomicSync } from '../lib/atomicFile';
 
 const AHS_JSON_URL = 'https://www.albertahealthservices.ca/Webapps/WaitTimes/api/waittimes/en';
 const SNAPSHOTS_FILE = path.join(process.cwd(), 'data-snapshots.json');
@@ -209,10 +210,10 @@ export async function fetchErWaitTimes(): Promise<SyncResult> {
       currentHospitals = updatedHospitals;
 
       // Write ER wait times to dedicated JSON file
-      fs.writeFileSync(ER_WAITTIMES_FILE, JSON.stringify({
+      writeFileAtomicSync(ER_WAITTIMES_FILE, JSON.stringify({
         hospitals: currentHospitals,
         lastUpdated: timestamp,
-      }, null, 2), 'utf8');
+      }, null, 2));
 
       // Check alert thresholds
       alertChecker?.();
@@ -223,7 +224,7 @@ export async function fetchErWaitTimes(): Promise<SyncResult> {
     currentSnapshots = currentSnapshots.filter(s => new Date(s.timestamp).getTime() > oneYearAgo);
 
     // Persist snapshots
-    fs.writeFileSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots, null, 2), 'utf8');
+    writeFileAtomicSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots, null, 2));
 
     if (updatedHospitals.length === 0) {
       console.warn('[ErWaitTimesFetcher] No valid facilities parsed from AHS response.');
