@@ -37,13 +37,16 @@ function makeEnv() {
 }
 
 describe('A2 Worker unknown /api/* 404 and SPA fallback', () => {
-  it('returns 404 application/json for unknown GET /api/no-such-route', async () => {
-    const res = await app.fetch(new Request('http://localhost/api/no-such-route'), makeEnv());
-    assert.equal(res.status, 404);
-    assert.equal(res.headers.get('content-type')?.toLowerCase().includes('application/json'), true);
-    const body = (await res.json()) as { error: string };
-    assert.equal(body.error, 'Not found');
-  });
+  const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
+  for (const method of methods) {
+    it(`returns 404 application/json for unknown ${method} /api/no-such-route`, async () => {
+      const res = await app.fetch(new Request('http://localhost/api/no-such-route', { method }), makeEnv());
+      assert.equal(res.status, 404);
+      assert.equal(res.headers.get('content-type')?.toLowerCase().includes('application/json'), true);
+      const body = (await res.json()) as { error: string };
+      assert.equal(body.error, 'Not found');
+    });
+  }
 
   it('returns 404 application/json for unknown /api/ path with trailing segment', async () => {
     const res = await app.fetch(new Request('http://localhost/api/admin/delete-everything'), makeEnv());

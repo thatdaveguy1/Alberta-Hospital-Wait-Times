@@ -180,7 +180,13 @@ export interface LabTrendPoint {
 
 export interface LabTrendsBlob {
   provincial: Record<Range, LabTrendPoint[]>;
-  labs: Record<string, Record<Range, LabTrendPoint[]>>;
+  labs?: Record<string, Record<Range, LabTrendPoint[]>>;
+}
+
+export interface LabTrendBuildResult {
+  blob: LabTrendsBlob;
+  bytes: number;
+  mode: 'full' | 'provincial-only' | 'oversized';
 }
 
 // --- Lab trend aggregates ---
@@ -235,17 +241,7 @@ export function computeLabTrendFacility(snapshots: LabWaitSnapshot[], labId: str
   return result;
 }
 
-/**
- * Build the `lab-trends` blob from snapshots. Returns null when the serialized
- * payload exceeds the conservative 5 MiB budget so a runaway dataset cannot
- * exhaust the Cloudflare KV value limit (25 MiB).
- */
-export function buildLabTrendsBlob(
-  snapshots: LabWaitSnapshot[],
-  budgetBytes: number = LAB_TRENDS_BLOB_BUDGET_BYTES,
-): LabTrendsBlob | null {
-  if (snapshots.length === 0) return { provincial: { '24h': [], '7d': [], '30d': [] }, labs: {} };
-
+function buildProvincialLabTrends(snapshots: LabWaitSnapshot[]): LabTrendsBlob {
   const provincial: Record<Range, ErTrendProvincialPoint[]> = {
     '24h': [],
     '7d': [],
@@ -253,6 +249,31 @@ export function buildLabTrendsBlob(
   };
   for (const range of RANGES) {
     provincial[range] = computeLabTrendProvincial(snapshots, range);
+  }
+  return { provincial, labs: {} };
+}
+
+/**
+ * Build the `lab-trends` blob from snapshots.
+ *
+ * - Always includes provincial ranges because they are small and safety-critical.
+ * - If the full { provincial, labs } blob fits the conservative budget, returns
+ *   the full blob and mode `'full'`.
+ * - If the full blob exceeds the budget but a provincial-only blob fits, drops
+ *   per-lab data, logs a fallback warning, and returns mode `'provincial-only'`.
+ * - If even the provincial-only blob exceeds the (possibly reduced) budget,
+ *   returns mode `'oversized'` with the provincial blob and an oversized byte
+ *   count so callers can report an honest failure rather than silently skipping.
+ */
+export function buildLabTrendsBlob(
+  snapshots: LabWaitSnapshot[],
+  budgetBytes: number = LAB_TRENDS_BLOB_BUDGET_BYTES,
+): LabTrendBuildResult {
+  const provincialBlob = buildProvincialLabTrends(snapshots);
+  const provincialOnly = { provincial: provincialBlob.provincial, labs: {} };
+  const provincialBytes = Buffer.byteLength(JSON.stringify(provincialOnly));
+  if (snapshots.length === 0) {
+    return { blob: provincialBlob, bytes: provincialBytes, mode: 'full' };
   }
 
   const labIds = [...new Set(snapshots.map(s => s.labId))].sort();
@@ -265,16 +286,23 @@ export function buildLabTrendsBlob(
     };
   }
 
-  const blob: LabTrendsBlob = { provincial, labs };
-  const serialized = JSON.stringify(blob);
-  const bytes = Buffer.byteLength(serialized);
-  if (bytes > budgetBytes) {
-    console.warn(
-      `[TrendsPusher] lab-trends blob ${bytes} bytes exceeds ${budgetBytes} byte budget — not building per-lab trends`,
-    );
-    return null;
+  const fullBlob: LabTrendsBlob = { provincial: provincialBlob.provincial, labs };
+  const fullBytes = Buffer.byteLength(JSON.stringify(fullBlob));
+  if (fullBytes <= budgetBytes) {
+    return { blob: fullBlob, bytes: fullBytes, mode: 'full' };
   }
-  return blob;
+
+  if (provincialBytes <= budgetBytes) {
+    console.warn(
+      `[TrendsPusher] lab-trends full blob ${fullBytes} bytes exceeds ${budgetBytes} byte budget — falling back to provincial-only (${provincialBytes} bytes)`,
+    );
+    return { blob: provincialOnly, bytes: provincialBytes, mode: 'provincial-only' };
+  }
+
+  console.error(
+    `[TrendsPusher] lab-trends provincial-only blob ${provincialBytes} bytes exceeds ${budgetBytes} byte budget`,
+  );
+  return { blob: provincialBlob, bytes: provincialBytes, mode: 'oversized' };
 }
 
 /**
@@ -332,15 +360,22 @@ export async function pushErTrends(
  * Call after each APL lab wait times fetch.
  */
 export async function pushLabTrends(snapshots: LabWaitSnapshot[]): Promise<void> {
-  const blob = buildLabTrendsBlob(snapshots);
-  if (!blob) return;
+  const { blob, bytes, mode } = buildLabTrendsBlob(snapshots);
+  if (mode === 'oversized') {
+    console.warn(
+      `[TrendsPusher] lab-trends payload ${bytes} bytes exceeds budget; not pushing`,
+    );
+    return;
+  }
 
   const result = await pushToCloudflare('lab-trends', blob);
   if (result.skipped) {
     const reason = result.cooldown ? 'cooldown' : 'unchanged';
     console.log(`[TrendsPusher] lab-trends blob ${reason} — not written`);
   } else if (result.success) {
-    console.log('[TrendsPusher] Pushed lab-trends blob to Cloudflare KV');
+    console.log(
+      `[TrendsPusher] Pushed lab-trends blob to Cloudflare KV (${bytes} bytes, ${mode})`,
+    );
   } else {
     console.warn(`[TrendsPusher] lab-trends blob push failed: ${result.error ?? 'unknown'}`);
   }

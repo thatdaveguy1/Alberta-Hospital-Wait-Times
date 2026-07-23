@@ -6,6 +6,7 @@ import {
   computeLabTrendFacility,
   computeLabTrendProvincial,
   type LabTrendPoint,
+  type LabTrendBuildResult,
 } from '../../src/pipelines/trendsPusher';
 import type { LabWaitSnapshot } from '../../src/pipelines/aplLabWaitTimesFetcher';
 
@@ -60,22 +61,38 @@ describe('A3 lab trends builder and budget', () => {
     assert.ok(values.includes(20));
   });
 
-  it('builds a blob with provincial and per-lab ranges', () => {
-    const blob = buildLabTrendsBlob(snapshots);
-    assert.ok(blob);
-    assert.ok(Array.isArray(blob!.provincial['24h']));
-    assert.ok(Array.isArray(blob!.labs['APL-KW']['24h']));
-    assert.ok(Array.isArray(blob!.labs['APL-AIR']['7d']));
+  it('builds a full blob with provincial and per-lab ranges', () => {
+    const result = buildLabTrendsBlob(snapshots) as LabTrendBuildResult;
+    assert.equal(result.mode, 'full');
+    assert.ok(result.blob);
+    assert.ok(Array.isArray(result.blob.provincial['24h']));
+    assert.ok(Array.isArray(result.blob.labs?.['APL-KW']['24h']));
+    assert.ok(Array.isArray(result.blob.labs?.['APL-AIR']['7d']));
+    assert.ok(result.bytes > 0);
   });
 
-  it('returns null when payload exceeds budget', () => {
-    const smallSnapshots: LabWaitSnapshot[] = Array.from({ length: 1000 }, (_, i) => ({
+  it('falls back to provincial-only when full payload exceeds budget but provincial fits', () => {
+    const smallSnapshots: LabWaitSnapshot[] = [
+      { labId: 'APL-KW', waitTime: 2, timestamp: '2026-07-23T10:00:00Z' },
+      { labId: 'APL-KW', waitTime: 4, timestamp: '2026-07-23T10:10:00Z' },
+      { labId: 'APL-AIR', waitTime: 90, timestamp: '2026-07-23T10:00:00Z' },
+    ];
+    const result = buildLabTrendsBlob(smallSnapshots, 500) as LabTrendBuildResult;
+    assert.equal(result.mode, 'provincial-only');
+    assert.ok(Array.isArray(result.blob.provincial['24h']));
+    assert.deepEqual(result.blob.labs, {});
+    assert.ok(result.bytes <= 500);
+  });
+
+  it('reports oversized when even provincial-only exceeds budget', () => {
+    const giantSnapshots: LabWaitSnapshot[] = Array.from({ length: 5000 }, (_, i) => ({
       labId: `APL-${i}`,
       waitTime: i % 90,
       timestamp: new Date(Date.now() - (i % 1000) * 60 * 1000).toISOString(),
     }));
-    const blob = buildLabTrendsBlob(smallSnapshots, 100);
-    assert.equal(blob, null);
+    const result = buildLabTrendsBlob(giantSnapshots, 50) as LabTrendBuildResult;
+    assert.equal(result.mode, 'oversized');
+    assert.ok(Array.isArray(result.blob.provincial['24h']));
   });
 
   it('budget is conservative (5 MiB) vs Cloudflare 25 MiB limit', () => {

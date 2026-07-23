@@ -319,6 +319,22 @@ app.delete('/api/alerts/:id', async (c) => {
   return c.json({ success: true });
 });
 
+// --- Global 404 handler ---
+// Unknown /api/* paths must return HTTP 404 application/json for ALL ordinary
+// methods (GET, POST, PUT, PATCH, DELETE). OPTIONS preflight requests are handled
+// by the CORS middleware before this fallback. Non-API paths keep the existing
+// 200 JSON SPA-fallback response.
+app.notFound((c) => {
+  const path = c.req.path;
+  if (path.startsWith('/api/')) {
+    return c.json({ error: 'Not found', path }, 404);
+  }
+  return c.json({
+    error: 'Frontend not served by Worker. Visit the Pages URL.',
+    api: 'Use /api/* endpoints',
+  });
+});
+
 // --- Authenticated Push Endpoint (receives data from Mac mini) ---
 app.post('/api/push/:domain', async (c) => {
   const domain = c.req.param('domain');
@@ -422,34 +438,6 @@ app.post('/api/push/:domain', async (c) => {
     console.error(`[push/${domain}] KV write failed:`, message);
     return c.json({ error: 'KV write failed', detail: message }, 500);
   }
-});
-
-// --- 404 for unknown /api/* routes ---
-// Hono's default 404 falls through to app.get('*'), which would return the SPA
-// fallback with HTTP 200. Add a catch-all GET /api/* handler that returns JSON 404
-// while leaving the non-API fallback intact. It is registered after explicit API
-// routes but before the SPA wildcard, so unknown /api paths hit this handler.
-app.get('/api/*', async (c) => {
-  const path = c.req.path;
-  if (path.startsWith('/api/')) {
-    return c.json({ error: 'Not found', path }, 404);
-  }
-  return c.json({
-    error: 'Frontend not served by Worker. Visit the Pages URL.',
-    api: 'Use /api/* endpoints',
-  });
-});
-
-// --- SPA Fallback (for Cloudflare Pages integration) ---
-// In production, static assets are served by Pages.
-// This fallback handles client-side routing for SPA routes.
-app.get('*', async (c) => {
-  // If running as a Pages Function, this would serve the SPA.
-  // For Worker-only deployment, return a simple redirect to Pages.
-  return c.json({
-    error: 'Frontend not served by Worker. Visit the Pages URL.',
-    api: 'Use /api/* endpoints',
-  });
 });
 
 export default app;

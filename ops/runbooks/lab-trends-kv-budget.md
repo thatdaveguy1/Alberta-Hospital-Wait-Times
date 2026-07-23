@@ -21,10 +21,15 @@ Sources: Cloudflare Workers KV Limits docs.
 
 ### Current real data
 
-Using the on-disk `data-lab-snapshots.json` (56 unique labs, 12 unique timestamps):
+Using the on-disk `data-lab-snapshots.json` (**56 unique labs**, **16 unique timestamps** at commit time):
 
-- Serialized `lab-trends` blob with per-lab ranges: **42,437 bytes**.
+- Serialized `lab-trends` blob with `{ provincial, labs }`: **49,642 bytes**.
+- Serialized provincial-only blob (`{ provincial, labs: {} }`): **2,689 bytes**.
 - Conservative in-code budget: **5 MiB** (`LAB_TRENDS_BLOB_BUDGET_BYTES`).
+
+### Fallback behavior
+
+`trendsPusher.ts` always computes the full `{ provincial, labs }` blob first. If the full blob exceeds the budget, it falls back to a provincial-only blob and logs the fallback explicitly. If even the provincial-only blob exceeds the budget, it logs an honest error and skips the push rather than writing an oversized value. Provincial trends are never silently dropped.
 
 ### Projected worst-case 90-day/153-lab dataset
 
@@ -37,13 +42,17 @@ Synthesized 153 labs with one snapshot every 10 minutes for 90 days (~1.98M snap
 
 This is comfortably under the 5 MiB conservative budget and far under the Cloudflare 25 MiB hard limit.
 
+## CPU/performance risk
+
+Near the 5 MiB boundary the JSON serialization of ~1.5–2M snapshot-derived points is measurable. The Worker request budget is **10 ms CPU time**, and serving `/api/trends/labs/:labId` only slices the stored blob (it does not reserialize the full payload). Monitor KV read latency and Worker CPU usage after any dataset size growth.
+
 ## Decision
 
-**GO.** Per-lab downsampled trends can safely be added to the existing single `lab-trends` KV blob. No new KV keys are required. If a future dataset ever exceeds the 5 MiB budget, `buildLabTrendsBlob` returns `null` and the push is skipped rather than risking a 25 MiB failure.
+**GO.** Per-lab downsampled trends can safely be added to the existing single `lab-trends` KV blob. No new KV keys are required. The provincial-only fallback ensures public trend charts remain available even if per-lab data temporarily grows beyond the conservative budget.
 
 ## Implementation notes
 
-- `trendsPusher.ts` computes `provincial` and `labs` ranges.
+- `trendsPusher.ts` computes `provincial` and optional `labs` ranges via `buildLabTrendsBlob`.
 - `cloudflare/worker.ts` serves `/api/trends/labs/:labId?range=24h|7d|30d` from `blob.labs[labId][range]`.
 - Unknown lab or range returns `[]` with HTTP 200.
-- Payload budget gate is enforced at build time in `buildLabTrendsBlob`.
+- Payload budget gate is enforced at build time in `buildLabTrendsBlob`; per-lab data is dropped before the KV push if necessary.
