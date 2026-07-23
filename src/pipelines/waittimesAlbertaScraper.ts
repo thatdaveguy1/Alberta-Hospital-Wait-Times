@@ -21,6 +21,7 @@ import {
   type DataMetadata,
 } from './metadataHelpers';
 import type { SyncResult } from './types';
+import { writeFileAtomicSync, withCollectorLockSync } from '../lib/atomicFile';
 
 const BASE_URL = 'https://waittimes.alberta.ca/';
 const PROCEDURE_OVERVIEW_URL = `${BASE_URL}ProcedureOverview.jsp`;
@@ -405,44 +406,54 @@ function parseDiagnosticTables(
 // records with matching id and preserving all other top-level keys.
 function mergeSurgicalData(newRecords: SurgicalRecord[], timestamp: string): number {
   type SurgicalJson = Record<string, unknown>;
-  let existing: SurgicalJson = {};
-  try {
-    existing = JSON.parse(fs.readFileSync(SURGICAL_FILE, 'utf8')) as SurgicalJson;
-  } catch {
-    // File doesn't exist yet.
-  }
-
-  const existingRecords = Array.isArray(existing.SURGICAL_RECORDS)
-    ? (existing.SURGICAL_RECORDS as SurgicalRecord[])
-    : [];
 
   const byId = new Map<string, SurgicalRecord>();
-  for (const record of existingRecords) {
-    byId.set(record.id, record);
-  }
   for (const record of newRecords) {
     byId.set(record.id, record);
   }
 
-  const merged = Array.from(byId.values());
-  existing.SURGICAL_RECORDS = merged;
+  // Lock, read, merge, and write so sibling surgical writers (ABJHI,
+  // powerbiScraper) cannot overwrite each others' arrays.
+  const merged = withCollectorLockSync(() => {
+    let existing: SurgicalJson = {};
+    try {
+      existing = JSON.parse(fs.readFileSync(SURGICAL_FILE, 'utf8')) as SurgicalJson;
+    } catch {
+      // File doesn't exist yet.
+    }
 
-  // Refresh _dataMetadata for SURGICAL_RECORDS; preserve all other entries
-  // (sibling writers' and hand-authored arrays) via mergeDataMetadata.
-  const ownedMetadata: DataMetadata = {
-    SURGICAL_RECORDS: buildMetadataEntry({
-      updateType: 'auto',
-      source: 'Alberta Wait Times Reporting (waittimes.alberta.ca)',
-      sourceVintage: 'Live provincial wait-times tables',
-      lastUpdated: timestamp,
-    }),
-  };
-  existing._dataMetadata = mergeDataMetadata(
-    existing._dataMetadata as DataMetadata | undefined,
-    ownedMetadata,
-  );
-  applyWithheldPayloadGuard(existing);
-  fs.writeFileSync(SURGICAL_FILE, JSON.stringify(existing, null, 2), 'utf8');
+    const existingRecords = Array.isArray(existing.SURGICAL_RECORDS)
+      ? (existing.SURGICAL_RECORDS as SurgicalRecord[])
+      : [];
+
+    for (const record of existingRecords) {
+      if (!byId.has(record.id)) {
+        byId.set(record.id, record);
+      }
+    }
+
+    const mergedRecords = Array.from(byId.values());
+    existing.SURGICAL_RECORDS = mergedRecords;
+
+    // Refresh _dataMetadata for SURGICAL_RECORDS; preserve all other entries
+    // (sibling writers' and hand-authored arrays) via mergeDataMetadata.
+    const ownedMetadata: DataMetadata = {
+      SURGICAL_RECORDS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'Alberta Wait Times Reporting (waittimes.alberta.ca)',
+        sourceVintage: 'Live provincial wait-times tables',
+        lastUpdated: timestamp,
+      }),
+    };
+    existing._dataMetadata = mergeDataMetadata(
+      existing._dataMetadata as DataMetadata | undefined,
+      ownedMetadata,
+    );
+    applyWithheldPayloadGuard(existing);
+    writeFileAtomicSync(SURGICAL_FILE, JSON.stringify(existing, null, 2));
+    return mergedRecords;
+  });
+
   return merged.length;
 }
 
@@ -451,86 +462,95 @@ function mergeDiagnosticData(
   newFacilities: FacilityImagingWait[],
   newTrends: ImagingWaitTrend[],
 ): { facilitiesWritten: number; trendsWritten: number } {
-  type DiagnosticJson = Record<string, unknown>;
-  let existing: DiagnosticJson = {};
-  try {
-    existing = JSON.parse(fs.readFileSync(DIAGNOSTIC_FILE, 'utf8')) as DiagnosticJson;
-  } catch {
-    // File doesn't exist yet.
-  }
+  const timestamp = new Date().toISOString();
 
-  // Merge facility imaging waits by facilityId.
-  const existingFacilities = Array.isArray(existing.FACILITY_IMAGING_WAITS)
-    ? (existing.FACILITY_IMAGING_WAITS as FacilityImagingWait[])
-    : [];
-
+  // Pre-stage new data maps outside the lock; network/parsing never holds it.
   const facilityById = new Map<string, FacilityImagingWait>();
-  for (const f of existingFacilities) {
+  for (const f of newFacilities) {
     facilityById.set(f.facilityId, f);
   }
-  for (const f of newFacilities) {
-    const prev = facilityById.get(f.facilityId);
-    if (prev) {
-      facilityById.set(f.facilityId, {
-        ...prev,
-        ...f,
-        mriP50WaitDays: f.mriP50WaitDays || prev.mriP50WaitDays,
-        mriP90WaitDays: f.mriP90WaitDays || prev.mriP90WaitDays,
-        ctP50WaitDays: f.ctP50WaitDays || prev.ctP50WaitDays,
-        ctP90WaitDays: f.ctP90WaitDays || prev.ctP90WaitDays,
-        annualCompletedExamsCount: f.annualCompletedExamsCount || prev.annualCompletedExamsCount,
-      });
-    } else {
-      facilityById.set(f.facilityId, f);
-    }
-  }
-
-  const mergedFacilities = Array.from(facilityById.values());
-  existing.FACILITY_IMAGING_WAITS = mergedFacilities;
-
-  // Merge imaging wait trends by year+modality.
-  const existingTrends = Array.isArray(existing.IMAGING_WAIT_TRENDS)
-    ? (existing.IMAGING_WAIT_TRENDS as ImagingWaitTrend[])
-    : [];
 
   const trendByKey = new Map<string, ImagingWaitTrend>();
-  for (const t of existingTrends) {
-    trendByKey.set(`${t.year}|${t.modality}`, t);
-  }
   for (const t of newTrends) {
     trendByKey.set(`${t.year}|${t.modality}`, t);
   }
 
-  const mergedTrends = Array.from(trendByKey.values());
-  existing.IMAGING_WAIT_TRENDS = mergedTrends;
+  type DiagnosticJson = Record<string, unknown>;
 
-  // Stamp metadata for the arrays this writer refreshes, preserving sibling
-  // entries (LAB_LOCATION_WAITS, TEST_TURNAROUND_METRICS, PRIORITY_TARGET_COMPLIANCE,
-  // CIHI_DIAGNOSTIC_WAIT_TIMES) owned by other diagnostic writers.
-  const timestamp = new Date().toISOString();
-  const ownedMetadata: DataMetadata = {
-    FACILITY_IMAGING_WAITS: buildMetadataEntry({
-      updateType: 'auto',
-      source: 'waittimes.alberta.ca (AccessGoalChart.do)',
-      sourceVintage: 'Live data',
-      lastUpdated: timestamp,
-      verification: 'CT/MRI facility wait times scraped from waittimes.alberta.ca per-zone tables.',
-    }),
-    IMAGING_WAIT_TRENDS: buildMetadataEntry({
-      updateType: 'auto',
-      source: 'waittimes.alberta.ca (AccessGoalChart.do)',
-      sourceVintage: 'Live data',
-      lastUpdated: timestamp,
-      verification: 'CT/MRI wait-time trends scraped from waittimes.alberta.ca per-quarter tables.',
-    }),
-  };
-  existing._dataMetadata = mergeDataMetadata(
-    existing._dataMetadata as DataMetadata | undefined,
-    ownedMetadata,
-  );
-  applyWithheldPayloadGuard(existing);
-  fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(existing, null, 2), 'utf8');
-  return { facilitiesWritten: mergedFacilities.length, trendsWritten: mergedTrends.length };
+  return withCollectorLockSync(() => {
+    let existing: DiagnosticJson = {};
+    try {
+      existing = JSON.parse(fs.readFileSync(DIAGNOSTIC_FILE, 'utf8')) as DiagnosticJson;
+    } catch {
+      // File doesn't exist yet.
+    }
+
+    // Merge facility imaging waits by facilityId.
+    const existingFacilities = Array.isArray(existing.FACILITY_IMAGING_WAITS)
+      ? (existing.FACILITY_IMAGING_WAITS as FacilityImagingWait[])
+      : [];
+
+    for (const f of existingFacilities) {
+      const prev = facilityById.get(f.facilityId);
+      if (prev) {
+        facilityById.set(f.facilityId, {
+          ...prev,
+          ...f,
+          mriP50WaitDays: f.mriP50WaitDays || prev.mriP50WaitDays,
+          mriP90WaitDays: f.mriP90WaitDays || prev.mriP90WaitDays,
+          ctP50WaitDays: f.ctP50WaitDays || prev.ctP50WaitDays,
+          ctP90WaitDays: f.ctP90WaitDays || prev.ctP90WaitDays,
+          annualCompletedExamsCount: f.annualCompletedExamsCount || prev.annualCompletedExamsCount,
+        });
+      } else {
+        facilityById.set(f.facilityId, f);
+      }
+    }
+
+    const mergedFacilities = Array.from(facilityById.values());
+    existing.FACILITY_IMAGING_WAITS = mergedFacilities;
+
+    // Merge imaging wait trends by year+modality.
+    const existingTrends = Array.isArray(existing.IMAGING_WAIT_TRENDS)
+      ? (existing.IMAGING_WAIT_TRENDS as ImagingWaitTrend[])
+      : [];
+
+    for (const t of existingTrends) {
+      if (!trendByKey.has(`${t.year}|${t.modality}`)) {
+        trendByKey.set(`${t.year}|${t.modality}`, t);
+      }
+    }
+
+    const mergedTrends = Array.from(trendByKey.values());
+    existing.IMAGING_WAIT_TRENDS = mergedTrends;
+
+    // Stamp metadata for the arrays this writer refreshes, preserving sibling
+    // entries (LAB_LOCATION_WAITS, TEST_TURNAROUND_METRICS, PRIORITY_TARGET_COMPLIANCE,
+    // CIHI_DIAGNOSTIC_WAIT_TIMES) owned by other diagnostic writers.
+    const ownedMetadata: DataMetadata = {
+      FACILITY_IMAGING_WAITS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'waittimes.alberta.ca (AccessGoalChart.do)',
+        sourceVintage: 'Live data',
+        lastUpdated: timestamp,
+        verification: 'CT/MRI facility wait times scraped from waittimes.alberta.ca per-zone tables.',
+      }),
+      IMAGING_WAIT_TRENDS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'waittimes.alberta.ca (AccessGoalChart.do)',
+        sourceVintage: 'Live data',
+        lastUpdated: timestamp,
+        verification: 'CT/MRI wait-time trends scraped from waittimes.alberta.ca per-zone tables.',
+      }),
+    };
+    existing._dataMetadata = mergeDataMetadata(
+      existing._dataMetadata as DataMetadata | undefined,
+      ownedMetadata,
+    );
+    applyWithheldPayloadGuard(existing);
+    writeFileAtomicSync(DIAGNOSTIC_FILE, JSON.stringify(existing, null, 2));
+    return { facilitiesWritten: mergedFacilities.length, trendsWritten: mergedTrends.length };
+  });
 }
 
 // Fetch a procedure category's wait time data via POST to AccessGoalChart.do.

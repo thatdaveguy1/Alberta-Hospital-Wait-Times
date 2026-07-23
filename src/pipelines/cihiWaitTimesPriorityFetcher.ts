@@ -21,6 +21,7 @@ import {
   type DataMetadata,
 } from './metadataHelpers';
 import type { SyncResult } from './types';
+import { writeFileAtomicSync, withCollectorLockSync } from '../lib/atomicFile';
 
 const SURGICAL_FILE = path.join(process.cwd(), 'data-surgical.json');
 const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
@@ -204,9 +205,10 @@ export async function run(): Promise<SyncResult> {
       };
     }
 
-    // Write to domain files (surgical + diagnostic only)
+    // Write to domain files (surgical + diagnostic only) under the collector
+    // lock so concurrent writers (waittimesAlbertaScraper, abjhiScraper,
+    // powerbiScraper) cannot interleave a lost update.
     if (surgicalRecords.length > 0) {
-      const existing = loadJsonFile(SURGICAL_FILE);
       const ownedMetadata: DataMetadata = {
         CIHI_PRIORITY_PROCEDURE_WAITS: buildMetadataEntry({
           updateType: 'auto',
@@ -215,21 +217,25 @@ export async function run(): Promise<SyncResult> {
           lastUpdated: timestamp,
         }),
       };
-      const merged = {
-        ...existing,
-        CIHI_PRIORITY_PROCEDURE_WAITS: surgicalRecords,
-        _dataMetadata: mergeDataMetadata(
-          existing._dataMetadata as DataMetadata | undefined,
-          ownedMetadata,
-        ),
-      };
-      applyWithheldPayloadGuard(merged);
-      fs.writeFileSync(SURGICAL_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
+
+      withCollectorLockSync(() => {
+        const existing = loadJsonFile(SURGICAL_FILE);
+        const merged = {
+          ...existing,
+          CIHI_PRIORITY_PROCEDURE_WAITS: surgicalRecords,
+          _dataMetadata: mergeDataMetadata(
+            existing._dataMetadata as DataMetadata | undefined,
+            ownedMetadata,
+          ),
+        };
+        applyWithheldPayloadGuard(merged);
+        writeFileAtomicSync(SURGICAL_FILE, JSON.stringify(merged, null, 2) + '\n');
+      });
+
       console.log(`[CihiWaitTimesPriority] Wrote ${surgicalRecords.length} surgical records to data-surgical.json`);
     }
 
     if (diagnosticRecords.length > 0) {
-      const existing = loadJsonFile(DIAGNOSTIC_FILE);
       const ownedMetadata: DataMetadata = {
         CIHI_DIAGNOSTIC_WAIT_TIMES: buildMetadataEntry({
           updateType: 'auto',
@@ -238,16 +244,21 @@ export async function run(): Promise<SyncResult> {
           lastUpdated: timestamp,
         }),
       };
-      const merged = {
-        ...existing,
-        CIHI_DIAGNOSTIC_WAIT_TIMES: diagnosticRecords,
-        _dataMetadata: mergeDataMetadata(
-          existing._dataMetadata as DataMetadata | undefined,
-          ownedMetadata,
-        ),
-      };
-      applyWithheldPayloadGuard(merged);
-      fs.writeFileSync(DIAGNOSTIC_FILE, JSON.stringify(merged, null, 2) + '\n', 'utf8');
+
+      withCollectorLockSync(() => {
+        const existing = loadJsonFile(DIAGNOSTIC_FILE);
+        const merged = {
+          ...existing,
+          CIHI_DIAGNOSTIC_WAIT_TIMES: diagnosticRecords,
+          _dataMetadata: mergeDataMetadata(
+            existing._dataMetadata as DataMetadata | undefined,
+            ownedMetadata,
+          ),
+        };
+        applyWithheldPayloadGuard(merged);
+        writeFileAtomicSync(DIAGNOSTIC_FILE, JSON.stringify(merged, null, 2) + '\n');
+      });
+
       console.log(`[CihiWaitTimesPriority] Wrote ${diagnosticRecords.length} diagnostic records to data-diagnostic.json`);
     }
 

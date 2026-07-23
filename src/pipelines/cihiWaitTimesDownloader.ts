@@ -23,6 +23,7 @@ import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult } from './types';
+import { writeFileAtomicSync, withCollectorLockSync } from '../lib/atomicFile';
 import {
   applyWithheldPayloadGuard,
   buildMetadataEntry,
@@ -523,17 +524,27 @@ function mergeAndWrite(
   newPartial: LoadedJson,
   ownedMetadata?: DataMetadata,
 ): number {
-  const existing = loadJsonFile(file);
-  let written = 0;
+  // Determine refreshed keys and staged data outside the lock; network/parsing
+  // must not hold the collector lock.
   const refreshedKeys: string[] = [];
   for (const [key, value] of Object.entries(newPartial)) {
     if (Array.isArray(value) && value.length > 0) {
-      existing[key] = value;
-      written += value.length;
       refreshedKeys.push(key);
     }
   }
-  if (written > 0) {
+
+  if (refreshedKeys.length === 0) {
+    return 0;
+  }
+
+  return withCollectorLockSync(() => {
+    const existing = loadJsonFile(file);
+    let written = 0;
+    for (const key of refreshedKeys) {
+      existing[key] = newPartial[key];
+      written += (newPartial[key] as unknown[]).length;
+    }
+
     if (ownedMetadata) {
       // Only stamp metadata for arrays actually refreshed this run.
       const stamped: DataMetadata = {};
@@ -549,9 +560,9 @@ function mergeAndWrite(
       }
     }
     applyWithheldPayloadGuard(existing);
-    fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
-  }
-  return written;
+    writeFileAtomicSync(file, JSON.stringify(existing, null, 2));
+    return written;
+  });
 }
 
 // Diagnostic domain: CT/MRI wait-time trends.

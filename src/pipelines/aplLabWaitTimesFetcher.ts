@@ -145,25 +145,6 @@ export async function run(): Promise<SyncResult> {
       // dailyVolume / peakHours are not provided by the QMe API — omit rather than invent zeros.
     }));
 
-    // Read existing data-diagnostic.json, replace only LAB_LOCATION_WAITS, preserve everything else
-    let existingData: Record<string, unknown>;
-    try {
-      const raw = fs.readFileSync(DIAGNOSTIC_FILE, 'utf8');
-      existingData = JSON.parse(raw);
-    } catch (err) {
-      console.error('[AplLabWaitTimesFetcher] Failed to read existing data-diagnostic.json:', err);
-      return {
-        domain: 'diagnostic',
-        pipeline: 'aplLabWaitTimesFetcher',
-        status: 'failed',
-        recordsFetched: 0,
-        recordsWritten: 0,
-        durationMs: Date.now() - startTime,
-        error: `Failed to read data file: ${err instanceof Error ? err.message : String(err)}`,
-        timestamp,
-      };
-    }
-
     if (labLocations.length === 0) {
       return {
         domain: 'diagnostic',
@@ -176,28 +157,6 @@ export async function run(): Promise<SyncResult> {
         timestamp,
       };
     }
-
-    existingData.LAB_LOCATION_WAITS = labLocations;
-
-    // Stamp metadata for LAB_LOCATION_WAITS, preserving sibling entries owned
-    // by other diagnostic writers (TEST_TURNAROUND_METRICS, IMAGING_WAIT_TRENDS,
-    // FACILITY_IMAGING_WAITS, PRIORITY_TARGET_COMPLIANCE, CIHI_DIAGNOSTIC_WAIT_TIMES).
-    const ownedMetadata: DataMetadata = {
-      LAB_LOCATION_WAITS: buildMetadataEntry({
-        updateType: 'auto',
-        source: 'APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)',
-        sourceVintage: 'Live point-in-time wait estimate, refreshed every 10 minutes',
-        lastUpdated: timestamp,
-        verification: 'Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes.',
-      }),
-    };
-    // Live QMe poll always rewrites LAB_LOCATION_WAITS — declare the key so
-    // mergeDataMetadata bumps lastUpdated (otherwise prior Jul stamps stick forever).
-    existingData._dataMetadata = mergeDataMetadata(
-      existingData._dataMetadata as DataMetadata | undefined,
-      ownedMetadata,
-      ['LAB_LOCATION_WAITS'],
-    );
 
     // Append numeric-only wait snapshots for historical trend charting.
     // Sentinel values ('Appointments Only' / 'Closed' / 'Not Available') are skipped.
@@ -217,10 +176,39 @@ export async function run(): Promise<SyncResult> {
     const retentionCutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
     currentLabSnapshots = currentLabSnapshots.filter(s => new Date(s.timestamp).getTime() > retentionCutoff);
 
-    // Write back (guard withheld residual arrays before RMW serialize) and
-    // persist snapshots atomically under the collector lock so fast-tier and
-    // daily processes cannot interleave a partial view of diagnostic data.
+    // Compute the APL-owned metadata outside the lock.
+    const ownedMetadata: DataMetadata = {
+      LAB_LOCATION_WAITS: buildMetadataEntry({
+        updateType: 'auto',
+        source: 'APL QMe REST API (qmeapi.albertaprecisionlabs.ca/api/location)',
+        sourceVintage: 'Live point-in-time wait estimate, refreshed every 10 minutes',
+        lastUpdated: timestamp,
+        verification: 'Live wait times from APL public location API. 153 sites. WaitTime parsed from string to minutes.',
+      }),
+    };
+
+    // Acquire the collector lock, reload the current diagnostic file, merge
+    // only APL-owned keys, and atomically write diagnostic + snapshots so
+    // concurrent sibling writers cannot lose updates.
     withCollectorLockSync(() => {
+      let existingData: Record<string, unknown> = {};
+      try {
+        const raw = fs.readFileSync(DIAGNOSTIC_FILE, 'utf8');
+        existingData = JSON.parse(raw);
+      } catch (err) {
+        // data-diagnostic.json may not exist yet on first run.
+        console.warn('[AplLabWaitTimesFetcher] No existing data-diagnostic.json — starting fresh:', err);
+      }
+
+      existingData.LAB_LOCATION_WAITS = labLocations;
+      // Live QMe poll always rewrites LAB_LOCATION_WAITS — declare the key so
+      // mergeDataMetadata bumps lastUpdated (otherwise prior Jul stamps stick forever).
+      existingData._dataMetadata = mergeDataMetadata(
+        existingData._dataMetadata as DataMetadata | undefined,
+        ownedMetadata,
+        ['LAB_LOCATION_WAITS'],
+      );
+
       applyWithheldPayloadGuard(existingData);
       writeFileAtomicSync(DIAGNOSTIC_FILE, JSON.stringify(existingData, null, 2));
       writeFileAtomicSync(LAB_SNAPSHOTS_FILE, JSON.stringify(currentLabSnapshots, null, 2));
