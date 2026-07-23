@@ -22,7 +22,6 @@ import { parseAplWaitTime } from '../lib/labWait';
 import type { SyncResult } from './types';
 import { writeFileAtomicSync, withCollectorLockSync } from '../lib/atomicFile';
 const APL_API_URL = 'https://qmeapi.albertaprecisionlabs.ca/api/location';
-const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
 const LAB_SNAPSHOTS_FILE = path.join(process.cwd(), 'data-lab-snapshots.json');
 
 // Snapshot shape for historical lab wait trends — numeric waits only.
@@ -190,29 +189,49 @@ export async function run(): Promise<SyncResult> {
     // Acquire the collector lock, reload the current diagnostic file, merge
     // only APL-owned keys, and atomically write diagnostic + snapshots so
     // concurrent sibling writers cannot lose updates.
-    withCollectorLockSync(() => {
-      let existingData: Record<string, unknown> = {};
-      try {
-        const raw = fs.readFileSync(DIAGNOSTIC_FILE, 'utf8');
-        existingData = JSON.parse(raw);
-      } catch (err) {
-        // data-diagnostic.json may not exist yet on first run.
-        console.warn('[AplLabWaitTimesFetcher] No existing data-diagnostic.json — starting fresh:', err);
-      }
+    // Network/parse of the API response stays outside the lock.
+    try {
+      withCollectorLockSync(() => {
+        const diagnosticFile = path.join(process.cwd(), 'data-diagnostic.json');
 
-      existingData.LAB_LOCATION_WAITS = labLocations;
-      // Live QMe poll always rewrites LAB_LOCATION_WAITS — declare the key so
-      // mergeDataMetadata bumps lastUpdated (otherwise prior Jul stamps stick forever).
-      existingData._dataMetadata = mergeDataMetadata(
-        existingData._dataMetadata as DataMetadata | undefined,
-        ownedMetadata,
-        ['LAB_LOCATION_WAITS'],
-      );
+        let existingData: Record<string, unknown> = {};
+        if (fs.existsSync(diagnosticFile)) {
+          const raw = fs.readFileSync(diagnosticFile, 'utf8');
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') {
+            throw new Error('data-diagnostic.json is not a JSON object');
+          }
+          existingData = parsed as Record<string, unknown>;
+        }
 
-      applyWithheldPayloadGuard(existingData);
-      writeFileAtomicSync(DIAGNOSTIC_FILE, JSON.stringify(existingData, null, 2));
-      writeFileAtomicSync(LAB_SNAPSHOTS_FILE, JSON.stringify(currentLabSnapshots, null, 2));
-    });
+        existingData.LAB_LOCATION_WAITS = labLocations;
+        // Live QMe poll always rewrites LAB_LOCATION_WAITS — declare the key so
+        // mergeDataMetadata bumps lastUpdated (otherwise prior Jul stamps stick forever).
+        existingData._dataMetadata = mergeDataMetadata(
+          existingData._dataMetadata as DataMetadata | undefined,
+          ownedMetadata,
+          ['LAB_LOCATION_WAITS'],
+        );
+
+        applyWithheldPayloadGuard(existingData);
+        writeFileAtomicSync(diagnosticFile, JSON.stringify(existingData, null, 2));
+        writeFileAtomicSync(LAB_SNAPSHOTS_FILE, JSON.stringify(currentLabSnapshots, null, 2));
+      });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      console.error('[AplLabWaitTimesFetcher] Cannot read/merge existing data-diagnostic.json — preserving last good file:', errorMsg);
+      return {
+        domain: 'diagnostic',
+        pipeline: 'aplLabWaitTimesFetcher',
+        status: 'failed',
+        recordsFetched: labLocations.length,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        error: `Cannot read/merge existing data-diagnostic.json: ${errorMsg}`,
+        timestamp,
+      };
+    }
+
     console.log(`[AplLabWaitTimesFetcher] Wrote ${labLocations.length} lab locations to data-diagnostic.json`);
     console.log(`[AplLabWaitTimesFetcher] Persisted ${currentLabSnapshots.length} lab wait snapshots`);
 

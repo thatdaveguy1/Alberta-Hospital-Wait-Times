@@ -27,7 +27,6 @@ const BASE_URL = 'https://waittimes.alberta.ca/';
 const PROCEDURE_OVERVIEW_URL = `${BASE_URL}ProcedureOverview.jsp`;
 const CHART_ENDPOINT = `${BASE_URL}AccessGoalChart.do`;
 const SURGICAL_FILE = path.join(process.cwd(), 'data-surgical.json');
-const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
 const RATE_LIMIT_MS = 2000;
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
@@ -457,8 +456,11 @@ function mergeSurgicalData(newRecords: SurgicalRecord[], timestamp: string): num
   return merged.length;
 }
 
-// Merge new diagnostic data into existing data-diagnostic.json.
-function mergeDiagnosticData(
+/**
+ * Merge new diagnostic data into existing data-diagnostic.json.
+ * Exported for focused unit testing.
+ */
+export function mergeDiagnosticData(
   newFacilities: FacilityImagingWait[],
   newTrends: ImagingWaitTrend[],
 ): { facilitiesWritten: number; trendsWritten: number } {
@@ -478,9 +480,11 @@ function mergeDiagnosticData(
   type DiagnosticJson = Record<string, unknown>;
 
   return withCollectorLockSync(() => {
+    const diagnosticFile = path.join(process.cwd(), 'data-diagnostic.json');
+
     let existing: DiagnosticJson = {};
     try {
-      existing = JSON.parse(fs.readFileSync(DIAGNOSTIC_FILE, 'utf8')) as DiagnosticJson;
+      existing = JSON.parse(fs.readFileSync(diagnosticFile, 'utf8')) as DiagnosticJson;
     } catch {
       // File doesn't exist yet.
     }
@@ -491,16 +495,24 @@ function mergeDiagnosticData(
       : [];
 
     for (const f of existingFacilities) {
-      const prev = facilityById.get(f.facilityId);
-      if (prev) {
+      const incoming = facilityById.get(f.facilityId);
+      if (incoming) {
+        // New truthy CT/MRI wait-day values override existing values.
+        // Existing sibling/unowned fields and falsish placeholders (0) survive.
         facilityById.set(f.facilityId, {
-          ...prev,
           ...f,
-          mriP50WaitDays: f.mriP50WaitDays || prev.mriP50WaitDays,
-          mriP90WaitDays: f.mriP90WaitDays || prev.mriP90WaitDays,
-          ctP50WaitDays: f.ctP50WaitDays || prev.ctP50WaitDays,
-          ctP90WaitDays: f.ctP90WaitDays || prev.ctP90WaitDays,
-          annualCompletedExamsCount: f.annualCompletedExamsCount || prev.annualCompletedExamsCount,
+          facilityId: incoming.facilityId,
+          facilityName: incoming.facilityName || f.facilityName,
+          city: incoming.city || f.city,
+          zone: incoming.zone || f.zone,
+          mriP50WaitDays: incoming.mriP50WaitDays || f.mriP50WaitDays,
+          mriP90WaitDays: incoming.mriP90WaitDays || f.mriP90WaitDays,
+          ctP50WaitDays: incoming.ctP50WaitDays || f.ctP50WaitDays,
+          ctP90WaitDays: incoming.ctP90WaitDays || f.ctP90WaitDays,
+          annualCompletedExamsCount:
+            incoming.annualCompletedExamsCount || f.annualCompletedExamsCount,
+          scannerUtilizationPct:
+            incoming.scannerUtilizationPct || f.scannerUtilizationPct,
         });
       } else {
         facilityById.set(f.facilityId, f);
@@ -516,8 +528,19 @@ function mergeDiagnosticData(
       : [];
 
     for (const t of existingTrends) {
-      if (!trendByKey.has(`${t.year}|${t.modality}`)) {
-        trendByKey.set(`${t.year}|${t.modality}`, t);
+      const key = `${t.year}|${t.modality}`;
+      const incoming = trendByKey.get(key);
+      if (incoming) {
+        // New truthy wait-day values override existing; 0/falsy placeholders survive.
+        trendByKey.set(key, {
+          ...t,
+          albertaP50Days: incoming.albertaP50Days || t.albertaP50Days,
+          albertaP90Days: incoming.albertaP90Days || t.albertaP90Days,
+          canadaP50Days: incoming.canadaP50Days || t.canadaP50Days,
+          canadaP90Days: incoming.canadaP90Days || t.canadaP90Days,
+        });
+      } else {
+        trendByKey.set(key, t);
       }
     }
 
@@ -548,7 +571,7 @@ function mergeDiagnosticData(
       ownedMetadata,
     );
     applyWithheldPayloadGuard(existing);
-    writeFileAtomicSync(DIAGNOSTIC_FILE, JSON.stringify(existing, null, 2));
+    writeFileAtomicSync(diagnosticFile, JSON.stringify(existing, null, 2));
     return { facilitiesWritten: mergedFacilities.length, trendsWritten: mergedTrends.length };
   });
 }

@@ -146,9 +146,11 @@ export function mergeDataMetadata(
 export const WITHHELD_PAYLOAD_KEYS = [
   // continuing care
   'HOME_CARE_EXPERIENCE',
-  // diagnostic estimated panels
+  // diagnostic estimated panels. FACILITY_IMAGING_WAITS and IMAGING_WAIT_TRENDS
+  // are intentionally absent because live scrapers (waittimesAlbertaScraper,
+  // cihiWaitTimesDownloader) legitimately populate them; only hand-authored
+  // panels remain withheld.
   'TEST_TURNAROUND_METRICS',
-  'FACILITY_IMAGING_WAITS',
   'PRIORITY_TARGET_COMPLIANCE',
   // mental health burden
   'COMMUNITY_MH_WAITS',
