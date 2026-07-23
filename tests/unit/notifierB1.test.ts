@@ -2,13 +2,13 @@
 // These tests do not hit any real webhook; they inject a fake sendImpl.
 
 import assert from 'node:assert/strict';
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it } from 'node:test';
 import {
   defaultState,
   decideAlerts,
-  sendAlerts,
   runNotifier,
   downFingerprint,
+  DEFAULT_DEDUPE_MS,
 } from '../../scripts/notifier.mjs';
 
 describe('notifier B1 — state-transition and deduplication', () => {
@@ -78,6 +78,127 @@ describe('notifier B1 — state-transition and deduplication', () => {
       assert.equal(second.events.length, 1);
       assert.equal(second.events[0].type, 'deduped');
       assert.equal(second.state.overall, 'down');
+    });
+
+    it('send -> deduped -> third check is still deduped within window', async () => {
+      const input = {
+        ok: false,
+        overall: 'down',
+        criticalDomains: ['er-waittimes'],
+        summary: 'ER feed failed',
+        url: 'http://127.0.0.1:3004/api/health',
+        httpStatus: 200,
+        error: null,
+        monitorId: 'local',
+      };
+
+      const sendImpl = async () => new Response('ok', { status: 200 });
+      const stateFile = `tmp/notifier-dedup-chain-${Date.now()}.json`;
+
+      const first = await runNotifier({
+        input,
+        stateDir: 'tmp',
+        stateFile,
+        webhookUrl: 'https://discord.example/webhook',
+        dedupeMs,
+        sendImpl,
+        now,
+      });
+      assert.equal(first.sent, 1);
+      assert.equal(first.events[0].type, 'down-transition');
+      assert.equal(first.state.lastAlert?.sentAt, now);
+
+      const second = await runNotifier({
+        input,
+        stateDir: 'tmp',
+        stateFile,
+        webhookUrl: 'https://discord.example/webhook',
+        dedupeMs,
+        sendImpl,
+        now: now + 1000,
+      });
+      assert.equal(second.sent, 0);
+      assert.equal(second.events[0].type, 'deduped');
+      assert.equal(second.state.lastAlert?.sentAt, now);
+
+      const third = await runNotifier({
+        input,
+        stateDir: 'tmp',
+        stateFile,
+        webhookUrl: 'https://discord.example/webhook',
+        dedupeMs,
+        sendImpl,
+        now: now + 2000,
+      });
+      assert.equal(third.sent, 0);
+      assert.equal(third.events[0].type, 'deduped');
+      assert.equal(third.state.lastAlert?.sentAt, now);
+    });
+
+    it('default 30-minute dedupe covers the 10-minute LaunchAgent interval and equality boundary', async () => {
+      const input = {
+        ok: false,
+        overall: 'down',
+        criticalDomains: ['er-waittimes'],
+        summary: 'ER feed failed',
+        url: 'http://127.0.0.1:3004/api/health',
+        httpStatus: 200,
+        error: null,
+        monitorId: 'local',
+      };
+
+      const sendImpl = async () => new Response('ok', { status: 200 });
+      const stateFile = `tmp/notifier-default-dedup-${Date.now()}.json`;
+
+      const first = await runNotifier({
+        input,
+        stateDir: 'tmp',
+        stateFile,
+        webhookUrl: 'https://discord.example/webhook',
+        dedupeMs: DEFAULT_DEDUPE_MS,
+        sendImpl,
+        now,
+      });
+      assert.equal(first.sent, 1);
+
+      // LaunchAgent StartInterval is 600 seconds; a 10-minute re-check must be deduped.
+      const atTenMin = await runNotifier({
+        input,
+        stateDir: 'tmp',
+        stateFile,
+        webhookUrl: 'https://discord.example/webhook',
+        dedupeMs: DEFAULT_DEDUPE_MS,
+        sendImpl,
+        now: now + 600 * 1000,
+      });
+      assert.equal(atTenMin.sent, 0);
+      assert.equal(atTenMin.events[0].type, 'deduped');
+
+      // Equality boundary at exactly the default dedupe window must still be deduped.
+      const atBoundary = await runNotifier({
+        input,
+        stateDir: 'tmp',
+        stateFile,
+        webhookUrl: 'https://discord.example/webhook',
+        dedupeMs: DEFAULT_DEDUPE_MS,
+        sendImpl,
+        now: now + DEFAULT_DEDUPE_MS,
+      });
+      assert.equal(atBoundary.sent, 0);
+      assert.equal(atBoundary.events[0].type, 'deduped');
+
+      // Re-alert only after the window has passed.
+      const afterWindow = await runNotifier({
+        input,
+        stateDir: 'tmp',
+        stateFile,
+        webhookUrl: 'https://discord.example/webhook',
+        dedupeMs: DEFAULT_DEDUPE_MS,
+        sendImpl,
+        now: now + DEFAULT_DEDUPE_MS + 1,
+      });
+      assert.equal(afterWindow.sent, 1);
+      assert.equal(afterWindow.events[0].type, 'down-transition');
     });
 
     it('alerts again after the dedupe window', async () => {

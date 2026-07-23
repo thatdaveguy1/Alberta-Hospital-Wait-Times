@@ -30,7 +30,7 @@ It **does not** alert for:
 
 ## Deduplication
 
-- `DEFAULT_DEDUPE_MS` is 10 minutes.
+- `DEFAULT_DEDUPE_MS` is 30 minutes.
 - Down states are fingerprinted by `overall` plus sorted `criticalDomains`.
 - Endpoint failures are deduped by the probe URL.
 - State is stored per endpoint in `logs/monitor-state-<id>.json`
@@ -51,7 +51,7 @@ See `.env.example`:
 - `ALERT_DISCORD_WEBHOOK_URL` — optional Discord webhook (to be wired later)
 - `MONITOR_STATE_DIR` — optional override for state directory (default
   `logs`)
-- `ALERT_DEDUPE_MS` — optional override (default 600000 ms)
+- `ALERT_DEDUPE_MS` — optional override (default 1800000 ms)
 
 ## Manual checks
 

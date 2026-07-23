@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const DEFAULT_DEDUPE_MS = 10 * 60 * 1000; // 10 minutes
+export const DEFAULT_DEDUPE_MS = 30 * 60 * 1000; // 30 minutes
 export const DEFAULT_STATE_DIR = 'logs';
 
 export function defaultState() {
@@ -184,7 +184,7 @@ export function decideAlerts({
     const fp = `endpoint:${input.url}`;
     if (
       next.endpointFailureSentAt &&
-      now - next.endpointFailureSentAt < dedupeMs
+      now - next.endpointFailureSentAt <= dedupeMs
     ) {
       events.push({
         type: 'deduped',
@@ -223,7 +223,7 @@ export function decideAlerts({
     const fp = downFingerprint(currentOverall, criticalDomains);
     const last = next.lastAlert;
     const sameFp = last?.fingerprint === fp;
-    const withinDedupe = last?.sentAt && now - last.sentAt < dedupeMs;
+    const withinDedupe = last?.sentAt && now - last.sentAt <= dedupeMs;
 
     if (isTransition) {
       events.push({
@@ -232,6 +232,7 @@ export function decideAlerts({
         payload: buildDownPayload(input, previousOverall, now),
       });
       next.criticalAlerted = criticalDomains;
+      next.lastAlert = { fingerprint: fp, sentAt: null, type: 'down-transition' };
     } else if (newCritical.length > 0) {
       for (const domain of newCritical) {
         events.push({
@@ -256,15 +257,16 @@ export function decideAlerts({
         payload: buildDownPayload(input, previousOverall, now),
       });
       next.criticalAlerted = criticalDomains;
+      next.lastAlert = { fingerprint: fp, sentAt: null, type: 'down-transition' };
     } else {
       events.push({
         type: 'deduped',
         fingerprint: fp,
         reason: 'repeated down within dedupe window',
       });
+      // Leave next.lastAlert untouched so the prior sentAt/fingerprint/type
+      // survives and future dedupe checks remain stable.
     }
-
-    next.lastAlert = { fingerprint: fp, sentAt: null, type: 'down-transition' };
   } else {
     // currentOverall is ok or degraded.
     if (previousOverall === 'down') {
