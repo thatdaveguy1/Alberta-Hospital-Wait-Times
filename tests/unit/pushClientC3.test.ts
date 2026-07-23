@@ -54,7 +54,11 @@ describe('pushClient C3 — cooldown, hash skip, and last-push persistence', () 
 
     const outcome = getLastPushOutcome('diagnostic');
     assert.ok(outcome);
-    assert.equal(outcome!.ok, true);
+    // Cooldown keeps overall health from marking as down, but the push itself
+    // is not a desired terminal success for the public edge.
+    assert.equal(outcome!.ok, false);
+    assert.equal(outcome!.result.success, false);
+    assert.equal(outcome!.result.cooldown, true);
   });
 
   it('returns success:true, skipped:true and records hash on unchanged payload', async () => {

@@ -153,13 +153,27 @@ export async function runAllPipelines(): Promise<SyncResult[]> {
 }
 
 /**
- * Run all pipelines once, then retry only the failed definitions one more
- * time. Retries replace the prior failed result by (domain, pipeline).
- * Success, partial, manual, and skipped results are never retried.
- * Returns the final result set.
+ * Run all provided pipeline definitions once, then retry only those whose
+ * result status is 'failed' one more time. Retries replace the prior failed
+ * result at the same index. Success, partial, manual, and skipped results are
+ * never retried. Returns the final result set.
+ *
+ * The definitions array is injectable so tests can exercise the retry helper
+ * with deterministic stub pipelines.
  */
-export async function runAllPipelinesWithRetry(): Promise<SyncResult[]> {
-  const firstPass = await runAllPipelines();
+export async function runPipelinesWithRetry(
+  definitions: Pipeline[] = PIPELINES,
+): Promise<SyncResult[]> {
+  const firstPass: SyncResult[] = [];
+  for (const pipeline of definitions) {
+    const result = await runPipelineSafely(pipeline);
+    firstPass.push(result);
+
+    // Brief pause between pipelines to avoid hammering sources
+    if (pipeline !== definitions[definitions.length - 1]) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
 
   const failedDefinitions = firstPass
     .map((r, index) => ({ r, index }))
@@ -173,7 +187,7 @@ export async function runAllPipelinesWithRetry(): Promise<SyncResult[]> {
 
   const retryResults = new Map<number, SyncResult>();
   for (const { r, index } of failedDefinitions) {
-    const pipeline = PIPELINES.find(
+    const pipeline = definitions.find(
       p => p.name === r.pipeline && p.domain === r.domain,
     );
     if (!pipeline) {
@@ -185,6 +199,23 @@ export async function runAllPipelinesWithRetry(): Promise<SyncResult[]> {
   }
 
   return firstPass.map((r, index) => retryResults.get(index) ?? r);
+}
+
+/**
+ * Backwards-compatible default: run the full static PIPELINES list with one
+ * retry pass for failed definitions.
+ */
+export async function runAllPipelinesWithRetry(): Promise<SyncResult[]> {
+  return runPipelinesWithRetry(PIPELINES);
+}
+
+/**
+ * Wrapper used by the CLI and daily sync entry points. Exits with code 1 when
+ * any pipeline still fails after the retry pass; exits 0 otherwise.
+ */
+export function exitCodeForResults(results: SyncResult[]): number {
+  const failed = results.filter(r => r.status === 'failed').length;
+  return failed > 0 ? 1 : 0;
 }
 
 // Run a single pipeline by name (for manual triggers)
@@ -216,8 +247,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   } else {
     runAllPipelinesWithRetry().then(results => {
       console.log(JSON.stringify(results, null, 2));
-      const failed = results.filter(r => r.status === 'failed').length;
-      process.exit(failed > 0 ? 1 : 0);
+      process.exit(exitCodeForResults(results));
     }).catch(err => {
       console.error(err);
       process.exit(1);

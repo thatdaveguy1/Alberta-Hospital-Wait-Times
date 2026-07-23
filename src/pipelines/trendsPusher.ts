@@ -231,7 +231,7 @@ export async function pushErTrends(
     facilities,
   };
   const result = await pushToCloudflare('er-trends', blob);
-  if (result.success && result.skipped) {
+  if (result.skipped) {
     const reason = result.cooldown ? 'cooldown' : 'unchanged';
     console.log(`[TrendsPusher] er-trends blob ${reason} — not written`);
   } else if (result.success) {
@@ -260,7 +260,7 @@ export async function pushLabTrends(snapshots: LabWaitSnapshot[]): Promise<void>
   const blob = { provincial };
 
   const result = await pushToCloudflare('lab-trends', blob);
-  if (result.success && result.skipped) {
+  if (result.skipped) {
     const reason = result.cooldown ? 'cooldown' : 'unchanged';
     console.log(`[TrendsPusher] lab-trends blob ${reason} — not written`);
   } else if (result.success) {

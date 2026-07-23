@@ -24,7 +24,9 @@ function lastPushFile(): string {
 
 export interface PushOutcome {
   domain: string;
-  /** True when the state is the desired end state for this domain, including skipped/cooldown. */
+  /** True only when the public edge is in the desired terminal state:
+   *  an actual success, or a deliberate skip that is NOT a cooldown.
+   */
   ok: boolean;
   pushedAt: string;
   result: PushResult;
@@ -56,14 +58,9 @@ function loadKvWriteCooldownFromDisk(): number {
   }
 }
 
-function persistKvWriteCooldown(untilMs: number): void {
-  try {
-    writeFileAtomicSync(cooldownFile(), JSON.stringify({ untilMs }, null, 2));
-  } catch (err) {
-    console.warn(
-      `[PushClient] Failed to persist KV cooldown: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  }
+/** Write cooldown file. Call inside the collector lock for RMW isolation. */
+function persistKvWriteCooldownLocked(untilMs: number): void {
+  writeFileAtomicSync(cooldownFile(), JSON.stringify({ untilMs }, null, 2));
 }
 
 function loadPushHashesFromDisk(): Record<string, string> {
@@ -79,14 +76,9 @@ function loadPushHashesFromDisk(): Record<string, string> {
   }
 }
 
-function persistPushHashes(hashes: Record<string, string>): void {
-  try {
-    writeFileAtomicSync(hashesFile(), JSON.stringify(hashes, null, 2));
-  } catch (err) {
-    console.warn(
-      `[PushClient] Failed to persist push hashes: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  }
+/** Write hashes file. Call inside the collector lock for RMW isolation. */
+function persistPushHashesLocked(hashes: Record<string, string>): void {
+  writeFileAtomicSync(hashesFile(), JSON.stringify(hashes, null, 2));
 }
 
 function loadLastPushOutcomesFromDisk(): Record<string, PushOutcome> {
@@ -102,14 +94,21 @@ function loadLastPushOutcomesFromDisk(): Record<string, PushOutcome> {
   }
 }
 
+/** Write one last-push outcome. Call inside the collector lock for RMW isolation. */
+function persistLastPushOutcomeLocked(
+  domain: string,
+  outcome: PushOutcome,
+): void {
+  const all = loadLastPushOutcomesFromDisk();
+  all[domain] = outcome;
+  writeFileAtomicSync(lastPushFile(), JSON.stringify(all, null, 2));
+}
+
 function persistLastPushOutcome(domain: string, outcome: PushOutcome): void {
   try {
-    const outcomes = withCollectorLockSync(() => {
-      const all = loadLastPushOutcomesFromDisk();
-      all[domain] = outcome;
-      return all;
+    withCollectorLockSync(() => {
+      persistLastPushOutcomeLocked(domain, outcome);
     });
-    writeFileAtomicSync(lastPushFile(), JSON.stringify(outcomes, null, 2));
   } catch (err) {
     console.warn(
       `[PushClient] Failed to persist last push outcome: ${err instanceof Error ? err.message : String(err)}`,
@@ -145,14 +144,18 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function recordOutcome(domain: string, result: PushResult): void {
-  const outcome: PushOutcome = {
-    domain,
-    ok: result.success || Boolean(result.skipped),
+function buildOutcome(result: PushResult): PushOutcome {
+  return {
+    domain: result.domain,
+    ok: result.success || Boolean(result.skipped && !result.cooldown),
     pushedAt: nowIso(),
     result,
     contentHash: result.contentHash ?? null,
   };
+}
+
+function recordOutcome(domain: string, result: PushResult): void {
+  const outcome = buildOutcome(result);
   persistLastPushOutcome(domain, outcome);
 }
 
@@ -162,11 +165,19 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
   const bodyHash = crypto.createHash('sha256').update(body).digest('hex');
 
   const now = Date.now();
-  const kvWriteCooldownUntilMs = loadKvWriteCooldownFromDisk();
-  const pushContentHashes = loadPushHashesFromDisk();
+
+  // RMW read for hashes and cooldown happens under the collector lock so the
+  // persisted outcome file cannot interleave with another writer in the same
+  // or a different process.
+  const state = withCollectorLockSync(() => {
+    return {
+      kvWriteCooldownUntilMs: loadKvWriteCooldownFromDisk(),
+      pushContentHashes: loadPushHashesFromDisk(),
+    };
+  });
 
   // Content-hash deduplication takes precedence: no need to write if nothing changed.
-  if (pushContentHashes[domain] === bodyHash) {
+  if (state.pushContentHashes[domain] === bodyHash) {
     console.log(`[PushClient] Skipping ${domain} — payload unchanged (content hash match)`);
     const result: PushResult = {
       domain,
@@ -175,14 +186,15 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
       skipped: true,
       contentHash: bodyHash,
     };
+    // Re-enter the lock under recordOutcome so load+merge+write is atomic.
     recordOutcome(domain, result);
     return result;
   }
 
   // Honor a persisted KV cooldown even when the environment is currently unconfigured,
   // because a previous configured run may have hit the daily write limit.
-  if (now < kvWriteCooldownUntilMs) {
-    const mins = Math.ceil((kvWriteCooldownUntilMs - now) / 60000);
+  if (now < state.kvWriteCooldownUntilMs) {
+    const mins = Math.ceil((state.kvWriteCooldownUntilMs - now) / 60000);
     console.log(
       `[PushClient] Skipping ${domain} — KV write cooldown active (~${mins}m left; resumes after UTC midnight)`,
     );
@@ -233,15 +245,22 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
       });
 
       if (response.ok) {
-        pushContentHashes[domain] = bodyHash;
-        persistPushHashes(pushContentHashes);
+        // Network write is done; now update hashes and last-push atomically. The
+        // actual fetch happened without holding the lock, satisfying the rule
+        // not to hold a lock during network I/O.
         const result: PushResult = {
           domain,
           success: true,
           attempts: attempt,
           contentHash: bodyHash,
         };
-        recordOutcome(domain, result);
+        const outcome = buildOutcome(result);
+        withCollectorLockSync(() => {
+          const pushContentHashes = loadPushHashesFromDisk();
+          pushContentHashes[domain] = bodyHash;
+          persistPushHashesLocked(pushContentHashes);
+          persistLastPushOutcomeLocked(domain, outcome);
+        });
         console.log(`[PushClient] Pushed ${domain} to Cloudflare KV (attempt ${attempt})`);
         return result;
       }
@@ -250,10 +269,7 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
       console.warn(`[PushClient] Push ${domain} failed (attempt ${attempt}): ${response.status} ${errorText}`);
 
       if (isKvQuotaError(response.status, errorText)) {
-        persistKvWriteCooldown(nextUtcMidnightMs());
-        console.error(
-          `[PushClient] Cloudflare KV daily write limit hit — cooling down until ${new Date(nextUtcMidnightMs()).toISOString()}`,
-        );
+        const untilMs = nextUtcMidnightMs();
         const result: PushResult = {
           domain,
           success: false,
@@ -262,7 +278,16 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
           contentHash: bodyHash,
           error: `HTTP ${response.status}: ${errorText}`,
         };
-        recordOutcome(domain, result);
+        // Persist cooldown and outcome atomically under one lock so another
+        // process cannot observe the cooldown without the matching outcome.
+        const outcome = buildOutcome(result);
+        withCollectorLockSync(() => {
+          persistKvWriteCooldownLocked(untilMs);
+          persistLastPushOutcomeLocked(domain, outcome);
+        });
+        console.error(
+          `[PushClient] Cloudflare KV daily write limit hit — cooling down until ${new Date(untilMs).toISOString()}`,
+        );
         return result;
       }
 

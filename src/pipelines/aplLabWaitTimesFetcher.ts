@@ -20,7 +20,7 @@ import {
 } from './metadataHelpers';
 import { parseAplWaitTime } from '../lib/labWait';
 import type { SyncResult } from './types';
-import { writeFileAtomicSync } from '../lib/atomicFile';
+import { writeFileAtomicSync, withCollectorLockSync } from '../lib/atomicFile';
 const APL_API_URL = 'https://qmeapi.albertaprecisionlabs.ca/api/location';
 const DIAGNOSTIC_FILE = path.join(process.cwd(), 'data-diagnostic.json');
 const LAB_SNAPSHOTS_FILE = path.join(process.cwd(), 'data-lab-snapshots.json');
@@ -199,10 +199,6 @@ export async function run(): Promise<SyncResult> {
       ['LAB_LOCATION_WAITS'],
     );
 
-    // Write back (guard withheld residual arrays before RMW serialize)
-    applyWithheldPayloadGuard(existingData);
-    writeFileAtomicSync(DIAGNOSTIC_FILE, JSON.stringify(existingData, null, 2));
-    console.log(`[AplLabWaitTimesFetcher] Wrote ${labLocations.length} lab locations to data-diagnostic.json`);
     // Append numeric-only wait snapshots for historical trend charting.
     // Sentinel values ('Appointments Only' / 'Closed' / 'Not Available') are skipped.
     for (const lab of labLocations) {
@@ -221,8 +217,15 @@ export async function run(): Promise<SyncResult> {
     const retentionCutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
     currentLabSnapshots = currentLabSnapshots.filter(s => new Date(s.timestamp).getTime() > retentionCutoff);
 
-    // Persist lab snapshots
-    writeFileAtomicSync(LAB_SNAPSHOTS_FILE, JSON.stringify(currentLabSnapshots, null, 2));
+    // Write back (guard withheld residual arrays before RMW serialize) and
+    // persist snapshots atomically under the collector lock so fast-tier and
+    // daily processes cannot interleave a partial view of diagnostic data.
+    withCollectorLockSync(() => {
+      applyWithheldPayloadGuard(existingData);
+      writeFileAtomicSync(DIAGNOSTIC_FILE, JSON.stringify(existingData, null, 2));
+      writeFileAtomicSync(LAB_SNAPSHOTS_FILE, JSON.stringify(currentLabSnapshots, null, 2));
+    });
+    console.log(`[AplLabWaitTimesFetcher] Wrote ${labLocations.length} lab locations to data-diagnostic.json`);
     console.log(`[AplLabWaitTimesFetcher] Persisted ${currentLabSnapshots.length} lab wait snapshots`);
 
     return {

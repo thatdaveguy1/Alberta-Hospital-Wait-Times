@@ -36,6 +36,7 @@ const TRENDS_MIN_INTERVAL_MS = 60 * 60 * 1000;
 
 // Graceful shutdown state.
 let shuttingDown = false;
+let shutdownPromise: Promise<void> | null = null;
 const activePipelinePromises = new Set<Promise<unknown>>();
 
 export function setAlertCheckFn(fn: () => void): void {
@@ -158,6 +159,7 @@ function scheduleWrapped(fn: () => Promise<void>, label: string): () => void {
 
 export async function startScheduler(): Promise<void> {
 	shuttingDown = false;
+	shutdownPromise = null;
 	activePipelinePromises.clear();
 
 	// Load persisted sync status
@@ -208,8 +210,24 @@ export function stopScheduler(): void {
  */
 export async function shutdownScheduler(server?: {
 	close: (cb?: (err?: Error) => void) => void;
+	closeAllConnections?: () => void;
 }): Promise<void> {
-	if (shuttingDown) return;
+	if (shutdownPromise) {
+		return shutdownPromise;
+	}
+
+	shutdownPromise = doShutdown(server);
+	return shutdownPromise;
+}
+
+async function doShutdown(server?: {
+	close: (cb?: (err?: Error) => void) => void;
+	closeAllConnections?: () => void;
+}): Promise<void> {
+	if (shuttingDown) {
+		// Already in progress from another signal; shared shutdownPromise awaits.
+		return;
+	}
 	shuttingDown = true;
 	console.log("[Scheduler] Shutting down: stopping intervals...");
 	stopScheduler();
@@ -232,12 +250,28 @@ export async function shutdownScheduler(server?: {
 	);
 
 	if (server) {
+		const closeStart = Date.now();
+		const closeTimeout = 5_000;
 		await new Promise<void>((resolve) => {
-			server.close(() => {
-				console.log("[Scheduler] HTTP server closed.");
+			const timeout = setTimeout(() => {
+				console.warn(`[Scheduler] HTTP server close timed out after ${closeTimeout}ms; forcing sockets closed.`);
+				if (typeof server.closeAllConnections === 'function') {
+					server.closeAllConnections();
+				}
+				resolve();
+			}, closeTimeout);
+
+			server.close((err) => {
+				clearTimeout(timeout);
+				if (err) {
+					console.warn("[Scheduler] HTTP server close error:", err);
+				} else {
+					console.log("[Scheduler] HTTP server closed.");
+				}
 				resolve();
 			});
 		});
+		console.log(`[Scheduler] Server close took ${Date.now() - closeStart}ms`);
 	}
 }
 

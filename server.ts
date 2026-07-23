@@ -143,6 +143,7 @@ async function startServer() {
       const edgePush = Object.entries(lastPushOutcomes).map(([domain, outcome]) => ({
         domain,
         ok: outcome.ok,
+        success: outcome.result.success,
         pushedAt: outcome.pushedAt,
         attempts: outcome.result.attempts,
         skipped: outcome.result.skipped ?? false,
@@ -691,9 +692,16 @@ async function startServer() {
   });
 
   // Graceful shutdown: stop accepting new work, drain active pipelines, close HTTP server.
+  // A shared shutdownPromise makes repeated signals idempotent and avoids early exit.
+  let shutdownInitiated = false;
   for (const signal of ['SIGTERM', 'SIGINT'] as NodeJS.Signals[]) {
     process.on(signal, () => {
       console.log(`[Server] Received ${signal}, initiating graceful shutdown...`);
+      if (shutdownInitiated) {
+        console.log(`[Server] Shutdown already in progress (${signal}), awaiting shared promise...`);
+        return;
+      }
+      shutdownInitiated = true;
       shutdownScheduler(server)
         .then(() => {
           console.log(`[Server] Graceful shutdown complete (${signal}).`);

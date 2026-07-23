@@ -8,6 +8,7 @@ import {
   writeFileAtomicSync,
   withCollectorLockSync,
   withCollectorLock,
+  tempPathFor,
 } from '../../src/lib/atomicFile';
 
 describe('atomic file writes', () => {
@@ -76,5 +77,13 @@ describe('atomic file writes', () => {
     );
     assert.equal(result, 'recovered');
     assert.equal(fs.existsSync(lockFile), false);
+  });
+
+  it('temp path is unique across same-ms calls and includes counter+random', () => {
+    const t1 = tempPathFor(targetFile);
+    const t2 = tempPathFor(targetFile);
+    assert.notEqual(t1, t2);
+    assert.ok(t1.includes('.'));
+    assert.ok(t2.includes('.'));
   });
 });

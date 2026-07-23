@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import type { Hospital, WaitTimeSnapshot, ServiceDisruption } from '../types';
 import type { SyncResult } from './types';
-import { writeFileAtomicSync } from '../lib/atomicFile';
+import { writeFileAtomicSync, withCollectorLockSync } from '../lib/atomicFile';
 
 const AHS_JSON_URL = 'https://www.albertahealthservices.ca/Webapps/WaitTimes/api/waittimes/en';
 const SNAPSHOTS_FILE = path.join(process.cwd(), 'data-snapshots.json');
@@ -206,25 +206,34 @@ export async function fetchErWaitTimes(): Promise<SyncResult> {
       }
     }
 
-    if (updatedHospitals.length > 0) {
-      currentHospitals = updatedHospitals;
-
-      // Write ER wait times to dedicated JSON file
-      writeFileAtomicSync(ER_WAITTIMES_FILE, JSON.stringify({
-        hospitals: currentHospitals,
-        lastUpdated: timestamp,
-      }, null, 2));
-
-      // Check alert thresholds
-      alertChecker?.();
-    }
-
-    // Retain only last 365 days of snapshots
+    // Retain only last 365 days of snapshots before writing.
     const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
     currentSnapshots = currentSnapshots.filter(s => new Date(s.timestamp).getTime() > oneYearAgo);
 
-    // Persist snapshots
-    writeFileAtomicSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots, null, 2));
+    if (updatedHospitals.length > 0) {
+      currentHospitals = updatedHospitals;
+
+      // Write ER wait times and snapshots atomically under the collector lock
+      // so the server and daily sync see a consistent snapshot of both files.
+      withCollectorLockSync(() => {
+        writeFileAtomicSync(ER_WAITTIMES_FILE, JSON.stringify({
+          hospitals: currentHospitals,
+          lastUpdated: timestamp,
+        }, null, 2));
+
+        writeFileAtomicSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots, null, 2));
+      });
+
+      // Check alert thresholds
+      alertChecker?.();
+    } else {
+      // Still write snapshots (retention may have removed old entries) even
+      // when no hospitals were parsed this cycle, but do not overwrite the
+      // good ER wait times file.
+      withCollectorLockSync(() => {
+        writeFileAtomicSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots, null, 2));
+      });
+    }
 
     if (updatedHospitals.length === 0) {
       console.warn('[ErWaitTimesFetcher] No valid facilities parsed from AHS response.');

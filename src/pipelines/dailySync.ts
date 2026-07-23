@@ -13,7 +13,7 @@
 
 import 'dotenv/config';
 import { scrapeDisruptions } from './disruptionsScraper';
-import { runAllPipelinesWithRetry } from './orchestrator';
+import { runAllPipelinesWithRetry, exitCodeForResults } from './orchestrator';
 import { recordDailySyncResults, getSyncStatus } from './syncStatus';
 import { pushToCloudflare, pushAllToCloudflare } from './pushClient';
 import type { SyncResult } from './types';
@@ -61,12 +61,7 @@ export async function runDailySyncFlow(): Promise<SyncResult[]> {
 if (import.meta.url === `file://${process.argv[1]}`) {
   runDailySyncFlow()
     .then((results) => {
-      const failed = results.filter(r => r.status === 'failed').length;
-      if (failed > 0) {
-        console.error(`[DailySync] ${failed} pipeline(s) failed after retry.`);
-        process.exit(1);
-      }
-      process.exit(0);
+      process.exit(exitCodeForResults(results));
     })
     .catch(err => {
       console.error('[DailySync] Fatal error:', err);

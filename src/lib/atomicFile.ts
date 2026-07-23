@@ -23,10 +23,15 @@ function defaultCollectorLockFile(): string {
 
 // --- atomic write helpers ---------------------------------------------------
 
-function tempPathFor(filePath: string): string {
+let tempCounter = 0;
+
+/** Exported for focused collision-coverage tests only. */
+export function tempPathFor(filePath: string): string {
   const dir = path.dirname(filePath);
   const base = path.basename(filePath);
-  return path.join(dir, `.${base}.${process.pid}.${Date.now()}.tmp`);
+  const counter = ++tempCounter;
+  const suffix = `${process.pid}.${Date.now()}.${counter}.${Math.random().toString(36).slice(2, 8)}`;
+  return path.join(dir, `.${base}.${suffix}.tmp`);
 }
 
 export function writeFileAtomicSync(
@@ -70,6 +75,10 @@ export async function writeFileAtomic(
 }
 
 // --- lock helpers -----------------------------------------------------------
+
+// Track locks held by this process to avoid self-deadlock if lock-aware
+// helper boundaries are accidentally nested.
+const heldLocks = new Set<string>();
 
 function sleepSync(ms: number): void {
   // Atomics.wait blocks the thread for a bounded time without busy-waiting.
@@ -140,13 +149,22 @@ export function withCollectorLockSync<T>(
   const maxWaitMs = options.maxWaitMs ?? 10000;
   const staleAfterMs = options.staleAfterMs ?? 60000;
   const pollMs = options.pollMs ?? 50;
+
+  // Reentrant call from the same process — the outer lock holder is still
+  // responsible for releasing the lock.
+  if (heldLocks.has(lockFile)) {
+    return operation();
+  }
+
   const deadline = Date.now() + maxWaitMs;
 
   while (true) {
     if (tryAcquireLock(lockFile, staleAfterMs)) {
+      heldLocks.add(lockFile);
       try {
         return operation();
       } finally {
+        heldLocks.delete(lockFile);
         releaseLock(lockFile);
       }
     }
@@ -169,13 +187,21 @@ export async function withCollectorLock<T>(
   const maxWaitMs = options.maxWaitMs ?? 10000;
   const staleAfterMs = options.staleAfterMs ?? 60000;
   const pollMs = options.pollMs ?? 50;
+
+  // Reentrant call from the same process.
+  if (heldLocks.has(lockFile)) {
+    return operation();
+  }
+
   const deadline = Date.now() + maxWaitMs;
 
   while (true) {
     if (tryAcquireLock(lockFile, staleAfterMs)) {
+      heldLocks.add(lockFile);
       try {
         return await operation();
       } finally {
+        heldLocks.delete(lockFile);
         releaseLock(lockFile);
       }
     }

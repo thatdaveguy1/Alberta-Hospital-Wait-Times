@@ -4,7 +4,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { SyncResult, SyncStatus } from './types';
-import { writeFileAtomicSync } from '../lib/atomicFile';
+import { writeFileAtomicSync, withCollectorLockSync } from '../lib/atomicFile';
 
 const SYNC_STATUS_FILE = path.join(process.cwd(), 'data-sync-status.json');
 const HISTORY_FILE = path.join(process.cwd(), 'data-sync-history.jsonl');
@@ -60,7 +60,7 @@ export function normalizeResultsByIdentity(results: SyncResult[]): SyncResult[] 
 export function loadSyncStatusFromDisk(): void {
   try {
     if (fs.existsSync(SYNC_STATUS_FILE)) {
-      const data = fs.readFileSync(SYNC_STATUS_FILE, 'utf8');
+      const data = withCollectorLockSync(() => fs.readFileSync(SYNC_STATUS_FILE, 'utf8'));
       currentStatus = JSON.parse(data) as SyncStatus;
       currentStatus.results = normalizeResultsByIdentity(currentStatus.results);
       console.log(`[SyncStatus] Loaded from disk. Last sync: ${currentStatus.lastSyncTimestamp}`);
@@ -84,10 +84,14 @@ export function applyErWaitTimesUpdate(status: SyncStatus, result: SyncResult, n
 
 export function recordErWaitTimesUpdate(result: SyncResult): void {
   // Reload from disk first so we don't clobber a standalone daily-sync run that wrote
-  // an updated status while the server was running.
-  loadSyncStatusFromDisk();
-  currentStatus = applyErWaitTimesUpdate(currentStatus, result);
-  saveToDisk();
+  // an updated status while the server was running, then write back under the
+  // cross-process collector lock so concurrent fast/daily processes cannot
+  // interleave read-modify-write cycles.
+  withCollectorLockSync(() => {
+    loadSyncStatusFromDisk();
+    currentStatus = applyErWaitTimesUpdate(currentStatus, result);
+    saveToDisk();
+  });
   if (result.status === 'failed') {
     appendHistory(buildFastTierSyncHistoryEntry(result, 'er'));
   }
@@ -106,11 +110,11 @@ export function applyLabWaitsUpdate(status: SyncStatus, result: SyncResult, nowM
 }
 
 export function recordLabWaitsUpdate(result: SyncResult): void {
-  // Reload from disk first so we don't clobber a standalone daily-sync run that wrote
-  // an updated status while the server was running.
-  loadSyncStatusFromDisk();
-  currentStatus = applyLabWaitsUpdate(currentStatus, result);
-  saveToDisk();
+  withCollectorLockSync(() => {
+    loadSyncStatusFromDisk();
+    currentStatus = applyLabWaitsUpdate(currentStatus, result);
+    saveToDisk();
+  });
   if (result.status === 'failed') {
     appendHistory(buildFastTierSyncHistoryEntry(result, 'lab'));
   }
@@ -160,12 +164,13 @@ export function applyDailySyncResults(status: SyncStatus, results: SyncResult[],
 
 export function recordDailySyncResults(results: SyncResult[]): void {
   // Reload from disk first so a standalone daily-sync CLI process does not
-  // clobber ER/lab timestamps written by the long-running scheduler.
-  loadSyncStatusFromDisk();
-
-  currentStatus = applyDailySyncResults(currentStatus, results);
-
-  saveToDisk();
+  // clobber ER/lab timestamps written by the long-running scheduler, then
+  // write back under the cross-process collector lock.
+  withCollectorLockSync(() => {
+    loadSyncStatusFromDisk();
+    currentStatus = applyDailySyncResults(currentStatus, results);
+    saveToDisk();
+  });
   appendHistory(buildDailySyncHistoryEntry(results, currentStatus.status, currentStatus.lastSyncTimestamp!));
 }
 
@@ -285,10 +290,9 @@ function trimHistoryIfNeeded(): void {
       }
     });
 
-    fs.writeFileSync(
+    writeFileAtomicSync(
       HISTORY_FILE,
       kept.length > 0 ? `${kept.join('\n')}\n` : '',
-      'utf8',
     );
   } catch (err) {
     console.error('[SyncStatus] Error trimming history:', err);
@@ -301,4 +305,13 @@ function saveToDisk(): void {
   } catch (err) {
     console.error('[SyncStatus] Error saving to disk:', err);
   }
+}
+
+// Lock-aware helper used by tests and callers that need to inspect the file
+// under the same cross-process lock.
+export function loadSyncStatusFromDiskLocked(): SyncStatus {
+  return withCollectorLockSync(() => {
+    loadSyncStatusFromDisk();
+    return { ...currentStatus };
+  });
 }
