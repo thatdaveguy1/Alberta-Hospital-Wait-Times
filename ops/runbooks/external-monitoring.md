@@ -33,9 +33,10 @@ Run two checks at a cadence of your choosing (e.g. every 1–5 minutes):
 ## Recommended triggers
 
 Alert when either check fails for more than one consecutive probe.  The local
-monitor (`scripts/run-uptime-check.sh`) writes to `logs/monitor-state.json` and
-uses a 10-minute dedupe window.  An external monitor should have its own
-separate state and not depend on local files.
+monitor (`scripts/run-uptime-check.sh`) writes per-endpoint
+`logs/monitor-state-<id>.json` files and uses a 30-minute dedupe window.
+An external monitor should have its own separate state and not depend on local
+files.
 
 ## Provider-neutral requirements
 

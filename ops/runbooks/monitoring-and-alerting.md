@@ -9,7 +9,7 @@ Last known state: 2026-07-23.
 | Health endpoint | `/api/health` | Returns overall status, critical/soft issues, banner message, and edge push outcomes. Always HTTP 200. |
 | Health check | `scripts/check-data-health.mjs` | Exits 0 on `ok` or `degraded` (or 1 with `--strict`), 1 on `down`/network/parse failure. `--json` mode emits a single line for the notifier. |
 | Uptime runner | `scripts/run-uptime-check.sh` | Probes local and production `/api/health` every 10 minutes via the `com.davemini.alberta-hospital-uptime` LaunchAgent. |
-| Notifier | `scripts/notifier.mjs` | Reads health check JSON, persists `logs/monitor-state.json`, and sends Discord webhook for actionable state transitions only. |
+| Notifier | `scripts/notifier.mjs` | Reads health check JSON, persists per-endpoint `logs/monitor-state-<id>.json` files, and sends Discord webhook for actionable state transitions only. |
 | LaunchAgent | `launchd/com.davemini.alberta-hospital-uptime.plist` | Runs `run-uptime-check.sh` every 600 seconds. |
 | Logs | `logs/uptime.jsonl` | One JSON line per probe with `ts`, `url`, `ok`, `exit`, `summary`. |
 
