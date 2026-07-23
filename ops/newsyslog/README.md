@@ -17,6 +17,17 @@ keeps disk usage predictable.
 Each log keeps the current file plus up to 7 archives (`count 7`) and rotates
 daily at midnight (`$D0`).  `logs/uptime.jsonl` keeps 14 archives.
 
+## Flags
+
+- `N` — no `syslogd` signal is sent at rotation time (LaunchAgents redirect
+their own stdout/stderr, so `syslogd` does not own these files).
+- `Z` — compress rotated archives with `gzip` to save disk space.
+- `-` was the previous placeholder but has been replaced with explicit flags.
+
+Do not use `G` on a fixed log path: on macOS (and BSD) `G` means the logfile
+name is a shell glob pattern, not that the archive is gzip-compressed.  Use `Z`
+for gzip compression and `N` to suppress the default `SIGHUP` to `syslogd`.
+
 ## Installation (manual, requires admin)
 
 Do not silently edit `/etc` during normal setup.  Run this as an explicit
@@ -54,6 +65,3 @@ scripts/preflight.sh
   or the username changes, update the paths before installing.
 - `newsyslog` can only rotate files it can read/write.  LaunchAgent logs are
   owned by the logged-in user, so `davemini:staff` is used in the template.
-- The `G` flag means the old log file is compressed with `gzip` after rotation.
-- The `Z` flag on `uptime.jsonl` rotates by size or age only (it does not
-  compress).

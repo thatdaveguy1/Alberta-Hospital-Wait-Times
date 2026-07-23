@@ -21,20 +21,22 @@ load_env
 LOCAL_URL="${LOCAL_URL:-http://127.0.0.1:3004/api/health}"
 PROD_URL="${PROD_URL:-https://alberta-hospital-wait-times.longmad.workers.dev/api/health}"
 LOG_FILE="logs/uptime.jsonl"
-MONITOR_STATE_FILE="${MONITOR_STATE_FILE:-logs/monitor-state.json}"
+MONITOR_STATE_DIR="${MONITOR_STATE_DIR:-logs}"
 overall_exit=0
 
+# Notify using a per-endpoint monitor ID. Webhook is read from env only
+# (never passed as CLI argument) to avoid ps leakage.
 notify() {
   local result_json="$1"
-  local webhook_url="${ALERT_DISCORD_WEBHOOK_URL:-}"
   node scripts/notifier.mjs \
     --health-json "$result_json" \
-    --state-file "$MONITOR_STATE_FILE" \
-    ${webhook_url:+"--webhook-url" "$webhook_url"}
+    --state-dir "$MONITOR_STATE_DIR" \
+    --monitor-id "$(node -e 'console.log(JSON.parse(process.argv[1]).monitorId || "default")' "$result_json")"
 }
 
 check_url() {
   local url="$1"
+  local label="$2"
   local stderr_file exit_code result_json ts json_line ok
 
   stderr_file="$(mktemp)"
@@ -57,7 +59,7 @@ check_url() {
 
   # Alert even when the JSON parse itself failed, so notifier sees endpoint failures.
   if [[ -z "$result_json" ]]; then
-    result_json="$(node -e 'console.log(JSON.stringify({ok:false,overall:"down",criticalDomains:[],summary:"check-data-health produced no JSON",url:process.argv[1],httpStatus:null,error:"no_json"}))' "$url")"
+    result_json="$(node -e 'console.log(JSON.stringify({ok:false,overall:"down",criticalDomains:[],summary:"check-data-health produced no JSON",url:process.argv[1],httpStatus:null,error:"no_json",monitorId:process.argv[2]}))' "$url" "$label")"
   fi
 
   ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
@@ -67,6 +69,7 @@ check_url() {
       const r = JSON.parse(resultJson);
       console.log(JSON.stringify({
         ts,
+        label: r.monitorId,
         url: r.url,
         ok: ok === "true" && r.ok === true,
         exit: ok === "true" ? 0 : 1,
@@ -81,7 +84,7 @@ check_url() {
   notify "$result_json" || true
 }
 
-check_url "$LOCAL_URL"
-check_url "$PROD_URL"
+check_url "$LOCAL_URL" local
+check_url "$PROD_URL" prod
 
 exit "$overall_exit"

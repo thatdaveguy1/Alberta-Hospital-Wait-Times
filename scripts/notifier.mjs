@@ -1,6 +1,6 @@
 // notifier.mjs — state-transition alerting for local monitoring.
-// Reads a health check JSON object, maintains deduplicated monitor state,
-// and sends a Discord webhook only for actionable transitions.
+// Reads a health check JSON object, maintains deduplicated monitor state keyed
+// by monitorId, and sends a Discord webhook only for actionable transitions.
 // Missing webhook config is safe: state is still updated and logged.
 
 import fs from 'node:fs';
@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const DEFAULT_DEDUPE_MS = 10 * 60 * 1000; // 10 minutes
-export const DEFAULT_STATE_FILE = 'logs/monitor-state.json';
+export const DEFAULT_STATE_DIR = 'logs';
 
 export function defaultState() {
   return {
@@ -17,6 +17,11 @@ export function defaultState() {
     endpointFailureSentAt: null,
     lastAlert: null,
   };
+}
+
+function monitorStateFile(stateDir, monitorId) {
+  const safeId = monitorId.replace(/[^A-Za-z0-9_-]/g, '_');
+  return path.join(stateDir, `monitor-state-${safeId}.json`);
 }
 
 export function loadMonitorState(stateFile) {
@@ -29,6 +34,9 @@ export function loadMonitorState(stateFile) {
       criticalAlerted: Array.isArray(parsed?.criticalAlerted)
         ? parsed.criticalAlerted
         : [],
+      lastAlert: parsed?.lastAlert
+        ? { ...parsed.lastAlert }
+        : null,
     };
   } catch (err) {
     if (err?.code !== 'ENOENT') {
@@ -148,7 +156,8 @@ export function buildRecoveryPayload(input, previousOverall, now = Date.now()) {
 }
 
 export function downFingerprint(overall, criticalDomains) {
-  return `down:${overall}:${criticalDomains.join('|')}`;
+  const sorted = [...criticalDomains].sort();
+  return `down:${overall}:${sorted.join('|')}`;
 }
 
 export function decideAlerts({
@@ -167,7 +176,7 @@ export function decideAlerts({
 
   const previousOverall = next.overall;
   const criticalDomains = Array.isArray(input.criticalDomains)
-    ? input.criticalDomains
+    ? [...input.criticalDomains].sort()
     : [];
 
   // Endpoint / network / JSON parse failure.
@@ -188,18 +197,14 @@ export function decideAlerts({
         fingerprint: fp,
         payload: buildEndpointFailurePayload(input, now),
       });
-      next.endpointFailureSentAt = now;
-      next.lastAlert = { fingerprint: fp, sentAt: now, type: 'endpoint' };
+      // sentAt is only set once the send is confirmed in sendAlerts.
+      // We leave endpointFailureSentAt alone here; it will be set on confirmed send.
     }
     if (next.overall !== 'down') {
       next.overall = 'down';
     }
     return { state: next, events };
   }
-
-  // If the health check fetched successfully but the body says down, treat it as
-  // a down state (not a network endpoint failure).
-  next.endpointFailureSentAt = null;
 
   const currentOverall =
     input.overall === 'ok' || input.overall === 'degraded'
@@ -226,7 +231,7 @@ export function decideAlerts({
         fingerprint: fp,
         payload: buildDownPayload(input, previousOverall, now),
       });
-      next.lastAlert = { fingerprint: fp, sentAt: now, type: 'down-transition' };
+      next.criticalAlerted = criticalDomains;
     } else if (newCritical.length > 0) {
       for (const domain of newCritical) {
         events.push({
@@ -240,7 +245,9 @@ export function decideAlerts({
           ),
         });
       }
-      next.lastAlert = { fingerprint: fp, sentAt: now, type: 'new-critical' };
+      next.criticalAlerted = criticalDomains;
+      next.lastAlert = { fingerprint: fp, sentAt: null, type: 'new-critical' };
+      return { state: next, events };
     } else if (!sameFp || !withinDedupe) {
       // Either fingerprint changed or dedupe window elapsed.
       events.push({
@@ -248,7 +255,7 @@ export function decideAlerts({
         fingerprint: fp,
         payload: buildDownPayload(input, previousOverall, now),
       });
-      next.lastAlert = { fingerprint: fp, sentAt: now, type: 'down-transition' };
+      next.criticalAlerted = criticalDomains;
     } else {
       events.push({
         type: 'deduped',
@@ -257,7 +264,7 @@ export function decideAlerts({
       });
     }
 
-    next.criticalAlerted = criticalDomains;
+    next.lastAlert = { fingerprint: fp, sentAt: null, type: 'down-transition' };
   } else {
     // currentOverall is ok or degraded.
     if (previousOverall === 'down') {
@@ -267,7 +274,7 @@ export function decideAlerts({
         fingerprint: fp,
         payload: buildRecoveryPayload(input, previousOverall, now),
       });
-      next.lastAlert = { fingerprint: fp, sentAt: now, type: 'recovery' };
+      next.lastAlert = { fingerprint: fp, sentAt: null, type: 'recovery' };
     } else {
       events.push({
         type: 'none',
@@ -343,20 +350,53 @@ export async function sendAlerts({
     }
   }
 
-
   return { sent, skipped, results };
+}
+
+// Update alert-state timestamps/endpointFailureSentAt only for confirmed sends.
+// This ensures that a failed send leaves state ready to retry on the next run.
+function applySendSuccess(state, events, results) {
+  const next = { ...state };
+  const resultByFingerprint = new Map(results.map((r) => [r.fingerprint, r]));
+
+  for (const event of events) {
+    if (!event.payload) continue;
+    const result = resultByFingerprint.get(event.fingerprint);
+    if (!result || !result.sent) continue;
+
+    if (event.type === 'endpoint') {
+      next.endpointFailureSentAt = result.sentAt;
+    }
+
+    if (['down-transition', 'new-critical', 'recovery'].includes(event.type)) {
+      next.lastAlert = {
+        fingerprint: event.fingerprint,
+        sentAt: result.sentAt,
+        type: event.type,
+      };
+    }
+  }
+  return next;
 }
 
 export async function runNotifier({
   input,
-  stateFile = DEFAULT_STATE_FILE,
+  stateDir = DEFAULT_STATE_DIR,
+  stateFile = '',
+  monitorId = '',
   webhookUrl = '',
   dedupeMs = DEFAULT_DEDUPE_MS,
   sendImpl = defaultSendImpl,
   log = console.error,
   now = Date.now(),
 }) {
-  const state = loadMonitorState(stateFile);
+  const resolvedStateFile =
+    stateFile ||
+    monitorStateFile(
+      stateDir,
+      monitorId || input.monitorId || input.url || 'default',
+    );
+  const state = loadMonitorState(resolvedStateFile);
   const { state: nextState, events } = decideAlerts({
     input,
     state,
@@ -369,24 +409,27 @@ export async function runNotifier({
     sendImpl,
     log,
   });
-  saveMonitorState(stateFile, nextState);
-  return { state: nextState, events, sent, skipped, results };
+
+  const resultsWithTimestamp = results.map((r) => ({
+    ...r,
+    sentAt: r.sent ? now : undefined,
+  }));
+
+  const stateAfterSend = applySendSuccess(nextState, events, resultsWithTimestamp);
+  saveMonitorState(resolvedStateFile, stateAfterSend);
+  return { state: stateAfterSend, events, sent, skipped, results: resultsWithTimestamp, stateFile: resolvedStateFile };
 }
 
 function parseArgs(argv) {
   const args = {
+    stateDir:
+      process.env.MONITOR_STATE_DIR || DEFAULT_STATE_DIR,
     stateFile:
-      process.env.MONITOR_STATE_FILE ||
-      process.argv.find((_, i, a) => a[i - 1] === '--state-file') ||
-      DEFAULT_STATE_FILE,
-    webhookUrl:
-      process.env.ALERT_DISCORD_WEBHOOK_URL ||
-      process.argv.find((_, i, a) => a[i - 1] === '--webhook-url') ||
-      '',
+      process.env.MONITOR_STATE_FILE || '',
+    monitorId: '',
+    webhookUrl: process.env.ALERT_DISCORD_WEBHOOK_URL || '',
     dedupeMs: Number(
-      process.env.ALERT_DEDUPE_MS ||
-        process.argv.find((_, i, a) => a[i - 1] === '--dedupe-ms') ||
-        DEFAULT_DEDUPE_MS,
+      process.env.ALERT_DEDUPE_MS || DEFAULT_DEDUPE_MS,
     ),
   };
 
@@ -394,10 +437,12 @@ function parseArgs(argv) {
     const a = argv[i];
     if ((a === '--health-json' || a === '-j') && i + 1 < argv.length) {
       args.healthJson = argv[++i];
+    } else if (a === '--state-dir' && i + 1 < argv.length) {
+      args.stateDir = argv[++i];
     } else if (a === '--state-file' && i + 1 < argv.length) {
       args.stateFile = argv[++i];
-    } else if (a === '--webhook-url' && i + 1 < argv.length) {
-      args.webhookUrl = argv[++i];
+    } else if (a === '--monitor-id' && i + 1 < argv.length) {
+      args.monitorId = argv[++i];
     } else if (a === '--dedupe-ms' && i + 1 < argv.length) {
       args.dedupeMs = Number(argv[++i]);
     }
@@ -418,7 +463,7 @@ if (isMain()) {
   const args = parseArgs(process.argv);
   if (!args.healthJson) {
     console.error(
-      'Usage: node notifier.mjs --health-json <json> [--state-file <path>] [--webhook-url <url>] [--dedupe-ms <ms>]',
+      'Usage: node notifier.mjs --health-json <json> [--monitor-id <id>] [--state-dir <dir>] [--state-file <path>] [--dedupe-ms <ms>]',
     );
     process.exit(0);
   }
@@ -433,7 +478,9 @@ if (isMain()) {
 
   runNotifier({
     input,
+    stateDir: args.stateDir,
     stateFile: args.stateFile,
+    monitorId: args.monitorId,
     webhookUrl: args.webhookUrl,
     dedupeMs: args.dedupeMs,
   })

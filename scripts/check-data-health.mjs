@@ -35,6 +35,13 @@ function summarize(body) {
   return `health=${status} syncStale=${syncStale} lastSyncAge=${age} domains=${domains} critical=${critical} soft=${soft} checks=[${checks}]${edge}`;
 }
 
+function makeMonitorId(url) {
+  // Distinct ID per endpoint so local and prod state never share a dedupe window.
+  if (url.includes('127.0.0.1') || url.includes('localhost')) return 'local';
+  if (url.includes('workers.dev')) return 'prod';
+  return 'other';
+}
+
 function makeResult({ ok, overall, body, url: u, httpStatus, error }) {
   const criticalDomains = Array.isArray(body?.criticalIssues)
     ? body.criticalIssues.map((d) => d.domain)
@@ -47,6 +54,7 @@ function makeResult({ ok, overall, body, url: u, httpStatus, error }) {
     url: u,
     httpStatus: httpStatus ?? null,
     error: error ?? null,
+    monitorId: makeMonitorId(u),
   };
 }
 

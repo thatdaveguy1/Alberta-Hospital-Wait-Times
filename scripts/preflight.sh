@@ -6,6 +6,19 @@ cd "$REPO_ROOT"
 
 echo "=== AlbertaHospitals preflight ==="
 
+# Load repo .env safely before checking credentials.
+load_env() {
+  [[ -f .env ]] || return 0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%%$'\r'}"
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    if [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+      export "$line"
+    fi
+  done < .env
+}
+load_env
+
 fail=0
 
 # 1. Build artifact exists and is reasonably fresh.
@@ -71,16 +84,14 @@ fi
 # 5. newsyslog config syntax (non-destructive validation; does not install).
 for conf in ops/newsyslog/*.conf; do
   [[ -f "$conf" ]] || continue
-  # newsyslog -v requires root and installation; syntax can be checked with a
-  # dry-run parser in Python instead.
-  if python3 scripts/validate-newsyslog.py "$conf" 2>/dev/null; then
+  if python3 scripts/validate-newsyslog.py "$conf" >/dev/null 2>&1; then
     echo "OK: $conf"
   else
     echo "WARN: $conf validation skipped" >&2
   fi
 done
 
-# 6. Required environment variables present.
+# 6. Required environment variables present (loaded from .env above).
 if [[ -z "${PUSH_SECRET:-}" || -z "${CLOUDFLARE_WORKER_URL:-}" ]]; then
   echo "FAIL: .env must define PUSH_SECRET and CLOUDFLARE_WORKER_URL" >&2
   fail=1

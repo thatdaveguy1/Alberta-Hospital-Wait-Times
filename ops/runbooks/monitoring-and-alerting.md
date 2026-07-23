@@ -33,8 +33,10 @@ It **does not** alert for:
 - `DEFAULT_DEDUPE_MS` is 10 minutes.
 - Down states are fingerprinted by `overall` plus sorted `criticalDomains`.
 - Endpoint failures are deduped by the probe URL.
-- State is stored in `logs/monitor-state.json` (gitignored, never
-  `data-sync-status.json`).
+- State is stored per endpoint in `logs/monitor-state-<id>.json`
+  (gitignored, never `data-sync-status.json`).  `local` and `prod` have
+  independent state files so a local failure and a production recovery cannot
+  interfere with each other.
 
 ## Missing webhook
 
@@ -47,8 +49,8 @@ remains accurate.
 See `.env.example`:
 
 - `ALERT_DISCORD_WEBHOOK_URL` — optional Discord webhook (to be wired later)
-- `MONITOR_STATE_FILE` — optional override for state path (default
-  `logs/monitor-state.json`)
+- `MONITOR_STATE_DIR` — optional override for state directory (default
+  `logs`)
 - `ALERT_DEDUPE_MS` — optional override (default 600000 ms)
 
 ## Manual checks
@@ -61,7 +63,7 @@ npm run health:check
 node scripts/check-data-health.mjs --json http://127.0.0.1:3004/api/health
 
 # Simulate notifier manually
-node scripts/notifier.mjs --health-json '{"ok":false,"overall":"down","criticalDomains":["er-waittimes"],"url":"http://127.0.0.1:3004/api/health"}'
+node scripts/notifier.mjs --health-json '{"ok":false,"overall":"down","criticalDomains":["er-waittimes"],"url":"http://127.0.0.1:3004/api/health","monitorId":"local"}'
 
 # Preflight
 scripts/preflight.sh
