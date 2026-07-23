@@ -171,9 +171,21 @@ function computeErTrendFacility(
   return result;
 }
 
+export const LAB_TRENDS_BLOB_BUDGET_BYTES = 5 * 1024 * 1024; // conservative; Cloudflare hard limit is 25 MiB
+
+export interface LabTrendPoint {
+  timestamp: string;
+  waitTime: number;
+}
+
+export interface LabTrendsBlob {
+  provincial: Record<Range, LabTrendPoint[]>;
+  labs: Record<string, Record<Range, LabTrendPoint[]>>;
+}
+
 // --- Lab trend aggregates ---
 
-function computeLabTrendProvincial(snapshots: LabWaitSnapshot[], range: Range): ErTrendProvincialPoint[] {
+export function computeLabTrendProvincial(snapshots: LabWaitSnapshot[], range: Range): ErTrendProvincialPoint[] {
   const cutoff = getRangeCutoff(range);
   const filtered = snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff);
 
@@ -189,6 +201,80 @@ function computeLabTrendProvincial(snapshots: LabWaitSnapshot[], range: Range): 
   });
   averages.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   return averages;
+}
+
+export function computeLabTrendFacility(snapshots: LabWaitSnapshot[], labId: string, range: Range): LabTrendPoint[] {
+  const cutoff = getRangeCutoff(range);
+  const filtered = snapshots.filter(s => s.labId === labId && new Date(s.timestamp).getTime() >= cutoff);
+
+  if (range === '24h') {
+    const points = filtered.map(s => ({ timestamp: s.timestamp, waitTime: s.waitTime }));
+    points.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    return points;
+  }
+
+  // Downsample to conserve KV value size while keeping enough resolution for charts.
+  const intervalMs = range === '7d' ? 60 * 60 * 1000 : 4 * 60 * 60 * 1000;
+  const buckets: { [bucketTime: string]: number[] } = {};
+
+  for (const snap of filtered) {
+    const time = new Date(snap.timestamp).getTime();
+    const roundedTime = Math.floor(time / intervalMs) * intervalMs;
+    const bucketStr = new Date(roundedTime).toISOString();
+    if (!buckets[bucketStr]) buckets[bucketStr] = [];
+    buckets[bucketStr].push(snap.waitTime);
+  }
+
+  const result = Object.entries(buckets).map(([timestamp, waitTimes]) => {
+    const valid = waitTimes.filter(t => t >= 0);
+    const sum = valid.reduce((acc, t) => acc + t, 0);
+    return { timestamp, waitTime: valid.length > 0 ? Math.round(sum / valid.length) : 0 };
+  });
+
+  result.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  return result;
+}
+
+/**
+ * Build the `lab-trends` blob from snapshots. Returns null when the serialized
+ * payload exceeds the conservative 5 MiB budget so a runaway dataset cannot
+ * exhaust the Cloudflare KV value limit (25 MiB).
+ */
+export function buildLabTrendsBlob(
+  snapshots: LabWaitSnapshot[],
+  budgetBytes: number = LAB_TRENDS_BLOB_BUDGET_BYTES,
+): LabTrendsBlob | null {
+  if (snapshots.length === 0) return { provincial: { '24h': [], '7d': [], '30d': [] }, labs: {} };
+
+  const provincial: Record<Range, ErTrendProvincialPoint[]> = {
+    '24h': [],
+    '7d': [],
+    '30d': [],
+  };
+  for (const range of RANGES) {
+    provincial[range] = computeLabTrendProvincial(snapshots, range);
+  }
+
+  const labIds = [...new Set(snapshots.map(s => s.labId))].sort();
+  const labs: Record<string, Record<Range, LabTrendPoint[]>> = {};
+  for (const labId of labIds) {
+    labs[labId] = {
+      '24h': computeLabTrendFacility(snapshots, labId, '24h'),
+      '7d': computeLabTrendFacility(snapshots, labId, '7d'),
+      '30d': computeLabTrendFacility(snapshots, labId, '30d'),
+    };
+  }
+
+  const blob: LabTrendsBlob = { provincial, labs };
+  const serialized = JSON.stringify(blob);
+  const bytes = Buffer.byteLength(serialized);
+  if (bytes > budgetBytes) {
+    console.warn(
+      `[TrendsPusher] lab-trends blob ${bytes} bytes exceeds ${budgetBytes} byte budget — not building per-lab trends`,
+    );
+    return null;
+  }
+  return blob;
 }
 
 /**
@@ -246,18 +332,8 @@ export async function pushErTrends(
  * Call after each APL lab wait times fetch.
  */
 export async function pushLabTrends(snapshots: LabWaitSnapshot[]): Promise<void> {
-  if (snapshots.length === 0) return;
-
-  const provincial: Record<Range, ErTrendProvincialPoint[]> = {
-    '24h': [],
-    '7d': [],
-    '30d': [],
-  };
-  for (const range of RANGES) {
-    provincial[range] = computeLabTrendProvincial(snapshots, range);
-  }
-
-  const blob = { provincial };
+  const blob = buildLabTrendsBlob(snapshots);
+  if (!blob) return;
 
   const result = await pushToCloudflare('lab-trends', blob);
   if (result.skipped) {

@@ -56,6 +56,7 @@ type ErTrendsBlob = {
 
 type LabTrendsBlob = {
   provincial?: Record<string, unknown[]>;
+  labs?: Record<string, Record<string, unknown[]>>;
 };
 
 async function readErTrendsBlob(kv: KVNamespace): Promise<ErTrendsBlob | null> {
@@ -234,6 +235,14 @@ app.get('/api/trends/labs', async (c) => {
 });
 
 app.get('/api/trends/labs/:labId', async (c) => {
+  const { labId } = c.req.param();
+  const range = c.req.query('range') ?? '24h';
+  if (!['24h', '7d', '30d'].includes(range)) {
+    return c.json([]);
+  }
+  const blob = await readLabTrendsBlob(c.env.SNAPSHOTS_KV);
+  const labData = blob?.labs?.[labId]?.[range];
+  if (Array.isArray(labData)) return c.json(labData);
   return c.json([]);
 });
 app.get('/api/trends/:hospitalId', async (c) => {
@@ -413,6 +422,22 @@ app.post('/api/push/:domain', async (c) => {
     console.error(`[push/${domain}] KV write failed:`, message);
     return c.json({ error: 'KV write failed', detail: message }, 500);
   }
+});
+
+// --- 404 for unknown /api/* routes ---
+// Hono's default 404 falls through to app.get('*'), which would return the SPA
+// fallback with HTTP 200. Add a catch-all GET /api/* handler that returns JSON 404
+// while leaving the non-API fallback intact. It is registered after explicit API
+// routes but before the SPA wildcard, so unknown /api paths hit this handler.
+app.get('/api/*', async (c) => {
+  const path = c.req.path;
+  if (path.startsWith('/api/')) {
+    return c.json({ error: 'Not found', path }, 404);
+  }
+  return c.json({
+    error: 'Frontend not served by Worker. Visit the Pages URL.',
+    api: 'Use /api/* endpoints',
+  });
 });
 
 // --- SPA Fallback (for Cloudflare Pages integration) ---
