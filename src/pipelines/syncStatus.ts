@@ -40,11 +40,28 @@ export function getSyncStatus(): SyncStatus {
   return currentStatus;
 }
 
+/** Return a result list containing only the latest entry for each (domain, pipeline) pair. */
+export function normalizeResultsByIdentity(results: SyncResult[]): SyncResult[] {
+  const latestByKey = new Map<string, SyncResult>();
+  for (const result of results) {
+    const key = `${result.domain}|${result.pipeline}`;
+    const existing = latestByKey.get(key);
+    const resultMs = new Date(result.timestamp).getTime();
+    const existingMs = existing ? new Date(existing.timestamp).getTime() : -Infinity;
+    // Latest timestamp wins; on exact ties the later input order wins.
+    if (!existing || resultMs >= existingMs) {
+      latestByKey.set(key, result);
+    }
+  }
+  return Array.from(latestByKey.values());
+}
+
 export function loadSyncStatusFromDisk(): void {
   try {
     if (fs.existsSync(SYNC_STATUS_FILE)) {
       const data = fs.readFileSync(SYNC_STATUS_FILE, 'utf8');
       currentStatus = JSON.parse(data) as SyncStatus;
+      currentStatus.results = normalizeResultsByIdentity(currentStatus.results);
       console.log(`[SyncStatus] Loaded from disk. Last sync: ${currentStatus.lastSyncTimestamp}`);
     }
   } catch (err) {
@@ -52,61 +69,54 @@ export function loadSyncStatusFromDisk(): void {
   }
 }
 
+/** Pure helper: merge a single ER result into a status object. */
+export function applyErWaitTimesUpdate(status: SyncStatus, result: SyncResult, nowMs = Date.now()): SyncStatus {
+  const next: SyncStatus = { ...status };
+  // Only advance the "last success" timestamp when the fetch actually succeeds.
+  if (result.status === 'success') {
+    next.erWaitTimesLastUpdate = result.timestamp;
+  }
+  next.erWaitTimesNextUpdate = new Date(nowMs + 10 * 60 * 1000).toISOString();
+  next.results = normalizeResultsByIdentity([...next.results, result]);
+  return next;
+}
+
 export function recordErWaitTimesUpdate(result: SyncResult): void {
   // Reload from disk first so we don't clobber a standalone daily-sync run that wrote
   // an updated status while the server was running.
   loadSyncStatusFromDisk();
-  // Only advance the "last success" timestamp when the fetch actually succeeds.
-  if (result.status === 'success') {
-    currentStatus.erWaitTimesLastUpdate = result.timestamp;
-  }
-  currentStatus.erWaitTimesNextUpdate = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-  // Update or append the result
-  const existingIdx = currentStatus.results.findIndex(
-    r => r.pipeline === result.pipeline
-  );
-  if (existingIdx >= 0) {
-    currentStatus.results[existingIdx] = result;
-  } else {
-    currentStatus.results.push(result);
-  }
+  currentStatus = applyErWaitTimesUpdate(currentStatus, result);
   saveToDisk();
   if (result.status === 'failed') {
     appendHistory(buildFastTierSyncHistoryEntry(result, 'er'));
   }
 }
 
+/** Pure helper: merge a single lab result into a status object. */
+export function applyLabWaitsUpdate(status: SyncStatus, result: SyncResult, nowMs = Date.now()): SyncStatus {
+  const next: SyncStatus = { ...status };
+  // Only advance the "last success" timestamp when the fetch actually succeeds.
+  if (result.status === 'success') {
+    next.labWaitsLastUpdate = result.timestamp;
+  }
+  next.labWaitsNextUpdate = new Date(nowMs + 10 * 60 * 1000).toISOString();
+  next.results = normalizeResultsByIdentity([...next.results, result]);
+  return next;
+}
+
 export function recordLabWaitsUpdate(result: SyncResult): void {
   // Reload from disk first so we don't clobber a standalone daily-sync run that wrote
   // an updated status while the server was running.
   loadSyncStatusFromDisk();
-  // Only advance the "last success" timestamp when the fetch actually succeeds.
-  if (result.status === 'success') {
-    currentStatus.labWaitsLastUpdate = result.timestamp;
-  }
-  currentStatus.labWaitsNextUpdate = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-  const existingIdx = currentStatus.results.findIndex(
-    r => r.pipeline === result.pipeline
-  );
-  if (existingIdx >= 0) {
-    currentStatus.results[existingIdx] = result;
-  } else {
-    currentStatus.results.push(result);
-  }
-
+  currentStatus = applyLabWaitsUpdate(currentStatus, result);
   saveToDisk();
   if (result.status === 'failed') {
     appendHistory(buildFastTierSyncHistoryEntry(result, 'lab'));
   }
 }
 
-export function recordDailySyncResults(results: SyncResult[]): void {
-  // Reload from disk first so a standalone daily-sync CLI process does not
-  // clobber ER/lab timestamps written by the long-running scheduler.
-  loadSyncStatusFromDisk();
-
+/** Pure helper: merge daily results into a status object. */
+export function applyDailySyncResults(status: SyncStatus, results: SyncResult[], nowMs = Date.now()): SyncStatus {
   const allSuccess = results.every(r => r.status === 'success');
   const anyFailed = results.some(r => r.status === 'failed');
   const anySuccess = results.some(r => r.status === 'success');
@@ -114,33 +124,48 @@ export function recordDailySyncResults(results: SyncResult[]): void {
     r => r.status === 'partial' || r.status === 'skipped' || r.status === 'manual'
   );
 
-  // success = all succeeded.
+  // overallStatus: success = all succeeded.
   // partial_success = some succeeded, rest partial/skipped/manual/failed; or any failed with success present.
   // failed = all failed (no successes, no partial/skipped/manual).
   // manual = no successes, only partial/skipped/manual (no failed).
-  let status: SyncStatus['status'];
+  let overallStatus: SyncStatus['status'];
   if (allSuccess) {
-    status = 'success';
+    overallStatus = 'success';
   } else if (anyFailed) {
-    status = anySuccess ? 'partial_success' : 'failed';
+    overallStatus = anySuccess ? 'partial_success' : 'failed';
   } else if (anyPartialSkippedOrManual) {
-    status = anySuccess ? 'partial_success' : 'manual';
+    overallStatus = anySuccess ? 'partial_success' : 'manual';
   } else {
-    status = 'failed';
+    overallStatus = 'failed';
   }
-  currentStatus.status = status;
-  currentStatus.lastSyncTimestamp = new Date().toISOString();
-  currentStatus.nextSyncTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+  const lastSyncTimestamp = new Date(nowMs).toISOString();
 
   // Replace all daily sync results with the new set.
   // Keep ER wait times and lab waits results (different cadence), replace everything else.
-  const fastTierResults = currentStatus.results.filter(
+  const fastTierResults = status.results.filter(
     r => r.pipeline === 'erWaitTimesFetcher' || r.pipeline === 'aplLabWaitTimesFetcher'
   );
-  currentStatus.results = [...fastTierResults, ...results];
+  const normalizedResults = normalizeResultsByIdentity([...fastTierResults, ...results]);
+
+  return {
+    ...status,
+    status: overallStatus,
+    lastSyncTimestamp,
+    nextSyncTimestamp: new Date(nowMs + 24 * 60 * 60 * 1000).toISOString(),
+    results: normalizedResults,
+  };
+}
+
+export function recordDailySyncResults(results: SyncResult[]): void {
+  // Reload from disk first so a standalone daily-sync CLI process does not
+  // clobber ER/lab timestamps written by the long-running scheduler.
+  loadSyncStatusFromDisk();
+
+  currentStatus = applyDailySyncResults(currentStatus, results);
 
   saveToDisk();
-  appendHistory(buildDailySyncHistoryEntry(results, status, currentStatus.lastSyncTimestamp!));
+  appendHistory(buildDailySyncHistoryEntry(results, currentStatus.status, currentStatus.lastSyncTimestamp!));
 }
 
 export function buildDailySyncHistoryEntry(

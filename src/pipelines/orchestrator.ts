@@ -8,7 +8,8 @@ import type { SyncResult, Pipeline } from './types';
 // Tier 1: API fetchers
 import { run as phacRun } from './phacFetcher';
 import { run as openAlbertaRun } from './openAlbertaFetcher';
-import { run as aplLabWaitTimesRun } from './aplLabWaitTimesFetcher';
+// aplLabWaitTimesFetcher is fast-tier only (10 min) and stays out of the daily
+// orchestrator so sync-status does not accumulate duplicate diagnostic results.
 
 // Tier 2: HTML scrapers
 import { run as abjhiRun } from './abjhiScraper';
@@ -75,7 +76,6 @@ const PIPELINES: Pipeline[] = [
   // Tier 1: API fetchers (most reliable, run first)
   { name: 'phac', domain: 'public-health', run: phacRun },
   { name: 'open-alberta', domain: 'spending', run: openAlbertaRun },
-  { name: 'apl-lab-waits', domain: 'diagnostic', run: aplLabWaitTimesRun },
 
   // Tier 2: HTML scrapers
   // waittimes.alberta.ca was shut down Jan 2026 — replaced by Power BI dashboard.

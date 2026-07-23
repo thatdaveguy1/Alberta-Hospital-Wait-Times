@@ -101,10 +101,11 @@ export async function fetchErWaitTimes(): Promise<SyncResult> {
       return {
         domain: 'er-waittimes',
         pipeline: 'erWaitTimesFetcher',
-        status: 'skipped',
+        status: 'failed',
         recordsFetched: 0,
         recordsWritten: 0,
         durationMs: Date.now() - startTime,
+        error: 'AHS response contained no regional keys',
         timestamp,
       };
     }
@@ -223,6 +224,20 @@ export async function fetchErWaitTimes(): Promise<SyncResult> {
 
     // Persist snapshots
     fs.writeFileSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots, null, 2), 'utf8');
+
+    if (updatedHospitals.length === 0) {
+      console.warn('[ErWaitTimesFetcher] No valid facilities parsed from AHS response.');
+      return {
+        domain: 'er-waittimes',
+        pipeline: 'erWaitTimesFetcher',
+        status: 'failed',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        error: 'AHS regional keys present but zero valid facilities parsed',
+        timestamp,
+      };
+    }
 
     const durationMs = Date.now() - startTime;
     console.log(`[ErWaitTimesFetcher] Sync complete. ${currentHospitals.length} facilities. ${durationMs}ms`);

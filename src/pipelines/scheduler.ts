@@ -52,15 +52,15 @@ async function runErWaitTimesPipeline(): Promise<void> {
 	const result = await fetchErWaitTimes();
 	recordErWaitTimesUpdate(result);
 
-	// Push to Cloudflare if configured
+	// Always publish the current sync status so failures propagate immediately.
+	await pushToCloudflare("sync-status", getSyncStatus());
+
+	// Push domain data and trends only on success.
 	if (result.status === "success") {
 		await pushToCloudflare("er-waittimes", {
 			hospitals: getHospitals(),
 			lastUpdated: result.timestamp,
 		});
-		// Keep Pages `/api/sync/status` in lockstep — ER data push alone left
-		// erWaitTimesLastUpdate null in KV and the UI showed "Unknown".
-		await pushToCloudflare("sync-status", getSyncStatus());
 		// Provincial/zone trend blob — throttle hourly for free-tier KV budget.
 		const now = Date.now();
 		if (now - lastErTrendsPushMs >= TRENDS_MIN_INTERVAL_MS) {
@@ -81,7 +81,10 @@ async function runLabWaitsPipeline(): Promise<void> {
 	const result = await runAplLabWaits();
 	recordLabWaitsUpdate(result);
 
-	// Push to Cloudflare if configured
+	// Always publish the current sync status so failures propagate immediately.
+	await pushToCloudflare("sync-status", getSyncStatus());
+
+	// Push domain data and trends only on success.
 	if (result.status === "success") {
 		const diagnosticFile = path.join(process.cwd(), "data-diagnostic.json");
 		try {
@@ -94,7 +97,6 @@ async function runLabWaitsPipeline(): Promise<void> {
 				err,
 			);
 		}
-		await pushToCloudflare("sync-status", getSyncStatus());
 		// Lab trend aggregates — throttle hourly for free-tier KV budget.
 		const now = Date.now();
 		if (now - lastLabTrendsPushMs >= TRENDS_MIN_INTERVAL_MS) {

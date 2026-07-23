@@ -114,6 +114,19 @@ export async function run(): Promise<SyncResult> {
     const sites = response.data.Sites as AplSite[];
     console.log(`[AplLabWaitTimesFetcher] Received ${sites.length} sites from APL API`);
 
+    if (sites.length === 0) {
+      return {
+        domain: 'diagnostic',
+        pipeline: 'aplLabWaitTimesFetcher',
+        status: 'failed',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        error: 'APL API returned empty Sites array',
+        timestamp,
+      };
+    }
+
     // Map API sites to LabLocationWait shape
     const labLocations = sites.map(site => ({
       id: `APL-${site.Code}`,
@@ -146,6 +159,19 @@ export async function run(): Promise<SyncResult> {
         recordsWritten: 0,
         durationMs: Date.now() - startTime,
         error: `Failed to read data file: ${err instanceof Error ? err.message : String(err)}`,
+        timestamp,
+      };
+    }
+
+    if (labLocations.length === 0) {
+      return {
+        domain: 'diagnostic',
+        pipeline: 'aplLabWaitTimesFetcher',
+        status: 'failed',
+        recordsFetched: 0,
+        recordsWritten: 0,
+        durationMs: Date.now() - startTime,
+        error: 'Zero valid lab locations parsed from APL API',
         timestamp,
       };
     }
