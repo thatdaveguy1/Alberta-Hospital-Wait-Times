@@ -95,7 +95,8 @@ async function runErWaitTimesPipeline(): Promise<void> {
 		await domainPush;
 		await trendPromise;
 
-		// Publish the current sync status after domain data is in KV.
+		// Publish sync-status after domain data is in KV. Lab pipeline no longer
+		// pushes sync-status (ER-only) to avoid duplicate KV writes (~144/day).
 		await pushToCloudflare("sync-status", getSyncStatus());
 	} else {
 		// Failure path: still publish sync-status so the failure is visible immediately.
@@ -107,6 +108,7 @@ async function runLabWaitsPipeline(): Promise<void> {
 	if (shuttingDown) return;
 	const result = await runAplLabWaits();
 	recordLabWaitsUpdate(result);
+	// Edge sync-status is published by the ER pipeline only (KV write budget).
 
 	if (result.status === "success") {
 		const diagnosticFile = path.join(process.cwd(), "data-diagnostic.json");
@@ -139,10 +141,6 @@ async function runLabWaitsPipeline(): Promise<void> {
 
 		await domainPush;
 		await trendPromise;
-
-		await pushToCloudflare("sync-status", getSyncStatus());
-	} else {
-		await pushToCloudflare("sync-status", getSyncStatus());
 	}
 }
 
