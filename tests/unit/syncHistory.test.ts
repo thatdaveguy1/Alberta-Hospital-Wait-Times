@@ -21,7 +21,7 @@ function result(
 }
 
 describe('buildDailySyncHistoryEntry', () => {
-  it('summarizes mixed daily results and lists non-success failures', () => {
+  it('summarizes mixed daily results and lists real failures (excluding intentional skips)', () => {
     const entry = buildDailySyncHistoryEntry(
       [
         result('phacFetcher', 'partial'),
@@ -38,11 +38,12 @@ describe('buildDailySyncHistoryEntry', () => {
     assert.equal(entry.status, 'partial_success');
     assert.equal(entry.ts, '2026-07-22T06:00:00.000Z');
     assert.match(entry.summary, /^31 pipelines: 27 success, 1 partial, 1 failed, 2 skipped$/);
-    assert.equal(entry.failures.length, 4);
+    assert.equal(entry.failures.length, 2, 'intentional skips are not listed as failures');
     assert.deepEqual(entry.failures.find((f) => f.pipeline === 'brokenScraper'), {
       pipeline: 'brokenScraper',
       status: 'failed',
       error: 'timeout',
     });
+    assert.ok(entry.failures.some((f) => f.pipeline === 'phacFetcher' && f.status === 'partial'));
   });
 });

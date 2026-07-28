@@ -98,12 +98,14 @@ app.get('/api/health', async (c) => {
       if (!Number.isFinite(lastSyncAgeHours)) lastSyncAgeHours = null;
     }
 
-    const syncStale = health.overall !== 'ok';
+    const syncStale = health.syncStale;
+    const healthDegraded = health.healthDegraded;
 
     return c.json({
       status: health.overall,
       time: new Date().toISOString(),
       syncStale,
+      healthDegraded,
       lastSyncAgeHours,
       lastSyncTimestamp,
       sync: {
@@ -125,7 +127,8 @@ app.get('/api/health', async (c) => {
     return c.json({
       status: health.overall,
       time: new Date().toISOString(),
-      syncStale: true,
+      syncStale: health.syncStale,
+      healthDegraded: health.healthDegraded,
       lastSyncAgeHours: null,
       lastSyncTimestamp: null,
       sync: {

@@ -20,16 +20,18 @@ function pipelineResult(
   status: SyncResultLike['status'],
   ageMinutes: number,
   error?: string,
+  note?: string,
 ): SyncResultLike {
   return {
     domain,
     pipeline,
     status,
     recordsFetched: status === 'failed' ? 0 : 10,
-    recordsWritten: status === 'failed' ? 0 : 10,
+    recordsWritten: status === 'failed' ? 0 : (note ? 0 : 10),
     durationMs: 100,
     timestamp: minutesAgo(ageMinutes),
     ...(error ? { error } : {}),
+    ...(note ? { note } : {}),
   };
 }
 
@@ -240,6 +242,24 @@ describe('assessDataHealth', () => {
     assert.equal(health.overall, 'down');
     assert.ok(health.bannerMessage);
     assert.match(health.bannerMessage, /never completed/i);
+  });
+
+  it('public-health noop + fresh ER/daily → overall ok, syncStale false, softIssues empty', () => {
+    const status = baseStatus({
+      lastSyncTimestamp: minutesAgo(15 * 60),
+      results: [
+        pipelineResult('er-waittimes', 'erWaitTimesFetcher', 'success', 5),
+        pipelineResult('diagnostic', 'aplLabWaitTimesFetcher', 'success', 5),
+        pipelineResult('public-health', 'phacFetcher', 'success', 60, undefined, 'PHAC wastewater content unchanged'),
+        pipelineResult('public-health', 'albertaRespiratoryVirusScraper', 'success', 60, undefined, 'RVD content unchanged'),
+      ],
+    });
+    const health = assessDataHealth(status, NOW_MS);
+    assert.equal(health.overall, 'ok');
+    assert.equal(health.syncStale, false);
+    assert.equal(health.healthDegraded, false);
+    assert.equal(health.softIssues.length, 0);
+    assert.equal(health.criticalIssues.length, 0);
   });
 });
 

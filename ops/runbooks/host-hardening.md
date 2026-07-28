@@ -34,6 +34,10 @@ The three agents run in the user login session:
 - `com.davemini.alberta-hospital-pipeline-daily` — daily sync at 06:00
 - `com.davemini.alberta-hospital-uptime` — health probe every 10 minutes
 
+**Production supervision is launchd.** `npm run dev` / `tsx` and any OMP `hub`
+process are **dev-only**; `scripts/preflight.sh` warns if `:3004` is held by
+a non-production listener.
+
 Install or refresh with:
 
 ```bash

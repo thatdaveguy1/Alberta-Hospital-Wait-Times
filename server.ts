@@ -137,7 +137,8 @@ async function startServer() {
         if (!Number.isFinite(lastSyncAgeHours)) lastSyncAgeHours = null;
       }
 
-      const syncStale = health.overall !== 'ok';
+      const syncStale = health.syncStale;
+      const healthDegraded = health.healthDegraded;
 
       const lastPushOutcomes = getLastPushOutcomes();
       const edgePush = Object.entries(lastPushOutcomes).map(([domain, outcome]) => ({
@@ -154,6 +155,7 @@ async function startServer() {
         status: health.overall,
         time: new Date().toISOString(),
         syncStale,
+        healthDegraded,
         lastSyncAgeHours,
         lastSyncTimestamp,
         sync: {
@@ -175,7 +177,8 @@ async function startServer() {
       res.status(200).json({
         status: health.overall,
         time: new Date().toISOString(),
-        syncStale: true,
+        syncStale: health.syncStale,
+        healthDegraded: health.healthDegraded,
         lastSyncAgeHours: null,
         lastSyncTimestamp: null,
         sync: {

@@ -16,6 +16,7 @@ export interface SyncHistoryFailure {
   pipeline: string;
   status: SyncResult['status'];
   error?: string;
+  note?: string;
 }
 
 export interface SyncHistoryEntry {
@@ -122,23 +123,24 @@ export function recordLabWaitsUpdate(result: SyncResult): void {
 
 /** Pure helper: merge daily results into a status object. */
 export function applyDailySyncResults(status: SyncStatus, results: SyncResult[], nowMs = Date.now()): SyncStatus {
-  const allSuccess = results.every(r => r.status === 'success');
-  const anyFailed = results.some(r => r.status === 'failed');
-  const anySuccess = results.some(r => r.status === 'success');
-  const anyPartialSkippedOrManual = results.some(
-    r => r.status === 'partial' || r.status === 'skipped' || r.status === 'manual'
+  const anyFailed = results.some((r) => r.status === 'failed');
+  const anySuccess = results.some((r) => r.status === 'success');
+  const anyPartial = results.some((r) => r.status === 'partial');
+  const anyManual = results.some((r) => r.status === 'manual');
+  const allSuccessOrSkipped = results.every(
+    (r) => r.status === 'success' || r.status === 'skipped',
   );
 
-  // overallStatus: success = all succeeded.
-  // partial_success = some succeeded, rest partial/skipped/manual/failed; or any failed with success present.
+  // overallStatus: success = all succeeded, or success + skipped only.
+  // partial_success = any real partial/manual/failed mixed with successes.
   // failed = all failed (no successes, no partial/skipped/manual).
   // manual = no successes, only partial/skipped/manual (no failed).
   let overallStatus: SyncStatus['status'];
-  if (allSuccess) {
-    overallStatus = 'success';
+  if (!anyFailed && !anyPartial && !anyManual && allSuccessOrSkipped) {
+    overallStatus = anySuccess ? 'success' : 'manual';
   } else if (anyFailed) {
     overallStatus = anySuccess ? 'partial_success' : 'failed';
-  } else if (anyPartialSkippedOrManual) {
+  } else if (anyPartial || anyManual) {
     overallStatus = anySuccess ? 'partial_success' : 'manual';
   } else {
     overallStatus = 'failed';
@@ -149,7 +151,7 @@ export function applyDailySyncResults(status: SyncStatus, results: SyncResult[],
   // Replace all daily sync results with the new set.
   // Keep ER wait times and lab waits results (different cadence), replace everything else.
   const fastTierResults = status.results.filter(
-    r => r.pipeline === 'erWaitTimesFetcher' || r.pipeline === 'aplLabWaitTimesFetcher'
+    (r) => r.pipeline === 'erWaitTimesFetcher' || r.pipeline === 'aplLabWaitTimesFetcher',
   );
   const normalizedResults = normalizeResultsByIdentity([...fastTierResults, ...results]);
 
@@ -198,11 +200,12 @@ export function buildDailySyncHistoryEntry(
   if (counts.manual) parts.push(`${counts.manual} manual`);
 
   const failures: SyncHistoryFailure[] = results
-    .filter((result) => result.status !== 'success')
+    .filter((result) => result.status !== 'success' && result.status !== 'skipped')
     .map((result) => ({
       pipeline: result.pipeline,
       status: result.status,
       ...(result.error ? { error: result.error } : {}),
+      ...(result.note ? { note: result.note } : {}),
     }));
 
   return {

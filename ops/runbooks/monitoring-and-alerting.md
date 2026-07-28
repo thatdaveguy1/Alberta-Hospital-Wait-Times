@@ -4,14 +4,7 @@ Last known state: 2026-07-23.
 
 ## Components
 
-| Component | Path | Role |
-| --- | --- | --- |
-| Health endpoint | `/api/health` | Returns overall status, critical/soft issues, banner message, and edge push outcomes. Always HTTP 200. |
-| Health check | `scripts/check-data-health.mjs` | Exits 0 on `ok` or `degraded` (or 1 with `--strict`), 1 on `down`/network/parse failure. `--json` mode emits a single line for the notifier. |
-| Uptime runner | `scripts/run-uptime-check.sh` | Probes local and production `/api/health` every 10 minutes via the `com.davemini.alberta-hospital-uptime` LaunchAgent. |
-| Notifier | `scripts/notifier.mjs` | Reads health check JSON, persists per-endpoint `logs/monitor-state-<id>.json` files, and sends Discord webhook for actionable state transitions only. |
-| LaunchAgent | `launchd/com.davemini.alberta-hospital-uptime.plist` | Runs `run-uptime-check.sh` every 600 seconds. |
-| Logs | `logs/uptime.jsonl` | One JSON line per probe with `ts`, `url`, `ok`, `exit`, `summary`. |
+| Health endpoint | `/api/health` | Returns overall status, `syncStale` (daily age/missing/down), optional `healthDegraded` (`overall !== 'ok'`), critical/soft issues, banner message, and edge push outcomes. Always HTTP 200. |
 
 ## Alert rules
 
@@ -23,10 +16,15 @@ The notifier sends a Discord webhook **only** for:
 - `down` → `ok`/`degraded` (recovery)
 
 It **does not** alert for:
+- `syncStale` transitions (daily > 26h old, missing, or overall `down`)
 
-- Repeated identical failures inside the dedupe window
-- Steady `degraded` state
-- Soft-stale domains
+## Expected non-alerting states
+
+- `openAlbertaFetcher` is **skipped** when only CKAN PDF/catalog resources are available.
+- `fraserDownloader` is **skipped** when the Fraser Institute blocks automated access (403).
+- Public-health pipelines (`phacFetcher`, `albertaRespiratoryVirusScraper`) report **success**
+  with `recordsWritten: 0` and a `note` when upstream content is unchanged.
+- These skips/no-ops do **not** degrade `overall` health or set `syncStale`.
 
 ## Deduplication
 

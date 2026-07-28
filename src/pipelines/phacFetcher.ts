@@ -348,13 +348,13 @@ export async function run(): Promise<SyncResult> {
     return {
       domain: 'public-health',
       pipeline,
-      status: contentChanged ? 'success' : 'partial',
+      status: 'success',
       recordsFetched: dailyRows.length + legacyRows.length,
       recordsWritten: contentChanged ? series.length : 0,
       durationMs: Date.now() - startTime,
-      error: contentChanged
+      note: contentChanged
         ? undefined
-        : 'PHAC wastewater fetch succeeded but time-series content unchanged; sibling arrays not re-stamped.',
+        : 'PHAC wastewater time-series content unchanged; sibling arrays not re-stamped.',
       timestamp,
     };
   } catch (err) {

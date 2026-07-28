@@ -29,8 +29,9 @@ function result(
   pipeline: string,
   status: SyncResult['status'],
   timestamp: string,
-  error?: string,
+  errorOrNote?: string,
 ): SyncResult {
+  const isNote = status === 'success' || status === 'skipped';
   return {
     domain,
     pipeline,
@@ -39,7 +40,7 @@ function result(
     recordsWritten: status === 'success' ? 10 : 0,
     durationMs: 100,
     timestamp,
-    ...(error ? { error } : {}),
+    ...(errorOrNote ? (isNote ? { note: errorOrNote } : { error: errorOrNote }) : {}),
   };
 }
 
@@ -181,6 +182,17 @@ describe('applyDailySyncResults (C2)', () => {
     assert.ok(cihiSurgical);
     assert.notEqual(cihiDiagnostic, cihiSurgical);
   });
+
+  it('rolls success + intentional skips up to success (C1)', () => {
+    const status = baseStatus();
+    const daily: SyncResult[] = [
+      result('public-health', 'phacFetcher', 'success', '2026-07-23T12:00:00.000Z'),
+      result('spending', 'openAlbertaFetcher', 'skipped', '2026-07-23T12:00:00.000Z', 'catalog-only'),
+      result('spending', 'fraserDownloader', 'skipped', '2026-07-23T12:00:00.000Z', '403 blocked'),
+    ];
+    const updated = applyDailySyncResults(status, daily, Date.parse('2026-07-23T12:01:00.000Z'));
+    assert.equal(updated.status, 'success');
+  });
 });
 
 describe('ER fetcher failure classification (C1)', () => {
@@ -258,11 +270,12 @@ describe('buildDailySyncHistoryEntry still works after syncStatus changes', () =
         result('public-health', 'phacFetcher', 'success', '2026-07-23T12:00:00.000Z'),
         result('spending', 'openAlbertaFetcher', 'skipped', '2026-07-23T12:00:00.000Z', 'no mapping'),
       ],
-      'partial_success',
+      'success',
       '2026-07-23T12:00:00.000Z',
     );
-    assert.equal(entry.status, 'partial_success');
+    assert.equal(entry.status, 'success');
     assert.match(entry.summary, /1 success/);
     assert.match(entry.summary, /1 skipped/);
+    assert.equal(entry.failures.length, 0, 'intentional skips are not failures');
   });
 });

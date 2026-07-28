@@ -64,6 +64,21 @@ for label in \
   fi
 done
 
+# 3b. Warn if :3004 is held by a non-production listener (tsx, hub, or orphan).
+if command -v lsof >/dev/null; then
+  orphan_pids="$(lsof -nP -iTCP:3004 -sTCP:LISTEN -t 2>/dev/null || true)"
+  if [[ -n "$orphan_pids" ]]; then
+    for orphan_pid in $orphan_pids; do
+      orphan_cmd="$(ps -p "$orphan_pid" -o args= 2>/dev/null || true)"
+      if [[ "$orphan_cmd" == *"tsx"* || "$orphan_cmd" == *"hub"* || "$orphan_cmd" != *"dist/server.cjs"* ]]; then
+        echo "WARN: port 3004 held by non-production listener (pid $orphan_pid): $orphan_cmd" >&2
+      else
+        echo "OK: port 3004 held by expected listener (pid $orphan_pid): $orphan_cmd"
+      fi
+    done
+  fi
+fi
+
 # 4. Local /api/health responds and is parseable.
 if command -v curl >/dev/null; then
   if body="$(curl -fsS http://127.0.0.1:3004/api/health 2>/dev/null)"; then

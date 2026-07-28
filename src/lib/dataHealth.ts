@@ -13,6 +13,7 @@ export interface SyncResultLike {
   recordsWritten?: number;
   durationMs?: number;
   error?: string;
+  note?: string;
   timestamp: string;
 }
 
@@ -43,6 +44,8 @@ export interface DomainHealth {
 
 export interface DataHealthSummary {
   overall: HealthLevel;
+  syncStale: boolean;
+  healthDegraded: boolean;
   syncStatusAvailable: boolean;
   lastSyncTimestamp: string | null;
   domains: DomainHealth[];
@@ -409,6 +412,8 @@ export function assessDataHealth(
   if (!syncStatus) {
     return {
       overall: 'down',
+      syncStale: true,
+      healthDegraded: true,
       syncStatusAvailable: false,
       lastSyncTimestamp: null,
       domains: [],
@@ -449,6 +454,12 @@ export function assessDataHealth(
     overall = 'degraded';
   }
 
+  const syncStale =
+    !syncStatus.lastSyncTimestamp ||
+    (dailyAge != null && dailyAge > 26 * 60) ||
+    overall === 'down';
+  const healthDegraded = overall !== 'ok';
+
   // Daily sync missing/critically old is itself a critical banner issue.
   const syntheticCritical = [...criticalIssues];
   if (dailyCritical) {
@@ -471,6 +482,8 @@ export function assessDataHealth(
 
   return {
     overall,
+    syncStale,
+    healthDegraded,
     syncStatusAvailable: true,
     lastSyncTimestamp: syncStatus.lastSyncTimestamp,
     domains,

@@ -393,7 +393,7 @@ export async function run(): Promise<SyncResult> {
       recordsFetched,
       recordsWritten,
       durationMs: Date.now() - startTime,
-      error: note,
+      note,
       timestamp,
     };
   } catch (err) {

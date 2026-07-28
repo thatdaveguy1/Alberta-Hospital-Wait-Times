@@ -12,3 +12,13 @@ This file is repo-specific guidance layered on top of the system-wide `~/Desktop
 - Default local server: port `3004`. Production-style process is typically `node dist/server.cjs` (`npm run build` then `npm start`). Prefer that when `dist/server.cjs` is already what is listening; otherwise use `npm run dev`.
 - Local dev servers must always be LAN-accessible: bind to `0.0.0.0` (not `127.0.0.1` / localhost-only). Other devices on the LAN should reach the app at `http://<host-lan-ip>:3004`. Do not start servers that only listen on loopback.
 - Restart procedure: kill whatever is bound to `:3004` (and the matching AlbertaHospitals `server`/`dist/server.cjs` process), start the server again, then verify with a quick health check (e.g. `curl -sS http://127.0.0.1:3004/` or `/api/sync/status`).
+
+## Supervision
+
+- Production supervision is **launchd KeepAlive** (`com.davemini.alberta-hospital-wait-times`),
+  which runs `scripts/start-server.sh`.
+- `npm run dev` / `tsx server.ts` and any OMP `hub` process are **dev-only**.
+- `scripts/preflight.sh` warns if port `3004` is held by a non-production listener
+  (`tsx`, `hub`, or any process not serving `dist/server.cjs`).
+- When a runtime change ships, rebuild (`npm run build`) and use `launchctl kickstart -k`
+  or `scripts/start-server.sh`; do not leave orphan dev listeners on `3004`.

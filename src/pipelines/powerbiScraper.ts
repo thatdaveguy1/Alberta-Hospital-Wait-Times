@@ -31,6 +31,16 @@ const POWERBI_REPORT_URL =
 const SURGICAL_FILE = path.join(process.cwd(), 'data-surgical.json');
 const CHROME_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
+async function resolveChromePath(): Promise<string | undefined> {
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  if (fs.existsSync(CHROME_PATH)) return CHROME_PATH;
+  try {
+    return await puppeteer.executablePath();
+  } catch {
+    return undefined;
+  }
+}
+
 // --- DSR (DAX Serialized Results) parser ---
 
 interface DsrRow {
@@ -241,9 +251,10 @@ interface ScrapedData {
 
 /** Launch Chrome, navigate to the Power BI report, click Surgery tab, intercept data. */
 async function scrapePowerBISurgeryData(): Promise<ScrapedData> {
+  const chromePath = await resolveChromePath();
   const browser: Browser = await puppeteer.launch({
     headless: true,
-    executablePath: CHROME_PATH,
+    ...(chromePath ? { executablePath: chromePath } : {}),
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   });
 

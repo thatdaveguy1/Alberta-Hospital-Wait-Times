@@ -107,6 +107,33 @@ describe('daily C4 retry semantics via production helper', () => {
     }
   });
 
+  it('retries by index even when result pipeline id differs from pipeline name', async () => {
+    let calls = 0;
+    const p1: Pipeline = {
+      name: 'phac-fetcher',
+      id: 'phacFetcher',
+      domain: 'public-health',
+      run: async () => {
+        calls++;
+        return {
+          domain: 'public-health',
+          pipeline: 'phacFetcher',
+          status: calls === 1 ? 'failed' : 'success',
+          recordsFetched: 1,
+          recordsWritten: calls === 1 ? 0 : 1,
+          durationMs: 1,
+          timestamp: new Date().toISOString(),
+          ...(calls === 1 ? { error: 'transient' } : {}),
+        } as SyncResult;
+      },
+    };
+
+    const results = await runPipelinesWithRetry([p1]);
+    assert.equal(results.length, 1);
+    assert.equal(results[0].status, 'success');
+    assert.equal(calls, 2, 'pipeline retried by index despite name/id mismatch');
+  });
+
   it('replaces retried result by index, preserving non-failed entries', async () => {
     let attempt = 0;
     const p1: Pipeline = {

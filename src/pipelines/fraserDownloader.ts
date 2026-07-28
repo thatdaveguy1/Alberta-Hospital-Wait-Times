@@ -274,7 +274,9 @@ export async function run(): Promise<SyncResult> {
       recordsFetched: 0,
       recordsWritten: 0,
       durationMs: Date.now() - startTime,
-      error: isBlocked ? 'Fraser Institute blocks automated access (403) — relying on CIHI/Open Alberta for spending data' : errorMsg,
+      note: isBlocked
+        ? 'Fraser Institute blocks automated access (403) — relying on CIHI/Open Alberta for spending data'
+        : errorMsg,
       timestamp: new Date().toISOString(),
     };
   } finally {

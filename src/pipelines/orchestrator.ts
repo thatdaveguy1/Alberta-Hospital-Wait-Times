@@ -2,8 +2,13 @@
 // Runs all Tier 1-4 pipelines in sequence, collects results, and returns them.
 // Called by the scheduler every 24 hours.
 
-import { execFileSync } from 'child_process';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs';
+import path from 'path';
 import type { SyncResult, Pipeline } from './types';
+
+const execFileAsync = promisify(execFile);
 
 // Tier 1: API fetchers
 import { run as phacRun } from './phacFetcher';
@@ -32,17 +37,27 @@ import { run as cihiWaitTimesPriorityRun } from './cihiWaitTimesPriorityFetcher'
 // intercepts Power BI querydata API responses, and writes to data-surgical.json.
 async function runPowerBIScraper(): Promise<SyncResult> {
   const startTime = Date.now();
+  const timestamp = new Date().toISOString();
+  const timeout = parseInt(process.env.POWERBI_SCRAPER_TIMEOUT_MS ?? '180000', 10);
+  if (!Number.isFinite(timeout) || timeout <= 0) {
+    throw new Error(`Invalid POWERBI_SCRAPER_TIMEOUT_MS: ${process.env.POWERBI_SCRAPER_TIMEOUT_MS}`);
+  }
+
+  const tsxBin = path.join(process.cwd(), 'node_modules/.bin/tsx');
+  const bin = fs.existsSync(tsxBin) ? tsxBin : process.execPath;
+  const args = bin === tsxBin
+    ? ['src/pipelines/powerbiScraper.ts']
+    : ['--import', 'tsx', 'src/pipelines/powerbiScraper.ts'];
+
   try {
-    const stdout = execFileSync(
-      'npx',
-      ['tsx', 'src/pipelines/powerbiScraper.ts'],
-      {
-        cwd: process.cwd(),
-        timeout: 120000,
-        encoding: 'utf8',
-        env: { ...process.env },
-      },
-    );
+    console.log(`[Orchestrator] Spawning Power BI scraper: ${bin} ${args.join(' ')} (timeout ${timeout}ms)`);
+    const { stdout } = await execFileAsync(bin, args, {
+      cwd: process.cwd(),
+      timeout,
+      encoding: 'utf8',
+      env: { ...process.env },
+      killSignal: 'SIGTERM',
+    });
     // The scraper prints log lines followed by a pretty-printed JSON SyncResult.
     // Find the first line starting with '{' and parse from there to the end.
     const lines = stdout.trim().split('\n');
@@ -65,7 +80,7 @@ async function runPowerBIScraper(): Promise<SyncResult> {
       recordsWritten: 0,
       durationMs: Date.now() - startTime,
       error: errorMsg,
-      timestamp: new Date().toISOString(),
+      timestamp,
     };
   }
 }
@@ -74,29 +89,29 @@ async function runPowerBIScraper(): Promise<SyncResult> {
 // Each pipeline is independent — failure of one doesn't stop others.
 const PIPELINES: Pipeline[] = [
   // Tier 1: API fetchers (most reliable, run first)
-  { name: 'phac', domain: 'public-health', run: phacRun },
-  { name: 'open-alberta', domain: 'spending', run: openAlbertaRun },
+  { id: 'phacFetcher', name: 'phac', domain: 'public-health', run: phacRun },
+  { id: 'openAlbertaFetcher', name: 'open-alberta', domain: 'spending', run: openAlbertaRun },
 
   // Tier 2: HTML scrapers
   // waittimes.alberta.ca was shut down Jan 2026 — replaced by Power BI dashboard.
   // Power BI scraper runs as child process (Puppeteer needs ESM + headless Chrome).
-  { name: 'powerbi-scraper', domain: 'surgical', run: runPowerBIScraper },
-  { name: 'abjhi', domain: 'surgical', run: abjhiRun },
+  { id: 'powerbiScraper', name: 'powerbi-scraper', domain: 'surgical', run: runPowerBIScraper },
+  { id: 'abjhiScraper', name: 'abjhi', domain: 'surgical', run: abjhiRun },
 
   // Tier 3: File download+parse (XLSX/CSV/ZIP)
-  { name: 'cihi-nhex', domain: 'spending', run: cihiRun },
-  { name: 'cihi-wait-times', domain: 'diagnostic', run: cihiWaitTimesRun },
-  { name: 'cihi-wait-times-surgical', domain: 'surgical', run: cihiWaitTimesSurgicalRun },
-  { name: 'primary-care', domain: 'primary-care', run: primaryCareRun },
-  { name: 'alberta-find-a-provider', domain: 'primary-care', run: albertaFindAProviderRun },
-  { name: 'open-alberta-inequity', domain: 'regional-inequity', run: openAlbertaInequityRun },
-  { name: 'open-alberta-inequity-primary-care', domain: 'primary-care', run: openAlbertaInequityPrimaryCareRun },
-  { name: 'fraser', domain: 'spending', run: fraserRun },
-  { name: 'open-alberta-billing', domain: 'spending', run: openAlbertaBillingRun },
-  { name: 'hqca-focus', domain: 'primary-care', run: hqcaFocusRun },
-  { name: 'alberta-rvd', domain: 'public-health', run: albertaRvdRun },
-  { name: 'cihi-mh-safety', domain: 'spending', run: cihiMhSafetyRun },
-  { name: 'cihi-wait-times-priority', domain: 'surgical', run: cihiWaitTimesPriorityRun },
+  { id: 'cihiDownloader', name: 'cihi-nhex', domain: 'spending', run: cihiRun },
+  { id: 'cihiWaitTimesDownloader', name: 'cihi-wait-times', domain: 'diagnostic', run: cihiWaitTimesRun },
+  { id: 'cihiWaitTimesDownloader', name: 'cihi-wait-times-surgical', domain: 'surgical', run: cihiWaitTimesSurgicalRun },
+  { id: 'primaryCareFetcher', name: 'primary-care', domain: 'primary-care', run: primaryCareRun },
+  { id: 'albertaFindAProviderScraper', name: 'alberta-find-a-provider', domain: 'primary-care', run: albertaFindAProviderRun },
+  { id: 'openAlbertaInequityFetcher', name: 'open-alberta-inequity', domain: 'regional-inequity', run: openAlbertaInequityRun },
+  { id: 'openAlbertaInequityPrimaryCareFetcher', name: 'open-alberta-inequity-primary-care', domain: 'primary-care', run: openAlbertaInequityPrimaryCareRun },
+  { id: 'fraserDownloader', name: 'fraser', domain: 'spending', run: fraserRun },
+  { id: 'openAlbertaBillingFetcher', name: 'open-alberta-billing', domain: 'spending', run: openAlbertaBillingRun },
+  { id: 'hqcaFocusScraper', name: 'hqca-focus', domain: 'primary-care', run: hqcaFocusRun },
+  { id: 'albertaRespiratoryVirusScraper', name: 'alberta-rvd', domain: 'public-health', run: albertaRvdRun },
+  { id: 'cihiMhSafetyFetcher', name: 'cihi-mh-safety', domain: 'spending', run: cihiMhSafetyRun },
+  { id: 'cihiWaitTimesPriorityFetcher', name: 'cihi-wait-times-priority', domain: 'surgical', run: cihiWaitTimesPriorityRun },
 ];
 
 
@@ -117,7 +132,7 @@ async function runPipelineSafely(pipeline: Pipeline): Promise<SyncResult> {
     console.error(`[Orchestrator] ${pipeline.name} threw: ${errorMsg}`);
     return {
       domain: pipeline.domain,
-      pipeline: pipeline.name,
+      pipeline: pipeline.id ?? pipeline.name,
       status: 'failed',
       recordsFetched: 0,
       recordsWritten: 0,
@@ -187,11 +202,9 @@ export async function runPipelinesWithRetry(
 
   const retryResults = new Map<number, SyncResult>();
   for (const { r, index } of failedDefinitions) {
-    const pipeline = definitions.find(
-      p => p.name === r.pipeline && p.domain === r.domain,
-    );
+    const pipeline = definitions[index];
     if (!pipeline) {
-      console.warn(`[Orchestrator] Cannot retry unknown pipeline: ${r.pipeline}`);
+      console.warn(`[Orchestrator] Cannot retry missing pipeline at index ${index}`);
       continue;
     }
     const retried = await runPipelineSafely(pipeline);

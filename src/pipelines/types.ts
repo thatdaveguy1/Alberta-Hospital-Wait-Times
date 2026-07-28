@@ -8,6 +8,8 @@ export interface SyncResult {
   recordsWritten: number;
   durationMs: number;
   error?: string;
+  /** Human-readable clarification for no-ops, skips, or failures. */
+  note?: string;
   timestamp: string;
 }
 
@@ -47,7 +49,10 @@ export type Domain = typeof DOMAINS[number];
 
 // Pipeline module interface — every pipeline implements this
 export interface Pipeline {
+  /** Display/kebab name (e.g. used by /api/sync/pipelines and CLI args). */
   name: string;
+  /** Optional stable module id (camelCase) for result pipeline ids. */
+  id?: string;
   domain: string;
   run(): Promise<SyncResult>;
 }

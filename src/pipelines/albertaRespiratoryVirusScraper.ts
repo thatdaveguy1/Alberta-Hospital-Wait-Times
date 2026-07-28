@@ -903,14 +903,14 @@ export async function run(): Promise<SyncResult> {
     return {
       domain: 'public-health',
       pipeline: 'albertaRespiratoryVirusScraper',
-      status: anyContentChanged ? 'success' : 'partial',
+      status: 'success',
       recordsFetched: totalFetched,
       recordsWritten: totalWritten,
       durationMs: Date.now() - startTime,
-      timestamp,
-      error: anyContentChanged
+      note: anyContentChanged
         ? undefined
-        : 'Parsed RVD data identical to existing; no writes performed.',
+        : 'RVD parsed content identical to existing; no writes performed.',
+      timestamp,
     };
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
