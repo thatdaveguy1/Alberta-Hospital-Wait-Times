@@ -212,6 +212,8 @@ describe('assessDataHealth', () => {
     const health = assessDataHealth(status, NOW_MS);
 
     assert.equal(health.overall, 'degraded');
+    assert.equal(health.syncStale, true);
+    assert.equal(health.healthDegraded, true);
     assert.ok(health.checks.includes('daily_sync_soft_stale'));
     assert.equal(health.bannerMessage, null);
   });

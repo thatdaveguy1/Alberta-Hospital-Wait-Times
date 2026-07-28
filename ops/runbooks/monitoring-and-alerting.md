@@ -4,7 +4,14 @@ Last known state: 2026-07-23.
 
 ## Components
 
+| Component | Path | Role |
+|---|---|---|
 | Health endpoint | `/api/health` | Returns overall status, `syncStale` (daily age/missing/down), optional `healthDegraded` (`overall !== 'ok'`), critical/soft issues, banner message, and edge push outcomes. Always HTTP 200. |
+| Health check script | `scripts/check-data-health.mjs` | Probes `/api/health` and emits JSON for the notifier / CLI. |
+| Uptime runner | `scripts/run-uptime-check.sh` | LaunchAgent-driven periodic local + prod health probe. |
+| Notifier | `scripts/notifier.mjs` | Discord webhook for down/recovery transitions only. |
+| Preflight | `scripts/preflight.sh` | Host readiness + orphan `:3004` listener warnings. |
+| LaunchAgent (server) | `launchd/com.davemini.alberta-hospital-wait-times.plist` | Canonical production supervisor for `node dist/server.cjs`. |
 
 ## Alert rules
 
