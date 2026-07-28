@@ -26,29 +26,44 @@ PORT="${PORT:-3004}"
 export PORT
 export NODE_ENV=production
 
-port_pid() {
-  lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null | head -1 || true
+port_pids() {
+  lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null | sort -u || true
+}
+
+port_in_use() {
+  [[ -n "$(port_pids)" ]]
 }
 
 # KeepAlive jobs must stay long-running. Never exit 0 while another listener
 # holds the port — take it over so this launchd process owns the server.
-existing_pid="$(port_pid)"
-if [[ -n "$existing_pid" ]]; then
-  cmd="$(ps -p "$existing_pid" -o args= 2>/dev/null || true)"
-  echo "Port $PORT held by pid $existing_pid — stopping: $cmd" >&2
-  kill "$existing_pid" 2>/dev/null || true
+if port_in_use; then
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    cmd="$(ps -p "$pid" -o args= 2>/dev/null || true)"
+    echo "Port $PORT held by pid $pid — stopping: $cmd" >&2
+    kill "$pid" 2>/dev/null || true
+  done < <(port_pids)
+
   for _ in {1..10}; do
-    [[ -z "$(port_pid)" ]] && break
+    port_in_use || break
     sleep 0.5
   done
-  if [[ -n "$(port_pid)" ]]; then
-    leftover="$(port_pid)"
-    echo "Force-killing leftover pid $leftover on port $PORT" >&2
-    kill -9 "$leftover" 2>/dev/null || true
-    sleep 0.5
+
+  if port_in_use; then
+    while IFS= read -r pid; do
+      [[ -z "$pid" ]] && continue
+      echo "Force-killing leftover pid $pid on port $PORT" >&2
+      kill -9 "$pid" 2>/dev/null || true
+    done < <(port_pids)
+
+    for _ in {1..10}; do
+      port_in_use || break
+      sleep 0.5
+    done
   fi
-  if [[ -n "$(port_pid)" ]]; then
-    echo "Error: port $PORT still in use after kill" >&2
+
+  if port_in_use; then
+    echo "Error: port $PORT still in use after kill (pids: $(port_pids | tr '\n' ' '))" >&2
     exit 1
   fi
 fi

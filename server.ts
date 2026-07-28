@@ -687,6 +687,11 @@ async function startServer() {
     console.log(`Server running at http://localhost:${PORT}`);
   });
 
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    console.error(`[Server] listen failed on 0.0.0.0:${PORT}:`, err);
+    process.exit(1);
+  });
+
   // Wire the pipeline scheduler — ER wait times every 10 min, daily orchestrator every 24 hr.
   // Daily sync runs in the background so it never blocks the Express server from accepting connections.
   setAlertCheckFn(checkEmailAlerts);
