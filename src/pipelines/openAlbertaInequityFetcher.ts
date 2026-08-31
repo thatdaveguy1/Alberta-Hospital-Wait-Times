@@ -46,9 +46,12 @@ type LgaType = CommunityNeedMetric['type'];
 
 // Indicator labels we match against in Table 10.1. Matched case-insensitively
 // by substring so minor year-to-year wording changes don't break the pivot.
+// Upstream as of 2026-08: travel indicator is "Travel: Percentage of total
+// family physician claims outside the recipients home local area" — earlier
+// releases used "outside home LGA". Matching "claims outside" covers both.
 const INDICATOR_VOLUME_FP = 'volume of family physicians';
 const INDICATOR_TRAVEL_CLAIMS = 'travel';
-const INDICATOR_CLAIMS_OUTSIDE = 'outside home lga';
+const INDICATOR_CLAIMS_OUTSIDE = 'claims outside';
 const INDICATOR_ACSC = 'ambulatory care sensitive conditions';
 const INDICATOR_DEPRIVATION = 'deprivation index';
 const INDICATOR_LIFE_EXPECTANCY = 'life expectancy';

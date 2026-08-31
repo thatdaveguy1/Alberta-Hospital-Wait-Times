@@ -144,12 +144,38 @@ async function fetchAlbertaWastewaterDaily(): Promise<PhacWastewaterRow[]> {
 /**
  * Legacy Edmonton rows strictly before the earliest daily Edmonton sample date.
  * Extends COVID toward 2020 when Infobase still publishes those rows.
+ * The `wastewater` legacy table has been retired by PHAC (now returns
+ * {"error":"Malformed query"}); this helper fails soft so the main
+ * wastewater_daily data still lands.
  */
 async function fetchLegacyEdmontonBefore(earliestDailyDate: string): Promise<PhacWastewaterRow[]> {
   const query =
     `SELECT * FROM ${WASTEWATER_LEGACY_TABLE} WHERE "pruid" = "${ALBERTA_PRUID}" ` +
     `AND "Location" LIKE "%Edmonton%" AND "Date" < "${earliestDailyDate}"`;
-  return queryWastewaterTable(query);
+  try {
+    return await queryWastewaterTable(query);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    // Legacy table retired — detect via response evidence (400 + Malformed)
+    // or via the isWastewaterArray guard's "unexpected shape" message.
+    // Keep scope narrow to this legacy endpoint so primary wastewater_daily
+    // failures still surface as pipeline errors.
+    const axiosErr = err as { response?: { status?: number; data?: unknown }; isAxiosError?: boolean };
+    const status = axiosErr?.response?.status;
+    const data = axiosErr?.response?.data;
+    const dataStr = typeof data === 'string' ? data : data ? JSON.stringify(data) : '';
+    const isRetiredLegacySignal =
+      message.includes('unexpected shape') ||
+      message.includes('Malformed query') ||
+      dataStr.includes('Malformed query') ||
+      (status === 400 && (dataStr.includes('Malformed') || dataStr.includes('error'))) ||
+      message.includes('status code 400');
+    if (isRetiredLegacySignal) {
+      console.warn(`[PhacFetcher] Legacy extension unavailable (${message}${status ? ` status=${status}` : ''}); continuing with wastewater_daily only.`);
+      return [];
+    }
+    throw err;
+  }
 }
 
 function displaySiteForLocation(locationRaw: string): string | null {
@@ -334,12 +360,12 @@ export async function run(): Promise<SyncResult> {
 
     // Preserve all sibling keys (including RVD-owned WASTEWATER_SIGNALS /
     // WASTEWATER_TIME_SERIES / RVD_*). Only replace PHAC_WASTEWATER_TIME_SERIES.
+    const changedKeys = (contentChanged || !priorPhacMeta) ? ['PHAC_WASTEWATER_TIME_SERIES'] as const : [];
     const output: Record<string, unknown> = {
       ...existing,
       PHAC_WASTEWATER_TIME_SERIES: series,
-      _dataMetadata: mergeDataMetadata(existingMeta, ownedMetadata),
+      _dataMetadata: mergeDataMetadata(existingMeta, ownedMetadata, changedKeys),
     };
-
     if (contentChanged || !priorPhacMeta) {
       applyWithheldPayloadGuard(output);
       fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + '\n', 'utf-8');
