@@ -1,0 +1,16 @@
+src/pipelines/openAlbertaInequityFetcher.ts
+  h_6f6f58d5fb612d 49-51,54
+src/pipelines/phacFetcher.ts
+  h_6f6f58d5fb612d 147-149,155-178,363,367
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "a7b197e1fdcd568c640f6295e226466cda55f563",
+  "prompts": {},
+  "humans": {
+    "h_6f6f58d5fb612d": {
+      "author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
