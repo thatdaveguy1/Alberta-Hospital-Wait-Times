@@ -1,7 +1,7 @@
 // Scheduler — manages timed execution of fast-tier pipelines.
 // ER wait times and lab waits: every 10 minutes.
-// The daily full sync is run by the standalone `npm run daily-sync` script
-// (src/pipelines/dailySync.ts), scheduled via launchd — not by this scheduler.
+// Daily full sync also runs in-process at 06:00 local (and on startup when stale)
+// so a launchd calendar/codesign failure cannot freeze disruptions + daily-sync.
 
 import fs from "fs";
 import path from "path";
@@ -28,6 +28,30 @@ import type { SyncResult } from "./types";
 
 let erIntervalId: NodeJS.Timeout | null = null;
 let labIntervalId: NodeJS.Timeout | null = null;
+let dailyTimeoutId: NodeJS.Timeout | null = null;
+let dailyIntervalId: NodeJS.Timeout | null = null;
+
+/** Matches launchd StartCalendarInterval Hour=6. */
+export const DAILY_SYNC_LOCAL_HOUR = 6;
+const DAILY_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
+const DAILY_SYNC_STALE_MS = 24 * 60 * 60 * 1000;
+
+export function msUntilNextLocalHour(hour: number, now = new Date()): number {
+	const next = new Date(now.getTime());
+	next.setHours(hour, 0, 0, 0);
+	if (next.getTime() <= now.getTime()) {
+		next.setDate(next.getDate() + 1);
+	}
+	return next.getTime() - now.getTime();
+}
+
+function lastDailySyncIsStale(nowMs = Date.now()): boolean {
+	const stamp = getSyncStatus().lastSyncTimestamp;
+	if (!stamp) return true;
+	const parsed = Date.parse(stamp);
+	if (!Number.isFinite(parsed)) return true;
+	return nowMs - parsed >= DAILY_SYNC_STALE_MS;
+}
 let lastErTrendsPushMs = 0;
 let lastLabTrendsPushMs = 0;
 // Live boards can refresh every 10 min; trend KV keys change every cycle and
@@ -102,6 +126,12 @@ async function runErWaitTimesPipeline(): Promise<void> {
 		// Failure path: still publish sync-status so the failure is visible immediately.
 		await pushToCloudflare("sync-status", getSyncStatus());
 	}
+}
+
+async function runDailySyncPipeline(): Promise<void> {
+	if (shuttingDown) return;
+	console.log("[Scheduler] Starting daily sync cycle...");
+	await runDailySyncFlow();
 }
 
 async function runLabWaitsPipeline(): Promise<void> {
@@ -183,8 +213,25 @@ export async function startScheduler(): Promise<void> {
 		10 * 60 * 1000,
 	);
 
+	const delayMs = msUntilNextLocalHour(DAILY_SYNC_LOCAL_HOUR);
+	dailyTimeoutId = setTimeout(() => {
+		dailyTimeoutId = null;
+		scheduleWrapped(runDailySyncPipeline, "Daily sync")();
+		dailyIntervalId = setInterval(
+			scheduleWrapped(runDailySyncPipeline, "Daily sync"),
+			DAILY_SYNC_INTERVAL_MS,
+		);
+	}, delayMs);
+
+	if (lastDailySyncIsStale()) {
+		console.log(
+			"[Scheduler] Daily sync is stale on startup — running catch-up in background.",
+		);
+		scheduleWrapped(runDailySyncPipeline, "Daily sync catch-up")();
+	}
+
 	console.log(
-		"[Scheduler] Running. ER wait times: every 10 min. Lab waits: every 10 min.",
+		`[Scheduler] Running. ER wait times: every 10 min. Lab waits: every 10 min. Daily sync: 06:00 local (in ${Math.round(delayMs / 60000)} min).`,
 	);
 }
 
@@ -196,6 +243,14 @@ export function stopScheduler(): void {
 	if (labIntervalId) {
 		clearInterval(labIntervalId);
 		labIntervalId = null;
+	}
+	if (dailyTimeoutId) {
+		clearTimeout(dailyTimeoutId);
+		dailyTimeoutId = null;
+	}
+	if (dailyIntervalId) {
+		clearInterval(dailyIntervalId);
+		dailyIntervalId = null;
 	}
 	console.log("[Scheduler] Stopped.");
 }

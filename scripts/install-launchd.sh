@@ -31,7 +31,16 @@ LABELS=(
 
 DOMAIN="gui/$(id -u)"
 AGENTS_DIR="$HOME/Library/LaunchAgents"
-mkdir -p "$AGENTS_DIR"
+SHARE_DIR="$HOME/.local/share/alberta-hospitals"
+mkdir -p "$AGENTS_DIR" "$SHARE_DIR" "$HOME/Library/Logs/Antigravity"
+
+# launchd cannot exec scripts that live on the external APFS volume
+# (TCC "Operation not permitted"). Stage copies on the internal home volume
+# and point plists at those copies via ALBERTA_HOSPITALS_ROOT.
+cp "$REPO_ROOT/scripts/start-server.sh" "$SHARE_DIR/start-server.sh"
+cp "$REPO_ROOT/scripts/run-daily-sync.sh" "$SHARE_DIR/run-daily-sync.sh"
+cp "$REPO_ROOT/scripts/run-uptime-check.sh" "$SHARE_DIR/run-uptime-check.sh"
+chmod 755 "$SHARE_DIR"/*.sh
 
 for plist in "$REPO_ROOT"/launchd/*.plist; do
   cp "$plist" "$AGENTS_DIR/"

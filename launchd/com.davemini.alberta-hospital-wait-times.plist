@@ -4,16 +4,15 @@
 <dict>
     <key>Label</key>
     <string>com.davemini.alberta-hospital-wait-times</string>
-
     <key>ProgramArguments</key>
     <array>
+        <string>/Users/davemini/.local/bin/node</string>
+        <string>/Users/davemini/.local/bin/launchd-external-exec.cjs</string>
         <string>/bin/bash</string>
-        <string>/Users/davemini/Antigravity/AlbertaHospitals/scripts/start-server.sh</string>
+        <string>/Users/davemini/.local/share/alberta-hospitals/start-server.sh</string>
     </array>
-
     <key>WorkingDirectory</key>
     <string>/Users/davemini/Antigravity/AlbertaHospitals</string>
-
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
@@ -22,21 +21,18 @@
         <string>/Users/davemini</string>
         <key>NODE_ENV</key>
         <string>production</string>
+        <key>ALBERTA_HOSPITALS_ROOT</key>
+        <string>/Users/davemini/Antigravity/AlbertaHospitals</string>
     </dict>
-
     <key>RunAtLoad</key>
     <true/>
-
     <key>KeepAlive</key>
     <true/>
-
     <key>ThrottleInterval</key>
     <integer>30</integer>
-
     <key>StandardOutPath</key>
-    <string>/Users/davemini/Antigravity/AlbertaHospitals/logs/wait-times.out.log</string>
-
+    <string>/Users/davemini/Library/Logs/Antigravity/alberta-wait-times.out.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/davemini/Antigravity/AlbertaHospitals/logs/wait-times.err.log</string>
+    <string>/Users/davemini/Library/Logs/Antigravity/alberta-wait-times.err.log</string>
 </dict>
 </plist>

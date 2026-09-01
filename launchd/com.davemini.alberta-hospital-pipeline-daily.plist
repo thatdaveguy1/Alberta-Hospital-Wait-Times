@@ -4,16 +4,13 @@
 <dict>
     <key>Label</key>
     <string>com.davemini.alberta-hospital-pipeline-daily</string>
-
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/davemini/Antigravity/AlbertaHospitals/scripts/run-daily-sync.sh</string>
+        <string>/Users/davemini/.local/share/alberta-hospitals/run-daily-sync.sh</string>
     </array>
-
     <key>WorkingDirectory</key>
-    <string>/Users/davemini/Antigravity/AlbertaHospitals</string>
-
+    <string>/Users/davemini/.local/share/alberta-hospitals</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
@@ -22,8 +19,9 @@
         <string>/Users/davemini</string>
         <key>NODE_ENV</key>
         <string>production</string>
+        <key>ALBERTA_HOSPITALS_ROOT</key>
+        <string>/Users/davemini/Antigravity/AlbertaHospitals</string>
     </dict>
-
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>
@@ -31,11 +29,9 @@
         <key>Minute</key>
         <integer>0</integer>
     </dict>
-
     <key>StandardOutPath</key>
-    <string>/Users/davemini/Antigravity/AlbertaHospitals/logs/daily-sync.out.log</string>
-
+    <string>/Users/davemini/Library/Logs/Antigravity/alberta-pipeline.out.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/davemini/Antigravity/AlbertaHospitals/logs/daily-sync.err.log</string>
+    <string>/Users/davemini/Library/Logs/Antigravity/alberta-pipeline.err.log</string>
 </dict>
 </plist>
