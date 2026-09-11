@@ -73,18 +73,16 @@ if [[ ! -f dist/server.cjs ]]; then
   exit 1
 fi
 
-# Preflight: dist artifact must not be older than 7 days, otherwise an
-# unexpected KeepAlive restart could serve stale code after source drift.
-ARTIFACT_AGE_HOURS="$(node -e '
-  const fs = require("fs");
-  const s = fs.statSync(process.argv[1]);
-  const ageMs = Date.now() - s.mtimeMs;
-  console.log(Math.round(ageMs / (1000 * 60 * 60)));
-' dist/server.cjs 2>/dev/null || echo 9999)"
+# Stale-build preflight: warn when the bundle predates its sources, which means
+# someone edited code without rebuilding. This is deliberately NOT fatal — a
+# KeepAlive job that exits here crash-loops the site until an operator notices,
+# and serving a working older bundle beats a dead server. Drift is surfaced
+# instead via this warning and a hard failure in scripts/preflight.sh.
+NEWEST_SOURCE="$(find server.ts src index.html vite.config.ts package.json tsconfig.json \
+  -type f -newer dist/server.cjs -print -quit 2>/dev/null || true)"
 
-if [[ "$ARTIFACT_AGE_HOURS" -gt 168 ]]; then
-  echo "Error: dist/server.cjs is ${ARTIFACT_AGE_HOURS}h old — run: npm run build" >&2
-  exit 1
+if [[ -n "$NEWEST_SOURCE" ]]; then
+  echo "Warning: dist/server.cjs predates ${NEWEST_SOURCE} — running an older build. Run: npm run build" >&2
 fi
 
 exec node dist/server.cjs

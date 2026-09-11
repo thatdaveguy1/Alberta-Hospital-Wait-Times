@@ -194,7 +194,7 @@ flowchart TD
 **Code/docs:**
 1. Preflight WARN if listener cmdline is tsx/hub/orphan.
 2. Document: hub = dev only; prod = launchd + start-server.sh.
-3. Note stale-build guard in start-server.sh (dist > 168h refuses start).
+3. Note stale-build guard in start-server.sh (warns, still starts, when dist predates source).
 
 ### Phase 5 — Observability polish
 **Files:** runbooks, optional `skipReason` later  

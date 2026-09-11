@@ -6,7 +6,7 @@ Last known state: 2026-07-23.
 
 `scripts/preflight.sh` checks:
 
-1. `dist/server.cjs` exists and is ≤ 168 hours old.
+1. `dist/server.cjs` exists and is not older than any build input.
 2. All three `launchd/*.plist` files pass `plutil -lint`.
 3. All three LaunchAgents are loaded in the user session.
 4. `http://127.0.0.1:3004/api/health` responds with parseable JSON.
@@ -21,10 +21,26 @@ scripts/preflight.sh
 
 ## Build artifact freshness
 
-`scripts/start-server.sh` refuses to start when `dist/server.cjs` is missing or
-older than 168 hours.  It does **not** run `npm run build` automatically; an
-operator must rebuild explicitly so a crash loop does not silently resurrect
-stale code.
+`scripts/start-server.sh` refuses to start only when `dist/server.cjs` is
+missing.  When the bundle is older than the source tree (someone edited code
+without rebuilding), it logs a `Warning:` line to stderr and **still starts**.
+
+This is deliberate. The previous rule refused any bundle older than 168 hours,
+which turned a stable site into a crash loop on day 8 — a KeepAlive job that
+exits at startup restarts forever, and the site is down until an operator
+notices. Age is not evidence of a problem; the bundle can be arbitrarily old
+and still correct. Source drift is the real signal, so that is what is checked:
+
+```bash
+find server.ts src index.html vite.config.ts package.json tsconfig.json \
+  -type f -newer dist/server.cjs -print -quit
+```
+
+Serving a working older bundle beats a dead server. Nothing runs `npm run build`
+automatically, so rebuild explicitly after changing runtime code — otherwise the
+warning is the only signal that the running server predates your edit.
+`scripts/preflight.sh` reports the same drift as a hard `FAIL`, and is the place
+to check before a deployment.
 
 ## LaunchAgents (not LaunchDaemons)
 

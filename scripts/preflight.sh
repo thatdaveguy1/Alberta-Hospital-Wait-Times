@@ -21,22 +21,18 @@ load_env
 
 fail=0
 
-# 1. Build artifact exists and is reasonably fresh.
+# 1. Build artifact exists and is not older than its sources.
 if [[ ! -f dist/server.cjs ]]; then
   echo "FAIL: dist/server.cjs not found" >&2
   fail=1
 else
-  age_hours="$(node -e '
-    const fs = require("fs");
-    const s = fs.statSync(process.argv[1]);
-    const ageMs = Date.now() - s.mtimeMs;
-    console.log(Math.round(ageMs / (1000 * 60 * 60)));
-  ' dist/server.cjs 2>/dev/null || echo 9999)"
-  if [[ "$age_hours" -gt 168 ]]; then
-    echo "WARN: dist/server.cjs is ${age_hours}h old (max safe: 168h)" >&2
+  drift_source="$(find server.ts src index.html vite.config.ts package.json tsconfig.json \
+    -type f -newer dist/server.cjs -print -quit 2>/dev/null || true)"
+  if [[ -n "$drift_source" ]]; then
+    echo "FAIL: dist/server.cjs predates $drift_source — run: npm run build" >&2
     fail=1
   else
-    echo "OK: dist/server.cjs exists and is ${age_hours}h old"
+    echo "OK: dist/server.cjs is newer than every build input"
   fi
 fi
 

@@ -905,3 +905,10 @@ Record mistakes and their solutions here. Read before each sprint to avoid repea
 - **Mistake:** Assumed pushing to GitHub `main` and deploying without an explicit Pages branch would promote the live site, because the git default branch is `main`.
 - **Solution:** Treat Cloudflare Pages branch routing as an independent production pin. This project now uses **Production / `main`** (was historically **`test`**). Fixed the project setting rather than encoding the wrong branch forever.
 - **Prevention:** Before any “ship to production” claim, run `pages deployment list` and open the bare `*.pages.dev` URL (not only a branch alias) in a clean browser session. If production is mis-pinned, fix the project setting — don't leave scripts targeting a stale label.
+
+## Session: 2026-09-11 (Server uptime — retiring the 7-day rebuild requirement)
+
+### Lesson: Age is not staleness — a build-artifact timer took the site down for 4 days
+- **Mistake:** `scripts/start-server.sh` refused to start any `dist/server.cjs` older than 168h. The bundle had not actually drifted — no source file was newer than it — but on day 8 the guard refused every KeepAlive start, so launchd restart-looped 5,209 times and `:3004` was dead from 2026-09-07 19:53 until 2026-09-11. A site that is stable and rarely rebuilt died on a timer, and the alerting that should have caught it had no webhook configured.
+- **Solution:** The guard now compares the bundle against its build inputs (`server.ts`, `src`, `index.html`, `vite.config.ts`, `package.json`, `tsconfig.json`). Real source drift logs a `Warning:` line and the server still starts; only a missing `dist/server.cjs` stays fatal. `scripts/preflight.sh` reports the same drift as a hard `FAIL`, so the signal survives without the downtime.
+- **Prevention:** Fail closed only on conditions that make the artifact genuinely unusable. Never gate a supervised service's startup on a wall clock — under KeepAlive, any startup refusal compounds into an outage. Before adding such a check, prove that refusing to start cannot make things worse than running the older artifact.
