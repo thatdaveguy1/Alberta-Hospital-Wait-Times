@@ -6,6 +6,8 @@
     <string>com.davemini.alberta-hospital-pipeline-daily</string>
     <key>ProgramArguments</key>
     <array>
+        <string>/Users/davemini/.local/bin/node</string>
+        <string>/Users/davemini/.local/bin/launchd-external-exec.cjs</string>
         <string>/bin/bash</string>
         <string>/Users/davemini/.local/share/alberta-hospitals/run-daily-sync.sh</string>
     </array>
