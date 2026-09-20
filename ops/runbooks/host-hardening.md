@@ -65,6 +65,38 @@ scripts/install-launchd.sh
 on a logged-in user session.  A migration requires design review and is out of
 scope for this runbook.
 
+### Homebrew node upgrades silently break the calendar job
+
+Every plist launches `/Users/davemini/.local/bin/node`, a symlink into the
+Homebrew Cellar. macOS attaches a launch constraint (LWCR) to that binary, and
+**the constraint goes stale the moment Homebrew replaces it** — `brew upgrade
+node` swaps 26.8.1 for 26.9.0 behind the symlink.
+
+Symptom: the next spawn is killed by the kernel before it produces any output.
+Nothing appears in `alberta-pipeline.*.log`; `launchctl list` shows exit code
+`-9` and `launchctl print` reports:
+
+```
+properties = ... | needs LWCR update | managed LWCR | has LWCR
+last exit reason = OS_REASON_CODESIGNING
+```
+
+The KeepAlive server and the 10-minute uptime probe recover on their own,
+because they respawn after the upgrade and pick up a fresh constraint. The
+daily sync has no `RunAtLoad`, so it only spawns at 06:00 and dies there.
+
+Recovery is a re-bootstrap, which regenerates the constraint:
+
+```bash
+launchctl bootout  gui/$(id -u)/com.davemini.alberta-hospital-pipeline-daily
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.davemini.alberta-hospital-pipeline-daily.plist
+```
+
+`scripts/preflight.sh` fails on `needs LWCR update` for any agent, so run it
+after any Homebrew upgrade that touches node. Data freshness is still covered
+while the calendar job is down — the server runs the same daily cycle in-process
+at 06:00 — but the redundancy is gone until the job is re-bootstrapped.
+
 ## Auto-login / restart-after-power-loss
 
 Last-known observed values (verify live state before trusting):

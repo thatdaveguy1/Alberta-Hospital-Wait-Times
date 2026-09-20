@@ -52,10 +52,19 @@ for label in \
   com.davemini.alberta-hospital-wait-times \
   com.davemini.alberta-hospital-pipeline-daily \
   com.davemini.alberta-hospital-uptime; do
-  if launchctl print "$DOMAIN/$label" >/dev/null 2>&1; then
-    echo "OK: $label loaded"
-  else
+  if ! agent_print="$(launchctl print "$DOMAIN/$label" 2>/dev/null)"; then
     echo "FAIL: $label not loaded" >&2
+    fail=1
+    continue
+  fi
+  echo "OK: $label loaded"
+
+  # A stale launch constraint (LWCR) kills the job at spawn with
+  # OS_REASON_CODESIGNING and no output. It goes stale whenever Homebrew
+  # replaces the node binary a plist launches, and only a re-bootstrap
+  # regenerates it — so check for it instead of waiting for a missed 06:00 run.
+  if grep -q "needs LWCR update" <<<"$agent_print"; then
+    echo "FAIL: $label has a stale launch constraint — re-run: scripts/install-launchd.sh" >&2
     fail=1
   fi
 done
