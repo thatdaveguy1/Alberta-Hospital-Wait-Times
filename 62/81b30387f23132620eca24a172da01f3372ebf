@@ -1,0 +1,22 @@
+scripts/preflight.sh
+  s_e724e11d1a46e0::t_0994850b0509a1 55,58-67
+  s_e724e11d1a46e0::t_ab80844f06352b 68
+ops/runbooks/host-hardening.md
+  s_e724e11d1a46e0::t_f9314886259b8e 68-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "6281b30387f23132620eca24a172da01f3372ebf",
+  "prompts": {},
+  "sessions": {
+    "s_e724e11d1a46e0": {
+      "agent_id": {
+        "tool": "omp",
+        "id": "01a09155-d433-72c7-9be7-66fed03da493",
+        "model": "deepseek-v4.1-flash"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
