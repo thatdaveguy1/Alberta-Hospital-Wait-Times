@@ -1,0 +1,25 @@
+src/components/MapComponent.tsx
+  s_0eed5f17bb3a6b::t_e6d0417b0d4ece 6-8,10-11
+.env.example
+  s_0eed5f17bb3a6b::t_e4636047510534 26-28
+src/vite-env.d.ts
+  s_0eed5f17bb3a6b::t_7daa00b8bc559b 1
+.gitignore
+  s_0eed5f17bb3a6b::t_6e1f1bc0b8777e 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "59d70d7b65d70fb3997c2016bff2778afff583bf",
+  "prompts": {},
+  "sessions": {
+    "s_0eed5f17bb3a6b": {
+      "agent_id": {
+        "tool": "omp",
+        "id": "01a0cbdb-7e6a-73f0-8eb4-6b1d63224cb4",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
