@@ -3,9 +3,12 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getTheme, THEME_CHANGE_EVENT, type Theme } from '../lib/theme';
 
+const CARTO_API_KEY =
+  import.meta.env.VITE_CARTO_API_KEY || 'cb1_2y1l_1_471f813392feeefb8dda9655';
+
 const MAP_TILES: Record<Theme, string> = {
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  dark: `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
+  light: `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
 };
 
 const MAP_ATTRIBUTION =

@@ -13,6 +13,7 @@ coverage/
 # Scratch
 tmp/
 
+.pi-subagents/
 # Local tool metadata
 assets/.aistudio/
 
