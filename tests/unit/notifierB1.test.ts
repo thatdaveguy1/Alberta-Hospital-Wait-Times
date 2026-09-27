@@ -8,6 +8,7 @@ import {
   decideAlerts,
   runNotifier,
   downFingerprint,
+  overdueTiers,
   DEFAULT_DEDUPE_MS,
 } from '../../scripts/notifier.mjs';
 
@@ -696,6 +697,31 @@ describe('notifier B1 — state-transition and deduplication', () => {
         downFingerprint('down', ['er-waittimes', 'diagnostic']),
         'down:down:diagnostic|er-waittimes',
       );
+    });
+  });
+
+  describe('overdue fast-tier watchdog', () => {
+    it('maps overdue scheduler flags to critical tiers', () => {
+      const fastTier = { erLastFinish: null, labLastFinish: new Date(now - 60_000).toISOString(), erOverdue: true, labOverdue: false };
+      assert.deepEqual(overdueTiers(fastTier, now, dedupeMs), ['er-waittimes']);
+    });
+
+    it('adds an overdue tier to continued-down pages', () => {
+      const state = { ...defaultState(), overall: 'down', criticalAlerted: ['er-waittimes'] };
+      const input = {
+        ok: false,
+        overall: 'down',
+        criticalDomains: ['er-waittimes'],
+        fastTier: { erLastFinish: new Date(now - 60_000).toISOString(), labLastFinish: new Date(now - 60_000).toISOString(), erOverdue: false, labOverdue: true },
+        summary: 'health=down',
+        url: 'http://127.0.0.1:3004/api/health',
+        httpStatus: 200,
+        error: null,
+      };
+      const { events, state: next } = decideAlerts({ input, state, dedupeMs, now });
+      assert.equal(events[0].type, 'new-critical');
+      assert.equal(events[0].fingerprint, 'critical:diagnostic');
+      assert.deepEqual(next.criticalAlerted, ['diagnostic', 'er-waittimes']);
     });
   });
 });

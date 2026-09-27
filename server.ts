@@ -4,7 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import axios from 'axios';
 import fs from 'fs';
 import type { ServiceDisruption } from './src/types';
-import { startScheduler, shutdownScheduler, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync } from './src/pipelines/scheduler';
+import { startScheduler, shutdownScheduler, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync, getFastTierState } from './src/pipelines/scheduler';
 import { getSyncHistory, getSyncStatus, loadSyncStatusFromDisk } from './src/pipelines/syncStatus';
 import { getLastPushOutcomes } from './src/pipelines/pushClient';
 import { assessDataHealth } from './src/lib/dataHealth';
@@ -164,6 +164,7 @@ async function startServer() {
           status: status.status,
         },
         edgePush,
+        fastTier: getFastTierState(),
         domains: health.domains,
         criticalIssues: health.criticalIssues,
         softIssues: health.softIssues,
@@ -187,6 +188,7 @@ async function startServer() {
           status: 'never_run',
         },
         edgePush: [],
+        fastTier: null,
         domains: health.domains,
         criticalIssues: health.criticalIssues,
         softIssues: health.softIssues,

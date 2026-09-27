@@ -57,6 +57,40 @@ let lastLabTrendsPushMs = 0;
 // Live boards can refresh every 10 min; trend KV keys change every cycle and
 // are the write-budget killers. Cap trend pushes at 60 min.
 const TRENDS_MIN_INTERVAL_MS = 60 * 60 * 1000;
+// Fast-tier watchdog — self-heal if the 10-min ER/lab timers ever stop firing
+// (wedged event loop, swallowed timer error, or a persistently throwing tick).
+// 2026-09-25: both tiers went ~35h without a finished attempt while the
+// process stayed up; nothing re-fired them until the process restarted.
+export const FAST_TIER_WATCHDOG_INTERVAL_MS = 60 * 1000;
+export const FAST_TIER_OVERDUE_MS = 15 * 60 * 1000;
+let watchdogIntervalId: NodeJS.Timeout | null = null;
+let lastErFinishMs = 0;
+let lastLabFinishMs = 0;
+let erInFlight = false;
+let labInFlight = false;
+
+/** Pure helper: true when a fast-tier pipeline has not finished recently. */
+export function isFastTierOverdue(
+	lastFinishMs: number,
+	nowMs = Date.now(),
+	thresholdMs = FAST_TIER_OVERDUE_MS,
+): boolean {
+	return nowMs - lastFinishMs > thresholdMs;
+}
+
+/** Snapshot of fast-tier liveness for /api/health. */
+export function getFastTierState(nowMs = Date.now()) {
+	return {
+		erLastFinish: lastErFinishMs ? new Date(lastErFinishMs).toISOString() : null,
+		labLastFinish: lastLabFinishMs ? new Date(lastLabFinishMs).toISOString() : null,
+		erInFlight,
+		labInFlight,
+		erOverdue: isFastTierOverdue(lastErFinishMs, nowMs),
+		labOverdue: isFastTierOverdue(lastLabFinishMs, nowMs),
+		watchdogIntervalMs: FAST_TIER_WATCHDOG_INTERVAL_MS,
+		overdueThresholdMs: FAST_TIER_OVERDUE_MS,
+	};
+}
 
 // Graceful shutdown state.
 let shuttingDown = false;
@@ -89,6 +123,17 @@ function trackPromise<T>(promise: Promise<T>): Promise<T> {
 }
 
 async function runErWaitTimesPipeline(): Promise<void> {
+	if (shuttingDown || erInFlight) return;
+	erInFlight = true;
+	try {
+		await runErWaitTimesCycle();
+	} finally {
+		lastErFinishMs = Date.now();
+		erInFlight = false;
+	}
+}
+
+async function runErWaitTimesCycle(): Promise<void> {
 	if (shuttingDown) return;
 	const result = await fetchErWaitTimes();
 	recordErWaitTimesUpdate(result);
@@ -96,17 +141,24 @@ async function runErWaitTimesPipeline(): Promise<void> {
 	// On success, push fresh domain data and throttled trends BEFORE sync-status
 	// so a quota/cooldown on the status write cannot strand the new public data.
 	if (result.status === "success") {
-		const domainPush = pushToCloudflare("er-waittimes", {
-			hospitals: getHospitals(),
-			lastUpdated: result.timestamp,
-		});
+		try {
+			await pushToCloudflare("er-waittimes", {
+				hospitals: getHospitals(),
+				lastUpdated: result.timestamp,
+			});
+		} catch (err) {
+			console.error("[Scheduler] ER domain push failed (trends + status still attempted):", err);
+		}
 
 		// Provincial/zone trend blob — throttle hourly for free-tier KV budget.
 		const now = Date.now();
-		let trendPromise: Promise<unknown> = Promise.resolve();
 		if (now - lastErTrendsPushMs >= TRENDS_MIN_INTERVAL_MS) {
-			trendPromise = pushErTrends(getSnapshots(), getHospitals());
-			lastErTrendsPushMs = now;
+			try {
+				await pushErTrends(getSnapshots(), getHospitals());
+				lastErTrendsPushMs = now;
+			} catch (err) {
+				console.error("[Scheduler] ER trends push failed (status still attempted):", err);
+			}
 		} else {
 			const waitMin = Math.ceil(
 				(TRENDS_MIN_INTERVAL_MS - (now - lastErTrendsPushMs)) / 60000,
@@ -116,15 +168,20 @@ async function runErWaitTimesPipeline(): Promise<void> {
 			);
 		}
 
-		await domainPush;
-		await trendPromise;
-
 		// Publish sync-status after domain data is in KV. Lab pipeline no longer
 		// pushes sync-status (ER-only) to avoid duplicate KV writes (~144/day).
-		await pushToCloudflare("sync-status", getSyncStatus());
+		try {
+			await pushToCloudflare("sync-status", getSyncStatus());
+		} catch (err) {
+			console.error("[Scheduler] ER sync-status push failed:", err);
+		}
 	} else {
 		// Failure path: still publish sync-status so the failure is visible immediately.
-		await pushToCloudflare("sync-status", getSyncStatus());
+		try {
+			await pushToCloudflare("sync-status", getSyncStatus());
+		} catch (err) {
+			console.error("[Scheduler] ER failure sync-status push failed:", err);
+		}
 	}
 }
 
@@ -135,31 +192,40 @@ async function runDailySyncPipeline(): Promise<void> {
 }
 
 async function runLabWaitsPipeline(): Promise<void> {
+	if (shuttingDown || labInFlight) return;
+	labInFlight = true;
+	try {
+		await runLabWaitsCycle();
+	} finally {
+		lastLabFinishMs = Date.now();
+		labInFlight = false;
+	}
+}
+
+async function runLabWaitsCycle(): Promise<void> {
 	if (shuttingDown) return;
 	const result = await runAplLabWaits();
 	recordLabWaitsUpdate(result);
 	// Edge sync-status is published by the ER pipeline only (KV write budget).
 
 	if (result.status === "success") {
-		const diagnosticFile = path.join(process.cwd(), "data-diagnostic.json");
-		let domainPush: Promise<unknown> = Promise.resolve();
 		try {
+			const diagnosticFile = path.join(process.cwd(), "data-diagnostic.json");
 			const data = fs.readFileSync(diagnosticFile, "utf8");
-			const parsed = JSON.parse(data);
-			domainPush = pushToCloudflare("diagnostic", parsed);
+			await pushToCloudflare("diagnostic", JSON.parse(data));
 		} catch (err) {
-			console.warn(
-				"[Scheduler] Failed to push diagnostic data to Cloudflare:",
-				err,
-			);
+			console.warn("[Scheduler] Failed to push diagnostic data to Cloudflare:", err);
 		}
 
 		// Lab trend aggregates — throttle hourly for free-tier KV budget.
 		const now = Date.now();
-		let trendPromise: Promise<unknown> = Promise.resolve();
 		if (now - lastLabTrendsPushMs >= TRENDS_MIN_INTERVAL_MS) {
-			trendPromise = pushLabTrends(getLabSnapshots());
-			lastLabTrendsPushMs = now;
+			try {
+				await pushLabTrends(getLabSnapshots());
+				lastLabTrendsPushMs = now;
+			} catch (err) {
+				console.error("[Scheduler] Lab trends push failed:", err);
+			}
 		} else {
 			const waitMin = Math.ceil(
 				(TRENDS_MIN_INTERVAL_MS - (now - lastLabTrendsPushMs)) / 60000,
@@ -168,9 +234,6 @@ async function runLabWaitsPipeline(): Promise<void> {
 				`[Scheduler] Skipping lab trends push (next in ~${waitMin}m) to conserve KV writes`,
 			);
 		}
-
-		await domainPush;
-		await trendPromise;
 	}
 }
 
@@ -183,6 +246,27 @@ function scheduleWrapped(fn: () => Promise<void>, label: string): () => void {
 			console.error(`[Scheduler] ${label} pipeline error:`, err);
 		});
 	};
+}
+
+function runFastTierWatchdog(): void {
+	if (shuttingDown) return;
+	const now = Date.now();
+	for (const tier of [
+		{ label: "ER wait times", inFlight: erInFlight, lastFinishMs: lastErFinishMs, rerun: runErWaitTimesPipeline },
+		{ label: "Lab waits", inFlight: labInFlight, lastFinishMs: lastLabFinishMs, rerun: runLabWaitsPipeline },
+	] as const) {
+		if (!isFastTierOverdue(tier.lastFinishMs, now)) continue;
+		if (tier.inFlight) {
+			console.error(
+				`[Scheduler] Watchdog: ${tier.label} stuck in-flight for ${Math.round((now - tier.lastFinishMs) / 60000)}m — leaving it alone, needs operator look.`,
+			);
+			continue;
+		}
+		console.warn(
+			`[Scheduler] Watchdog: ${tier.label} overdue (${Math.round((now - tier.lastFinishMs) / 60000)}m since last finish) — re-firing.`,
+		);
+		scheduleWrapped(tier.rerun, `${tier.label} (watchdog)`)();
+	}
 }
 
 export async function startScheduler(): Promise<void> {
@@ -212,6 +296,12 @@ export async function startScheduler(): Promise<void> {
 		scheduleWrapped(runLabWaitsPipeline, "Lab waits"),
 		10 * 60 * 1000,
 	);
+
+	// Watchdog: if a fast-tier tick ever stops finishing (wedged loop or a
+	// persistently throwing tick), re-fire it within ~1 min instead of waiting
+	// for the next restart. Skips tiers already running.
+	lastErFinishMs = lastLabFinishMs = Date.now();
+	watchdogIntervalId = setInterval(runFastTierWatchdog, FAST_TIER_WATCHDOG_INTERVAL_MS);
 
 	const delayMs = msUntilNextLocalHour(DAILY_SYNC_LOCAL_HOUR);
 	dailyTimeoutId = setTimeout(() => {
@@ -243,6 +333,10 @@ export function stopScheduler(): void {
 	if (labIntervalId) {
 		clearInterval(labIntervalId);
 		labIntervalId = null;
+	}
+	if (watchdogIntervalId) {
+		clearInterval(watchdogIntervalId);
+		watchdogIntervalId = null;
 	}
 	if (dailyTimeoutId) {
 		clearTimeout(dailyTimeoutId);

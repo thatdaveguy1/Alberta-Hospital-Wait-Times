@@ -50,6 +50,7 @@ function makeResult({ ok, overall, body, url: u, httpStatus, error }) {
     ok,
     overall: overall ?? body?.status ?? 'unknown',
     criticalDomains,
+    fastTier: body?.fastTier ?? null,
     summary: error || summarize(body),
     url: u,
     httpStatus: httpStatus ?? null,

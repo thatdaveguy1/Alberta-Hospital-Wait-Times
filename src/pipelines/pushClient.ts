@@ -233,6 +233,8 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
   const url = `${CLOUDFLARE_WORKER_URL}/api/push/${domain}`;
 
   for (let attempt = 1; attempt <= 3; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30_000);
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -242,7 +244,9 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
           'X-Push-Timestamp': timestamp,
         },
         body,
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
 
       if (response.ok) {
         // Network write is done; now update hashes and last-push atomically. The
@@ -321,9 +325,9 @@ export async function pushToCloudflare(domain: string, data: unknown): Promise<P
         return result;
       }
     } catch (err) {
+      clearTimeout(timeout);
       const errorMsg = err instanceof Error ? err.message : String(err);
       console.warn(`[PushClient] Push ${domain} error (attempt ${attempt}): ${errorMsg}`);
-
       if (attempt < 3) {
         const backoffMs = 4 ** (attempt - 1) * 1000;
         const { promise, resolve } = Promise.withResolvers<void>();

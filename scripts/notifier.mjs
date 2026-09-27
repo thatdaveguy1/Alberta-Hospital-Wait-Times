@@ -79,6 +79,20 @@ export function buildEndpointFailurePayload(input, now = Date.now()) {
   };
 }
 
+export function overdueTiers(fastTier, now = Date.now(), thresholdMs = DEFAULT_DEDUPE_MS) {
+  if (!fastTier || typeof fastTier !== 'object') return [];
+  const out = [];
+  const ageOf = (iso) => {
+    if (!iso) return null;
+    const ms = Date.parse(iso);
+    if (!Number.isFinite(ms)) return null;
+    return now - ms;
+  };
+  if (fastTier.erOverdue || (ageOf(fastTier.erLastFinish) ?? Infinity) > thresholdMs) out.push('er-waittimes');
+  if (fastTier.labOverdue || (ageOf(fastTier.labLastFinish) ?? Infinity) > thresholdMs) out.push('diagnostic');
+  return out;
+}
+
 export function buildDownPayload(input, previousOverall, now = Date.now()) {
   const criticalList =
     input.criticalDomains.length > 0
@@ -175,9 +189,15 @@ export function decideAlerts({
   };
 
   const previousOverall = next.overall;
-  const criticalDomains = Array.isArray(input.criticalDomains)
-    ? [...input.criticalDomains].sort()
-    : [];
+  const criticalDomains = Array.from(
+    new Set([
+      ...(Array.isArray(input.criticalDomains) ? input.criticalDomains : []),
+      // Watchdog liveness: the API may still report overall ok while the
+      // in-process ER/lab timers have stopped finishing. Treat an overdue
+      // fast tier as critical so it pages even before domain TTLs trip.
+      ...overdueTiers(input.fastTier, now, dedupeMs),
+    ]),
+  ).sort();
 
   // Endpoint / network / JSON parse failure.
   if (input.error) {

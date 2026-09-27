@@ -118,6 +118,7 @@ app.get('/api/health', async (c) => {
       softIssues: health.softIssues,
       bannerMessage: health.bannerMessage,
       checks: health.checks,
+      fastTier: (parsed as { fastTier?: unknown } | null)?.fastTier ?? null,
       edge: true,
     });
   } catch (err: unknown) {
@@ -141,6 +142,7 @@ app.get('/api/health', async (c) => {
       softIssues: health.softIssues,
       bannerMessage: health.bannerMessage,
       checks: health.checks,
+      fastTier: null,
       edge: true,
     });
   }
