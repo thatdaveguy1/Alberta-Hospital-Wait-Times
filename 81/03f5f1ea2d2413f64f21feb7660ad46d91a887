@@ -1,0 +1,24 @@
+src/pipelines/powerbiScraper.ts
+  s_2febf0fa36e9b6::t_00f8e88a0140a3 50
+  s_2febf0fa36e9b6::t_a6e3c9356659e5 34-43,45-48,51,53,55
+lessons.md
+  s_2febf0fa36e9b6::t_dd62baca0fe83e 922-928
+launchd/com.davemini.alberta-hospital-pipeline-daily.plist
+  s_2febf0fa36e9b6::t_b0a53d3f925667 22-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "8103f5f1ea2d2413f64f21feb7660ad46d91a887",
+  "prompts": {},
+  "sessions": {
+    "s_2febf0fa36e9b6": {
+      "agent_id": {
+        "tool": "omp",
+        "id": "01a0dff0-bb63-75eb-a567-97949e6840b8",
+        "model": "muse-spark-1.3-contributor"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
