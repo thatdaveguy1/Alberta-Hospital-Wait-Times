@@ -31,14 +31,28 @@ const POWERBI_REPORT_URL =
 const SURGICAL_FILE = path.join(process.cwd(), 'data-surgical.json');
 const CHROME_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
-async function resolveChromePath(): Promise<string | undefined> {
-  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
-  if (fs.existsSync(CHROME_PATH)) return CHROME_PATH;
+async function chromeCandidateWorks(candidate: string): Promise<boolean> {
+  if (!fs.existsSync(candidate)) return false;
   try {
-    return await puppeteer.executablePath();
+    await fs.promises.access(candidate, fs.constants.X_OK);
+    return true;
   } catch {
-    return undefined;
+    return false;
   }
+}
+
+async function resolveChromePath(): Promise<string | undefined> {
+  if (process.env.CHROME_PATH && (await chromeCandidateWorks(process.env.CHROME_PATH))) {
+    return process.env.CHROME_PATH;
+  }
+  if (await chromeCandidateWorks(CHROME_PATH)) return CHROME_PATH;
+  try {
+    const bundled = await puppeteer.executablePath();
+    if (await chromeCandidateWorks(bundled)) return bundled;
+  } catch {
+    // fall through to undefined — puppeteer falls back to its default lookup
+  }
+  return undefined;
 }
 
 // --- DSR (DAX Serialized Results) parser ---

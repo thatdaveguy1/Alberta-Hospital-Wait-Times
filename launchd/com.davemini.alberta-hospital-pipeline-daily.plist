@@ -19,6 +19,8 @@
         <string>/Users/davemini/.local/bin:/Users/davemini/.local/lib/nodejs/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
         <key>HOME</key>
         <string>/Users/davemini</string>
+        <key>CHROME_PATH</key>
+        <string>/Applications/Google Chrome.app/Contents/MacOS/Google Chrome</string>
         <key>NODE_ENV</key>
         <string>production</string>
         <key>ALBERTA_HOSPITALS_ROOT</key>
