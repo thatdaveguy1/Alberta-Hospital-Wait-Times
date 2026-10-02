@@ -37,6 +37,7 @@ KEEP_GEOGRAPHIES = {
 }
 
 INDICATOR_FRAGMENTS = [
+    "primary health care provider",  # CIHI rename (2026): "Canadians With a Primary Health Care Provider"
     "regular health provider",
     "regular health care provider",
     "regular provider",
@@ -59,30 +60,37 @@ def find_col(headers, fragments):
 
 
 def derive_demographic(breakdown, breakdown_val, segment_value):
-    """Map CIHI breakdown columns to a demographic-group label.
+    """Map CIHI breakdown columns to a demographic-group label, segment-aware.
 
-    When Level 1 breakdown is "Not applicable", the row is an overall rate
-    for the segment (Adults or Children and youth). We map the Adults overall
-    rate to "All Residents" since the dashboard uses that as the headline.
+    Returns None when the row should be skipped (child-segment breakdowns that
+    would collide with adult labels, or any unrecognised breakdown).
     """
     bd = normalize(breakdown)
     bv = normalize(breakdown_val)
     seg = normalize(segment_value)
+    children = "children" in seg
 
-    if bd == "not applicable" or not bv or bv == "not applicable":
-        if "children" in seg:
-            return "Children & Youth (0-17)"
-        # Adults overall rate → headline "All Residents"
-        return "All Residents"
+    if bd == "not applicable" or not bd:
+        return "Children & Youth (0-17)" if children else "All Residents"
+
+    if children:
+        if "gender" in bd:
+            if "girls" in bv:
+                return "Girls"
+            if "boys" in bv:
+                return "Boys"
+        return None
 
     if "age group" in bd:
-        if "18 to 34" in bv or "35 to 49" in bv or "50 to 64" in bv:
-            return "Adults (18-64)"
+        if "18 to 34" in bv:
+            return "Adults (18-34)"
+        if "35 to 49" in bv:
+            return "Adults (35-49)"
+        if "50 to 64" in bv:
+            return "Adults (50-64)"
         if "65" in bv:
             return "Seniors (65+)"
-        if "12 to 17" in bv or "5 to 11" in bv or "1 to 4" in bv:
-            return "Children & Youth (0-17)"
-        return str(breakdown_val) if breakdown_val else "All Residents"
+        return None
 
     if "income" in bd:
         if "q1" in bv or "lowest" in bv:
@@ -95,28 +103,23 @@ def derive_demographic(breakdown, breakdown_val, segment_value):
             return "Middle Income Quintile"
         if "q4" in bv:
             return "Upper-Middle Income Quintile"
-        return str(breakdown_val) if breakdown_val else "All Residents"
+        return None
 
     if "urban" in bd and "rural" in bd:
         if "rural" in bv:
             return "Rural / Remote Areas"
         if "urban" in bv:
             return "Urban Centres"
-        return str(breakdown_val) if breakdown_val else "All Residents"
+        return None
 
     if "sex" in bd or "gender" in bd:
-        # Map specific gender/sex values
         if "female" in bv:
             return "Female"
         if "male" in bv:
             return "Male"
-        if "girls" in bv:
-            return "Girls"
-        if "boys" in bv:
-            return "Boys"
-        return str(breakdown_val) if breakdown_val else "All Residents"
+        return None
 
-    return str(breakdown_val) if breakdown_val else "All Residents"
+    return None
 
 
 def main():
@@ -137,8 +140,13 @@ def main():
         value_col = find_col(headers, ["metric value"])
         year_col = find_col(headers, ["time frame"])
         main_metric_col = find_col(headers, ["main metric"])
+        # 2026 workbook renamed "Level 1 breakdown(s/ value)" to "Breakdowns" / "Breakdown value".
         breakdown_col = find_col(headers, ["level 1 breakdown"])
+        if breakdown_col < 0:
+            breakdown_col = find_col(headers, ["breakdowns"])
         breakdown_val_col = find_col(headers, ["level 1 breakdown value"])
+        if breakdown_val_col < 0:
+            breakdown_val_col = find_col(headers, ["breakdown value"])
         segment_val_col = find_col(headers, ["segment value"])
 
         if indicator_col < 0 or geo_col < 0 or value_col < 0:
@@ -193,9 +201,12 @@ def main():
             breakdown_val = row[breakdown_val_col] if breakdown_val_col >= 0 and breakdown_val_col < len(row) else None
             segment_val = row[segment_val_col] if segment_val_col >= 0 and segment_val_col < len(row) else None
             demographic = derive_demographic(breakdown, breakdown_val, segment_val)
+            if demographic is None:
+                continue
 
             rate_id = f"att_{normalize(geography).replace(' ', '_')}_{normalize(demographic).replace(' ', '_')}_{reporting_year}"
             if rate_id in seen_ids:
+                print(f"WARNING: duplicate id {rate_id} (value {metric_value}); keeping first", file=sys.stderr)
                 continue
             seen_ids.add(rate_id)
 

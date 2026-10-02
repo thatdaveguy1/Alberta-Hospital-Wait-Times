@@ -280,7 +280,9 @@ export default function PrimaryCareDashboard() {
     const preferred = [
       'All Residents',
       'Seniors (65+)',
-      'Adults (18-64)',
+      'Adults (18-34)',
+      'Adults (35-49)',
+      'Adults (50-64)',
       'Children & Youth (0-17)',
       'Rural / Remote Areas',
       'Urban Centres',
@@ -297,7 +299,7 @@ export default function PrimaryCareDashboard() {
     return found != null && Number.isFinite(found) ? found : null;
   };
   const lowIncomeRate = getRate('Lowest Income Quintile');
-  const youngAdultsRate = getRate('Adults (18-64)');
+  const youngAdultsRate = getRate('Adults (18-34)');
   const ruralRate = getRate('Rural / Remote Areas');
   const seniorsRate = getRate('Seniors (65+)');
   const workingAgeRate = youngAdultsRate;
@@ -316,7 +318,7 @@ export default function PrimaryCareDashboard() {
         ? { label: 'rural / remote residents', rate: ruralRate, gap: attachmentRate - ruralRate }
         : null,
       workingAgeRate != null
-        ? { label: 'working-age adults (18–64)', rate: workingAgeRate, gap: attachmentRate - workingAgeRate }
+        ? { label: 'adults 18–34', rate: workingAgeRate, gap: attachmentRate - workingAgeRate }
         : null,
     ].filter((g): g is { label: string; rate: number; gap: number } => g != null && g.gap >= 3);
 

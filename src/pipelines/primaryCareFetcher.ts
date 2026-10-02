@@ -49,10 +49,9 @@ function loadJsonFile(file: string): LoadedJson {
   return {};
 }
 
-// Merge the ATTACHMENT_RATES array into the existing JSON, preserving genuine
+// Replace the ATTACHMENT_RATES array in the existing JSON, preserving genuine
 // upstream keys (ACCEPTING_PROVIDERS, etc.). Force withheld primary-care residual
-// arrays empty so RMW never reintroduces them. Dedupe by id, preferring the
-// freshly fetched rows. Returns the number of records written.
+// arrays empty so RMW never reintroduces them. Returns the number of records written.
 function mergeAndWrite(file: string, newRates: AttachmentRate[]): number {
   if (newRates.length === 0) return 0;
   const existing = loadJsonFile(file);
@@ -62,19 +61,10 @@ function mergeAndWrite(file: string, newRates: AttachmentRate[]): number {
   existing.ED_RELIANCE_BY_CONTINUITY = [];
   existing.CONTINUITY_SATISFACTION = [];
 
-  const prevRaw = existing['ATTACHMENT_RATES'];
-  const prev: AttachmentRate[] = Array.isArray(prevRaw)
-    ? (prevRaw as unknown[]).filter(
-        (r): r is AttachmentRate =>
-          typeof r === 'object' && r !== null && typeof (r as Record<string, unknown>).id === 'string',
-      )
-    : [];
-
-  const byId = new Map<string, AttachmentRate>();
-  for (const r of prev) byId.set(r.id, r);
-  for (const r of newRates) byId.set(r.id, r);
-
-  const merged = Array.from(byId.values());
+  // The workbook contains every year, so replace wholesale (old rows with
+  // superseded ids must not linger).
+  const merged = newRates;
+  const contentChanged = JSON.stringify(existing['ATTACHMENT_RATES'] ?? []) !== JSON.stringify(merged);
   existing['ATTACHMENT_RATES'] = merged;
 
   const years = merged.map(r => r.reporting_year).sort();
@@ -91,6 +81,7 @@ function mergeAndWrite(file: string, newRates: AttachmentRate[]): number {
   existing._dataMetadata = mergeDataMetadata(
     existing._dataMetadata as DataMetadata | undefined,
     ownedMetadata,
+    contentChanged ? ['ATTACHMENT_RATES'] : [],
   );
 
   applyWithheldPayloadGuard(existing);
