@@ -1,0 +1,25 @@
+README.md
+  s_555e2f9f127db1::t_e3702c2215ddfd 40
+scripts/extract-data-to-json.ts
+  s_555e2f9f127db1::t_a0d45f62db75c4 7
+src/pipelines/README.md
+  s_555e2f9f127db1::t_cdd476398ee326 13
+src/pipelines/powerbiScraper.ts
+  s_555e2f9f127db1::t_0e1f5527cacbec 652,689-693
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "5005bb410a83ec6c4e240f7875aa5df6faeb3c00",
+  "prompts": {},
+  "sessions": {
+    "s_555e2f9f127db1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a47129c591d193262",
+        "model": "unknown"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
