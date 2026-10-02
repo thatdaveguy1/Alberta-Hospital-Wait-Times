@@ -215,7 +215,7 @@ export async function run(): Promise<SyncResult> {
 
         applyWithheldPayloadGuard(existingData);
         writeFileAtomicSync(diagnosticFile, JSON.stringify(existingData, null, 2));
-        writeFileAtomicSync(LAB_SNAPSHOTS_FILE, JSON.stringify(currentLabSnapshots, null, 2));
+        writeFileAtomicSync(LAB_SNAPSHOTS_FILE, JSON.stringify(currentLabSnapshots));
       });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);

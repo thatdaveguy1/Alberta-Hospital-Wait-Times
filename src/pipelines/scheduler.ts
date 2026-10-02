@@ -1,7 +1,9 @@
 // Scheduler — manages timed execution of fast-tier pipelines.
 // ER wait times and lab waits: every 10 minutes.
-// Daily full sync also runs in-process at 06:00 local (and on startup when stale)
-// so a launchd calendar/codesign failure cannot freeze disruptions + daily-sync.
+// Daily full sync: the launchd job (`npm run daily-sync`, 06:00) is the primary
+// runner. This process only acts as a staleness fallback: an hourly check (and
+// a check on startup) runs the daily flow if the last daily sync is older than
+// 26 hours, so a launchd calendar/codesign failure cannot freeze disruptions.
 
 import fs from "fs";
 import path from "path";
@@ -9,7 +11,6 @@ import {
 	fetchErWaitTimes,
 	getHospitals,
 	getSnapshots,
-	setAlertChecker,
 } from "./erWaitTimesFetcher";
 import {
 	getLabSnapshots,
@@ -28,30 +29,25 @@ import type { SyncResult } from "./types";
 
 let erIntervalId: NodeJS.Timeout | null = null;
 let labIntervalId: NodeJS.Timeout | null = null;
-let dailyTimeoutId: NodeJS.Timeout | null = null;
-let dailyIntervalId: NodeJS.Timeout | null = null;
+let dailyFallbackIntervalId: NodeJS.Timeout | null = null;
+let dailyInFlight = false;
 
-/** Matches launchd StartCalendarInterval Hour=6. */
-export const DAILY_SYNC_LOCAL_HOUR = 6;
-const DAILY_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
-const DAILY_SYNC_STALE_MS = 24 * 60 * 60 * 1000;
+const DAILY_SYNC_FALLBACK_CHECK_MS = 60 * 60 * 1000;
+/** Daily sync counts as stale after 26h (24h cadence plus 2h grace for launchd). */
+export const DAILY_SYNC_FALLBACK_STALE_MS = 26 * 60 * 60 * 1000;
 
-export function msUntilNextLocalHour(hour: number, now = new Date()): number {
-	const next = new Date(now.getTime());
-	next.setHours(hour, 0, 0, 0);
-	if (next.getTime() <= now.getTime()) {
-		next.setDate(next.getDate() + 1);
-	}
-	return next.getTime() - now.getTime();
-}
-
-function lastDailySyncIsStale(nowMs = Date.now()): boolean {
-	const stamp = getSyncStatus().lastSyncTimestamp;
-	if (!stamp) return true;
-	const parsed = Date.parse(stamp);
+/** Pure helper: true when the last daily sync is missing, unparseable, or too old. */
+export function isDailySyncStale(
+	lastSyncTimestamp: string | null,
+	nowMs: number,
+	thresholdMs = DAILY_SYNC_FALLBACK_STALE_MS,
+): boolean {
+	if (!lastSyncTimestamp) return true;
+	const parsed = Date.parse(lastSyncTimestamp);
 	if (!Number.isFinite(parsed)) return true;
-	return nowMs - parsed >= DAILY_SYNC_STALE_MS;
+	return nowMs - parsed >= thresholdMs;
 }
+
 let lastErTrendsPushMs = 0;
 let lastLabTrendsPushMs = 0;
 // Live boards can refresh every 10 min; trend KV keys change every cycle and
@@ -96,10 +92,6 @@ export function getFastTierState(nowMs = Date.now()) {
 let shuttingDown = false;
 let shutdownPromise: Promise<void> | null = null;
 const activePipelinePromises = new Set<Promise<unknown>>();
-
-export function setAlertCheckFn(fn: () => void): void {
-	setAlertChecker(fn);
-}
 
 export function getHospitalsData() {
 	return getHospitals();
@@ -187,8 +179,26 @@ async function runErWaitTimesCycle(): Promise<void> {
 
 async function runDailySyncPipeline(): Promise<void> {
 	if (shuttingDown) return;
-	console.log("[Scheduler] Starting daily sync cycle...");
-	await runDailySyncFlow();
+	if (dailyInFlight) {
+		console.log("[Scheduler] Daily sync already in flight — skipping.");
+		return;
+	}
+	dailyInFlight = true;
+	try {
+		console.log("[Scheduler] Starting daily sync cycle...");
+		await runDailySyncFlow();
+	} finally {
+		dailyInFlight = false;
+	}
+}
+
+/** Hourly fallback: refresh status from disk (launchd job writes it from another process), run only if stale. */
+async function runDailyFallbackCheck(): Promise<void> {
+	if (shuttingDown || dailyInFlight) return;
+	loadSyncStatusFromDisk();
+	if (!isDailySyncStale(getSyncStatus().lastSyncTimestamp, Date.now())) return;
+	console.log("[Scheduler] Daily sync is stale (>26h) — running fallback.");
+	await runDailySyncPipeline();
 }
 
 async function runLabWaitsPipeline(): Promise<void> {
@@ -303,17 +313,12 @@ export async function startScheduler(): Promise<void> {
 	lastErFinishMs = lastLabFinishMs = Date.now();
 	watchdogIntervalId = setInterval(runFastTierWatchdog, FAST_TIER_WATCHDOG_INTERVAL_MS);
 
-	const delayMs = msUntilNextLocalHour(DAILY_SYNC_LOCAL_HOUR);
-	dailyTimeoutId = setTimeout(() => {
-		dailyTimeoutId = null;
-		scheduleWrapped(runDailySyncPipeline, "Daily sync")();
-		dailyIntervalId = setInterval(
-			scheduleWrapped(runDailySyncPipeline, "Daily sync"),
-			DAILY_SYNC_INTERVAL_MS,
-		);
-	}, delayMs);
+	dailyFallbackIntervalId = setInterval(
+		scheduleWrapped(runDailyFallbackCheck, "Daily sync fallback"),
+		DAILY_SYNC_FALLBACK_CHECK_MS,
+	);
 
-	if (lastDailySyncIsStale()) {
+	if (isDailySyncStale(getSyncStatus().lastSyncTimestamp, Date.now())) {
 		console.log(
 			"[Scheduler] Daily sync is stale on startup — running catch-up in background.",
 		);
@@ -321,7 +326,7 @@ export async function startScheduler(): Promise<void> {
 	}
 
 	console.log(
-		`[Scheduler] Running. ER wait times: every 10 min. Lab waits: every 10 min. Daily sync: 06:00 local (in ${Math.round(delayMs / 60000)} min).`,
+		"[Scheduler] Running. ER wait times: every 10 min. Lab waits: every 10 min. Daily sync: launchd primary; in-process fallback checks hourly (runs if last sync >26h old).",
 	);
 }
 
@@ -338,13 +343,9 @@ export function stopScheduler(): void {
 		clearInterval(watchdogIntervalId);
 		watchdogIntervalId = null;
 	}
-	if (dailyTimeoutId) {
-		clearTimeout(dailyTimeoutId);
-		dailyTimeoutId = null;
-	}
-	if (dailyIntervalId) {
-		clearInterval(dailyIntervalId);
-		dailyIntervalId = null;
+	if (dailyFallbackIntervalId) {
+		clearInterval(dailyFallbackIntervalId);
+		dailyFallbackIntervalId = null;
 	}
 	console.log("[Scheduler] Stopped.");
 }
@@ -429,7 +430,16 @@ export async function triggerDailySync(): Promise<SyncResult[]> {
 		console.log("[Scheduler] Refusing daily sync trigger during shutdown.");
 		return getSyncStatus().results;
 	}
+	if (dailyInFlight) {
+		console.log("[Scheduler] Daily sync already in flight — ignoring manual trigger.");
+		return getSyncStatus().results;
+	}
 	console.log("[Scheduler] Manual daily sync trigger via API...");
-	await trackPromise(runDailySyncFlow());
+	dailyInFlight = true;
+	try {
+		await trackPromise(runDailySyncFlow());
+	} finally {
+		dailyInFlight = false;
+	}
 	return getSyncStatus().results;
 }

@@ -25,7 +25,7 @@ import { run as fraserRun } from './fraserDownloader';
 import { run as cihiWaitTimesRun, runSurgical as cihiWaitTimesSurgicalRun } from './cihiWaitTimesDownloader';
 import { run as primaryCareRun } from './primaryCareFetcher';
 import { run as albertaFindAProviderRun } from './albertaFindAProviderScraper';
-import { run as openAlbertaInequityRun, runPrimaryCare as openAlbertaInequityPrimaryCareRun } from './openAlbertaInequityFetcher';
+import { run as openAlbertaInequityRun } from './openAlbertaInequityFetcher';
 import { run as openAlbertaBillingRun } from './openAlbertaBillingFetcher';
 import { run as hqcaFocusRun } from './hqcaFocusScraper';
 import { run as albertaRvdRun } from './albertaRespiratoryVirusScraper';
@@ -105,7 +105,6 @@ const PIPELINES: Pipeline[] = [
   { id: 'primaryCareFetcher', name: 'primary-care', domain: 'primary-care', run: primaryCareRun },
   { id: 'albertaFindAProviderScraper', name: 'alberta-find-a-provider', domain: 'primary-care', run: albertaFindAProviderRun },
   { id: 'openAlbertaInequityFetcher', name: 'open-alberta-inequity', domain: 'regional-inequity', run: openAlbertaInequityRun },
-  { id: 'openAlbertaInequityPrimaryCareFetcher', name: 'open-alberta-inequity-primary-care', domain: 'primary-care', run: openAlbertaInequityPrimaryCareRun },
   { id: 'fraserDownloader', name: 'fraser', domain: 'spending', run: fraserRun },
   { id: 'openAlbertaBillingFetcher', name: 'open-alberta-billing', domain: 'spending', run: openAlbertaBillingRun },
   { id: 'hqcaFocusScraper', name: 'hqca-focus', domain: 'primary-care', run: hqcaFocusRun },

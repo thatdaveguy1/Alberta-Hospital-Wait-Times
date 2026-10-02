@@ -4,60 +4,17 @@ import { createServer as createViteServer } from 'vite';
 import axios from 'axios';
 import fs from 'fs';
 import type { ServiceDisruption } from './src/types';
-import { startScheduler, shutdownScheduler, setAlertCheckFn, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync, getFastTierState } from './src/pipelines/scheduler';
+import { startScheduler, shutdownScheduler, getHospitalsData, getSnapshotsData, getLabSnapshotsData, triggerDailySync, getFastTierState } from './src/pipelines/scheduler';
 import { getSyncHistory, getSyncStatus, loadSyncStatusFromDisk } from './src/pipelines/syncStatus';
 import { getLastPushOutcomes } from './src/pipelines/pushClient';
 import { assessDataHealth } from './src/lib/dataHealth';
 
-// Alert Interfaces
-interface EmailAlert {
-  id: string;
-  email: string;
-  hospitalId: string;
-  hospitalName: string;
-  thresholdMins: number;
-  createdAt: string;
-  lastTriggeredAt?: string;
-}
-
-interface AlertLog {
-  id: string;
-  email: string;
-  hospitalName: string;
-  thresholdMins: number;
-  currentMins: number;
-  timestamp: string;
-}
-// In-memory data store for alerts and disruptions (hospitals/snapshots now managed by scheduler)
-let localAlerts: EmailAlert[] = [];
-let dispatchedAlertLogs: AlertLog[] = [];
+// In-memory data store for disruptions (hospitals/snapshots now managed by scheduler)
 let localDisruptions: ServiceDisruption[] = [];
 
-const ALERTS_FILE = path.join(process.cwd(), 'data-alerts.json');
-const ALERT_LOGS_FILE = path.join(process.cwd(), 'data-alert-logs.json');
 const DISRUPTIONS_FILE = path.join(process.cwd(), 'data-disruptions.json');
 
 function loadDataFromFile() {
-  try {
-    if (fs.existsSync(ALERTS_FILE)) {
-      const data = fs.readFileSync(ALERTS_FILE, 'utf8');
-      localAlerts = JSON.parse(data);
-      console.log(`[Server] Loaded ${localAlerts.length} alert subscriptions from disk.`);
-    }
-  } catch (err) {
-    console.error('[Server] Error loading alerts from file:', err);
-  }
-
-  try {
-    if (fs.existsSync(ALERT_LOGS_FILE)) {
-      const data = fs.readFileSync(ALERT_LOGS_FILE, 'utf8');
-      dispatchedAlertLogs = JSON.parse(data);
-      console.log(`[Server] Loaded ${dispatchedAlertLogs.length} dispatched alert logs from disk.`);
-    }
-  } catch (err) {
-    console.error('[Server] Error loading alert logs from file:', err);
-  }
-
   try {
     if (fs.existsSync(DISRUPTIONS_FILE)) {
       const data = fs.readFileSync(DISRUPTIONS_FILE, 'utf8');
@@ -74,40 +31,6 @@ function saveDataToFile(file: string, data: any) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
   } catch (err) {
     console.error(`[Server] Error saving data to file ${file}:`, err);
-  }
-}
-
-
-// Check if any registered alert is triggered
-function checkEmailAlerts() {
-  const now = new Date().toISOString();
-  console.log(`[Server] Evaluating ${localAlerts.length} active email alert thresholds against current wait times...`);
-  for (const alert of localAlerts) {
-    const hosp = getHospitalsData().find(h => h.id === alert.hospitalId);
-    if (!hosp) continue;
-
-    // Cooldown check: 10 minutes to avoid spamming the logs
-    const cooldownPeriod = 10 * 60 * 1000;
-    const isReadyToTrigger = !alert.lastTriggeredAt || 
-      (Date.now() - new Date(alert.lastTriggeredAt).getTime() > cooldownPeriod);
-
-    if (hosp.waitTime <= alert.thresholdMins && isReadyToTrigger) {
-      alert.lastTriggeredAt = now;
-      const log: AlertLog = {
-        id: Math.random().toString(36).substring(2, 9),
-        email: alert.email,
-        hospitalName: hosp.name,
-        thresholdMins: alert.thresholdMins,
-        currentMins: hosp.waitTime,
-        timestamp: now
-      };
-      dispatchedAlertLogs.unshift(log);
-      console.log(`✉️ [ALERT DISPATCHED] To: ${alert.email} | Target: ${hosp.name} is at ${hosp.waitTime} mins (Threshold <= ${alert.thresholdMins} mins).`);
-      
-      // Save updated alert lastTriggeredAt & logs to disk
-      saveDataToFile(ALERTS_FILE, localAlerts);
-      saveDataToFile(ALERT_LOGS_FILE, dispatchedAlertLogs);
-    }
   }
 }
 
@@ -564,77 +487,6 @@ async function startServer() {
     res.json(trends);
   });
 
-  // Email Alerts Endpoint: Subscribe to alerts
-  app.post('/api/alerts', (req, res) => {
-    const { email, hospitalId, hospitalIds, thresholdMins } = req.body;
-    
-    if (!email || typeof thresholdMins !== 'number') {
-      return res.status(400).json({ error: 'Missing email or thresholdMins' });
-    }
-
-    const idsToRegister: string[] = [];
-    if (Array.isArray(hospitalIds)) {
-      idsToRegister.push(...hospitalIds);
-    } else if (typeof hospitalId === 'string') {
-      idsToRegister.push(hospitalId);
-    }
-
-    if (idsToRegister.length === 0) {
-      return res.status(400).json({ error: 'Missing hospitalId or hospitalIds' });
-    }
-
-    const registeredAlerts: EmailAlert[] = [];
-    for (const hId of idsToRegister) {
-      const hosp = getHospitalsData().find(h => h.id === hId);
-      if (!hosp) {
-        continue;
-      }
-
-      // Avoid duplicates for the same email, hospital, and threshold
-      const exists = localAlerts.some(a => a.email === email && a.hospitalId === hId && a.thresholdMins === thresholdMins);
-      if (exists) continue;
-
-      const newAlert: EmailAlert = {
-        id: Math.random().toString(36).substring(2, 9),
-        email,
-        hospitalId: hId,
-        hospitalName: hosp.name,
-        thresholdMins,
-        createdAt: new Date().toISOString()
-      };
-
-      localAlerts.push(newAlert);
-      registeredAlerts.push(newAlert);
-      console.log(`[Server] Registered wait time alert for ${email} at facility: ${hosp.name} (<= ${thresholdMins} mins)`);
-    }
-    
-    // Persist to disk
-    saveDataToFile(ALERTS_FILE, localAlerts);
-    
-    // Check immediately if wait time is already met!
-    checkEmailAlerts();
-
-    res.status(201).json({ success: true, alerts: registeredAlerts });
-  });
-
-  // Email Alerts Endpoint: Retrieve active subscriptions for debug/management
-  app.get('/api/alerts', (req, res) => {
-    res.json(localAlerts);
-  });
-
-  // Email Alerts Endpoint: Fetch dispatched alert trigger history
-  app.get('/api/alerts/logs', (req, res) => {
-    res.json(dispatchedAlertLogs);
-  });
-
-  // Email Alerts Endpoint: Cancel subscription
-  app.delete('/api/alerts/:id', (req, res) => {
-    const { id } = req.params;
-    localAlerts = localAlerts.filter(a => a.id !== id);
-    saveDataToFile(ALERTS_FILE, localAlerts);
-    res.json({ success: true, message: 'Alert subscription successfully cancelled' });
-  });
-
   // Domain data endpoint — serves data-*.json files for dashboard fetch calls
   app.get('/api/data/:domain', (req, res) => {
     const domainMap: Record<string, string> = {
@@ -696,7 +548,6 @@ async function startServer() {
 
   // Wire the pipeline scheduler — ER wait times every 10 min, daily orchestrator every 24 hr.
   // Daily sync runs in the background so it never blocks the Express server from accepting connections.
-  setAlertCheckFn(checkEmailAlerts);
   startScheduler().catch(err => {
     console.error('[Server] Failed to start scheduler:', err);
   });

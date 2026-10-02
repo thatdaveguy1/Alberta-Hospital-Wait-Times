@@ -64,14 +64,6 @@ function loadSnapshotsFromDisk(): WaitTimeSnapshot[] {
   return [];
 }
 
-// Alert checking — callback registered by server.ts
-type AlertChecker = () => void;
-let alertChecker: AlertChecker | null = null;
-
-export function setAlertChecker(fn: AlertChecker): void {
-  alertChecker = fn;
-}
-
 export async function fetchErWaitTimes(): Promise<SyncResult> {
   const startTime = Date.now();
   const timestamp = new Date().toISOString();
@@ -221,17 +213,15 @@ export async function fetchErWaitTimes(): Promise<SyncResult> {
           lastUpdated: timestamp,
         }, null, 2));
 
-        writeFileAtomicSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots, null, 2));
+        writeFileAtomicSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots));
       });
 
-      // Check alert thresholds
-      alertChecker?.();
     } else {
       // Still write snapshots (retention may have removed old entries) even
       // when no hospitals were parsed this cycle, but do not overwrite the
       // good ER wait times file.
       withCollectorLockSync(() => {
-        writeFileAtomicSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots, null, 2));
+        writeFileAtomicSync(SNAPSHOTS_FILE, JSON.stringify(currentSnapshots));
       });
     }
 
