@@ -1,7 +1,6 @@
 // Push Client — sends local JSON data to Cloudflare KV via authenticated POST.
 // Used after each pipeline writes its local JSON file.
 
-import 'dotenv/config'; // CLI use (npm run push:all) needs .env; never overrides existing env
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';

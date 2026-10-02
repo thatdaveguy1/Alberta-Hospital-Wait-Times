@@ -11,7 +11,7 @@
     "lint": "tsc --noEmit",
     "pipeline": "tsx src/pipelines/orchestrator.ts",
     "daily-sync": "tsx src/pipelines/dailySync.ts",
-    "push:all": "tsx src/pipelines/pushClient.ts --all",
+    "push:all": "tsx --env-file=.env src/pipelines/pushClient.ts --all",
     "deploy:worker": "cd cloudflare && npx wrangler deploy",
     "deploy:pages": "npx wrangler pages deploy dist --project-name alberta-hospital-wait-times --branch main --commit-dirty=true",
     "seed:kv": "cd cloudflare && wrangler kv key put --remote",
