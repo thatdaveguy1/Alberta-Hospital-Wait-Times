@@ -1,0 +1,35 @@
+package.json
+  s_105ab7679289bc::t_855634bbcdab3b 20
+tests/unit/dashboardModuleSearch.test.ts
+  s_105ab7679289bc::t_83e3187017c1df 1-2,22-23,27,37-38,44,48-51,53,55-56
+tests/unit/erFacility.test.ts
+  s_105ab7679289bc::t_9ff3bacac9f26b 1-2,39-43,53-55,67-70,82-85,96-97,117-119,123-125,138-139
+tests/unit/geoZones.test.ts
+  s_105ab7679289bc::t_9553cbf94a8ec0 1-2,25-26,31,36-38,43-44,49-50,58,65-67,72-74,78-79,85-89,95-96
+tests/unit/labTrendsA3.test.ts
+  s_105ab7679289bc::t_f30ffe18f04ce7 13-21,24-31,37,39,41,67,85-87
+tests/unit/labWait.test.ts
+  s_105ab7679289bc::t_0d9d8aea62ab7c 1-2,14-16,20-26,30-33,39-43,48-52,56-60,65-67,71-75
+tests/unit/schedulerDaily.test.ts
+  s_105ab7679289bc::t_eca325f5211d03 4,10-12,14-18
+tests/unit/surgicalDashboardComparisons.test.ts
+  s_105ab7679289bc::t_e21077813a1821 1-2,51-52,56-57
+tests/unit/surgicalWaitSelection.test.ts
+  s_105ab7679289bc::t_899e61331227fe 1-2,146-148,155-156,161-162,167-168,181-185,191-193,199-200,204-206,212-217,241-246,300-302,307-309
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d74bb48d2932ff7eb91afae282c0d089916c33c8",
+  "prompts": {},
+  "sessions": {
+    "s_105ab7679289bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a7ed14d5212a8034d",
+        "model": "unknown"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
