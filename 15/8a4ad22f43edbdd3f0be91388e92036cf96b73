@@ -1,0 +1,19 @@
+package.json
+  s_13681d18a868ea::t_fc84a658836985 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "158a4ad22f43edbdd3f0be91388e92036cf96b73",
+  "prompts": {},
+  "sessions": {
+    "s_13681d18a868ea": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "26f711ba-b8b4-4657-8a45-396cd2dc1acf",
+        "model": "unknown"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
