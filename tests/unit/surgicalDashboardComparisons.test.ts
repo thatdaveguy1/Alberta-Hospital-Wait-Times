@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import type { SurgicalRecord } from '../../src/surgicalData';
 
 /** Mirrors SurgicalDashboard findComparison90th lookup. */
@@ -47,12 +48,12 @@ const sample: SurgicalRecord[] = [
 
 describe('surgical procedure comparison lookup', () => {
   it('finds records when dropdown uses procedure_name keys', () => {
-    expect(findComparison90th(sample, 'Total Hip Arthroplasty')?.metric_value).toBe(36.8);
-    expect(findComparison90th(sample, 'Total Knee Arthroplasty')?.metric_value).toBe(43.1);
+    assert.strictEqual(findComparison90th(sample, 'Total Hip Arthroplasty')?.metric_value, 36.8);
+    assert.strictEqual(findComparison90th(sample, 'Total Knee Arthroplasty')?.metric_value, 43.1);
   });
 
   it('still supports procedure_group keys for legacy defaults', () => {
-    expect(findComparison90th(sample, 'Hip Replacement')?.metric_value).toBe(36.8);
-    expect(findComparison90th(sample, 'Knee Replacement')?.metric_value).toBe(43.1);
+    assert.strictEqual(findComparison90th(sample, 'Hip Replacement')?.metric_value, 36.8);
+    assert.strictEqual(findComparison90th(sample, 'Knee Replacement')?.metric_value, 43.1);
   });
 });

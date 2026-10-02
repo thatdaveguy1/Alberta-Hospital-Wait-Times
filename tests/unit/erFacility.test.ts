@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import type { Hospital } from '../../src/types';
 import {
   deriveCareType,
@@ -35,11 +36,11 @@ describe('erFacility model', () => {
       note: '8 am – 10 pm',
       status: 'Green',
     });
-    expect(deriveOpenState(h)).toBe('closed');
-    expect(isWaitTimeUnavailable(h)).toBe(true);
-    expect(effectiveWaitMinutes(h)).toBeNull();
-    expect(waitBandFor(h)).toBe('closed');
-    expect(deriveCareType(h)).toBe('urgent-care');
+    assert.strictEqual(deriveOpenState(h), 'closed');
+    assert.strictEqual(isWaitTimeUnavailable(h), true);
+    assert.strictEqual(effectiveWaitMinutes(h), null);
+    assert.strictEqual(waitBandFor(h), 'closed');
+    assert.strictEqual(deriveCareType(h), 'urgent-care');
   });
 
   it('treats unavailable negative waits as null effective wait', () => {
@@ -49,9 +50,9 @@ describe('erFacility model', () => {
       waitTime: -1,
       waitTimeLabel: 'Wait times unavailable',
     });
-    expect(isWaitTimeUnavailable(h)).toBe(true);
-    expect(effectiveWaitMinutes(h)).toBeNull();
-    expect(waitBandFor(h)).toBe('unavailable');
+    assert.strictEqual(isWaitTimeUnavailable(h), true);
+    assert.strictEqual(effectiveWaitMinutes(h), null);
+    assert.strictEqual(waitBandFor(h), 'unavailable');
   });
 
   it('detects pediatric emergency from name and note', () => {
@@ -63,10 +64,10 @@ describe('erFacility model', () => {
       waitTimeLabel: '0 hr 43 min',
     });
     const enriched = enrichHospital(h);
-    expect(enriched.careType).toBe('pediatric-emergency');
-    expect(enriched.ageMaxYears).toBe(17);
-    expect(enriched.servesLabel).toMatch(/17/);
-    expect(enriched.effectiveWaitMinutes).toBe(43);
+    assert.strictEqual(enriched.careType, 'pediatric-emergency');
+    assert.strictEqual(enriched.ageMaxYears, 17);
+    assert.match(enriched.servesLabel, /17/);
+    assert.strictEqual(enriched.effectiveWaitMinutes, 43);
   });
 
   it('keeps open adult ER waits in averages', () => {
@@ -78,10 +79,10 @@ describe('erFacility model', () => {
       status: 'Red',
       note: 'Open 24 hours<br />For patients 15 and older',
     });
-    expect(deriveOpenState(h)).toBe('open');
-    expect(effectiveWaitMinutes(h)).toBe(326);
-    expect(waitBandFor(h)).toBe('high');
-    expect(enrichHospital(h).ageMinYears).toBe(15);
+    assert.strictEqual(deriveOpenState(h), 'open');
+    assert.strictEqual(effectiveWaitMinutes(h), 326);
+    assert.strictEqual(waitBandFor(h), 'high');
+    assert.strictEqual(enrichHospital(h).ageMinYears, 15);
   });
 });
 
@@ -92,8 +93,8 @@ describe('care scope routing', () => {
       name: 'Cochrane Community Health Centre',
       category: 'Urgent Care',
     });
-    expect(hospitalInCareScope(uc, 'urgent-care')).toBe(true);
-    expect(hospitalInCareScope(uc, 'emergency')).toBe(false);
+    assert.strictEqual(hospitalInCareScope(uc, 'urgent-care'), true);
+    assert.strictEqual(hospitalInCareScope(uc, 'emergency'), false);
   });
 
   it('emergency scope includes pediatric and adult ER, excludes UC', () => {
@@ -113,15 +114,15 @@ describe('care scope routing', () => {
       category: 'Urgent Care',
     });
 
-    expect(hospitalInCareScope(pediatric, 'emergency')).toBe(true);
-    expect(hospitalInCareScope(adult, 'emergency')).toBe(true);
-    expect(hospitalInCareScope(uc, 'emergency')).toBe(false);
+    assert.strictEqual(hospitalInCareScope(pediatric, 'emergency'), true);
+    assert.strictEqual(hospitalInCareScope(adult, 'emergency'), true);
+    assert.strictEqual(hospitalInCareScope(uc, 'emergency'), false);
   });
 
   it('maps care types to dashboard modules', () => {
-    expect(moduleForCareType('urgent-care')).toBe('urgent-care');
-    expect(moduleForCareType('emergency')).toBe('er-waits');
-    expect(moduleForCareType('pediatric-emergency')).toBe('er-waits');
+    assert.strictEqual(moduleForCareType('urgent-care'), 'urgent-care');
+    assert.strictEqual(moduleForCareType('emergency'), 'er-waits');
+    assert.strictEqual(moduleForCareType('pediatric-emergency'), 'er-waits');
   });
 
   it('matches known UC IDs on urgent-care scope when category is Urgent Care', () => {
@@ -134,8 +135,8 @@ describe('care scope routing', () => {
     ];
     for (const id of knownUcIds) {
       const h = hospital({ id, name: id, category: 'Urgent Care' });
-      expect(hospitalInCareScope(h, 'urgent-care')).toBe(true);
-      expect(hospitalInCareScope(h, 'emergency')).toBe(false);
+      assert.strictEqual(hospitalInCareScope(h, 'urgent-care'), true);
+      assert.strictEqual(hospitalInCareScope(h, 'emergency'), false);
     }
   });
 });

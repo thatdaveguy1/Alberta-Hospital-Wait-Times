@@ -17,6 +17,7 @@
     "seed:kv": "cd cloudflare && wrangler kv key put --remote",
     "gen:push-secret": "openssl rand -hex 24",
     "health:check": "node scripts/check-data-health.mjs",
+    "test": "tsx --test tests/unit/*.test.ts",
     "test:data-health": "tsx --test tests/unit/dataHealth.test.ts",
     "test:sync-history": "tsx --test tests/unit/syncHistory.test.ts",
     "test:gps-accuracy": "tsx --test tests/unit/gpsAccuracy.test.ts",

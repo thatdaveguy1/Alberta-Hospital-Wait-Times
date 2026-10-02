@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import {
   dashboardMatchesSearch,
   readDashboardModuleFromUrl,
@@ -18,12 +19,12 @@ const surgicalTile = {
 
 describe('dashboardMatchesSearch', () => {
   it('matches diagnostics by id without matching surgical description noise', () => {
-    expect(dashboardMatchesSearch(diagnosticsTile, 'diagnostics')).toBe(true);
-    expect(dashboardMatchesSearch(surgicalTile, 'diagnostics')).toBe(false);
+    assert.strictEqual(dashboardMatchesSearch(diagnosticsTile, 'diagnostics'), true);
+    assert.strictEqual(dashboardMatchesSearch(surgicalTile, 'diagnostics'), false);
   });
 
   it('matches shortName Diagnostics & Labs', () => {
-    expect(dashboardMatchesSearch(diagnosticsTile, 'labs')).toBe(true);
+    assert.strictEqual(dashboardMatchesSearch(diagnosticsTile, 'labs'), true);
   });
 
   it('does not search description text (health spending NHEX physician)', () => {
@@ -33,25 +34,26 @@ describe('dashboardMatchesSearch', () => {
       shortName: 'Health Spending',
     };
     // description mentions NHEX / physician clinical payments; title/shortName/id do not
-    expect(dashboardMatchesSearch(healthSpending, 'NHEX')).toBe(false);
-    expect(dashboardMatchesSearch(healthSpending, 'physician')).toBe(false);
+    assert.strictEqual(dashboardMatchesSearch(healthSpending, 'NHEX'), false);
+    assert.strictEqual(dashboardMatchesSearch(healthSpending, 'physician'), false);
   });
 });
 
 describe('readDashboardModuleFromUrl', () => {
   it('returns null when module param absent', () => {
-    expect(readDashboardModuleFromUrl(['diagnostics', 'er-waits', 'urgent-care'])).toBeNull();
+    assert.strictEqual(readDashboardModuleFromUrl(['diagnostics', 'er-waits', 'urgent-care']), null);
   });
 
   it('accepts urgent-care module id from URL', () => {
-    const previous = window.location.search;
-    window.history.replaceState({}, '', '?module=urgent-care');
+    const g = globalThis as { window?: unknown };
+    const hadWindow = 'window' in g;
+    const previous = g.window;
+    g.window = { location: { search: '?module=urgent-care' } };
     try {
-      expect(readDashboardModuleFromUrl(['diagnostics', 'er-waits', 'urgent-care'])).toBe(
-        'urgent-care',
-      );
+      assert.strictEqual(readDashboardModuleFromUrl(['diagnostics', 'er-waits', 'urgent-care']), 'urgent-care');
     } finally {
-      window.history.replaceState({}, '', previous || '/');
+      if (hadWindow) g.window = previous;
+      else delete g.window;
     }
   });
 });

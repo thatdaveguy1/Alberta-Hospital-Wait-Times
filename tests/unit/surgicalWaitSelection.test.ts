@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import type { SurgicalRecord } from '../../src/surgicalData';
 import {
   dedupeLatestMedians,
@@ -142,29 +143,29 @@ const sample: SurgicalRecord[] = [
 
 describe('periodEndMs', () => {
   it('parses ISO and month-year labels', () => {
-    expect(periodEndMs('2026-03-31')).toBe(Date.parse('2026-03-31'));
-    expect(periodEndMs('April 2026')).toBe(Date.UTC(2026, 4, 0));
-    expect(periodEndMs('April 2026')).toBeGreaterThan(periodEndMs('2026-03-31'));
+    assert.strictEqual(periodEndMs('2026-03-31'), Date.parse('2026-03-31'));
+    assert.strictEqual(periodEndMs('April 2026'), Date.UTC(2026, 4, 0));
+    assert.ok(periodEndMs('April 2026') > periodEndMs('2026-03-31'));
   });
 });
 
 describe('pickLatestProvincialRecord', () => {
   it('prefers fresher Power BI hip 90th over older AWR', () => {
     const hit = pickLatestProvincialRecord(sample, 'Total Hip Arthroplasty', '90th percentile');
-    expect(hit?.metric_value).toBe(58.1);
-    expect(hit?.unit).toBe('weeks');
+    assert.strictEqual(hit?.metric_value, 58.1);
+    assert.strictEqual(hit?.unit, 'weeks');
   });
 
   it('prefers fresher Power BI breast 90th in days over CIHI weeks', () => {
     const hit = pickLatestProvincialRecord(sample, 'Breast Cancer Surgery', '90th percentile');
-    expect(hit?.metric_value).toBe(51);
-    expect(hit?.unit).toBe('days');
+    assert.strictEqual(hit?.metric_value, 51);
+    assert.strictEqual(hit?.unit, 'days');
   });
 
   it('resolves cataract aliases to Power BI 90th', () => {
     const hit = pickLatestProvincialRecord(sample, 'Cataract Extraction & Lens Implant', '90th percentile');
-    expect(hit?.metric_value).toBe(42.4);
-    expect(hit?.procedure_name).toBe('Cataract Surgery 1st Eye');
+    assert.strictEqual(hit?.metric_value, 42.4);
+    assert.strictEqual(hit?.procedure_name, 'Cataract Surgery 1st Eye');
   });
 });
 
@@ -177,45 +178,43 @@ describe('dedupeLatestMedians + findMatchingP90', () => {
       r.procedure_name === 'Cataract Extraction & Lens Implant' ||
       r.procedure_name === 'Cataract Surgery 1st Eye',
     );
-    expect(hip?.metric_value).toBe(16.6);
-    expect(breast?.metric_value).toBe(28);
-    expect(breast?.unit).toBe('days');
-    expect(cataract?.metric_value).toBe(8.7);
-    expect(medians).toHaveLength(3);
+    assert.strictEqual(hip?.metric_value, 16.6);
+    assert.strictEqual(breast?.metric_value, 28);
+    assert.strictEqual(breast?.unit, 'days');
+    assert.strictEqual(cataract?.metric_value, 8.7);
+    assert.strictEqual(medians.length, 3);
   });
 
   it('pairs p90 from same source/period as median', () => {
     const breastMed = sample.find(r => r.id === 'breast-pbi-med')!;
     const p90 = findMatchingP90(sample, breastMed);
-    expect(p90?.metric_value).toBe(51);
-    expect(p90?.unit).toBe('days');
-    expect(p90?.source_name).toContain('Power BI');
+    assert.strictEqual(p90?.metric_value, 51);
+    assert.strictEqual(p90?.unit, 'days');
+    assert.ok(p90?.source_name.includes('Power BI'));
   });
 });
 
 describe('unit-aware benchmark math', () => {
   it('parses week and day benchmarks into weeks', () => {
-    expect(parseBenchmarkWeeks('26 weeks (182 days)')).toBe(26);
-    expect(parseBenchmarkWeeks('28 days')).toBeCloseTo(4, 5);
+    assert.strictEqual(parseBenchmarkWeeks('26 weeks (182 days)'), 26);
+    assert.ok(Math.abs((parseBenchmarkWeeks('28 days')) - (4)) < 10 ** -5 / 2);
   });
 
   it('converts days before comparing to week benchmarks', () => {
-    expect(toWeeks(28, 'days')).toBeCloseTo(4, 5);
-    expect(pctOfBenchmark(28, 'days', '4 weeks (28 days)')).toBe(100);
-    expect(pctOfBenchmark(51, 'days', '4 weeks (28 days)')).toBeCloseTo(182.1, 1);
+    assert.ok(Math.abs((toWeeks(28, 'days')) - (4)) < 10 ** -5 / 2);
+    assert.strictEqual(pctOfBenchmark(28, 'days', '4 weeks (28 days)'), 100);
+    assert.ok(Math.abs((pctOfBenchmark(51, 'days', '4 weeks (28 days)')) - (182.1)) < 10 ** -1 / 2);
   });
 });
 
 describe('CIHI published priority benchmarks', () => {
   it('exposes hip/knee/cataract national Wait-2 targets only', () => {
-    expect(CIHI_PRIORITY_BENCHMARKS['Total Hip Arthroplasty']).toBe('26 weeks (182 days)');
-    expect(CIHI_PRIORITY_BENCHMARKS['Total Knee Arthroplasty']).toBe('26 weeks (182 days)');
-    expect(CIHI_PRIORITY_BENCHMARKS['Cataract Extraction & Lens Implant']).toBe(
-      '16 weeks (112 days)',
-    );
-    expect(CIHI_PRIORITY_BENCHMARKS['Breast Cancer Surgery']).toBeUndefined();
-    expect(CIHI_PRIORITY_BENCHMARKS['Bariatric Surgery']).toBeUndefined();
-    expect(CIHI_PRIORITY_BENCHMARKS['Coronary Artery Bypass Graft']).toBeUndefined();
+    assert.strictEqual(CIHI_PRIORITY_BENCHMARKS['Total Hip Arthroplasty'], '26 weeks (182 days)');
+    assert.strictEqual(CIHI_PRIORITY_BENCHMARKS['Total Knee Arthroplasty'], '26 weeks (182 days)');
+    assert.strictEqual(CIHI_PRIORITY_BENCHMARKS['Cataract Extraction & Lens Implant'], '16 weeks (112 days)');
+    assert.strictEqual(CIHI_PRIORITY_BENCHMARKS['Breast Cancer Surgery'], undefined);
+    assert.strictEqual(CIHI_PRIORITY_BENCHMARKS['Bariatric Surgery'], undefined);
+    assert.strictEqual(CIHI_PRIORITY_BENCHMARKS['Coronary Artery Bypass Graft'], undefined);
   });
 
   it('falls back to CIHI map when no record carries benchmark_value', () => {
@@ -239,12 +238,12 @@ describe('CIHI published priority benchmarks', () => {
         unit: 'days',
       }),
     ];
-    expect(resolveBenchmarkValue(rows, 'Total Hip Arthroplasty')).toBe('26 weeks (182 days)');
-    expect(resolveBenchmarkValue(rows, 'Cataract Surgery 1st Eye')).toBe('16 weeks (112 days)');
-    expect(resolveBenchmarkValue(rows, 'Breast Cancer Surgery')).toBeUndefined();
-    expect(pctOfBenchmark(58.1, 'weeks', resolveBenchmarkValue(rows, 'Total Hip Arthroplasty'))).toBeCloseTo(
-      223.5,
-      1,
+    assert.strictEqual(resolveBenchmarkValue(rows, 'Total Hip Arthroplasty'), '26 weeks (182 days)');
+    assert.strictEqual(resolveBenchmarkValue(rows, 'Cataract Surgery 1st Eye'), '16 weeks (112 days)');
+    assert.strictEqual(resolveBenchmarkValue(rows, 'Breast Cancer Surgery'), undefined);
+    assert.ok(
+      Math.abs(pctOfBenchmark(58.1, 'weeks', resolveBenchmarkValue(rows, 'Total Hip Arthroplasty')) - 223.5) <
+        10 ** -1 / 2,
     );
   });
 });
@@ -298,17 +297,15 @@ describe('CABG naming + benchmark inheritance', () => {
   it('dedupes CABG aliases to freshest Power BI median', () => {
     const medians = dedupeLatestMedians(cabgRows);
     const cabg = medians.find(r => r.procedure_name.includes('Coronary'));
-    expect(medians.filter(r => r.procedure_name.includes('Coronary'))).toHaveLength(1);
-    expect(cabg?.metric_value).toBe(11.75);
-    expect(cabg?.source_name).toContain('Power BI');
+    assert.strictEqual(medians.filter(r => r.procedure_name.includes('Coronary')).length, 1);
+    assert.strictEqual(cabg?.metric_value, 11.75);
+    assert.ok(cabg?.source_name.includes('Power BI'));
   });
 
   it('inherits benchmark from older same-procedure row when latest lacks one', () => {
     const latest = pickLatestProvincialRecord(cabgRows, 'Total Hip Arthroplasty', '90th percentile');
-    expect(latest?.metric_value).toBe(58.1);
-    expect(latest?.benchmark_value).toBeUndefined();
-    expect(resolveBenchmarkValue(cabgRows, 'Total Hip Arthroplasty', latest?.benchmark_value)).toBe(
-      '26 weeks (182 days)',
-    );
+    assert.strictEqual(latest?.metric_value, 58.1);
+    assert.strictEqual(latest?.benchmark_value, undefined);
+    assert.strictEqual(resolveBenchmarkValue(cabgRows, 'Total Hip Arthroplasty', latest?.benchmark_value), '26 weeks (182 days)');
   });
 });
