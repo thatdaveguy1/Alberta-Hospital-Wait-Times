@@ -1,0 +1,23 @@
+scripts/extract_cihi_attachment.py
+  s_555e2f9f127db1::t_dd096e92a082b1 40,63,65-66,71,73-82,85-90,93,106,113,120,122,143,145-146,148-149,204-205,209
+src/components/PrimaryCareDashboard.tsx
+  s_555e2f9f127db1::t_01451f18f4ed0d 283-285,302,321
+src/pipelines/primaryCareFetcher.ts
+  s_555e2f9f127db1::t_042a208dcbe229 52,54,64-67,84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "0205453cf60a476494c7a826d4b8dbba9a4b3c0e",
+  "prompts": {},
+  "sessions": {
+    "s_555e2f9f127db1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a47129c591d193262",
+        "model": "unknown"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
