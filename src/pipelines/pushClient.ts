@@ -1,6 +1,7 @@
 // Push Client — sends local JSON data to Cloudflare KV via authenticated POST.
 // Used after each pipeline writes its local JSON file.
 
+import 'dotenv/config'; // CLI use (npm run push:all) needs .env; never overrides existing env
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -412,7 +413,8 @@ export async function pushAllToCloudflare(): Promise<PushResult[]> {
 
 // CLI entry point: tsx src/pipelines/pushClient.ts [domain]
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const domain = process.argv[2];
+  const arg = process.argv[2];
+  const domain = arg === '--all' ? undefined : arg;
   if (domain) {
     const filePath = path.join(process.cwd(), `data-${domain}.json`);
     if (!fs.existsSync(filePath)) {
