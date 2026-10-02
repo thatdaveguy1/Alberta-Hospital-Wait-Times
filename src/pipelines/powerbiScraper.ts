@@ -579,7 +579,6 @@ interface SurgicalJson {
   SPECIALISTS_LIST: unknown[];
   CIHI_PROVINCIAL_COMPARATORS: unknown[];
   STATSCAN_SATISFACTION_STATS: unknown[];
-  FRASER_MEDIAN_WEEKS_2025?: unknown[];
   _dataMetadata?: DataMetadata;
 }
 const MONTH_NAME_TO_END_ISO: Record<string, { year: number; month: number }> = {
@@ -635,16 +634,6 @@ function deriveSurgicalRecordsSourceVintage(records: SurgicalRecord[], periodLab
 
 
 function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], periodLabel: string): number {
-  const fraserSource = 'Fraser Institute — Waiting Your Turn';
-  const deriveFraserSourceVintage = (records: unknown[]): string => {
-    if (!Array.isArray(records) || records.length === 0) {
-      return 'Unavailable — Fraser Institute specialty wait-time data not currently scraped';
-    }
-    const first = records.find((r): r is Record<string, unknown> => typeof r === 'object' && r !== null);
-    const year = first && 'year' in first ? String(first.year) : '2025';
-    return `${year} data (annual Fraser Institute physician survey)`;
-  };
-
   if (!fs.existsSync(filePath)) {
     console.warn(`[PowerBIScraper] ${filePath} not found — creating new file`);
     const sourceVintage = deriveSurgicalRecordsSourceVintage(newRecords, periodLabel);
@@ -653,11 +642,6 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], pe
       source: 'Alberta Wait Times Reporting (Power BI scraper)',
       sourceVintage,
     });
-    const fraserMeta = buildMetadataEntry({
-      updateType: 'manual',
-      source: fraserSource,
-      sourceVintage: deriveFraserSourceVintage([]),
-    });
     const data: SurgicalJson = {
       SURGICAL_RECORDS: newRecords,
       ORTHOPEDIC_SPECIALTY_RECORDS: [],
@@ -665,8 +649,7 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], pe
       SPECIALISTS_LIST: [],
       CIHI_PROVINCIAL_COMPARATORS: [],
       STATSCAN_SATISFACTION_STATS: [],
-      FRASER_MEDIAN_WEEKS_2025: [],
-      _dataMetadata: { SURGICAL_RECORDS: surgicalMeta, FRASER_MEDIAN_WEEKS_2025: fraserMeta },
+      _dataMetadata: { SURGICAL_RECORDS: surgicalMeta },
     };
     applyWithheldPayloadGuard(data as unknown as Record<string, unknown>);
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
@@ -699,18 +682,15 @@ function mergeSurgicalRecords(filePath: string, newRecords: SurgicalRecord[], pe
     source: 'Alberta Wait Times Reporting (Power BI scraper)',
     sourceVintage,
   });
-  const fraserMeta = buildMetadataEntry({
-    updateType: 'manual',
-    source: fraserSource,
-    sourceVintage: deriveFraserSourceVintage(parsed.FRASER_MEDIAN_WEEKS_2025 ?? []),
-    previous: parsed._dataMetadata?.FRASER_MEDIAN_WEEKS_2025,
-    contentChanged: false,
-  });
   // Stamp SURGICAL_RECORDS freshness; preserve other _dataMetadata entries.
   parsed._dataMetadata = mergeDataMetadata(parsed._dataMetadata, {
     SURGICAL_RECORDS: surgicalMeta,
-    FRASER_MEDIAN_WEEKS_2025: fraserMeta,
   }, ['SURGICAL_RECORDS']);
+  // Fraser Institute connection removed: clean out the leftover empty key + metadata.
+  delete (parsed as unknown as Record<string, unknown>).FRASER_MEDIAN_WEEKS_2025;
+  if (parsed._dataMetadata) {
+    delete (parsed._dataMetadata as Record<string, unknown>).FRASER_MEDIAN_WEEKS_2025;
+  }
   applyWithheldPayloadGuard(parsed as unknown as Record<string, unknown>);
   fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2));
   return newRecords.length;

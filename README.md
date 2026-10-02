@@ -37,7 +37,7 @@ Not affiliated with or endorsed by Alberta Health Services. For emergencies, cal
 
 ## Data Sources
 
-AHS, CIHI, HQCA, StatsCan, Open Alberta, PHAC, Alberta Health, CPSA, Fraser Institute, 211 Alberta, Alberta Find a Provider, Alberta Respiratory Virus Dashboard, Alberta Substance Use Surveillance, APL QMe.
+AHS, CIHI, HQCA, StatsCan, Open Alberta, PHAC, Alberta Health, CPSA, 211 Alberta, Alberta Find a Provider, Alberta Respiratory Virus Dashboard, Alberta Substance Use Surveillance, APL QMe.
 
 ## Run Locally
 

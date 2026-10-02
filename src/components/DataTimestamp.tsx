@@ -40,7 +40,6 @@ export function sanitizeSource(source: string): string {
     cihiWaitTimesPriorityFetcher: 'CIHI Priority Wait Times',
     disruptionsScraper: 'AHS Service Disruptions',
     erWaitTimesFetcher: 'AHS ER Wait Times',
-    fraserDownloader: 'Fraser Institute',
     hqcaFocusScraper: 'HQCA FOCUS',
     openAlbertaBillingFetcher: 'Open Alberta Billing',
     openAlbertaInequityFetcher: 'Open Alberta Inequity',

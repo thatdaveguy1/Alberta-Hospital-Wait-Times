@@ -28,7 +28,6 @@ It **does not** alert for:
 ## Expected non-alerting states
 
 - `openAlbertaFetcher` is **skipped** when only CKAN PDF/catalog resources are available.
-- `fraserDownloader` is **skipped** when the Fraser Institute blocks automated access (403).
 - Public-health pipelines (`phacFetcher`, `albertaRespiratoryVirusScraper`) report **success**
   with `recordsWritten: 0` and a `note` when upstream content is unchanged.
 - These skips/no-ops do **not** degrade `overall` health or set `syncStale`.

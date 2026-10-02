@@ -21,7 +21,6 @@ import { run as abjhiRun } from './abjhiScraper';
 
 // Tier 3: File download+parse
 import { run as cihiRun } from './cihiDownloader';
-import { run as fraserRun } from './fraserDownloader';
 import { run as cihiWaitTimesRun, runSurgical as cihiWaitTimesSurgicalRun } from './cihiWaitTimesDownloader';
 import { run as primaryCareRun } from './primaryCareFetcher';
 import { run as albertaFindAProviderRun } from './albertaFindAProviderScraper';
@@ -105,7 +104,6 @@ const PIPELINES: Pipeline[] = [
   { id: 'primaryCareFetcher', name: 'primary-care', domain: 'primary-care', run: primaryCareRun },
   { id: 'albertaFindAProviderScraper', name: 'alberta-find-a-provider', domain: 'primary-care', run: albertaFindAProviderRun },
   { id: 'openAlbertaInequityFetcher', name: 'open-alberta-inequity', domain: 'regional-inequity', run: openAlbertaInequityRun },
-  { id: 'fraserDownloader', name: 'fraser', domain: 'spending', run: fraserRun },
   { id: 'openAlbertaBillingFetcher', name: 'open-alberta-billing', domain: 'spending', run: openAlbertaBillingRun },
   { id: 'hqcaFocusScraper', name: 'hqca-focus', domain: 'primary-care', run: hqcaFocusRun },
   { id: 'albertaRespiratoryVirusScraper', name: 'alberta-rvd', domain: 'public-health', run: albertaRvdRun },

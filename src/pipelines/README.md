@@ -10,7 +10,7 @@ Scheduler (launchd)
   └── every 24 hr:  Daily orchestrator
       ├── Tier 1 API fetchers (PHAC, Open Alberta)
       ├── Tier 2 HTML scrapers (waittimes.alberta.ca, ABJHI, etc.)
-      ├── Tier 3 File downloaders (CIHI XLSX, Fraser PDF)
+      ├── Tier 3 File downloaders (CIHI XLSX)
       ├── Disruptions scraper
       └── Push all results to Cloudflare KV
 ```
@@ -27,7 +27,6 @@ Scheduler (launchd)
 | `abjhiScraper.ts` | Scraper | surgical | 24 hr |
 | `cihiWaitTimesDownloader.ts` | Download | diagnostic, surgical | 24 hr |
 | `cihiNhexDownloader.ts` | Download | spending | 24 hr |
-| `fraserDownloader.ts` | Download | surgical | 24 hr (skipped — 403 blocked) |
 | `primaryCareFetcher.ts` | Download | primary-care | 24 hr |
 | `albertaFindAProviderScraper.ts` | Scraper | primary-care | 24 hr |
 | `openAlbertaInequityFetcher.ts` | API | regional-inequity | 24 hr |
@@ -103,6 +102,5 @@ These appear in sync history as partial/skipped/manual — they do **not** block
 | Source | Behavior |
 |---|---|
 | ABJHI | Empty dataset → **skipped** |
-| Fraser | HTTP 403 → **skipped** |
 | Open Alberta | Unmapped rows → **skipped** |
 | PHAC | Unchanged feed → **partial** |

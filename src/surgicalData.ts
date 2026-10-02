@@ -93,15 +93,6 @@ export const STATSCAN_SATISFACTION_STATS = {
   }
 };
 
-// 7. Fraser Institute - Waiting Your Turn (Specialty Benchmarks Weeks)
-// Cleared: no verified live upstream in this fallback module.
-export const FRASER_MEDIAN_WEEKS_2025: {
-  specialty: string;
-  gp_to_consult: number;
-  consult_to_surgery: number;
-  total: number;
-}[] = [];
-
 // 8. Historical Wait Trends (CIHI Priority Procedures 2015 - 2026)
 export interface HistoricalTrend {
   year: string;
