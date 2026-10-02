@@ -1,0 +1,35 @@
+server.ts
+  s_555e2f9f127db1::t_a4a9acb648e15f 7,12
+src/pipelines/aplLabWaitTimesFetcher.ts
+  s_555e2f9f127db1::t_cc6efb26bf650f 218
+src/pipelines/erWaitTimesFetcher.ts
+  s_555e2f9f127db1::t_c897fdf1bd5f75 216,224
+src/pipelines/orchestrator.ts
+  s_555e2f9f127db1::t_fc9cd685a31a68 28
+src/pipelines/scheduler.ts
+  s_105ab7679289bc::t_1d3bdc5b0b8494 3-6,32-46,48,50,182-201,316-319,321,329,346-348,433-436,438-443
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "dff141b19dd825b231324a33c8443c805320ecec",
+  "prompts": {},
+  "sessions": {
+    "s_105ab7679289bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a7ed14d5212a8034d",
+        "model": "unknown"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    },
+    "s_555e2f9f127db1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a47129c591d193262",
+        "model": "unknown"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
