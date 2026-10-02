@@ -1,0 +1,19 @@
+src/pipelines/pushClient.ts
+  s_13681d18a868ea::t_a3e3f8a0dd5016 4,416-417
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "66e51a3eaf64e468a8afc725b2708653ea46d620",
+  "prompts": {},
+  "sessions": {
+    "s_13681d18a868ea": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "26f711ba-b8b4-4657-8a45-396cd2dc1acf",
+        "model": "unknown"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
