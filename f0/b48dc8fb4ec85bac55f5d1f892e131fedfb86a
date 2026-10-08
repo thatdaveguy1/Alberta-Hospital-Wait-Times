@@ -1,0 +1,21 @@
+AGENTS.md
+  s_703de1635271f0::t_d7ab900bd26162 23-25
+scripts/run-uptime-check.sh
+  s_703de1635271f0::t_41c4b166e4bb5c 27-75,136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "f0b48dc8fb4ec85bac55f5d1f892e131fedfb86a",
+  "prompts": {},
+  "sessions": {
+    "s_703de1635271f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a1260cc923f0f80bd",
+        "model": "unknown"
+      },
+      "human_author": "David Longman <dlongman@tokentradegames.com>"
+    }
+  }
+}
