@@ -20,5 +20,8 @@ This file is repo-specific guidance layered on top of the system-wide `~/Desktop
 - `npm run dev` / `tsx server.ts` and any OMP `hub` process are **dev-only**.
 - `scripts/preflight.sh` warns if port `3004` is held by a non-production listener
   (`tsx`, `hub`, or any process not serving `dist/server.cjs`).
+- Self-heal: `scripts/run-uptime-check.sh` (every 10 min) restarts the server job when its Node
+  binary was deleted by a Homebrew upgrade or `GET /` returns 5xx. KeepAlive does not catch this,
+  because the old process keeps the port open while every file read fails.
 - When a runtime change ships, rebuild (`npm run build`) and use `launchctl kickstart -k`
   or `scripts/start-server.sh`; do not leave orphan dev listeners on `3004`.

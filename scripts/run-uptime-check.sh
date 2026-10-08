@@ -24,6 +24,55 @@ LOG_FILE="logs/uptime.jsonl"
 MONITOR_STATE_DIR="${MONITOR_STATE_DIR:-logs}"
 overall_exit=0
 
+# Self-heal: launchd KeepAlive does not restart a server that is still "up" but
+# broken. After Homebrew deletes the Node binary a running server is still
+# listening, yet every file read fails with EPERM and GET / returns 500.
+# Restart the server job when its binary is deleted or when GET / returns 5xx.
+PORT="${PORT:-3004}"
+SERVER_LABEL="com.davemini.alberta-hospital-wait-times"
+
+port_pids() {
+  /usr/sbin/lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null | sort -u || true
+}
+
+restart_server() {
+  local reason="$1" old_pid="$2" pid
+  echo "Self-heal: restarting $SERVER_LABEL (was pid $old_pid): $reason" >&2
+  if ! launchctl kickstart -k "gui/$(id -u)/$SERVER_LABEL"; then
+    echo "Self-heal: launchctl kickstart failed; continuing with checks" >&2
+    return 0
+  fi
+  for _ in {1..30}; do
+    pid="$(port_pids | head -n1)"
+    if [[ -n "$pid" && "$pid" != "$old_pid" ]]; then
+      break
+    fi
+    sleep 1
+  done
+  return 0
+}
+
+self_heal() {
+  local pid code exe
+  pid="$(port_pids | head -n1)"
+  # Nothing listening: KeepAlive handles that, so do nothing here.
+  [[ -n "$pid" ]] || return 0
+
+  # The first mapped text file is the executable. Its path is the real Cellar
+  # path (not the ~/.local/bin symlink, which Homebrew repoints to the new build).
+  exe="$(/usr/sbin/lsof -nP -p "$pid" -a -d txt -Fn 2>/dev/null | sed -n 's/^n//p' | head -n1 || true)"
+  if [[ "$exe" == /* && ! -e "$exe" ]]; then
+    restart_server "pid $pid is running a Node binary that was deleted from disk ($exe)" "$pid"
+    return 0
+  fi
+
+  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "http://127.0.0.1:$PORT/" 2>/dev/null || true)"
+  if [[ "$code" =~ ^5[0-9][0-9]$ ]]; then
+    restart_server "GET / returned HTTP $code" "$pid"
+  fi
+  return 0
+}
+
 # Notify using a per-endpoint monitor ID. Webhook is read from env only
 # (never passed as CLI argument) to avoid ps leakage.
 notify() {
@@ -84,6 +133,7 @@ check_url() {
   notify "$result_json" || true
 }
 
+self_heal || true
 check_url "$LOCAL_URL" local
 check_url "$PROD_URL" prod
 
